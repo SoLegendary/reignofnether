@@ -2,14 +2,15 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -28,7 +29,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -189,7 +189,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        return List.of(
+        ArrayList<BuildingPlaceButton> buttons = new ArrayList<>(List.of(
                 Buildings.CENTRAL_PORTAL.getBuildButton(Keybindings.keyQ),
                 Buildings.PORTAL_BASIC.getBuildButton(Keybindings.keyW),
                 Buildings.NETHERWART_FARM.getBuildButton(Keybindings.keyE),
@@ -202,7 +202,12 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
                 Buildings.INFERNAL_PORTAL.getBuildButton(Keybindings.keyF),
                 Buildings.BLACKSTONE_BRIDGE.getBuildButton(Keybindings.keyC),
                 Buildings.BEACON.getBuildButton(null)
-        );
+        ));
+        CustomBuildingClientEvents.customBuildings.forEach(cb -> {
+            if (cb.buildableByPiglins)
+                buttons.add(cb.getWorkerBuildButton(null));
+        });
+        return buttons;
     }
 
     public GruntUnit(EntityType<? extends Piglin> entityType, Level level) {

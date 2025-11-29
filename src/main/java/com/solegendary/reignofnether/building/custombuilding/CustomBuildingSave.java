@@ -9,17 +9,12 @@ public class CustomBuildingSave {
     public CompoundTag structureNbt;
     public String buildingName;
     public Vec3i structureSize;
-    public String portraitBlockRegistryKey;
-    public boolean capturable;
-    public boolean invulnerable;
+    public CompoundTag attributesNbt;
 
-    public CustomBuildingSave(CompoundTag structureNbt, String buildingName, Vec3i structureSize, String portraitBlockRegistryKey,
-                              boolean capturable, boolean invulnerable) {
+    public CustomBuildingSave(CompoundTag structureNbt, String buildingName, Vec3i structureSize, CompoundTag attributesNbt) {
         this.structureNbt = structureNbt;
         this.buildingName = buildingName;
         this.structureSize = structureSize;
-        this.portraitBlockRegistryKey = portraitBlockRegistryKey;
-        this.capturable = capturable;
-        this.invulnerable = invulnerable;
+        this.attributesNbt = attributesNbt;
     }
 }

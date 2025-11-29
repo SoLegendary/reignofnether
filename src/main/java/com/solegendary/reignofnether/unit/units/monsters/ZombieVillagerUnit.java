@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -197,7 +198,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        return List.of(
+        ArrayList<BuildingPlaceButton> buttons = new ArrayList<>(List.of(
                 Buildings.MAUSOLEUM.getBuildButton(Keybindings.keyQ),
                 Buildings.SPRUCE_STOCKPILE.getBuildButton(Keybindings.keyW),
                 Buildings.HAUNTED_HOUSE.getBuildButton(Keybindings.keyE),
@@ -213,7 +214,12 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
                 Buildings.SPRUCE_BRIDGE.getBuildButton(Keybindings.keyC),
                 Buildings.SCULK_CATALYST.getBuildButton(Keybindings.keyV),
                 Buildings.BEACON.getBuildButton(null)
-        );
+        ));
+        CustomBuildingClientEvents.customBuildings.forEach(cb -> {
+            if (cb.buildableByMonsters)
+                buttons.add(cb.getWorkerBuildButton(null));
+        });
+        return buttons;
     }
 
     public ZombieVillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {

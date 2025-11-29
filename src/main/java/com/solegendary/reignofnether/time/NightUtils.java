@@ -23,7 +23,7 @@ public class NightUtils {
 
         for (BuildingPlacement building : buildings) {
             if (building.isDestroyedServerside) continue;
-            if (building instanceof NightSource ns) {
+            if (building instanceof NightSource ns && ns.getNightRange() > 0) {
                 BlockPos centrePos = BuildingUtils.getCentrePos(building.getBlocks());
                 Vec2 centrePos2d = new Vec2(centrePos.getX(), centrePos.getZ());
                 float nightRangeSqr = ns.getNightRange() * ns.getNightRange();

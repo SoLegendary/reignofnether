@@ -9,19 +9,33 @@
 
 Custom Buildings
 ----------------
-[❌] Nether conversion range option (default 0)
-[❌] Night radius option (default 0)
-[❌] Buildable by Villagers
-[❌] Buildable by Monsters
-[❌] Buildable by Piglins
-[❌] Build cost (default 0,100,100)
+
+[!] This patch reworks how custom building saves work - all options set in the customisation menu such as invulnerable, capturable, etc. will be set back to their defaults
+
+[🟡] Nether conversion range option (default 0)
+[🟡] Night radius option (default 0)
+[🟡] Buildable by Villagers
+[🟡] Buildable by Monsters
+[🟡] Buildable by Piglins
+[🟡] Build cost
+    - TODO: save and sync to clients on load
+
 [❌] Garrisonable
     - Using custom invisible block for exit/entry
     - Enabled if there is exactly 1 of each
     - Not toggleable in menu (but will show warning if there's an issue)
 
+[❌] Command block triggers?
+    - Write commands directly in the UI that trigger periodically, on build, on destroy, etc.
+
 Bugfixes
 --------
+[❌] Some people reporting piglins can't spawn?
+
+[✔] Fixed not being able to hold alt and drag to pan or rotate the camera
+[✔] Zombie piglins now correctly have piglin faction bonuses (regeneration and speed on nether terrain)
+[✔] Militia Archers now remain as archers after saving and quitting
+[❌] Fixed unit movement issues when trying to use a neutral transport portal
 
 
 Quality of Life
@@ -29,6 +43,8 @@ Quality of Life
 [❌] Allow overlapping of custom structures (if possible, only with air blocks)
 
 [❌] Postgame stats from @ThatBusyBoi
+
+[❌] Global production queue from @PerseoJ
 
 
 Balance

@@ -632,16 +632,14 @@ public class OrthoviewClientEvents {
             return;
         }
 
-        if ((evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybindings.altMod.isDown()
-            && !MinimapClientEvents.isMarkerInteractionActive())
+        if ((evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 && Keybindings.altMod.isDown())
             || evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_3) {
             cameraMovingByMouse = true;
 
             float moveX = (float) evt.getDragX() * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult();
             float moveZ = (float) evt.getDragY() * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult();
             panCam(moveX, 0, moveZ);
-        } else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()
-            && !MinimapClientEvents.isMarkerInteractionActive()) {
+        } else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;
             camRotAdjX = (float) (evt.getMouseX() - mouseRightDownX) * CAMROT_MOUSE_SENSITIVITY;
             //camRotAdjY = (float) -(evt.getMouseY() - mouseRightDownY) * CAMROT_MOUSE_SENSITIVITY;

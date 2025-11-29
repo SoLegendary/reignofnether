@@ -4,11 +4,8 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.sandbox.SandboxServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -47,7 +44,7 @@ public class CustomBuildingServerEvents {
     public static void deregisterCustomBuilding(String buildingName) {
         customBuildings.removeIf(b -> b.name.equals(buildingName));
         BuildingServerEvents.getBuildings().removeIf(b -> b.getBuilding().name.equals(buildingName));
-        saveBuildings(BuildingServerEvents.getServerLevel());
+        saveCustomBuildings(BuildingServerEvents.getServerLevel());
     }
 
     public static boolean createAndRegisterNewCustomBuilding(ResourceLocation structureRL, String structureName, ServerLevel level, BlockPos pos) {
@@ -97,7 +94,7 @@ public class CustomBuildingServerEvents {
                 BuildingPlacement placement = new BuildingPlacement(building, level, pos, Rotation.NONE, "", blocks, false);
                 BuildingServerEvents.getBuildings().add(placement);
                 CustomBuildingClientboundPacket.registerCustomBuilding(building);
-                saveBuildings(level);
+                saveCustomBuildings(level);
                 BuildingServerEvents.saveBuildings(level);
                 BuildingServerEvents.syncBuildingPlacement(pos);
                 return true;
@@ -110,36 +107,30 @@ public class CustomBuildingServerEvents {
     public static void onServerStopping(ServerStoppingEvent evt) {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null) {
-            saveBuildings(level);
+            saveCustomBuildings(level);
         }
     }
 
-    public static void saveBuildings(ServerLevel level) {
+    public static void saveCustomBuildings(ServerLevel level) {
         CustomBuildingSaveData customBuildingData = CustomBuildingSaveData.getInstance(level);
         customBuildingData.customBuildings.clear();
         customBuildings.forEach(b -> {
+            b.packAttributesNbt();
             customBuildingData.customBuildings.add(new CustomBuildingSave(
                     b.structureNbt,
                     b.name,
                     b.structureSize,
-                    b.getPortraitBlockRegistryKey(),
-                    b.capturable,
-                    b.invulnerable
+                    b.attributesNbt
             ));
         });
         customBuildingData.save();
         level.getDataStorage().save();
     }
 
-    public static void loadBuildings(ServerLevel level) {
+    public static void loadCustomBuildings(ServerLevel level) {
         CustomBuildingSaveData customBuildingData = CustomBuildingSaveData.getInstance(level);
-        customBuildingData.customBuildings.forEach(b -> {
-            CustomBuilding building = new CustomBuilding(b.buildingName, b.structureSize, Blocks.COMMAND_BLOCK, b.structureNbt);
-            if (!b.portraitBlockRegistryKey.isBlank())
-                building.setIconAndPortrait(b.portraitBlockRegistryKey);
-            building.capturable = b.capturable;
-            building.invulnerable = b.invulnerable;
-
+        customBuildingData.customBuildings.forEach(bSave -> {
+            CustomBuilding building = new CustomBuilding(bSave.buildingName, bSave.structureSize, Blocks.COMMAND_BLOCK, bSave.structureNbt, bSave.attributesNbt);
             boolean buildingExists = false;
             for (CustomBuilding customBuilding : customBuildings) {
                 if (customBuilding.name.equals(building.name)) {
@@ -149,7 +140,7 @@ public class CustomBuildingServerEvents {
             }
             if (!buildingExists)
                 customBuildings.add(building);
-            ReignOfNether.LOGGER.info("loaded custom building in serverevents: " + b.buildingName);
+            ReignOfNether.LOGGER.info("loaded custom building in serverevents: " + bSave.buildingName);
         });
     }
 

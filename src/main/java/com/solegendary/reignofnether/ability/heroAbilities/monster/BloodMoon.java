@@ -6,6 +6,7 @@ package com.solegendary.reignofnether.ability.heroAbilities.monster;
 
 // play a cave sound and announce "A blood moon rises" in global chat
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -63,7 +64,7 @@ public class BloodMoon extends HeroAbility {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Blood Moon",
-            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/blood_moon.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.BLOOD_MOON,
             () -> getRank(hero) == 0,
@@ -80,7 +81,7 @@ public class BloodMoon extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Blood Moon",
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/blood_moon.png"),
                 hero
         );
     }
@@ -104,7 +105,8 @@ public class BloodMoon extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip2")),
-                fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip3"))
+                fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip3")),
+                fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip4"))
         );
     }
 

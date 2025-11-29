@@ -286,7 +286,7 @@ public class TimeClientEvents {
 
             // get list of night source centre:range pairs
             for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-                if (!building.isExploredClientside || !(building instanceof NightSource ns)) {
+                if (!building.isExploredClientside || !(building instanceof NightSource ns) || ns.getNightRange() <= 0) {
                     continue;
                 }
                 nightSourceOrigins.add(new Pair<>(building.centrePos, ns.getNightRange() - VISIBLE_BORDER_ADJ));

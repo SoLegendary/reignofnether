@@ -1026,8 +1026,8 @@ public class BuildingPlacement {
         double addedRange = 0;
 
         if (extendedRange) {
-            if (this instanceof NetherConvertingBuilding netherConvertingBuilding) {
-                double range = netherConvertingBuilding.getMaxRange();
+            if (this instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0) {
+                double range = ncb.getMaxNetherRange();
                 addedRange = (16 * Math.ceil(Math.abs(range / 16))) + 16; // round up to next multiple of 16
             } else if (getBuilding() instanceof AbstractStockpile) {
                 addedRange = 32;

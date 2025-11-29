@@ -141,7 +141,7 @@ public class BuildingServerEvents {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
 
         if (level != null) {
-            CustomBuildingServerEvents.loadBuildings(level);
+            CustomBuildingServerEvents.loadCustomBuildings(level);
             BuildingSaveData buildingData = BuildingSaveData.getInstance(level);
             NetherZoneSaveData netherData = NetherZoneSaveData.getInstance(level);
             ArrayList<BlockPos> placedNZs = new ArrayList<>();
@@ -182,7 +182,7 @@ public class BuildingServerEvents {
                     }
                     // setNetherZone can only be run once - this supercedes where it normally happens in tick() ->
                     // onBuilt()
-                    if (building instanceof NetherConvertingBuilding ncb) {
+                    if (building instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0) {
                         for (NetherZone nz : netherData.netherZones)
                             if (building.isPosInsideBuilding(nz.getOrigin())) {
                                 ncb.setNetherZone(nz, false);
@@ -391,8 +391,8 @@ public class BuildingServerEvents {
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
-        if (building instanceof NetherConvertingBuilding nb && nb.getZone() != null) {
-            nb.getZone().startRestoring();
+        if (building instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0 && ncb.getNetherZone() != null) {
+            ncb.getNetherZone().startRestoring();
             saveNetherZones(serverLevel);
         }
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
@@ -539,8 +539,8 @@ public class BuildingServerEvents {
         List<BuildingPlacement> buildingsToDestroy = buildings.stream().filter(BuildingPlacement::shouldBeDestroyed).toList();
         buildings.removeIf(b -> {
             if (b.shouldBeDestroyed()) {
-                if (b instanceof NetherConvertingBuilding nb && nb.getZone() != null) {
-                    nb.getZone().startRestoring();
+                if (b instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0 && ncb.getNetherZone() != null) {
+                    ncb.getNetherZone().startRestoring();
                     saveNetherZones(serverLevel);
                 }
                 FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);

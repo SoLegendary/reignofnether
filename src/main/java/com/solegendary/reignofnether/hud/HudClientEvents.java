@@ -2095,7 +2095,12 @@ public class HudClientEvents {
     private static void cycleBuildingSubgroups() {
         List<BuildingPlacement> selBuildings = BuildingClientEvents.getSelectedBuildings();
         List<String> buildingNames = selBuildings
-                .stream().map(b -> ReignOfNetherRegistries.BUILDING.getKey(b.getBuilding()).toString())
+                .stream().map(b -> {
+                    if (b.getBuilding() instanceof CustomBuilding cb) {
+                        return cb.name;
+                    }
+                    return ReignOfNetherRegistries.BUILDING.getKey(b.getBuilding()).toString();
+                })
                 .distinct().sorted(Comparator.comparing(b -> b))
                 .collect(Collectors.toList());
 

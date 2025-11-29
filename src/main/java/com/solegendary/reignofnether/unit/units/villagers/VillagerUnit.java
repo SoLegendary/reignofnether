@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -309,7 +310,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        return List.of(
+        ArrayList<BuildingPlaceButton> buttons = new ArrayList<>(List.of(
                 Buildings.TOWN_CENTRE.getBuildButton(Keybindings.keyQ),
                 Buildings.OAK_STOCKPILE.getBuildButton(Keybindings.keyW),
                 Buildings.VILLAGER_HOUSE.getBuildButton(Keybindings.keyE),
@@ -324,7 +325,12 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                 Buildings.IRON_GOLEM_BUILDING.getBuildButton(Keybindings.keyL),
                 Buildings.OAK_BRIDGE.getBuildButton(Keybindings.keyC),
                 Buildings.BEACON.getBuildButton(null)
-        );
+        ));
+        CustomBuildingClientEvents.customBuildings.forEach(cb -> {
+            if (cb.buildableByVillagers)
+                buttons.add(cb.getWorkerBuildButton(null));
+        });
+        return buttons;
     }
 
     public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
