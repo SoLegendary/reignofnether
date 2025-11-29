@@ -232,17 +232,22 @@ public class Button {
         }
 
         if (greyPercent > 0 || !isEnabled.get()) {
-            int greyHeightPx = Math.round(greyPercent * iconFrameSize);
-            if (!isEnabled.get())
-                greyHeightPx = 0;
+            float clampedGreyPercent = Math.max(0f, Math.min(1f, greyPercent));
+            int greyHeightPx = Math.round(clampedGreyPercent * iconFrameSize);
+            if (!isEnabled.get()) {
+                greyHeightPx = iconFrameSize;
+            }
 
-            guiGraphics.pose().translate(0,0,1);
-            guiGraphics.fill( // x1,y1, x2,y2,
-                    x + xyDiff,
-                    y + xyDiff + greyHeightPx,
-                    x + xyDiff + iconFrameSize,
-                    y + xyDiff + iconFrameSize,
-                    0x99000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+            if (greyHeightPx > 0) {
+                int greyTop = y + xyDiff + (iconFrameSize - greyHeightPx);
+                guiGraphics.pose().translate(0, 0, 1);
+                guiGraphics.fill(
+                        x + xyDiff,
+                        greyTop,
+                        x + xyDiff + iconFrameSize,
+                        y + xyDiff + iconFrameSize,
+                        0x99000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+            }
         }
 
         if (isFlashing.get()) {

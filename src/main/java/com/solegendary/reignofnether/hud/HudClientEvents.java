@@ -70,6 +70,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -307,11 +308,21 @@ public class HudClientEvents {
                 OrthoviewClientEvents.centreCameraOnPos(nextPlacement.centrePos);
             };
 
-            float percentDone = group.getProgressPercent();
-            displayButton.greyPercent = 1 - percentDone;
+            float fractionRemaining = Mth.clamp(group.getProgressPercent(), 0f, 1f);
+            displayButton.greyPercent = group.includesFront() ? fractionRemaining : 1f;
             displayButton.render(guiGraphics, iconX, iconY, mouseX, mouseY);
             renderedButtons.add(displayButton);
             renderQueueGroupCount(guiGraphics, iconX, iconY, iconFrameSize, group.getCount());
+
+            List<FormattedCharSequence> tooltip = new ArrayList<>();
+            tooltip.add(FormattedCharSequence.forward(displayButton.name, Style.EMPTY));
+            int percent = Math.round((1.0f - fractionRemaining) * 100f);
+            tooltip.add(FormattedCharSequence.forward(percent + "%", Style.EMPTY));
+            displayButton.tooltipLines = tooltip;
+
+            if (displayButton.isMouseOver(mouseX, mouseY)) {
+                displayButton.renderTooltip(guiGraphics, mouseX, mouseY);
+            }
         }
     }
 
@@ -685,7 +696,7 @@ public class HudClientEvents {
 
                         // top row for currently-in-progress item
                         if (buttonsRendered == 0) {
-                            prodButton.greyPercent = 1 - percentageDoneInv;
+                            prodButton.greyPercent = Mth.clamp(percentageDoneInv, 0f, 1f);
                             prodButton.render(evt.getGuiGraphics(), blitX, blitY - 5, mouseX, mouseY);
                             renderedButtons.add(prodButton);
                         }
