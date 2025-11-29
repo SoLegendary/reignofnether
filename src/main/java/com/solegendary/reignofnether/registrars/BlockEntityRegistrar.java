@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.blocks.GarrisonBlockEntity;
 import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -20,6 +21,14 @@ public class BlockEntityRegistrar {
             register("rts_structure_block_entity",
                     () -> BlockEntityType.Builder.of(RTSStructureBlockEntity::new,
                             BlockRegistrar.RTS_STRUCTURE_BLOCK.get()).build(null)
+            );
+
+    public static final RegistryObject<BlockEntityType<GarrisonBlockEntity>> GARRISON_BLOCK_ENTITY =
+            register("garrison_entry_block_entity",
+                    () -> BlockEntityType.Builder.of(GarrisonBlockEntity::new,
+                            BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
+                            BlockRegistrar.GARRISON_EXIT_BLOCK.get())
+                            .build(null)
             );
 
     private static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(String name, Supplier<BlockEntityType<T>> blockEntity) {

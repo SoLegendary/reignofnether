@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.blocks.FallingRotatedPillarBlock;
-import com.solegendary.reignofnether.blocks.RTSStartBlock;
-import com.solegendary.reignofnether.blocks.RTSStructureBlock;
-import com.solegendary.reignofnether.blocks.WalkableMagmaBlock;
+import com.solegendary.reignofnether.blocks.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
@@ -177,6 +174,22 @@ public class BlockRegistrar {
             new RTSStructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).requiresCorrectToolForDrops()
                     .strength(-1.0F, 3600000.0F).noLootTable()), CreativeModeTabs.FUNCTIONAL_BLOCKS);
 
+    public static final RegistryObject<Block> GARRISON_ENTRY_BLOCK = registerBlock("garrison_entry_block", () ->
+                    new GarrisonEntryBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                            .strength(-1.0F, 3600000.0F)
+                            .noLootTable()
+                            .noOcclusion()
+                            .noCollission()),
+            CreativeModeTabs.FUNCTIONAL_BLOCKS);
+
+    public static final RegistryObject<Block> GARRISON_EXIT_BLOCK = registerBlock("garrison_exit_block", () ->
+                    new GarrisonExitBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                            .strength(-1.0F, 3600000.0F)
+                            .noLootTable()
+                            .noOcclusion()
+                            .noCollission()),
+            CreativeModeTabs.FUNCTIONAL_BLOCKS);
+
     private static boolean always(BlockState p_50775_, BlockGetter p_50776_, BlockPos p_50777_) {
         return true;
     }
@@ -184,6 +197,7 @@ public class BlockRegistrar {
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block, ResourceKey<CreativeModeTab> tab) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);
         registerBlockItem(name, toReturn, tab);
+
         return toReturn;
     }
 

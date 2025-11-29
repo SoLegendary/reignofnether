@@ -323,13 +323,15 @@ public class MiscUtil {
     // neutral -> owned ✔ (if neutral aggro on)
     // owned -> owned ✔ (if hostile)
     private static boolean isBuildingAttackable(Mob unitMob, BuildingPlacement building) {
+        if (building.getBuilding().invulnerable)
+            return false;
+
         Relationship relationship = UnitServerEvents.getUnitToBuildingRelationship((Unit) unitMob, building);
 
         if (relationship == Relationship.FRIENDLY) {
             return false;
         }
         boolean neutralAggro = unitMob.level().getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get();
-        boolean neutralUnit = ((Unit) unitMob).getOwnerName().isBlank();
 
         if (relationship == Relationship.NEUTRAL && neutralAggro)
             return true;

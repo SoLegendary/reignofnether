@@ -1206,6 +1206,8 @@
     "block.reignofnether.falling_crimson_stem": "Falling Crimson Stem",
     "block.reignofnether.walkable_magma_block": "Walkable Magma",
     "block.reignofnether.rts_structure_block": "RTS Structure Block",
+    "block.reignofnether.garrison_entry_block": "Garrison Entry Block",
+    "block.reignofnether.garrison_exit_block": "Garrison Exit Block",
 
     "block.reignofnether.rts_start_block_black": "Black RTS Start Block",
     "block.reignofnether.rts_start_block_blue": "Blue RTS Start Block",

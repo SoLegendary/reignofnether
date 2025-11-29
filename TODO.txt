@@ -35,7 +35,8 @@ Bugfixes
 [✔] Fixed not being able to hold alt and drag to pan or rotate the camera
 [✔] Zombie piglins now correctly have piglin faction bonuses (regeneration and speed on nether terrain)
 [✔] Militia Archers now remain as archers after saving and quitting
-[❌] Fixed unit movement issues when trying to use a neutral transport portal
+[✔] Fixed unit movement issues when trying to use a neutral transport portal
+    - Doesn't affect workers, maybe something to do with aggro logic?
 
 
 Quality of Life
