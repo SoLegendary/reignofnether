@@ -139,23 +139,27 @@ public class HudClientEvents {
 
     private static class ProductionQueueGroup {
         private final ProductionItem item;
-        private final ProductionPlacement sourcePlacement;
+        private final List<ProductionPlacement> placements = new ArrayList<>();
         private ActiveProduction representative;
+        private ProductionPlacement representativePlacement;
         private int count;
         private boolean includesFront;
 
-        private ProductionQueueGroup(ProductionItem item, ProductionPlacement sourcePlacement) {
+        private ProductionQueueGroup(ProductionItem item) {
             this.item = item;
-            this.sourcePlacement = sourcePlacement;
         }
 
-        private void add(ActiveProduction production, int queueIndex) {
+        private void add(ActiveProduction production, int queueIndex, ProductionPlacement placement) {
             count += 1;
+            if (!placements.contains(placement)) {
+                placements.add(placement);
+            }
             if (queueIndex == 0) {
                 includesFront = true;
             }
             if (representative == null || production.ticksLeft < representative.ticksLeft) {
                 representative = production;
+                representativePlacement = placement;
             }
         }
 
@@ -174,15 +178,20 @@ public class HudClientEvents {
         private boolean includesFront() {
             return includesFront;
         }
+
         private ProductionPlacement getSourcePlacement() {
-            return sourcePlacement;
+            return representativePlacement;
+        }
+
+        private List<ProductionPlacement> getPlacements() {
+            return placements;
         }
 
         private float getProgressPercent() {
-            if (representative == null) {
+            if (representative == null || representativePlacement == null) {
                 return 0f;
             }
-            float totalTicks = representative.item.getCost(true, sourcePlacement.ownerName).ticks;
+            float totalTicks = representative.item.getCost(true, representativePlacement.ownerName).ticks;
             if (totalTicks <= 0) {
                 return 0f;
             }
@@ -197,11 +206,11 @@ public class HudClientEvents {
             ActiveProduction production = placement.productionQueue.get(i);
             ProductionQueueGroup group = grouped.get(production.item);
             if (group == null) {
-                group = new ProductionQueueGroup(production.item, placement);
+                group = new ProductionQueueGroup(production.item);
                 grouped.put(production.item, group);
                 orderedGroups.add(group);
             }
-            group.add(production, i);
+            group.add(production, i, placement);
         }
         return orderedGroups;
     }
@@ -219,11 +228,11 @@ public class HudClientEvents {
                     ActiveProduction production = placement.productionQueue.get(i);
                     ProductionQueueGroup group = grouped.get(production.item);
                     if (group == null) {
-                        group = new ProductionQueueGroup(production.item, placement);
+                        group = new ProductionQueueGroup(production.item);
                         grouped.put(production.item, group);
                         orderedGroups.add(group);
                     }
-                    group.add(production, i);
+                    group.add(production, i, placement);
                 }
             }
         }
@@ -246,57 +255,63 @@ public class HudClientEvents {
     }
 
     private static void renderTopLeftQueuePanel(GuiGraphics guiGraphics,
-                                                List<ProductionQueueGroup> groupedQueue,
-                                                int baseX,
-                                                int baseY,
-                                                int mouseX,
-                                                int mouseY) {
+        List<ProductionQueueGroup> groupedQueue,
+        int baseX,
+        int baseY,
+        int mouseX,
+        int mouseY) {
         if (groupedQueue == null || groupedQueue.isEmpty()) {
             return;
         }
 
         int iconFrameSize = Button.DEFAULT_ICON_FRAME_SIZE;
-        int iconsToShow = Math.min(groupedQueue.size(), MAX_BUTTONS_PER_ROW);
-        int panelWidth = iconFrameSize * iconsToShow + 10;
+        int iconsPerRow = 5;
+        int rows = (int) Math.ceil((double) groupedQueue.size() / iconsPerRow);
+        int panelWidth = iconFrameSize * Math.min(groupedQueue.size(), iconsPerRow) + 10;
+        int panelHeight = iconFrameSize * rows + 10;
+
         RectZone zone = MyRenderer.renderFrameWithBg(guiGraphics,
             baseX,
             baseY,
             panelWidth,
-            iconFrameSize + 10,
+            panelHeight,
             frameBgColour
         );
         hudZones.add(zone);
 
-        int iconX = baseX + 5;
-        int iconY = baseY + 5;
+        int startX = baseX + 5;
+        int startY = baseY + 5;
         for (int i = 0; i < groupedQueue.size(); i++) {
             ProductionQueueGroup group = groupedQueue.get(i);
-            if (i >= MAX_BUTTONS_PER_ROW) {
-                int numExtraItems = groupedQueue.size() - MAX_BUTTONS_PER_ROW;
-                MyRenderer.renderIconFrameWithBg(guiGraphics,
-                    ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                    iconX,
-                    iconY,
-                    iconFrameSize,
-                    iconBgColour
-                );
-                guiGraphics.drawCenteredString(
-                    MC.font,
-                    "+" + numExtraItems,
-                    iconX + iconFrameSize / 2,
-                    iconY + 8,
-                    0xFFFFFF
-                );
-                break;
-            } else {
-                ProductionPlacement sourcePlacement = group.getSourcePlacement();
-                Button displayButton = group.getItem().getCancelButton(sourcePlacement, group.includesFront());
-                float percentDone = group.getProgressPercent();
-                displayButton.greyPercent = 1 - percentDone;
-                displayButton.render(guiGraphics, iconX, iconY, mouseX, mouseY);
-                renderQueueGroupCount(guiGraphics, iconX, iconY, iconFrameSize, group.getCount());
-                iconX += iconFrameSize;
-            }
+
+            int col = i % iconsPerRow;
+            int row = i / iconsPerRow;
+            int iconX = startX + col * iconFrameSize;
+            int iconY = startY + row * iconFrameSize;
+
+            ProductionPlacement sourcePlacement = group.getSourcePlacement();
+            Button displayButton = group.getItem().getCancelButton(sourcePlacement, group.includesFront());
+            displayButton.onLeftClick = () -> {
+                List<ProductionPlacement> placements = group.getPlacements();
+                if (placements.isEmpty()) return;
+
+                ProductionPlacement nextPlacement = placements.get(0);
+                if (hudSelectedPlacement != null && placements.contains(hudSelectedPlacement)) {
+                    int idx = placements.indexOf(hudSelectedPlacement);
+                    nextPlacement = placements.get((idx + 1) % placements.size());
+                }
+
+                BuildingClientEvents.clearSelectedBuildings();
+                UnitClientEvents.clearSelectedUnits();
+                BuildingClientEvents.addSelectedBuilding(nextPlacement);
+                OrthoviewClientEvents.centreCameraOnPos(nextPlacement.centrePos);
+            };
+
+            float percentDone = group.getProgressPercent();
+            displayButton.greyPercent = 1 - percentDone;
+            displayButton.render(guiGraphics, iconX, iconY, mouseX, mouseY);
+            renderedButtons.add(displayButton);
+            renderQueueGroupCount(guiGraphics, iconX, iconY, iconFrameSize, group.getCount());
         }
     }
 
