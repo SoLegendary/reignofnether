@@ -139,190 +139,114 @@ public class HudClientEvents {
     private static final ArrayList<RectZone> hudZones = new ArrayList<>();
 
     private static class ProductionQueueGroup {
-        private final ProductionItem item;
-        private final List<ProductionPlacement> placements = new ArrayList<>();
-        private ActiveProduction representative;
-        private ProductionPlacement representativePlacement;
-        private int count;
-        private boolean includesFront;
+        final ProductionItem item;
+        final List<ProductionPlacement> placements = new ArrayList<>();
+        ActiveProduction rep;
+        ProductionPlacement repPlac;
+        int count;
+        boolean includesFront;
 
-        private ProductionQueueGroup(ProductionItem item) {
-            this.item = item;
+        ProductionQueueGroup(ProductionItem item) { this.item = item; }
+
+        void add(ActiveProduction p, int idx, ProductionPlacement plac) {
+            count++;
+            if (!placements.contains(plac)) placements.add(plac);
+            if (idx == 0) includesFront = true;
+            if (rep == null || p.ticksLeft < rep.ticksLeft) { rep = p; repPlac = plac; }
         }
 
-        private void add(ActiveProduction production, int queueIndex, ProductionPlacement placement) {
-            count += 1;
-            if (!placements.contains(placement)) {
-                placements.add(placement);
-            }
-            if (queueIndex == 0) {
-                includesFront = true;
-            }
-            if (representative == null || production.ticksLeft < representative.ticksLeft) {
-                representative = production;
-                representativePlacement = placement;
-            }
+        float getProgress() {
+            if (rep == null || repPlac == null) return 0f;
+            float total = rep.item.getCost(true, repPlac.ownerName).ticks;
+            return total <= 0 ? 0f : rep.ticksLeft / total;
         }
+    }
 
-        private ProductionItem getItem() {
-            return item;
-        }
-
-        private ActiveProduction getRepresentative() {
-            return representative;
-        }
-
-        private int getCount() {
-            return count;
-        }
-
-        private boolean includesFront() {
-            return includesFront;
-        }
-
-        private ProductionPlacement getSourcePlacement() {
-            return representativePlacement;
-        }
-
-        private List<ProductionPlacement> getPlacements() {
-            return placements;
-        }
-
-        private float getProgressPercent() {
-            if (representative == null || representativePlacement == null) {
-                return 0f;
-            }
-            float totalTicks = representative.item.getCost(true, representativePlacement.ownerName).ticks;
-            if (totalTicks <= 0) {
-                return 0f;
-            }
-            return representative.ticksLeft / totalTicks;
+    private static void aggregateQueue(ProductionPlacement placement, Map<ProductionItem, ProductionQueueGroup> grouped, List<ProductionQueueGroup> ordered) {
+        for (int i = 0; i < placement.productionQueue.size(); i++) {
+            ActiveProduction production = placement.productionQueue.get(i);
+            ProductionQueueGroup group = grouped.computeIfAbsent(production.item, k -> {
+                ProductionQueueGroup g = new ProductionQueueGroup(k);
+                ordered.add(g);
+                return g;
+            });
+            group.add(production, i, placement);
         }
     }
 
     private static List<ProductionQueueGroup> groupProductionQueue(ProductionPlacement placement) {
         LinkedHashMap<ProductionItem, ProductionQueueGroup> grouped = new LinkedHashMap<>();
-        ArrayList<ProductionQueueGroup> orderedGroups = new ArrayList<>();
-        for (int i = 0; i < placement.productionQueue.size(); i++) {
-            ActiveProduction production = placement.productionQueue.get(i);
-            ProductionQueueGroup group = grouped.get(production.item);
-            if (group == null) {
-                group = new ProductionQueueGroup(production.item);
-                grouped.put(production.item, group);
-                orderedGroups.add(group);
-            }
-            group.add(production, i, placement);
-        }
-        return orderedGroups;
+        ArrayList<ProductionQueueGroup> ordered = new ArrayList<>();
+        aggregateQueue(placement, grouped, ordered);
+        return ordered;
     }
 
     private static List<ProductionQueueGroup> groupPlayerProductionQueues(String playerName) {
-        if (playerName == null) {
-            return Collections.emptyList();
-        }
+        if (playerName == null) return Collections.emptyList();
         LinkedHashMap<ProductionItem, ProductionQueueGroup> grouped = new LinkedHashMap<>();
-        ArrayList<ProductionQueueGroup> orderedGroups = new ArrayList<>();
-
-        for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-            if (building instanceof ProductionPlacement placement && playerName.equals(placement.ownerName)) {
-                for (int i = 0; i < placement.productionQueue.size(); i++) {
-                    ActiveProduction production = placement.productionQueue.get(i);
-                    ProductionQueueGroup group = grouped.get(production.item);
-                    if (group == null) {
-                        group = new ProductionQueueGroup(production.item);
-                        grouped.put(production.item, group);
-                        orderedGroups.add(group);
-                    }
-                    group.add(production, i, placement);
-                }
-            }
+        ArrayList<ProductionQueueGroup> ordered = new ArrayList<>();
+        for (BuildingPlacement b : BuildingClientEvents.getBuildings()) {
+            if (b instanceof ProductionPlacement p && playerName.equals(p.ownerName))
+                aggregateQueue(p, grouped, ordered);
         }
-
-        return orderedGroups;
+        return ordered;
     }
 
     private static final float COUNT_TEXT_SCALE = 0.75f;
 
     private static void renderQueueGroupCount(GuiGraphics guiGraphics, int x, int y, int iconFrameSize, int count) {
-        if (count <= 1) {
-            return;
-        }
+        if (count <= 1) return;
         String countText = String.valueOf(count);
         int textWidth = MC.font.width(countText);
-        int padding = 2;
-        int textX = x + iconFrameSize - textWidth - padding - 1;
-        int textY = y + iconFrameSize - 10;
-        guiGraphics.drawString(MC.font, countText, textX, textY, 0xFFFFFF);
+        guiGraphics.drawString(MC.font, countText, x + iconFrameSize - textWidth - 3, y + iconFrameSize - 10, 0xFFFFFF);
     }
 
-    private static void renderTopLeftQueuePanel(GuiGraphics guiGraphics,
-        List<ProductionQueueGroup> groupedQueue,
-        int baseX,
-        int baseY,
-        int mouseX,
-        int mouseY) {
-        if (groupedQueue == null || groupedQueue.isEmpty()) {
-            return;
-        }
+    private static Button createQueueButton(ProductionQueueGroup group) {
+        Button btn = group.item.getCancelButton(group.repPlac, group.includesFront);
+        btn.onLeftClick = () -> {
+            if (group.placements.isEmpty()) return;
+            ProductionPlacement next = group.placements.get(0);
+            if (hudSelectedPlacement != null && group.placements.contains(hudSelectedPlacement)) {
+                next = group.placements.get((group.placements.indexOf(hudSelectedPlacement) + 1) % group.placements.size());
+            }
+            BuildingClientEvents.clearSelectedBuildings();
+            UnitClientEvents.clearSelectedUnits();
+            BuildingClientEvents.addSelectedBuilding(next);
+            OrthoviewClientEvents.centreCameraOnPos(next.centrePos);
+        };
+        float frac = Mth.clamp(group.getProgress(), 0f, 1f);
+        btn.greyPercent = group.includesFront ? frac : 1f;
+        
+        List<FormattedCharSequence> tooltip = new ArrayList<>();
+        tooltip.add(FormattedCharSequence.forward(btn.name, Style.EMPTY));
+        tooltip.add(FormattedCharSequence.forward(Math.round((1.0f - frac) * 100f) + "%", Style.EMPTY));
+        btn.tooltipLines = tooltip;
+        return btn;
+    }
+
+    private static void renderTopLeftQueuePanel(GuiGraphics guiGraphics, List<ProductionQueueGroup> groupedQueue, int baseX, int baseY, int mouseX, int mouseY) {
+        if (groupedQueue == null || groupedQueue.isEmpty()) return;
 
         int iconFrameSize = Button.DEFAULT_ICON_FRAME_SIZE;
         int iconsPerRow = 5;
         int rows = (int) Math.ceil((double) groupedQueue.size() / iconsPerRow);
-        int panelWidth = iconFrameSize * Math.min(groupedQueue.size(), iconsPerRow) + 10;
-        int panelHeight = iconFrameSize * rows + 10;
 
-        RectZone zone = MyRenderer.renderFrameWithBg(guiGraphics,
-            baseX,
-            baseY,
-            panelWidth,
-            panelHeight,
-            frameBgColour
-        );
-        hudZones.add(zone);
+        hudZones.add(MyRenderer.renderFrameWithBg(guiGraphics, baseX, baseY, 
+            iconFrameSize * Math.min(groupedQueue.size(), iconsPerRow) + 10, 
+            iconFrameSize * rows + 10, frameBgColour));
 
-        int startX = baseX + 5;
-        int startY = baseY + 5;
+        int startX = baseX + 5, startY = baseY + 5;
         for (int i = 0; i < groupedQueue.size(); i++) {
             ProductionQueueGroup group = groupedQueue.get(i);
+            int iconX = startX + (i % iconsPerRow) * iconFrameSize;
+            int iconY = startY + (i / iconsPerRow) * iconFrameSize;
 
-            int col = i % iconsPerRow;
-            int row = i / iconsPerRow;
-            int iconX = startX + col * iconFrameSize;
-            int iconY = startY + row * iconFrameSize;
+            Button btn = createQueueButton(group);
+            btn.render(guiGraphics, iconX, iconY, mouseX, mouseY);
+            renderedButtons.add(btn);
+            renderQueueGroupCount(guiGraphics, iconX, iconY, iconFrameSize, group.count);
 
-            ProductionPlacement sourcePlacement = group.getSourcePlacement();
-            Button displayButton = group.getItem().getCancelButton(sourcePlacement, group.includesFront());
-            displayButton.onLeftClick = () -> {
-                List<ProductionPlacement> placements = group.getPlacements();
-                if (placements.isEmpty()) return;
-
-                ProductionPlacement nextPlacement = placements.get(0);
-                if (hudSelectedPlacement != null && placements.contains(hudSelectedPlacement)) {
-                    int idx = placements.indexOf(hudSelectedPlacement);
-                    nextPlacement = placements.get((idx + 1) % placements.size());
-                }
-
-                BuildingClientEvents.clearSelectedBuildings();
-                UnitClientEvents.clearSelectedUnits();
-                BuildingClientEvents.addSelectedBuilding(nextPlacement);
-                OrthoviewClientEvents.centreCameraOnPos(nextPlacement.centrePos);
-            };
-
-            float fractionRemaining = Mth.clamp(group.getProgressPercent(), 0f, 1f);
-            displayButton.greyPercent = group.includesFront() ? fractionRemaining : 1f;
-            displayButton.render(guiGraphics, iconX, iconY, mouseX, mouseY);
-            renderedButtons.add(displayButton);
-            renderQueueGroupCount(guiGraphics, iconX, iconY, iconFrameSize, group.getCount());
-
-            List<FormattedCharSequence> tooltip = new ArrayList<>();
-            tooltip.add(FormattedCharSequence.forward(displayButton.name, Style.EMPTY));
-            int percent = Math.round((1.0f - fractionRemaining) * 100f);
-            tooltip.add(FormattedCharSequence.forward(percent + "%", Style.EMPTY));
-            displayButton.tooltipLines = tooltip;
-
-            if (displayButton.isMouseOver(mouseX, mouseY)) {
-                displayButton.renderTooltip(guiGraphics, mouseX, mouseY);
-            }
+            if (btn.isMouseOver(mouseX, mouseY)) btn.renderTooltip(guiGraphics, mouseX, mouseY);
         }
     }
 
@@ -500,7 +424,7 @@ public class HudClientEvents {
         boolean showTopLeftQueue = false;
         if (!globalQueueGroups.isEmpty()) {
             ProductionQueueGroup firstGroup = globalQueueGroups.get(0);
-            ActiveProduction representative = firstGroup.getRepresentative();
+            ActiveProduction representative = firstGroup.rep;
             showTopLeftQueue = true;
         }
 
