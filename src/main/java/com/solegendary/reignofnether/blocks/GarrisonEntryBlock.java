@@ -18,4 +18,9 @@ public class GarrisonEntryBlock extends Block implements EntityBlock {
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
         return new GarrisonBlockEntity(blockPos, blockState);
     }
+
+    @Override
+    public RenderShape getRenderShape(BlockState pState) {
+        return RenderShape.INVISIBLE;
+    }
 }
