@@ -27,11 +27,8 @@ import java.util.function.Supplier;
 public class Button {
 
     public String name;
-    public int x; // top left
-    public int y;
-    int iconSize;
-    int iconFrameSize;
-    int iconSelectedFrameSize;
+    public int x, y;
+    int iconSize, iconFrameSize, iconSelectedFrameSize;
     public static int DEFAULT_ICON_SIZE = 14;
     public static int DEFAULT_ICON_FRAME_SIZE = 22;
     public static int DEFAULT_ICON_SELECTED_FRAME_SIZE = 24;
@@ -46,17 +43,8 @@ public class Button {
     public LivingEntity entity = null; // for selected unit buttons
     public BuildingPlacement building = null; // for selected building buttons
 
-    /** https://stackoverflow.com/questions/29945627/java-8-lambda-void-argument
-     * Supplier       ()    -> x
-     * Consumer       x     -> ()
-     * Runnable       ()    -> ()
-     * Predicate      x     -> boolean
-     */
-    public Supplier<Boolean> isSelected; // controls selected frame rendering
-    public Supplier<Boolean> isHidden; // special highlighting for an on-state (eg. auto-cast/auto-producing)
-    public Supplier<Boolean> isEnabled; // is the button allowed to be used right now? (eg. off cooldown)
-    public Runnable onLeftClick;
-    public Runnable onRightClick;
+    public Supplier<Boolean> isSelected, isHidden, isEnabled; // is the button allowed to be used right now? (eg. off cooldown)
+    public Runnable onLeftClick, onRightClick;
     public List<FormattedCharSequence> tooltipLines;
 
     public Supplier<Boolean> isFlashing = () -> false;
@@ -69,70 +57,37 @@ public class Button {
 
     Minecraft MC = Minecraft.getInstance();
 
-    // constructor for ability/action/production buttons
     public Button(String name, int iconSize, ResourceLocation iconRl, @Nullable Keybinding hotkey, Supplier<Boolean> isSelected,
                   Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
-        this.name = name;
-        this.iconResource = iconRl;
-        this.iconSize = iconSize;
-        this.iconFrameSize = iconSize + 8;
-        this.iconSelectedFrameSize = iconSize + 10;
-        this.hotkey = hotkey;
-        this.isSelected = isSelected;
-        this.isHidden = isHidden;
-        this.isEnabled = isEnabled;
-        this.onLeftClick = onLeftClick;
-        this.onRightClick = onRightClick;
-        this.tooltipLines = tooltipLines;
+        this(name, iconSize, iconRl, null, hotkey, null, null, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
     }
 
-    // constructor for ability/action/production buttons with non-default frame
     public Button(String name, int iconSize, ResourceLocation iconRl, ResourceLocation frameRl, @Nullable Keybinding hotkey, Supplier<Boolean> isSelected,
                   Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
-        this.name = name;
-        this.iconResource = iconRl;
-        this.frameResource = frameRl;
-        this.iconSize = iconSize;
-        this.iconFrameSize = iconSize + 8;
-        this.iconSelectedFrameSize = iconSize + 10;
-        this.hotkey = hotkey;
-        this.isSelected = isSelected;
-        this.isHidden = isHidden;
-        this.isEnabled = isEnabled;
-        this.onLeftClick = onLeftClick;
-        this.onRightClick = onRightClick;
-        this.tooltipLines = tooltipLines;
+        this(name, iconSize, iconRl, frameRl, hotkey, null, null, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
     }
 
-    // constructor for unit selection buttons
     public Button(String name, int iconSize, ResourceLocation iconRl, LivingEntity entity, Supplier<Boolean> isSelected,
                   Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
-        this.name = name;
-        this.iconResource = iconRl;
-        this.iconSize = iconSize;
-        this.iconFrameSize = iconSize + 8;
-        this.iconSelectedFrameSize = iconSize + 10;
-        this.entity = entity;
-        this.isSelected = isSelected;
-        this.isHidden = isHidden;
-        this.isEnabled = isEnabled;
-        this.onLeftClick = onLeftClick;
-        this.onRightClick = onRightClick;
-        this.tooltipLines = tooltipLines;
+        this(name, iconSize, iconRl, null, null, entity, null, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
     }
 
-    // constructor for building selection buttons
     public Button(String name, int iconSize, ResourceLocation iconRl, BuildingPlacement building, Supplier<Boolean> isSelected,
                   Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
                   @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
+        this(name, iconSize, iconRl, null, null, null, building, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
+    }
+
+    private Button(String name, int iconSize, ResourceLocation iconRl, ResourceLocation frameRl, Keybinding hotkey, LivingEntity entity, BuildingPlacement building, Supplier<Boolean> isSelected, Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, Runnable onLeftClick, Runnable onRightClick, List<FormattedCharSequence> tooltipLines) {
         this.name = name;
-        this.iconResource = iconRl;
         this.iconSize = iconSize;
-        this.iconFrameSize = iconSize + 8;
-        this.iconSelectedFrameSize = iconSize + 10;
+        this.iconResource = iconRl;
+        if (frameRl != null) this.frameResource = frameRl;
+        this.hotkey = hotkey;
+        this.entity = entity;
         this.building = building;
         this.isSelected = isSelected;
         this.isHidden = isHidden;
@@ -140,122 +95,69 @@ public class Button {
         this.onLeftClick = onLeftClick;
         this.onRightClick = onRightClick;
         this.tooltipLines = tooltipLines;
+        this.iconFrameSize = iconSize + 8;
+        this.iconSelectedFrameSize = iconSize + 10;
     }
 
     public void renderHealthBar(PoseStack poseStack) {
-        if (entity != null)
-            HealthBarClientEvents.renderForEntity(poseStack, entity,
-                    x + ((float) iconFrameSize / 2), y - 5,
-                    iconFrameSize - 1,
-                    HealthBarClientEvents.RenderMode.GUI_ICON);
-        else if (building != null)
-            HealthBarClientEvents.renderForBuilding(poseStack, building,
-                    x + ((float) iconFrameSize / 2), y - 5,
-                    iconFrameSize - 1,
-                    HealthBarClientEvents.RenderMode.GUI_ICON);
+        float cx = x + (float) iconFrameSize / 2, cy = y - 5;
+        if (entity != null) HealthBarClientEvents.renderForEntity(poseStack, entity, cx, cy, iconFrameSize - 1, HealthBarClientEvents.RenderMode.GUI_ICON);
+        else if (building != null) HealthBarClientEvents.renderForBuilding(poseStack, building, cx, cy, iconFrameSize - 1, HealthBarClientEvents.RenderMode.GUI_ICON);
     }
 
     protected void renderHotkey(GuiGraphics guiGraphics, int x, int y) {
-        // hotkey letter
-        if (this.hotkey != null) {
-            String hotkeyStr = hotkey.buttonLabel;
-            hotkeyStr = hotkeyStr.substring(0,Math.min(3, hotkeyStr.length()));
-            guiGraphics.pose().translate(0,0,1);
-            guiGraphics.drawCenteredString(MC.font,
-                    hotkeyStr,
-                    x + iconSize + 8 - (hotkeyStr.length() * 4),
-                    y + iconSize - 1,
-                    0xFFFFFF);
-        }
+        if (this.hotkey == null) return;
+        String str = hotkey.buttonLabel;
+        str = str.substring(0, Math.min(3, str.length()));
+        guiGraphics.pose().translate(0, 0, 1);
+        guiGraphics.drawCenteredString(MC.font, str, x + iconSize + 8 - (str.length() * 4), y + iconSize - 1, 0xFFFFFF);
     }
 
     public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
         this.x = x;
         this.y = y;
+        int diff = (DEFAULT_ICON_SIZE - iconSize) / 2;
 
-        int xyDiff = (DEFAULT_ICON_SIZE - iconSize) / 2;
-
-        if (this.frameResource != null) {
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource, x + xyDiff, y + xyDiff, iconFrameSize, 0x64000000);
+        if (frameResource != null) {
+            guiGraphics.pose().translate(0, 0, 1);
+            MyRenderer.renderIconFrameWithBg(guiGraphics, frameResource, x + diff, y + diff, iconFrameSize, 0x64000000);
         }
 
         if (bgIconResource != null) {
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderIcon(
-                    guiGraphics,
-                    bgIconResource,
-                    frameResource != null ? x+4 + (7 - iconSize/2) : x + (7 - iconSize/2),
-                    frameResource != null ? y+4 + (7 - iconSize/2) : y + (7 - iconSize/2),
-                    iconSize
-            );
+            guiGraphics.pose().translate(0, 0, 1);
+            MyRenderer.renderIcon(guiGraphics, bgIconResource, x + (frameResource != null ? 4 : 0) + (7 - iconSize / 2), y + (frameResource != null ? 4 : 0) + (7 - iconSize / 2), iconSize);
         }
-        // item/unit icon
         if (iconResource != null) {
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderIcon(
-                    guiGraphics,
-                    iconResource,
-                    x+4 + (7 - xyDiff - iconSize/2), y+4 + (7 - xyDiff - iconSize/2),
-                    DEFAULT_ICON_SIZE
-            );
+            guiGraphics.pose().translate(0, 0, 1);
+            MyRenderer.renderIcon(guiGraphics, iconResource, x + 4 + (7 - diff - iconSize / 2), y + 4 + (7 - diff - iconSize / 2), DEFAULT_ICON_SIZE);
         }
 
         renderHotkey(guiGraphics, x, y);
 
-        // user is holding click or hotkey down over the button and render frame if so
-        if (isEnabled.get() &&
-            (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) &&
-                    ((MiscUtil.isLeftClickDown(MC) && onLeftClick != null) ||
-                    (MiscUtil.isRightClickDown(MC) && onRightClick != null))
-            ))) {
-
+        boolean hover = isMouseOver(mouseX, mouseY);
+        if (isEnabled.get() && (isSelected.get() || (hotkey != null && hotkey.isDown()) || (hover && ((MiscUtil.isLeftClickDown(MC) && onLeftClick != null) || (MiscUtil.isRightClickDown(MC) && onRightClick != null))))) {
             if (frameResource != null) {
-                ResourceLocation iconFrameSelectedResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
-                guiGraphics.pose().translate(0,0,1);
-                MyRenderer.renderIcon(
-                        guiGraphics,
-                        iconFrameSelectedResource,
-                        x-1 + xyDiff,y-1 + xyDiff,
-                        iconSelectedFrameSize
-                );
-            }
-        }
-        // light up on hover
-        if (isEnabled.get() && isMouseOver(mouseX, mouseY)) {
-            guiGraphics.pose().translate(0,0,1);
-            guiGraphics.fill( // x1,y1, x2,y2,
-                    x + xyDiff, y + xyDiff,
-                    x + xyDiff + iconFrameSize,
-                    y + xyDiff + iconFrameSize,
-                    0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-        }
-
-        if (greyPercent > 0 || !isEnabled.get()) {
-            float clampedGreyPercent = Math.max(0f, Math.min(1f, greyPercent));
-            int greyHeightPx = Math.round(clampedGreyPercent * iconFrameSize);
-            if (!isEnabled.get()) {
-                greyHeightPx = iconFrameSize;
-            }
-
-            if (greyHeightPx > 0) {
-                int greyTop = y + xyDiff + (iconFrameSize - greyHeightPx);
                 guiGraphics.pose().translate(0, 0, 1);
-                guiGraphics.fill(
-                        x + xyDiff,
-                        greyTop,
-                        x + xyDiff + iconFrameSize,
-                        y + xyDiff + iconFrameSize,
-                        0x99000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+                MyRenderer.renderIcon(guiGraphics, ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png"), x - 1 + diff, y - 1 + diff, iconSelectedFrameSize);
+            }
+        }
+
+        if (isEnabled.get() && hover) {
+            guiGraphics.pose().translate(0, 0, 1);
+            guiGraphics.fill(x + diff, y + diff, x + diff + iconFrameSize, y + diff + iconFrameSize, 0x32FFFFFF);
+        }
+
+        float gp = isEnabled.get() ? greyPercent : 1f;
+        if (gp > 0) {
+            int h = Math.round(Math.max(0f, Math.min(1f, gp)) * iconFrameSize);
+            if (h > 0) {
+                guiGraphics.pose().translate(0, 0, 1);
+                guiGraphics.fill(x + diff, y + diff + (iconFrameSize - h), x + diff + iconFrameSize, y + diff + iconFrameSize, 0x99000000);
             }
         }
 
         if (isFlashing.get()) {
-            guiGraphics.fill(x, y,
-                x + iconFrameSize,
-                y + iconFrameSize,
-                (0xFFFFFF | ((int) (0x80 * MiscUtil.getOscillatingFloat(0,1)) << 24))
-            ); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+            guiGraphics.fill(x, y, x + iconFrameSize, y + iconFrameSize, (0xFFFFFF | ((int) (0x80 * MiscUtil.getOscillatingFloat(0, 1)) << 24)));
         }
     }
 
@@ -264,40 +166,24 @@ public class Button {
     }
 
     public boolean isMouseOver(int mouseX, int mouseY) {
-        int xyDiff = (DEFAULT_ICON_SIZE - iconSize) / 2;
-        return (mouseX >= x + xyDiff &&
-                mouseY >= y + xyDiff &&
-                mouseX < x + xyDiff + iconFrameSize &&
-                mouseY < y + xyDiff + iconFrameSize);
+        int diff = (DEFAULT_ICON_SIZE - iconSize) / 2;
+        return mouseX >= x + diff && mouseY >= y + diff && mouseX < x + diff + iconFrameSize && mouseY < y + diff + iconFrameSize;
     }
 
-    // must be done from mouse press event
     public void checkClicked(int mouseX, int mouseY, boolean leftClick) {
-        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
-            return;
-
-        if (isMouseOver(mouseX, mouseY) && MC.player != null) {
-            if (leftClick && this.onLeftClick != null) {
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-                this.onLeftClick.run();
-            }
-            else if (!leftClick && this.onRightClick != null) {
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-                this.onRightClick.run();
-            }
+        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get() || !isMouseOver(mouseX, mouseY) || MC.player == null) return;
+        if (leftClick && onLeftClick != null) {
+            MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+            onLeftClick.run();
+        } else if (!leftClick && onRightClick != null) {
+            MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+            onRightClick.run();
         }
     }
 
-
-    // must be done from key press event
     public void checkPressed(int key) {
-        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
-            return;
-
-        if (hotkey != null && hotkey.key == key) {
-            if (MC.player != null)
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-            this.onLeftClick.run();
-        }
+        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get() || hotkey == null || hotkey.key != key || MC.player == null) return;
+        MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+        onLeftClick.run();
     }
 }
