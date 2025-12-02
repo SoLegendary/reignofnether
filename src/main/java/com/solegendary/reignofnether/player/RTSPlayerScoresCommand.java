@@ -36,7 +36,7 @@ public class RTSPlayerScoresCommand {
     public static int execute(CommandContext<CommandSourceStack> command) {
         if (command.getSource().getEntity() instanceof Player) {
             Player player = (Player) command.getSource().getEntity();
-            List<RTSPlayer> rtsPlayers = PlayerServerEvents.getRTSPlayers();
+            List<RTSPlayer> rtsPlayers = PlayerServerEvents.finalRTSPlayers;
 
             player.sendSystemMessage(Component.literal(displayScores(rtsPlayers)));
         }
@@ -58,6 +58,10 @@ public class RTSPlayerScoresCommand {
     }
 
     public static String displayScores(List<RTSPlayer> rtsPlayerList) {
+        if (rtsPlayerList.isEmpty()) {
+            return "No players have been defeated yet.";
+        }
+
         String scores = "      ";
 
         for (RTSPlayer rtsPlayer : rtsPlayerList) {
