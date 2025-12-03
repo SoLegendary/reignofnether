@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class RTSPlayerScoresCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -25,9 +26,15 @@ public class RTSPlayerScoresCommand {
     public static int executeOnPlayer(CommandContext<CommandSourceStack> command, Player targetPlayer) throws CommandSyntaxException {
         if (command.getSource().getEntity() instanceof Player) {
             Player player = (Player) command.getSource().getEntity();
-            RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(targetPlayer.getDisplayName().getString());
+            String targetName = targetPlayer.getDisplayName().getString();
 
-            player.sendSystemMessage(Component.literal(displayScores(rtsPlayer)));
+            for (RTSPlayer rtsPlayer : PlayerServerEvents.finalRTSPlayers) {
+                if (Objects.equals(rtsPlayer.name, targetName)) {
+                    player.sendSystemMessage(Component.literal(displayScores(rtsPlayer)));
+                    return Command.SINGLE_SUCCESS;
+                }
+            }
+            player.sendSystemMessage(Component.literal("Player is either currently in a match or a spectator."));
         }
 
         return Command.SINGLE_SUCCESS;
