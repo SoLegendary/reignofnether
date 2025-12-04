@@ -1,12 +1,14 @@
 package com.solegendary.reignofnether.building;
 
+import javax.annotation.Nullable;
+
 public interface NetherConvertingBuilding {
 
-    double getMaxRange();
+    double getMaxNetherRange();
 
-    double getStartingRange();
+    double getStartingNetherRange();
 
-    NetherZone getZone();
+    @Nullable NetherZone getNetherZone();
 
     void setNetherZone(NetherZone nz, boolean save);
 }

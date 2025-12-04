@@ -367,19 +367,12 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
 
     @Override
     public void setupEquipmentAndUpgradesClient() {
-        ItemStack swordStack = new ItemStack(Items.STONE_SWORD);
-        this.setItemSlot(EquipmentSlot.MAINHAND, swordStack);
+        swapWeapons(isUsingBow());
     }
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
-        Item sword = Items.STONE_SWORD;
-        int damageMod = 0;
-        ItemStack swordStack = new ItemStack(sword);
-        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), damageMod, AttributeModifier.Operation.ADDITION);
-        swordStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
-
-        this.setItemSlot(EquipmentSlot.MAINHAND, swordStack);
+        swapWeapons(isUsingBow());
     }
 
     protected AbstractArrow getArrow(ItemStack pArrowStack, float pVelocity) {

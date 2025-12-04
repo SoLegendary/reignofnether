@@ -1,11 +1,12 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
-import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
-import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
-import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
-import com.solegendary.reignofnether.unit.units.piglins.PiglinMerchantUnit;
+import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
+import com.solegendary.reignofnether.unit.units.piglins.*;
+import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RoyalGuardUnit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.*;
@@ -55,7 +56,7 @@ public class PortraitRendererModifiers {
             scale = 15;
         } else if (entity instanceof Chicken) {
             yOffset = 14;
-        } else if (entity instanceof Blaze) {
+        } else if (entity instanceof Blaze && !(entity instanceof WildfireUnit)) {
             yOffset = -10;
             scale = -5;
         } else if (entity instanceof MushroomCow) {
@@ -109,9 +110,18 @@ public class PortraitRendererModifiers {
             float avatarPercent = (float) royalGuardUnit.avatarScaleTicks / royalGuardUnit.AVATAR_SCALE_TICKS_MAX;
             yOffset -= (26 * avatarPercent);
         } else if (entity instanceof GruntUnit ||
-                    entity instanceof BruteUnit ||
-                    entity instanceof HeadhunterUnit) {
+                entity instanceof BruteUnit ||
+                entity instanceof HeadhunterUnit) {
             yOffset = -6;
+        } else if (entity instanceof WretchedWraithUnit) {
+            yOffset = -6;
+            scale = -24;
+        } else if (entity instanceof WildfireUnit) {
+            yOffset = -30;
+            scale = -32;
+        } else if (entity instanceof EnchanterUnit) {
+            yOffset = -36;
+            scale = -16;
         }
 
         return new Pair<>(yOffset, scale);

@@ -18,7 +18,7 @@ public class FortressPlacement extends ProductionPlacement implements Garrisonab
 
     @Override
     public BlockPos getIndoorSpawnPoint(ServerLevel level) {
-        return this.originPos.offset(getExitPosition());
+        return getExitPosition();
     }
 
     // don't use this for abilities as it may not be balanced
@@ -33,30 +33,14 @@ public class FortressPlacement extends ProductionPlacement implements Garrisonab
 
     @Override
     public BlockPos getEntryPosition() {
-        if (this.rotation == Rotation.NONE) {
-            return new BlockPos(5,17,5);
-        } else if (this.rotation == Rotation.CLOCKWISE_90) {
-            return new BlockPos(-5,17,5);
-        } else if (this.rotation == Rotation.CLOCKWISE_180) {
-            return new BlockPos(-5,17,-5);
-        } else {
-            return new BlockPos(5,17,-5);
-        }
+        return originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(5,17,5), this.rotation));
     }
 
     @Override
     public BlockPos getExitPosition() {
-        if (this.rotation == Rotation.NONE) {
-            return new BlockPos(5,1,5);
-        } else if (this.rotation == Rotation.CLOCKWISE_90) {
-            return new BlockPos(-5,1,5);
-        } else if (this.rotation == Rotation.CLOCKWISE_180) {
-            return new BlockPos(-5,1,-5);
-        } else {
-            return new BlockPos(5,1,-5);
-        }
+        return originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(5,1,5), this.rotation));
     }
 
     @Override
-    public boolean isFull() { return GarrisonableBuilding.getNumOccupants(this) >= MAX_OCCUPANTS; }
+    public int getCapacity() { return MAX_OCCUPANTS; }
 }

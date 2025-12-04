@@ -1,42 +1,58 @@
 
-1.20.1-1.2.3b
+1.20.1-1.2.3c
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
 
-Features
---------
-Custom structures
 
-[✔] Custom structures can now save NBT data from block entities
-    - This means that command block content can now be saved
+Custom Buildings
+----------------
 
+[!] This patch reworks how custom building saves work - all options set in the customisation menu such as invulnerable, capturable, etc. will be set back to their defaults
 
+[✔] Nether conversion range option (default 0)
+[✔] Night radius option (default 0)
+[✔] Buildable by Villagers
+[✔] Buildable by Monsters
+[✔] Buildable by Piglins
+[✔] Build cost
+
+[✔] Garrisonable
+    - Using custom invisible block for exit/entry
+    - Enabled if there is exactly 1 of each
+    - Not toggleable in menu (but will show warning if there's an issue):
+    [✔] add new block for marking garrison area (the area a mob needs to be on to be considered 'garrisoned'
+        - also will prevent blocks underneath it from being destroyed
+    [✔] make entry and exit blocks (and marker blocks) indestructible
+
+[❌] Command block triggers?
+    - Write commands directly in the UI that trigger periodically, on build, on destroy, etc.
 
 Bugfixes
 --------
-[✔] All weapons and armour on units are now saved on restart
-[✔] Fixed Hoglins sometimes duplicating when picking up armour
-[✔] Destroyed buildings no longer breaks blocks that weren't part of its structure
-    - This was sometimes breaking surrounding terrain blocks
-[✔] Fixed Ravager artillery shots not causing damage to obsidian and deepslate buildings
-[✔] Fixed a crash when a beacon is upgraded in multiplayer wave survival
-[✔] Fixed nether conversion zones not saving properly when their portal was destroyed
+[✔] Fixed not being able to hold alt and drag to pan or rotate the camera
+[✔] Zombie piglins now correctly have piglin faction bonuses (regeneration and speed on nether terrain)
+[✔] Militia Archers now remain as archers after saving and quitting
+[✔] Fixed unit movement issues when trying to use a neutral transport portal
+[✔] Fixed zombie villagers, skeletons and grunts sometimes spawning with extra equipment
+[✔] The Piglin Merchant's TNT no longer disappears when he dies
+[✔] Fixed sometimes not being able to control both shared allied units and your own units at once
 
 
 Quality of Life
 ---------------
+[✔] Workers can now chop jungle vines (worth 1 wood)
+
+[✔] You can now pre-queue all heroes for training before their altar is completed
+
+
 [❌] Allow overlapping of custom structures (if possible, only with air blocks)
 
 [❌] Postgame stats from @ThatBusyBoi
 
-[✔] Command block API from @PerseoJ
-    - Test @p and @s arguments
-    - Rename appropriately
-
-[✔] Minimap pings from @PerseoJ
+[❌] Global production queue from @PerseoJ
 
 
 Balance
@@ -45,4 +61,3 @@ Balance
 
 Languages
 ---------
-[✔] Persian by Alizera

@@ -58,6 +58,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class BuildingServerEvents {
 
@@ -122,6 +123,11 @@ public class BuildingServerEvents {
             ));
             //ReignOfNether.LOGGER.info("saved buildings/nether in serverevents: " + b.originPos);
         });
+
+        // deduplicate saved buildings by removing any additional buildings with the same originPos
+        Set<BlockPos> seenOriginPoses = new HashSet<>();
+        buildingData.buildings.removeIf(b -> !seenOriginPoses.add(b.originPos));
+
         buildingData.save();
         level.getDataStorage().save();
     }
@@ -141,7 +147,7 @@ public class BuildingServerEvents {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
 
         if (level != null) {
-            CustomBuildingServerEvents.loadBuildings(level);
+            CustomBuildingServerEvents.loadCustomBuildings(level);
             BuildingSaveData buildingData = BuildingSaveData.getInstance(level);
             NetherZoneSaveData netherData = NetherZoneSaveData.getInstance(level);
             ArrayList<BlockPos> placedNZs = new ArrayList<>();
@@ -182,7 +188,7 @@ public class BuildingServerEvents {
                     }
                     // setNetherZone can only be run once - this supercedes where it normally happens in tick() ->
                     // onBuilt()
-                    if (building instanceof NetherConvertingBuilding ncb) {
+                    if (building instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0) {
                         for (NetherZone nz : netherData.netherZones)
                             if (building.isPosInsideBuilding(nz.getOrigin())) {
                                 ncb.setNetherZone(nz, false);
@@ -391,8 +397,8 @@ public class BuildingServerEvents {
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
-        if (building instanceof NetherConvertingBuilding nb && nb.getZone() != null) {
-            nb.getZone().startRestoring();
+        if (building instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0 && ncb.getNetherZone() != null) {
+            ncb.getNetherZone().startRestoring();
             saveNetherZones(serverLevel);
         }
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
@@ -444,7 +450,7 @@ public class BuildingServerEvents {
         }
     }
 
-    private static void syncBuildingPlacements() {
+    private static void placeBuildingsClientside() {
         for (BuildingPlacement building : buildings) {
             BuildingClientboundPacket.placeBuilding(building.originPos,
                     building.getBuilding(),
@@ -461,7 +467,7 @@ public class BuildingServerEvents {
         }
     }
 
-    public static void syncBuildingPlacement(BlockPos pos) {
+    public static void placeBuildingClientside(BlockPos pos) {
         for (BuildingPlacement building : buildings) {
             if (building.originPos.equals(pos)) {
                 BuildingClientboundPacket.placeBuilding(building.originPos,
@@ -488,9 +494,9 @@ public class BuildingServerEvents {
         }
         MinecraftServer server = evt.getEntity().level().getServer();
         if (server == null || !server.isDedicatedServer()) {
-            CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(BuildingServerEvents::syncBuildingPlacements);
+            CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(BuildingServerEvents::placeBuildingsClientside);
         } else {
-            syncBuildingPlacements();
+            placeBuildingsClientside();
         }
         //ReignOfNether.LOGGER.info("Synced " + buildings.size() + " buildings with player logged in");
     }
@@ -539,8 +545,8 @@ public class BuildingServerEvents {
         List<BuildingPlacement> buildingsToDestroy = buildings.stream().filter(BuildingPlacement::shouldBeDestroyed).toList();
         buildings.removeIf(b -> {
             if (b.shouldBeDestroyed()) {
-                if (b instanceof NetherConvertingBuilding nb && nb.getZone() != null) {
-                    nb.getZone().startRestoring();
+                if (b instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0 && ncb.getNetherZone() != null) {
+                    ncb.getNetherZone().startRestoring();
                     saveNetherZones(serverLevel);
                 }
                 FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
@@ -633,7 +639,7 @@ public class BuildingServerEvents {
 
                 if (atkDmg > 0) {
                     // all explosion damage will directly hit all occupants at an average of 1/4 rate
-                    if (building instanceof GarrisonableBuilding garr) {
+                    if (building instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
                         for (LivingEntity le : garr.getOccupants())
                             le.hurt(exp.getDamageSource(), (random.nextInt(atkDmg + 1)) / 2f);
                     }

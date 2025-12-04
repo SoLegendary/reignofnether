@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
+import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.config.ConfigClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
@@ -59,6 +60,7 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.resources.language.I18n;
@@ -68,6 +70,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -447,7 +450,6 @@ public class HudClientEvents {
                 blitY = screenHeight - iconFrameSize * 2 - 5;
 
                 for (int i = 0; i < selProdBuilding.productionQueue.size(); i++) {
-
                     Button button = selProdBuilding.productionQueue.get(i)
                             .item.getCancelButton(selProdBuilding, i == 0);
                     if (!hudSelBuildingOwned) {
@@ -817,7 +819,7 @@ public class HudClientEvents {
             blitY = screenHeight - iconFrameSize;
 
             blitY -= iconFrameSize * buildingProdRows;
-            if (hudSelectedEntity != null || (hudSelectedPlacement != null && !hudSelectedPlacement.getAbilities().isEmpty())) {
+            if (hudSelectedEntity != null || !hudSelectedPlacement.getAbilities().isEmpty() || !hudSelectedPlacement.isBuilt) {
                 blitY -= iconFrameSize;
             }
             ArrayList<Button> actionButtons = new ArrayList<>();
@@ -1098,6 +1100,7 @@ public class HudClientEvents {
         }
 
         int resourceBlitYStart = blitY;
+        int resourcePanelBottomY = blitY;
 
         if (resources != null && MC.player != null) {
             for (String resourceName : new String[] { "food", "wood", "ore", "pop" }) {
@@ -1225,6 +1228,7 @@ public class HudClientEvents {
 
                 blitY += iconFrameSize - 1;
             }
+            resourcePanelBottomY = blitY;
 
             blitY = resourceBlitYStart;
             final String finalSelPlayerName = selPlayerName;
@@ -1265,9 +1269,28 @@ public class HudClientEvents {
                     }
                     MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipWorkersAssigned, mouseX + 5, mouseY);
 
+
                 }
                 blitY += iconFrameSize - 1;
             }
+        }
+
+        // global production queue - visible to yourself, observers, sandbox players and allies
+        int queuePanelStartX = 0;
+        int queuePanelStartY = resourcePanelBottomY + 6;
+        if (isSelPlayer ||
+            !PlayerClientEvents.isRTSPlayer() ||
+            SandboxClientEvents.isSandboxPlayer() ||
+            AlliancesClient.isAllied(MC.player.getName().getString(), selPlayerName)) {
+            Pair<List<RectZone>, List<Button>> renderedElements = GlobalProductionQueueRenderer.renderQueue(evt.getGuiGraphics(),
+                    selPlayerName,
+                    queuePanelStartX,
+                    queuePanelStartY,
+                    mouseX,
+                    mouseY
+            );
+            hudZones.addAll(renderedElements.getFirst());
+            renderedButtons.addAll(renderedElements.getSecond());
         }
 
         // --------------------------
@@ -1885,7 +1908,12 @@ public class HudClientEvents {
     private static void cycleBuildingSubgroups() {
         List<BuildingPlacement> selBuildings = BuildingClientEvents.getSelectedBuildings();
         List<String> buildingNames = selBuildings
-                .stream().map(b -> ReignOfNetherRegistries.BUILDING.getKey(b.getBuilding()).toString())
+                .stream().map(b -> {
+                    if (b.getBuilding() instanceof CustomBuilding cb) {
+                        return cb.name;
+                    }
+                    return ReignOfNetherRegistries.BUILDING.getKey(b.getBuilding()).toString();
+                })
                 .distinct().sorted(Comparator.comparing(b -> b))
                 .collect(Collectors.toList());
 

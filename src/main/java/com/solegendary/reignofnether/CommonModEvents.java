@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether;
 
+import com.solegendary.reignofnether.blocks.GarrisonBlockRenderer;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
@@ -168,6 +169,11 @@ public class CommonModEvents {
     @SubscribeEvent
     public static void onClientSetupEvent(FMLClientSetupEvent evt) {
         evt.enqueueWork(() -> MenuScreens.register(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), TopdownGui::new));
+    }
+
+    @SubscribeEvent
+    public static void registerBlockEntityRenderers(EntityRenderersEvent.RegisterRenderers evt) {
+        evt.registerBlockEntityRenderer(BlockEntityRegistrar.GARRISON_BLOCK_ENTITY.get(), GarrisonBlockRenderer::new);
     }
 
     @SubscribeEvent

@@ -66,6 +66,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -320,8 +321,8 @@ public class UnitClientEvents {
                     .mapToInt(Entity::getId).toArray();
 
             String playerName = MC.player.getName().getString();
-            if (hudSelectedEntity instanceof Unit unit && AlliancesClient.canControlAlly(hudSelectedEntity))
-                playerName = unit.getOwnerName();
+            //if (hudSelectedEntity instanceof Unit unit && AlliancesClient.canControlAlly(hudSelectedEntity))
+            //    playerName = unit.getOwnerName();
 
             UnitActionItem actionItem = new UnitActionItem(
                 playerName,
@@ -692,7 +693,7 @@ public class UnitClientEvents {
                         sendUnitCommand(UnitAction.MOUNT_SPIDER);
                 }
                 // right click -> garrison friendly building
-                else if (preSelBuilding instanceof GarrisonableBuilding garr &&
+                else if (preSelBuilding instanceof GarrisonableBuilding garr && garr.getCapacity() > 0 &&
                         hudSelectedEntity instanceof RangedAttackerUnit &&
                         hudSelectedEntity instanceof Unit unit && unit.canGarrison() &&
                         preSelBuilding.ownerName.equals(unit.getOwnerName())) {
@@ -1251,55 +1252,26 @@ public class UnitClientEvents {
      */
 
     /*
-    public static int option = 0;
-
-    public static double arm_x_rot = 0;
-    public static double arm_y_rot = 0;
-    public static double arm_z_rot = 0;
-    public static int xp_rot = -90;
-    public static int yp_rot = 180;
-    public static double x_pos = 16.0f;
-    public static double y_pos = 0.125f;
-    public static double z_pos = -0.625f;
+    public static int yOffset = 0;
+    public static int scale = 0;
 
     @SubscribeEvent
     public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT || evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-            int mult = evt.getKeyCode() == GLFW.GLFW_KEY_LEFT ? -1 : 1;
-            switch (option) {
-                case 0 -> arm_x_rot += mult * 0.1;
-                case 1 -> arm_y_rot += mult * 0.1;
-                case 2 -> arm_z_rot += mult * 0.1;
-                case 3 -> xp_rot += mult * 5;
-                case 4 -> yp_rot += mult * 5;
-                case 5 -> x_pos += mult * 0.1;
-                case 6 -> y_pos += mult * 0.1;
-                case 7 -> z_pos += mult * 0.1;
-            }
+            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_LEFT ? -1 : 1;
+            yOffset += sign;
         }
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-            option -= 1;
-            if (option < 0)
-                option = 7;
-        }
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-            option += 1;
-            if (option > 7)
-                option = 0;
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP || evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
+            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_UP ? -1 : 1;
+            scale += sign;
         }
     }
 
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "arm_x_rot: " + arm_x_rot + (option == 0 ? " <" : ""),
-                "arm_y_rot: " + arm_y_rot + (option == 1 ? " <" : ""),
-                "arm_z_rot: " + arm_z_rot + (option == 2 ? " <" : ""),
-                "xp_rot: " + xp_rot + (option == 3 ? " <" : ""),
-                "yp_rot: " + yp_rot + (option == 4 ? " <" : ""),
-                "x_pos: " + x_pos + (option == 5 ? " <" : ""),
-                "y_pos: " + y_pos + (option == 6 ? " <" : ""),
-                "z_pos: " + z_pos + (option == 7 ? " <" : ""),
+        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
+                "yOffset: " +  yOffset,
+                "scale: " + scale,
         });
     }
      */

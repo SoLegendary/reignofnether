@@ -107,9 +107,7 @@ public class SandboxActionButtons {
                 () -> true,
                 () -> {
                     if (HudClientEvents.hudSelectedPlacement != null) {
-                        BuildingClientEvents.getBuildings().remove(HudClientEvents.hudSelectedPlacement);
                         SandboxServerboundPacket.removeBuilding(HudClientEvents.hudSelectedPlacement.originPos);
-                        BuildingClientEvents.clearSelectedBuildings();
                     }
                 },
                 null,

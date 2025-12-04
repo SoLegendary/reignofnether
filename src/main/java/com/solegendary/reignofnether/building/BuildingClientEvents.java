@@ -27,6 +27,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -1163,5 +1164,10 @@ public class BuildingClientEvents {
         } else {
             beacon.deactivate();
         }
+    }
+
+    public static void removeBuilding(BlockPos bp) {
+        buildings.removeIf(b -> b.originPos.equals(bp));
+        BuildingClientEvents.clearSelectedBuildings();
     }
 }

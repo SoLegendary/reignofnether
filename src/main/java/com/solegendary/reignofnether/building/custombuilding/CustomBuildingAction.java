@@ -15,5 +15,7 @@ public enum CustomBuildingAction {
     SET_ORE_COST,
     SET_FOOD_BOUNTY,
     SET_WOOD_BOUNTY,
-    SET_ORE_BOUNTY
+    SET_ORE_BOUNTY,
+    SET_GARRISON_CAPACITY,
+    SET_GARRISON_RANGE
 }

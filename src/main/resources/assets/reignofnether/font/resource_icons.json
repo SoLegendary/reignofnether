@@ -65,6 +65,13 @@
         },
         {
             "type": "bitmap",
+            "file": "reignofnether:hud/warning.png",
+            "ascent": 9,
+            "height": 9,
+            "chars": ["\uE009"]
+        },
+        {
+            "type": "bitmap",
             "file": "minecraft:font/ascii.png",
             "ascent": 7,
             "chars": [

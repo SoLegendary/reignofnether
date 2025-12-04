@@ -3,7 +3,9 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
@@ -17,8 +19,11 @@ import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.util.Faction;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
 
@@ -40,6 +45,13 @@ public class ShrineOfProsperity extends ProductionBuilding {
 
         this.productions.add(ProductionItems.ROYAL_GUARD, Keybindings.keyQ);
         this.productions.add(ProductionItems.ROYAL_GUARD_REVIVE, Keybindings.keyQ);
+    }
+
+    @Override
+    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
+        ProductionPlacement pp = (ProductionPlacement) super.createBuildingPlacement(level, pos, rotation, ownerName);
+        pp.allowProdWhileBuilding = true;
+        return pp;
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}

@@ -285,8 +285,4 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
         return pSpawnData;
     }
-
-
-
-
 }

@@ -50,7 +50,9 @@ public class InfernalPortal extends ProductionBuilding {
 
     @Override
     public PortalPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new PortalPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
+        PortalPlacement pp = new PortalPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
+        pp.allowProdWhileBuilding = true;
+        return pp;
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {

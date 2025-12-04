@@ -462,7 +462,8 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         if (level().isClientSide())
             return;
 
-        ThrowableTntProjectile tnt = new ThrowableTntProjectile(level(), this);
+        ThrowTNT throwTNT = getThrowTNT();
+        ThrowableTntProjectile tnt = new ThrowableTntProjectile(level(), this, throwTNT.explosionPower);
         tnt.setItem(new ItemStack(ItemRegistrar.THROWABLE_TNT.get()));
         Vec3 dMove = Vec3.atCenterOf(targetBp).subtract(this.getEyePosition())
                 .multiply(1,0,1)
@@ -478,7 +479,6 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         if (greedIsGood.isAutocasting(this))
             resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.WOOD, this);
 
-        ThrowTNT throwTNT = getThrowTNT();
         float cooldown = Math.max(0, throwTNT.cooldownMax - (resourceBonus * ThrowTNT.LESS_COOLDOWN_PER_100_RESOURCES));
         throwTNT.setCooldown(cooldown, this);
         AbilityClientboundPacket.sendSetCooldownPacket(getId(), throwTNT.action, throwTNT.getCooldown(this));

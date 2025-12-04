@@ -128,8 +128,9 @@ public class SandboxClientEvents {
                 ProductionItems.WITCH.getPlaceButton(),
                 ProductionItems.EVOKER.getPlaceButton(),
                 ProductionItems.RAVAGER.getPlaceButton(),
-                ProductionItems.ROYAL_GUARD.getPlaceButton()
-                //ProductionItems.ENCHANTER.getPlaceButton()
+                ProductionItems.ROYAL_GUARD.getPlaceButton(),
+
+                ProductionItems.ENCHANTER.getPlaceButton()
             );
             case MONSTERS -> List.of(
                 ProductionItems.ZOMBIE_VILLAGER.getPlaceButton(),
@@ -145,8 +146,9 @@ public class SandboxClientEvents {
                 ProductionItems.WARDEN.getPlaceButton(),
                 ProductionItems.ZOMBIE_PIGLIN.getPlaceButton(),
                 ProductionItems.ZOGLIN.getPlaceButton(),
-                ProductionItems.NECROMANCER.getPlaceButton()
-                //ProductionItems.WRETCHED_WRAITH.getPlaceButton(),
+                ProductionItems.NECROMANCER.getPlaceButton(),
+
+                ProductionItems.WRETCHED_WRAITH.getPlaceButton()
             );
             case PIGLINS -> List.of(
                 ProductionItems.GRUNT.getPlaceButton(),
@@ -157,8 +159,9 @@ public class SandboxClientEvents {
                 ProductionItems.WITHER_SKELETON.getPlaceButton(),
                 ProductionItems.MAGMA_CUBE.getPlaceButton(),
                 ProductionItems.GHAST.getPlaceButton(),
-                ProductionItems.PIGLIN_MERCHANT.getPlaceButton()
-                //ProductionItems.WILDFIRE.getPlaceButton()
+                ProductionItems.PIGLIN_MERCHANT.getPlaceButton(),
+
+                ProductionItems.WILDFIRE.getPlaceButton()
             );
             case NONE -> List.of(
                 ProductionItems.ENDERMAN.getPlaceButton(),

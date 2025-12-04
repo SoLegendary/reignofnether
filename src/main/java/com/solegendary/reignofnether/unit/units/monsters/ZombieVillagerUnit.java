@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -33,10 +34,9 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -46,6 +46,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -197,7 +198,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        return List.of(
+        ArrayList<BuildingPlaceButton> buttons = new ArrayList<>(List.of(
                 Buildings.MAUSOLEUM.getBuildButton(Keybindings.keyQ),
                 Buildings.SPRUCE_STOCKPILE.getBuildButton(Keybindings.keyW),
                 Buildings.HAUNTED_HOUSE.getBuildButton(Keybindings.keyE),
@@ -213,7 +214,12 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
                 Buildings.SPRUCE_BRIDGE.getBuildButton(Keybindings.keyC),
                 Buildings.SCULK_CATALYST.getBuildButton(Keybindings.keyV),
                 Buildings.BEACON.getBuildButton(null)
-        );
+        ));
+        CustomBuildingClientEvents.customBuildings.forEach(cb -> {
+            if (cb.buildableByMonsters)
+                buttons.add(cb.getWorkerBuildButton(null));
+        });
+        return buttons;
     }
 
     public ZombieVillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {
@@ -334,10 +340,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
             this.maxResources = 200;
     }
 
-
-
-
-
     @Override
     public List<Button> getAbilityButtons() {
         List<Button> abilities = new ArrayList<>(getAbilities().getButtons(this));
@@ -346,5 +348,11 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
             abilities.addAll(getBuildingButtons());
         }
         return abilities;
+    }
+
+    @Override
+    @Nullable
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        return pSpawnData;
     }
 }
