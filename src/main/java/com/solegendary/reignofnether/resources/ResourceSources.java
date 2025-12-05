@@ -386,6 +386,13 @@ public class ResourceSources {
                     8,
                     1,
                     ResourceName.WOOD
+            ),
+            new ResourceSource("Leaves",
+                    List.of(Blocks.VINE),
+                    List.of(Items.VINE),
+                    8,
+                    1,
+                    ResourceName.WOOD
             )
     );
 

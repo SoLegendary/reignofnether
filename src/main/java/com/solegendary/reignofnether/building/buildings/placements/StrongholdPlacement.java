@@ -38,37 +38,19 @@ public class StrongholdPlacement extends DarknessProductionBuilding implements G
 
     @Override
     public BlockPos getIndoorSpawnPoint(ServerLevel level) {
-        return this.originPos.offset(getExitPosition());
+        return getExitPosition();
     }
 
     @Override
     public BlockPos getEntryPosition() {
-        if (this.rotation == Rotation.NONE) {
-            return new BlockPos(5, 14, 5);
-        } else if (this.rotation == Rotation.CLOCKWISE_90) {
-            return new BlockPos(-5, 14, 5);
-        } else if (this.rotation == Rotation.CLOCKWISE_180) {
-            return new BlockPos(-5, 14, -5);
-        } else {
-            return new BlockPos(5, 14, -5);
-        }
+        return originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(5, 14, 5), this.rotation));
     }
 
     @Override
     public BlockPos getExitPosition() {
-        if (this.rotation == Rotation.NONE) {
-            return new BlockPos(5, 2, 6);
-        } else if (this.rotation == Rotation.CLOCKWISE_90) {
-            return new BlockPos(-5, 2, 6);
-        } else if (this.rotation == Rotation.CLOCKWISE_180) {
-            return new BlockPos(-5, 2, -6);
-        } else {
-            return new BlockPos(5, 2, -6);
-        }
+        return originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(5, 2, 6), this.rotation));
     }
 
     @Override
-    public boolean isFull() {
-        return GarrisonableBuilding.getNumOccupants(this) >= MAX_OCCUPANTS;
-    }
+    public int getCapacity() { return MAX_OCCUPANTS; }
 }

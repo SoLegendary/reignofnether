@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CallToArmsUnit;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.hud.Button;
@@ -305,7 +306,16 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        return FactionRegistries.VILLAGERS.getBuildingButtons();
+        List<BuildingPlaceButton> buttons = new ArrayList<>();
+        buttons.addAll(FactionRegistries.VILLAGERS.getBuildingButtons());
+
+        //TODO Add to register
+        CustomBuildingClientEvents.customBuildings.forEach(cb -> {
+            if (cb.buildableByVillagers)
+                buttons.add(cb.getWorkerBuildButton(null));
+        });
+
+        return buttons;
     }
 
     public VillagerUnit(EntityType<? extends Vindicator> entityType, Level level) {

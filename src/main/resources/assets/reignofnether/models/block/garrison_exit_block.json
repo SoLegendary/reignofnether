@@ -1,0 +1,7 @@
+{
+    "render_type": "minecraft:cutout",
+    "parent": "block/cross",
+    "textures": {
+        "cross": "reignofnether:block/garrison_exit_block"
+    }
+}

@@ -21,9 +21,7 @@ public class CustomBuildingClientboundPacket {
     public String name;
     public BlockPos structureSize;
     public CompoundTag structureNbt;
-    public String portraitBlockRegistryKey;
-    public boolean capturable;
-    public boolean invulnerable;
+    public CompoundTag attributesNbt;
 
     public static void registerCustomBuilding(CustomBuilding building) {
         registerCustomBuilding("", building);
@@ -31,8 +29,7 @@ public class CustomBuildingClientboundPacket {
 
     public static void registerCustomBuilding(String playerName, CustomBuilding building) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new CustomBuildingClientboundPacket(
-                playerName, building.name, new BlockPos(building.structureSize), building.structureNbt,
-                building.getPortraitBlockRegistryKey(), building.capturable, building.invulnerable
+                playerName, building.name, new BlockPos(building.structureSize), building.structureNbt, building.attributesNbt
         ));
     }
 
@@ -41,17 +38,13 @@ public class CustomBuildingClientboundPacket {
             String name,
             BlockPos structureSize,
             CompoundTag structureNbt,
-            String portraitBlockRegistryKey,
-            boolean capturable,
-            boolean invulnerable
+            CompoundTag attributesNbt
     ) {
         this.playerName = playerName;
         this.name = name;
         this.structureSize = structureSize;
         this.structureNbt = structureNbt;
-        this.portraitBlockRegistryKey = portraitBlockRegistryKey;
-        this.capturable = capturable;
-        this.invulnerable = invulnerable;
+        this.attributesNbt = attributesNbt;
     }
 
     public CustomBuildingClientboundPacket(FriendlyByteBuf buffer) {
@@ -59,9 +52,7 @@ public class CustomBuildingClientboundPacket {
         this.name = buffer.readUtf();
         this.structureSize = buffer.readBlockPos();
         this.structureNbt = buffer.readNbt();
-        this.portraitBlockRegistryKey = buffer.readUtf();
-        this.capturable = buffer.readBoolean();
-        this.invulnerable = buffer.readBoolean();
+        this.attributesNbt = buffer.readNbt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -69,9 +60,7 @@ public class CustomBuildingClientboundPacket {
         buffer.writeUtf(this.name);
         buffer.writeBlockPos(this.structureSize);
         buffer.writeNbt(this.structureNbt);
-        buffer.writeUtf(this.portraitBlockRegistryKey);
-        buffer.writeBoolean(this.capturable);
-        buffer.writeBoolean(this.invulnerable);
+        buffer.writeNbt(this.attributesNbt);
     }
 
     // server-side packet-consuming functions
@@ -80,8 +69,7 @@ public class CustomBuildingClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 CustomBuildingClientEvents.registerCustomBuilding(
-                        playerName, name, structureSize, structureNbt,
-                        portraitBlockRegistryKey, capturable, invulnerable
+                        playerName, name, structureSize, structureNbt, attributesNbt
                 );
                 success.set(true);
             });

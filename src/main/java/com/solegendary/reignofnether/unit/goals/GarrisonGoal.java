@@ -22,7 +22,7 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     }
 
     public void tick() {
-        if (buildingTarget instanceof GarrisonableBuilding garrisonableBuilding) {
+        if (buildingTarget instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() <= 0) {
                 stopGarrisoning();
@@ -33,8 +33,8 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
             )) <= 3f) {
 
                 // teleport to garrison entry pos
-                if (!garrisonableBuilding.isFull() && buildingTarget.isBuilt) {
-                    BlockPos bp = buildingTarget.originPos.offset(garrisonableBuilding.getEntryPosition());
+                if (!garr.isFull() && buildingTarget.isBuilt && garr.getEntryPosition() != null) {
+                    BlockPos bp = garr.getEntryPosition();
                     this.mob.teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
                 }
                 this.stopGarrisoning();
@@ -45,7 +45,7 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     }
 
     private void calcMoveTarget() {
-        if (this.buildingTarget instanceof GarrisonableBuilding) {
+        if (this.buildingTarget instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
             this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1);
         }
     }
@@ -64,12 +64,12 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
             else
                 isAllied = AlliancesServerEvents.isAllied(building.ownerName, ((Unit) mob).getOwnerName());
 
-            if (!(building instanceof GarrisonableBuilding garrisonableBuilding) ||
+            if (!(building instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) ||
                 (!building.ownerName.equals(((Unit) mob).getOwnerName()) && !isAllied)) {
                 if (clientside)
                     HudClientEvents.showTemporaryMessage(I18n.get("hud.reignofnether.not_garrisonable"));
             }
-            else if (garrisonableBuilding.isFull()) {
+            else if (garr.isFull()) {
                 if (clientside)
                     HudClientEvents.showTemporaryMessage(I18n.get("hud.reignofnether.building_full"));
             } else {

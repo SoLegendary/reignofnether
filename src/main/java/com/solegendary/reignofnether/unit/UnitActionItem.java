@@ -217,9 +217,9 @@ public class UnitActionItem {
                 }
                 case UNGARRISON -> {
                     GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
-                    if (garr != null) {
+                    if (garr != null && garr.getExitPosition() != null ) {
                         BuildingPlacement building = (BuildingPlacement) garr;
-                        BlockPos bp = building.originPos.offset(garr.getExitPosition());
+                        BlockPos bp = garr.getExitPosition();
                         ((LivingEntity) unit).teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
                     }
                 }

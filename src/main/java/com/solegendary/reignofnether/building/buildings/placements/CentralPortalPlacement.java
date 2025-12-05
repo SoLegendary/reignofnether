@@ -17,9 +17,9 @@ public class CentralPortalPlacement extends ProductionPlacement implements Nethe
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
     }
 
-    @Override public double getMaxRange() { return 30; }
-    @Override public double getStartingRange() { return 6; }
-    @Override public NetherZone getZone() { return netherConversionZone; }
+    @Override public double getMaxNetherRange() { return 30; }
+    @Override public double getStartingNetherRange() { return 6; }
+    @Override public NetherZone getNetherZone() { return netherConversionZone; }
 
     @Override
     public void tick(Level tickLevel) {
@@ -53,8 +53,8 @@ public class CentralPortalPlacement extends ProductionPlacement implements Nethe
     @Override
     public void onBuilt() {
         super.onBuilt();
-        if (getMaxRange() > 0)
-            setNetherZone(new NetherZone(centrePos.offset(0,-6,0), getMaxRange(), getStartingRange()), true);
+        if (getMaxNetherRange() > 0)
+            setNetherZone(new NetherZone(centrePos.offset(0,-6,0), getMaxNetherRange(), getStartingNetherRange()), true);
     }
 
     @Override

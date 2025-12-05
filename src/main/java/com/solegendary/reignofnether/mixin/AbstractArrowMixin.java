@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -47,17 +46,21 @@ public abstract class AbstractArrowMixin extends Projectile {
 
     @Shadow public abstract boolean isNoPhysics();
     @Shadow private int life;
+    @Shadow protected EntityHitResult findHitEntity(Vec3 pStartVec, Vec3 pEndVec) {
+        return null;
+    }
 
-    private boolean isInsideTopOfBuilding(BuildingPlacement building) {
-        BlockPos bp = this.blockPosition();
-        boolean isPosInsideBuildingExt =
-                bp.getX() <= building.maxCorner.getX() + 1 && bp.getX() >= building.minCorner.getX() - 1 &&
-                bp.getY() <= building.maxCorner.getY() + 1 && bp.getY() >= building.minCorner.getY() - 1 &&
-                bp.getZ() <= building.maxCorner.getZ() + 1 && bp.getZ() >= building.minCorner.getZ() - 1;
+    private boolean isInsideBuildingAndNotForeignEntity(BuildingPlacement building) {
+        Vec3 vec32 = this.position();
+        Vec3 vec33 = vec32.add(getDeltaMovement());
+        EntityHitResult entityHitResult = this.findHitEntity(vec32, vec33);
 
-        // only have nophysics at a high Y value so we can still attack enemies at the base of the building
-        return building.isPosInsideBuilding(this.blockPosition()) &&
-                this.blockPosition().getY() > building.originPos.getY() + 5;
+        boolean insideForeignEntity = entityHitResult != null && entityHitResult.getEntity() != getOwner();
+        if (entityHitResult != null && entityHitResult.getEntity() instanceof Unit unit1 && getOwner() instanceof Unit unit2 &&
+            GarrisonableBuilding.getGarrison(unit1) == GarrisonableBuilding.getGarrison(unit2))
+            insideForeignEntity = false;
+
+        return building.isPosInsideBuilding(this.blockPosition()) && !insideForeignEntity;
     }
 
     // prevent arrows from colliding with the building that a garrisoned unit is inside of
@@ -70,7 +73,7 @@ public abstract class AbstractArrowMixin extends Projectile {
         if (this.getOwner() instanceof AttackerUnit aUnit) {
             // garrisoned unit -> ground
             if (GarrisonableBuilding.getGarrison((Unit) aUnit) instanceof BuildingPlacement building &&
-                isInsideTopOfBuilding(building)) {
+                    isInsideBuildingAndNotForeignEntity(building)) {
                 cir.setReturnValue(true);
             }
 

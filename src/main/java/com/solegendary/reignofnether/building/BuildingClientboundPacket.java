@@ -195,6 +195,26 @@ public class BuildingClientboundPacket {
         );
     }
 
+    public static void removeBuilding(BlockPos buildingPos) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new BuildingClientboundPacket(BuildingAction.REMOVE,
+                        EMPTY,
+                        "",
+                        buildingPos,
+                        Rotation.NONE,
+                        "",
+                        0,
+                        0,
+                        false,
+                        0,
+                        false,
+                        PortalPlacement.PortalType.BASIC,
+                        new BlockPos(0,0,0),
+                        false
+                )
+        );
+    }
+
     public BuildingClientboundPacket(
         BuildingAction action,
         ResourceLocation itemKey,
@@ -354,6 +374,9 @@ public class BuildingClientboundPacket {
                                 pBuilding.productionQueue.remove(pItem);
                             }
                         }
+                    }
+                    case REMOVE -> {
+                        BuildingClientEvents.removeBuilding(buildingPos);
                     }
                 }
                 success.set(true);

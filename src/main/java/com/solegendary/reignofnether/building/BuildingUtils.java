@@ -251,8 +251,8 @@ public class BuildingUtils {
         List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings) {
-            if (building instanceof NetherConvertingBuilding netherBuilding) {
-                double maxRangeSquared = Math.pow(netherBuilding.getMaxRange(), 2);
+            if (building instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0) {
+                double maxRangeSquared = Math.pow(ncb.getMaxNetherRange(), 2);
                 if (bp.distSqr(building.centrePos) <= maxRangeSquared) {
                     return true;
                 }

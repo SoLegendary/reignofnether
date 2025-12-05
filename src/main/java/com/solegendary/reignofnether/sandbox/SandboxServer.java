@@ -97,7 +97,7 @@ public class SandboxServer {
         for (BuildingPlacement bpl : BuildingServerEvents.getBuildings()) {
             if (bpl.originPos.equals(pos)) {
                 bpl.ownerName = ownerName;
-                BuildingServerEvents.syncBuildingPlacement(pos);
+                BuildingClientboundPacket.syncBuilding(pos, bpl.getBlocksPlaced(), ownerName);
             }
         }
     }
@@ -105,9 +105,9 @@ public class SandboxServer {
     public static void removeBuilding(BlockPos pos) {
         BuildingServerEvents.getBuildings().removeIf(b -> {
             if (b.originPos.equals(pos)) {
-                BuildingServerEvents.syncBuildingPlacement(pos);
-                if (b instanceof NetherConvertingBuilding ncb)
-                    ncb.getZone().startRestoring();
+                BuildingClientboundPacket.removeBuilding(pos);
+                if (b instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0 && ncb.getNetherZone() != null)
+                    ncb.getNetherZone().startRestoring();
                 return true;
             }
             return false;

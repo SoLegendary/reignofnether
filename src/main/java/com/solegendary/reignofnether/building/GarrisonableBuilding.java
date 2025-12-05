@@ -2,13 +2,18 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Rotation;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public interface GarrisonableBuilding {
@@ -18,12 +23,28 @@ public interface GarrisonableBuilding {
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus();
 
-    // returns the relative building position units will go to when garrisoning
-    BlockPos getEntryPosition();
-    // returns the relative building position units will go to when ungarrisoning
-    BlockPos getExitPosition();
+    // returns the absolute building position units will go to when garrisoning
+    @Nullable BlockPos getEntryPosition();
+    // returns the absolute building position units will go to when ungarrisoning
+    @Nullable BlockPos getExitPosition();
 
-    boolean isFull();
+    int getCapacity();
+
+    default boolean isFull() {
+        return getNumOccupants((BuildingPlacement) this) >= getCapacity();
+    }
+
+    static BlockPos rotatePos(BlockPos pos, Rotation rot) {
+        if (rot == Rotation.NONE) {
+            return new BlockPos(pos.getX(), pos.getY(), pos.getZ());
+        } else if (rot == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-pos.getX(), pos.getY(), pos.getZ());
+        } else if (rot == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-pos.getX(), pos.getY(), -pos.getZ());
+        } else {
+            return new BlockPos(pos.getX(), pos.getY(), -pos.getZ());
+        }
+    }
 
     // will only return actual Units, not any other LivingEntity
     public default List<LivingEntity> getOccupants() {
@@ -44,7 +65,8 @@ public interface GarrisonableBuilding {
 
     static GarrisonableBuilding getGarrison(Unit unit) {
         List<BuildingPlacement> buildings;
-        if (((Entity) unit).level().isClientSide())
+        Entity entity = (Entity) unit;
+        if (entity.level().isClientSide())
             buildings = BuildingClientEvents.getBuildings();
         else
             buildings = BuildingServerEvents.getBuildings();
@@ -52,16 +74,24 @@ public interface GarrisonableBuilding {
         for (BuildingPlacement building : buildings) {
 
             boolean isAllied;
-            if (((Entity) unit).level().isClientSide())
+            if (entity.level().isClientSide())
                 isAllied = AlliancesClient.isAllied(unit.getOwnerName(), building.ownerName);
             else
                 isAllied = AlliancesServerEvents.isAllied(unit.getOwnerName(), building.ownerName);
 
             if ((unit.getOwnerName().equals(building.ownerName) || isAllied || (unit.getOwnerName().isEmpty() && building.ownerName.isEmpty())) &&
-                    building instanceof GarrisonableBuilding garr && building.isBuilt &&
-                    building.isPosInsideBuilding(((LivingEntity) unit).getOnPos()) &&
-                    ((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2) {
-                return garr;
+                    building instanceof GarrisonableBuilding garr && garr.getCapacity() > 0 && building.isBuilt &&
+                    building.isPosInsideBuilding(((LivingEntity) unit).getOnPos().above())) {
+
+                if (building.getBuilding() instanceof CustomBuilding) {
+                    Block onBlock = entity.level().getBlockState(entity.getOnPos().above()).getBlock();
+                    if (onBlock == BlockRegistrar.GARRISON_ZONE_BLOCK.get() ||
+                        onBlock == BlockRegistrar.GARRISON_ENTRY_BLOCK.get())
+                        return garr;
+                } else {
+                    if (((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2)
+                        return garr;
+                }
             }
         }
         return null;
@@ -75,10 +105,19 @@ public interface GarrisonableBuilding {
             entities = UnitServerEvents.getAllUnits();
 
         int numOccupants = 0;
-        for (LivingEntity entity : entities)
-            if (building.isPosInsideBuilding(entity.getOnPos()) &&
-                entity.getOnPos().getY() > building.originPos.getY() + 2)
-                numOccupants += 1;
+        for (LivingEntity entity : entities) {
+            if (building.isPosInsideBuilding(entity.getOnPos().above())) {
+                if (building.getBuilding() instanceof CustomBuilding) {
+                    Block onBlock = entity.level().getBlockState(entity.getOnPos().above()).getBlock();
+                    if (onBlock == BlockRegistrar.GARRISON_ZONE_BLOCK.get() ||
+                        onBlock == BlockRegistrar.GARRISON_ENTRY_BLOCK.get())
+                        numOccupants += 1;;
+                } else {
+                    if (entity.getOnPos().getY() > building.originPos.getY() + 2)
+                        numOccupants += 1;;
+                }
+            }
+        }
 
         return numOccupants;
     }

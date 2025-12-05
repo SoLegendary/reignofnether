@@ -22,7 +22,7 @@ public class ThrowableTnt extends Item {
                 SoundSource.NEUTRAL, 0.5F, 0.4F / (pLevel.getRandom().nextFloat() * 0.4F + 0.8F));
 
         if (!pLevel.isClientSide) {
-            ThrowableTntProjectile tnt = new ThrowableTntProjectile(pLevel, pPlayer);
+            ThrowableTntProjectile tnt = new ThrowableTntProjectile(pLevel, pPlayer, 3.0f);
             tnt.setItem(item);
             tnt.shootFromRotation(pPlayer, pPlayer.getXRot(), pPlayer.getYRot(), -20.0F, 0.5F, 1.0F);
             pLevel.addFreshEntity(tnt);

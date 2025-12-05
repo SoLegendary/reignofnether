@@ -1,12 +1,9 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
-import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalCivilian;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalMilitary;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalTransport;
-import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -18,8 +15,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
@@ -90,7 +85,7 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
     @Override
     public void onBuilt() {
         super.onBuilt();
-        setNetherZone(new NetherZone(centrePos.offset(0, -2, 0), getMaxRange(), getStartingRange()), true);
+        setNetherZone(new NetherZone(centrePos.offset(0, -2, 0), getMaxNetherRange(), getStartingNetherRange()), true);
     }
 
     public void disconnectPortal() {
@@ -135,14 +130,14 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
         }
     }
 
-    public double getMaxRange() { return 20; }
+    public double getMaxNetherRange() { return 20; }
 
-    public double getStartingRange() {
+    public double getStartingNetherRange() {
         return 3;
     }
 
     @Override
-    public NetherZone getZone() {
+    public NetherZone getNetherZone() {
         return netherConversionZone;
     }
 

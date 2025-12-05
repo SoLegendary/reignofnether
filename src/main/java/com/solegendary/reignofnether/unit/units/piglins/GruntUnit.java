@@ -2,9 +2,13 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.hud.Button;
@@ -26,9 +30,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -37,6 +40,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -186,7 +190,16 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        return FactionRegistries.PIGLINS.getBuildingButtons();
+        List<BuildingPlaceButton> buttons = new ArrayList<>();
+        buttons.addAll(FactionRegistries.PIGLINS.getBuildingButtons());
+
+        //TODO Add to Register
+        CustomBuildingClientEvents.customBuildings.forEach(cb -> {
+            if (cb.buildableByPiglins)
+                buttons.add(cb.getWorkerBuildButton(null));
+        });
+
+        return buttons;
     }
 
     public GruntUnit(EntityType<? extends Piglin> entityType, Level level) {
@@ -295,10 +308,6 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
         return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
     }
 
-
-
-
-
     @Override
     public List<Button> getAbilityButtons() {
         List<Button> abilities = new ArrayList<>(getAbilities().getButtons(this));
@@ -307,5 +316,11 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
             abilities.addAll(getBuildingButtons());
         }
         return abilities;
+    }
+
+    @Override
+    @Nullable
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        return pSpawnData;
     }
 }

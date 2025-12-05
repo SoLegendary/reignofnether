@@ -6,6 +6,7 @@ package com.solegendary.reignofnether.unit.modelling.models;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.unit.goals.UnitRangedAttackGoal;
 import com.solegendary.reignofnether.unit.modelling.animations.WildfireAnimations;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -13,9 +14,11 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 
 public class WildfireModel<T extends Entity> extends KeyframeHierarchicalModel<T> {
 
@@ -159,6 +162,19 @@ public class WildfireModel<T extends Entity> extends KeyframeHierarchicalModel<T
 		return LayerDefinition.create(meshdefinition, 256, 256);
 	}
 
+	private float partialTick = 0;
+
+	@Override
+	public void prepareMobModel(T entity, float limbSwing, float limbSwingAmount, float partialTicks) {
+		super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTicks);
+		this.partialTick = partialTicks;
+	}
+
+	private void desyncShieldRotations(WildfireUnit wildfire) {
+		float bodyYaw = Mth.lerp(partialTick, wildfire.yRotO, wildfire.getYRot());
+		this.shields.yRot = -bodyYaw * (float)(Math.PI / 180f);
+	}
+
 	@Override
 	public void setupAnim(Entity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.root().getAllParts().forEach(ModelPart::resetPose);
@@ -183,15 +199,19 @@ public class WildfireModel<T extends Entity> extends KeyframeHierarchicalModel<T
 		// any once-off animation like attack or cast spell
 		if (wildfire.activeAnimDef != null && wildfire.activeAnimState != null && wildfire.animateTicks > 0) {
 			restartThenAnimate(wildfire, wildfire.activeAnimState, wildfire.activeAnimDef, ageInTicks, wildfire.animateScale);
-		}
-		// walk animation
-		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
-			restart(wildfire, wildfire.walkAnimState, WildfireAnimations.WALK, ageInTicks);
-			animateWalk(WildfireAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
-		}
-		// idle animation
-		else {
-			restartThenAnimate(wildfire, wildfire.idleAnimState, WildfireAnimations.IDLE, ageInTicks);
+		} else {
+			if (wildfire.getTarget() == null) {
+				desyncShieldRotations(wildfire);
+			}
+			// walk animation
+			if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
+				restart(wildfire, wildfire.walkAnimState, WildfireAnimations.WALK, ageInTicks);
+				animateWalk(WildfireAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
+			}
+			// idle animation
+			else {
+				restartThenAnimate(wildfire, wildfire.idleAnimState, WildfireAnimations.IDLE, ageInTicks);
+			}
 		}
 	}
 
