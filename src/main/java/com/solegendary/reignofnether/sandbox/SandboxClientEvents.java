@@ -26,8 +26,11 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+<<<<<<< HEAD
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.ArrayUtil;
+=======
+>>>>>>> 64215091 (PRs and QoL stuff)
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +39,10 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+<<<<<<< HEAD
 import java.util.ArrayList;
+=======
+>>>>>>> 64215091 (PRs and QoL stuff)
 import java.util.Comparator;
 import java.util.List;
 
