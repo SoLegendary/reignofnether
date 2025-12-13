@@ -48,7 +48,7 @@ public class ProductionPlacement extends BuildingPlacement {
 
     @Nullable
     public BlockPos getFinalRallyPoint() {
-        if (this.rallyPoints.size() > 0)
+        if (!this.rallyPoints.isEmpty())
             return this.rallyPoints.get(this.rallyPoints.size() - 1);
         else
             return null;
@@ -99,7 +99,7 @@ public class ProductionPlacement extends BuildingPlacement {
     }
 
     private boolean isProducing() {
-        return this.productionQueue.size() > 0;
+        return !this.productionQueue.isEmpty();
     }
     // start with the centre pos then go down and look at adjacent blocks until we reach a non-solid block
     public BlockPos getIndoorSpawnPoint(ServerLevel level) {
@@ -296,7 +296,7 @@ public class ProductionPlacement extends BuildingPlacement {
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
 
-        if (productionQueue.size() >= 1) {
+        if (!productionQueue.isEmpty()) {
             ActiveProduction nextItem = productionQueue.get(0);
             if (nextItem.item.tick(this, nextItem)) {
                 if (!tickLevel.isClientSide()) {

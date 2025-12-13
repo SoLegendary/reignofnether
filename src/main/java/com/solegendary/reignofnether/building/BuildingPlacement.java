@@ -828,7 +828,6 @@ public class BuildingPlacement {
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) {
-        placedBlockPosSet.add(bp);
     }
 
     public void tick(Level tickLevel) {
@@ -999,6 +998,7 @@ public class BuildingPlacement {
                 level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
                 level.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
                 blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
+                placedBlockPosSet.add(bp);
                 onBlockBuilt(bp, bs);
                 if (this.getBlocksPlaced() > highestBlockCountReached) {
                     highestBlockCountReached = this.getBlocksPlaced();
