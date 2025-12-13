@@ -388,8 +388,12 @@ public class UnitActionItem {
 
         // if we have multiple units performing the same MOVE action, calculate a spread of blockPoses for them to go to
         if (!formationUnits.isEmpty()) {
+            List<LivingEntity> list = new ArrayList<>();
+            for (Unit u : formationUnits) {
+                if (u instanceof LivingEntity livingEntity) list.add(livingEntity);
+            }
             List<Pair<LivingEntity, BlockPos>> formationPairs = UnitFormations.getMoveFormation(
-                level, new ArrayList<>(formationUnits.stream().map(u -> ((LivingEntity) u)).toList()), preselectedBlockPos
+                level, new ArrayList<>(list), preselectedBlockPos
             );
             for (Pair<LivingEntity, BlockPos> pair : formationPairs) {
                 LivingEntity le = pair.getFirst();
@@ -398,8 +402,8 @@ public class UnitActionItem {
                 if (isRedundantMove((Unit) le, targetPos))
                     continue;
 
-                if (le instanceof Unit unit)
-                    unit.setMoveTarget(targetPos);
+                Unit unit = (Unit) le;
+                unit.setMoveTarget(targetPos);
             }
         }
 

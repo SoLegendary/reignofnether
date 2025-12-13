@@ -23,16 +23,21 @@ public class UnitSyncAbilityClientboundPacket {
 
     public static void sendSyncAbilitiesPacket(LivingEntity entity) {
         if (entity instanceof Unit unit) {
+            var abilities = unit.getAbilities().get();
+            var abilityCooldowns = new int[abilities.size()];
+            var abilityCharges = new int[abilities.size()];
+            for (int i = 0; i < abilities.size(); i++) {
+                abilityCooldowns[i] = (int) abilities.get(i).getCooldown(unit);
+            }
+            for (int i = 0; i < abilities.size(); i++) {
+                abilityCharges[i] = abilities.get(i).getCharges(unit);
+            }
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new UnitSyncAbilityClientboundPacket(
-                    UnitSyncAction.SYNC_ABILITIES,
-                    entity.getId(),
-                    unit.getAbilities().get().stream()
-                            .mapToInt(a -> (int) a.getCooldown(unit))
-                            .toArray(),
-                    unit.getAbilities().get().stream()
-                            .mapToInt(a -> a.getCharges(unit))
-                            .toArray()
+                    new UnitSyncAbilityClientboundPacket(
+                        UnitSyncAction.SYNC_ABILITIES,
+                        entity.getId(),
+                        abilityCooldowns,
+                        abilityCharges
                 )
             );
         }

@@ -22,6 +22,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
@@ -59,19 +61,19 @@ public class TimeServerEvents {
         }
         Random random = new Random();
 
-        ArrayList<BuildingPlacement> enemyBuildings = new ArrayList<>(BuildingServerEvents.getBuildings().stream()
-                .filter(b -> b.centrePos.distSqr(bloodMoonTarget) < (BloodMoon.RADIUS * BloodMoon.RADIUS) && !b.getBuilding().invulnerable)
-                .toList());
+        List<BuildingPlacement> list = new ArrayList<>();
+        for (BuildingPlacement buildingPlacement : BuildingServerEvents.getBuildings()) {
+            if (buildingPlacement.centrePos.distSqr(bloodMoonTarget) < (BloodMoon.RADIUS * BloodMoon.RADIUS) && !buildingPlacement.getBuilding().invulnerable) {
+                list.add(buildingPlacement);
+            }
+        }
+        ArrayList<BuildingPlacement> enemyBuildings = new ArrayList<>(list);
         Collections.shuffle(enemyBuildings);
 
         // one random building per enemyPlayerName
-        ArrayList<BuildingPlacement> singleEnemyBuildings = new ArrayList<>();
-        for (BuildingPlacement building : enemyBuildings) {
-            if (!singleEnemyBuildings.stream().map(b -> b.ownerName).toList().contains(building.ownerName))
-                singleEnemyBuildings.add(building);
-        }
+        var enemyBuildingSet = new HashSet<>(enemyBuildings);
 
-        for (BuildingPlacement building : singleEnemyBuildings) {
+        for (BuildingPlacement building : enemyBuildingSet) {
             int x = building.centrePos.getX() + random.nextInt(-10, 10);
             int z = building.centrePos.getZ() + random.nextInt(-10, 10);
 

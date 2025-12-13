@@ -22,8 +22,13 @@ public class HealingFountainPlacement extends BuildingPlacement implements Range
     private final ArrayList<BuildingBlock> waterBlocks;
     public HealingFountainPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
-        List<BuildingBlock> wbs = blocks.stream().filter(b -> b.getBlockPos().getY() < centrePos.getY() &&
-                b.getBlockState().getBlock() == Blocks.WATER).toList();
+        List<BuildingBlock> wbs = new ArrayList<>();
+        for (BuildingBlock b : blocks) {
+            if (b.getBlockPos().getY() < centrePos.getY() &&
+                b.getBlockState().getBlock() == Blocks.WATER) {
+                wbs.add(b);
+            }
+        }
         this.waterBlocks = new ArrayList<>(wbs);
     }
 

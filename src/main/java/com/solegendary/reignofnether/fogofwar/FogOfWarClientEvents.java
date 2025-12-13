@@ -260,9 +260,12 @@ public class FogOfWarClientEvents {
 
         for (BuildingPlacement building : BuildingClientEvents.getBuildings())
             if (BuildingClientEvents.getPlayerToBuildingRelationship(building) != Relationship.OWNED &&
-                    !isPlayerRevealed(building.ownerName) && MC.level != null)
-                enemyOccupiedChunks.addAll(building.getRenderChunkOrigins(true)
-                        .stream().map(bp -> MC.level.getChunk(bp).getPos()).toList());
+                    !isPlayerRevealed(building.ownerName) && MC.level != null) {
+                for (BlockPos bp : building.getRenderChunkOrigins(true)) {
+                    ChunkPos pos = MC.level.getChunk(bp).getPos();
+                    enemyOccupiedChunks.add(pos);
+                }
+            }
 
         return enemyOccupiedChunks;
     }

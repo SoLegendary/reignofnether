@@ -517,13 +517,16 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     // give at least one rare item per unit
     private List<ItemStack> getRandomLoot(int amount) {
         ArrayList<ItemStack> items = new ArrayList<>();
-        ArrayList<LivingEntity> units = new ArrayList<>(UnitServerEvents.getAllUnits()
-                .stream()
-                .filter(u -> u instanceof Unit unit &&
-                        unit.getOwnerName().equals(this.getOwnerName()) &&
-                        unit instanceof AttackerUnit &&
-                        !(unit instanceof GhastUnit))
-                .toList());
+        List<LivingEntity> list = new ArrayList<>();
+        for (LivingEntity u : UnitServerEvents.getAllUnits()) {
+            if (u instanceof Unit unit &&
+                unit.getOwnerName().equals(this.getOwnerName()) &&
+                unit instanceof AttackerUnit &&
+                !(unit instanceof GhastUnit)) {
+                list.add(u);
+            }
+        }
+        ArrayList<LivingEntity> units = new ArrayList<>(list);
         Collections.shuffle(units);
 
         for (int n = 0; n < amount; n++) {

@@ -30,6 +30,7 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.ArrayUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.client.Minecraft;
@@ -1028,10 +1029,12 @@ public class MinimapClientEvents {
                 evt.setCanceled(true);
                 return;
             }
-            if (UnitClientEvents.getSelectedUnits().size() > 0) {
+            if (!UnitClientEvents.getSelectedUnits().isEmpty()) {
+                var ids = UnitClientEvents.getSelectedUnits();
+                var idArray = ArrayUtil.livingEntityListToIdArray(ids);
                 UnitClientEvents.sendUnitCommandManual(UnitAction.MOVE,
                     -1,
-                    UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray(),
+                    idArray,
                     moveTo
                 );
             }

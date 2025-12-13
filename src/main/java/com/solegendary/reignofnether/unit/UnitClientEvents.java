@@ -43,6 +43,7 @@ import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.ArrayUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -309,25 +310,22 @@ public class UnitClientEvents {
         }
 
         if (MC.player != null) {
-            int[] selUnits = selectedUnits.stream()
-                    .filter(u -> {
-                        if (u instanceof Unit unit)
-                            for (Ability ability : unit.getAbilities().get())
-                                if (ability.isCasting(unit) && ability.oneClickOneUse && ability.action == action)
-                                    return false;
-                        return true;
-                    })
-                    .mapToInt(Entity::getId).toArray();
-
+            var selUnits = new LinkedList<LivingEntity>();
+            loop:
+            for (LivingEntity livingEntity : selectedUnits) {
+                if (!(livingEntity instanceof Unit unit)) continue;
+                for (Ability ability : unit.getAbilities().get()) {
+                    if (ability.isCasting(unit) && ability.oneClickOneUse && ability.action == action) continue loop;
+                }
+                selUnits.add(livingEntity);
+            }
             String playerName = MC.player.getName().getString();
-            //if (hudSelectedEntity instanceof Unit unit && AlliancesClient.canControlAlly(hudSelectedEntity))
-            //    playerName = unit.getOwnerName();
 
             UnitActionItem actionItem = new UnitActionItem(
                 playerName,
                 action,
-                preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
-                selUnits,
+                    !preselectedUnits.isEmpty() ? preselectedUnits.get(0).getId() : -1,
+                    ArrayUtil.livingEntityListToIdArray(selUnits),
                 bp,
                 HudClientEvents.hudSelectedPlacement != null ? HudClientEvents.hudSelectedPlacement.originPos : new BlockPos(0,0,0)
             );
@@ -336,8 +334,8 @@ public class UnitClientEvents {
             PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
                 playerName,
                 action,
-                preselectedUnits.size() > 0 ? preselectedUnits.get(0).getId() : -1,
-                selUnits,
+                    !preselectedUnits.isEmpty() ? preselectedUnits.get(0).getId() : -1,
+                    ArrayUtil.livingEntityListToIdArray(selUnits),
                 bp,
                 HudClientEvents.hudSelectedPlacement != null ? HudClientEvents.hudSelectedPlacement.originPos : new BlockPos(0,0,0),
                 Keybindings.shiftMod.isDown()
@@ -796,8 +794,12 @@ public class UnitClientEvents {
                         MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
                 }
             }
-            
-            var selectedEntityIds = selectedUnits.stream().map(u -> u.getId()).toList();
+
+            var selectedEntityIds = new HashSet<>();
+            for (LivingEntity selectedUnit : selectedUnits) {
+                Integer id = selectedUnit.getId();
+                selectedEntityIds.add(id);
+            }
             for (LivingEntity entity : allUnits) {
                 if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
                         entity.isPassenger())

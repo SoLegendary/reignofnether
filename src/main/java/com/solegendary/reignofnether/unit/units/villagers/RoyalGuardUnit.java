@@ -61,6 +61,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.ibm.icu.impl.ValidIdentifiers.Datatype.unit;
+
 public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated {
     public static final Abilities ABILITIES = new Abilities();
     static {
@@ -352,24 +354,16 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public boolean doHurtTarget(Entity pEntity) {
         boolean result = super.doHurtTarget(pEntity);
         if (result && avatarTicksLeft > 0) {
-
-            List<LivingEntity> hitEntities = MiscUtil.getEntitiesWithinRange(pEntity.getEyePosition(), Avatar.ATTACK_SPLASH_RADIUS, LivingEntity.class, level())
-                    .stream()
-                    .filter(e -> {
-                        if (e instanceof Unit unit) {
-                            return !List.of(Relationship.OWNED, Relationship.FRIENDLY)
-                                    .contains(UnitServerEvents.getUnitToEntityRelationship(unit, this));
-                        }
-                        return true;
-                    })
-                    .toList();
-
             level().explode(null, null, null, pEntity.getX(), pEntity.getY(), pEntity.getZ(),
                     1.0f, false, Level.ExplosionInteraction.NONE);
             AttributeInstance ai = getAttribute(Attributes.ATTACK_DAMAGE);
 
             if (ai != null) {
-                for (LivingEntity hitEntity : hitEntities) {
+                for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(pEntity.getEyePosition(), Avatar.ATTACK_SPLASH_RADIUS, LivingEntity.class, level())) {
+                    if (!(hitEntity instanceof Unit unit)) continue;
+                    var relationShip = UnitServerEvents.getUnitToEntityRelationship(unit, this);
+                    if (relationShip.equals(Relationship.OWNED)) continue;
+                    if (relationShip.equals(Relationship.FRIENDLY)) continue;
                     if (hitEntity == pEntity)
                         continue;
                     boolean hurt = hitEntity.hurt(this.damageSources().mobAttack(this), (float) ai.getValue() * Avatar.ATTACK_SPLASH_MULT);
@@ -553,17 +547,6 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public void maceSlam(BlockPos blockPos) {
         if (level().isClientSide())
             return;
-        List<LivingEntity> hitEntities = MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(blockPos.above()), MaceSlam.RADIUS, LivingEntity.class, level())
-                .stream()
-                .filter(e -> {
-                    if (e instanceof Unit unit) {
-                        return !List.of(Relationship.OWNED, Relationship.FRIENDLY)
-                                .contains(UnitServerEvents.getUnitToEntityRelationship(unit, this));
-                    }
-                    return true;
-                })
-                .toList();
-
         MaceSlam maceSlam = getMaceSlam();
         if (maceSlam != null && maceSlam.getRank(this) > 0) {
             level().explode(null, null, null, blockPos.getX(), blockPos.getY(), blockPos.getZ(),
@@ -583,13 +566,13 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 building.destroyRandomBlocks((int) (maceSlam.damage / 2));
             }
 
-            for (LivingEntity hitEntity : hitEntities) {
-                if (hitEntity instanceof Unit unit) {
-                    Unit.fullResetBehaviours(unit);
-                    hitEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), maceSlam.stunDuration));
-                } else {
-                    hitEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, maceSlam.stunDuration, 63));
-                }
+            for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(blockPos.above()), MaceSlam.RADIUS, LivingEntity.class, level())) {
+                if (!(hitEntity instanceof Unit unit)) continue;
+                var relationShip = UnitServerEvents.getUnitToEntityRelationship(unit, this);
+                if (relationShip.equals(Relationship.OWNED)) continue;
+                if (relationShip.equals(Relationship.FRIENDLY)) continue;
+                Unit.fullResetBehaviours(unit);
+                hitEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), maceSlam.stunDuration));
 
                 boolean hurt = hitEntity.hurt(this.damageSources().mobAttack(this), maceSlam.damage);
                 if (hurt) {
@@ -605,20 +588,15 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public void tauntingCry() {
         if (level().isClientSide())
             return;
-        List<AttackerUnit> tauntableUnits = MiscUtil.getEntitiesWithinRange(position(), TauntingCry.RANGE, Mob.class, level())
-                .stream()
-                .filter(e -> e instanceof AttackerUnit unit &&
-                        !List.of(Relationship.OWNED, Relationship.FRIENDLY)
-                        .contains(UnitServerEvents.getUnitToEntityRelationship((Unit) unit, this)))
-                .map(e -> (AttackerUnit) e)
-                .toList();
-
         TauntingCry tauntingCry = getTauntingCry();
         if (tauntingCry != null && tauntingCry.getRank(this) > 0) {
-            for (AttackerUnit unit : tauntableUnits) {
-                Unit.fullResetBehaviours((Unit) unit);
-                unit.setUnitAttackTargetForced(this);
-                ((LivingEntity) unit).addEffect(new MobEffectInstance(MobEffectRegistrar.UNCONTROLLABLE.get(), tauntingCry.duration));
+            for (Mob e : MiscUtil.getEntitiesWithinRange(position(), TauntingCry.RANGE, Mob.class, level())) {
+                if (!(e instanceof AttackerUnit attackerUnit) ||
+                    List.of(Relationship.OWNED, Relationship.FRIENDLY)
+                            .contains(UnitServerEvents.getUnitToEntityRelationship((Unit) attackerUnit, this))) continue;
+                Unit.fullResetBehaviours((Unit) attackerUnit);
+                attackerUnit.setUnitAttackTargetForced(this);
+                ((LivingEntity) attackerUnit).addEffect(new MobEffectInstance(MobEffectRegistrar.UNCONTROLLABLE.get(), tauntingCry.duration));
             }
             this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, tauntingCry.duration, 2));
             this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, tauntingCry.duration, 2));

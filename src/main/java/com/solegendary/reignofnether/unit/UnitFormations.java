@@ -16,7 +16,7 @@ public class UnitFormations {
     // given a list of entities that were issued a move command to moveBp, find the best pairings of entities and
     // positions that allows each entity the best chance to reach said position without bumping into each other
 
-    public static List<Pair<LivingEntity, BlockPos>> getMoveFormation(Level level, ArrayList<LivingEntity> units, BlockPos moveBp) {
+    public static <T extends LivingEntity> List<Pair<LivingEntity, BlockPos>> getMoveFormation(Level level, List<T> units, BlockPos moveBp) {
 
         // 1. create a list of final BPs the units should move into, closest approximation of a square
         //    with moveBp at the approximate centre by spiralling outward

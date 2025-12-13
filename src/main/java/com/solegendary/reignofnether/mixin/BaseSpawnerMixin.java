@@ -119,13 +119,6 @@ public class BaseSpawnerMixin {
                     }
                 }
 
-                List<Unit> nearbyUnits = MiscUtil.getEntitiesWithinRange(new Vector3d(pPos.getX(), pPos.getY(), pPos.getZ()),
-                                ACTIVATION_RANGE, Mob.class, pServerLevel)
-                        .stream()
-                        .filter(mob -> mob instanceof Unit unit)
-                        .map(mob -> (Unit) mob)
-                        .toList();
-
                 for (int i = 0; i < SPAWN_COUNT; i++) {
 
                     Optional<EntityType<?>> optional = EntityType.by(compoundtag);
@@ -168,15 +161,27 @@ public class BaseSpawnerMixin {
                                 return;
                             }
 
-                            List<Unit> nearbyNeutralUnitsOfType = nearbyUnits
-                                    .stream()
-                                    .filter(u -> u.getOwnerName().isBlank() && entity.getName().equals(((Entity) u).getName()))
-                                    .toList();
+                            List<Unit> nearbyUnits = new ArrayList<>();
+                            for (Mob mob : MiscUtil.getEntitiesWithinRange(new Vector3d(pPos.getX(), pPos.getY(), pPos.getZ()),
+                                ACTIVATION_RANGE, Mob.class, pServerLevel)) {
+                                if (mob instanceof Unit unit) {
+                                    nearbyUnits.add(unit);
+                                }
+                            }
 
-                            List<Unit> nearbyNonNeutralUnits = nearbyUnits
-                                    .stream()
-                                    .filter(u -> !u.getOwnerName().isBlank())
-                                    .toList();
+                            List<Unit> nearbyNeutralUnitsOfType = new ArrayList<>();
+                            for (Unit nearbyUnit : nearbyUnits) {
+                                if (nearbyUnit.getOwnerName().isBlank() && entity.getName().equals(((Entity) nearbyUnit).getName())) {
+                                    nearbyNeutralUnitsOfType.add(nearbyUnit);
+                                }
+                            }
+
+                            List<Unit> nearbyNonNeutralUnits = new ArrayList<>();
+                            for (Unit u : nearbyUnits) {
+                                if (!u.getOwnerName().isBlank()) {
+                                    nearbyNonNeutralUnits.add(u);
+                                }
+                            }
 
                             if (nearbyNeutralUnitsOfType.size() >= reignofnether$getMaxNearbyNeutralUnits(entity, nearbySameTypeSpawners) ||
                                     !nearbyNonNeutralUnits.isEmpty()) {

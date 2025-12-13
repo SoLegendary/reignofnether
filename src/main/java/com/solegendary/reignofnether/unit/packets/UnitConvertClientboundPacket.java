@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.packets;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.util.ArrayUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
@@ -22,8 +23,8 @@ public class UnitConvertClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitConvertClientboundPacket(
                 ownerName,
-                oldUnitIds.stream().mapToInt(i -> i).toArray(),
-                newUnitIds.stream().mapToInt(i -> i).toArray()
+                ArrayUtil.intListToArray(oldUnitIds),
+                ArrayUtil.intListToArray(newUnitIds)
             ));
     }
 

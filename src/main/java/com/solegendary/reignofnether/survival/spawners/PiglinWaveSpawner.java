@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.survival.Wave;
+import com.solegendary.reignofnether.survival.WavePortal;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.faction.Faction;
@@ -143,9 +144,12 @@ public class PiglinWaveSpawner {
                 for (BlockPos bp : portalBps)
                     if (spawnBp != null && bp.distSqr(spawnBp) < 25)
                         tooCloseToAnotherPortal = true;
-                for (BlockPos bp : portals.stream().map(p -> p.portal.originPos).toList())
-                    if (spawnBp != null && bp.distSqr(spawnBp) < 25)
+                for (WavePortal p : portals) {
+                    BlockPos it = p.portal.originPos;
+                    if (spawnBp != null && it.distSqr(spawnBp) < 25)
                         tooCloseToAnotherPortal = true;
+                }
+
 
             } while((spawnBp == null || tooCloseToAnotherPortal) && attempts < 100);
 

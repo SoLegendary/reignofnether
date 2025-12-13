@@ -8,7 +8,9 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.faction.Faction;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.TICKS_TO_REVEAL;
 
@@ -36,9 +38,11 @@ public class RTSPlayer {
 
     // bot
     private RTSPlayer(String name, Faction faction) {
-        int minId = 0;
+        int minId = Integer.MAX_VALUE;
         if (!PlayerServerEvents.rtsPlayers.isEmpty()) {
-            minId = Collections.min(PlayerServerEvents.rtsPlayers.stream().map(r -> r.id).toList());
+            for (RTSPlayer r : PlayerServerEvents.rtsPlayers) {
+                minId = Math.min(r.id, minId);
+            }
         }
         if (minId >= 0) {
             this.id = -1;
@@ -79,16 +83,14 @@ public class RTSPlayer {
     }
 
     public void serverTick() {
-        int numBuildingsOwned = BuildingServerEvents.getBuildings()
-            .stream()
-            .filter(b -> b.ownerName.equals(this.name))
-            .toList()
-            .size();
-        int numCapitolsOwned = BuildingServerEvents.getBuildings()
-            .stream()
-            .filter(b -> b.ownerName.equals(this.name) && b.isCapitol)
-            .toList()
-            .size();
+        int numBuildingsOwned = 0;
+        for (BuildingPlacement buildingPlacement : BuildingServerEvents.getBuildings()) {
+            if (buildingPlacement.ownerName.equals(this.name)) numBuildingsOwned++;
+        }
+        int numCapitolsOwned = 0;
+        for (BuildingPlacement b : BuildingServerEvents.getBuildings()) {
+            if (b.ownerName.equals(this.name) && b.isCapitol) numCapitolsOwned++;
+        }
 
         if (numBuildingsOwned > 0 && numCapitolsOwned == 0) {
             if (ticksWithoutCapitol < TICKS_TO_REVEAL) {

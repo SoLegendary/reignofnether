@@ -279,12 +279,16 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
 
     public Enchantment getEnchant() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        Optional<Enchantment> enchant = itemStack.getAllEnchantments().keySet().stream().findFirst();
+        Optional<Enchantment> enchant = Optional.empty();
+        for (Enchantment enchantment : itemStack.getAllEnchantments().keySet()) {
+            enchant = Optional.of(enchantment);
+            break;
+        }
         return enchant.orElse(null);
     }
 
     @Override
-    public boolean doHurtTarget(Entity pEntity) {
+    public boolean doHurtTarget(@NotNull Entity pEntity) {
         boolean hurt = super.doHurtTarget(pEntity);
         if (hurt && hasMaimingEnchant() && pEntity instanceof LivingEntity le)
             le.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, EnchantMaiming.SLOWNESS_DURATION, 1));
@@ -293,7 +297,13 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+    public SpawnGroupData finalizeSpawn(
+            @NotNull ServerLevelAccessor pLevel,
+            @NotNull DifficultyInstance pDifficulty,
+            @NotNull MobSpawnType pReason,
+            @Nullable SpawnGroupData pSpawnData,
+            @Nullable CompoundTag pDataTag
+    ) {
         return pSpawnData;
     }
 

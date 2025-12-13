@@ -95,12 +95,20 @@ public class Beacon extends ProductionBuilding {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> TutorialClientEvents.isEnabled() || !GameruleClient.allowBeacons,
-                () -> BuildingClientEvents.getBuildings().stream().filter(b -> b instanceof BeaconPlacement).toList().isEmpty() && (
-                    BuildingClientEvents.hasFinishedBuilding(Buildings.CASTLE) ||
-                    BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD) ||
-                    BuildingClientEvents.hasFinishedBuilding(Buildings.FORTRESS) ||
-                    ResearchClient.hasCheat("modifythephasevariance")
-                ),
+                () -> {
+                    List<BuildingPlacement> list = new ArrayList<>();
+                    for (BuildingPlacement b : BuildingClientEvents.getBuildings()) {
+                        if (b instanceof BeaconPlacement) {
+                            list.add(b);
+                        }
+                    }
+                    return list.isEmpty() && (
+                        BuildingClientEvents.hasFinishedBuilding(Buildings.CASTLE) ||
+                        BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD) ||
+                        BuildingClientEvents.hasFinishedBuilding(Buildings.FORTRESS) ||
+                        ResearchClient.hasCheat("modifythephasevariance")
+                    );
+                },
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),

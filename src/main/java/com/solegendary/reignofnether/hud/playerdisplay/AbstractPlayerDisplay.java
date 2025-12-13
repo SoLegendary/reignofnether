@@ -28,7 +28,14 @@ public abstract class AbstractPlayerDisplay {
     public AbstractPlayerDisplay(RTSPlayer rtsPlayer) {
         var server = MC.getCurrentServer();
         if (server != null) {
-            this.player = MC.level.players().stream().filter(p -> p.getName().getString().equals(rtsPlayer.name)).findFirst().orElse(null);
+            AbstractClientPlayer found = null;
+            for (AbstractClientPlayer p : MC.level.players()) {
+                if (p.getName().getString().equals(rtsPlayer.name)) {
+                    found = p;
+                    break;
+                }
+            }
+            this.player = found;
         } else if (MC.player.getName().getString().equals(rtsPlayer.name)) {
             this.player = MC.player;
         } else {

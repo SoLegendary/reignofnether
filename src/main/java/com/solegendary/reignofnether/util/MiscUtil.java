@@ -167,7 +167,11 @@ public class MiscUtil {
     }
 
     public static boolean listContainsObjectValue(List<Object> objs, String obj){
-        return objs.stream().anyMatch(o -> o.equals(obj));
+        for (Object o : objs) {
+            if (!o.equals(obj)) continue;
+            return true;
+        }
+        return false;
     }
 
     public static boolean isLeftClickDown(Minecraft MC) {

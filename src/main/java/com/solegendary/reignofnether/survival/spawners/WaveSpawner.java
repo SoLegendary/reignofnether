@@ -107,9 +107,12 @@ public class WaveSpawner {
     }
 
     public static List<BlockPos> getValidSpawnPoints(int amount, Level level, boolean allowLiquid, int flatnessRadius) {
-        List<BuildingPlacement> buildings = BuildingServerEvents.getBuildings()
-                .stream().filter(b -> !ENEMY_OWNER_NAME.equals(b.ownerName) && !b.ownerName.isBlank())
-                .toList();
+        List<BuildingPlacement> buildings = new ArrayList<>();
+        for (BuildingPlacement buildingPlacement : BuildingServerEvents.getBuildings()) {
+            if (!ENEMY_OWNER_NAME.equals(buildingPlacement.ownerName) && !buildingPlacement.ownerName.isBlank()) {
+                buildings.add(buildingPlacement);
+            }
+        }
 
         Random random = new Random();
         if (buildings.isEmpty())
@@ -124,12 +127,12 @@ public class WaveSpawner {
         final Vec3 fCentroid = centroid.multiply(new Vec3(invBs, invBs, invBs));
 
         // calculate all valid buildings to spawn around based on distance from the centroid
-        List<BuildingPlacement> sortedBuildings = buildings.stream().sorted(
+        buildings.sort(
                 Comparator.comparing((BuildingPlacement b) -> b.centrePos.distToCenterSqr(fCentroid.x, fCentroid.y, fCentroid.z)).reversed()
-        ).toList();
+        );
 
         int numValidBuildings = (int) (MIN_VALID_BUILDINGS + (buildings.size() * PERCENT_VALID_BUILDINGS));
-        List<BuildingPlacement> validBuildings = sortedBuildings.subList(0, Math.min(sortedBuildings.size(), numValidBuildings));
+        List<BuildingPlacement> validBuildings = buildings.subList(0, Math.min(buildings.size(), numValidBuildings));
 
         int spawnAttemptsThisBuilding = 0;
         BlockState spawnBs;

@@ -177,13 +177,13 @@ public abstract class LevelRendererMixin {
 
         // load saved blocks into unexplored frozen chunks (don't repeat this for overlapping chunks)
         ArrayList<BlockPos> loadedFcOrigins = new ArrayList<>();
-        for (FrozenChunk frozenChunk : frozenChunks.stream().filter(fc -> !fc.hasFakeBlocks).toList()) {
+        for (FrozenChunk frozenChunk : frozenChunks) {
+            if (frozenChunk.hasFakeBlocks) continue;
             for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum) {
                 if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
                     !isInBrightChunk(frozenChunk.origin) &&
                     !loadedFcOrigins.contains(frozenChunk.origin)) {
                     if (!frozenChunk.unsaved) {
-                        //System.out.println("loaded frozen blocks at: " + frozenChunk.origin);
                         frozenChunk.loadBlocks();
                         loadedFcOrigins.add(frozenChunk.origin);
                     }
@@ -191,7 +191,8 @@ public abstract class LevelRendererMixin {
             }
         }
         // rerun for any faked chunks, only run them if they were not already loaded
-        for (FrozenChunk frozenChunk : frozenChunks.stream().filter(fc -> fc.hasFakeBlocks).toList()) {
+        for (FrozenChunk frozenChunk : frozenChunks) {
+            if (!frozenChunk.hasFakeBlocks) continue;
             for (LevelRenderer.RenderChunkInfo newRenderChunk : newRenderChunksInFrustum) {
                 if (newRenderChunk.chunk.getOrigin().equals(frozenChunk.origin) &&
                     !isInBrightChunk(frozenChunk.origin) &&
@@ -211,7 +212,7 @@ public abstract class LevelRendererMixin {
         List<ChunkRenderDispatcher.RenderChunk> list = Lists.newArrayList();
         Set<ChunkPos> rerenderChunksToRemove = ConcurrentHashMap.newKeySet();
         Set<ChunkPos> enemyOccupiedChunks = FogOfWarClientEvents.getEnemyOccupiedChunks();
-
+        outerLoop:
         for(LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
 
             BlockPos originPos = chunkInfo.chunk.getOrigin();
@@ -222,13 +223,12 @@ public abstract class LevelRendererMixin {
                 rerenderChunksToRemove.add(chunkPos);
             }
             else if (!isInBrightChunk(originPos)) {
-                if (semiFrozenChunks.contains(originPos) ||
-                    frozenChunks.stream()
-                            .filter(fc -> fc.unsaved)
-                            .map(fc -> fc.origin)
-                            .toList().contains(originPos))
-                    continue;
-                else if (OrthoviewClientEvents.isEnabled() || enemyOccupiedChunks.contains(chunkPos))
+                if (semiFrozenChunks.contains(originPos)) continue;
+                for (FrozenChunk chunk : frozenChunks) {
+                    if (!chunk.unsaved) continue;
+                    if (chunk.origin.equals(originPos)) continue outerLoop;
+                }
+                if (OrthoviewClientEvents.isEnabled() || enemyOccupiedChunks.contains(chunkPos))
                     semiFrozenChunks.add(originPos);
             }
             ChunkRenderDispatcher.RenderChunk renderChunk = chunkInfo.chunk;

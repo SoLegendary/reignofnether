@@ -388,10 +388,10 @@ public class UnitServerEvents {
         synchronized (allUnits) {
             try {
                 if (evt.getEntity() instanceof Unit unit) {
-                    int unitsOwned = allUnits.stream()
-                            .filter(u -> (u instanceof Unit unit1 && unit1.getOwnerName().equals(unit.getOwnerName())))
-                            .toList()
-                            .size();
+                    var unitsOwned = 0;
+                    for (LivingEntity u : allUnits) {
+                        if ((u instanceof Unit unit1 && unit1.getOwnerName().equals(unit.getOwnerName()))) unitsOwned++;
+                    }
                     if (!SandboxServer.isSandboxPlayer(unit.getOwnerName()) &&
                             unitsOwned == 0 && isRTSPlayer(unit.getOwnerName())
                             && BuildingUtils.getTotalCompletedBuildingsOwned(false, unit.getOwnerName()) == 0) {
@@ -527,7 +527,7 @@ public class UnitServerEvents {
                     new Vector3d(pos.x, pos.y, pos.z),
                     SoulSiphonPassive.RANGE,
                     NecromancerUnit.class,
-                    evt.getEntity().level()).stream().toList();
+                    evt.getEntity().level());
 
             for (NecromancerUnit necromancerUnit : necromancers) {
                 SoulSiphonPassive soulSiphon = necromancerUnit.getSoulSiphon();

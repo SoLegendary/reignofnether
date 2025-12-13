@@ -19,6 +19,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import org.joml.Vector3d;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
@@ -64,30 +65,26 @@ public class BackToWorkBuilding extends Ability {
     @Override
     public void use(Level level, BuildingPlacement buildingUsing, BlockPos targetBp) {
         if (!level.isClientSide()) {
-
-            List<VillagerUnit> nearbyVillagers = MiscUtil.getEntitiesWithinRange(
-                            new Vector3d(buildingUsing.centrePos.getX(), buildingUsing.centrePos.getY(), buildingUsing.centrePos.getZ()),
-                            range, VillagerUnit.class, buildingUsing.getLevel())
-                    .stream()
-                    .filter(u -> u.getOwnerName().equals(buildingUsing.ownerName))
-                    .toList();
-
-            for (VillagerUnit vUnit : nearbyVillagers) {
-                vUnit.callToArmsGoal.stop();
-                Unit.resetBehaviours(vUnit);
-                vUnit.getGatherResourceGoal().saveData = vUnit.getGatherResourceGoal().permSaveData;
-                vUnit.getGatherResourceGoal().loadState();
+            var villagers = MiscUtil.getEntitiesWithinRange(
+                    new Vector3d(buildingUsing.centrePos.getX(), buildingUsing.centrePos.getY(), buildingUsing.centrePos.getZ()),
+                    range, VillagerUnit.class, buildingUsing.getLevel());
+            for (VillagerUnit villager : villagers) {
+                if (villager.getOwnerName().equals(buildingUsing.ownerName)) {
+                    villager.callToArmsGoal.stop();
+                    Unit.resetBehaviours(villager);
+                    villager.getGatherResourceGoal().saveData = villager.getGatherResourceGoal().permSaveData;
+                    villager.getGatherResourceGoal().loadState();
+                }
             }
 
-            List<MilitiaUnit> nearbyMilitia = MiscUtil.getEntitiesWithinRange(
-                            new Vector3d(buildingUsing.centrePos.getX(), buildingUsing.centrePos.getY(), buildingUsing.centrePos.getZ()),
-                            range, MilitiaUnit.class, buildingUsing.getLevel())
-                    .stream()
-                    .filter(u -> u.getOwnerName().equals(buildingUsing.ownerName) && !u.isCaptain)
-                    .toList();
-
-            for (MilitiaUnit mUnit : nearbyMilitia)
-                mUnit.convertToVillager();
+            var militias = MiscUtil.getEntitiesWithinRange(
+                    new Vector3d(buildingUsing.centrePos.getX(), buildingUsing.centrePos.getY(), buildingUsing.centrePos.getZ()),
+                    range, MilitiaUnit.class, buildingUsing.getLevel());
+            for (MilitiaUnit militia : militias) {
+                if (militia.getOwnerName().equals(buildingUsing.ownerName) && !militia.isCaptain) {
+                    militia.convertToVillager();
+                }
+            }
         }
     }
 }

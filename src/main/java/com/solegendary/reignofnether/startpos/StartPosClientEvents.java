@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.startpos;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.hud.Button;
@@ -12,7 +13,6 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -41,10 +41,10 @@ public class StartPosClientEvents {
 
     public static boolean isSelectedPosReservedByOther() {
         return getPos() != null &&
-                !getPos().playerName.isEmpty() &&
-                MC.player != null &&
-                !getPos().playerName.equals(MC.player.getName().getString()) &&
-                getPos().faction != Faction.NONE;
+               !getPos().playerName.isEmpty() &&
+               MC.player != null &&
+               !getPos().playerName.equals(MC.player.getName().getString()) &&
+               getPos().faction != Faction.NONE;
     }
 
     public static boolean hasReservedPos() {
@@ -64,8 +64,7 @@ public class StartPosClientEvents {
                     if (Keybindings.shiftMod.isDown()) {
                         if (hasReservedPos())
                             OrthoviewClientEvents.centreCameraOnPos(getPos().pos);
-                    }
-                    else
+                    } else
                         cycleStartBlock(true);
                 },
                 () -> cycleStartBlock(false),
@@ -78,14 +77,17 @@ public class StartPosClientEvents {
         ArrayList<FormattedCharSequence> fcsList = new ArrayList<>();
 
         fcsList.add(fcs(I18n.get("startpos.reignofnether.positions_button.tooltip1"), true));
-        fcsList.add(fcs(I18n.get("startpos.reignofnether.positions_button.tooltip2",
-            startPoses.stream().filter(sp -> sp.faction != Faction.NONE).toList().size(), startPoses.size())));
+        int startPosesSize = 0;
+        for (StartPos startPose : startPoses) {
+            if (startPose.faction != Faction.NONE) startPosesSize++;
+        }
+        fcsList.add(fcs(I18n.get("startpos.reignofnether.positions_button.tooltip2", startPosesSize, startPoses.size())));
         fcsList.add(fcs(I18n.get("startpos.reignofnether.positions_button.tooltip3")));
 
         if (isSelectedPosReservedByOther() && startPos != null) {
-            fcsList.add(fcs(I18n.get("startpos.reignofnether.positions_button.tooltip4",startPos.playerName),true));
+            fcsList.add(fcs(I18n.get("startpos.reignofnether.positions_button.tooltip4", startPos.playerName), true));
         } else if (hasReservedPos())
-            fcsList.add(fcs(I18n.get("startpos.reignofnether.positions_button.tooltip5"),false));
+            fcsList.add(fcs(I18n.get("startpos.reignofnether.positions_button.tooltip5"), false));
 
         return fcsList;
     }
@@ -98,7 +100,15 @@ public class StartPosClientEvents {
                 null,
                 () -> false,
                 () -> !isEnabled() || isStarting,
-                () -> !PlayerClientEvents.rtsLocked && startPoses.stream().filter(sp -> sp.faction != Faction.NONE).toList().size() > 0,
+                () -> {
+                    if (PlayerClientEvents.rtsLocked) return false;
+                    for (StartPos startPos : startPoses) {
+                        if (startPos.faction != Faction.NONE) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
                 PlayerServerboundPacket::startRTSEveryone,
                 null,
                 getStartButtonTooltip()
@@ -106,15 +116,16 @@ public class StartPosClientEvents {
     }
 
     private static List<FormattedCharSequence> getStartButtonTooltip() {
-        StartPos startPos = getPos();
         ArrayList<FormattedCharSequence> fcsList = new ArrayList<>();
-
         fcsList.add(fcs(I18n.get("startpos.reignofnether.start_button.tooltip1"), true));
+        int startPosesSize = 0;
+        for (StartPos startPose : startPoses) {
+            if (startPose.faction != Faction.NONE) startPosesSize++;
+        }
         fcsList.add(fcs(I18n.get("startpos.reignofnether.start_button.tooltip2",
-                startPoses.stream().filter(sp -> sp.faction != Faction.NONE).toList().size(), startPoses.size())));
+                startPosesSize, startPoses.size())));
         if (!hasReservedPos())
             fcsList.add(fcs(I18n.get("startpos.reignofnether.start_button.tooltip3")));
-
         return fcsList;
     }
 
@@ -126,7 +137,14 @@ public class StartPosClientEvents {
                 null,
                 () -> false,
                 () -> !isEnabled() || !isStarting,
-                () -> startPoses.stream().filter(sp -> sp.faction != Faction.NONE).toList().size() > 0,
+                () -> {
+                    for (StartPos startPos : startPoses) {
+                        if (startPos.faction != Faction.NONE) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
                 PlayerServerboundPacket::cancelStartRTSEveryone,
                 null,
                 List.of(

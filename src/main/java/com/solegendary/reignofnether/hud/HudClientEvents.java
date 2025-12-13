@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
-import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.config.ConfigClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
@@ -60,23 +59,18 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackResources;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -142,21 +136,24 @@ public class HudClientEvents {
             return;
         }
 
-        List<Pair<LivingEntity, Float>> pairs = UnitClientEvents.getSelectedUnits().stream().map((le) -> {
+        List<Pair<LivingEntity, Float>> pairs = new ArrayList<>();
+        for (LivingEntity livingEntity : getSelectedUnits()) {
             float totalCd = 0;
-            if (le instanceof Unit unit) {
+            if (livingEntity instanceof Unit unit) {
                 for (Ability ability : unit.getAbilities().get()) {
                     totalCd += ability.getCooldown(unit);
                     if (ability.isCasting(unit))
                         totalCd += 10;
                 }
             }
-            return new Pair<>(le, totalCd);
-        }).filter(p -> {
-            String str1 = getModifiedEntityName(p.getFirst());
+            Pair<LivingEntity, Float> apply = new Pair<>(livingEntity, totalCd);
+            String str1 = getModifiedEntityName(apply.getFirst());
             String str2 = getModifiedEntityName(hudSelectedEntity);
-            return str1.equals(str2);
-        }).sorted(Comparator.comparing(Pair::getSecond)).toList();
+            if (str1.equals(str2)) {
+                pairs.add(apply);
+            }
+        }
+        pairs.sort(Comparator.comparing(Pair::getSecond));
 
         if (!pairs.isEmpty())
             setHudSelectedEntity(pairs.get(0).getFirst());
@@ -1862,18 +1859,21 @@ public class HudClientEvents {
 
     private static void cycleUnitSubgroups() {
         List<LivingEntity> selUnits = UnitClientEvents.getSortedSelectedUnits();
-        List<String> unitNames = selUnits
-                .stream()
-                .map(HudClientEvents::getModifiedEntityName)
-                .distinct()
-                .collect(Collectors.toList());
+        var unitNameSet = new LinkedHashSet<String>();
+        Set<String> uniqueValues = new HashSet<>();
+        for (LivingEntity selUnit : selUnits) {
+            String modifiedEntityName = getModifiedEntityName(selUnit);
+            if (uniqueValues.add(modifiedEntityName)) {
+                unitNameSet.add(modifiedEntityName);
+            }
+        }
+        var unitNames = new LinkedList<>(unitNameSet);
 
         if (unitNames.size() <= 1 || hudSelectedEntity == null)
             return;
 
         boolean reversed = Keybindings.shiftMod.isDown();
         String selUnitName = getModifiedEntityName(hudSelectedEntity);
-
         if (reversed)
             Collections.reverse(unitNames);
 

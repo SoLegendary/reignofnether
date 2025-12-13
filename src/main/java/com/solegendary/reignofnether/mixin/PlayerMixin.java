@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -11,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(Entity.class)
@@ -30,7 +32,11 @@ public abstract class PlayerMixin {
     private void tick(CallbackInfo ci) {
         int id = this.getId();
         Entity entity = this.level.getEntity(id);
-        List<Integer> orthoIds = PlayerServerEvents.orthoviewPlayers.stream().map(Entity::getId).toList();
+        List<Integer> orthoIds = new ArrayList<>();
+        for (ServerPlayer orthoviewPlayer : PlayerServerEvents.orthoviewPlayers) {
+            Integer serverPlayerId = orthoviewPlayer.getId();
+            orthoIds.add(serverPlayerId);
+        }
         if (entity instanceof Player player && player.isCreative() &&
             (orthoIds.contains(id) || (this.level.isClientSide() && OrthoviewClientEvents.isEnabled()))) {
             this.noPhysics = true;

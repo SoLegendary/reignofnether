@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
+import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
@@ -166,20 +167,17 @@ public class BuildingClientEvents {
         if (hudSelectedPlacement == null || MC.player == null)
             return;
         BuildingPlacement idlestBuilding = null;
-
-        List<BuildingPlacement> sameNameBuildings = selectedBuildings.stream().filter(
-                b -> b.getBuilding().equals(hudSelectedPlacement.getBuilding()) && b.isBuilt && b.ownerName.equals(MC.player.getName().getString())
-        ).toList();
-
         float prodTicksLeftMax = Float.MAX_VALUE;
-        for (BuildingPlacement building : sameNameBuildings) {
-            if (building instanceof ProductionPlacement prodB) {
-                Float prodTicksLeft = prodB.productionQueue.stream().map(p -> p.ticksLeft).reduce(0F, Float::sum);
-                if (prodTicksLeft < prodTicksLeftMax) {
-                    prodTicksLeftMax = prodTicksLeft;
-                    idlestBuilding = building;
-                }
+        for (BuildingPlacement building : selectedBuildings) {
+            if (!(building.getBuilding().equals(hudSelectedPlacement.getBuilding()) && building.isBuilt && building.ownerName.equals(MC.player.getName().getString()))) continue;
+            if (!(building instanceof ProductionPlacement prodB)) continue;
+            float prodTicksLeft = 0f;
+            for (ActiveProduction production : prodB.productionQueue) {
+                prodTicksLeft += production.ticksLeft;
             }
+            if (prodTicksLeft >= prodTicksLeftMax) continue;
+            prodTicksLeftMax = prodTicksLeft;
+            idlestBuilding = building;
         }
         if (idlestBuilding != null)
             hudSelectedPlacement = idlestBuilding;
@@ -546,8 +544,8 @@ public class BuildingClientEvents {
         int minZ = 999999;
         int maxX = -999999;
         int maxZ = -999999;
-
-        for (BlockPos bp : blocksToDraw.stream().map(BuildingBlock::getBlockPos).toList()) {
+        for (BuildingBlock block : blocksToDraw) {
+            var bp = block.getBlockPos();
             if (bp.getX() < minX) {
                 minX = bp.getX();
             }
@@ -761,13 +759,16 @@ public class BuildingClientEvents {
                     if (builderEntity instanceof WorkerUnit) {
                         builderIds.add(builderEntity.getId());
                     }
-
+                var ids = new int[builderIds.size()];
+                for (int i = 0; i < ids.length; i++) {
+                    ids[i] = builderIds.get(i);
+                }
                 if (Keybindings.shiftMod.isDown()) {
                     BuildingServerboundPacket.placeAndQueueBuilding(building,
                         isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
                         buildingRotation,
                         hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : MC.player.getName().getString(),
-                        builderIds.stream().mapToInt(i -> i).toArray(),
+                        ids,
                         isBridgeDiagonal()
                     );
 
@@ -799,11 +800,15 @@ public class BuildingClientEvents {
                         else if (SandboxClientEvents.relationship == Relationship.HOSTILE)
                             ownerName = "Enemy";
                     }
+                    var builderArray = new int[builderIds.size()];
+                    for (int i = 0; i < builderIds.size(); i++) {
+                        builderArray[i] = builderIds.get(i);
+                    }
                     BuildingServerboundPacket.placeBuilding(buildingToPlace,
                         isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
                         buildingRotation,
                         hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : ownerName,
-                        builderIds.stream().mapToInt(i -> i).toArray(),
+                        builderArray,
                         isBridgeDiagonal()
                     );
                     setBuildingToPlace(null);

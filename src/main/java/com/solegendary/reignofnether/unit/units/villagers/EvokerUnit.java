@@ -451,7 +451,11 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
 
     public Enchantment getEnchant() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        Optional<Enchantment> enchant = itemStack.getAllEnchantments().keySet().stream().findFirst();
+        Optional<Enchantment> enchant = Optional.empty();
+        for (Enchantment enchantment : itemStack.getAllEnchantments().keySet()) {
+            enchant = Optional.of(enchantment);
+            break;
+        }
         return enchant.orElse(null);
     }
 

@@ -17,8 +17,6 @@ import net.minecraftforge.client.event.ScreenEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.getCustomBuildingToEdit;
 import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.setCustomBuildingToEdit;
@@ -348,7 +346,8 @@ public class CustomBuildingMenu {
             renderButton(button, x, y, evt);
             y += 18;
         }
-        return Stream.of(buttonsCol1, buttonsCol2).flatMap(List::stream).collect(Collectors.toList());
+        buttonsCol1.addAll(buttonsCol2);
+        return buttonsCol1;
     }
 
     private static List<FormattedCharSequence> getGarrisonTooltips(CustomBuilding customBuilding, String originalTooltip) {

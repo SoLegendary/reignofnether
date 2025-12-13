@@ -7,10 +7,11 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.ArrayUtil;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -42,7 +43,7 @@ public class SandboxActionButtons {
 
     private static boolean selectedUnitsHaveAnchor() {
         for (LivingEntity entity : UnitClientEvents.getSelectedUnits())
-            if (entity instanceof Unit unit && unit.getAnchor() != null && !unit.getAnchor().equals(new BlockPos(0,0,0)))
+            if (entity instanceof Unit unit && unit.getAnchor() != null && !unit.getAnchor().equals(new BlockPos(0, 0, 0)))
                 return true;
         return false;
     }
@@ -72,10 +73,10 @@ public class SandboxActionButtons {
                 () -> !SandboxClientEvents.isSandboxPlayer(),
                 SandboxActionButtons::selectedUnitsHaveAnchor,
                 () -> {
-                        SandboxServerboundPacket.resetToAnchor(UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray());
-                        for (LivingEntity entity : UnitClientEvents.getSelectedUnits())
-                            if (entity instanceof Unit unit)
-                                Unit.fullResetBehaviours(unit);
+                    SandboxServerboundPacket.resetToAnchor(ArrayUtil.livingEntityListToIdArray(UnitClientEvents.getSelectedUnits()));
+                    for (LivingEntity entity : UnitClientEvents.getSelectedUnits())
+                        if (entity instanceof Unit unit)
+                            Unit.fullResetBehaviours(unit);
                 },
                 null,
                 List.of(
@@ -91,7 +92,7 @@ public class SandboxActionButtons {
                 () -> CursorClientEvents.getLeftClickSandboxAction() == SandboxAction.REMOVE_ANCHOR,
                 () -> !SandboxClientEvents.isSandboxPlayer(),
                 SandboxActionButtons::selectedUnitsHaveAnchor,
-                () -> SandboxServerboundPacket.removeAnchor(UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray()),
+                () -> SandboxServerboundPacket.removeAnchor(ArrayUtil.livingEntityListToIdArray(UnitClientEvents.getSelectedUnits())),
                 null,
                 List.of(
                         fcs(I18n.get("hud.actionbuttons.reignofnether.remove_anchor"), true)
@@ -132,7 +133,8 @@ public class SandboxActionButtons {
                 switch (finalRelationship) {
                     case OWNED -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/lime_wool.png");
                     case FRIENDLY -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/blue_wool.png");
-                    case NEUTRAL -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/yellow_wool.png");
+                    case NEUTRAL ->
+                            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/yellow_wool.png");
                     case HOSTILE -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/red_wool.png");
                 },
                 (Keybinding) null,
@@ -144,21 +146,21 @@ public class SandboxActionButtons {
                         for (LivingEntity entity : UnitClientEvents.getSelectedUnits()) {
                             if (entity instanceof Unit unit) {
                                 switch (finalRelationship) {
-                                    default -> unit.setOwnerName("");
                                     case NEUTRAL -> unit.setOwnerName("Enemy");
                                     case HOSTILE -> unit.setOwnerName(MC.player.getName().getString());
+                                    default -> unit.setOwnerName("");
                                 }
                             }
                         }
                         if (HudClientEvents.hudSelectedEntity instanceof Unit unit) {
-                            SandboxServerboundPacket.setUnitOwner(UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray(), unit.getOwnerName());
+                            SandboxServerboundPacket.setUnitOwner(ArrayUtil.livingEntityListToIdArray(UnitClientEvents.getSelectedUnits()), unit.getOwnerName());
                             updateButtons();
                         }
                         for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings()) {
                             switch (finalRelationship) {
-                                default -> bpl.ownerName = "";
                                 case NEUTRAL -> bpl.ownerName = "Enemy";
                                 case HOSTILE -> bpl.ownerName = MC.player.getName().getString();
+                                default -> bpl.ownerName = "";
                             }
                             SandboxServerboundPacket.setBuildingOwner(bpl.originPos, bpl.ownerName);
                             updateButtons();
@@ -170,21 +172,21 @@ public class SandboxActionButtons {
                         for (LivingEntity entity : UnitClientEvents.getSelectedUnits()) {
                             if (entity instanceof Unit unit) {
                                 switch (finalRelationship) {
-                                    default -> unit.setOwnerName("Enemy");
                                     case NEUTRAL -> unit.setOwnerName(MC.player.getName().getString());
                                     case HOSTILE -> unit.setOwnerName("");
+                                    default -> unit.setOwnerName("Enemy");
                                 }
                             }
                         }
                         if (HudClientEvents.hudSelectedEntity instanceof Unit unit) {
-                            SandboxServerboundPacket.setUnitOwner(UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray(), unit.getOwnerName());
+                            SandboxServerboundPacket.setUnitOwner(ArrayUtil.livingEntityListToIdArray(UnitClientEvents.getSelectedUnits()), unit.getOwnerName());
                             updateButtons();
                         }
                         for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings()) {
                             switch (finalRelationship) {
-                                default -> bpl.ownerName = "Enemy";
                                 case NEUTRAL -> bpl.ownerName = MC.player.getName().getString();
                                 case HOSTILE -> bpl.ownerName = "";
+                                default -> bpl.ownerName = "Enemy";
                             }
                             SandboxServerboundPacket.setBuildingOwner(bpl.originPos, bpl.ownerName);
                             updateButtons();

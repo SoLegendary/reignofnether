@@ -34,16 +34,34 @@ public class BuildingUtils {
         else
             buildings = BuildingServerEvents.getBuildings();
 
-        return buildings.stream().filter(b -> b.isBuilt && b.ownerName.equals(ownerName)).toList().size();
+        List<BuildingPlacement> list = new ArrayList<>();
+        for (BuildingPlacement b : buildings) {
+            if (b.isBuilt && b.ownerName.equals(ownerName)) {
+                list.add(b);
+            }
+        }
+        return list.size();
     }
 
     public static boolean isBuildingBuildable(boolean isClientSide, BuildingPlacement building) {
-        if (isClientSide)
-            return BuildingClientEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&
+        if (isClientSide) {
+            List<BlockPos> list = new ArrayList<>();
+            for (BuildingPlacement b : BuildingClientEvents.getBuildings()) {
+                BlockPos originPos = b.originPos;
+                list.add(originPos);
+            }
+            return list.contains(building.originPos) &&
                     building.getBlocksPlaced() < building.getBlocksTotal();
-        else
-            return BuildingServerEvents.getBuildings().stream().map(b -> b.originPos).toList().contains(building.originPos) &&
+        }
+        else {
+            List<BlockPos> list = new ArrayList<>();
+            for (BuildingPlacement b : BuildingServerEvents.getBuildings()) {
+                BlockPos originPos = b.originPos;
+                list.add(originPos);
+            }
+            return list.contains(building.originPos) &&
                     building.getBlocksPlaced() < building.getBlocksTotal();
+        }
     }
 
     // returns a list of BPs that may reside in unique chunks for fog of war calcs
@@ -202,10 +220,13 @@ public class BuildingUtils {
         // Precompute range squared to avoid repeated calculation
         int rangeSquared = range * range;
 
-        return buildings.stream().anyMatch(building ->
-                (range == 0 || bp.distSqr(building.centrePos) < rangeSquared) &&
-                        building.isPosPartOfBuilding(bp, onlyPlacedBlocks)
-        );
+        for (BuildingPlacement building : buildings) {
+            if ((range == 0 || bp.distSqr(building.centrePos) < rangeSquared) &&
+                building.isPosPartOfBuilding(bp, onlyPlacedBlocks)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

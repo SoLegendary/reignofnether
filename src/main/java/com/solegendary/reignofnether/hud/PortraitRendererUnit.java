@@ -127,8 +127,15 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
     private static boolean shouldAnimate() {
         if (!checkedFreshAnimations && HudClientEvents.hudSelectedEntity != null) {
-            isFreshAnimationsInstalled = MC.getResourceManager().listPacks().map(PackResources::packId)
-                    .toList().stream().anyMatch(s -> s.toLowerCase().contains("freshanimations"));
+            boolean b = false;
+            for (String s : MC.getResourceManager().listPacks().map(PackResources::packId)
+                .toList()) {
+                if (s.toLowerCase().contains("freshanimations")) {
+                    b = true;
+                    break;
+                }
+            }
+            isFreshAnimationsInstalled = b;
             checkedFreshAnimations = true;
         }
         return !isFreshAnimationsInstalled ||

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -64,7 +65,15 @@ public class CapturableBeacon extends Beacon {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 TutorialClientEvents::isEnabled,
-                () -> BuildingClientEvents.getBuildings().stream().filter(b -> b.getBuilding() instanceof CapturableBeacon).toList().isEmpty(),
+                () -> {
+                    List<BuildingPlacement> list = new ArrayList<>();
+                    for (BuildingPlacement b : BuildingClientEvents.getBuildings()) {
+                        if (b.getBuilding() instanceof CapturableBeacon) {
+                            list.add(b);
+                        }
+                    }
+                    return list.isEmpty();
+                },
                 List.of(
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon.tooltip3"), Style.EMPTY),

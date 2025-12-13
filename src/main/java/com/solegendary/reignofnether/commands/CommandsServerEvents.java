@@ -227,12 +227,9 @@ public class CommandsServerEvents {
     }
 
     private static int destroyBuildingsAt(BlockPos pos, CommandSourceStack source) {
-        List<BuildingPlacement> targets = BuildingServerEvents.getBuildings().stream()
-            .filter(building -> building.isPosInsideBuilding(pos))
-            .toList();
-
         int removed = 0;
-        for (BuildingPlacement placement : targets) {
+        for (BuildingPlacement placement : BuildingServerEvents.getBuildings()) {
+            if (!placement.isPosInsideBuilding(pos)) continue;
             placement.destroy(source.getLevel());
             removed++;
         }
@@ -264,7 +261,11 @@ public class CommandsServerEvents {
                 ids.add(entity.getId());
             }
         }
-        SandboxServer.setUnitOwner(ids.stream().mapToInt(Integer::intValue).toArray(), ownerName);
+        var idArray = new int[ids.size()];
+        for (int i = 0; i < idArray.length; i++) {
+            idArray[i] = ids.get(i);
+        }
+        SandboxServer.setUnitOwner(idArray, ownerName);
         ctx.getSource().sendSuccess(
             () -> Component.literal("Assigned " + ids.size() + " unit(s) to " + ownerName),
             true
@@ -356,7 +357,12 @@ public class CommandsServerEvents {
                 ids.add(entity.getId());
             }
         }
-        return ids.stream().mapToInt(Integer::intValue).toArray();
+
+        var idArray = new int[ids.size()];
+        for (int i = 0; i < idArray.length; i++) {
+            idArray[i] = ids.get(i);
+        }
+        return idArray;
     }
 
     private static Building resolveBuilding(String input) {

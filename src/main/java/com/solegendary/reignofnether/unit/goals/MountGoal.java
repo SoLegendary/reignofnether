@@ -55,19 +55,18 @@ public class MountGoal extends MoveToTargetBlockGoal {
 
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (this.mob instanceof Unit) {
-                List<Mob> nearbyUnits = MiscUtil.getEntitiesWithinRange(
-                        new Vector3d(this.mob.position().x, this.mob.position().y, this.mob.position().z),
-                        SEARCH_RANGE, Mob.class, this.mob.level())
-                        .stream().filter(this::isMountableUnit).toList();
-
                 // find the closest mob
-                double closestDist = 999999;
+                double closestDist = Double.MAX_VALUE;
                 Mob closestMob = null;
-                for (Mob pfMob : nearbyUnits) {
-                    double dist = mob.position().distanceTo(pfMob.position());
-                    if (dist < closestDist) {
-                        closestDist = mob.position().distanceTo(pfMob.position());
-                        closestMob = pfMob;
+                for (Mob pfMob : MiscUtil.getEntitiesWithinRange(
+                        new Vector3d(this.mob.position().x, this.mob.position().y, this.mob.position().z),
+                        SEARCH_RANGE, Mob.class, this.mob.level())) {
+                    if (isMountableUnit(pfMob)) {
+                        double dist = mob.position().distanceTo(pfMob.position());
+                        if (dist < closestDist) {
+                            closestDist = mob.position().distanceTo(pfMob.position());
+                            closestMob = pfMob;
+                        }
                     }
                 }
                 if (closestMob != null)

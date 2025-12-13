@@ -16,6 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -94,10 +95,13 @@ public class WavePortal {
             if (unit instanceof MagmaCubeUnit magmaCubeUnit)
                 magmaCubeUnit.setSize(wave.highestUnitTier, true);
 
-            List<Unit> enemies = SurvivalServerEvents.getCurrentEnemies().stream().map(e -> e.unit).toList();
-            if (!enemies.contains(unit))
+            List<Unit> enemies = new ArrayList<>();
+            for (WaveEnemy e : SurvivalServerEvents.getCurrentEnemies()) {
+                Unit unit1 = e.unit;
+                if (unit1.equals(unit)) continue;
                 SurvivalServerEvents.getCurrentEnemies().add(new WaveEnemy(unit));
-
+                break;
+            }
             if (initialSpawnPop > 0)
                 initialSpawnPop -= getModifiedPopCost(unit);
         }

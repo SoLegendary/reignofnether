@@ -53,7 +53,7 @@ public class RTSStructureBlockEntity extends StructureBlockEntity {
     }
 
     @Override
-    public Stream<BlockPos> getRelatedCorners(BlockPos pMinPos, BlockPos pMaxPos) {
+    public @NotNull Stream<BlockPos> getRelatedCorners(@NotNull BlockPos pMinPos, @NotNull BlockPos pMaxPos) {
         Objects.requireNonNull(level);
         Stream<BlockPos> stream = BlockPos.betweenClosedStream(pMinPos, pMaxPos).filter((p_272561_) ->
                 level.getBlockState(p_272561_).is(BlockRegistrar.RTS_STRUCTURE_BLOCK.get()));

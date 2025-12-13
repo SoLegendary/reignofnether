@@ -89,15 +89,18 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
                 if (potionAbility instanceof ThrowLingeringRegenPotion ||
                     potionAbility instanceof ThrowHealingPotion) {
 
-                    List<Mob> nearbyFriendlyHurtUnits = nearbyMobs.stream().filter(mb ->
-                        mb instanceof Unit unit &&
-                        mb.getMobType() != MobType.UNDEAD &&
-                        mb.getHealth() < mb.getMaxHealth() && (
-                            unit.getOwnerName().equals(witch.getOwnerName()) ||
-                            AlliancesServerEvents.isAllied(unit.getOwnerName(), witch.getOwnerName())
-                        ))
-                        .sorted(Comparator.comparing(mb -> mb.getHealth() / mb.getMaxHealth()))
-                        .toList();
+                    List<Mob> nearbyFriendlyHurtUnits = new ArrayList<>();
+                    for (Mob nearbyMob : nearbyMobs) {
+                        if (nearbyMob instanceof Unit unit &&
+                            nearbyMob.getMobType() != MobType.UNDEAD &&
+                            nearbyMob.getHealth() < nearbyMob.getMaxHealth() && (
+                                    unit.getOwnerName().equals(witch.getOwnerName()) ||
+                                    AlliancesServerEvents.isAllied(unit.getOwnerName(), witch.getOwnerName())
+                            )) {
+                            nearbyFriendlyHurtUnits.add(nearbyMob);
+                        }
+                    }
+                    nearbyFriendlyHurtUnits.sort(Comparator.comparing(mb -> mb.getHealth() / mb.getMaxHealth()));
 
                     if (!nearbyFriendlyHurtUnits.isEmpty()) {
                         if (potionAbility instanceof ThrowLingeringRegenPotion pa)
@@ -109,14 +112,17 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
                     }
                 }
                 else if (potionAbility instanceof ThrowWaterPotion throwWaterPotion) {
-                    List<Mob> nearbyOnFireUnits = nearbyMobs.stream().filter(mb ->
-                        mb instanceof Unit unit &&
-                            mb.isOnFire() && (
-                            unit.getOwnerName().equals(witch.getOwnerName()) ||
-                            AlliancesServerEvents.isAllied(unit.getOwnerName(), witch.getOwnerName())
-                        ))
-                        .sorted(Comparator.comparing(mb -> mb.getHealth() / mb.getMaxHealth()))
-                        .toList();
+                    List<Mob> nearbyOnFireUnits = new ArrayList<>();
+                    for (Mob nearbyMob : nearbyMobs) {
+                        if (nearbyMob instanceof Unit unit &&
+                            nearbyMob.isOnFire() && (
+                                    unit.getOwnerName().equals(witch.getOwnerName()) ||
+                                    AlliancesServerEvents.isAllied(unit.getOwnerName(), witch.getOwnerName())
+                            )) {
+                            nearbyOnFireUnits.add(nearbyMob);
+                        }
+                    }
+                    nearbyOnFireUnits.sort(Comparator.comparing(mb -> mb.getHealth() / mb.getMaxHealth()));
 
                     if (!nearbyOnFireUnits.isEmpty()) {
                         setPotion(throwWaterPotion.potion);
@@ -132,13 +138,16 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
                     }
                 }
                 else if (potionAbility instanceof ThrowLingeringHarmingPotion throwHarmingPotion) {
-                    List<Mob> nearbyEnemyUnits = nearbyMobs.stream().filter(mb ->
-                        mb instanceof Unit unit &&
+                    List<Mob> nearbyEnemyUnits = new ArrayList<>();
+                    for (Mob mb : nearbyMobs) {
+                        if (mb instanceof Unit unit &&
                             mb.getMobType() != MobType.UNDEAD && (
-                            !unit.getOwnerName().equals(witch.getOwnerName()) &&
-                            !AlliancesServerEvents.isAllied(unit.getOwnerName(), witch.getOwnerName())
-                        ))
-                        .toList();
+                                    !unit.getOwnerName().equals(witch.getOwnerName()) &&
+                                    !AlliancesServerEvents.isAllied(unit.getOwnerName(), witch.getOwnerName())
+                            )) {
+                            nearbyEnemyUnits.add(mb);
+                        }
+                    }
 
                     if (!nearbyEnemyUnits.isEmpty()) {
                         setPotion(throwHarmingPotion.potion);
@@ -160,9 +169,9 @@ public class ThrowPotionGoal extends MoveToTargetBlockGoal {
                     if (mob.level().getBlockState(bp).getBlock() == Blocks.FIRE)
                         bps.add(bp);
                 }
-        List<BlockPos> sortedBps = bps.stream().sorted(Comparator.comparing(bp -> bp.distSqr(this.mob.blockPosition()))).toList();
-        if (!sortedBps.isEmpty())
-            return sortedBps.get(0);
+        bps.sort(Comparator.comparing(bp -> bp.distSqr(this.mob.blockPosition())));
+        if (!bps.isEmpty())
+            return bps.get(0);
         else
             return null;
     }

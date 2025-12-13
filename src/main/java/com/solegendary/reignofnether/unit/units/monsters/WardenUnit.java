@@ -303,12 +303,15 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
             hasResearch = ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_SCULK_AMPLIFIERS);
 
         if (hasResearch && targetBuilding instanceof SculkCatalystPlacement && targetBuilding.isBuilt) {
-            List<Mob> nearbyEnemies = MiscUtil.getEntitiesWithinRange(
-                            new Vector3d(targetBuilding.centrePos.getX(), targetBuilding.centrePos.getY(), targetBuilding.centrePos.getZ()),
-                            ResearchSculkAmplifiers.SPLIT_BOOM_RANGE, Mob.class, this.level())
-                    .stream().filter(mob -> mob instanceof Unit unit &&
-                            UnitServerEvents.getUnitToEntityRelationship(this, mob) == Relationship.HOSTILE)
-                    .toList();
+            List<Mob> nearbyEnemies = new ArrayList<>();
+            for (Mob mob : MiscUtil.getEntitiesWithinRange(
+                    new Vector3d(targetBuilding.centrePos.getX(), targetBuilding.centrePos.getY(), targetBuilding.centrePos.getZ()),
+                    ResearchSculkAmplifiers.SPLIT_BOOM_RANGE, Mob.class, this.level())) {
+                if (mob instanceof Unit &&
+                    UnitServerEvents.getUnitToEntityRelationship(this, mob) == Relationship.HOSTILE) {
+                    nearbyEnemies.add(mob);
+                }
+            }
 
             for (int i = 0; i < ResearchSculkAmplifiers.SPLIT_BOOM_AMOUNT; i++)
                 if (nearbyEnemies.size() > i)

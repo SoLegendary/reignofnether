@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.ArrayUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.MinecraftServer;
@@ -29,6 +30,8 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import java.util.ArrayList;
 
 import static com.solegendary.reignofnether.unit.UnitServerEvents.spawnMobs;
 
@@ -226,17 +229,18 @@ public class TutorialServerEvents {
     }
 
     public static void startBuildingMonsterBase() {
-        int[] builderUnitIds = UnitServerEvents.getAllUnits()
-            .stream()
-            .filter(u -> u instanceof ZombieVillagerUnit)
-            .mapToInt(Entity::getId)
-            .toArray();
-        if (builderUnitIds.length > 0) {
+        var builderUnitIds = new ArrayList<LivingEntity>();
+        for (LivingEntity u : UnitServerEvents.getAllUnits()) {
+            if (u instanceof ZombieVillagerUnit) {
+                builderUnitIds.add(u);
+            }
+        }
+        if (!builderUnitIds.isEmpty()) {
             BuildingServerEvents.placeBuilding(Buildings.MAUSOLEUM,
                 new BlockPos(MAUSOLEUM_POS.getX(), MAUSOLEUM_POS.getY(), MAUSOLEUM_POS.getZ()),
                 Rotation.NONE,
                 TUTORIAL_ENEMY_NAME,
-                builderUnitIds,
+                ArrayUtil.livingEntityListToIdArray(builderUnitIds),
                 false,
                 false
             );
@@ -244,68 +248,38 @@ public class TutorialServerEvents {
     }
 
     public static void expandMonsterBaseA() {
-        int[] builderUnitIds = UnitServerEvents.getAllUnits()
-            .stream()
-            .filter(u -> u instanceof ZombieVillagerUnit)
-            .mapToInt(Entity::getId)
-            .toArray();
-
-        for (int i = 0; i < builderUnitIds.length; i++) {
-            switch (i) {
-                case 0 -> BuildingServerEvents.placeBuilding(Buildings.PUMPKIN_FARM,
-                    new BlockPos(FARM_POS_1),
-                    Rotation.NONE,
-                    TUTORIAL_ENEMY_NAME,
-                    new int[] { builderUnitIds[0] },
-                    false,
-                    false
+        var index = 0;
+        for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
+            if (!(unit instanceof ZombieVillagerUnit)) continue;
+            if (index <= 1) {
+                BuildingServerEvents.placeBuilding(Buildings.PUMPKIN_FARM,
+                        new BlockPos(FARM_POS_1),
+                        Rotation.NONE,
+                        TUTORIAL_ENEMY_NAME,
+                        new int[]{unit.getId()},
+                        false,
+                        false
                 );
-                case 1 -> BuildingServerEvents.placeBuilding(Buildings.PUMPKIN_FARM,
-                    new BlockPos(FARM_POS_2),
-                    Rotation.CLOCKWISE_90,
-                    TUTORIAL_ENEMY_NAME,
-                    new int[] { builderUnitIds[1] },
-                    false,
-                    false
-                );
-            }
+            } else break;
+            index++;
         }
     }
 
     public static void expandMonsterBaseB() {
-        int[] builderUnitIds = UnitServerEvents.getAllUnits()
-            .stream()
-            .filter(u -> u instanceof ZombieVillagerUnit)
-            .mapToInt(Entity::getId)
-            .toArray();
-
-        for (int i = 0; i < builderUnitIds.length; i++) {
-            switch (i) {
-                case 0 -> BuildingServerEvents.placeBuilding(Buildings.GRAVEYARD,
-                    new BlockPos(GRAVEYARD_POS),
-                    Rotation.NONE,
-                    TUTORIAL_ENEMY_NAME,
-                    new int[] { builderUnitIds[0] },
-                    false,
-                    false
+        var index = 0;
+        for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
+            if (!(unit instanceof ZombieVillagerUnit)) continue;
+            if (index <= 2) {
+                BuildingServerEvents.placeBuilding(Buildings.GRAVEYARD,
+                        new BlockPos(GRAVEYARD_POS),
+                        Rotation.NONE,
+                        TUTORIAL_ENEMY_NAME,
+                        new int[] { unit.getId() },
+                        false,
+                        false
                 );
-                case 1 -> BuildingServerEvents.placeBuilding(Buildings.DARK_WATCHTOWER,
-                    new BlockPos(TOWER_POS),
-                    Rotation.NONE,
-                    TUTORIAL_ENEMY_NAME,
-                    new int[] { builderUnitIds[1] },
-                    false,
-                    false
-                );
-                case 2 -> BuildingServerEvents.placeBuilding(Buildings.SPIDER_LAIR,
-                    new BlockPos(SPIDER_LAIR_POS),
-                    Rotation.NONE,
-                    TUTORIAL_ENEMY_NAME,
-                    new int[] { builderUnitIds[2] },
-                    false,
-                    false
-                );
-            }
+            } else break;
+            index++;
         }
     }
 

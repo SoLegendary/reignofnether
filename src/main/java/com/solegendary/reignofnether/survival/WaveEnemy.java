@@ -180,12 +180,14 @@ public class WaveEnemy {
     public void retaliateCommand() { }
 
     private BuildingPlacement getNearestAttackableBuilding() {
-        List<BuildingPlacement> buildings = BuildingServerEvents.getBuildings().stream()
-                .filter(b -> !SurvivalServerEvents.ENEMY_OWNER_NAME.equals(b.ownerName) && !b.ownerName.isBlank() && !b.getBuilding().invulnerable)
-                .sorted(Comparator.comparing(b -> b.centrePos.distToCenterSqr(((Entity) unit).position())))
-                .toList();
+        List<BuildingPlacement> buildings = new ArrayList<>();
+        for (BuildingPlacement buildingPlacement : BuildingServerEvents.getBuildings()) {
+            if (!SurvivalServerEvents.ENEMY_OWNER_NAME.equals(buildingPlacement.ownerName) && !buildingPlacement.ownerName.isBlank() && !buildingPlacement.getBuilding().invulnerable) {
+                buildings.add(buildingPlacement);
+            }
+        }
+        buildings.sort(Comparator.comparing(b -> b.centrePos.distToCenterSqr(((Entity) unit).position())));
 
-        BlockPos targetBp = null;
         if (!buildings.isEmpty())
             return buildings.get(0);
 
@@ -193,10 +195,13 @@ public class WaveEnemy {
     }
 
     private LivingEntity getNearestAttackableUnit() {
-        List<LivingEntity> entities = UnitServerEvents.getAllUnits().stream()
-                .filter(le -> le instanceof Unit u && !SurvivalServerEvents.ENEMY_OWNER_NAME.equals(u.getOwnerName()) && !u.getOwnerName().isBlank())
-                .sorted(Comparator.comparing(le -> le.position().distanceToSqr(((Entity) unit).position())))
-                .toList();
+        List<LivingEntity> entities = new ArrayList<>();
+        for (LivingEntity livingEntity : UnitServerEvents.getAllUnits()) {
+            if (livingEntity instanceof Unit u && !SurvivalServerEvents.ENEMY_OWNER_NAME.equals(u.getOwnerName()) && !u.getOwnerName().isBlank()) {
+                entities.add(livingEntity);
+            }
+        }
+        entities.sort(Comparator.comparing(le -> le.position().distanceToSqr(((Entity) unit).position())));
 
         BlockPos targetBp = null;
         if (!entities.isEmpty())
@@ -206,13 +211,15 @@ public class WaveEnemy {
     }
 
     private LivingEntity getNearestAttackableWorkerUnit() {
-        List<LivingEntity> entities = UnitServerEvents.getAllUnits().stream()
-                .filter(le -> le instanceof Unit u && le instanceof WorkerUnit &&
-                        !SurvivalServerEvents.ENEMY_OWNER_NAME.equals(u.getOwnerName()) && !u.getOwnerName().isBlank())
-                .sorted(Comparator.comparing(le -> le.position().distanceToSqr(((Entity) unit).position())))
-                .toList();
+        List<LivingEntity> entities = new ArrayList<>();
+        for (LivingEntity livingEntity : UnitServerEvents.getAllUnits()) {
+            if (livingEntity instanceof Unit u && livingEntity instanceof WorkerUnit &&
+                !SurvivalServerEvents.ENEMY_OWNER_NAME.equals(u.getOwnerName()) && !u.getOwnerName().isBlank()) {
+                entities.add(livingEntity);
+            }
+        }
+        entities.sort(Comparator.comparing(le -> le.position().distanceToSqr(((Entity) unit).position())));
 
-        BlockPos targetBp = null;
         if (!entities.isEmpty())
             return entities.get(0);
 
@@ -220,13 +227,15 @@ public class WaveEnemy {
     }
 
     private LivingEntity getNearestNonWitherAllyUnit() {
-        List<LivingEntity> entities = UnitServerEvents.getAllUnits().stream()
-                .filter(le -> le instanceof Unit u && !(u instanceof WitherSkeletonUnit) &&
-                        SurvivalServerEvents.ENEMY_OWNER_NAME.equals(u.getOwnerName()) && !u.getOwnerName().isBlank())
-                .sorted(Comparator.comparing(le -> le.position().distanceToSqr(((Entity) unit).position())))
-                .toList();
+        List<LivingEntity> entities = new ArrayList<>();
+        for (LivingEntity livingEntity : UnitServerEvents.getAllUnits()) {
+            if (livingEntity instanceof Unit u && !(u instanceof WitherSkeletonUnit) &&
+                SurvivalServerEvents.ENEMY_OWNER_NAME.equals(u.getOwnerName()) && !u.getOwnerName().isBlank()) {
+                entities.add(livingEntity);
+            }
+        }
+        entities.sort(Comparator.comparing(le -> le.position().distanceToSqr(((Entity) unit).position())));
 
-        BlockPos targetBp = null;
         if (!entities.isEmpty())
             return entities.get(0);
 
@@ -259,9 +268,12 @@ public class WaveEnemy {
         ArrayList<BuildingPlacement> buildings = BuildingServerEvents.getBuildings();
         Collections.shuffle(buildings);
 
-        List<BuildingPlacement> playerBuildings = buildings.stream()
-                .filter(b -> !SurvivalServerEvents.ENEMY_OWNER_NAME.equals(b.ownerName) && !b.ownerName.isBlank())
-                .toList();
+        List<BuildingPlacement> playerBuildings = new ArrayList<>();
+        for (BuildingPlacement b : buildings) {
+            if (!SurvivalServerEvents.ENEMY_OWNER_NAME.equals(b.ownerName) && !b.ownerName.isBlank()) {
+                playerBuildings.add(b);
+            }
+        }
 
         BlockPos targetBp = null;
         if (!playerBuildings.isEmpty())

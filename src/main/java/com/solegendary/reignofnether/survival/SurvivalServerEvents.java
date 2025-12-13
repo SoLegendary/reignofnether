@@ -148,13 +148,15 @@ public class SurvivalServerEvents {
             enemy.tick(TICK_INTERVAL);
 
         // detect new portals and update portals list accordingly
-        List<BuildingPlacement> currentPortals = BuildingServerEvents.getBuildings().stream().filter(b ->
-                ENEMY_OWNER_NAME.equals(b.ownerName) && !b.ownerName.isBlank() && b instanceof PortalPlacement)
-                .toList();
+        List<BuildingPlacement> currentPortals = new ArrayList<>();
+        for (BuildingPlacement b : BuildingServerEvents.getBuildings()) {
+            if (ENEMY_OWNER_NAME.equals(b.ownerName) && b instanceof PortalPlacement) {
+                currentPortals.add(b);
+                if (!lastPortals.contains(b))
+                    SurvivalServerEvents.portals.add(new WavePortal((PortalPlacement) b, currentWave != null ? currentWave : nextWave));
+            }
+        }
 
-        for (BuildingPlacement portal : currentPortals)
-            if (!lastPortals.contains(portal))
-                SurvivalServerEvents.portals.add(new WavePortal((PortalPlacement) portal, currentWave != null ? currentWave : nextWave));
         SurvivalServerEvents.portals.removeIf(p -> !currentPortals.contains(p.getPortal()));
 
         lastPortals.clear();

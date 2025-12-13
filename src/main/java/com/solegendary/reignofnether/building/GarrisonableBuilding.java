@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface GarrisonableBuilding {
@@ -49,16 +50,26 @@ public interface GarrisonableBuilding {
     // will only return actual Units, not any other LivingEntity
     public default List<LivingEntity> getOccupants() {
         if (this instanceof BuildingPlacement building) {
-            if (building.level.isClientSide())
-                return UnitClientEvents.getAllUnits().stream()
-                        .filter(le -> le instanceof Unit u &&
-                                GarrisonableBuilding.getGarrison(u) == this)
-                        .toList();
-            else
-                return UnitServerEvents.getAllUnits().stream()
-                        .filter(le -> le instanceof Unit u &&
-                                GarrisonableBuilding.getGarrison(u) == this)
-                        .toList();
+            if (building.level.isClientSide()) {
+                List<LivingEntity> list = new ArrayList<>();
+                for (LivingEntity le : UnitClientEvents.getAllUnits()) {
+                    if (le instanceof Unit u &&
+                        GarrisonableBuilding.getGarrison(u) == this) {
+                        list.add(le);
+                    }
+                }
+                return list;
+            }
+            else {
+                List<LivingEntity> list = new ArrayList<>();
+                for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+                    if (le instanceof Unit u &&
+                        GarrisonableBuilding.getGarrison(u) == this) {
+                        list.add(le);
+                    }
+                }
+                return list;
+            }
         }
         return List.of();
     }

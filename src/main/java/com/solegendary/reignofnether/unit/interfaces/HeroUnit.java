@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
@@ -45,10 +46,13 @@ public interface HeroUnit extends Unit {
 
     static List<HeroUnit> getHeroes(boolean isClientside) {
         List<LivingEntity> units = isClientside ? UnitClientEvents.getAllUnits() : UnitServerEvents.getAllUnits();
-        return units.stream()
-                .filter(e -> e instanceof HeroUnit)
-                .map(e -> (HeroUnit) e)
-                .toList();
+        List<HeroUnit> list = new ArrayList<>();
+        for (LivingEntity e : units) {
+            if (e instanceof HeroUnit heroUnit) {
+                list.add(heroUnit);
+            }
+        }
+        return list;
     }
 
     static List<HeroUnit> getHeroes(boolean isClientside, String ownerName) {
@@ -57,12 +61,15 @@ public interface HeroUnit extends Unit {
 
     static List<HeroUnit> getHeroes(boolean isClientside, String ownerName, String unitName) {
         List<LivingEntity> units = isClientside ? UnitClientEvents.getAllUnits() : UnitServerEvents.getAllUnits();
-        return units.stream()
-                .filter(e -> e instanceof HeroUnit heroUnit &&
-                        heroUnit.getOwnerName().equals(ownerName) &&
-                        (e.getName().getString().equals(unitName) || unitName.isBlank()))
-                .map(e -> (HeroUnit) e)
-                .toList();
+        List<HeroUnit> list = new ArrayList<>();
+        for (LivingEntity e : units) {
+            if (e instanceof HeroUnit heroUnit &&
+                heroUnit.getOwnerName().equals(ownerName) &&
+                (e.getName().getString().equals(unitName) || unitName.isBlank())) {
+                list.add(heroUnit);
+            }
+        }
+        return list;
     }
 
     @Nullable
@@ -176,10 +183,13 @@ public interface HeroUnit extends Unit {
     }
 
     default List<HeroAbility> getHeroAbilities() {
-        return getAbilities().get().stream()
-                .filter(a -> a instanceof HeroAbility)
-                .map(a -> (HeroAbility) a)
-                .toList();
+        List<HeroAbility> list = new ArrayList<>();
+        for (Ability a : getAbilities().get()) {
+            if (a instanceof HeroAbility heroAbility) {
+                list.add(heroAbility);
+            }
+        }
+        return list;
     }
 
     // call from addAdditionalSaveData

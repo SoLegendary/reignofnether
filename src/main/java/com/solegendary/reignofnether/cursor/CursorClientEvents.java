@@ -356,7 +356,11 @@ public class CursorClientEvents {
                             unitsToAdd.add(unit);
 
                     if (Keybindings.shiftMod.isDown()) {
-                        List<Integer> selectedIds = UnitClientEvents.getSelectedUnits().stream().map(Entity::getId).toList();
+                        List<Integer> selectedIds = new ArrayList<>();
+                        for (LivingEntity livingEntity : UnitClientEvents.getSelectedUnits()) {
+                            Integer id = livingEntity.getId();
+                            selectedIds.add(id);
+                        }
                         unitsToAdd.removeIf(e -> selectedIds.contains(e.getId()));
                     } else {
                         UnitClientEvents.clearSelectedUnits();

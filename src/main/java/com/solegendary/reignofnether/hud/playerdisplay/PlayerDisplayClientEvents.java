@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class PlayerDisplayClientEvents {
 
@@ -90,7 +89,13 @@ public class PlayerDisplayClientEvents {
     private static int getNumFpvPlayers() {
         if (MC.level == null)
             return 0;
-        return (MC.level.players().stream().filter(p -> !p.isSpectator() && !p.isCreative()).toList().size());
+        var size = 0;
+        for (AbstractClientPlayer p : MC.level.players()) {
+            if (!p.isSpectator() && !p.isCreative()) {
+                size++;
+            }
+        }
+        return size;
     }
 
     public static final Button shareUnitControlButton = new Button(
@@ -157,9 +162,18 @@ public class PlayerDisplayClientEvents {
 
         GuiGraphics guiGraphics = evt.getGuiGraphics();
 
-        observerPlayerDisplays.removeIf(r -> !PlayerClientEvents.rtsPlayers.stream().map(rtsp -> rtsp.name).toList().contains(r.playerName));
+        List<String> list = new ArrayList<>();
+        for (RTSPlayer rtsp : PlayerClientEvents.rtsPlayers) {
+            String name = rtsp.name;
+            list.add(name);
+        }
+        observerPlayerDisplays.removeIf(r -> !list.contains(r.playerName));
 
-        List<String> trackedPlayers = observerPlayerDisplays.stream().map(d -> d.playerName).collect(Collectors.toCollection(ArrayList::new));
+        List<String> trackedPlayers = new ArrayList<>();
+        for (ObserverPlayerDisplay d : observerPlayerDisplays) {
+            String playerName = d.playerName;
+            trackedPlayers.add(playerName);
+        }
         for (RTSPlayer rtsPlayer : PlayerClientEvents.rtsPlayers) {
             if (!trackedPlayers.contains(rtsPlayer.name)) {
                 observerPlayerDisplays.add(new ObserverPlayerDisplay(rtsPlayer));
@@ -189,12 +203,29 @@ public class PlayerDisplayClientEvents {
         int blitY = 37;
 
         GuiGraphics guiGraphics = evt.getGuiGraphics();
+        List<String> list = new ArrayList<>();
+        for (RTSPlayer rtsp : PlayerClientEvents.rtsPlayers) {
+            String name = rtsp.name;
+            list.add(name);
+        }
+        rtsDiplomacyPlayerDisplays.removeIf(d -> !list.contains(d.playerName));
+        List<String> result = new ArrayList<>();
+        for (AbstractClientPlayer p : MC.level.players()) {
+            String string = p.getName().getString();
+            result.add(string);
+        }
+        fpvDiplomacyPlayerDisplays.removeIf(d -> !result.contains(d.playerName));
 
-        rtsDiplomacyPlayerDisplays.removeIf(d -> !PlayerClientEvents.rtsPlayers.stream().map(rtsp -> rtsp.name).toList().contains(d.playerName));
-        fpvDiplomacyPlayerDisplays.removeIf(d -> !MC.level.players().stream().map(p -> p.getName().getString()).toList().contains(d.playerName));
-
-        Set<String> trackedRtsPlayers = rtsDiplomacyPlayerDisplays.stream().map(d -> d.playerName).collect(Collectors.toSet());
-        Set<String> trackedFpvPlayers = fpvDiplomacyPlayerDisplays.stream().map(d -> d.playerName).collect(Collectors.toSet());
+        Set<String> trackedRtsPlayers = new HashSet<>();
+        for (DiplomacyPlayerDisplay rtsDiplomacyPlayerDisplay : rtsDiplomacyPlayerDisplays) {
+            String playerName = rtsDiplomacyPlayerDisplay.playerName;
+            trackedRtsPlayers.add(playerName);
+        }
+        Set<String> trackedFpvPlayers = new HashSet<>();
+        for (DiplomacyPlayerDisplay fpvDiplomacyPlayerDisplay : fpvDiplomacyPlayerDisplays) {
+            String playerName = fpvDiplomacyPlayerDisplay.playerName;
+            trackedFpvPlayers.add(playerName);
+        }
         for (AbstractClientPlayer player : MC.level.players()) {
             if (player != MC.player) {
                 RTSPlayer rtsPlayer = PlayerClientEvents.getRTSPlayer(player.getName().getString());

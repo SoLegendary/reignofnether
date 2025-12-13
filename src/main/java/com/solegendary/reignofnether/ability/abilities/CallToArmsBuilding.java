@@ -68,17 +68,15 @@ public class CallToArmsBuilding extends Ability {
 
     @Override
     public void use(Level level, BuildingPlacement buildingUsing, BlockPos targetBp) {
-        List<VillagerUnit> nearbyUnits = MiscUtil.getEntitiesWithinRange(
+        List<VillagerUnit> units = MiscUtil.getEntitiesWithinRange(
                         new Vector3d(buildingUsing.centrePos.getX(), buildingUsing.centrePos.getY(), buildingUsing.centrePos.getZ()),
-                        range, VillagerUnit.class, buildingUsing.getLevel())
-                .stream()
-                .filter(u -> u.getOwnerName().equals(buildingUsing.ownerName))
-                .toList();
-
-        for (VillagerUnit vUnit : nearbyUnits) {
-            Unit.resetBehaviours(vUnit);
-            WorkerUnit.resetBehaviours(vUnit);
-            vUnit.callToArmsGoal.setNearestTownCentreAsTarget();
+                        range, VillagerUnit.class, buildingUsing.getLevel());
+        for (VillagerUnit unit : units) {
+            if (unit.getOwnerName().equals(buildingUsing.ownerName)) {
+                Unit.resetBehaviours(unit);
+                WorkerUnit.resetBehaviours(unit);
+                unit.callToArmsGoal.setNearestTownCentreAsTarget();
+            }
         }
 
         if (!level.isClientSide()) {

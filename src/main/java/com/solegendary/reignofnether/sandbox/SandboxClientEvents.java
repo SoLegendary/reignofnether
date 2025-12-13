@@ -1,10 +1,8 @@
 package com.solegendary.reignofnether.sandbox;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -28,10 +26,10 @@ import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.ArrayUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -101,7 +99,12 @@ public class SandboxClientEvents {
                     )
             ));
         } else {
-            return CustomBuildingClientEvents.customBuildings.stream().map(cb -> (Button) cb.getBuildButton(null)).toList();
+            List<Button> list = new ArrayList<>();
+            for (CustomBuilding cb : CustomBuildingClientEvents.customBuildings) {
+                Button buildButton = cb.getBuildButton(null);
+                list.add(buildButton);
+            }
+            return list;
         }
     }
 
@@ -434,7 +437,7 @@ public class SandboxClientEvents {
 
             switch (sandboxAction) {
                 case SPAWN_UNIT -> SandboxServerboundPacket.spawnUnit(CursorClientEvents.getLeftClickSandboxAction(), ownerName, spawnUnitName, CursorClientEvents.getPreselectedBlockPos());
-                case SET_ANCHOR -> SandboxServerboundPacket.setAnchor(CursorClientEvents.getPreselectedBlockPos(), UnitClientEvents.getSelectedUnits().stream().mapToInt(Entity::getId).toArray());
+                case SET_ANCHOR -> SandboxServerboundPacket.setAnchor(CursorClientEvents.getPreselectedBlockPos(), ArrayUtil.livingEntityListToIdArray(UnitClientEvents.getSelectedUnits()));
             }
 
             if (!Keybindings.shiftMod.isDown()) {

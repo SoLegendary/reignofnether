@@ -28,6 +28,11 @@ public class FactionRegister {
     }
 
     public List<BuildingPlaceButton> getBuildingButtons() {
-        return registeredBuildings.stream().map(pair -> pair.getA().getBuildButton(pair.getB())).toList();
+        List<BuildingPlaceButton> list = new ArrayList<>();
+        for (Pair<Building, Keybinding> pair : registeredBuildings) {
+            BuildingPlaceButton buildButton = pair.getA().getBuildButton(pair.getB());
+            list.add(buildButton);
+        }
+        return list;
     }
 }

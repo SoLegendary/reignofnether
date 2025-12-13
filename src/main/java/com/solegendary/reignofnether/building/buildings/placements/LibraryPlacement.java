@@ -27,18 +27,23 @@ public class LibraryPlacement extends ProductionPlacement {
         if (tickAgeAfterBuilt > 0 && tickAgeAfterBuilt % 15 == 0 && isBuilt && autoCastEnchant != null
                 && autoCastEnchant.isOffCooldown(this)) {
 
-            List<Mob> mobs = MiscUtil.getEntitiesWithinRange(new Vector3d(
-                            this.centrePos.getX(),
-                            this.centrePos.getY(),
-                            this.centrePos.getZ()
-                    ),
-                    autoCastEnchant.range - 1,
-                    Mob.class,
-                    tickLevel
-            ).stream().filter(e -> (
+            List<Mob> mobs = new ArrayList<>();
+            for (Mob e : MiscUtil.getEntitiesWithinRange(new Vector3d(
+                    this.centrePos.getX(),
+                    this.centrePos.getY(),
+                    this.centrePos.getZ()
+                ),
+                autoCastEnchant.range - 1,
+                Mob.class,
+                tickLevel
+            )) {
+                if ((
                     autoCastEnchant.isCorrectUnitAndEquipment(e) && autoCastEnchant.canAfford(this)
-                            && !autoCastEnchant.hasAnyEnchant(e)
-            )).toList();
+                    && !autoCastEnchant.hasAnyEnchant(e)
+                )) {
+                    mobs.add(e);
+                }
+            }
 
             if (!mobs.isEmpty()) {
                 autoCastEnchant.use(tickLevel, this, mobs.get(0));

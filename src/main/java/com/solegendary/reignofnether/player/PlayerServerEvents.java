@@ -64,7 +64,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.building.BuildingServerEvents.saveBuildings;
 import static com.solegendary.reignofnether.time.TimeUtils.getWaveSurvivalTimeModifier;
@@ -161,7 +160,10 @@ public class PlayerServerEvents {
 
     public static boolean isRTSPlayer(String playerName) {
         synchronized (rtsPlayers) {
-            return rtsPlayers.stream().filter(p -> p.name.equals(playerName)).toList().size() > 0;
+            for (RTSPlayer p : rtsPlayers) {
+                if (!p.name.equals(playerName)) return true;
+            }
+            return false;
         }
     }
 
@@ -177,7 +179,10 @@ public class PlayerServerEvents {
 
     public static boolean isRTSPlayer(int id) {
         synchronized (rtsPlayers) {
-            return rtsPlayers.stream().filter(p -> p.id == id).toList().size() > 0;
+            for (RTSPlayer p : rtsPlayers) {
+                if (p.id == id) return true;
+            }
+            return false;
         }
     }
 
@@ -302,8 +307,8 @@ public class PlayerServerEvents {
             ResearchServerEvents.syncResearch(playerName);
             ResearchServerEvents.syncCheats(playerName);
         }
-
-        if (orthoviewPlayers.stream().map(Entity::getId).toList().contains(evt.getEntity().getId())) {
+        for (ServerPlayer orthoviewPlayer : orthoviewPlayers) {
+            if (orthoviewPlayer.getId() != evt.getEntity().getId()) continue;
             orthoviewPlayers.add((ServerPlayer) evt.getEntity());
         }
         if (!TutorialServerEvents.isEnabled()) {
@@ -473,7 +478,10 @@ public class PlayerServerEvents {
                         workers.get(i).moveTo(bp.offset(i, 0, 0), 0, 0);
                         level.addFreshEntity(workers.get(i));
                     }
-                    int[] workerIds = workers.stream().map(Entity::getId).mapToInt(Integer::intValue).toArray();
+                    var workerIds = new int[workers.size()];
+                    for (int i = 0; i < workers.size(); i++) {
+                        workerIds[i] = workers.get(i).getId();
+                    }
                     BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, playerName, workerIds, false, false);
                 }
                 for (RTSPlayer rtsPlayer : rtsPlayers) {
@@ -671,7 +679,12 @@ public class PlayerServerEvents {
     }
 
     private static ServerPlayer getPlayerById(int playerId) {
-        return players.stream().filter(player -> playerId == player.getId()).findAny().orElse(null);
+        for (ServerPlayer player : players) {
+            if (playerId == player.getId()) {
+                return player;
+            }
+        }
+        return null;
     }
 
     public static void openTopdownGui(int playerId) {
@@ -866,9 +879,11 @@ public class PlayerServerEvents {
             // Check if only allied players are left or if a single player remains
             if (rtsPlayers.size() > 1) {
                 // Get the set of remaining player names
-                Set<String> remainingPlayers = rtsPlayers.stream()
-                        .map(player -> player.name)
-                        .collect(Collectors.toSet());
+                Set<String> remainingPlayers = new HashSet<>();
+                for (RTSPlayer player : rtsPlayers) {
+                    String name = player.name;
+                    remainingPlayers.add(name);
+                }
 
                 // Use the first remaining player as a reference to find all connected allies
                 String referencePlayer = remainingPlayers.iterator().next();
@@ -904,11 +919,11 @@ public class PlayerServerEvents {
                 PlayerClientboundPacket.victory(allyName);
             SurvivalServerEvents.endCurrentWave();
         } else {
-            List<String> playerNames = rtsPlayers.stream().map(p -> p.name)
-                    .filter(n -> !AlliancesServerEvents.isAllied(playerName, n) && !n.equals(playerName))
-                    .toList();
-            for (String name : playerNames)
-                defeat(name, Component.translatable("server.reignofnether.beacon_defeat").getString());
+            for (RTSPlayer p : rtsPlayers) {
+                String n = p.name;
+                if (AlliancesServerEvents.isAllied(playerName, n) || n.equals(playerName)) continue;
+                defeat(n, Component.translatable("server.reignofnether.beacon_defeat").getString());
+            }
         }
     }
 

@@ -56,9 +56,7 @@ public class HelperButtons {
                 () -> false,
                 () -> false,
                 () -> true,
-                () -> {
-                    MC.setScreen(new ChatScreen(""));
-                },
+                () -> MC.setScreen(new ChatScreen("")),
                 null,
                 List.of(FormattedCharSequence.forward(I18n.get("hud.helperbuttons.reignofnether.chat"), Style.EMPTY))
         );
@@ -133,11 +131,16 @@ public class HelperButtons {
                 Keybindings.keyK,
                 () -> false,
                 () -> {
-                    List<LivingEntity> militaryUnits = UnitClientEvents.getAllUnits().stream()
-                            .filter(u -> !(u instanceof WorkerUnit) &&
-                                    GarrisonableBuilding.getGarrison((Unit) u) == null &&
-                                    getPlayerToEntityRelationship(u) == Relationship.OWNED).toList();
-                    return militaryUnits.isEmpty();
+                    var flag = false;
+                    for (LivingEntity u : UnitClientEvents.getAllUnits()) {
+                        if (!(u instanceof WorkerUnit) &&
+                            GarrisonableBuilding.getGarrison((Unit) u) == null &&
+                            getPlayerToEntityRelationship(u) == Relationship.OWNED) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    return !flag;
                 },
                 () -> true,
                 () -> {
@@ -146,10 +149,13 @@ public class HelperButtons {
                     if (Keybindings.shiftMod.isDown()) {
                         militaryUnits.addAll(UnitClientEvents.getMilitaryUnitsOnScreen());
                     } else {
-                        militaryUnits.addAll(UnitClientEvents.getAllUnits().stream()
-                                .filter(u -> !(u instanceof WorkerUnit) &&
-                                        GarrisonableBuilding.getGarrison((Unit) u) == null &&
-                                        getPlayerToEntityRelationship(u) == Relationship.OWNED).toList());
+                        for (LivingEntity u : UnitClientEvents.getAllUnits()) {
+                            if (!(u instanceof WorkerUnit) &&
+                                GarrisonableBuilding.getGarrison((Unit) u) == null &&
+                                getPlayerToEntityRelationship(u) == Relationship.OWNED) {
+                                militaryUnits.add(u);
+                            }
+                        }
                     }
                     UnitClientEvents.clearSelectedUnits();
                     for (LivingEntity militaryUnit : militaryUnits)
@@ -219,7 +225,12 @@ public class HelperButtons {
                 () -> BuildingUtils.getBeacon(true) == null,
                 () -> true,
                 () -> {
-                    List<BuildingPlacement> beacons = BuildingClientEvents.getBuildings().stream().filter(b -> b instanceof BeaconPlacement).toList();
+                    List<BuildingPlacement> beacons = new ArrayList<>();
+                    for (BuildingPlacement b : BuildingClientEvents.getBuildings()) {
+                        if (b instanceof BeaconPlacement) {
+                            beacons.add(b);
+                        }
+                    }
                     if (!beacons.isEmpty()) {
                         BlockPos bp = beacons.get(0).centrePos;
                         OrthoviewClientEvents.centreCameraOnPos(bp);

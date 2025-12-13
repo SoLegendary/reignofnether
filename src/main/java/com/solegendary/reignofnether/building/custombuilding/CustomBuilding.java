@@ -16,8 +16,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -28,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -64,17 +61,22 @@ public class CustomBuilding extends Building {
         this.structureNbt = structureNbt;
         this.portraitBlock = portraitBlock;
         this.icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_front.png");
-        this.startingBlockTypes.addAll(BuildingBlockData.getBuildingBlocksFromNbt(this.structureNbt)
-            .stream().filter(bb -> bb.getBlockPos().getY() == 0)
-            .map(bb -> bb.getBlockState().getBlock()).toList());
-        this.portraitBlockOptions = BuildingBlockData.getBuildingBlocksFromNbt(this.structureNbt)
-                .stream().filter(bb -> !List.of(
-                            BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
-                            BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
-                            BlockRegistrar.GARRISON_ZONE_BLOCK.get()
-                        ).contains(bb.getBlockState().getBlock()))
-                .map(bb -> bb.getBlockState().getBlock())
-                .collect(Collectors.toSet());
+        for (BuildingBlock buildingBlock : BuildingBlockData.getBuildingBlocksFromNbt(this.structureNbt)) {
+            if (buildingBlock.getBlockPos().getY() == 0) {
+                Block block = buildingBlock.getBlockState().getBlock();
+                this.startingBlockTypes.add(block);
+            }
+        }
+        for (BuildingBlock buildingBlock : BuildingBlockData.getBuildingBlocksFromNbt(this.structureNbt)) {
+            if (!List.of(
+                BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
+                BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
+                BlockRegistrar.GARRISON_ZONE_BLOCK.get()
+            ).contains(buildingBlock.getBlockState().getBlock())) {
+                Block block = buildingBlock.getBlockState().getBlock();
+                this.portraitBlockOptions.add(block);
+            }
+        }
         this.packAttributesNbt();
         if (attributesNbt != null) {
             this.attributesNbt = attributesNbt;
@@ -197,7 +199,13 @@ public class CustomBuilding extends Building {
     }
 
     public void cycleIconAndPortrait(boolean reverse) {
-        ArrayList<Block> blockOptions = new ArrayList<>(portraitBlockOptions.stream().filter(b -> !b.defaultBlockState().isAir()).toList());
+        List<Block> list = new ArrayList<>();
+        for (Block b : portraitBlockOptions) {
+            if (!b.defaultBlockState().isAir()) {
+                list.add(b);
+            }
+        }
+        ArrayList<Block> blockOptions = new ArrayList<>(list);
         if (reverse)
             Collections.reverse(blockOptions);
         boolean foundCurrentPortrait = false;

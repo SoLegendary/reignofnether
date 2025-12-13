@@ -859,18 +859,22 @@ public class TutorialClientEvents {
                     TutorialServerboundPacket.doServerAction(TutorialAction.ATTACK_WITH_MONSTERS_A);
                     progressStage();
                 } else if (stageProgress == 3) {
-                    if (UnitClientEvents.getAllUnits()
-                        .stream()
-                        .filter(u -> u instanceof PillagerUnit || u instanceof VindicatorUnit)
-                        .toList()
-                        .isEmpty()) {
-                        progressStage();
+                    var flag = true;
+                    for (LivingEntity livingEntity : UnitClientEvents.getAllUnits()) {
+                        if (livingEntity instanceof PillagerUnit || livingEntity instanceof VindicatorUnit) {
+                            flag = false;
+                            break;
+                        }
                     }
-                    if (UnitClientEvents.getAllUnits()
-                        .stream()
-                        .filter(u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
-                        .toList()
-                        .isEmpty()) {
+                    if (flag) progressStage();
+                    flag = true;
+                    for (LivingEntity livingEntity : UnitClientEvents.getAllUnits()) {
+                        if (livingEntity instanceof ZombieUnit || livingEntity instanceof SkeletonUnit) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
                         msg("tutorial.reignofnether.more_incoming");
                         TutorialServerboundPacket.doServerAction(TutorialAction.SPAWN_MONSTERS_B);
                         OrthoviewClientEvents.forceMoveCam(MONSTER_CAM_POS, 50);
@@ -885,11 +889,14 @@ public class TutorialClientEvents {
                     specialMsg("tutorial.reignofnether.dawn_breaks");
                     progressStage();
                 } else if (stageProgress == 6) {
-                    if (UnitClientEvents.getAllUnits()
-                        .stream()
-                        .filter(u -> u instanceof ZombieUnit || u instanceof SkeletonUnit)
-                        .toList()
-                        .isEmpty()) {
+                    var flag = true;
+                    for (LivingEntity livingEntity : UnitClientEvents.getAllUnits()) {
+                        if (livingEntity instanceof ZombieUnit || livingEntity instanceof SkeletonUnit) {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag) {
                         specialMsg("tutorial.reignofnether.defended");
                         clearHelpButtonText();
                         progressStageAfterDelay(100);

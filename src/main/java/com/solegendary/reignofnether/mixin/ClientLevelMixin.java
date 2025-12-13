@@ -141,11 +141,16 @@ public class ClientLevelMixin {
             posList.add(new Vec3(bp.getX(), bp.getY(), bp.getZ()));
         }
         // remove any positions that aren't on the screen
-        List<Vec3> posListOnScreen = posList.stream().filter(vec3 -> MinimapClientEvents.isWorldXZinsideMap((int) vec3.x, (int) vec3.z)).toList();
+        List<Vec3> posListOnScreen = new ArrayList<>();
+        for (Vec3 vec3 : posList) {
+            if (MinimapClientEvents.isWorldXZinsideMap((int) vec3.x, (int) vec3.z)) {
+                posListOnScreen.add(vec3);
+            }
+        }
 
         // calculate the average position
         Vec3 newPos = new Vec3(0,0,0);
-        if (posListOnScreen.size() > 0) {
+        if (!posListOnScreen.isEmpty()) {
             for (Vec3 pos : posListOnScreen)
                 newPos = newPos.add(pos);
             double m = 1D/posListOnScreen.size();

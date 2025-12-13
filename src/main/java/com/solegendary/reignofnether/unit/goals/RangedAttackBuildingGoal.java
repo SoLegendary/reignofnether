@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.goal.Goal;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
@@ -38,7 +39,12 @@ public class RangedAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> 
     public void setNextBlockTarget() {
         if (this.buildingTarget != null && !buildingTarget.getBlocks().isEmpty()) {
             Random rand = new Random();
-            List<BuildingBlock> nonAirBlocks = buildingTarget.getBlocks().stream().filter(b -> b.isPlaced(this.mob.level())).toList();
+            List<BuildingBlock> nonAirBlocks = new ArrayList<>();
+            for (BuildingBlock b : buildingTarget.getBlocks()) {
+                if (b.isPlaced(this.mob.level())) {
+                    nonAirBlocks.add(b);
+                }
+            }
 
             int bound = nonAirBlocks.size();
             if (bound > 0) {

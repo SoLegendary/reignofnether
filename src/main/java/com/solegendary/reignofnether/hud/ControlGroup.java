@@ -65,12 +65,18 @@ public class ControlGroup {
 
     // removes any entities/buildings that are no longer being tracked (likely dead/left world)
     public void clean() {
-        this.entityIds.removeIf(e ->
-                !UnitClientEvents.getAllUnits().stream().
-                map(Entity::getId).toList().contains(e));
-        this.buildingBps.removeIf(b ->
-                !BuildingClientEvents.getBuildings().stream().
-                map(b2 -> b2.originPos).toList().contains(b));
+        var ids = new ArrayList<>();
+        for (LivingEntity livingEntity : getAllUnits()) {
+            Integer id = livingEntity.getId();
+            ids.add(id);
+        }
+        this.entityIds.removeIf(e -> !ids.contains(e));
+        var poses = new ArrayList<>();
+        for (BuildingPlacement b2 : BuildingClientEvents.getBuildings()) {
+            BlockPos originPos = b2.originPos;
+            poses.add(originPos);
+        }
+        this.buildingBps.removeIf(b -> !poses.contains(b));
     }
 
     // assigns selected entities/buildings to this control group
@@ -79,24 +85,28 @@ public class ControlGroup {
             this.clearAll();
             this.keybinding = keybinding;
         }
-        List<Integer> saveableUnits = getSelectedUnits().stream().filter(
-                e -> ((getPlayerToEntityRelationship(e) == Relationship.OWNED || AlliancesClient.canControlAlly(e)) &&
-                    (!entityIds.contains(e.getId())))
-                )
-                .map(Entity::getId)
-                .toList();
+        List<Integer> saveableUnits = new ArrayList<>();
+        for (LivingEntity e : getSelectedUnits()) {
+            if (((getPlayerToEntityRelationship(e) == Relationship.OWNED || AlliancesClient.canControlAlly(e)) &&
+                 (!entityIds.contains(e.getId())))) {
+                Integer id = e.getId();
+                saveableUnits.add(id);
+            }
+        }
 
-        List<BlockPos> saveableBuildings = getSelectedBuildings().stream().filter(
-                b -> getPlayerToBuildingRelationship(b) == Relationship.OWNED &&
-                    !buildingBps.contains(b.originPos)
-                )
-                .map(b -> b.originPos)
-                .toList();
+        List<BlockPos> saveableBuildings = new ArrayList<>();
+        for (BuildingPlacement b : getSelectedBuildings()) {
+            if (getPlayerToBuildingRelationship(b) == Relationship.OWNED &&
+                !buildingBps.contains(b.originPos)) {
+                BlockPos originPos = b.originPos;
+                saveableBuildings.add(originPos);
+            }
+        }
 
-        if (saveableUnits.size() > 0 && (!this.entityIds.isEmpty() || newGroup)) {
+        if (!saveableUnits.isEmpty() && (!this.entityIds.isEmpty() || newGroup)) {
             this.entityIds.addAll(saveableUnits);
         }
-        else if (saveableBuildings.size() > 0 && (!this.buildingBps.isEmpty() || newGroup)) {
+        else if (!saveableBuildings.isEmpty() && (!this.buildingBps.isEmpty() || newGroup)) {
             this.buildingBps.addAll(saveableBuildings);
         }
         // assign the icon resource (won't update if the front entity/building dies)
@@ -120,12 +130,17 @@ public class ControlGroup {
 
         boolean doubleClicked = (System.currentTimeMillis() - lastClickTime) < DOUBLE_CLICK_TIME_MS && player != null;
 
-        if (entityIds.size() > 0) {
+        if (!entityIds.isEmpty()) {
             BuildingClientEvents.clearSelectedBuildings();
             UnitClientEvents.clearSelectedUnits();
             for (int id : entityIds) {
-                List<LivingEntity> entities = getAllUnits().stream().filter(e -> entityIds.contains(e.getId()) && e instanceof Unit).toList();
-                if (entities.size() > 0) {
+                List<LivingEntity> entities = new ArrayList<>();
+                for (LivingEntity e : getAllUnits()) {
+                    if (entityIds.contains(e.getId()) && e instanceof Unit) {
+                        entities.add(e);
+                    }
+                }
+                if (!entities.isEmpty()) {
                     UnitClientEvents.clearSelectedUnits();
                     for (LivingEntity entity : entities)
                         UnitClientEvents.addSelectedUnit(entity);
@@ -135,7 +150,7 @@ public class ControlGroup {
                 }
             }
         }
-        else if (buildingBps.size() > 0) {
+        else if (!buildingBps.isEmpty()) {
             UnitClientEvents.clearSelectedUnits();
 
             BuildingClientEvents.clearSelectedBuildings();
