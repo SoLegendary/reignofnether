@@ -12,6 +12,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.Tags;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -19,19 +21,17 @@ public class BuildingBlock {
     private BlockPos blockPos;
     private BlockState blockState; // ideal blockstate when placed, not actual world state
     private CompoundTag blockNbt = null;
+    private final HashMap<BlockState, Boolean> ignoredCache = new HashMap<>();
 
-    private List<Predicate<BlockState>> materialsThatIgnoreState = List.of(
-            (s)-> SculkCatalystPlacement.isSculk(s.getBlock()),
-            (s)->s.is(Tags.Blocks.GLASS),
-            (s)->s.is(BlockTags.LEAVES)
-    );
-
-    private boolean isIgnored(BlockState state){
-        for(Predicate<BlockState> predicate : materialsThatIgnoreState){
-            if(predicate.test(state)){
-                return true;
-            }
+    private boolean isIgnored(BlockState state) {
+        if (ignoredCache.containsKey(state)) {
+            return ignoredCache.get(state);
         }
+        var isIgnored = false;
+        if (state.is(BlockTags.LEAVES)) isIgnored = true;
+        else if (state.is(Tags.Blocks.GLASS)) isIgnored = true;
+        else if (SculkCatalystPlacement.isSculk(state.getBlock())) isIgnored = true;
+        ignoredCache.put(state, isIgnored);
         return false;
     }
 

@@ -94,10 +94,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 import static com.solegendary.reignofnether.building.BuildingUtils.getMaxCorner;
@@ -133,7 +135,14 @@ public class BuildingPlacement {
     protected int highestBlockCountReached = 2; // effective max health of the building
 
     protected ArrayList<BuildingBlock> scaffoldBlocks = new ArrayList<>();
+    /**
+     * Don't set blocks directly
+     * Please use setBlocks()
+     */
     protected ArrayList<BuildingBlock> blocks; // positions are absolute
+    protected Map<BlockPos, BuildingBlock> blockMap = new HashMap<>();
+    protected Set<BlockPos> placedBlockPosSet = new HashSet<>();
+    protected int totalBlocks = 0;
     protected ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     public String ownerName;
     public int serverBlocksPlaced = 1;
@@ -216,8 +225,9 @@ public class BuildingPlacement {
         this.originPos = originPos;
         this.rotation = rotation;
         this.ownerName = ownerName;
-        this.blocks = blocks;
         this.isCapitol = isCapitol;
+
+        setBlocks(blocks);
 
         cooldowns.defaultReturnValue(0F);
         var maxX = Integer.MIN_VALUE;
@@ -254,6 +264,18 @@ public class BuildingPlacement {
             getAbilities().add(ability);
         }
         updateButtons();
+        initPlacedBlocks();
+    }
+
+    protected void setBlocks(ArrayList<BuildingBlock> blocks) {
+        this.blocks = blocks;
+        var index = 0;
+        for (BuildingBlock block : this.blocks) {
+            blockMap.put(block.getBlockPos(), block);
+            if (block.getBlockState().isAir()) continue;
+            index++;
+        }
+        this.totalBlocks = index;
     }
 
     public float getMeleeDamageMult() {
@@ -271,6 +293,7 @@ public class BuildingPlacement {
             if (!block.isPlaced(level) && !block.getBlockState().isAir()) {
                 addToBlockPlaceQueue(block);
             }
+        initPlacedBlocks();
     }
 
     public void setServerBlocksPlaced(int blocksPlaced) {
@@ -337,11 +360,9 @@ public class BuildingPlacement {
     }
 
     public boolean isPosPartOfBuilding(BlockPos bp, boolean onlyPlacedBlocks) {
-        for (BuildingBlock block : this.blocks)
-            if ((block.isPlaced(getLevel()) || !onlyPlacedBlocks) && block.getBlockPos().equals(bp)) {
-                return true;
-            }
-        return false;
+        if (!blockMap.containsKey(bp)) return false;
+        if (!onlyPlacedBlocks) return true;
+        return blockMap.get(bp).isPlaced(level);
     }
 
     // returns the lowest Y value block in this.blocks to the given blockPos
@@ -384,28 +405,28 @@ public class BuildingPlacement {
     }
 
     public int getBlocksTotal() {
-        var index = 0;
-        for (BuildingBlock block : blocks) {
-            if (block.getBlockState().isAir()) continue;
-            index++;
-        }
-        return index;
+        return totalBlocks;
     }
 
-    public int getBlocksPlaced() {
-        // on clientside a building outside of render view would always be 0
+    public void initPlacedBlocks() {
+        placedBlockPosSet.clear();
         if (!getLevel().isClientSide() || isFullyLoadedClientSide((ClientLevel) getLevel())) {
             var blocksPlaced = 0;
             for (BuildingBlock block : blocks) {
-                if (block.isPlaced(getLevel()) && !block.getBlockState().isAir()) blocksPlaced++;
+                if (block.isPlaced(getLevel()) && !block.getBlockState().isAir()) {
+                    placedBlockPosSet.add(block.getBlockPos());
+                    blocksPlaced++;
+                }
             }
             if (blocksPlaced > highestBlockCountReached) {
                 highestBlockCountReached = blocksPlaced;
             }
-            return blocksPlaced;
-        } else {
-            return this.serverBlocksPlaced;
         }
+    }
+
+    public int getBlocksPlaced() {
+        if (level.isClientSide) return this.serverBlocksPlaced;
+        return placedBlockPosSet.size();
     }
 
     // % of total buildable blocks existing
@@ -430,7 +451,6 @@ public class BuildingPlacement {
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
     public void buildNextBlock(ServerLevel level, String builderName) {
-
         // if the building is already constructed then start subtracting resources for repairs
         if (isBuilt) {
             if (!ResourcesServerEvents.canAfford(builderName, ResourceName.WOOD, 1)) {
@@ -678,6 +698,7 @@ public class BuildingPlacement {
                 breakBlocks ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE
             );
         }
+        placedBlockPosSet.remove(pos);
     }
 
     private void randomSilverfishSpawn(BlockPos pos) {
@@ -807,6 +828,7 @@ public class BuildingPlacement {
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) {
+        placedBlockPosSet.add(bp);
     }
 
     public void tick(Level tickLevel) {
@@ -1158,7 +1180,7 @@ public class BuildingPlacement {
 
     public void changeStructure(String newStructureName) {
         ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocksFromNbt(newStructureName, this.getLevel());
-        this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
+        setBlocks(getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation));
         refreshBlocks();
     }
 

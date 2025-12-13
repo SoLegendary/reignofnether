@@ -107,6 +107,8 @@ public class UnitClientEvents {
     private static final ArrayList<LivingEntity> preselectedUnits = new ArrayList<>();
     // units selected by click or box select
     private static final ArrayList<LivingEntity> selectedUnits = new ArrayList<>();
+    private static ArrayList<LivingEntity> sortedSelectedUnits = new ArrayList<>();
+    private static boolean sortedSelectedUnitsChanged = true;
     // tracking of all existing units
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
@@ -121,10 +123,21 @@ public class UnitClientEvents {
         return selectedUnits;
     }
 
-    public static ArrayList<LivingEntity> getSortedSelectedUnits() {
-        ArrayList<LivingEntity> units = UnitClientEvents.getSelectedUnits();
+    private static void markSelectedUnitsChanged() {
+        sortedSelectedUnitsChanged = true;
+    }
 
-        units.sort(Comparator.comparing(HudClientEvents::getModifiedEntityName));
+    public static ArrayList<LivingEntity> getSortedSelectedUnits() {
+
+        ArrayList<LivingEntity> units;
+        if (sortedSelectedUnitsChanged) {
+            units = new ArrayList<>(UnitClientEvents.getSelectedUnits());
+            units.sort(Comparator.comparing(HudClientEvents::getModifiedEntityName));
+            sortedSelectedUnits = units;
+            sortedSelectedUnitsChanged = false;
+        } else {
+            units = sortedSelectedUnits;
+        }
 
         // always put heroes first
         ArrayList<LivingEntity> heroUnits = new ArrayList<>();
@@ -152,6 +165,7 @@ public class UnitClientEvents {
         if (unit.isPassenger())
             return;
         preselectedUnits.add(unit);
+        markSelectedUnitsChanged();
     }
     public static void addSelectedUnit(LivingEntity unit) {
         CursorClientEvents.setLeftClickAction(null);
@@ -164,6 +178,7 @@ public class UnitClientEvents {
         selectedUnits.sort(Comparator.comparing(Entity::getId));
         BuildingClientEvents.clearSelectedBuildings();
         NonUnitClientEvents.isMoveCheckpointGreen = true;
+        markSelectedUnitsChanged();
     }
     public static void clearPreselectedUnits() {
         preselectedUnits.clear();
@@ -184,6 +199,7 @@ public class UnitClientEvents {
     public static void onEntityMount(EntityMountEvent evt) {
         if (evt.getLevel().isClientSide())
             selectedUnits.removeIf(e -> e.getId() == evt.getEntityMounting().getId());
+        markSelectedUnitsChanged();
     }
 
     public static int getCurrentPopulation(String playerName) {
@@ -509,6 +525,7 @@ public class UnitClientEvents {
                 unitWindowVecs.clear();
             }
         }
+        markSelectedUnitsChanged();
     }
 
     @SubscribeEvent
@@ -534,6 +551,7 @@ public class UnitClientEvents {
         allUnits.removeIf(e -> e.getId() == entityId);
         //System.out.println("allUnits removed entity: " + entityId);
         MinimapClientEvents.removeMinimapUnit(entityId);
+        markSelectedUnitsChanged();
     }
     /**
      * Add and update entities from clientside action
@@ -565,6 +583,7 @@ public class UnitClientEvents {
         }
         if (entity instanceof LivingEntity le && (ResourceSources.isHuntableAnimal(le) || le instanceof PhantomSummon))
             addUnitPoofs(evt.getLevel(), entity);
+        markSelectedUnitsChanged();
     }
 
     @SubscribeEvent
@@ -746,6 +765,7 @@ public class UnitClientEvents {
         }
         // clear all cursor actions
         CursorClientEvents.setLeftClickAction(null);
+        markSelectedUnitsChanged();
     }
 
     public static RenderLevelStageEvent.Stage stage = AFTER_ENTITIES;
@@ -1054,6 +1074,7 @@ public class UnitClientEvents {
             }
         }
         sendUnitCommandManual(UnitAction.DISCARD, oldUnitIds);
+        markSelectedUnitsChanged();
     }
 
     public static void syncUnitAnimation(UnitAnimationAction animAction, boolean startAnimation, int entityId, int targetId,

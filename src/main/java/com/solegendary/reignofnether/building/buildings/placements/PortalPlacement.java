@@ -125,7 +125,7 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
         updateButtons();
         if (!newStructureName.isEmpty()) {
             ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocksFromNbt(newStructureName, this.getLevel());
-            this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
+            setBlocks(getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation));
             super.refreshBlocks();
         }
     }
