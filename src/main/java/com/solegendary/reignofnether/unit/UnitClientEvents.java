@@ -127,29 +127,22 @@ public class UnitClientEvents {
         sortedSelectedUnitsChanged = true;
     }
 
+
+
     public static ArrayList<LivingEntity> getSortedSelectedUnits() {
-
-        ArrayList<LivingEntity> units;
-        if (sortedSelectedUnitsChanged) {
-            units = new ArrayList<>(UnitClientEvents.getSelectedUnits());
-            units.sort(Comparator.comparing(HudClientEvents::getModifiedEntityName));
-            sortedSelectedUnits = units;
-            sortedSelectedUnitsChanged = false;
-        } else {
-            units = sortedSelectedUnits;
+        if (!sortedSelectedUnitsChanged) {
+            return sortedSelectedUnits;
         }
-
-        // always put heroes first
-        ArrayList<LivingEntity> heroUnits = new ArrayList<>();
-        units.removeIf(le -> {
-            if (le instanceof HeroUnit) {
-                heroUnits.add(le);
-                return true;
-            }
-            return false;
+        ArrayList<LivingEntity> units = new ArrayList<>(UnitClientEvents.getSelectedUnits());
+        units.sort((a, b) -> {
+            var isHeroA = a instanceof HeroUnit;
+            var isHeroB = b instanceof HeroUnit;
+            if (isHeroA && !isHeroB) return -1;
+            if (!isHeroA && isHeroB) return 1;
+            return HudClientEvents.getModifiedEntityName(a).compareTo(HudClientEvents.getModifiedEntityName(b));
         });
-        for (LivingEntity heroUnit : heroUnits)
-            units.add(0, heroUnit);
+        sortedSelectedUnits = units;
+        sortedSelectedUnitsChanged = false;
         return units;
     }
 
