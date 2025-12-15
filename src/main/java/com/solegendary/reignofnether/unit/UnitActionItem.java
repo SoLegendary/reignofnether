@@ -7,7 +7,7 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
 import com.solegendary.reignofnether.building.buildings.placements.FarmPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -23,7 +23,6 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
@@ -217,9 +216,9 @@ public class UnitActionItem {
                 }
                 case UNGARRISON -> {
                     GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
-                    if (garr != null && garr.getExitPosition() != null ) {
-                        BuildingPlacement building = (BuildingPlacement) garr;
-                        BlockPos bp = garr.getExitPosition();
+                    BuildingPlacement placement = GarrisonableBuilding.getGarrisonPlacement(unit);
+                    if (garr != null && garr.getExitPosition(placement) != null ) {
+                        BlockPos bp = garr.getExitPosition(placement);
                         ((LivingEntity) unit).teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
                     }
                 }

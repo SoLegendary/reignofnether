@@ -7,7 +7,7 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
 import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.buildings.placements.IronGolemPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
@@ -710,7 +710,7 @@ public class UnitClientEvents {
                         sendUnitCommand(UnitAction.MOUNT_SPIDER);
                 }
                 // right click -> garrison friendly building
-                else if (preSelBuilding instanceof GarrisonableBuilding garr && garr.getCapacity() > 0 &&
+                else if (preSelBuilding != null && preSelBuilding.getBuilding().hasActiveAddon(GarrisonableBuilding.class) &&
                         hudSelectedEntity instanceof RangedAttackerUnit &&
                         hudSelectedEntity instanceof Unit unit && unit.canGarrison() &&
                         preSelBuilding.ownerName.equals(unit.getOwnerName())) {

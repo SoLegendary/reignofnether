@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
 import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
 import com.solegendary.reignofnether.building.buildings.piglins.Bastion;
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
@@ -522,7 +523,7 @@ public class BuildingPlacement {
 
     // are we allowed to destroy this blockPos using destroyRandomBlocks
     public boolean canDestroyBlock(BlockPos relativeBp) {
-        return true;
+        return getBuilding().canDestroyBlock(relativeBp, this);
     }
 
     private boolean isDestroyedAndNotNextToLiquid(BuildingBlock block) {
@@ -805,7 +806,8 @@ public class BuildingPlacement {
                     this.level.setBlockAndUpdate(bb.getBlockPos(), Blocks.AIR.defaultBlockState());
 
         if (!level.isClientSide() && ownerName.equals(ENEMY_OWNER_NAME)) {
-            if (this instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
+            GarrisonableBuilding garr;
+            if ((garr = getBuilding().getActiveAddon(GarrisonableBuilding.class)) != null) {
                 int numUnits = 7;
                 if (getBuilding() instanceof DarkWatchtower || getBuilding() instanceof Watchtower)
                     numUnits = 3;
@@ -821,11 +823,11 @@ public class BuildingPlacement {
                     else if (getFaction() == Faction.PIGLINS)
                         entityType = EntityRegistrar.HEADHUNTER_UNIT.get();
 
-                    if (entityType != null && garr.getEntryPosition() != null) {
+                    if (entityType != null && garr.getEntryPosition(this) != null) {
                         UnitServerEvents.spawnMob(
                             entityType,
                             (ServerLevel) level,
-                            garr.getEntryPosition(),
+                            garr.getEntryPosition(this),
                             ENEMY_OWNER_NAME
                         );
                     }

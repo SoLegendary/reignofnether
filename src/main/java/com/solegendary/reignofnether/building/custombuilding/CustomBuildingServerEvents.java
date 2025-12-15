@@ -75,7 +75,7 @@ public class CustomBuildingServerEvents {
             for (BuildingBlock bb : blocks) {
                 BlockState bs = bb.getBlockState();
                 if (!bs.isAir() && bs.getFluidState().isEmpty() &&
-                    !CustomBuildingPlacement.INVULNERABLE_BLOCKS.contains(bb.getBlockState().getBlock())) {
+                    !CustomBuilding.INVULNERABLE_BLOCKS.contains(bb.getBlockState().getBlock())) {
                     numSolidBlocks += 1;
                     portraitBlock = bs.getBlock();
                 }

@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
 import com.solegendary.reignofnether.building.buildings.placements.*;
@@ -694,8 +695,9 @@ public class BuildingServerEvents {
 
                 if (atkDmg > 0) {
                     // all explosion damage will directly hit all occupants at an average of 1/4 rate
-                    if (building instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
-                        for (LivingEntity le : garr.getOccupants())
+                    GarrisonableBuilding garr;
+                    if ((garr = building.getBuilding().getActiveAddon(GarrisonableBuilding.class)) != null) {
+                        for (LivingEntity le : garr.getOccupants(building))
                             le.hurt(exp.getDamageSource(), (random.nextFloat(atkDmg + 1)) / 2f);
                     }
 

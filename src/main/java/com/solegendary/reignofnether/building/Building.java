@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ability.Abilities;
+import com.solegendary.reignofnether.building.addon.BuildingAddon;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.faction.Faction;
@@ -10,9 +12,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // Registered object in Buildings
 // is a member of BuildingPlacement and is generally not instantiated directly
@@ -48,6 +53,8 @@ public abstract class Building {
     public int foundationYLayers = 1; // how many Y layers from the bottom are part of the foundation
 
     protected final Abilities abilities = new Abilities();
+
+    private Map<Class<BuildingAddon>, BuildingAddon> activeAddons = new HashMap<>();
 
     public Abilities getAbilities() {
         return this.abilities;
@@ -116,5 +123,26 @@ public abstract class Building {
 
     public boolean isTypeOf(Building building) {
         return this == building;
+    }
+
+    @Nullable
+    public <T extends BuildingAddon> T getActiveAddon(Class<T> addonClass) {
+        return (T) activeAddons.get(addonClass);
+    }
+
+    public <T extends BuildingAddon> void setActiveAddon(Class<T> addonClass, T addon, boolean active) {
+        if (active) {
+            activeAddons.put((Class<BuildingAddon>) addonClass, addon);
+        }else {
+            activeAddons.remove(addonClass);
+        }
+    }
+
+    public boolean hasActiveAddon(Class<GarrisonableBuilding> addonClass) {
+        return activeAddons.containsKey(addonClass);
+    }
+
+    public boolean canDestroyBlock(BlockPos relativeBp, BuildingPlacement placement) {
+        return true;
     }
 }

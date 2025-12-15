@@ -76,7 +76,7 @@ public class CentralPortal extends ProductionBuilding {
     }
 
     @Override
-    public BlockPos getIndoorSpawnPoint(ServerLevel level, BlockPos originPos) {
-        return super.getIndoorSpawnPoint(level, originPos).offset(0,-5,0);
+    public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
+        return super.getIndoorSpawnPoint(level, placement).offset(0,-5,0);
     }
 }

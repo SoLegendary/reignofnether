@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
 import com.solegendary.reignofnether.building.buildings.placements.StrongholdPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -18,6 +19,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -29,7 +31,8 @@ import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Stronghold extends ProductionBuilding {
+public class Stronghold extends ProductionBuilding implements GarrisonableBuilding {
+    public final static int MAX_OCCUPANTS = 7;
 
     public final static String buildingName = "Stronghold";
     public final static String structureName = "stronghold";
@@ -50,6 +53,8 @@ public class Stronghold extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.DEEPSLATE);
 
         this.productions.add(ProductionItems.WARDEN, Keybindings.keyQ);
+
+        setActiveAddon(GarrisonableBuilding.class, this, true);
     }
 
     public Faction getFaction() {
@@ -97,4 +102,39 @@ public class Stronghold extends ProductionBuilding {
             this
         );
     }
+
+    // don't use this for abilities as it may not be balanced
+    @Override
+    public int getAttackRange() {
+        return 30;
+    }
+
+    // bonus for units attacking garrisoned units
+    @Override
+    public int getExternalAttackRangeBonus() {
+        return 15;
+    }
+
+    @Override
+    public boolean canDestroyBlock(BlockPos relativeBp, BuildingPlacement placement) {
+        return relativeBp.getY() != 13 && relativeBp.getY() != 14;
+    }
+
+    @Override
+    public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
+        return getExitPosition(placement);
+    }
+
+    @Override
+    public BlockPos getEntryPosition(BuildingPlacement placement) {
+        return placement.originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(5, 14, 5), placement.rotation));
+    }
+
+    @Override
+    public BlockPos getExitPosition(BuildingPlacement placement) {
+        return placement.originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(5, 2, 6), placement.rotation));
+    }
+
+    @Override
+    public int getCapacity() { return MAX_OCCUPANTS; }
 }

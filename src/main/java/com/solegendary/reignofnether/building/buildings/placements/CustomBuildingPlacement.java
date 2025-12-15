@@ -15,29 +15,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class CustomBuildingPlacement extends BuildingPlacement implements RangeIndicator, NightSource, NetherConvertingBuilding, GarrisonableBuilding {
+public class CustomBuildingPlacement extends BuildingPlacement implements RangeIndicator, NightSource, NetherConvertingBuilding {
 
     public NetherZone netherConversionZone = null;
     private final Set<BlockPos> nightBorderBps = new HashSet<>();
-    private final ArrayList<BlockPos> garrisonEntries = new ArrayList<>();
-    private final ArrayList<BlockPos> garrisonExits = new ArrayList<>();
-    private final Random random = new Random();
-
-    public static final List<Block> INVULNERABLE_BLOCKS = List.of(
-            BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
-            BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
-            BlockRegistrar.GARRISON_ZONE_BLOCK.get(),
-            Blocks.NETHER_PORTAL,
-            Blocks.LIGHT,
-            Blocks.COMMAND_BLOCK,
-            Blocks.CHAIN_COMMAND_BLOCK,
-            Blocks.REPEATING_COMMAND_BLOCK
-    );
-
-    public static final List<Block> INVULNERABLE_ABOVE_BLOCKS = List.of(
-            BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
-            BlockRegistrar.GARRISON_ZONE_BLOCK.get()
-    );
+    public final ArrayList<BlockPos> garrisonEntries = new ArrayList<>();
+    public final ArrayList<BlockPos> garrisonExits = new ArrayList<>();
 
     public CustomBuildingPlacement(CustomBuilding customBuilding, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(customBuilding, level, originPos, rotation, ownerName, blocks, isCapitol);
@@ -114,42 +97,5 @@ public class CustomBuildingPlacement extends BuildingPlacement implements RangeI
     @Override
     public boolean showOnlyWhenSelected() {
         return false;
-    }
-
-    // GarrisonableBuilding
-    @Override
-    public int getAttackRange() { return getCustomBuilding().garrisonRange; }
-
-    @Override
-    public int getExternalAttackRangeBonus() { return Math.min(15, getCustomBuilding().garrisonRange / 2); }
-
-    @Override
-    public int getCapacity() { return getCustomBuilding().garrisonCapacity; }
-
-    @Override
-    public BlockPos getEntryPosition() {
-        if (!garrisonEntries.isEmpty()) {
-            return garrisonEntries.get(random.nextInt(garrisonEntries.size())).above();
-        }
-        return null;
-    }
-
-    @Override
-    public BlockPos getExitPosition() {
-        if (!garrisonExits.isEmpty()) {
-            return garrisonExits.get(random.nextInt(garrisonExits.size())).above();
-        }
-        return null;
-    }
-
-    @Override
-    public boolean canDestroyBlock(BlockPos relativeBp) {
-        if (getCapacity() <= 0)
-            return true;
-        BlockPos worldBp = relativeBp.offset(this.originPos);
-        Block block = this.getLevel().getBlockState(worldBp).getBlock();
-        BlockPos worldBpAbove = relativeBp.offset(this.originPos.above());
-        Block blockAbove = this.getLevel().getBlockState(worldBpAbove).getBlock();
-        return !INVULNERABLE_BLOCKS.contains(block) && !INVULNERABLE_ABOVE_BLOCKS.contains(blockAbove);
     }
 }
