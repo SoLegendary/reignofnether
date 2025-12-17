@@ -211,7 +211,6 @@ public class GraveyardPlacement extends ProductionPlacement {
             as.setPos(x + 0.5, y, z + 0.5);
             as.setNoGravity(true);
             as.setInvisible(true);
-            as.setSmall(true);
             as.setCustomName(Component.literal("Stockpiled Unit"));
             as.setCustomNameVisible(false);
             
