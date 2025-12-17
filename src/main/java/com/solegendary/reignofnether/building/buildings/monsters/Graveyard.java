@@ -1,9 +1,8 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -13,10 +12,13 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class Graveyard extends ProductionBuilding {
 
     public final static String buildingName = "Graveyard";
     public final static String structureName = "graveyard";
+    public final static String upgradedStructureName = "graveyard_overflow";
     public final static ResourceCost cost = ResourceCosts.GRAVEYARD;
 
     public Graveyard() {
@@ -41,9 +44,26 @@ public class Graveyard extends ProductionBuilding {
         this.productions.add(ProductionItems.DROWNED, Keybindings.keyW);
         this.productions.add(ProductionItems.SKELETON, Keybindings.keyE);
         this.productions.add(ProductionItems.STRAY, Keybindings.keyE);
+        this.productions.add(ProductionItems.RESEARCH_OVERFLOWING_GRAVEYARD, Keybindings.keyR);
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
+
+    @Override
+    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
+        return new GraveyardPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation), this.isCapitol);
+    }
+
+    @Override
+    public int getUpgradeLevel(BuildingPlacement placement) {
+        for (BuildingBlock block : placement.getBlocks()) {
+            if (block.getBlockState().getBlock() == Blocks.NETHER_BRICKS || 
+                block.getBlockState().getBlock() == Blocks.RED_NETHER_BRICKS) {
+                return 1;
+            }
+        }
+        return 0;
+    }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);

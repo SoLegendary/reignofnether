@@ -1471,5 +1471,14 @@
 
     "alliances.reignofnether.tooltip.toggle_observer_player_displays": "Observer Menu (Z)",
     "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "Diplomacy Menu (Z)",
-    "alliances.reignofnether.tooltip.toggle_shared_unit_control": "Toggle whether allies can control your units"
+    "alliances.reignofnether.tooltip.toggle_shared_unit_control": "Toggle whether allies can control your units",
+
+    "research.reignofnether.overflowing_graveyard": "Overflowing Graveyard",
+    "research.reignofnether.overflowing_graveyard.tooltip1": "Allows stockpiling 10 units. Stockpiled units spawn instantly when population frees.",
+    "research.reignofnether.blacksmith_armorer": "Armorer Upgrade",
+    "research.reignofnether.blacksmith_armorer.tooltip1": "Unlocks Iron Armor and upgrades the Blacksmith structure.",
+    "ability.reignofnether.enchant.leather_armor": "Leather Armor",
+    "ability.reignofnether.enchant.leather_armor.tooltip1": "Equips target with Leather Armor.",
+    "ability.reignofnether.enchant.iron_armor": "Iron Armor",
+    "ability.reignofnether.enchant.iron_armor.tooltip1": "Equips target with Iron Armor."
 }

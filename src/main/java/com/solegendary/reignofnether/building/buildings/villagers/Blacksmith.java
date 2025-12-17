@@ -1,9 +1,10 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
+import com.solegendary.reignofnether.ability.abilities.EnchantIronArmor;
+import com.solegendary.reignofnether.ability.abilities.EnchantLeatherArmor;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.placements.BlacksmithPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -15,10 +16,13 @@ import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
 
@@ -26,6 +30,7 @@ public class Blacksmith extends ProductionBuilding {
 
     public final static String buildingName = "Blacksmith";
     public final static String structureName = "blacksmith";
+    public final static String upgradedStructureName = "blacksmith_armorer";
     public final static ResourceCost cost = ResourceCosts.BLACKSMITH;
 
     public Blacksmith() {
@@ -42,9 +47,28 @@ public class Blacksmith extends ProductionBuilding {
         this.productions.add(ProductionItems.IRON_GOLEM, Keybindings.keyQ);
         this.productions.add(ProductionItems.RESEARCH_GOLEM_SMITHING, Keybindings.keyW);
         this.productions.add(ProductionItems.RESEARCH_MILITIA_BOWS, Keybindings.keyE);
+        this.productions.add(ProductionItems.RESEARCH_BLACKSMITH_ARMORER, Keybindings.keyY);
+        
+        this.abilities.add(new EnchantLeatherArmor(), Keybindings.keyR);
+        this.abilities.add(new EnchantIronArmor(), Keybindings.keyT);
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
+
+    @Override
+    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
+        return new BlacksmithPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation), this.isCapitol);
+    }
+
+    @Override
+    public int getUpgradeLevel(BuildingPlacement placement) {
+        for (BuildingBlock block : placement.getBlocks()) {
+            if (block.getBlockState().getBlock() == Blocks.IRON_BLOCK) {
+                return 1;
+            }
+        }
+        return 0;
+    }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
