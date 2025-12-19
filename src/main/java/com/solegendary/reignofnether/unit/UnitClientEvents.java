@@ -78,6 +78,7 @@ import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -596,7 +597,7 @@ public class UnitClientEvents {
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
 
-            if (selectedUnits.size() > 0 && isLeftClickAttack()) {
+            if (!selectedUnits.isEmpty() && isLeftClickAttack()) {
                 // A + left click -> force attack single unit (even if friendly)
                 if (preselectedUnits.size() == 1 && !targetingSelf()) {
                     sendUnitCommand(UnitAction.ATTACK);
@@ -613,7 +614,7 @@ public class UnitClientEvents {
             // only works for owned units
             else if (selectedUnits.size() == 1 && MC.level != null && !Keybindings.shiftMod.isDown() &&
                ((System.currentTimeMillis() - lastLeftClickTime) < DOUBLE_CLICK_TIME_MS || Keybindings.ctrlMod.isDown()) &&
-                preselectedUnits.size() > 0 && selectedUnits.contains(preselectedUnits.get(0))) {
+                     !preselectedUnits.isEmpty() && selectedUnits.contains(preselectedUnits.get(0))) {
 
                 lastLeftClickTime = 0;
                 LivingEntity selectedUnit = selectedUnits.get(0);
@@ -627,7 +628,6 @@ public class UnitClientEvents {
                         NonUnitClientEvents.canControlAllMobs() ||
                         AlliancesClient.canControlAlly(selectedUnit)) {
 
-                    clearSelectedUnits();
                     for (LivingEntity entity : nearbyEntities) {
                         boolean bothVillagers = entity instanceof VillagerUnit &&
                                                 selectedUnit instanceof VillagerUnit;
@@ -654,6 +654,8 @@ public class UnitClientEvents {
             // resolve any other abilities not explicitly covered here
             else if (CursorClientEvents.getLeftClickAction() != null && MC.player != null) {
                 sendUnitCommand(CursorClientEvents.getLeftClickAction());
+            } else if (!selectedUnits.isEmpty() && BuildingClientEvents.getPreselectedBuilding() == null && preselectedUnits.isEmpty()) {
+                clearSelectedUnits();
             }
 
             // left click -> select a single unit
@@ -691,7 +693,7 @@ public class UnitClientEvents {
                 BuildingClientEvents.setBuildingToPlace(null);
                 return;
             }
-            if (selectedUnits.size() > 0) {
+            if (!selectedUnits.isEmpty()) {
                 BuildingPlacement preSelBuilding = BuildingClientEvents.getPreselectedBuilding();
 
                 // right click -> mount friendly unit
