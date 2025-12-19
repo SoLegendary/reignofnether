@@ -21,6 +21,7 @@
     "PlayerMixin",
     "PowderSnowBlockMixin",
     "SculkCatalystBlockEntityMixin",
+    "ServerGamePacketListenerImplMixin",
     "ServerLevelMixin",
     "ThrownPotionMixin",
     "ThrownTridentMixin",
