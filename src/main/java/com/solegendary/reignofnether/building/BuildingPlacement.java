@@ -995,7 +995,7 @@ public class BuildingPlacement {
                         level.setBlockAndUpdate(bp.below(), Blocks.COBBLESTONE.defaultBlockState());
                     }
                 }
-                placedBlockPosSet.add(bp);
+                if (blockMap.containsKey(bp)) placedBlockPosSet.add(bp);
                 level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
                 level.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
                 blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
