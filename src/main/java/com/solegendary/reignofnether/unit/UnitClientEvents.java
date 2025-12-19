@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
@@ -48,6 +49,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -767,7 +769,6 @@ public class UnitClientEvents {
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (MC.level == null)
             return;
-
         if (evt.getStage() == stage) {
             ArrayList<LivingEntity> selectedUnits = getSelectedUnits();
             ArrayList<LivingEntity> preselectedUnits = getPreselectedUnits();
@@ -778,13 +779,13 @@ public class UnitClientEvents {
 
             // draw outlines on all (pre)selected units but only draw once per unit based on conditions
             // don't render preselection outlines if mousing over HUD
+            var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST);
             if (OrthoviewClientEvents.isEnabled()) {
                 // evaluate conditions that will remain constant during the rendering stage
                 boolean isMouseOverAnyButtonOrHud = HudClientEvents.isMouseOverAnyButtonOrHud();
                 boolean isLeftClickAttack = isLeftClickAttack();
                 boolean targetingSelf = targetingSelf();
                 boolean isRightClickDown = MiscUtil.isRightClickDown(MC);
-
                 // render outline for each selected and preselected entities
                 for (Entity entity : unitsToDraw) {
                     if (!FogOfWarClientEvents.isInBrightChunk(entity))
@@ -800,11 +801,11 @@ public class UnitClientEvents {
                     boolean isSelected = selectedUnits.contains(entity);
 
                     if (isPreselected && isLeftClickAttack && !targetingSelf && !isMouseOverAnyButtonOrHud)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumer, entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
                     else if (isSelected)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumer, entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
                     else if (isPreselected && !isMouseOverAnyButtonOrHud)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumer, entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
                 }
             }
 
@@ -847,7 +848,7 @@ public class UnitClientEvents {
 
                 // always-shown highlights to indicate unit relationships
                 if (OrthoviewClientEvents.isEnabled()) {
-                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
+                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumer, entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
                 }
 
                 MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, r, g, b, 0.5f);
@@ -863,6 +864,9 @@ public class UnitClientEvents {
 
         // AFTER_CUTOUT_BLOCKS lets us see checkpoints through leaves
         if (OrthoviewClientEvents.isEnabled() && evt.getStage() == stage) {
+            VertexConsumer vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINE_STRIP);
+            ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+            VertexConsumer vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
             // draw unit checkpoints
             for (LivingEntity entity : getSelectedUnits()) {
                 if (entity instanceof Unit unit) {
@@ -874,17 +878,26 @@ public class UnitClientEvents {
                         int ticksUnderFade = Math.min(cp.ticksLeft, CHECKPOINT_TICKS_FADE);
                         float a = ((float) ticksUnderFade / (float) CHECKPOINT_TICKS_FADE) * 0.5f;
                         if (cp.isForEntity()) {
-                            MyRenderer.drawLine(evt.getPoseStack(), lastPos, cp.getPos(), cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a);
+                            MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, lastPos, cp.getPos(), cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a);
                             lastPos = cp.getPos();
                         } else {
-                            MyRenderer.drawLine(evt.getPoseStack(), lastPos, cp.getPos(), cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a);
+                            MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, lastPos, cp.getPos(), cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a);
                             if (MC.level.getBlockState(cp.bp.offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
                                 AABB aabb = new AABB(cp.bp);
                                 aabb = aabb.setMaxY(aabb.maxY + 0.13f);
-                                MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, Direction.UP, cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a,
-                                        ResourceLocation.parse("forge:textures/white.png"));
+                                MyRenderer.drawSolidBox(
+                                        evt.getPoseStack(),
+                                        vertexConsumerEntityTranslucent,
+                                        aabb,
+                                        Direction.UP,
+                                        cp.isGreen ? 0 : 1,
+                                        cp.isGreen ? 1 : 0,
+                                        0,
+                                        a,
+                                        ResourceLocation.parse("forge:textures/white.png")
+                                );
                             } else {
-                                MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, cp.bp, cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a);
+                                MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, cp.bp, cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a);
                             }
                             lastPos = cp.getPos();
                         }
@@ -895,15 +908,24 @@ public class UnitClientEvents {
                         BlockPos ap = unit.getAnchor();
                         float a = MiscUtil.getOscillatingFloat(0.25f, 0.75f);
                         Vec3 apVec3 = new Vec3(ap.getX() + 0.5f, ap.getY() + 1.0f, ap.getZ() + 0.5f);
-                        MyRenderer.drawLine(evt.getPoseStack(), firstPos, apVec3, 1, 1, 0, a);
+                        MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, firstPos, apVec3, 1, 1, 0, a);
 
                         if (MC.level.getBlockState(ap.offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
                             AABB aabb = new AABB(ap);
                             aabb = aabb.setMaxY(aabb.maxY + 0.13f);
-                            MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, Direction.UP, 1, 1, 0, a,
-                                    ResourceLocation.parse("forge:textures/white.png"));
+                            MyRenderer.drawSolidBox(
+                                    evt.getPoseStack(),
+                                    vertexConsumerEntityTranslucent,
+                                    aabb,
+                                    Direction.UP,
+                                    1,
+                                    1,
+                                    0,
+                                    a,
+                                    ResourceLocation.parse("forge:textures/white.png")
+                            );
                         } else {
-                            MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, ap, 1, 1, 0, a);
+                            MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, ap, 1, 1, 0, a);
                         }
                     }
 

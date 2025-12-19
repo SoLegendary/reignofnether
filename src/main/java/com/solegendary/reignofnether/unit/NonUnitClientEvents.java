@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.unit;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -53,14 +55,16 @@ public class NonUnitClientEvents {
 
         // AFTER_CUTOUT_BLOCKS lets us see checkpoints through leaves
         if (OrthoviewClientEvents.isEnabled() && evt.getStage() == AFTER_CUTOUT_BLOCKS) {
-
+            VertexConsumer vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
+            ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+            VertexConsumer vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
             for (LivingEntity le : UnitClientEvents.getSelectedUnits()) {
                 if (le instanceof PathfinderMob mob && !(le instanceof Unit) && le.isAlive() && !le.isRemoved()) {
                     float entityYOffset = 1.74f - le.getEyeHeight() - 1;
                     Vec3 firstPos = le.getEyePosition().add(0, entityYOffset,0);
 
                     if (mob.getTarget() != null && !mob.getTarget().isDeadOrDying()) {
-                        MyRenderer.drawLine(evt.getPoseStack(), firstPos, mob.getTarget().getEyePosition(), 1, 0, 0, 0.5f);
+                        MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, firstPos, mob.getTarget().getEyePosition(), 1, 0, 0, 0.5f);
                     }
                     else if (!mob.getNavigation().isDone() && mob.getNavigation().getTargetPos() != null) {
 
@@ -70,15 +74,24 @@ public class NonUnitClientEvents {
                         if (a > 0) {
                             BlockPos bp = mob.getNavigation().getTargetPos().below();
                             Vec3 pos = new Vec3(bp.getX() + 0.5f, bp.getY() + 1.0f, bp.getZ() + 0.5f);
-                            MyRenderer.drawLine(evt.getPoseStack(), firstPos, pos, isMoveCheckpointGreen ? 0 : 1, isMoveCheckpointGreen ? 1 : 0, 0, a);
+                            MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, firstPos, pos, isMoveCheckpointGreen ? 0 : 1, isMoveCheckpointGreen ? 1 : 0, 0, a);
 
                             if (MC.level.getBlockState(bp.offset(0, 1, 0)).getBlock() instanceof SnowLayerBlock) {
                                 AABB aabb = new AABB(bp);
                                 aabb = aabb.setMaxY(aabb.maxY + 0.13f);
-                                MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, Direction.UP, isMoveCheckpointGreen ? 0 : 1, isMoveCheckpointGreen ? 1 : 0, 0, a * 0.5f,
-                                        ResourceLocation.parse("forge:textures/white.png"));
+                                MyRenderer.drawSolidBox(
+                                        evt.getPoseStack(),
+                                        vertexConsumerEntityTranslucent,
+                                        aabb,
+                                        Direction.UP,
+                                        isMoveCheckpointGreen ? 0 : 1,
+                                        isMoveCheckpointGreen ? 1 : 0,
+                                        0,
+                                        a * 0.5f,
+                                        ResourceLocation.parse("forge:textures/white.png")
+                                );
                             } else {
-                                MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, isMoveCheckpointGreen ? 0 : 1, isMoveCheckpointGreen ? 1 : 0, 0, a * 0.5f);
+                                MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, bp, isMoveCheckpointGreen ? 0 : 1, isMoveCheckpointGreen ? 1 : 0, 0, a * 0.5f);
                             }
                         }
                     } else {

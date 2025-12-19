@@ -19,6 +19,7 @@ import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -237,6 +238,8 @@ public class TimeClientEvents {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
+        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
             //            if (!OrthoviewClientEvents.isEnabled() || nightCircleMode == NightCircleMode.OFF || MC
@@ -249,9 +252,9 @@ public class TimeClientEvents {
             if (building instanceof RangeIndicator ri) {
                 for (BlockPos bp : ri.getBorderBps()) {
                     if (BuildingClientEvents.getSelectedBuildings().contains(building)) {
-                        MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0f, 0.8f, 0f, 0.3f);
+                        MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, bp, 0f, 0.8f, 0f, 0.3f);
                     } else if (!ri.showOnlyWhenSelected()) {
-                        MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0f, 0f, 0f, 0.6f);
+                        MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, bp, 0f, 0f, 0f, 0.6f);
                     }
                     /* causes a lot of flickering
                     if (MC.level.getBlockState(bp.north()).isAir())

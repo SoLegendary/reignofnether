@@ -41,6 +41,7 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.BeaconScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.language.I18n;
@@ -71,7 +72,6 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.hud.HudClientEvents.*;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
-
 public class BuildingClientEvents {
 
     static final Minecraft MC = Minecraft.getInstance();
@@ -247,7 +247,8 @@ public class BuildingClientEvents {
         int maxX = -999999;
         int maxY = -999999;
         int maxZ = -999999;
-
+        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         for (BuildingBlock block : blocksToDraw) {
             if (buildingToPlace != null && isBuildingToPlaceABridge()
                 && MC.level != null && AbstractBridge.shouldCullBlock(originPos.offset(0, 1, 0), block, MC.level)) {
@@ -328,10 +329,9 @@ public class BuildingClientEvents {
         if (minY < 0) {
             minY -= 1;
         }
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
         AABB aabb = new AABB(minX, minY, minZ, maxX, minY, maxZ);
         MyRenderer.drawLineBox(matrix, aabb, r, g, 0, 0.5f);
-        MyRenderer.drawSolidBox(matrix, aabb, Direction.UP, r, g, 0, 0.5f, rl);
+        MyRenderer.drawSolidBox(matrix, vertexConsumer, aabb, Direction.UP, r, g, 0, 0.5f, rl);
         AABB aabb2 = new AABB(minX, -64, minZ, maxX, minY, maxZ);
         MyRenderer.drawLineBox(matrix, aabb2, r, g, 0, 0.25f);
     }
@@ -653,6 +653,10 @@ public class BuildingClientEvents {
         }
 
         // draw rally points and lines
+        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        var vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
+        var vertexConsumerNoDepthLine = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST);
+        var vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
         for (BuildingPlacement selBuilding : selectedBuildings) {
             if (selBuilding instanceof ProductionPlacement selProdBuilding) {
                 float a = MiscUtil.getOscillatingFloat(0.25f, 0.75f);
@@ -660,29 +664,29 @@ public class BuildingClientEvents {
                 if (!selProdBuilding.getRallyPoints().isEmpty() && MC.level != null) {
                     Vec3 lastPos = Vec3.atBottomCenterOf(selProdBuilding.centrePos.above());
                     for (BlockPos bp : selProdBuilding.getRallyPoints()) {
-                        MyRenderer.drawLine(evt.getPoseStack(), lastPos, Vec3.atBottomCenterOf(bp.above()), 0, 1, 0, a);
+                        MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, lastPos, Vec3.atBottomCenterOf(bp.above()), 0, 1, 0, a);
                         if (MC.level.getBlockState(bp.offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
                             AABB aabb = new AABB(bp);
                             aabb = aabb.setMaxY(aabb.maxY + 0.13f);
-                            MyRenderer.drawSolidBox(evt.getPoseStack(), aabb, Direction.UP, 0, 1, 0, a,
+                            MyRenderer.drawSolidBox(evt.getPoseStack(), vertexConsumerEntityTranslucent, aabb, Direction.UP, 0, 1, 0, a,
                                     ResourceLocation.fromNamespaceAndPath("forge", "textures/white.png"));
                         } else {
-                            MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0, 1, 0, a);
+                            MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, bp, 0, 1, 0, a);
                         }
                         lastPos = Vec3.atBottomCenterOf(bp.above());
                     }
                 } else if (selProdBuilding.getRallyPointEntity() != null) {
                     LivingEntity le = selProdBuilding.getRallyPointEntity();
-                    MyRenderer.drawLine(evt.getPoseStack(), new Vec3(selBuilding.centrePos.getX(),
+                    MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, new Vec3(selBuilding.centrePos.getX(),
                         selBuilding.centrePos.getY(),
                         selBuilding.centrePos.getZ()
                     ), new Vec3(le.getX(), le.getEyeY(), le.getZ()), 0, 1, 0, a);
-                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), le.getBoundingBox(), 0, 1.0f, 0, a, false);
+                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumerNoDepthLine, le.getBoundingBox(), 0, 1.0f, 0, a, false);
                 }
             }
             if (selBuilding instanceof PortalPlacement portal && portal.hasDestination()) {
                 float a = MiscUtil.getOscillatingFloat(0.25f, 0.75f);
-                MyRenderer.drawLine(evt.getPoseStack(), selBuilding.centrePos, portal.destination, 0, 1, 0, a);
+                MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, selBuilding.centrePos, portal.destination, 0, 1, 0, a);
             }
         }
 
