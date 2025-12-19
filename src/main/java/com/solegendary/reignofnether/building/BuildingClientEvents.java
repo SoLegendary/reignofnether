@@ -28,7 +28,6 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -92,7 +91,7 @@ public class BuildingClientEvents {
 
     // clientside buildings used for tracking position (for cursor selection)
     private static final ArrayList<BuildingPlacement> buildings = new ArrayList<>();
-
+    private static final ArrayList<GarrisonableBuilding>  garrisonableBuildings = new ArrayList<>();
     private static final ArrayList<BuildingPlacement> selectedBuildings = new ArrayList<>();
     private static Building buildingToPlace = null;
     private static Building lastBuildingToPlace = null;
@@ -133,6 +132,10 @@ public class BuildingClientEvents {
 
     public static List<BuildingPlacement> getBuildings() {
         return buildings;
+    }
+
+    public static List<GarrisonableBuilding> getGarrisonableBuildings() {
+        return garrisonableBuildings;
     }
 
     public static void clearSelectedBuildings() {
@@ -1065,7 +1068,9 @@ public class BuildingClientEvents {
                 }
             }
             buildings.add(newBuilding);
-
+            if (newBuilding instanceof GarrisonableBuilding garrison) {
+                garrisonableBuildings.add(garrison);
+            }
             if (FogOfWarClientEvents.isEnabled()) {
                 newBuilding.freezeChunks(MC.player.getName().getString(), forPlayerLoggingIn);
             }

@@ -73,11 +73,16 @@ public class BuildingServerEvents {
 
     // buildings that currently exist serverside
     private static final ArrayList<BuildingPlacement> buildings = new ArrayList<>();
+    private static final ArrayList<GarrisonableBuilding>  garrisonableBuildings = new ArrayList<>();
 
     public static final ArrayList<NetherZone> netherZones = new ArrayList<>();
 
     public static ArrayList<BuildingPlacement> getBuildings() {
         return buildings;
+    }
+
+    public static List<GarrisonableBuilding> getGarrisonableBuildings() {
+        return garrisonableBuildings;
     }
 
     public static final Random random = new Random();
@@ -270,6 +275,9 @@ public class BuildingServerEvents {
                     BuildingUtils.clearBuildingArea(newBuilding);
                 }
                 buildings.add(newBuilding);
+                if (newBuilding instanceof GarrisonableBuilding garrisonableBuilding) {
+                    garrisonableBuildings.add(garrisonableBuilding);
+                }
                 newBuilding.forceChunk(true);
                 int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
 

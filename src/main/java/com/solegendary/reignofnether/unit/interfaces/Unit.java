@@ -177,7 +177,7 @@ public interface Unit {
         }
     }
 
-    public static void tick(Unit unit) {
+    static void tick(Unit unit) {
         Mob unitMob = (Mob) unit;
         if (!unitMob.level().isClientSide() && unitMob.level() instanceof ServerLevel serverLevel) {
             ServerChunkCache chunkProvider = serverLevel.getChunkSource();
