@@ -156,7 +156,6 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_BEACON_LEVEL4.define(BUILDER);
         ResearchCosts.RESEARCH_BEACON_LEVEL5.define(BUILDER);
         ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD.define(BUILDER);
-        ResearchCosts.RESEARCH_BLACKSMITH_ARMORER.define(BUILDER);
 
         //*Enchantments*
         BUILDER.comment("Enchantment Cost Configurations");
@@ -165,8 +164,6 @@ public class ReignOfNetherCommonConfigs {
         EnchantmentCosts.ENCHANT_SHARPNESS.define(BUILDER);
         EnchantmentCosts.ENCHANT_MULTISHOT.define(BUILDER);
         EnchantmentCosts.ENCHANT_VIGOR.define(BUILDER);
-        EnchantmentCosts.ENCHANT_LEATHER_ARMOR.define(BUILDER);
-        EnchantmentCosts.ENCHANT_IRON_ARMOR.define(BUILDER);
         SPEC = BUILDER.build();
     }
 
@@ -311,7 +308,6 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL4 = ResourceCostConfigEntry.Research(0, 0, 500, 120, ResourceCosts.RESEARCH_BEACON_LEVEL4, "Beacon Level 4 Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL5 = ResourceCostConfigEntry.Research(0, 0, 600, 120, ResourceCosts.RESEARCH_BEACON_LEVEL5, "Beacon Level 5 Research Config");
         public static final ResourceCostConfigEntry RESEARCH_OVERFLOWING_GRAVEYARD = ResourceCostConfigEntry.Research(0, 75, 0, 150, ResourceCosts.RESEARCH_OVERFLOWING_GRAVEYARD, "Overflowing Graveyard Research Config");
-        public static final ResourceCostConfigEntry RESEARCH_BLACKSMITH_ARMORER = ResourceCostConfigEntry.Research(0, 200, 100, 150, ResourceCosts.RESEARCH_BLACKSMITH_ARMORER, "Blacksmith Armorer Research Config");
     }
     public static class EnchantmentCosts implements Costs {
         public static final ResourceCostConfigEntry ENCHANT_MAIMING = ResourceCostConfigEntry.Enchantment(0,20, 30, ResourceCosts.ENCHANT_MAIMING, "Maiming Enchantment Config");
@@ -319,8 +315,6 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry ENCHANT_SHARPNESS = ResourceCostConfigEntry.Enchantment(0,40, 60, ResourceCosts.ENCHANT_SHARPNESS, "Sharpness Enchantment Config");
         public static final ResourceCostConfigEntry ENCHANT_MULTISHOT = ResourceCostConfigEntry.Enchantment(0,70, 35, ResourceCosts.ENCHANT_MULTISHOT, "Multishot Enchantment Config");
         public static final ResourceCostConfigEntry ENCHANT_VIGOR = ResourceCostConfigEntry.Enchantment(0,60, 60, ResourceCosts.ENCHANT_VIGOR, "Vigor Enchantment Config");
-        public static final ResourceCostConfigEntry ENCHANT_LEATHER_ARMOR = ResourceCostConfigEntry.Enchantment(0,0, 20, ResourceCosts.ENCHANT_LEATHER_ARMOR, "Leather Armor Enchantment Config");
-        public static final ResourceCostConfigEntry ENCHANT_IRON_ARMOR = ResourceCostConfigEntry.Enchantment(0,0, 45, ResourceCosts.ENCHANT_IRON_ARMOR, "Iron Armor Enchantment Config");
     }
     public interface Costs {}
 }

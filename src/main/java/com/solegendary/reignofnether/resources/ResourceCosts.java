@@ -143,7 +143,6 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_BEACON_LEVEL4 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL4");
     public static final ResourceCost RESEARCH_BEACON_LEVEL5 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL5");
     public static final ResourceCost RESEARCH_OVERFLOWING_GRAVEYARD = new ResourceCost(ID, "RESEARCH_OVERFLOWING_GRAVEYARD");
-    public static final ResourceCost RESEARCH_BLACKSMITH_ARMORER = new ResourceCost(ID, "RESEARCH_BLACKSMITH_ARMORER");
 
     // ENCHANTMENTS
 
@@ -152,8 +151,6 @@ public class ResourceCosts {
     public static final ResourceCost ENCHANT_SHARPNESS = new ResourceCost(ID, "ENCHANT_SHARPNESS");
     public static final ResourceCost ENCHANT_MULTISHOT = new ResourceCost(ID, "ENCHANT_MULTISHOT");
     public static final ResourceCost ENCHANT_VIGOR = new ResourceCost(ID, "ENCHANT_VIGOR");
-    public static final ResourceCost ENCHANT_LEATHER_ARMOR = new ResourceCost(ID, "ENCHANT_LEATHER_ARMOR");
-    public static final ResourceCost ENCHANT_IRON_ARMOR = new ResourceCost(ID, "ENCHANT_IRON_ARMOR");
 
     // UNUSED
 
@@ -332,7 +329,6 @@ public class ResourceCosts {
         RESEARCH_BEACON_LEVEL4.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL4);
         RESEARCH_BEACON_LEVEL5.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL5);
         RESEARCH_OVERFLOWING_GRAVEYARD.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD);
-        RESEARCH_BLACKSMITH_ARMORER.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BLACKSMITH_ARMORER);
 
         // ******************* ENCHANTMENTS ******************* //
 
@@ -341,8 +337,6 @@ public class ResourceCosts {
         ENCHANT_SHARPNESS.bakeValues(ReignOfNetherCommonConfigs.EnchantmentCosts.ENCHANT_SHARPNESS);
         ENCHANT_MULTISHOT.bakeValues(ReignOfNetherCommonConfigs.EnchantmentCosts.ENCHANT_MULTISHOT);
         ENCHANT_VIGOR.bakeValues(ReignOfNetherCommonConfigs.EnchantmentCosts.ENCHANT_VIGOR);
-        ENCHANT_LEATHER_ARMOR.bakeValues(ReignOfNetherCommonConfigs.EnchantmentCosts.ENCHANT_LEATHER_ARMOR);
-        ENCHANT_IRON_ARMOR.bakeValues(ReignOfNetherCommonConfigs.EnchantmentCosts.ENCHANT_IRON_ARMOR);
 
     }
 }
