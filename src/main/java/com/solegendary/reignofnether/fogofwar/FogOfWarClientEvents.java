@@ -216,9 +216,7 @@ public class FogOfWarClientEvents {
             return true;
 
         // first check if the ChunkPos is already occupied as this is faster
-        for (ChunkPos chunkPos : brightChunks)
-            if (new ChunkPos(bp).equals(chunkPos))
-                return true;
+        if (brightChunks.contains(new ChunkPos(bp))) return true;
 
         return false;
     }
@@ -228,9 +226,7 @@ public class FogOfWarClientEvents {
             return true;
 
         // first check if the ChunkPos is already occupied as this is faster
-        for (ChunkPos chunkPos : brightChunks)
-            if (new ChunkPos(entity.getOnPos()).equals(chunkPos))
-                return true;
+        if (brightChunks.contains(entity.getOnPos())) return true;
 
         return entity instanceof RangedAttackerUnit rangedAttackerUnit &&
                 rangedAttackerUnit.getFogRevealDuration() > 0;

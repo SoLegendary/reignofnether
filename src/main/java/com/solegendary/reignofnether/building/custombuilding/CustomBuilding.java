@@ -24,6 +24,7 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,7 +35,7 @@ public class CustomBuilding extends Building {
 
     public Vec3i structureSize;
     public final CompoundTag structureNbt;
-    public Set<Block> portraitBlockOptions;
+    public Set<Block> portraitBlockOptions = new HashSet<>();
     public CompoundTag attributesNbt = new CompoundTag(); // NBT containing all the below fields (including portrait block key)
     public int nightRadius = 0;
     public int netherRadius = 0;
