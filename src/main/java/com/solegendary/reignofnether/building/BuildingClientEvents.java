@@ -105,6 +105,8 @@ public class BuildingClientEvents {
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long DOUBLE_CLICK_TIME_MS = 500;
 
+    public static boolean isBuilt = false;
+
     // minimum % of blocks below a building that need to be supported by a solid block for it to be placeable
     // 1 means you can't have any gaps at all, 0 means you can place buildings in mid-air
     private static final float MIN_SUPPORTED_BLOCKS_PERCENT = 0.6f;
@@ -116,6 +118,7 @@ public class BuildingClientEvents {
     private static final float MIN_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.20f; // at least 20% of covered blocks must be
     // liquid
     private static final float MAX_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.95f; // at least 5% of covered blocks must be solid
+
 
     // can only be one preselected building as you can't box-select them like units
     public static BuildingPlacement getPreselectedBuilding() {
@@ -819,6 +822,7 @@ public class BuildingClientEvents {
                         isBridgeDiagonal()
                     );
                     setBuildingToPlace(null);
+                    isBuilt = true;
 
                     if (hasSelectedWorkers) {
                         for (LivingEntity entity : getSelectedUnits()) {

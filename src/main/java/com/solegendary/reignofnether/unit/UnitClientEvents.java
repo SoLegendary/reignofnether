@@ -68,7 +68,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -78,7 +77,6 @@ import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -654,7 +652,12 @@ public class UnitClientEvents {
             // resolve any other abilities not explicitly covered here
             else if (CursorClientEvents.getLeftClickAction() != null && MC.player != null) {
                 sendUnitCommand(CursorClientEvents.getLeftClickAction());
-            } else if (!selectedUnits.isEmpty() && BuildingClientEvents.getPreselectedBuilding() == null && preselectedUnits.isEmpty()) {
+            } else if (
+                    !selectedUnits.isEmpty() &&
+                    BuildingClientEvents.getPreselectedBuilding() == null &&
+                    preselectedUnits.isEmpty() &&
+                    !BuildingClientEvents.isBuilt
+            ) {
                 clearSelectedUnits();
             }
 
@@ -685,7 +688,7 @@ public class UnitClientEvents {
                             e.getId() == MC.player.getId()
                 );
             }
-
+            BuildingClientEvents.isBuilt = false;
             lastLeftClickTime = System.currentTimeMillis();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
