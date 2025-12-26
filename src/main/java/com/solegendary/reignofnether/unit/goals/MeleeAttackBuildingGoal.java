@@ -69,9 +69,9 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
                 if (ticksToNextBlockBreak <= 0)
                     doBuildingAttack();
             }
-        }
-        else
+        } else {
             this.moveTarget = null;
+        }
     }
 
     protected void doBuildingAttack() {

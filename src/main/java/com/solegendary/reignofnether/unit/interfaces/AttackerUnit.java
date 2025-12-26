@@ -87,7 +87,7 @@ public interface AttackerUnit {
         }
     }
 
-    public static void resetBehaviours(AttackerUnit unit) {
+    static void resetBehaviours(AttackerUnit unit) {
         unit.setUnitAttackTarget(null);
         unit.setAttackMoveTarget(null);
 

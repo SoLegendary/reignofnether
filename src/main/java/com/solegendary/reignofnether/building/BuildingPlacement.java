@@ -59,7 +59,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -91,7 +90,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
-import org.stringtemplate.v4.misc.Misc;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -417,7 +415,7 @@ public class BuildingPlacement {
             var blocksPlaced = 0;
             for (BuildingBlock block : blocks) {
                 if (block.isPlaced(getLevel()) && !block.getBlockState().isAir()) {
-                    placedBlockPosSet.add(block.getBlockPos());
+                    if (blockMap.containsKey(block.getBlockPos())) placedBlockPosSet.add(block.getBlockPos());
                     blocksPlaced++;
                 }
             }
@@ -659,6 +657,7 @@ public class BuildingPlacement {
         if (ownerName.isEmpty()) {
             awardBounty();
         }
+        placedBlockPosSet.clear();
     }
 
     private void awardBounty() {
