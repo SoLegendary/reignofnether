@@ -142,7 +142,7 @@ public class VillagerUnitArmorLayer<T extends LivingEntity, M extends HumanoidMo
         s1 = ForgeHooksClient.getArmorTexture(entity, stack, s1, slot, type);
         ResourceLocation resourcelocation = ARMOR_LOCATION_CACHE.get(s1);
         if (resourcelocation == null) {
-            resourcelocation = new ResourceLocation(s1);
+            resourcelocation = ResourceLocation.tryParse(s1);
             ARMOR_LOCATION_CACHE.put(s1, resourcelocation);
         }
         return resourcelocation;
