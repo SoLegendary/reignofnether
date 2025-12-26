@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
-import com.solegendary.reignofnether.ability.heroAbilities.monster.RaiseDead;
+import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
+import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.NightUtils;
@@ -30,6 +30,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -229,8 +230,18 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     }
 
     @Override
+    public void aiStep() {
+        boolean isWearingPumpkin = getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.CARVED_PUMPKIN;
+        if (isWearingPumpkin)
+            this.armorItems.set(EquipmentSlot.HEAD.getIndex(), new ItemStack(Items.AIR));
+        super.aiStep();
+        if (isWearingPumpkin)
+            this.armorItems.set(EquipmentSlot.HEAD.getIndex(), new ItemStack(Items.CARVED_PUMPKIN));
+    }
+
+    @Override
     public SunlightEffect getSunlightEffect() {
-        if (hasItemInSlot(EquipmentSlot.HEAD)) {
+        if (hasItemInSlot(EquipmentSlot.HEAD) && getItemBySlot(EquipmentSlot.HEAD).getItem() != Items.CARVED_PUMPKIN) {
             return SunlightEffect.SLOWNESS_II;
         } else {
             return SunlightEffect.FIRE;

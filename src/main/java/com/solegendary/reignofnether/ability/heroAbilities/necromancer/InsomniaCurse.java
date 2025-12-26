@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.ability.heroAbilities.monster;
+package com.solegendary.reignofnether.ability.heroAbilities.necromancer;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
@@ -26,12 +26,6 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class InsomniaCurse extends HeroAbility {
 
-    // TODO:
-    // [X] PhantomUnit that can attack buildings and fixate on a target
-    // [X] Phantoms should despawn after a set number of attacks
-    // [X] Should be able to curse buildings too
-    // [X] Can have set number of charges
-
     public static final int RANGE = 12;
     public static final float PHANTOM_DAMAGE = 6;
     public static final float PHANTOM_DAMAGE_BONUS_PER_SOUL_RANK = 2f;
@@ -57,7 +51,6 @@ public class InsomniaCurse extends HeroAbility {
             maxCharges = 3;
             cooldownMax = 20 * ResourceCost.TICKS_PER_SECOND;
         } else if (getRank(hero) == 2) {
-            maxCharges = 4;
             maxCharges = 4;
             cooldownMax = 17 * ResourceCost.TICKS_PER_SECOND;
         } else if (getRank(hero) == 3) {

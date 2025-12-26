@@ -5,9 +5,11 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
 import com.solegendary.reignofnether.building.buildings.placements.*;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -26,6 +28,7 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -222,6 +225,26 @@ public class BuildingServerEvents {
             saveNetherZones(level);
             saveBuildings(level);
         }
+    }
+
+    private static boolean isOverlappingAnyOtherBuilding(BuildingPlacement buildingToPlace) {
+        BlockPos minPos = buildingToPlace.minCorner;
+        BlockPos maxPos = buildingToPlace.maxCorner;
+
+        for (BuildingPlacement building : buildings) {
+            for (BuildingBlock block : building.blocks) {
+                if (buildingToPlace.getBuilding() instanceof AbstractBridge &&
+                        building.getBuilding() instanceof AbstractBridge) {
+                    continue;
+                }
+                BlockPos bp = block.getBlockPos();
+                if (bp.getX() >= minPos.getX() && bp.getX() <= maxPos.getX() && bp.getY() >= minPos.getY()
+                        && bp.getY() <= maxPos.getY() && bp.getZ() >= minPos.getZ() && bp.getZ() <= maxPos.getZ()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Nullable

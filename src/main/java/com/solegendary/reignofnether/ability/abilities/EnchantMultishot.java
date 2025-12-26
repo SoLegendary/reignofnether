@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.EnchantAbility;
 import com.solegendary.reignofnether.ability.EnchantAbilityServerboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -41,7 +42,7 @@ public class EnchantMultishot extends EnchantAbility {
         LibraryPlacement library = (LibraryPlacement) placement;
         return new AbilityButton(
                 "Multishot Enchantment",
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/crossbow_arrow.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/multishot.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || library.autoCastEnchant == this,
                 () -> false,

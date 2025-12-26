@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.ability.heroAbilities.monster;
+package com.solegendary.reignofnether.ability.heroAbilities.necromancer;
 
 //Summons an empowered zombie pair (only one pair at a time)
 //Higher levels give the units armor and weapons, then enchanted armor and weapons

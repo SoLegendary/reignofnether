@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.ability.heroAbilities.piglin;
+package com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant;
 
 //Throws out a huge amount of random weapons and armour that your units automatically equip upon pickup
 //All equipment has limited durability
@@ -42,7 +42,7 @@ public class LootExplosion extends HeroAbility {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Loot Explosion",
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_chestplate.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_chestplate.png"),
                 hotkey,
                 () -> false,
                 () -> getRank(hero) == 0,
@@ -69,7 +69,7 @@ public class LootExplosion extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Loot Explosion",
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_chestplate.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_chestplate.png"),
                 hero
         );
     }

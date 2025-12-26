@@ -1,5 +1,5 @@
 
-1.20.1-1.2.3c
+1.20.1-1.2.4
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -7,56 +7,48 @@
 
 
 
-Custom Buildings
-----------------
+Christmas
+---------
+During christmas season, units spawn with santa hats, and the piglin merchant throws presents
+During new years, buildings explode with fireworks
 
-[!] This patch reworks how custom building saves work - all options set in the customisation menu such as invulnerable, capturable, etc. will be set back to their defaults
+New Heroes
+----------
+[❌] Change /gamerule allowHeroes (bool) to /gamerule allowedHeroes (int) (default 1)
 
-[✔] Nether conversion range option (default 0)
-[✔] Night radius option (default 0)
-[✔] Buildable by Villagers
-[✔] Buildable by Monsters
-[✔] Buildable by Piglins
-[✔] Build cost
+Wretched Wraith
+    [❌] New snow layer block that doesn't interfere with vanilla snow
+        - Maybe with a subtle particle effect?
 
-[✔] Garrisonable
-    - Using custom invisible block for exit/entry
-    - Enabled if there is exactly 1 of each
-    - Not toggleable in menu (but will show warning if there's an issue):
-    [✔] add new block for marking garrison area (the area a mob needs to be on to be considered 'garrisoned'
-        - also will prevent blocks underneath it from being destroyed
-    [✔] make entry and exit blocks (and marker blocks) indestructible
+Enchanter
+    [❌] Blacksmith armour upgrades
 
-[❌] Command block triggers?
-    - Write commands directly in the UI that trigger periodically, on build, on destroy, etc.
+Wildfire
+    [❌] Global toggle to turn all fire rendering into soulfires
+
+
+
+Seasons Greetings!
+[🟡] Between 19th and 26th December (inclusive), many units will spawn with Santa Hats
+[🟡] On 31st December and 1st January, buildings will create fireworks when damaged instead of explosions
+
+
 
 Bugfixes
 --------
-[✔] Fixed not being able to hold alt and drag to pan or rotate the camera
-[✔] Zombie piglins now correctly have piglin faction bonuses (regeneration and speed on nether terrain)
-[✔] Militia Archers now remain as archers after saving and quitting
-[✔] Fixed unit movement issues when trying to use a neutral transport portal
-[✔] Fixed zombie villagers, skeletons and grunts sometimes spawning with extra equipment
-[✔] The Piglin Merchant's TNT no longer disappears when he dies
-[✔] Fixed sometimes not being able to control both shared allied units and your own units at once
+[🟡] Fixed sculk catalysts not spreading any sculk
 
 
 Quality of Life
 ---------------
-[✔] Workers can now chop jungle vines (worth 1 wood)
-
-[✔] You can now pre-queue all heroes for training before their altar is completed
-
-
-[❌] Allow overlapping of custom structures (if possible, only with air blocks)
-
-[❌] Postgame stats from @ThatBusyBoi
-
-[❌] Global production queue from @PerseoJ
+[🟡] Illager models now show worn armour (this will be used in a later update)
 
 
 Balance
 -------
+[❌] Ghasts can no longer attack and move 20% slower while over void or structure void blocks
+[❌] Prevent friendly fire from wither skeleton clouds
+    - Might need to create a new AreaEffectCloud entity
 
 
 Languages

@@ -99,12 +99,12 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
-    private GenericTargetedSpellGoal castEnchantCivilianGoal;
-    public GenericTargetedSpellGoal getCastEnchantCivilianGoal() { return castEnchantCivilianGoal; }
+    private GenericTargetedSpellGoal castEnchantCivilGoal;
+    public GenericTargetedSpellGoal getCastEnchantCivilGoal() { return castEnchantCivilGoal; }
     private GenericTargetedSpellGoal castEnchantMilitaryGoal;
-    public GenericTargetedSpellGoal getCastEnchantMilitaryGoal() { return castEnchantMilitaryGoal; }
-    private GenericTargetedSpellGoal castEnchantArmourGoal;
-    public GenericTargetedSpellGoal getCastEnchantArmourGoal() { return castEnchantArmourGoal; }
+    public GenericTargetedSpellGoal getCastEnchantMartialGoal() { return castEnchantMilitaryGoal; }
+    private GenericTargetedSpellGoal castEnchantProtectiveGoal;
+    public GenericTargetedSpellGoal getCastEnchantProtectiveGoal() { return castEnchantProtectiveGoal; }
     private GenericUntargetedSpellGoal castAuraGoal;
     public GenericUntargetedSpellGoal getCastAuraGoal() { return castAuraGoal; }
 
@@ -169,11 +169,11 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 100;
+    private float baseMaxMana = 150;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    private float manaRegenPerSecond = 0.5f;
-    private float manaBonusPerLevel = 6;
+    private float manaRegenPerSecond = 1f;
+    private float manaBonusPerLevel = 10;
     @Override public float getBaseMaxMana() { return baseMaxMana; }
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
@@ -190,13 +190,13 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
     @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
-    final static public float attackDamage = 6.0f;
-    final static public float attackBonusPerLevel = 0.6f;
+    final static public float attackDamage = 4.0f;
+    final static public float attackBonusPerLevel = 0.4f;
     final static public float attacksPerSecond = 0.5f;
-    final static public float maxHealth = 125.0f;
-    final static public float maxHealthBonusPerLevel = 15.0f;
+    final static public float maxHealth = 100.0f;
+    final static public float maxHealthBonusPerLevel = 10.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.28f;
+    final static public float movementSpeed = 0.25f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -319,8 +319,8 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
             animateTicks -= 1;
         }
         this.castEnchantMilitaryGoal.tick();
-        this.castEnchantCivilianGoal.tick();
-        this.castEnchantArmourGoal.tick();
+        this.castEnchantCivilGoal.tick();
+        this.castEnchantProtectiveGoal.tick();
         this.castAuraGoal.tick();
 
         BlockPos targetBp = castEnchantMilitaryGoal.getCastTarget();
@@ -368,7 +368,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false, ATTACK_WINDUP_TICKS);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this, ATTACK_WINDUP_TICKS);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
-        this.castEnchantCivilianGoal = new GenericTargetedSpellGoal(
+        this.castEnchantCivilGoal = new GenericTargetedSpellGoal(
                 this,
                 14,
                 10,
@@ -386,7 +386,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
                 null,
                 null
         );
-        this.castEnchantArmourGoal = new GenericTargetedSpellGoal(
+        this.castEnchantProtectiveGoal = new GenericTargetedSpellGoal(
                 this,
                 14,
                 10,
@@ -428,7 +428,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public void resetBehaviours() {
         animateScaleReducing = true;
         this.castEnchantMilitaryGoal.stop();
-        this.castEnchantCivilianGoal.stop();
+        this.castEnchantCivilGoal.stop();
         this.castAuraGoal.stop();
     }
 

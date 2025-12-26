@@ -32,7 +32,6 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
     private Boolean isBuildingServerside = false;
 
-    private final int AUTOCAST_RANGE = 20;
     public boolean autocastRepair = false;
 
     public BuildRepairGoal(Mob mob) {
@@ -53,6 +52,9 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     }
 
     public void tick() {
+        if (this.mob.tickCount % 5 != 0)
+            return;
+
         if (buildingTarget == null) {
             if (!this.mob.level().isClientSide() && WorkerUnit.isIdle((WorkerUnit) this.mob) && autocastRepair) {
                 BuildingPlacement building = BuildingUtils.findClosestBuilding(
@@ -110,6 +112,9 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     }
 
     public void setBuildingTarget(@Nullable BuildingPlacement target) {
+        if (target != null && !BuildingUtils.isBuildingBuildable(this.mob.level().isClientSide(), target))
+            return;
+
         if (target != null) {
             if (ignoreNextCheckpoint)
                 ignoreNextCheckpoint = false;

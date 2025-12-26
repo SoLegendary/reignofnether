@@ -184,7 +184,7 @@ public class CustomBuildingMenu {
         buttonsCol1.add(new CustomBuildingBooleanButton(
                 I18n.get("sandbox.reignofnether.custom_buildings.set_buildable_by_monsters.label"), customBuilding.buildableByMonsters,
                 () -> {
-                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_BUILDABLE_BY_VILLAGERS, customBuilding.name, !customBuilding.buildableByMonsters);
+                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_BUILDABLE_BY_MONSTERS, customBuilding.name, !customBuilding.buildableByMonsters);
                     customBuilding.buildableByMonsters = !customBuilding.buildableByMonsters;
                 },
                 I18n.get("sandbox.reignofnether.custom_buildings.set_buildable_by_monsters.tooltip1")
@@ -249,8 +249,6 @@ public class CustomBuildingMenu {
         setOreCostButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
         buttonsCol1.add(setOreCostButton);
 
-
-
         buttonsCol2.add(new CustomBuildingBooleanButton(
                 I18n.get("sandbox.reignofnether.custom_buildings.set_capturable.label"), customBuilding.capturable,
                 () -> {
@@ -266,6 +264,22 @@ public class CustomBuildingMenu {
                     customBuilding.invulnerable = !customBuilding.invulnerable;
                 },
                 I18n.get("sandbox.reignofnether.custom_buildings.set_invulnerable.tooltip1")
+        ));
+        buttonsCol2.add(new CustomBuildingBooleanButton(
+                I18n.get("sandbox.reignofnether.custom_buildings.set_repairable.label"), customBuilding.repairable,
+                () -> {
+                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_REPAIRABLE, customBuilding.name, !customBuilding.repairable);
+                    customBuilding.repairable = !customBuilding.repairable;
+                },
+                I18n.get("sandbox.reignofnether.custom_buildings.set_repairable.tooltip1")
+        ));
+        buttonsCol2.add(new CustomBuildingBooleanButton(
+                I18n.get("sandbox.reignofnether.custom_buildings.set_destroy_on_reset.label"), customBuilding.shouldDestroyOnReset,
+                () -> {
+                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_DESTROY_ON_RESET, customBuilding.name, !customBuilding.shouldDestroyOnReset);
+                    customBuilding.shouldDestroyOnReset = !customBuilding.shouldDestroyOnReset;
+                },
+                I18n.get("sandbox.reignofnether.custom_buildings.set_destroy_on_reset.tooltip1")
         ));
 
         Button setNightRadiusButton = new CustomBuildingIntegerButton(

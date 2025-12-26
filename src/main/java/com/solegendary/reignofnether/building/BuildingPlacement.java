@@ -59,6 +59,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -84,11 +85,13 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
+import org.stringtemplate.v4.misc.Misc;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -498,8 +501,10 @@ public class BuildingPlacement {
         if (!validBlocks.isEmpty()) {
             if (getBuilding() instanceof AbstractBridge) {
                 ArrayList<WorkerUnit> builders = getBuilders(this.level);
-                BlockPos builderPos = ((LivingEntity) builders.get(new Random().nextInt(builders.size()))).getOnPos();
-                validBlocks.sort(Comparator.comparing(bb -> bb.getBlockPos().distSqr(builderPos)));
+                if (!builders.isEmpty()) {
+                    BlockPos builderPos = ((LivingEntity) builders.get(new Random().nextInt(builders.size()))).getOnPos();
+                    validBlocks.sort(Comparator.comparing(bb -> bb.getBlockPos().distSqr(builderPos)));
+                }
             }
             this.blockPlaceQueue.add(validBlocks.get(0));
         }
@@ -551,12 +556,12 @@ public class BuildingPlacement {
         Collections.shuffle(placedBlocks);
         for (int i = 0; i < amount && i < placedBlocks.size(); i++) {
             BlockPos bp = placedBlocks.get(i).getBlockPos();
-            this.onBlockBreak((ServerLevel) getLevel(), bp, false);
             if (!getLevel().getBlockState(bp).getFluidState().isEmpty()) {
                 getLevel().setBlockAndUpdate(bp, Blocks.AIR.defaultBlockState());
             } else {
                 getLevel().destroyBlock(bp, false);
             }
+            this.onBlockBreak((ServerLevel) getLevel(), bp, false);
         }
         if (amount > 0) {
             AttackWarningClientboundPacket.sendWarning(ownerName, BuildingUtils.getCentrePos(getBlocks()));
@@ -686,17 +691,21 @@ public class BuildingPlacement {
         // - roll explodeChance to cause explosion effects and destroy more blocks
         // - cause fire if < fireThreshold% blocksPercent
         if (rand.nextFloat(1.0f) < this.building.explodeChance) {
-            level.explode(null,
-                level.damageSources().generic(),
-                null,
-                pos.getX(),
-                pos.getY(),
-                pos.getZ(),
-                breakBlocks ? this.building.explodeRadius : 2.0f,
-                this.getBlocksPlacedPercent() < this.building.fireThreshold,
-                // fire
-                breakBlocks ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE
-            );
+            if (!breakBlocks && MiscUtil.isNewYearsSeason()) {
+                MiscUtil.doRandomFireworkExplosion(level, Vec3.atCenterOf(pos));
+            } else {
+                level.explode(null,
+                        level.damageSources().generic(),
+                        null,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ(),
+                        breakBlocks ? this.building.explodeRadius : 2.0f,
+                        this.getBlocksPlacedPercent() < this.building.fireThreshold,
+                        // fire
+                        breakBlocks ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE
+                );
+            }
         }
         placedBlockPosSet.remove(pos);
     }
@@ -780,7 +789,6 @@ public class BuildingPlacement {
                 for (int i = 0; i < 3; i++)
                     spawnHuntableAnimalsNearby(ANIMAL_SPAWN_BLOCK_RANGE / 2);
             }
-        } else {
             RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(ownerName);
             if (rtsPlayer == null) return;
             rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED);

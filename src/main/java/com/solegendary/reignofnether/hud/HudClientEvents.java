@@ -608,6 +608,8 @@ public class HudClientEvents {
                 nameCap,
                 blitX,
                 blitY,
+                mouseX,
+                mouseY,
                 hudSelectedEntity
             );
             hudZones.add(unitPortraitZone);
@@ -825,7 +827,7 @@ public class HudClientEvents {
             if (hudSelectedPlacement != null) {
                 actionButtons.add(SandboxActionButtons.removeBuildingPlacement);
             }
-            if (hudSelectedEntity instanceof AttackerUnit) {
+            if (hudSelectedEntity instanceof Unit) {
                 actionButtons.add(SandboxActionButtons.setAnchor);
                 actionButtons.add(SandboxActionButtons.resetToAnchor);
                 actionButtons.add(SandboxActionButtons.removeAnchor);
@@ -982,11 +984,14 @@ public class HudClientEvents {
                 actionButtons.add(SandboxClientEvents.getToggleBuildingCheatsButton());
             }
             actionButtons.add(SandboxClientEvents.getToggleNonUnitControlButton());
+            actionButtons.add(SandboxClientEvents.getSortCustomBuildingsButton());
 
             for (Button actionButton : actionButtons) {
-                actionButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
-                renderedButtons.add(actionButton);
-                blitX += iconFrameSize;
+                if (!actionButton.isHidden.get()) {
+                    actionButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                    renderedButtons.add(actionButton);
+                    blitX += iconFrameSize;
+                }
             }
             blitX = 0;
             blitY = screenHeight - (iconFrameSize * 2) - 4;

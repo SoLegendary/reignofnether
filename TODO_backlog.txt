@@ -4,9 +4,6 @@ Features
 
 [❌] Let villagers repair iron golems with ore for 1hp per ore, masons repair faster
 
-[❌] Custom structure block to register new buildings
-    - That are also saved to the level
-
 [❌] Walls
     - Connect to garrisonable towers
     - 3 layers that are broken starting from where the unit attacking it is positioned
@@ -18,15 +15,10 @@ Features
     - Includes minimap and sound warning
 
 
-
-[❌] Import the Bedrock Minecraft Movie addon piglins
-
 [❌] Config to allow changing resource block values, including modded blocks
 
 [❌] AoE2-style markets
     - Start as neutral building
-
-[❌] let modded/vanilla mobs attack buildings by making them attack an indestructible invisible armor stand
 
 
 Bugfixes
@@ -44,12 +36,6 @@ Bugfixes
 Quality of Life Features
 ------------------------
 
-[❌] Command to list end of game stats like:
-    - total resources gathered/spent
-    - average resources gathered/min
-    - total unit resource values lost
-    - total units produced (military and worker)
-
 [❌] Handicap command
     - Makes all resource costs some % higher than normal
 
@@ -59,11 +45,7 @@ Quality of Life Features
     - Created unit
     - Used ability
 
-[❌] Command block commands for mapmakers
-    - Set unit owner (by id, by area, by type?)
-    - Win/lose
-    - Destroy/create building
-    - Set building owner
+[❌] Command block API for UnitActionItem commands
 
 [❌] Added /gamerule for bridges over void
 

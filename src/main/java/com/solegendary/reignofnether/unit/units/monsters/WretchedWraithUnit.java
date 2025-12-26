@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.units.monsters;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.ability.heroAbilities.monster.InsomniaCurse;
+import com.solegendary.reignofnether.ability.heroAbilities.necromancer.InsomniaCurse;
 import com.solegendary.reignofnether.ability.heroAbilities.shared.PlaceholderUntargetedAbility;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -193,11 +193,11 @@ public class WretchedWraithUnit extends Zombie implements Unit, AttackerUnit, He
     @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
     @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
-    final static public float attackDamage = 6.0f;
-    final static public float attackBonusPerLevel = 0.4f;
+    final static public float attackDamage = 5.0f;
+    final static public float attackBonusPerLevel = 0.5f;
     final static public float attacksPerSecond = 0.4f;
     final static public float maxHealth = 140.0f;
-    final static public float maxHealthBonusPerLevel = 12.0f;
+    final static public float maxHealthBonusPerLevel = 17.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
     final static public float attackRange = 3F; // only used by ranged units or melee building attackers

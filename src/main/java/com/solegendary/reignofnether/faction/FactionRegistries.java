@@ -54,6 +54,7 @@ public class FactionRegistries {
         register(Faction.PIGLINS, Buildings.HOGLIN_STABLES, Keybindings.keyT);
         register(Faction.PIGLINS, Buildings.FLAME_SANCTUARY, Keybindings.keyY);
         register(Faction.PIGLINS, Buildings.WITHER_SHRINE, Keybindings.keyU);
+        register(Faction.PIGLINS, Buildings.BASALT_SPRINGS, Keybindings.keyI);
         register(Faction.PIGLINS, Buildings.FORTRESS, Keybindings.keyO);
         register(Faction.PIGLINS, Buildings.INFERNAL_PORTAL, Keybindings.keyF);
         register(Faction.PIGLINS, Buildings.BLACKSTONE_BRIDGE, Keybindings.keyC);

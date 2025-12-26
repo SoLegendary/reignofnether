@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.util;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.ability.heroAbilities.monster.BloodMoon;
+import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.time.NightCircleMode;
 import com.solegendary.reignofnether.time.TimeClientEvents;
@@ -23,14 +24,14 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleType;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
@@ -45,10 +46,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.FlyingMob;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -80,12 +78,21 @@ import static com.solegendary.reignofnether.resources.BlockUtils.isLogBlock;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
 
+
 public class MiscUtil {
+
+    private static final int[] DYE_COLORS = {
+            0xF0F0F0, 0xEB8844, 0xC354CD, 0x6689D3,
+            0xDECF2A, 0x41CD34, 0xD88198, 0x434343,
+            0xABABAB, 0x287697, 0x7B2FBE, 0x253193,
+            0x51301A, 0x3B511A, 0xB3312C, 0x1E1B1B
+    };
 
     public static void shootFirework(Level level, Vec3 vec3) {
         CompoundTag explosion = new CompoundTag();
-        explosion.put("Colors", new IntArrayTag(new int[]{0xF0F0F0}));
-        explosion.putByte("Type", (byte) 0b0);
+        int color = DYE_COLORS[level.random.nextInt(DYE_COLORS.length)];
+        explosion.put("Colors", new IntArrayTag(new int[]{ color }));
+        explosion.putByte("Type", (byte) 0);
         ListTag explosions = new ListTag();
         explosions.add(explosion);
         CompoundTag explosionsAndFlight = new CompoundTag();
@@ -100,11 +107,31 @@ public class MiscUtil {
         entity.moveTo(vec3);
     }
 
+    public static void doRandomFireworkExplosion(Level level, Vec3 vec3) {
+        CompoundTag explosion = new CompoundTag();
+        int color = DYE_COLORS[level.random.nextInt(DYE_COLORS.length)];
+        explosion.put("Colors", new IntArrayTag(new int[]{ color }));
+        byte type = (byte) level.random.nextInt(5);
+        explosion.putByte("Type", type);
+        ListTag explosions = new ListTag();
+        explosions.add(explosion);
+        CompoundTag explosionsAndFlight = new CompoundTag();
+        explosionsAndFlight.put("Explosions", explosions);
+        explosionsAndFlight.putByte("Flight", (byte) 0b1);
+        CompoundTag fireworks = new CompoundTag();
+        fireworks.put("Fireworks", explosionsAndFlight);
+        ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET);
+        itemStack.setTag(fireworks);
+        FireworkRocketEntity entity = new FireworkRocketEntity(level, null, vec3.x, vec3.y(), vec3.z, itemStack);
+        level.addFreshEntity(entity);
+        entity.moveTo(vec3);
+        entity.lifetime = 0;
+    }
+
     // prevent flying mobs from floating above trees and buildings (or they're effectively unreachable)
     // also used to move the camera Y pos up and down to prevent clipping inside of blocks
     public static boolean isGroundBlock(Level level, BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
-        Block block = bs.getBlock();
         if (isLogBlock(bs) || isLeafBlock(bs) || bs.isAir() ||
                 BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), bp))
             return false;
@@ -741,5 +768,37 @@ public class MiscUtil {
         TextureAtlasSprite sprite = model.getParticleIcon();
         String path = sprite.contents().name().getPath();
         return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/" + path + ".png");
+    }
+
+    public static boolean canWearChristmasHat(LivingEntity entity) {
+        boolean isFarmer = entity instanceof VillagerUnit vUnit && vUnit.getUnitProfession() == VillagerUnitProfession.FARMER;
+        return List.of(
+                EntityRegistrar.VILLAGER_UNIT.get(),
+                EntityRegistrar.VINDICATOR_UNIT.get(),
+                EntityRegistrar.EVOKER_UNIT.get(),
+                EntityRegistrar.MILITIA_UNIT.get(),
+                EntityRegistrar.PILLAGER_UNIT.get(),
+                EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(),
+                EntityRegistrar.ZOMBIE_UNIT.get(),
+                EntityRegistrar.HUSK_UNIT.get(),
+                EntityRegistrar.DROWNED_UNIT.get(),
+                EntityRegistrar.SKELETON_UNIT.get(),
+                EntityRegistrar.STRAY_UNIT.get(),
+                EntityRegistrar.GRUNT_UNIT.get(),
+                EntityRegistrar.BRUTE_UNIT.get(),
+                EntityRegistrar.HEADHUNTER_UNIT.get(),
+                EntityRegistrar.WITHER_SKELETON_UNIT.get()
+        ).contains(entity.getType()) && !entity.hasItemInSlot(EquipmentSlot.HEAD) && !isFarmer;
+    }
+
+    public static boolean isChristmasSeason() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.get(Calendar.MONTH) + 1 == 12 && calendar.get(Calendar.DATE) >= 19 && calendar.get(Calendar.DATE) <= 26;
+    }
+
+    public static boolean isNewYearsSeason() {
+        Calendar calendar = Calendar.getInstance();
+        return (calendar.get(Calendar.MONTH) + 1 == 12 && calendar.get(Calendar.DATE) == 31) ||
+                (calendar.get(Calendar.MONTH) + 1 == 1 && calendar.get(Calendar.DATE) == 1);
     }
 }

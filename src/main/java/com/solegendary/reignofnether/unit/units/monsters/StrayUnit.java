@@ -213,8 +213,18 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
     }
 
     @Override
+    public void aiStep() {
+        boolean isWearingPumpkin = getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.CARVED_PUMPKIN;
+        if (isWearingPumpkin)
+            this.armorItems.set(EquipmentSlot.HEAD.getIndex(), new ItemStack(Items.AIR));
+        super.aiStep();
+        if (isWearingPumpkin)
+            this.armorItems.set(EquipmentSlot.HEAD.getIndex(), new ItemStack(Items.CARVED_PUMPKIN));
+    }
+
+    @Override
     public SunlightEffect getSunlightEffect() {
-        if (hasItemInSlot(EquipmentSlot.HEAD)) {
+        if (hasItemInSlot(EquipmentSlot.HEAD) && getItemBySlot(EquipmentSlot.HEAD).getItem() != Items.CARVED_PUMPKIN) {
             return SunlightEffect.SLOWNESS_II;
         } else {
             return SunlightEffect.FIRE;

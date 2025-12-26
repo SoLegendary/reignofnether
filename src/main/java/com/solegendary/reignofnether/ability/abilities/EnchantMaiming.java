@@ -29,7 +29,7 @@ import java.util.List;
 public class EnchantMaiming extends EnchantAbility {
 
     private static final UnitAction ENCHANT_ACTION = UnitAction.ENCHANT_MAIMING;
-    public static final Enchantment actualEnchantment = Enchantments.UNBREAKING;
+    public static final Enchantment actualEnchantment = Enchantments.VANISHING_CURSE;
     public static final int SLOWNESS_DURATION = 5 * ResourceCost.TICKS_PER_SECOND;
     public static final int enchantLevel = 1;
 

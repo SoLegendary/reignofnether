@@ -144,7 +144,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage + (hasFireAspectTrident() ? 1 : 0);}
+    public float getUnitAttackDamage() {return attackDamage + (hasFlameTrident() ? 1 : 0);}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
@@ -293,13 +293,13 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
-        if (!hasFireAspectTrident()) {
+        if (!hasFlameTrident()) {
             ItemStack tridentStack = new ItemStack(Items.TRIDENT);
             AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
             tridentStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
 
             if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_HEAVY_TRIDENTS))
-                tridentStack.enchant(Enchantments.UNBREAKING, 1);
+                tridentStack.enchant(Enchantments.PUNCH_ARROWS, 1);
 
             this.setItemSlot(EquipmentSlot.MAINHAND, tridentStack);
         }
@@ -316,9 +316,9 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
         return itemStack.getItem() == Items.NETHERITE_CHESTPLATE;
     }
 
-    public boolean hasFireAspectTrident() {
+    public boolean hasFlameTrident() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getAllEnchantments().containsKey(Enchantments.FIRE_ASPECT);
+        return itemStack.getAllEnchantments().containsKey(Enchantments.FLAMING_ARROWS);
     }
 
     @Override
@@ -335,7 +335,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
                 item == Items.NETHERITE_HELMET ||
                 item == Items.TRIDENT) &&
                 (currentItemStack.getItem() != item ||
-                        (!hasFireAspectTrident() && itemStack.isEnchanted())));
+                        (!hasFlameTrident() && itemStack.isEnchanted())));
     }
 
     @Override
@@ -354,6 +354,6 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
 
     @Override
     public boolean hasBonusDamage() {
-        return hasFireAspectTrident();
+        return hasFlameTrident();
     }
 }

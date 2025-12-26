@@ -29,7 +29,7 @@ import java.util.List;
 public class EnchantVigor extends EnchantAbility {
 
     private static final UnitAction ENCHANT_ACTION = UnitAction.ENCHANT_VIGOR;
-    public static final Enchantment actualEnchantment = Enchantments.UNBREAKING;
+    public static final Enchantment actualEnchantment = Enchantments.BINDING_CURSE;
     public static final int enchantLevel = 1;
     public static final float cooldownMultiplier = 0.70f;
 

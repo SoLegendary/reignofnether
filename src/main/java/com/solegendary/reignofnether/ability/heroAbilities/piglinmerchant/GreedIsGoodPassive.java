@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.ability.heroAbilities.piglin;
+package com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant;
 
 //Causes other abilities to use your resources to gain improved effects
 //Higher levels raise the effects but also cost of the buff

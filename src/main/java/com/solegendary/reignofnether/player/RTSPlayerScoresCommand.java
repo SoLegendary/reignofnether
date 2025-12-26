@@ -16,35 +16,32 @@ import java.util.Objects;
 
 public class RTSPlayerScoresCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("rts-scores").executes((command) -> {
-            return execute(command);
-        }).then(Commands.argument("target", EntityArgument.player()).executes((command) -> {
-            return executeOnPlayer(command, EntityArgument.getPlayer(command, "target"));
-        })));
+        dispatcher.register(Commands.literal("rts-scores")
+                .executes(RTSPlayerScoresCommand::execute)
+                .then(Commands.argument("target", EntityArgument.player())
+                .executes((command) -> executeOnPlayer(command, EntityArgument.getPlayer(command, "target"))))
+        );
     }
 
-    public static int executeOnPlayer(CommandContext<CommandSourceStack> command, Player targetPlayer) throws CommandSyntaxException {
-        if (command.getSource().getEntity() instanceof Player) {
-            Player player = (Player) command.getSource().getEntity();
+    public static int executeOnPlayer(CommandContext<CommandSourceStack> command, Player targetPlayer) {
+        if (command.getSource().getEntity() instanceof Player player) {
             String targetName = targetPlayer.getDisplayName().getString();
 
-            for (RTSPlayer rtsPlayer : PlayerServerEvents.finalRTSPlayers) {
+            for (RTSPlayer rtsPlayer : PlayerServerEvents.postGameRtsPlayers) {
                 if (Objects.equals(rtsPlayer.name, targetName)) {
                     player.sendSystemMessage(Component.literal(displayScores(rtsPlayer)));
                     return Command.SINGLE_SUCCESS;
                 }
             }
-            player.sendSystemMessage(Component.literal("Player is either currently in a match or a spectator."));
+            player.sendSystemMessage(Component.literal("Player is either currently in a match, is a spectator or doesn't exist."));
         }
 
         return Command.SINGLE_SUCCESS;
     }
 
     public static int execute(CommandContext<CommandSourceStack> command) {
-        if (command.getSource().getEntity() instanceof Player) {
-            Player player = (Player) command.getSource().getEntity();
-            List<RTSPlayer> rtsPlayers = PlayerServerEvents.finalRTSPlayers;
-
+        if (command.getSource().getEntity() instanceof Player player) {
+            List<RTSPlayer> rtsPlayers = PlayerServerEvents.postGameRtsPlayers;
             player.sendSystemMessage(Component.literal(displayScores(rtsPlayers)));
         }
 

@@ -4,10 +4,10 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.ability.heroAbilities.piglin.FancyFeast;
-import com.solegendary.reignofnether.ability.heroAbilities.piglin.GreedIsGoodPassive;
-import com.solegendary.reignofnether.ability.heroAbilities.piglin.LootExplosion;
-import com.solegendary.reignofnether.ability.heroAbilities.piglin.ThrowTNT;
+import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.FancyFeast;
+import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.GreedIsGoodPassive;
+import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.LootExplosion;
+import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.ThrowTNT;
 import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
@@ -548,10 +548,10 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 else if (unit instanceof HeadhunterUnit headhunterUnit) {
                     if (i >= 50 && !headhunterUnit.hasNetheriteChestplate())
                         items.add(new ItemStack(Items.NETHERITE_CHESTPLATE));
-                    else if (i > 0 && !headhunterUnit.hasFireAspectTrident()) {
+                    else if (i > 0 && !headhunterUnit.hasFlameTrident()) {
                         ItemStack itemStack = new ItemStack(Items.TRIDENT);
-                        itemStack.enchant(Enchantments.FIRE_ASPECT, 1);
-                        itemStack.enchant(Enchantments.UNBREAKING, 1);
+                        itemStack.enchant(Enchantments.FLAMING_ARROWS, 1);
+                        itemStack.enchant(Enchantments.PUNCH_ARROWS, 1);
                         items.add(itemStack);
                     } else {
                         items.add(new ItemStack(Items.ENCHANTED_GOLDEN_APPLE));

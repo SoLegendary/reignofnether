@@ -35,6 +35,7 @@ public abstract class Building {
     public int captureRange = 20;
     public boolean capturable = false;
     public boolean invulnerable = false;
+    public boolean repairable = true;
     public boolean shouldDestroyOnReset = true;
 
     public ResourceCost cost;

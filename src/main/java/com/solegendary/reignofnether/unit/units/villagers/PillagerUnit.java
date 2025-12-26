@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.abilities.EnchantQuickCharge;
 import com.solegendary.reignofnether.ability.abilities.MountRavager;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
@@ -36,6 +35,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
@@ -340,9 +340,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         }
         double d0 = rabg.getBuildingTarget().centrePos.getX() - pUser.getX();
         double d1 = rabg.getBuildingTarget().centrePos.getZ() - pUser.getZ();
-        double d3 = rabg.getBuildingTarget().centrePos.getY();
 
-        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
+        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
         pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
         pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
 
@@ -356,17 +355,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         return pSpawnData;
     }
 
-    public boolean hasQuickChargeEnchant() {
-        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getAllEnchantments().containsKey(EnchantQuickCharge.actualEnchantment);
-    }
-
     @Override
     public boolean hasBonusAttackSpeed() {
-        return hasQuickChargeEnchant();
+        return getEnchant() == Enchantments.QUICK_CHARGE;
     }
-
-
-
-
 }

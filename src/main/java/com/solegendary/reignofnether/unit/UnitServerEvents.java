@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
-import com.solegendary.reignofnether.ability.heroAbilities.monster.SoulSiphonPassive;
+import com.solegendary.reignofnether.ability.heroAbilities.necromancer.SoulSiphonPassive;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
@@ -38,6 +38,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
@@ -53,6 +55,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -357,6 +360,14 @@ public class UnitServerEvents {
             }
             ((Unit) entity).setupEquipmentAndUpgradesServer();
 
+            boolean isChristmas = MiscUtil.isChristmasSeason();
+            boolean isWearingPumpkin = entity.getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.CARVED_PUMPKIN;
+            if (isChristmas && MiscUtil.canWearChristmasHat(entity)) {
+                entity.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.CARVED_PUMPKIN));
+            } else if (isWearingPumpkin) {
+                entity.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
+            }
+
             ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
             ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(),
                 ReignOfNether.MOD_ID,
@@ -409,34 +420,42 @@ public class UnitServerEvents {
         // Convert nearby blocks arond a death into something that is sculk convertible
         // supposed to add to sculk_spreadable.json tag under the data/minecraft/tags/blocks but doesn't work for
         // some reason
-        for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
-            if (building instanceof SculkCatalystPlacement sc && evt.getEntity().distanceToSqr(Vec3.atCenterOf(sc.centrePos))
-                < SculkCatalyst.ESTIMATED_RANGE * SculkCatalyst.ESTIMATED_RANGE) {
-                Level level = evt.getEntity().level();
-                BlockPos bp = evt.getEntity().getOnPos();
+        MinecraftServer server = evt.getEntity().level().getServer();
+        if (server != null) {
+            server.tell(new TickTask(
+                server.getTickCount() + 2,
+                () -> {
+                    for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
+                        if (building instanceof SculkCatalystPlacement sc && evt.getEntity().distanceToSqr(Vec3.atCenterOf(sc.centrePos))
+                                < SculkCatalyst.ESTIMATED_RANGE * SculkCatalyst.ESTIMATED_RANGE) {
+                            Level level = evt.getEntity().level();
+                            BlockPos bp = evt.getEntity().getOnPos();
 
-                if (level.getBlockState(bp).getBlock() == Blocks.DIRT_PATH) {
-                    level.setBlockAndUpdate(bp, Blocks.DIRT.defaultBlockState());
-                }
-                if (level.getBlockState(bp.above()).getBlock() instanceof IPlantable) {
-                    level.destroyBlock(bp.above(), false);
-                }
-
-                for (int x = -3; x <= 3; x++) {
-                    for (int y = -3; y <= 3; y++) {
-                        for (int z = -3; z <= 3; z++) {
-                            BlockPos bp2 = bp.offset(x, y, z);
-                            BlockState bs = level.getBlockState(bp2);
-                            if (bp2.distManhattan(bp) > 3) {
-                                continue;
+                            if (level.getBlockState(bp).getBlock() == Blocks.DIRT_PATH) {
+                                level.setBlockAndUpdate(bp, Blocks.DIRT.defaultBlockState());
                             }
-                            if (bs.getBlock() == Blocks.DIRT_PATH) {
-                                level.setBlockAndUpdate(bp2, Blocks.DIRT.defaultBlockState());
+                            if (level.getBlockState(bp.above()).getBlock() instanceof IPlantable) {
+                                level.destroyBlock(bp.above(), false);
+                            }
+
+                            for (int x = -3; x <= 3; x++) {
+                                for (int y = -3; y <= 3; y++) {
+                                    for (int z = -3; z <= 3; z++) {
+                                        BlockPos bp2 = bp.offset(x, y, z);
+                                        BlockState bs = level.getBlockState(bp2);
+                                        if (bp2.distManhattan(bp) > 3) {
+                                            continue;
+                                        }
+                                        if (bs.getBlock() == Blocks.DIRT_PATH) {
+                                            level.setBlockAndUpdate(bp2, Blocks.DIRT.defaultBlockState());
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
+            ));
         }
         // drop all resources held
         if (evt.getEntity() instanceof Unit unit) {
@@ -863,7 +882,7 @@ public class UnitServerEvents {
             UnitSyncClientboundPacket.sendSyncStatsPacket(evt.getEntity());
 
         if (evt.getSource().getEntity() instanceof HeadhunterUnit headhunterUnit &&
-                headhunterUnit.hasFireAspectTrident() &&
+                headhunterUnit.hasFlameTrident() &&
                 evt.getAmount() > 0)
             evt.getEntity().setSecondsOnFire(4);
     }

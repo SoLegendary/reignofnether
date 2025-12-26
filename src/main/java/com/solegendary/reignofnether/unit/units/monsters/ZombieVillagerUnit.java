@@ -3,12 +3,10 @@ package com.solegendary.reignofnether.unit.units.monsters;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -227,14 +225,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
                 .add(Attributes.MAX_HEALTH, ZombieVillagerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, ZombieVillagerUnit.armorValue);
-    }
-
-    public VillagerUnitModel.ArmPose getZombieVillagerUnitArmPose() {
-        if (this.buildRepairGoal != null && this.buildRepairGoal.isBuilding())
-            return VillagerUnitModel.ArmPose.BUILDING;
-        else if (this.gatherResourcesGoal != null && this.gatherResourcesGoal.isGathering())
-            return VillagerUnitModel.ArmPose.GATHERING;
-        return VillagerUnitModel.ArmPose.CROSSED;
     }
 
     @Override

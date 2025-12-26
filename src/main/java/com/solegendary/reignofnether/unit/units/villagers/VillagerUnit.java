@@ -50,6 +50,7 @@ import net.minecraft.world.entity.npc.VillagerDataHolder;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -507,6 +508,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
     public void setProfession(VillagerProfession profession) {
         this.setVillagerData(this.getVillagerData().setProfession(profession));
+        if (profession == VillagerProfession.FARMER && getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.CARVED_PUMPKIN)
+            setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
     }
     public VillagerProfession getProfession() {
         return this.getVillagerData().getProfession();

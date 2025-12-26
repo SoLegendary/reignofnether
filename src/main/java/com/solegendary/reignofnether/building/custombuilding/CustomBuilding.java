@@ -99,6 +99,8 @@ public class CustomBuilding extends Building {
         attributesNbt.putString("portraitBlockRegistryKey", this.getPortraitBlockRegistryKey());
         attributesNbt.putBoolean("capturable", this.capturable);
         attributesNbt.putBoolean("invulnerable", this.invulnerable);
+        attributesNbt.putBoolean("repairable", this.repairable);
+        attributesNbt.putBoolean("shouldDestroyOnReset", this.shouldDestroyOnReset);
         attributesNbt.putInt("nightRadius", this.nightRadius);
         attributesNbt.putInt("netherRadius", this.netherRadius);
         attributesNbt.putBoolean("buildableByVillagers", this.buildableByVillagers);
@@ -115,6 +117,8 @@ public class CustomBuilding extends Building {
         this.setIconAndPortrait(attributesNbt.getString("portraitBlockRegistryKey"));
         this.capturable = attributesNbt.getBoolean("capturable");
         this.invulnerable = attributesNbt.getBoolean("invulnerable");
+        this.repairable = attributesNbt.getBoolean("repairable");
+        this.shouldDestroyOnReset = attributesNbt.getBoolean("shouldDestroyOnReset");
         this.nightRadius = attributesNbt.getInt("nightRadius");
         this.netherRadius = attributesNbt.getInt("netherRadius");
         this.buildableByVillagers = attributesNbt.getBoolean("buildableByVillagers");
@@ -161,6 +165,8 @@ public class CustomBuilding extends Building {
             tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.set_capturable.label")));
         if (invulnerable)
             tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.set_invulnerable.label")));
+        if (!repairable)
+            tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.not_repairable.label")));
         if (nightRadius > 0)
             tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.set_night_radius.label") + ": " + nightRadius));
         if (netherRadius > 0)
@@ -196,7 +202,8 @@ public class CustomBuilding extends Building {
     }
 
     public void setIconAndPortrait(String blockRegistryKey) {
-        this.portraitBlock = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(ResourceLocation.DEFAULT_NAMESPACE, blockRegistryKey));
+        this.portraitBlock = BuiltInRegistries.BLOCK.get(ResourceLocation.parse(blockRegistryKey));
+
     }
 
     public void cycleIconAndPortrait(boolean reverse) {

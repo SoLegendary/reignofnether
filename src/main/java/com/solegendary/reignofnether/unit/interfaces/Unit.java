@@ -6,6 +6,8 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
+import com.solegendary.reignofnether.hud.passives.PassiveIcons;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -47,6 +49,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -715,4 +718,18 @@ public interface Unit {
         return getCharges().get(ability);
     }
     Object2ObjectArrayMap<Ability,Integer> getCharges();
+
+    default List<EnchantmentIcon> getPassiveIcons() {
+        ArrayList<EnchantmentIcon> icons = new ArrayList<>();
+        LivingEntity entity = (LivingEntity) this;
+        for (EnchantmentIcon enchantIcon : PassiveIcons.ENCHANTMENT_ICONS) {
+            ItemStack itemStack = entity.getItemBySlot(enchantIcon.slot);
+            for (Enchantment enchant : itemStack.getAllEnchantments().keySet()) {
+                if (enchant == enchantIcon.enchantment) {
+                    icons.add(enchantIcon);
+                }
+            }
+        }
+        return icons;
+    }
 }

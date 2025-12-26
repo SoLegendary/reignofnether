@@ -8,11 +8,10 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.ability.abilities.EnchantMaiming;
-import com.solegendary.reignofnether.ability.abilities.EnchantVigor;
 import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.building.GarrisonableBuilding;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -43,7 +42,6 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
@@ -179,7 +177,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     // - healthbar
     // - unit name
     // Must be called from DrawScreenEvent
-    public RectZone render(GuiGraphics guiGraphics, String name, int x, int y, LivingEntity entity) {
+    public RectZone render(GuiGraphics guiGraphics, String name, int x, int y, int mouseX, int mouseY, LivingEntity entity) {
         if (entity instanceof HeroUnit)
             y -= HERO_Y_OFFSET;
 
@@ -219,8 +217,9 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         guiGraphics.pose().translate(0,0,2000);
         name = WordUtils.capitalize(name);
 
+        /*
         if ((entity instanceof BruteUnit bUnit && bUnit.hasEnchantedNetheriteSword()) ||
-            (entity instanceof HeadhunterUnit hUnit && hUnit.hasFireAspectTrident())) {
+            (entity instanceof HeadhunterUnit hUnit && hUnit.hasFlameTrident())) {
             name += " (FA)";
         }
         if (entity instanceof VindicatorUnit pUnit && pUnit.getEnchant() == Enchantments.SHARPNESS) {
@@ -244,20 +243,32 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                 name += "I";
             name += ")";
         }
+         */
 
         if (rs != Relationship.OWNED && entity instanceof Unit unit && unit.getOwnerName().length() > 0) {
             name += " (" + unit.getOwnerName() + ")";
         }
 
         // draw name (unless a player, since their nametag will be rendered anyway)
-        if (entity instanceof HeroUnit heroUnit) {
+        if (entity instanceof HeroUnit) {
             y -= 6;
-            //name += I18n.get("hud.hero.reignofnether.level", heroUnit.getHeroLevel());
+        }
+        int xOrig = x;
+        if (entity instanceof Unit unit) {
+            for (EnchantmentIcon passiveIcon : unit.getPassiveIcons()) {
+                passiveIcon.render(guiGraphics, x - 2, y - 16, mouseX, mouseY);
+                if (passiveIcon.isMouseOver(mouseX, mouseY))
+                    passiveIcon.renderTooltip(guiGraphics, mouseX, mouseY);
+                x += EnchantmentIcon.ICON_SIZE * 2;
+            }
+            if (!unit.getPassiveIcons().isEmpty())
+                x += EnchantmentIcon.ICON_SIZE / 2;
         }
         if (!(entity instanceof Player)) {
             guiGraphics.drawString(Minecraft.getInstance().font, name, x + 4, y - 9, 0xFFFFFFFF);
         }
-        if (entity instanceof HeroUnit heroUnit) {
+        x = xOrig;
+        if (entity instanceof HeroUnit) {
             y += 14;
         }
 
@@ -340,10 +351,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     }
 
     private void renderStatText(List<String> texts, LivingEntity entity, int x, int y, GuiGraphics guiGraphics) {
-        // need to render like this instead of GuiComponent.drawCenteredString, so it's layered above the portrait
-        // entity
+        // need to render like this instead of GuiComponent.drawCenteredString, so it's layered above the portrait entity
         Minecraft MC = Minecraft.getInstance();
-        Window window = MC.getWindow();
         MultiBufferSource.BufferSource multibuffersource$buffersource =
                 MultiBufferSource.immediate(Tesselator.getInstance()
                         .getBuilder());

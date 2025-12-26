@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.util;
 
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -9,6 +10,9 @@ import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,6 +22,7 @@ import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ItemParticleOption;
@@ -33,6 +38,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
@@ -527,4 +533,34 @@ public class MyRenderer {
         );
     }
 
+    public static void renderItem(GuiGraphics guiGraphics, ItemStack pStack, int pX, int pY, float scale) {
+        if (!pStack.isEmpty()) {
+            BakedModel bakedmodel = MC.getItemRenderer().getModel(pStack, null, null, 0);
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(pX + (9 * scale), pY + (9 * scale), (float)(150));
+            try {
+                guiGraphics.pose().mulPoseMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
+                guiGraphics.pose().scale(16.0F * scale, 16.0F * scale, 16.0F * scale);
+                boolean flag = !bakedmodel.usesBlockLight();
+                if (flag) {
+                    Lighting.setupForFlatItems();
+                }
+                MC.getItemRenderer().render(pStack, ItemDisplayContext.GUI, false, guiGraphics.pose(), guiGraphics.bufferSource(), 15728880, OverlayTexture.NO_OVERLAY, bakedmodel);
+                guiGraphics.flush();
+                if (flag) {
+                    Lighting.setupFor3DItems();
+                }
+            } catch (Throwable var12) {
+                CrashReport crashreport = CrashReport.forThrowable(var12, "Rendering item");
+                CrashReportCategory crashreportcategory = crashreport.addCategory("Item being rendered");
+                crashreportcategory.setDetail("Item Type", () -> String.valueOf(pStack.getItem()));
+                crashreportcategory.setDetail("Registry Name", () -> String.valueOf(ForgeRegistries.ITEMS.getKey(pStack.getItem())));
+                crashreportcategory.setDetail("Item Damage", () -> String.valueOf(pStack.getDamageValue()));
+                crashreportcategory.setDetail("Item NBT", () -> String.valueOf(pStack.getTag()));
+                crashreportcategory.setDetail("Item Foil", () -> String.valueOf(pStack.hasFoil()));
+                throw new ReportedException(crashreport);
+            }
+            guiGraphics.pose().popPose();
+        }
+    }
 }

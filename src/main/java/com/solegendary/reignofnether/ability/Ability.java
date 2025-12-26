@@ -17,8 +17,8 @@ import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitComman
 public class Ability {
     public final UnitAction action; // null for worker building production items (handled specially in BuildingClientEvents)
     public float cooldownMax;
-    public final float range; // if <= 0, is melee
-    public final float radius; // if <= 0, is single target
+    public float range; // if <= 0, is melee
+    public float radius; // if <= 0, is single target
     public final boolean canTargetEntities;
     public boolean oneClickOneUse; // if true, a group of units/buildings will use their abilities one by one
     public UnitAction autocastEnableAction = null;

@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.ability.heroAbilities.piglin;
+package com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant;
 
 //Throws a TNT item which, when it hits the ground, becomes a full block of TNT that explodes after a delay
 //Higher levels raise the damage

@@ -83,7 +83,7 @@ public class PlayerServerEvents {
     // players that are currently playing a match
     public static final List<RTSPlayer> rtsPlayers = Collections.synchronizedList(new ArrayList<>());
     // list of players after a match ends
-    public static final List<RTSPlayer> finalRTSPlayers = Collections.synchronizedList(new ArrayList<>());
+    public static final List<RTSPlayer> postGameRtsPlayers = Collections.synchronizedList(new ArrayList<>());
     public static boolean rtsLocked = false; // can players join as RTS players or not?
     public static boolean rtsSyncingEnabled = true; // will logging in players sync units and buildings?
 
@@ -840,7 +840,7 @@ public class PlayerServerEvents {
                     sendMessageToAllPlayers(playerName + " has " + reason + " and is defeated!", true);
                     sendMessageToAllPlayers("server.reignofnether.players_remaining", false, (rtsPlayers.size() - 1));
 
-                    finalRTSPlayers.add(rtsPlayer);
+                    postGameRtsPlayers.add(rtsPlayer);
 
                     PlayerClientboundPacket.defeat(playerName);
 
@@ -893,7 +893,7 @@ public class PlayerServerEvents {
                 if (remainingPlayers.equals(factionGroup)) {
                     // Declare victory for all players in the faction group
                     for (String winner : remainingPlayers) {
-                        finalRTSPlayers.add(getRTSPlayer(winner));
+                        postGameRtsPlayers.add(getRTSPlayer(winner));
                         sendMessageToAllPlayers("server.reignofnether.victory_alliance", true, winner);
                         PlayerClientboundPacket.victory(winner);
                     }
@@ -901,7 +901,7 @@ public class PlayerServerEvents {
             } else if (rtsPlayers.size() == 1) {
                 // Single remaining player - declare victory
                 RTSPlayer winner = rtsPlayers.get(0);
-                finalRTSPlayers.add(winner);
+                postGameRtsPlayers.add(winner);
                 sendMessageToAllPlayers("server.reignofnether.victorious", true, winner.name);
                 PlayerClientboundPacket.victory(winner.name);
             }
@@ -1009,7 +1009,7 @@ public class PlayerServerEvents {
 
             // clear all saved data
             saveRTSPlayers();
-            finalRTSPlayers.clear();
+            postGameRtsPlayers.clear();
             saveBuildings(serverLevel);
             BuildingServerEvents.saveNetherZones(serverLevel);
             UnitServerEvents.saveGatherTargets(serverLevel);

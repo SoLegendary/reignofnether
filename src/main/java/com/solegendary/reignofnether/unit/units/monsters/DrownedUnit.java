@@ -28,6 +28,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Drowned;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.NotNull;
@@ -206,8 +207,18 @@ public class DrownedUnit extends Drowned implements Unit, AttackerUnit {
     }
 
     @Override
+    public void aiStep() {
+        boolean isWearingPumpkin = getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.CARVED_PUMPKIN;
+        if (isWearingPumpkin)
+            this.armorItems.set(EquipmentSlot.HEAD.getIndex(), new ItemStack(Items.AIR));
+        super.aiStep();
+        if (isWearingPumpkin)
+            this.armorItems.set(EquipmentSlot.HEAD.getIndex(), new ItemStack(Items.CARVED_PUMPKIN));
+    }
+
+    @Override
     public SunlightEffect getSunlightEffect() {
-        if (hasItemInSlot(EquipmentSlot.HEAD)) {
+        if (hasItemInSlot(EquipmentSlot.HEAD) && getItemBySlot(EquipmentSlot.HEAD).getItem() != Items.CARVED_PUMPKIN) {
             return SunlightEffect.SLOWNESS_II;
         } else {
             return SunlightEffect.FIRE;

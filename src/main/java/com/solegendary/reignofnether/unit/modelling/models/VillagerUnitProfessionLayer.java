@@ -63,7 +63,7 @@ public class VillagerUnitProfessionLayer<T extends LivingEntity & VillagerDataHo
             VillagerMetaDataSection.Hat typeHatData = this.getHatData(this.typeHatCache, "type", BuiltInRegistries.VILLAGER_TYPE, biomeType);
             VillagerMetaDataSection.Hat profHatData = this.getHatData(this.professionHatCache, "profession", BuiltInRegistries.VILLAGER_PROFESSION, profession);
             M vHeadModel = this.getParentModel();
-            ((VillagerUnitModel<?>) vHeadModel).hatRimVisible(profession == VillagerProfession.FARMER);
+            ((VillagerUnitModel<?>) vHeadModel).getHatRim().visible = (profession == VillagerProfession.FARMER);
             ResourceLocation biomeTypeRL = this.getResourceLocation("type", BuiltInRegistries.VILLAGER_TYPE.getKey(biomeType));
             renderColoredCutoutModel(vHeadModel, biomeTypeRL, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, 1.0F, 1.0F, 1.0F);
             if (profession != VillagerProfession.NONE && !pLivingEntity.isBaby()) {
@@ -74,7 +74,7 @@ public class VillagerUnitProfessionLayer<T extends LivingEntity & VillagerDataHo
                     renderColoredCutoutModel(vHeadModel, profLevelRL, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, 1.0F, 1.0F, 1.0F);
                 }
             }
-            ((VillagerUnitModel<?>) vHeadModel).hatRimVisible(false);
+            ((VillagerUnitModel<?>) vHeadModel).getHatRim().visible = false;
         }
     }
 

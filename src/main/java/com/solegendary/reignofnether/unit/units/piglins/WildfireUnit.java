@@ -4,8 +4,8 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.abilities.FirewallShot;
-import com.solegendary.reignofnether.ability.heroAbilities.monster.InsomniaCurse;
-import com.solegendary.reignofnether.ability.heroAbilities.monster.RaiseDead;
+import com.solegendary.reignofnether.ability.heroAbilities.necromancer.InsomniaCurse;
+import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -105,13 +105,13 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     private ReturnResourcesGoal returnResourcesGoal;
     public MountGoal mountGoal;
 
-    private GenericTargetedSpellGoal castFirebombGoal;
-    public GenericTargetedSpellGoal getCastFirebombGoal() {
-        return castFirebombGoal;
+    private GenericTargetedSpellGoal castMoltenBombGoal;
+    public GenericTargetedSpellGoal getCastMoltenBombGoal() {
+        return castMoltenBombGoal;
     }
-    private GenericTargetedSpellGoal castScorchingEruptionGoal;
-    public GenericTargetedSpellGoal getCastScorchingEruptionGoal() {
-        return castScorchingEruptionGoal;
+    private GenericTargetedSpellGoal castScorchingGazeGoal;
+    public GenericTargetedSpellGoal getCastScorchingGazeGoal() {
+        return castScorchingGazeGoal;
     }
     private GenericUntargetedSpellGoal castSoulsAflameGoal;
     public GenericUntargetedSpellGoal getCastSoulsAflameGoal() {
@@ -173,11 +173,11 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 150;
+    private float baseMaxMana = 110;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    private float manaRegenPerSecond = 1;
-    private float manaBonusPerLevel = 10;
+    private float manaRegenPerSecond = 0.6f;
+    private float manaBonusPerLevel = 7;
     @Override public float getBaseMaxMana() { return baseMaxMana; }
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
@@ -194,10 +194,10 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
     @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
-    final static public float attackDamage = 4.0f;
-    final static public float attackBonusPerLevel = 0.4f;
-    final static public float attacksPerSecond = 0.35f;
-    final static public float maxHealth = 100.0f;
+    final static public float attackDamage = 2.5f;
+    final static public float attackBonusPerLevel = 0.3f;
+    final static public float attacksPerSecond = 0.75f;
+    final static public float maxHealth = 120.0f;
     final static public float maxHealthBonusPerLevel = 12.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
@@ -291,8 +291,8 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     @Override
     public void resetBehaviours() {
         animateScaleReducing = true;
-        this.castFirebombGoal.stop();
-        this.castScorchingEruptionGoal.stop();
+        this.castMoltenBombGoal.stop();
+        this.castScorchingGazeGoal.stop();
         this.castSoulsAflameGoal.stop();
     }
 
@@ -318,8 +318,8 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         if (level().isClientSide() && animateTicks > 0) {
             animateTicks -= 1;
         }
-        this.castFirebombGoal.tick();
-        this.castScorchingEruptionGoal.tick();
+        this.castMoltenBombGoal.tick();
+        this.castScorchingGazeGoal.tick();
         this.castSoulsAflameGoal.tick();
     }
 
@@ -342,7 +342,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         this.garrisonGoal = new GarrisonGoal(this);
         this.attackGoal = new UnitRangedAttackGoal<>(this, ATTACK_WINDUP_TICKS);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
-        this.castFirebombGoal = new GenericTargetedSpellGoal(
+        this.castMoltenBombGoal = new GenericTargetedSpellGoal(
                 this,
                 0,
                 InsomniaCurse.RANGE,
@@ -351,12 +351,12 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                 this::doFirebomb,
                 null
         );
-        this.castScorchingEruptionGoal = new GenericTargetedSpellGoal(
+        this.castScorchingGazeGoal = new GenericTargetedSpellGoal(
                 this,
                 0,
                 InsomniaCurse.RANGE,
                 UnitAnimationAction.CAST_SPELL,
-                this::scorchingEruption,
+                this::scorchingGaze,
                 null,
                 null
         );
@@ -412,7 +412,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     }
 
-    public void scorchingEruption(LivingEntity targetEntity) {
+    public void scorchingGaze(LivingEntity targetEntity) {
 
     }
 

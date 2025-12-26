@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
@@ -35,7 +36,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -46,6 +47,7 @@ public class SandboxClientEvents {
     private static Faction faction = Faction.NONE;
     public static Relationship relationship = Relationship.OWNED;
     public static SandboxMenuType sandboxMenuType = SandboxMenuType.UNITS;
+    public static CustomBuildingSortOption customBuildingSortOption = CustomBuildingSortOption.NAME;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
@@ -392,10 +394,54 @@ public class SandboxClientEvents {
                 },
                 null,
                 List.of(hasCheat ? fcs(I18n.get("sandbox.reignofnether.nonunit_control_cheat_on")) :
-                                    fcs(I18n.get("sandbox.reignofnether.nonunit_control_cheat_off")),
-                                    fcs(I18n.get("sandbox.reignofnether.nonunit_control_cheat1"))
+                                fcs(I18n.get("sandbox.reignofnether.nonunit_control_cheat_off")),
+                        fcs(I18n.get("sandbox.reignofnether.nonunit_control_cheat1"))
                 )
         );
+    }
+
+    public static Button getSortCustomBuildingsButton() {
+        return new Button(
+                "Sort Custom Buildings",
+                Button.itemIconSize,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/hopper.png"),
+                (Keybinding) null,
+                () -> false,
+                () -> sandboxMenuType != SandboxMenuType.CUSTOM_BUILDINGS,
+                () -> true,
+                () -> {
+                    switch (customBuildingSortOption) {
+                        case NAME -> customBuildingSortOption = CustomBuildingSortOption.SIZE;
+                        case SIZE -> customBuildingSortOption = CustomBuildingSortOption.FACTION;
+                        case FACTION -> customBuildingSortOption = CustomBuildingSortOption.NAME;
+                    }
+                    sortCustomBuildings();
+                },
+                () -> {
+                    switch (customBuildingSortOption) {
+                        case NAME -> customBuildingSortOption = CustomBuildingSortOption.FACTION;
+                        case SIZE -> customBuildingSortOption = CustomBuildingSortOption.NAME;
+                        case FACTION -> customBuildingSortOption = CustomBuildingSortOption.SIZE;
+                    }
+                    sortCustomBuildings();
+                },
+                List.of(
+                        fcs(I18n.get("sandbox.reignofnether.sort_custom_buildings.name"), customBuildingSortOption == CustomBuildingSortOption.NAME),
+                        fcs(I18n.get("sandbox.reignofnether.sort_custom_buildings.size"), customBuildingSortOption == CustomBuildingSortOption.SIZE),
+                        fcs(I18n.get("sandbox.reignofnether.sort_custom_buildings.faction"), customBuildingSortOption == CustomBuildingSortOption.FACTION)
+                )
+        );
+    }
+
+    public static void sortCustomBuildings() {
+        switch (customBuildingSortOption) {
+            case NAME -> CustomBuildingClientEvents.customBuildings.sort(Comparator.comparing(b -> b.name));
+            case SIZE -> CustomBuildingClientEvents.customBuildings.sort(Comparator.comparing(b -> b.structureSize.getX() * b.structureSize.getY() * b.structureSize.getZ()));
+            case FACTION -> CustomBuildingClientEvents.customBuildings.sort(
+                    Comparator.comparing((CustomBuilding b) -> b.buildableByVillagers)
+                            .thenComparing((CustomBuilding b) -> b.buildableByMonsters)
+                            .thenComparing((CustomBuilding b) -> b.buildableByPiglins).reversed());
+        }
     }
 
     public static Button getExitSandboxButton() {

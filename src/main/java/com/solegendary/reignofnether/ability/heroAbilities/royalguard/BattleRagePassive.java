@@ -1,10 +1,11 @@
-package com.solegendary.reignofnether.ability.heroAbilities.villager;
+package com.solegendary.reignofnether.ability.heroAbilities.royalguard;
 
 //The lower the guard's health, the more damage, resistance and life regen he gains
 //Higher levels increase the amount of damage and resistance gained
 
 // show vanilla villager angry clouds when the guard is hit
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -62,14 +63,14 @@ public class BattleRagePassive extends HeroAbility {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
         return new AbilityButton("Battle Rage",
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/battle_rage.png"),
                 hotkey,
                 () -> false,
                 () -> getRank(hero) == 0,
                 () -> true,
                 null,
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );
@@ -79,7 +80,7 @@ public class BattleRagePassive extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Battle Rage",
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/battle_rage.png"),
                 hero
         );
     }

@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -34,13 +35,14 @@ public class Button {
     int iconSelectedFrameSize;
     public static int DEFAULT_ICON_SIZE = 14;
     public static int DEFAULT_ICON_FRAME_SIZE = 22;
-    public static int DEFAULT_ICON_SELECTED_FRAME_SIZE = 24;
     public int tooltipOffsetY = 0;
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
 
     public ResourceLocation iconResource;
     public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
     public ResourceLocation frameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
+
+    public ItemStack iconItem = null;
 
     public Keybinding hotkey = null; // for action/ability buttons
     public LivingEntity entity = null; // for selected unit buttons
@@ -199,6 +201,8 @@ public class Button {
                     x+4 + (7 - xyDiff - iconSize/2), y+4 + (7 - xyDiff - iconSize/2),
                     DEFAULT_ICON_SIZE
             );
+        } else if (iconItem != null) {
+            MyRenderer.renderItem(guiGraphics, iconItem, x+4 + (7 - xyDiff - iconSize/2), y+4 + (7 - xyDiff - iconSize/2), 0.75f);
         }
 
         renderHotkey(guiGraphics, x, y);
@@ -282,7 +286,6 @@ public class Button {
             }
         }
     }
-
 
     // must be done from key press event
     public void checkPressed(int key) {

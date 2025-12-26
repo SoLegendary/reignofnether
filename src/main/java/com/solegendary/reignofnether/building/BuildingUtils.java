@@ -44,24 +44,19 @@ public class BuildingUtils {
     }
 
     public static boolean isBuildingBuildable(boolean isClientSide, BuildingPlacement building) {
-        if (isClientSide) {
-            List<BlockPos> list = new ArrayList<>();
-            for (BuildingPlacement b : BuildingClientEvents.getBuildings()) {
-                BlockPos originPos = b.originPos;
-                list.add(originPos);
+        List<BuildingPlacement> buildings;
+        if (isClientSide)
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+        var flag = false;
+        for (BuildingPlacement buildingPlacement : buildings) {
+            if (buildingPlacement.originPos == building.originPos) {
+                flag = true;
+                break;
             }
-            return list.contains(building.originPos) &&
-                    building.getBlocksPlaced() < building.getBlocksTotal();
         }
-        else {
-            List<BlockPos> list = new ArrayList<>();
-            for (BuildingPlacement b : BuildingServerEvents.getBuildings()) {
-                BlockPos originPos = b.originPos;
-                list.add(originPos);
-            }
-            return list.contains(building.originPos) &&
-                    building.getBlocksPlaced() < building.getBlocksTotal();
-        }
+        return flag && building.getBlocksPlaced() < building.getBlocksTotal() && (!building.isBuilt || building.getBuilding().repairable);
     }
 
     // returns a list of BPs that may reside in unique chunks for fog of war calcs

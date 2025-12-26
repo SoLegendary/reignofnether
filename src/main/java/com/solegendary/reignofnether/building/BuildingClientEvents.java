@@ -343,10 +343,14 @@ public class BuildingClientEvents {
     }
 
     public static boolean isBuildingPlacementValid(BlockPos originPos) {
-        return !isBuildingPlacementInAir(originPos) && !isBuildingPlacementClipping(originPos)
-            && !isOverlappingAnyOtherBuilding() && isNonPiglinOrOnNetherBlocks(originPos) && isNonBridgeOrValidBridge(
-            originPos) && FogOfWarClientEvents.isInBrightChunk(originPos) && isBuildingPlacementWithinWorldBorder(
-            originPos) && isNotTutorialOrNearValidCapitolPosition(originPos);
+        return !isBuildingPlacementInAir(originPos) &&
+                !isBuildingPlacementClipping(originPos) &&
+                (!isOverlappingAnyOtherBuilding() || SandboxClientEvents.isSandboxPlayer()) &&
+                isNonPiglinOrOnNetherBlocks(originPos) &&
+                isNonBridgeOrValidBridge(originPos) &&
+                FogOfWarClientEvents.isInBrightChunk(originPos) &&
+                isBuildingPlacementWithinWorldBorder(originPos) &&
+                isNotTutorialOrNearValidCapitolPosition(originPos);
     }
 
     public static void checkBuildingPlacementValidityWithMessages(BlockPos originPos) {
@@ -356,7 +360,7 @@ public class BuildingClientEvents {
             showTemporaryMessage(I18n.get("building.reignofnether.ground_not_flat"));
         } else if (isBuildingPlacementClipping(originPos)) {
             showTemporaryMessage(I18n.get("building.reignofnether.ground_not_flat"));
-        } else if (isOverlappingAnyOtherBuilding()) {
+        } else if (isOverlappingAnyOtherBuilding() && !SandboxClientEvents.isSandboxPlayer()) {
             showTemporaryMessage(I18n.get("building.reignofnether.too_close"));
         } else if (!isNonPiglinOrOnNetherBlocks(originPos)) {
             showTemporaryMessage(I18n.get("building.reignofnether.must_be_nether"));

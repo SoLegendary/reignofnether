@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.ability.heroAbilities.villager;
+package com.solegendary.reignofnether.ability.heroAbilities.royalguard;
 
 //Temporarily gain bonus damage, health and movespeed
 //While active, the guard's model becomes larger and has a shimmering enchanted effect

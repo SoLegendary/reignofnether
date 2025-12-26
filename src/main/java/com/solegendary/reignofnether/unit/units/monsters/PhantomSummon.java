@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
-import com.solegendary.reignofnether.ability.heroAbilities.monster.InsomniaCurse;
+import com.solegendary.reignofnether.ability.heroAbilities.necromancer.InsomniaCurse;
 import com.solegendary.reignofnether.time.NightUtils;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 
 import javax.annotation.Nullable;
 
-import static com.solegendary.reignofnether.ability.heroAbilities.monster.InsomniaCurse.PHANTOM_MAX_ATTACKS;
+import static com.solegendary.reignofnether.ability.heroAbilities.necromancer.InsomniaCurse.PHANTOM_MAX_ATTACKS;
 
 // still not a unit, but has overrides to make
 

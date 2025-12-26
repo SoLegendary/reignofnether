@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
@@ -152,18 +151,20 @@ public abstract class ProductionItem {
         return null;
     }
 
-    public void onItemProduced(ProductionPlacement placement, ActiveProduction active) {
+    public void recordScore(ProductionPlacement placement) {
         if (!placement.getLevel().isClientSide()) {
             RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(placement.ownerName);
-            rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_UNITS_PRODUCED);
-            if (
-                    active.item.getItemName() == "Villager"
-                    || active.item.getItemName() == "Zombie Villager"
-                    || active.item.getItemName() == "Grunt"
-            )
-                rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.WORKER_UNITS_PRODUCED);
-            else
-                rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.MILITARY_UNITS_PRODUCED);
+            if (rtsPlayer != null) {
+                rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_UNITS_PRODUCED);
+                if (List.of(
+                        ProductionItems.VILLAGER,
+                        ProductionItems.ZOMBIE_VILLAGER,
+                        ProductionItems.GRUNT
+                ).contains(this))
+                    rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.WORKER_UNITS_PRODUCED);
+                else
+                    rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.MILITARY_UNITS_PRODUCED);
+            }
         }
     }
 
@@ -188,7 +189,7 @@ public abstract class ProductionItem {
                 active.ticksLeft = 0;
         }
         if (active.ticksLeft <= 0 && isBelowPopulationSupply(placement.getLevel(), placement.ownerName)) {
-            this.onItemProduced(placement, active);
+            this.recordScore(placement);
             if (!active.completed) {
                 onComplete.accept(placement.getLevel(), placement);
                 active.completed = true;
