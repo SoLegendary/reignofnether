@@ -567,13 +567,13 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
             }
 
             for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(blockPos.above()), MaceSlam.RADIUS, LivingEntity.class, level())) {
-                if (!(hitEntity instanceof Unit unit)) continue;
-                var relationShip = UnitServerEvents.getUnitToEntityRelationship(unit, this);
-                if (relationShip.equals(Relationship.OWNED)) continue;
-                if (relationShip.equals(Relationship.FRIENDLY)) continue;
-                Unit.fullResetBehaviours(unit);
+                if (hitEntity instanceof Unit unit) {
+                    var relationShip = UnitServerEvents.getUnitToEntityRelationship(unit, this);
+                    if (relationShip.equals(Relationship.OWNED)) continue;
+                    if (relationShip.equals(Relationship.FRIENDLY)) continue;
+                    Unit.fullResetBehaviours(unit);
+                }
                 hitEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), maceSlam.stunDuration));
-
                 boolean hurt = hitEntity.hurt(this.damageSources().mobAttack(this), maceSlam.damage);
                 if (hurt) {
                     float kb = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);

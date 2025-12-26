@@ -269,8 +269,8 @@ public class TutorialServerEvents {
         var index = 0;
         for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
             if (!(unit instanceof ZombieVillagerUnit)) continue;
-            if (index <= 2) {
-                BuildingServerEvents.placeBuilding(Buildings.GRAVEYARD,
+            switch (index) {
+                case 0 -> BuildingServerEvents.placeBuilding(Buildings.GRAVEYARD,
                         new BlockPos(GRAVEYARD_POS),
                         Rotation.NONE,
                         TUTORIAL_ENEMY_NAME,
@@ -278,12 +278,31 @@ public class TutorialServerEvents {
                         false,
                         false
                 );
-            } else break;
+                case 1 -> BuildingServerEvents.placeBuilding(Buildings.DARK_WATCHTOWER,
+                        new BlockPos(TOWER_POS),
+                        Rotation.NONE,
+                        TUTORIAL_ENEMY_NAME,
+                        new int[] { unit.getId() },
+                        false,
+                        false
+                );
+                case 2 -> BuildingServerEvents.placeBuilding(Buildings.SPIDER_LAIR,
+                        new BlockPos(SPIDER_LAIR_POS),
+                        Rotation.NONE,
+                        TUTORIAL_ENEMY_NAME,
+                        new int[] { unit.getId() },
+                        false,
+                        false
+                );
+                case 3 -> {
+                    return;
+                }
+            }
             index++;
         }
     }
 
-    public static void spawnMonsterBaseArmy() {
+        public static void spawnMonsterBaseArmy() {
         spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), getServerLevel(), GRAVEYARD_ZOMBIE_POS, 3, TUTORIAL_ENEMY_NAME);
         spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), GROUND_SKELETON_POS_1, 1, TUTORIAL_ENEMY_NAME);
         spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), GROUND_SKELETON_POS_2, 1, TUTORIAL_ENEMY_NAME);

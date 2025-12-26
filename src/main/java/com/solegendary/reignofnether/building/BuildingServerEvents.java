@@ -652,18 +652,18 @@ public class BuildingServerEvents {
                 }
             }
             for (BuildingPlacement building : affectedBuildings) {
-                int atkDmg = 0;
+                float atkDmg = 0;
                 if (ghastUnit != null) {
-                    atkDmg = (int) ghastUnit.getUnitAttackDamage();
+                    atkDmg = ghastUnit.getUnitAttackDamage();
                     building.lastAttacker = ghastUnit;
                 } else if (creeperUnit != null) {
-                    atkDmg = (int) creeperUnit.getUnitAttackDamage();
+                    atkDmg = creeperUnit.getUnitAttackDamage();
                     if (creeperUnit.isPowered()) {
-                        atkDmg *= (int) CreeperUnit.CHARGED_DAMAGE_MULT;
+                        atkDmg *= CreeperUnit.CHARGED_DAMAGE_MULT;
                     }
                     building.lastAttacker = creeperUnit;
                 } else if (pillagerUnit != null) {
-                    atkDmg = (int) pillagerUnit.getUnitAttackDamage() / 2;
+                    atkDmg = pillagerUnit.getUnitAttackDamage() / 2;
                     building.lastAttacker = pillagerUnit;
                 } else if (exp.getExploder() instanceof PrimedTnt) {
                     atkDmg = TNT_BUILDING_BASE_DAMAGE;
@@ -673,14 +673,14 @@ public class BuildingServerEvents {
                     // all explosion damage will directly hit all occupants at an average of 1/4 rate
                     if (building instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
                         for (LivingEntity le : garr.getOccupants())
-                            le.hurt(exp.getDamageSource(), (random.nextInt(atkDmg + 1)) / 2f);
+                            le.hurt(exp.getDamageSource(), (random.nextFloat(atkDmg + 1)) / 2f);
                     }
 
                     if (building instanceof BridgePlacement) {
                         atkDmg /= 2;
                     }
 
-                    building.destroyRandomBlocks(atkDmg);
+                    building.destroyRandomBlocks((int) atkDmg);
                 }
 
             }

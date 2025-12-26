@@ -522,7 +522,7 @@ public class BuildingPlacement {
         return true;
     }
 
-    private boolean isPlaced(BuildingBlock block) {
+    private boolean isDestroyedAndNotNextToLiquid(BuildingBlock block) {
         if (!(this instanceof BridgePlacement) && this.level.getBlockState(block.getBlockPos()).getFluidState().isEmpty() && (
             !this.level.getBlockState(block.getBlockPos().above()).getFluidState().isEmpty()
             || !this.level.getBlockState(block.getBlockPos().north()).getFluidState().isEmpty()
@@ -545,7 +545,7 @@ public class BuildingPlacement {
             return;
         var placedBlocks = new ArrayList<BuildingBlock>();
         for (BuildingBlock block : blocks) {
-            if (!isPlaced(block)) continue;
+            if (!isDestroyedAndNotNextToLiquid(block)) continue;
             placedBlocks.add(block);
         }
         Collections.shuffle(placedBlocks);

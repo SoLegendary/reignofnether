@@ -161,7 +161,7 @@ public class PlayerServerEvents {
     public static boolean isRTSPlayer(String playerName) {
         synchronized (rtsPlayers) {
             for (RTSPlayer p : rtsPlayers) {
-                if (!p.name.equals(playerName)) return true;
+                if (p.name.equals(playerName)) return true;
             }
             return false;
         }

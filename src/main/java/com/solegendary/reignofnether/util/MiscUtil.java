@@ -243,20 +243,6 @@ public class MiscUtil {
     public static LivingEntity findClosestAttackableEntity(Mob unitMob, float range, ServerLevel level) {
         Vector3d unitPosition = new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z);
         var pos = new Vec3(unitPosition.x, unitPosition.y, unitPosition.z);
-        /*
-        double closestDist = range;
-        LivingEntity closestTarget = null;
-        bo
-        for (LivingEntity tle : nearbyEntities) {
-            if (isIdleOrMoveAttackable(unitMob, tle, neutralAggro) && hasLineOfSightForAttacks(unitMob, tle)) {
-                double dist = unitMob.position().distanceTo(tle.position());
-                if (dist < closestDist) {
-                    closestDist = dist;
-                    closestTarget = tle;
-                }
-            }
-        }
-        */
         boolean neutralAggro = unitMob.level().getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get();
         AABB aabb = new AABB(
                 unitPosition.x - range,
