@@ -128,7 +128,7 @@ public class BuildingPlacement {
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
 
     private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned;
-    public int msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
+    public float msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
 
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float MIN_BLOCKS_PERCENT = 0.5f;
@@ -930,18 +930,18 @@ public class BuildingPlacement {
                 // 3 builders - 3/5 (60%)
                 // 4 builders - 3/6 (50%)
                 // 5 builders - 3/7 (43%)
-                int msPerBuild = (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
+                float msPerBuild = (float) (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
                 if (!isBuilt) {
-                    msPerBuild *= (int) building.buildTimeModifier;
+                    msPerBuild *= building.buildTimeModifier;
                     if (isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) > 0)
                         msPerBuild *= 2;
                 } else {
-                    msPerBuild *= (int) building.repairTimeModifier;
+                    msPerBuild *= building.repairTimeModifier;
                 }
 
                 if (getBuilding() instanceof PortalBasic && !BuildingServerEvents.isOnNetherBlocks(blocks, originPos, serverLevel)
                     && !ResearchServerEvents.playerHasResearch(ownerName, ProductionItems.RESEARCH_ADVANCED_PORTALS)) {
-                    msPerBuild *= (int) PortalPlacement.NON_NETHER_BUILD_TIME_MODIFIER;
+                    msPerBuild *= PortalPlacement.NON_NETHER_BUILD_TIME_MODIFIER;
                 }
 
                 if (msToNextBuild > msPerBuild) {
