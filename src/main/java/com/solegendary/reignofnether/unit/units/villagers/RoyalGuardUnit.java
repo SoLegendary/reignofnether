@@ -360,10 +360,11 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
             if (ai != null) {
                 for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(pEntity.getEyePosition(), Avatar.ATTACK_SPLASH_RADIUS, LivingEntity.class, level())) {
-                    if (!(hitEntity instanceof Unit unit)) continue;
-                    var relationShip = UnitServerEvents.getUnitToEntityRelationship(unit, this);
-                    if (relationShip.equals(Relationship.OWNED)) continue;
-                    if (relationShip.equals(Relationship.FRIENDLY)) continue;
+                    if (hitEntity instanceof Unit unit) {
+                        var relationShip = UnitServerEvents.getUnitToEntityRelationship(unit, this);
+                        if (relationShip.equals(Relationship.OWNED)) continue;
+                        if (relationShip.equals(Relationship.FRIENDLY)) continue;
+                    }
                     if (hitEntity == pEntity)
                         continue;
                     boolean hurt = hitEntity.hurt(this.damageSources().mobAttack(this), (float) ai.getValue() * Avatar.ATTACK_SPLASH_MULT);
