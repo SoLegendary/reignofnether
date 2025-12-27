@@ -251,16 +251,24 @@ public class TutorialServerEvents {
         var index = 0;
         for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
             if (!(unit instanceof ZombieVillagerUnit)) continue;
-            if (index <= 1) {
-                BuildingServerEvents.placeBuilding(Buildings.PUMPKIN_FARM,
+            switch (index) {
+                case 0 -> BuildingServerEvents.placeBuilding(Buildings.PUMPKIN_FARM,
                         new BlockPos(FARM_POS_1),
                         Rotation.NONE,
                         TUTORIAL_ENEMY_NAME,
-                        new int[]{unit.getId()},
+                        new int[] { unit.getId() },
                         false,
                         false
                 );
-            } else break;
+                case 1 -> BuildingServerEvents.placeBuilding(Buildings.PUMPKIN_FARM,
+                        new BlockPos(FARM_POS_2),
+                        Rotation.CLOCKWISE_90,
+                        TUTORIAL_ENEMY_NAME,
+                        new int[] { unit.getId() },
+                        false,
+                        false
+                );
+            }
             index++;
         }
     }
