@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether;
 
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
 import com.solegendary.reignofnether.faction.FactionRegistries;
@@ -123,6 +124,16 @@ public class ReignOfNether {
             );
         }
         ResourceCosts.deferredLoadResourceCosts();
+
+        // Regression signal: if a build accidentally omits a structure NBT, warn early (instead of crashing later).
+        if (!BuildingBlockData.bundledStructureExists("graveyard_overflow")) {
+            ReignOfNether.LOGGER.warn(
+                "Missing bundled structure NBT: '/assets/{}/structures/{}.nbt'. " +
+                    "Upgrades or structure swaps may fail (but should no longer crash).",
+                MOD_ID,
+                "graveyard_overflow"
+            );
+        }
     }
 
     public static void handleReset(
