@@ -580,6 +580,7 @@ public class UnitClientEvents {
         markSelectedUnitsChanged();
     }
 
+    @SuppressWarnings("SequencedCollectionMethodCanBeUsed")
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         if (!OrthoviewClientEvents.isEnabled()) return;
@@ -635,7 +636,7 @@ public class UnitClientEvents {
                         boolean garrisoned1 = selectedUnit instanceof Unit unit1 && GarrisonableBuilding.getGarrison(unit1) != null;
                         boolean garrisoned2 = entity instanceof Unit unit2 && GarrisonableBuilding.getGarrison(unit2) != null;
                         boolean garrionStatusMatches = (garrisoned1 && garrisoned2) || (!garrisoned1 && !garrisoned2);
-
+                        if (entity == selectedUnit) continue;
                         if ((getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
                                 NonUnitClientEvents.canControlAllMobs() ||
                                 AlliancesClient.canControlAlly(entity)) &&
