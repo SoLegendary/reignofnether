@@ -252,7 +252,7 @@ public class MyRenderer {
     // might be null RL for black.png as of 1.19?
     public static void drawSolidBox(
             PoseStack matrixStack,
-            VertexConsumer vertexConsumer,
+            VertexConsumer vertexConsumer0, //Generally, a VertexConsumer should be passed in, but this is currently not possible due to PoseStack conversions within this function. This may be fixed in the future.
             AABB aabb,
             Direction dir,
             float r,
@@ -292,6 +292,8 @@ public class MyRenderer {
         // all vertices are in order: BR, TR, TL, BL
 
         int light = 255;
+
+        VertexConsumer vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
 
         // +y top face
         if (dir == null || dir == Direction.UP) {

@@ -363,7 +363,7 @@ public class UnitClientEvents {
             }
         }
         // move to ground pos (disabled during camera manip)
-        else if (!Keybindings.altMod.isDown() && selectedUnits.size() > 0 && MC.level != null) {
+        else if (!Keybindings.altMod.isDown() && !selectedUnits.isEmpty() && MC.level != null) {
             ResourceName resName = ResourceSources.getBlockResourceName(getPreselectedBlockPos(), MC.level);
             boolean isGathering = hudSelectedEntity instanceof WorkerUnit && resName != ResourceName.NONE;
 
