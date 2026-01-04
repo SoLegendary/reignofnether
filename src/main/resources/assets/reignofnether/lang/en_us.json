@@ -283,7 +283,7 @@
     "abilities.reignofnether.molten_bomb.rank3": "Rank 3: %d damage, %d block radius",
     "abilities.reignofnether.scorching_gaze": "Scorching Gaze",
     "abilities.reignofnether.scorching_gaze.stats": "\uE004  %ds   \uE005  %ds   \uE008  %d",
-    "abilities.reignofnether.scorching_gaze.tooltip1": "Focus a burning hatred for a single enemy, engulfing it in.",
+    "abilities.reignofnether.scorching_gaze.tooltip1": "Focus a burning hatred for a single enemy, engulfing it in",
     "abilities.reignofnether.scorching_gaze.tooltip2": "a fire that ticks twice as fast and leaves a trail of magma.",
     "abilities.reignofnether.scorching_gaze.tooltip3": "If the unit dies under this effect, it ignites nearby enemies.",
     "abilities.reignofnether.scorching_gaze.rank1": "Rank 1: Lasts %ds",
