@@ -143,6 +143,8 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_BEACON_LEVEL4 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL4");
     public static final ResourceCost RESEARCH_BEACON_LEVEL5 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL5");
     public static final ResourceCost RESEARCH_OVERFLOWING_GRAVEYARD = new ResourceCost(ID, "RESEARCH_OVERFLOWING_GRAVEYARD");
+    public static final ResourceCost RESEARCH_BLACKSMITH_LEATHER_ARMOR = new ResourceCost(ID, "RESEARCH_BLACKSMITH_LEATHER_ARMOR");
+    public static final ResourceCost RESEARCH_BLACKSMITH_IRON_ARMOR = new ResourceCost(ID, "RESEARCH_BLACKSMITH_IRON_ARMOR");
 
     // ENCHANTMENTS
 
@@ -151,6 +153,10 @@ public class ResourceCosts {
     public static final ResourceCost ENCHANT_SHARPNESS = new ResourceCost(ID, "ENCHANT_SHARPNESS");
     public static final ResourceCost ENCHANT_MULTISHOT = new ResourceCost(ID, "ENCHANT_MULTISHOT");
     public static final ResourceCost ENCHANT_VIGOR = new ResourceCost(ID, "ENCHANT_VIGOR");
+
+    // BLACKSMITH ABILITIES
+
+    public static final ResourceCost BLACKSMITH_FORGE_CHESTPLATE = new ResourceCost(ID, "BLACKSMITH_FORGE_CHESTPLATE");
 
     // UNUSED
 
@@ -329,6 +335,8 @@ public class ResourceCosts {
         RESEARCH_BEACON_LEVEL4.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL4);
         RESEARCH_BEACON_LEVEL5.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL5);
         RESEARCH_OVERFLOWING_GRAVEYARD.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD);
+        RESEARCH_BLACKSMITH_LEATHER_ARMOR.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BLACKSMITH_LEATHER_ARMOR);
+        RESEARCH_BLACKSMITH_IRON_ARMOR.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BLACKSMITH_IRON_ARMOR);
 
         // ******************* ENCHANTMENTS ******************* //
 
@@ -337,6 +345,7 @@ public class ResourceCosts {
         ENCHANT_SHARPNESS.bakeValues(ReignOfNetherCommonConfigs.EnchantmentCosts.ENCHANT_SHARPNESS);
         ENCHANT_MULTISHOT.bakeValues(ReignOfNetherCommonConfigs.EnchantmentCosts.ENCHANT_MULTISHOT);
         ENCHANT_VIGOR.bakeValues(ReignOfNetherCommonConfigs.EnchantmentCosts.ENCHANT_VIGOR);
+        BLACKSMITH_FORGE_CHESTPLATE.bakeValues(ReignOfNetherCommonConfigs.EnchantmentCosts.BLACKSMITH_FORGE_CHESTPLATE);
 
     }
 }

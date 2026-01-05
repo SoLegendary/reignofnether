@@ -15,21 +15,12 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-
-<<<<<<< HEAD
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-=======
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Set;
->>>>>>> 02d047be (Graveyard crash fix)
 
 // a class for static functions related to reading building NBT data (as created by Structure Blocks)
 
@@ -89,9 +80,6 @@ public class BuildingBlockData {
     }
 
     public static CompoundTag getBuildingNbt(String structureName, ResourceManager resManager) {
-<<<<<<< HEAD
-
-=======
         return tryGetBuildingNbt(structureName, resManager).orElse(null);
     }
 
@@ -103,17 +91,9 @@ public class BuildingBlockData {
      */
     public static Optional<CompoundTag> tryGetBuildingNbt(String structureName, ResourceManager resManager) {
         // 1) Try through resource manager (client-side resource packs, etc.)
->>>>>>> 02d047be (Graveyard crash fix)
         try {
             ResourceLocation rl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "structures/" + structureName + ".nbt");
             Optional<Resource> rs = resManager.getResource(rl);
-<<<<<<< HEAD
-            if (rs.isEmpty()) return null;
-            return NbtIo.readCompressed(rs.get().open());
-        } catch (IOException e) {
-            ReignOfNether.LOGGER.error(e.getMessage(), e);
-            return null;
-=======
             if (rs.isPresent()) {
                 try (InputStream in = rs.get().open()) {
                     return Optional.of(NbtIo.readCompressed(in));
@@ -131,7 +111,6 @@ public class BuildingBlockData {
             }
         } catch (Exception e) {
             ReignOfNether.LOGGER.warn("BuildingBlockData: failed reading structure NBT '{}' from classpath '{}'", structureName, cpPath, e);
->>>>>>> 02d047be (Graveyard crash fix)
         }
 
         return Optional.empty();

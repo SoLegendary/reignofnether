@@ -1187,9 +1187,6 @@ public class BuildingPlacement {
 
     public void changeStructure(String newStructureName) {
         ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocksFromNbt(newStructureName, this.getLevel());
-<<<<<<< HEAD
-        setBlocks(getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation));
-=======
         if (newBlocks.isEmpty()) {
             ReignOfNether.LOGGER.warn(
                 "BuildingPlacement.changeStructure: structure '{}' produced 0 blocks for building '{}' at {} (owner='{}'); keeping existing structure",
@@ -1200,8 +1197,7 @@ public class BuildingPlacement {
             );
             return;
         }
-        this.blocks = getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation);
->>>>>>> 02d047be (Graveyard crash fix)
+        setBlocks(getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation));
         refreshBlocks();
     }
 

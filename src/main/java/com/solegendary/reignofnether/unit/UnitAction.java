@@ -121,6 +121,9 @@ public enum UnitAction {
     ENCHANT_VIGOR,
     ENCHANT_QUICKCHARGE,
 
+    // blacksmith
+    BLACKSMITH_FORGE_CHESTPLATE,
+
     BEACON_HASTE,
     BEACON_RESISTANCE,
     BEACON_WEALTH,

@@ -187,6 +187,14 @@ public class BuildingServerEvents {
                             } if (b.portalDestination != null && !b.portalDestination.equals(new BlockPos(0,0,0))) {
                                 portal.destination = b.portalDestination;
                             }
+                        } else if (building.getBuilding() instanceof com.solegendary.reignofnether.building.buildings.villagers.Blacksmith) {
+                            if (b.upgradeLevel == 1) {
+                                building.changeStructure(com.solegendary.reignofnether.building.buildings.villagers.Blacksmith.upgradedStructureNameLeather);
+                                com.solegendary.reignofnether.building.buildings.villagers.Blacksmith.applyTierMarker(building, 1);
+                            } else if (b.upgradeLevel >= 2) {
+                                building.changeStructure(com.solegendary.reignofnether.building.buildings.villagers.Blacksmith.upgradedStructureNameIron);
+                                com.solegendary.reignofnether.building.buildings.villagers.Blacksmith.applyTierMarker(building, 2);
+                            }
                         } else if (building.getBuilding() instanceof Library) {
                             building.changeStructure(Library.upgradedStructureName);
                         } else if (building instanceof BeaconPlacement beacon) {
