@@ -28,8 +28,10 @@ public class ResearchOverflowingGraveyard extends ProductionItem {
     public ResearchOverflowingGraveyard() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (placement instanceof GraveyardPlacement graveyardPlacement)
+            if (placement instanceof GraveyardPlacement graveyardPlacement) {
                 graveyardPlacement.changeStructure(Graveyard.upgradedStructureName);
+                graveyardPlacement.setOverflowUpgradeLevel(1);
+            }
         };
     }
 

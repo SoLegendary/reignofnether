@@ -56,6 +56,9 @@ public class Graveyard extends ProductionBuilding {
 
     @Override
     public int getUpgradeLevel(BuildingPlacement placement) {
+        if (placement instanceof GraveyardPlacement gp && gp.getOverflowUpgradeLevel() > 0) {
+            return 1;
+        }
         for (BuildingBlock block : placement.getBlocks()) {
             if (block.getBlockState().getBlock() == Blocks.NETHER_BRICKS || 
                 block.getBlockState().getBlock() == Blocks.RED_NETHER_BRICKS) {

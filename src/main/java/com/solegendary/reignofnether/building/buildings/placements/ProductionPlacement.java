@@ -295,7 +295,14 @@ public class ProductionPlacement extends BuildingPlacement {
 
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
+        tickProductionQueue(tickLevel);
+    }
 
+    /**
+     * Separated for specialization (eg. Graveyard overflow stockpile).
+     * Default behavior: tick the first queue item; when complete, remove and notify clients.
+     */
+    protected void tickProductionQueue(Level tickLevel) {
         if (!productionQueue.isEmpty()) {
             ActiveProduction nextItem = productionQueue.get(0);
             if (nextItem.item.tick(this, nextItem)) {

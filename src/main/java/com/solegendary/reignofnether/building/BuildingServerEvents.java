@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
 import com.solegendary.reignofnether.building.buildings.placements.*;
@@ -181,6 +182,9 @@ public class BuildingServerEvents {
                             building.changeStructure(Castle.upgradedStructureName);
                         } else if (building.getBuilding() instanceof Laboratory) {
                             building.changeStructure(Laboratory.upgradedStructureName);
+                        } else if (building instanceof GraveyardPlacement graveyardPlacement) {
+                            building.changeStructure(Graveyard.upgradedStructureName);
+                            graveyardPlacement.setOverflowUpgradeLevel(1);
                         } else if (building instanceof PortalPlacement portal) {
                             if (!(building.getBuilding() instanceof NeutralTransportPortal)) {
                                 portal.changeStructure(b.portalType);

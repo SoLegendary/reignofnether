@@ -34,6 +34,8 @@ public class GraveyardPlacement extends ProductionPlacement {
 
     public final List<ActiveProduction> stockpile = new ArrayList<>();
     public static final int STOCKPILE_CAP = 10;
+
+    private int overflowUpgradeLevel = 0;
     
     // Server-side tracking of display entities
     private final List<ArmorStand> visualHeads = new ArrayList<>();
@@ -63,16 +65,25 @@ public class GraveyardPlacement extends ProductionPlacement {
                     case ALLOW -> true;
                 };
 
-                ResourceCost normalCost = prodItem.getCost(level.isClientSide(), ownerName);
-                boolean canAffordNormal = prodItem.canAfford(getLevel(), ownerName);
+                ResourceCost normalCost = prodItem.getCost(false, ownerName);
+                boolean canAffordPopulation = prodItem.canAffordPopulation(getLevel(), ownerName);
+                boolean canAffordNormalResources = false;
+                for (Resources resources : ResourcesServerEvents.resourcesList) {
+                    if (resources.ownerName.equals(ownerName)) {
+                        canAffordNormalResources = (resources.food >= normalCost.food &&
+                                resources.wood >= normalCost.wood &&
+                                resources.ore >= normalCost.ore);
+                        break;
+                    }
+                }
                 
                 // Overflow logic checks
                 boolean isUpgraded = getUpgradeLevel() > 0;
-                boolean popFull = !prodItem.canAffordPopulation(getLevel(), ownerName);
+                boolean popFull = !canAffordPopulation;
                 boolean stockpileAvailable = stockpile.size() < STOCKPILE_CAP;
 
                 if (allow) {
-                    if (canAffordNormal && !popFull) {
+                    if (canAffordNormalResources && !popFull) {
                         // Standard production
                         ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);
                         productionQueue.add(activeProduction);
@@ -85,9 +96,9 @@ public class GraveyardPlacement extends ProductionPlacement {
                         success = true;
                     } else if (isUpgraded && popFull && stockpileAvailable) {
                         // Stockpile production (25% surcharge)
-                        int extraFood = (int)(normalCost.food * 1.25);
-                        int extraWood = (int)(normalCost.wood * 1.25);
-                        int extraOre = (int)(normalCost.ore * 1.25);
+                        int extraFood = (int) Math.ceil(normalCost.food * 1.25);
+                        int extraWood = (int) Math.ceil(normalCost.wood * 1.25);
+                        int extraOre = (int) Math.ceil(normalCost.ore * 1.25);
 
                         boolean canAffordExtra = false;
                         for (Resources resources : ResourcesServerEvents.resourcesList)
@@ -95,7 +106,7 @@ public class GraveyardPlacement extends ProductionPlacement {
                                 canAffordExtra = (resources.food >= extraFood && resources.wood >= extraWood && resources.ore >= extraOre);
 
                         if (canAffordExtra) {
-                            ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);
+                            ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName, true);
                             productionQueue.add(activeProduction);
                             ResourcesServerEvents.addSubtractResources(new Resources(
                                     ownerName,
@@ -116,7 +127,7 @@ public class GraveyardPlacement extends ProductionPlacement {
                         // Fail
                         if (!prodItem.isBelowMaxPopulation(level, ownerName))
                             ResourcesClientboundPacket.warnMaxPopulation(ownerName);
-                        else if (!prodItem.canAffordPopulation(getLevel(), ownerName)) {
+                        else if (!canAffordPopulation) {
                             ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
                         } else {
                             ResourcesClientboundPacket.warnInsufficientResources(ownerName,
@@ -133,57 +144,78 @@ public class GraveyardPlacement extends ProductionPlacement {
     }
 
     @Override
-    public void tick(Level tickLevel) {
-        super.tick(tickLevel);
-
+    protected void tickProductionQueue(Level tickLevel) {
+        // First: release from stockpile if possible (server-side only).
         if (!tickLevel.isClientSide()) {
-            
-            // Release from stockpile if possible
-            if (!stockpile.isEmpty()) {
+            boolean releasedAny = false;
+            while (!stockpile.isEmpty()) {
                 ActiveProduction head = stockpile.get(0);
-                if (head.item.canAffordPopulation(tickLevel, ownerName)) {
-                    head.item.onComplete.accept(tickLevel, this);
-                    stockpile.remove(0);
-                    updateVisuals(tickLevel);
+                if (!head.item.canAffordPopulation(tickLevel, ownerName)) {
+                    break;
+                }
+                head.item.onComplete.accept(tickLevel, this);
+                stockpile.remove(0);
+                releasedAny = true;
+            }
+            if (releasedAny) {
+                updateVisuals(tickLevel);
+            }
+        }
+
+        // Then: tick production queue.
+        if (productionQueue.isEmpty()) {
+            return;
+        }
+
+        ActiveProduction nextItem = productionQueue.get(0);
+
+        // Normal behavior if not an overflow-stockpile entry.
+        if (!nextItem.overflowStockpile) {
+            if (nextItem.item.tick(this, nextItem)) {
+                if (!tickLevel.isClientSide()) {
+                    productionQueue.remove(0);
+                    if (productionQueue.isEmpty())
+                        BuildingClientboundPacket.clearQueue(this.originPos);
+                    else
+                        BuildingClientboundPacket.completeProduction(this.originPos);
                 }
             }
+            return;
+        }
 
-            // Handle production when pop is full but upgrade allows stockpile
-            if (!productionQueue.isEmpty()) {
-                ActiveProduction nextItem = productionQueue.get(0);
-                
-                boolean popFull = !nextItem.item.isBelowPopulationSupply(tickLevel, ownerName);
-                boolean upgradeOK = getUpgradeLevel() > 0 && stockpile.size() < STOCKPILE_CAP;
+        // Overflow-stockpile behavior: allow ticking while population is full, and store instead of spawning.
+        // (Only meaningful when upgraded and there is stockpile space; if not, fall back to normal gating.)
+        boolean upgradeOK = getUpgradeLevel() > 0 && stockpile.size() < STOCKPILE_CAP;
+        if (!upgradeOK || !isBuilt) {
+            return;
+        }
 
-                if (popFull && upgradeOK && isBuilt && nextItem.ticksLeft > 0) {
-                    
-                    float decrement = 1;
-                    if (ResearchServerEvents.playerHasCheat(ownerName, "warpten"))
-                        decrement = 10;
-                        
-                    nextItem.ticksLeft -= decrement;
-                    
-                    if (nextItem.ticksLeft <= 0) {
-                        nextItem.ticksLeft = 0;
-                        // Complete into stockpile
-                        nextItem.item.recordScore(this);
-                        stockpile.add(nextItem);
-                        updateVisuals(tickLevel);
-                        
-                        productionQueue.remove(0);
-                        if (productionQueue.isEmpty())
-                            BuildingClientboundPacket.clearQueue(this.originPos);
-                        else
-                            BuildingClientboundPacket.completeProduction(this.originPos);
-                    }
-                }
+        if (nextItem.ticksLeft > 0) {
+            float decrement;
+            if (tickLevel.isClientSide()) {
+                decrement = (float) (TPSClientEvents.getCappedTPS() / 20D);
+                if (ResearchClient.hasCheat("warpten"))
+                    decrement *= 10f;
+            } else {
+                decrement = ResearchServerEvents.playerHasCheat(ownerName, "warpten") ? 10f : 1f;
             }
-        } else {
-            // Client side cheat handling for visual consistency if needed, 
-            // but super.tick handles most visual ticks. 
-            // If pop is full client side, super.tick pauses.
-            // We could replicate the decrement here for smoother UI bar, 
-            // but strict sync isn't critical for the bar.
+
+            nextItem.ticksLeft -= decrement;
+            if (nextItem.ticksLeft < 0)
+                nextItem.ticksLeft = 0;
+        }
+
+        if (nextItem.ticksLeft <= 0 && !tickLevel.isClientSide()) {
+            // Complete into stockpile (do NOT spawn yet).
+            nextItem.item.recordScore(this);
+            stockpile.add(nextItem);
+            updateVisuals(tickLevel);
+
+            productionQueue.remove(0);
+            if (productionQueue.isEmpty())
+                BuildingClientboundPacket.clearQueue(this.originPos);
+            else
+                BuildingClientboundPacket.completeProduction(this.originPos);
         }
     }
     
@@ -223,11 +255,14 @@ public class GraveyardPlacement extends ProductionPlacement {
     }
     
     private ItemStack getHeadItem(ProductionItem item) {
-        // Basic mapping for now
+        // Basic mapping (vanilla item heads are limited; use closest equivalent)
         if (item == ProductionItems.ZOMBIE) return new ItemStack(Items.ZOMBIE_HEAD);
+        if (item == ProductionItems.HUSK) return new ItemStack(Items.ZOMBIE_HEAD);
+        if (item == ProductionItems.DROWNED) return new ItemStack(Items.ZOMBIE_HEAD);
+
         if (item == ProductionItems.SKELETON) return new ItemStack(Items.SKELETON_SKULL);
-        if (item == ProductionItems.CREEPER) return new ItemStack(Items.CREEPER_HEAD);
-        // Add more mappings or custom heads if available
+        if (item == ProductionItems.STRAY) return new ItemStack(Items.SKELETON_SKULL);
+
         return new ItemStack(Items.SKELETON_SKULL); // Default
     }
 
@@ -239,6 +274,14 @@ public class GraveyardPlacement extends ProductionPlacement {
         }
         visualHeads.clear();
         stockpile.clear();
+    }
+
+    public int getOverflowUpgradeLevel() {
+        return overflowUpgradeLevel;
+    }
+
+    public void setOverflowUpgradeLevel(int overflowUpgradeLevel) {
+        this.overflowUpgradeLevel = overflowUpgradeLevel;
     }
 }
 
