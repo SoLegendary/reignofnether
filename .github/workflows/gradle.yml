@@ -1,27 +1,26 @@
-name: "Build mod"
+name: Build mod
+
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        java: [ 17 ]
-        os: [ ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Validate Gradle Wrapper
         uses: gradle/actions/wrapper-validation@v5
 
-      - name: Set up JDK ${{ matrix.java }}
+      - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: ${{ matrix.java }}
+          java-version: 17
 
       - name: Cache Gradle Dependencies
         uses: actions/cache@v4
@@ -32,14 +31,13 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Make Gradle Wrapper Executable
-        if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
 
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Capture Build Artifacts
+      - name: Upload Mod JAR
         uses: actions/upload-artifact@v4
         with:
-          name: Build Artifacts
-          path: build/libs/
+          name: mod-jar
+          path: build/libs/*.jar
