@@ -100,7 +100,6 @@ public class ProductionItems {
     public static final ResearchBeaconLevel3 RESEARCH_BEACON_LEVEL_3 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_3"), new ResearchBeaconLevel3());
     public static final ResearchBeaconLevel4 RESEARCH_BEACON_LEVEL_4 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_4"), new ResearchBeaconLevel4());
     public static final ResearchBeaconLevel5 RESEARCH_BEACON_LEVEL_5 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_5"), new ResearchBeaconLevel5());
-    public static final ResearchOverflowingGraveyard RESEARCH_OVERFLOWING_GRAVEYARD = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "overflowing_graveyard"), new ResearchOverflowingGraveyard());
     public static final ResearchBlacksmithLeatherArmor RESEARCH_BLACKSMITH_LEATHER_ARMOR = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "blacksmith_leather_armor"), new ResearchBlacksmithLeatherArmor());
     public static final ResearchBlacksmithIronArmor RESEARCH_BLACKSMITH_IRON_ARMOR = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "blacksmith_iron_armor"), new ResearchBlacksmithIronArmor());
 

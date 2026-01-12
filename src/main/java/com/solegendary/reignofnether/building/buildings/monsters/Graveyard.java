@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -26,7 +26,6 @@ public class Graveyard extends ProductionBuilding {
 
     public final static String buildingName = "Graveyard";
     public final static String structureName = "graveyard";
-    public final static String upgradedStructureName = "graveyard_overflow";
     public final static ResourceCost cost = ResourceCosts.GRAVEYARD;
 
     public Graveyard() {
@@ -44,28 +43,16 @@ public class Graveyard extends ProductionBuilding {
         this.productions.add(ProductionItems.DROWNED, Keybindings.keyW);
         this.productions.add(ProductionItems.SKELETON, Keybindings.keyE);
         this.productions.add(ProductionItems.STRAY, Keybindings.keyE);
-        this.productions.add(ProductionItems.RESEARCH_OVERFLOWING_GRAVEYARD, Keybindings.keyR);
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
 
     @Override
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new GraveyardPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation), this.isCapitol);
-    }
-
-    @Override
-    public int getUpgradeLevel(BuildingPlacement placement) {
-        if (placement instanceof GraveyardPlacement gp && gp.getOverflowUpgradeLevel() > 0) {
-            return 1;
-        }
-        for (BuildingBlock block : placement.getBlocks()) {
-            if (block.getBlockState().getBlock() == Blocks.NETHER_BRICKS || 
-                block.getBlockState().getBlock() == Blocks.RED_NETHER_BRICKS) {
-                return 1;
-            }
-        }
-        return 0;
+        return new ProductionPlacement(this, level, pos, rotation, ownerName,
+                BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation),
+                this.isCapitol
+        );
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {

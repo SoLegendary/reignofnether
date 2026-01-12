@@ -155,7 +155,6 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_BEACON_LEVEL3.define(BUILDER);
         ResearchCosts.RESEARCH_BEACON_LEVEL4.define(BUILDER);
         ResearchCosts.RESEARCH_BEACON_LEVEL5.define(BUILDER);
-        ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD.define(BUILDER);
         ResearchCosts.RESEARCH_BLACKSMITH_LEATHER_ARMOR.define(BUILDER);
         ResearchCosts.RESEARCH_BLACKSMITH_IRON_ARMOR.define(BUILDER);
 
@@ -310,7 +309,6 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL3 = ResourceCostConfigEntry.Research(0, 0, 400, 120, ResourceCosts.RESEARCH_BEACON_LEVEL3, "Beacon Level 3 Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL4 = ResourceCostConfigEntry.Research(0, 0, 500, 120, ResourceCosts.RESEARCH_BEACON_LEVEL4, "Beacon Level 4 Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL5 = ResourceCostConfigEntry.Research(0, 0, 600, 120, ResourceCosts.RESEARCH_BEACON_LEVEL5, "Beacon Level 5 Research Config");
-        public static final ResourceCostConfigEntry RESEARCH_OVERFLOWING_GRAVEYARD = ResourceCostConfigEntry.Research(0, 75, 0, 150, ResourceCosts.RESEARCH_OVERFLOWING_GRAVEYARD, "Overflowing Graveyard Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BLACKSMITH_LEATHER_ARMOR = ResourceCostConfigEntry.Research(0, 150, 100, 120, ResourceCosts.RESEARCH_BLACKSMITH_LEATHER_ARMOR, "Blacksmith Leather Armor Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BLACKSMITH_IRON_ARMOR = ResourceCostConfigEntry.Research(0, 200, 250, 150, ResourceCosts.RESEARCH_BLACKSMITH_IRON_ARMOR, "Blacksmith Iron Armor Research Config");
     }

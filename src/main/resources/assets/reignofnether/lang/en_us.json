@@ -1390,8 +1390,6 @@
     "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "Diplomacy Menu (Z)",
     "alliances.reignofnether.tooltip.toggle_shared_unit_control": "Toggle whether allies can control your units",
 
-    "research.reignofnether.overflowing_graveyard": "Overflowing Graveyard",
-    "research.reignofnether.overflowing_graveyard.tooltip1": "Allows stockpiling 10 units. Stockpiled units spawn instantly when population frees.",
 
     "research.reignofnether.blacksmith_leather_armor": "Leather Armor",
     "research.reignofnether.blacksmith_leather_armor.tooltip1": "Upgrades this blacksmith, unlocking basic armor forging.",

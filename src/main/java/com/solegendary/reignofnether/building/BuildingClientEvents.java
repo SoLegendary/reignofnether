@@ -5,13 +5,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
@@ -1065,9 +1063,6 @@ public class BuildingClientEvents {
                     newBuilding.changeStructure(Castle.upgradedStructureName);
                 } else if (newBuilding.getBuilding() instanceof Laboratory lab) {
                     newBuilding.changeStructure(Laboratory.upgradedStructureName);
-                } else if (newBuilding instanceof GraveyardPlacement graveyardPlacement) {
-                    newBuilding.changeStructure(Graveyard.upgradedStructureName);
-                    graveyardPlacement.setOverflowUpgradeLevel(1);
                 } else if (newBuilding instanceof PortalPlacement portal) {
                     if (!(newBuilding.getBuilding() instanceof NeutralTransportPortal)) {
                         portal.changeStructure(portalType);

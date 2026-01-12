@@ -142,7 +142,6 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_BEACON_LEVEL3 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL3");
     public static final ResourceCost RESEARCH_BEACON_LEVEL4 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL4");
     public static final ResourceCost RESEARCH_BEACON_LEVEL5 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL5");
-    public static final ResourceCost RESEARCH_OVERFLOWING_GRAVEYARD = new ResourceCost(ID, "RESEARCH_OVERFLOWING_GRAVEYARD");
     public static final ResourceCost RESEARCH_BLACKSMITH_LEATHER_ARMOR = new ResourceCost(ID, "RESEARCH_BLACKSMITH_LEATHER_ARMOR");
     public static final ResourceCost RESEARCH_BLACKSMITH_IRON_ARMOR = new ResourceCost(ID, "RESEARCH_BLACKSMITH_IRON_ARMOR");
 
@@ -334,7 +333,6 @@ public class ResourceCosts {
         RESEARCH_BEACON_LEVEL3.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL3);
         RESEARCH_BEACON_LEVEL4.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL4);
         RESEARCH_BEACON_LEVEL5.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL5);
-        RESEARCH_OVERFLOWING_GRAVEYARD.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD);
         RESEARCH_BLACKSMITH_LEATHER_ARMOR.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BLACKSMITH_LEATHER_ARMOR);
         RESEARCH_BLACKSMITH_IRON_ARMOR.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BLACKSMITH_IRON_ARMOR);
 

@@ -299,7 +299,7 @@ public class ProductionPlacement extends BuildingPlacement {
     }
 
     /**
-     * Separated for specialization (eg. Graveyard overflow stockpile).
+     * Separated for specialization.
      * Default behavior: tick the first queue item; when complete, remove and notify clients.
      */
     protected void tickProductionQueue(Level tickLevel) {
