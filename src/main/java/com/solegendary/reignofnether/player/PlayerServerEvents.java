@@ -837,7 +837,7 @@ public class PlayerServerEvents {
             // Remove the defeated player from the list
             rtsPlayers.removeIf(rtsPlayer -> {
                 if (rtsPlayer.name.equals(playerName)) {
-                    sendMessageToAllPlayers(playerName + " has " + reason + " and is defeated!", true);
+                    sendMessageToAllPlayers("server.reignofnether.is_defeated", true);
                     sendMessageToAllPlayers("server.reignofnether.players_remaining", false, (rtsPlayers.size() - 1));
 
                     postGameRtsPlayers.add(rtsPlayer);
