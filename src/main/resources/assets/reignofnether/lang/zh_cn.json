@@ -762,6 +762,8 @@
   "hud.enchant.reignofnether.flame.tooltip": "箭矢击中时点燃对方单位",
   "hud.enchant.reignofnether.fire_aspect": "火焰附加",
   "hud.enchant.reignofnether.fire_aspect.tooltip": "近战击中时点燃对方单位",
+  "hud.enchant.reignofnether.march_of_progress": "进取行军",
+  "hud.enchant.reignofnether.march_of_progress.tooltip": "使所有魔咒的效果翻倍",
 
 
   "hud.faction.reignofnether.villager": "村民",
