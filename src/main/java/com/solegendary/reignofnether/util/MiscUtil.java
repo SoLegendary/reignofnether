@@ -305,8 +305,6 @@ public class MiscUtil {
         return retBps;
     }
 
-    public static HashMap<Integer, LivingEntity> findClosestAttackableEntityCacheMap = new HashMap<>();
-
     public static LivingEntity findClosestAttackableEntity(Mob unitMob, float range, ServerLevel level) {
         Vector3d unitPosition = new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z);
         var pos = new Vec3(unitPosition.x, unitPosition.y, unitPosition.z);
@@ -320,10 +318,6 @@ public class MiscUtil {
                 unitPosition.z + range
         );
         var entities = level.getEntitiesOfClass(LivingEntity.class, aabb);
-        var key = unitMob.hashCode() + entities.hashCode();
-        if (findClosestAttackableEntityCacheMap.containsKey(key)) {
-            return findClosestAttackableEntityCacheMap.get(key);
-        }
         entities.sort(Comparator.comparingDouble(
                 it -> it.position().distanceTo(pos)
         ));
@@ -331,11 +325,9 @@ public class MiscUtil {
             if (!(entity.position().distanceTo(new Vec3(unitPosition.x, unitPosition.y, unitPosition.z)) <= range) ||
                 !entity.level().getWorldBorder().isWithinBounds(entity.blockPosition())) continue;
             if (isIdleOrMoveAttackable(unitMob, entity, neutralAggro) && hasLineOfSightForAttacks(unitMob, entity)) {
-                findClosestAttackableEntityCacheMap.put(key, entity);
                 return entity;
             }
         }
-        findClosestAttackableEntityCacheMap.put(key, null);
         return null;
     }
 

@@ -218,7 +218,6 @@ public interface AttackerUnit {
         }
         LivingEntity currentTarget = ((Mob) this).getTarget();
         if (currentTarget == null) return;
-        if ((level.getServer().getTickCount() & 4) != 0) return;
         LivingEntity closestTarget = MiscUtil.findClosestAttackableEntity((Mob) this, aggroRange, level);
         if (closestTarget == null) return;
         double distClosestTarget =  ((Mob) this).distanceToSqr(closestTarget.position());
@@ -256,7 +255,7 @@ public interface AttackerUnit {
         }
     }
 
-    public static double getWeaponDamageModifier(AttackerUnit attackerUnit) {
+    static double getWeaponDamageModifier(AttackerUnit attackerUnit) {
         ItemStack itemStack = ((LivingEntity) attackerUnit).getItemBySlot(EquipmentSlot.MAINHAND);
 
         if (!itemStack.isEmpty())

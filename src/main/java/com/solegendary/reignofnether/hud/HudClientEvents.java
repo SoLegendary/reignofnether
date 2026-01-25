@@ -274,7 +274,7 @@ public class HudClientEvents {
         // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
         int hudStartingXPos = Button.DEFAULT_ICON_FRAME_SIZE * 6 + (Button.DEFAULT_ICON_FRAME_SIZE / 2);
 
-        ArrayList<LivingEntity> selUnits = UnitClientEvents.getSelectedUnits();
+        ArrayList<LivingEntity> selUnits = UnitClientEvents.getSortedSelectedUnits();
         ArrayList<BuildingPlacement> selBuildings = BuildingClientEvents.getSelectedBuildings();
 
         // create all the unit buttons for this frame

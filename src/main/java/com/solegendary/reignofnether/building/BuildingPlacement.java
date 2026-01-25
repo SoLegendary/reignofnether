@@ -34,12 +34,7 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
-import com.solegendary.reignofnether.resources.BlockUtils;
-import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
-import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
@@ -1031,7 +1026,7 @@ public class BuildingPlacement {
             centrePos.getY(),
             centrePos.getZ()
         ), range, Animal.class, level)) {
-            if (animal.isInvertedHealAndHarm()) numNearbyAnimals++;
+            if (ResourceSources.isHuntableAnimal(animal)) numNearbyAnimals++;
         }
         int numNearbyChickens = MiscUtil.getEntitiesWithinRange(new Vector3d(centrePos.getX(),
                 centrePos.getY(),
