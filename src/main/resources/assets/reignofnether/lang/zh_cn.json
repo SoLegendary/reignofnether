@@ -245,7 +245,7 @@
   "abilities.reignofnether.blizzard.stats": "\uE004  %ds   \uE008  %d",
   "abilities.reignofnether.blizzard.tooltip1": "施放最多 %d 秒，使附近随机敌方单位冻结于冰块中，",
   "abilities.reignofnether.blizzard.tooltip2": "即刻受到大量伤害。在施放期间，哀霜幽灵无法被敌方单位移动，",
-  "abilities.reignofnether.blizzard.tooltip3": "但执行任意其它操作均会结束魂灵暴雪。",
+  "abilities.reignofnether.blizzard.tooltip3": "但执行任意其它行动均会结束魂灵暴雪。",
 
   "abilities.reignofnether.throw_tnt": "TNT 投掷",
   "abilities.reignofnether.throw_tnt.stats": "\uE006  %d   \uE004  %ds   \uE005  %d   \uE008  %d",
