@@ -353,7 +353,7 @@
   "abilities.reignofnether.protective_enchantment.rank3": "等级 3：最多可施放 %d 次，冷却 %d 秒",
   "abilities.reignofnether.march_of_progress": "进取行军（终极技能）",
   "abilities.reignofnether.march_of_progress.already_active": "进取行军技能光环已经激活",
-  "abilities.reignofnether.march_of_progress.stats": "\uE004  %ds   \uE005  %d",
+  "abilities.reignofnether.march_of_progress.stats": "\uE004  %ds   \uE005  %d 每秒",
   "abilities.reignofnether.march_of_progress.tooltip1": "启用光环，使所有魔咒效果翻倍。",
   "abilities.reignofnether.march_of_progress.tooltip2": "光环激活时，每秒消耗 %d 魔力值",
 
@@ -1499,5 +1499,20 @@
 
   "alliances.reignofnether.tooltip.toggle_observer_player_displays": "观察者菜单（Z）",
   "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "外交菜单（Z）",
-  "alliances.reignofnether.tooltip.toggle_shared_unit_control": "切换是否允许盟友控制你的单位"
+  "alliances.reignofnether.tooltip.toggle_shared_unit_control": "切换是否允许盟友控制你的单位",
+
+  "effect.reignofnether.stun": "眩晕",
+  "effect.reignofnether.freeze": "冻结",
+  "effect.reignofnether.uncontrollable": "失控",
+  "effect.reignofnether.zombie_infected": "僵尸化",
+  "effect.reignofnether.minor_speed": "略有迅捷",
+  "effect.reignofnether.minor_slowdown": "略有缓慢",
+  "effect.reignofnether.damage_taken_increase": "受伤提升",
+  "effect.reignofnether.intense_fire": "灼热",
+  "effect.reignofnether.attack_slowdown": "攻速减缓",
+  "effect.reignofnether.temporary_efficiency": "临时效率",
+  "effect.reignofnether.bloodlust": "嗜血",
+  "effect.reignofnether.frost_damage": "霜冻伤害",
+  "effect.reignofnether.enchantment_amplifier": "魔咒增幅",
+  "effect.reignofnether.disarm": "缴械"
 }
