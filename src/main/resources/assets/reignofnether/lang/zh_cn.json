@@ -223,7 +223,7 @@
   "abilities.reignofnether.chilling_screech": "颤栗尖啸",
   "abilities.reignofnether.chilling_screech.stats": "\uE004  %d   \uE005  %d   \uE008  %d",
   "abilities.reignofnether.chilling_screech.tooltip1": "释放一股冷彻骨髓的尖啸，触发一阵雪浪，",
-  "abilities.reignofnether.chilling_screech.tooltip2": "使附近在雪上的敌方单位在 %d 秒内受到伤害。",
+  "abilities.reignofnether.chilling_screech.tooltip2": "使附近的敌方单位在 %d 秒内在雪上受到伤害。",
   "abilities.reignofnether.chilling_screech.rank1": "等级 1：持续 %d 秒，攻击范围 %d 格",
   "abilities.reignofnether.chilling_screech.rank2": "等级 2：持续 %d 秒，攻击范围 %d 格",
   "abilities.reignofnether.chilling_screech.rank3": "等级 3：持续 %d 秒，攻击范围 %d 格",
