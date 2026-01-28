@@ -34,7 +34,8 @@
         "fire.MagmaBlockMixin",
         "fire.WalkNodeEvaluatorMixin",
         "goals.MobMixin",
-        "goals.RandomStrollGoalMixin"
+        "goals.RandomStrollGoalMixin",
+        "path.DripstonePathMixin"
     ],
     "minVersion": "0.8",
     "client": [
