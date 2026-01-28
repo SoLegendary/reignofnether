@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.mixin.path;
 
-import com.solegendary.reignofnether.ReignOfNether;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
@@ -10,8 +10,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.logging.Logger;
 
 @Mixin(WalkNodeEvaluator.class)
 public class DripstonePathMixin {
