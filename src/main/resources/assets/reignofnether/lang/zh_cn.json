@@ -276,7 +276,7 @@
 
   "abilities.reignofnether.molten_bomb": "熔岩炸弹",
   "abilities.reignofnether.molten_bomb.stats": "\uE006  %d   \uE004  %ds   \uE005  %d   \uE008  %d",
-  "abilities.reignofnether.molten_bomb.tooltip1": "发射一颗大火球，在接触目标或达到最大范围时爆炸，",
+  "abilities.reignofnether.molten_bomb.tooltip1": "发射一颗大火球，接触任意目标后爆炸，",
   "abilities.reignofnether.molten_bomb.tooltip2": "造成可观伤害，点燃一片区域，并临时生成岩浆块。",
   "abilities.reignofnether.molten_bomb.rank1": "等级 1：造成 %d 伤害值，最大范围 %d 格",
   "abilities.reignofnether.molten_bomb.rank2": "等级 2：造成 %d 伤害值，最大范围 %d 格",
