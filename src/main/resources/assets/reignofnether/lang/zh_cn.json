@@ -289,7 +289,7 @@
   "abilities.reignofnether.scorching_gaze.rank1": "等级 1：技能持续 %d 秒",
   "abilities.reignofnether.scorching_gaze.rank2": "等级 2：技能持续 %d 秒",
   "abilities.reignofnether.scorching_gaze.rank3": "等级 3：技能持续 %d 秒",
-  "abilities.reignofnether.intense_heat": "极致灼热（被动技能）",
+  "abilities.reignofnether.intense_heat": "极致高温（被动技能）",
   "abilities.reignofnether.intense_heat.tooltip1": "距离野火 %d 格范围内的敌方单位，",
   "abilities.reignofnether.intense_heat.tooltip2": "距离野火越近，其所受燃烧伤害频率越高。",
   "abilities.reignofnether.intense_heat.rank1": "等级 1：燃烧伤害频率为原先的 %d 倍",
@@ -297,9 +297,9 @@
   "abilities.reignofnether.intense_heat.rank3": "等级 3：燃烧伤害频率为原先的 %d 倍",
   "abilities.reignofnether.souls_aflame": "灵魂焰火（终极技能）",
   "abilities.reignofnether.souls_aflame.stats": "\uE004  %ds   \uE008  %d",
-  "abilities.reignofnether.souls_aflame.tooltip1": "将地图上所有的火焰方块、及敌方单位身上的火焰转化为",
-  "abilities.reignofnether.souls_aflame.tooltip2": "灵魂火焰，持续 %d 秒。灵魂火焰将会造成原先双倍的燃烧伤害，",
-  "abilities.reignofnether.souls_aflame.tooltip3": "且无法熄灭、无视抗火效果。",
+  "abilities.reignofnether.souls_aflame.tooltip1": "引燃附近所有火焰与友方烈焰人的灵魂，",
+  "abilities.reignofnether.souls_aflame.tooltip2": "为其注入灵魂火焰，持续 %d 秒。灵魂火焰将会",
+  "abilities.reignofnether.souls_aflame.tooltip3": "造成普通火焰双倍的燃烧伤害，且无法熄灭、无视抗火效果。",
   "abilities.reignofnether.souls_aflame.already_active": "灵魂焰火已经生效",
 
   "abilities.reignofnether.mace_slam": "重锤猛击",
@@ -1253,7 +1253,7 @@
   "units.piglins.reignofnether.piglin_merchant.revive": "复活猪灵商人（等级 %d）",
   "units.piglins.reignofnether.wildfire": "野火",
   "units.piglins.reignofnether.wildfire.tooltip1": "野火是更为强大的烈焰人，",
-  "units.piglins.reignofnether.wildfire.tooltip2": "有着引燃对方灵魂深处火焰的力量，无论敌我。",
+  "units.piglins.reignofnether.wildfire.tooltip2": "有着引燃他物灵魂深处火焰的力量，无论敌我。",
   "units.piglins.reignofnether.wildfire.revive": "复活野火（等级 %d）",
 
   "units.villagers.reignofnether.evoker": "唤魔者",
@@ -1512,12 +1512,13 @@
   "effect.reignofnether.minor_speed": "略有迅捷",
   "effect.reignofnether.minor_slowdown": "略有缓慢",
   "effect.reignofnether.damage_taken_increase": "受伤提升",
-  "effect.reignofnether.scorching_fire": "灼热",
-  "effect.reignofnether.intense_heat": "灼热",
+  "effect.reignofnether.scorching_fire": "灼热火焰",
+  "effect.reignofnether.intense_heat": "极致高温",
   "effect.reignofnether.attack_slowdown": "攻速减缓",
   "effect.reignofnether.temporary_efficiency": "临时效率",
   "effect.reignofnether.bloodlust": "嗜血",
   "effect.reignofnether.frost_damage": "霜冻伤害",
   "effect.reignofnether.enchantment_amplifier": "魔咒增幅",
-  "effect.reignofnether.disarm": "缴械"
+  "effect.reignofnether.disarm": "缴械",
+  "effect.reignofnether.souls_aflame": "灵魂焰火"
 }
