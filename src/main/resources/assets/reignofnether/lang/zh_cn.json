@@ -696,6 +696,8 @@
   "hud.map.reignofnether.lock_map.tooltip1.enabled": "地图中心锁定：已启用",
   "hud.map.reignofnether.lock_map.tooltip1.disabled": "地图中心锁定：已禁用",
   "hud.map.reignofnether.lock_map.tooltip2": "（鼠标左击以切换）",
+  "hud.map.reignofnether.highlight_animals.enabled": "高亮显示可捕猎动物：已启用",
+  "hud.map.reignofnether.highlight_animals.disabled": "高亮显示可捕猎动物：已禁用",
   "hud.map.reignofnether.rotate_cw.tooltip1": "顺时针旋转视角",
   "hud.map.reignofnether.rotate_cw.tooltip2": "（Alt + 右箭头）",
   "hud.map.reignofnether.rotate_ccw.tooltip1": "逆时针旋转视角",
