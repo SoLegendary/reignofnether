@@ -1,21 +1,34 @@
 package com.solegendary.reignofnether.building.buildings.shared;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
+import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.AirBlock;
+import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public abstract class AbstractBridge extends Building {
+    public static final DataType<Boolean> DIAGONAL = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "diagonal"), (tag, server) -> tag.getBoolean("diagonal"), diagonal -> {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("diagonal", diagonal);
+        return tag;
+    }, () -> false);
     public final float MELEE_DAMAGE_MULTIPLIER = 0.05f;
 
     public AbstractBridge(ResourceCost cost) {
@@ -29,15 +42,36 @@ public abstract class AbstractBridge extends Building {
         return BuildingBlockData.getBuildingBlocksFromNbt(diagonal ? getDiagonalStructureName() : getOrthogonalStructureName(), level);
     }
 
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return createBuildingPlacement(level, pos, rotation, ownerName, false);
-    }
-
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName, boolean diagonal) {
-        return new BridgePlacement(this, level, pos, rotation, "", getCulledBlocks(getAbsoluteBlockData(getRelativeBlockData(level, diagonal), level, pos, rotation), level), isCapitol, diagonal);
+        BuildingPlacement placement = createBuildingPlacement(level, pos, rotation, ownerName);
+        placement.getDataStorage().setData(DIAGONAL, diagonal);
+        return placement;
     }
 
     public abstract String getDiagonalStructureName();
     public abstract String getOrthogonalStructureName();
+
+    public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks, BuildingPlacement placement) {
+        BlockState bs = level.getBlockState(pos);
+//        super.onBlockBreak(level, pos, breakBlocks);
+        replaceWithLiquidBelow(pos, bs, placement.level);
+    }
+
+    public void destroy(ServerLevel serverLevel, BuildingPlacement placement) {
+        super.destroy(serverLevel, placement);
+        for (BuildingBlock bb : placement.getBlocks()) // need to check first here since we already destroyed the level blocks
+            if (!(bb.getBlockState().getBlock() instanceof FenceBlock) &&
+                    !(bb.getBlockState().getBlock() instanceof AirBlock))
+                replaceWithLiquidBelow(bb.getBlockPos(), bb.getBlockState(), placement.level);
+    }
+
+    private void replaceWithLiquidBelow(BlockPos bp, BlockState bs, Level level) {
+        if (!(bs.getBlock() instanceof FenceBlock)) {
+            for (BlockPos bpAdj : List.of(bp.below(), bp.north(), bp.south(), bp.east(), bp.west())) {
+                BlockState bsAdj = level.getBlockState(bpAdj);
+                if (!bsAdj.getFluidState().isEmpty())
+                    level.setBlockAndUpdate(bp, bsAdj);
+            }
+        }
+    }
 }

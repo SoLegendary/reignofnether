@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.sandbox;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -106,8 +107,9 @@ public class SandboxServer {
         BuildingServerEvents.getBuildings().removeIf(b -> {
             if (b.originPos.equals(pos)) {
                 BuildingClientboundPacket.removeBuilding(pos);
-                if (b instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0 && ncb.getNetherZone() != null)
-                    ncb.getNetherZone().startRestoring();
+                NetherConvertingAddon ncb;
+                if ((ncb = b.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(b) > 0 && ncb.getNetherZone(b) != null)
+                    ncb.getNetherZone(b).startRestoring();
                 return true;
             }
             return false;

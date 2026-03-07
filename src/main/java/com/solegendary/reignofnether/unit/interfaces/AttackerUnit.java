@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -178,7 +178,7 @@ public interface AttackerUnit {
                 boolean isMeleeAttackedByFlyingOrGarrisoned = false;
                 if (lastDSEntity instanceof Unit unitDS &&
                     (unitDS.getMoveGoal() instanceof FlyingMoveToTargetGoal ||
-                        GarrisonableBuilding.getGarrison(unitDS) != null ||
+                        GarrisonableBuildingAddon.getGarrison(unitDS) != null ||
                         unitDS instanceof PhantomSummon ||
                         unitDS instanceof Vex) &&
                     attackerUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal) {
@@ -208,7 +208,7 @@ public interface AttackerUnit {
     // if the nearest target is closer than the current target, retarget to the nearest
     default void retargetToClosestUnit(ServerLevel level) {
         float aggroRange = this.getAggroRange();
-        GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this);
+        GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison((Unit) this);
         if (garr != null) {
             aggroRange = garr.getAttackRange();
         }
@@ -229,7 +229,7 @@ public interface AttackerUnit {
 
     default void attackClosestEnemy(ServerLevel level) {
         float aggroRange = this.getAggroRange();
-        GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this);
+        GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison((Unit) this);
         if (garr != null)
             aggroRange  = garr.getAttackRange();
 

@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.ability.EnchantAbility;
 import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.placements.LibraryPlacement;
+import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -13,20 +15,51 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import org.joml.Vector3d;
 
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class Library extends ProductionBuilding {
+    public static final DataType<EnchantAbility> AUTO_CAST_ENCHANT = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "auto_cast_enchant"), (tag, server) -> {
+        int id = tag.getInt("autocast-id");
+        return switch (id) {
+            case 1: yield new EnchantMaiming();
+            case 2: yield new EnchantQuickCharge();
+            case 3: yield new EnchantSharpness();
+            case 4: yield new EnchantMultishot();
+            case 5: yield new EnchantVigor();
+            default: yield null;
+        };
+    }, enchantAbility -> {
+        int id = 0;
+        if (enchantAbility instanceof EnchantMaiming)
+            id = 1;
+        if (enchantAbility instanceof EnchantQuickCharge)
+            id = 2;
+        if (enchantAbility instanceof EnchantSharpness)
+            id = 3;
+        if (enchantAbility instanceof EnchantMultishot)
+            id = 4;
+        if (enchantAbility instanceof EnchantVigor)
+            id = 5;
+        CompoundTag nbt = new CompoundTag();
+        nbt.putInt("autocast-id", id);
+        return nbt;
+    });
+
 
     public final static String buildingName = "Library";
     public final static String structureName = "library";
@@ -63,11 +96,6 @@ public class Library extends ProductionBuilding {
 
     public Faction getFaction() {
         return Faction.VILLAGERS;
-    }
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new LibraryPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
@@ -108,5 +136,30 @@ public class Library extends ProductionBuilding {
                 return 1;
             }
         return 0;
+    }
+
+    @Override
+    public void tick(Level tickLevel, BuildingPlacement bp) {
+        EnchantAbility autoCastEnchant = bp.getDataStorage().getData(AUTO_CAST_ENCHANT);
+        if (bp.getTickAgeAfterBuilt() > 0 && bp.getTickAgeAfterBuilt() % 15 == 0 && bp.isBuilt && autoCastEnchant != null
+                && autoCastEnchant.isOffCooldown(bp)) {
+
+            List<Mob> mobs = MiscUtil.getEntitiesWithinRange(new Vector3d(
+                            bp.centrePos.getX(),
+                            bp.centrePos.getY(),
+                            bp.centrePos.getZ()
+                    ),
+                    autoCastEnchant.range - 1,
+                    Mob.class,
+                    tickLevel
+            ).stream().filter(e -> (
+                    autoCastEnchant.isCorrectUnitAndEquipment(e) && autoCastEnchant.canAfford(bp)
+                            && !autoCastEnchant.hasAnyEnchant(e)
+            )).toList();
+
+            if (!mobs.isEmpty()) {
+                autoCastEnchant.use(tickLevel, bp, mobs.get(0));
+            }
+        }
     }
 }

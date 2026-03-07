@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
+import com.solegendary.reignofnether.building.data.DataStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
@@ -19,9 +20,10 @@ public class BuildingSave {
     public int upgradeLevel; // castle flag, lab rod, etc.
     PortalPlacement.PortalType portalType;
     public BlockPos portalDestination;
+    public DataStorage dataStorage;
 
     public BuildingSave(BlockPos originPos, Level level, Building building, String ownerName, Rotation rotation, BlockPos rallyPoint,
-                        boolean isDiagonalBridge, boolean isBuilt, int upgradeLevel, PortalPlacement.PortalType portalType, BlockPos portalDestination) {
+                        boolean isDiagonalBridge, boolean isBuilt, int upgradeLevel, PortalPlacement.PortalType portalType, BlockPos portalDestination, DataStorage dataStorage) {
         this.originPos = originPos;
         this.level = level;
         this.building = building;
@@ -33,5 +35,6 @@ public class BuildingSave {
         this.upgradeLevel = upgradeLevel;
         this.portalType = portalType;
         this.portalDestination = portalDestination;
+        this.dataStorage = dataStorage;
     }
 }

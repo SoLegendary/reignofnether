@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.ability;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.placements.LibraryPlacement;
+import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.client.Minecraft;
@@ -55,10 +55,10 @@ public class EnchantAbilityServerboundPacket {
             }
 
             BuildingPlacement building = BuildingUtils.findBuilding(false, buildingPos);
-            if (building instanceof LibraryPlacement library) {
+            if (building.getBuilding() instanceof Library) {
 
                 if (!player.getName().getString().equals(building.ownerName)) {
-                    ReignOfNether.LOGGER.warn("EnchantAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + library.ownerName);
+                    ReignOfNether.LOGGER.warn("EnchantAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);
                     success.set(false);
                     return;
                 }
@@ -68,10 +68,10 @@ public class EnchantAbilityServerboundPacket {
                     if (abl.action == abilityAction)
                         ability = abl;
                 if (ability instanceof EnchantAbility enchantAbility) {
-                    if (library.autoCastEnchant == enchantAbility)
-                        library.autoCastEnchant = null;
+                    if (building.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == enchantAbility)
+                        building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
                     else
-                        library.autoCastEnchant = enchantAbility;
+                        building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, enchantAbility);
                 }
             }
             success.set(true);

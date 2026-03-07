@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
-import com.solegendary.reignofnether.building.buildings.placements.DungeonPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -20,9 +19,13 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
@@ -47,11 +50,6 @@ public class Dungeon extends ProductionBuilding {
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new DungeonPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
-    }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
@@ -79,5 +77,16 @@ public class Dungeon extends ProductionBuilding {
     @Override
     public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
         return super.getIndoorSpawnPoint(level, placement).offset(-1,0,0);
+    }
+
+    @Override
+    public void onBlockBuilt(BlockPos bp, BlockState bs, BuildingPlacement placement) {
+        if (!placement.getLevel().isClientSide()) {
+            if (bs.hasBlockEntity()) {
+                BlockEntity be = placement.getLevel().getBlockEntity(bp);
+                if (be instanceof SpawnerBlockEntity sbe)
+                    sbe.getSpawner().setEntityId(EntityType.CREEPER, placement.getLevel(), placement.getLevel().random, bp);
+            }
+        }
     }
 }

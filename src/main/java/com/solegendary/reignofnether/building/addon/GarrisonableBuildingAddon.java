@@ -20,7 +20,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public interface GarrisonableBuilding extends BuildingAddon{
+public interface GarrisonableBuildingAddon extends BuildingAddon{
     // set range for all garrisoned units don't use this for abilities as it may not be balanced
     public int getAttackRange();
     // bonus for units attacking garrisoned units
@@ -56,7 +56,7 @@ public interface GarrisonableBuilding extends BuildingAddon{
             List<LivingEntity> list = new ArrayList<>();
             for (LivingEntity le : UnitClientEvents.getAllUnits()) {
                 if (le instanceof Unit u &&
-                    GarrisonableBuilding.getGarrison(u) == this) {
+                    GarrisonableBuildingAddon.getGarrison(u) == this) {
                     list.add(le);
                 }
             }
@@ -66,7 +66,7 @@ public interface GarrisonableBuilding extends BuildingAddon{
             List<LivingEntity> list = new ArrayList<>();
             for (LivingEntity le : UnitServerEvents.getAllUnits()) {
                 if (le instanceof Unit u &&
-                    GarrisonableBuilding.getGarrison(u) == this) {
+                    GarrisonableBuildingAddon.getGarrison(u) == this) {
                     list.add(le);
                 }
             }
@@ -75,7 +75,7 @@ public interface GarrisonableBuilding extends BuildingAddon{
         return List.of();
     }
 
-    static GarrisonableBuilding getGarrison(Unit unit) {
+    static GarrisonableBuildingAddon getGarrison(Unit unit) {
         List<GarrisonableBuilding> buildings;
         Entity entity = (Entity) unit;
         if (entity.level().isClientSide())
@@ -127,9 +127,9 @@ public interface GarrisonableBuilding extends BuildingAddon{
             else
                 isAllied = AlliancesServerEvents.isAllied(unit.getOwnerName(), building.ownerName);
 
-            GarrisonableBuilding garr;
+            GarrisonableBuildingAddon garr;
             if ((unit.getOwnerName().equals(building.ownerName) || isAllied || (unit.getOwnerName().isEmpty() && building.ownerName.isEmpty())) &&
-                    (garr = building.getBuilding().getActiveAddon(GarrisonableBuilding.class)) != null && building.isBuilt &&
+                    (garr = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null && building.isBuilt &&
                     building.isPosInsideBuilding(((LivingEntity) unit).getOnPos().above())) {
 
                 if (building.getBuilding() instanceof CustomBuilding) {

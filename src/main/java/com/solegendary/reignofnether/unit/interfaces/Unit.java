@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.interfaces;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
@@ -275,7 +275,7 @@ public interface Unit {
         }
 
         if (le.isInWater() && // stuck in bridge
-                BuildingUtils.findBuilding(le.level().isClientSide(), le.getOnPos().above()) instanceof BridgePlacement) {
+                BuildingUtils.findBuilding(le.level().isClientSide(), le.getOnPos().above()).getBuilding() instanceof AbstractBridge) {
             le.setDeltaMovement(0, 0.2, 0);
         }
 

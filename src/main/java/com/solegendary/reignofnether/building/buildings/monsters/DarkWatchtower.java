@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -19,7 +19,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class DarkWatchtower extends Building implements GarrisonableBuilding {
+public class DarkWatchtower extends Building implements GarrisonableBuildingAddon {
     public final static int MAX_OCCUPANTS = 3;
 
     public final static String buildingName = "Dark Watchtower";
@@ -72,12 +72,12 @@ public class DarkWatchtower extends Building implements GarrisonableBuilding {
     public int getExternalAttackRangeBonus() { return 10; }
     @Override
     public BlockPos getEntryPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(2,11,2), placement.rotation));
+        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(2,11,2), placement.rotation));
     }
 
     @Override
     public BlockPos getExitPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(2,1,2), placement.rotation));
+        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(2,1,2), placement.rotation));
     }
 
     @Override

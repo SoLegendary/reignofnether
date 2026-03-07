@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.NightSource;
 import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -248,12 +249,13 @@ public class TimeClientEvents {
             //            }
         }
         // draw range indicators for buildings with abilities and monster night sources
-        for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-            if (building instanceof RangeIndicator ri) {
-                for (BlockPos bp : ri.getBorderBps()) {
+        for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
+            RangeIndicatorAddon ria;
+            if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
+                for (BlockPos bp : ria.getBorderBps(building)) {
                     if (BuildingClientEvents.getSelectedBuildings().contains(building)) {
                         MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, bp, 0f, 0.8f, 0f, 0.3f);
-                    } else if (!ri.showOnlyWhenSelected()) {
+                    } else if (!ria.showOnlyWhenSelected(building)) {
                         MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, bp, 0f, 0f, 0f, 0.6f);
                     }
                     /* causes a lot of flickering
@@ -268,6 +270,7 @@ public class TimeClientEvents {
                     */
                 }
             }
+        }
     }
 
     // maintain a mapping of night sources for easy culling calcs

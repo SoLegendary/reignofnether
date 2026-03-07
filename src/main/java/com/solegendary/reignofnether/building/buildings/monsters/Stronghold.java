@@ -5,8 +5,9 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
-import com.solegendary.reignofnether.building.buildings.placements.StrongholdPlacement;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -23,7 +24,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Stronghold extends ProductionBuilding implements GarrisonableBuilding {
+public class Stronghold extends ProductionBuilding implements GarrisonableBuildingAddon, RangeIndicatorAddon, NightSourceAddon {
     public final static int MAX_OCCUPANTS = 7;
 
     public final static String buildingName = "Stronghold";
@@ -54,16 +54,13 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
         this.productions.add(ProductionItems.WARDEN, Keybindings.keyQ);
 
-        setActiveAddon(GarrisonableBuilding.class, this, true);
+        setActiveAddon(GarrisonableBuildingAddon.class, this, true);
+        setActiveAddon(RangeIndicatorAddon.class, this, true);
+        setActiveAddon(NightSourceAddon.class, this, true);
     }
 
     public Faction getFaction() {
         return Faction.MONSTERS;
-    }
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new StrongholdPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), true, nightRange,false, true);
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
@@ -88,7 +85,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.stronghold.tooltip2",
-                    StrongholdPlacement.MAX_OCCUPANTS
+                    Stronghold.MAX_OCCUPANTS
                 ), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.stronghold.tooltip3",
@@ -127,14 +124,42 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
     @Override
     public BlockPos getEntryPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(5, 14, 5), placement.rotation));
+        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(5, 14, 5), placement.rotation));
     }
 
     @Override
     public BlockPos getExitPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(5, 2, 6), placement.rotation));
+        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(5, 2, 6), placement.rotation));
     }
 
     @Override
     public int getCapacity() { return MAX_OCCUPANTS; }
+
+    @Override
+    public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
+        super.tick(tickLevel, buildingPlacement);
+        if (tickLevel.isClientSide && buildingPlacement.getTickAgeAfterBuilt() > 0 && buildingPlacement.getTickAgeAfterBuilt() % 100 == 0)
+            updateBorderBps(buildingPlacement);
+    }
+
+    @Override
+    public void onBuilt(BuildingPlacement buildingPlacement) {
+        super.onBuilt(buildingPlacement);
+        updateBorderBps(buildingPlacement);
+    }
+
+    @Override
+    public int getNightRange(BuildingPlacement placement) {
+        return getRange(placement);
+    }
+
+    @Override
+    public int getRange(BuildingPlacement placement) {
+        return (placement.isBuiltServerside && placement.isBuilt) ? nightRange : 0;
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected(BuildingPlacement placement) {
+        return false;
+    }
 }

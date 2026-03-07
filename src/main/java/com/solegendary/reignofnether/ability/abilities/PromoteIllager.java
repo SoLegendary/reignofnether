@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.ability.abilities;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.CastlePlacement;
+import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -72,8 +72,8 @@ public class PromoteIllager extends Ability {
             hotkey,
             () -> false,
             () -> {
-                if (placement instanceof CastlePlacement castle) {
-                    return castle.getUpgradeLevel() == 0;
+                if (placement.getBuilding() instanceof Castle) {
+                    return placement.getUpgradeLevel() == 0;
                 }
                 return true;
             },
@@ -105,9 +105,8 @@ public class PromoteIllager extends Ability {
 
     @Override
     public void use(Level level, BuildingPlacement buildingUsing, LivingEntity targetEntity) {
-        if (!(buildingUsing instanceof CastlePlacement))
+        if (!(buildingUsing.getBuilding() instanceof Castle))
             return;
-        CastlePlacement castle = (CastlePlacement) buildingUsing;
 
         Vec3 pos = targetEntity.getEyePosition();
         if (buildingUsing.centrePos.distToCenterSqr(pos.x, pos.y, pos.z) > RANGE * RANGE) {
@@ -132,16 +131,17 @@ public class PromoteIllager extends Ability {
                 return;
             }
             // only once promotedIllager allowed at a time
-            if (castle.promotedIllager != null && castle.promotedIllager.isAlive() &&
-                castle.promotedIllager.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
-                castle.promotedIllager.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
+            LivingEntity promotedIllager = buildingUsing.getDataStorage().getData(Castle.PROMOTED_ILLAGER);
+            if (promotedIllager != null && promotedIllager.isAlive() &&
+                promotedIllager.getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem) {
+                promotedIllager.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
             }
-            castle.promotedIllager = targetEntity;
-            castle.promotedIllager.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
+            buildingUsing.getDataStorage().setData(Castle.PROMOTED_ILLAGER, targetEntity);
+            targetEntity.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
 
             // spawn a firework
             if (!level.isClientSide()) {
-                MiscUtil.shootFirework(level, castle.promotedIllager.getEyePosition());
+                MiscUtil.shootFirework(level, targetEntity.getEyePosition());
             }
             this.setToMaxCooldown(buildingUsing);
         } else {

@@ -7,11 +7,11 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
-import com.solegendary.reignofnether.building.buildings.placements.IronGolemPlacement;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
+import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -209,7 +209,7 @@ public class UnitClientEvents {
                     if (building instanceof ProductionPlacement prodBuilding) {
                         for (ActiveProduction prodItem : prodBuilding.productionQueue)
                             currentPopulation += prodItem.item.getCost(true, playerName).population;
-                    } else if (building instanceof IronGolemPlacement) {
+                    } else if (building.getBuilding() instanceof IronGolemBuilding) {
                         currentPopulation += ResourceCosts.IRON_GOLEM.population;
                     }
         }
@@ -633,8 +633,8 @@ public class UnitClientEvents {
                         boolean sameProfession = entity instanceof VillagerUnit vUnit1 &&
                                                 selectedUnit instanceof VillagerUnit vUnit2 &&
                                                 vUnit1.getUnitProfession() == vUnit2.getUnitProfession();
-                        boolean garrisoned1 = selectedUnit instanceof Unit unit1 && GarrisonableBuilding.getGarrison(unit1) != null;
-                        boolean garrisoned2 = entity instanceof Unit unit2 && GarrisonableBuilding.getGarrison(unit2) != null;
+                        boolean garrisoned1 = selectedUnit instanceof Unit unit1 && GarrisonableBuildingAddon.getGarrison(unit1) != null;
+                        boolean garrisoned2 = entity instanceof Unit unit2 && GarrisonableBuildingAddon.getGarrison(unit2) != null;
                         boolean garrionStatusMatches = (garrisoned1 && garrisoned2) || (!garrisoned1 && !garrisoned2);
                         if (entity == selectedUnit) continue;
                         if ((getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
@@ -710,7 +710,7 @@ public class UnitClientEvents {
                         sendUnitCommand(UnitAction.MOUNT_SPIDER);
                 }
                 // right click -> garrison friendly building
-                else if (preSelBuilding != null && preSelBuilding.getBuilding().hasActiveAddon(GarrisonableBuilding.class) &&
+                else if (preSelBuilding != null && preSelBuilding.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class) &&
                         hudSelectedEntity instanceof RangedAttackerUnit &&
                         hudSelectedEntity instanceof Unit unit && unit.canGarrison() &&
                         preSelBuilding.ownerName.equals(unit.getOwnerName())) {
@@ -734,7 +734,7 @@ public class UnitClientEvents {
                 else if (hudSelectedEntity instanceof AttackerUnit &&
                         (preSelBuilding != null) &&
                         !preSelBuilding.getBuilding().invulnerable &&
-                        !(preSelBuilding instanceof BridgePlacement) &&
+                        !(preSelBuilding.getBuilding() instanceof AbstractBridge) &&
                         ((GameruleClient.neutralAggro && getPlayerToBuildingRelationship(preSelBuilding) == Relationship.NEUTRAL) ||
                         getPlayerToBuildingRelationship(preSelBuilding) == Relationship.HOSTILE)) {
                     sendUnitCommand(UnitAction.ATTACK_BUILDING);
@@ -750,7 +750,7 @@ public class UnitClientEvents {
                 // right click -> build or repair preselected building
                 else if (hudSelectedEntity instanceof WorkerUnit && preSelBuilding != null &&
                         (getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED || AlliancesClient.canControlAlly(hudSelectedEntity)) ||
-                        preSelBuilding instanceof BridgePlacement) {
+                        preSelBuilding.getBuilding() instanceof AbstractBridge) {
 
                     if (preSelBuilding.getBuilding() instanceof AbstractFarm && preSelBuilding.isBuilt)
                         sendUnitCommand(UnitAction.FARM);
@@ -1226,7 +1226,7 @@ public class UnitClientEvents {
                     entity.getId() != MC.player.getId() &&
                     !(entity instanceof WorkerUnit) &&
                     entity instanceof AttackerUnit &&
-                    GarrisonableBuilding.getGarrison((Unit) entity) == null &&
+                    GarrisonableBuildingAddon.getGarrison((Unit) entity) == null &&
                     getPlayerToEntityRelationship(entity) == Relationship.OWNED
             )
                 units.add(entity);

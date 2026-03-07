@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.building.custombuilding;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -29,7 +29,7 @@ import java.util.*;
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class CustomBuilding extends Building implements GarrisonableBuilding {
+public class CustomBuilding extends Building implements GarrisonableBuildingAddon {
     public static final List<Block> INVULNERABLE_BLOCKS = List.of(
             BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
             BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),

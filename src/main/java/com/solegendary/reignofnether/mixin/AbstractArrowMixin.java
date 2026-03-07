@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.mixin;
 
 import com.google.common.collect.Lists;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
@@ -57,7 +57,7 @@ public abstract class AbstractArrowMixin extends Projectile {
 
         boolean insideForeignEntity = entityHitResult != null && entityHitResult.getEntity() != getOwner();
         if (entityHitResult != null && entityHitResult.getEntity() instanceof Unit unit1 && getOwner() instanceof Unit unit2 &&
-            GarrisonableBuilding.getGarrison(unit1) == GarrisonableBuilding.getGarrison(unit2))
+            GarrisonableBuildingAddon.getGarrison(unit1) == GarrisonableBuildingAddon.getGarrison(unit2))
             insideForeignEntity = false;
 
         return building.isPosInsideBuilding(this.blockPosition()) && !insideForeignEntity;
@@ -72,7 +72,7 @@ public abstract class AbstractArrowMixin extends Projectile {
     public void isNoPhysics(CallbackInfoReturnable<Boolean> cir) {
         if (this.getOwner() instanceof AttackerUnit aUnit) {
             // garrisoned unit -> ground
-            if (GarrisonableBuilding.getGarrison((Unit) aUnit) instanceof BuildingPlacement building &&
+            if (GarrisonableBuildingAddon.getGarrison((Unit) aUnit) instanceof BuildingPlacement building &&
                     isInsideBuildingAndNotForeignEntity(building)) {
                 cir.setReturnValue(true);
             }

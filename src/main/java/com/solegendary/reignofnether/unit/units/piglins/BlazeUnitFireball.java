@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ability.abilities.FirewallShot;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -100,10 +100,10 @@ public class BlazeUnitFireball extends SmallFireball {
 
     public boolean isNoPhysics() {
         if (this.getOwner() instanceof Unit unit) {
-            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
+            GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison(unit);
 
             if (garr != null ) {
-                BuildingPlacement building = GarrisonableBuilding.getGarrisonPlacement(unit);
+                BuildingPlacement building = GarrisonableBuildingAddon.getGarrisonPlacement(unit);
 
                 // only have nophysics at a high Y value so we can still attack enemies at the base of the building
                 if (building.isPosInsideBuilding(this.blockPosition()) &&

@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -25,7 +25,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Bastion extends ProductionBuilding implements GarrisonableBuilding {
+public class Bastion extends ProductionBuilding implements GarrisonableBuildingAddon {
     public final static int MAX_OCCUPANTS = 4;
 
     public final static String buildingName = "Bastion";
@@ -51,7 +51,7 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuilding 
         this.productions.add(ProductionItems.RESEARCH_BRUTE_SHIELDS, Keybindings.keyQ);
         this.productions.add(ProductionItems.RESEARCH_HEAVY_TRIDENTS, Keybindings.keyW);
 
-        setActiveAddon(GarrisonableBuilding.class, this, true);
+        setActiveAddon(GarrisonableBuildingAddon.class, this, true);
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}
@@ -94,12 +94,12 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuilding 
 
     @Override
     public BlockPos getEntryPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(2,11,2), placement.rotation));
+        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(2,11,2), placement.rotation));
     }
 
     @Override
     public BlockPos getExitPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuilding.rotatePos(new BlockPos(2,1,2), placement.rotation));
+        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(2,1,2), placement.rotation));
     }
 
     @Override

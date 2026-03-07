@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -22,8 +22,8 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     }
 
     public void tick() {
-        GarrisonableBuilding garr;
-        if ((garr = buildingTarget.getBuilding().getActiveAddon(GarrisonableBuilding.class)) != null) {
+        GarrisonableBuildingAddon garr;
+        if ((garr = buildingTarget.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null) {
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() <= 0) {
                 stopGarrisoning();
@@ -46,7 +46,7 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     }
 
     private void calcMoveTarget() {
-        if (buildingTarget.getBuilding().hasActiveAddon(GarrisonableBuilding.class)) {
+        if (buildingTarget.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class)) {
             this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1);
         }
     }
@@ -65,8 +65,8 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
             else
                 isAllied = AlliancesServerEvents.isAllied(building.ownerName, ((Unit) mob).getOwnerName());
 
-            GarrisonableBuilding garr;
-            if ((garr = building.getBuilding().getActiveAddon(GarrisonableBuilding.class)) == null ||
+            GarrisonableBuildingAddon garr;
+            if ((garr = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) == null ||
                 (!building.ownerName.equals(((Unit) mob).getOwnerName()) && !isAllied)) {
                 if (clientside)
                     HudClientEvents.showTemporaryMessage(I18n.get("hud.reignofnether.not_garrisonable"));

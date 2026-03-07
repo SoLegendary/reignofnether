@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 import com.solegendary.reignofnether.ability.abilities.CallLightning;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.placements.RangeIndicatorProductionPlacement;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -19,7 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +26,7 @@ import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Laboratory extends ProductionBuilding {
+public class Laboratory extends ProductionBuilding implements RangeIndicatorAddon {
 
     public final static String buildingName = "Laboratory";
     public final static String structureName = "laboratory";
@@ -62,6 +61,8 @@ public class Laboratory extends ProductionBuilding {
         this.productions.add(ProductionItems.RESEARCH_LAB_LIGHTNING_ROD, Keybindings.keyI);
         this.productions.add(ProductionItems.RESEARCH_SILVERFISH, Keybindings.keyO);
         this.productions.add(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, Keybindings.keyP);
+
+        setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
@@ -87,11 +88,6 @@ public class Laboratory extends ProductionBuilding {
         return 0;
     }
 
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new RangeIndicatorProductionPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false, CallLightning.RANGE, true, true);
-    }
-
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
@@ -115,5 +111,22 @@ public class Laboratory extends ProductionBuilding {
             ),
                 this
         );
+    }
+
+    @Override
+    public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
+        super.tick(tickLevel, buildingPlacement);
+        if (tickLevel.isClientSide && buildingPlacement.getTickAgeAfterBuilt() > 0 && buildingPlacement.getTickAgeAfterBuilt() % 100 == 0)
+            updateBorderBps(buildingPlacement);
+    }
+
+    @Override
+    public int getRange(BuildingPlacement placement) {
+        return (getUpgradeLevel(placement) > 0 && placement.isBuilt) ? CallLightning.RANGE : 0;
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected(BuildingPlacement placement) {
+        return true;
     }
 }

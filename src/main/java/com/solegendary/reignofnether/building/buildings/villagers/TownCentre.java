@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
-import com.solegendary.reignofnether.building.buildings.placements.RangeIndicatorProductionPlacement;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -17,19 +17,17 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class TownCentre extends ProductionBuilding {
+public class TownCentre extends ProductionBuilding implements RangeIndicatorAddon {
 
     public final static String buildingName = "Town Centre";
     public final static String structureName = "town_centre";
@@ -57,14 +55,11 @@ public class TownCentre extends ProductionBuilding {
         this.abilities.add(backToWork, Keybindings.build);
 
         this.productions.add(ProductionItems.VILLAGER, Keybindings.keyQ);
+
+        setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new RangeIndicatorProductionPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), true, MILITIA_RANGE, true, false);
-    }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
@@ -85,5 +80,22 @@ public class TownCentre extends ProductionBuilding {
                 ),
                 this
         );
+    }
+
+    @Override
+    public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
+        super.tick(tickLevel, buildingPlacement);
+        if (tickLevel.isClientSide && buildingPlacement.getTickAgeAfterBuilt() > 0 && buildingPlacement.getTickAgeAfterBuilt() % 100 == 0)
+            updateBorderBps(buildingPlacement);
+    }
+
+    @Override
+    public int getRange(BuildingPlacement placement) {
+        return (placement.isBuilt) ? MILITIA_RANGE : 0;
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected(BuildingPlacement placement) {
+        return true;
     }
 }
