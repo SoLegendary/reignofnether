@@ -24,6 +24,7 @@ import java.util.List;
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public abstract class AbstractBridge extends Building {
+    //Is this still necessary?
     public static final DataType<Boolean> DIAGONAL = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "diagonal"), (tag, server) -> tag.getBoolean("diagonal"), diagonal -> {
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("diagonal", diagonal);
@@ -44,6 +45,7 @@ public abstract class AbstractBridge extends Building {
 
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName, boolean diagonal) {
         BuildingPlacement placement = createBuildingPlacement(level, pos, rotation, ownerName);
+        //Is this still necessary?
         placement.getDataStorage().setData(DIAGONAL, diagonal);
         return placement;
     }
@@ -54,7 +56,12 @@ public abstract class AbstractBridge extends Building {
     public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks, BuildingPlacement placement) {
         BlockState bs = level.getBlockState(pos);
 //        super.onBlockBreak(level, pos, breakBlocks);
-        replaceWithLiquidBelow(pos, bs, placement.level);
+        for (BuildingBlock bb : placement.getBlocks()) {
+            if (bb.getBlockPos().equals(pos)) {
+                replaceWithLiquidBelow(placement, pos, bb.getBlockState());
+                return;
+            }
+        }
     }
 
     public void destroy(ServerLevel serverLevel, BuildingPlacement placement) {
@@ -62,15 +69,17 @@ public abstract class AbstractBridge extends Building {
         for (BuildingBlock bb : placement.getBlocks()) // need to check first here since we already destroyed the level blocks
             if (!(bb.getBlockState().getBlock() instanceof FenceBlock) &&
                     !(bb.getBlockState().getBlock() instanceof AirBlock))
-                replaceWithLiquidBelow(bb.getBlockPos(), bb.getBlockState(), placement.level);
+                replaceWithLiquidBelow(placement, bb.getBlockPos(), bb.getBlockState());
     }
 
-    private void replaceWithLiquidBelow(BlockPos bp, BlockState bs, Level level) {
+    private void replaceWithLiquidBelow(BuildingPlacement placement, BlockPos bp, BlockState bs) {
         if (!(bs.getBlock() instanceof FenceBlock)) {
             for (BlockPos bpAdj : List.of(bp.below(), bp.north(), bp.south(), bp.east(), bp.west())) {
-                BlockState bsAdj = level.getBlockState(bpAdj);
-                if (!bsAdj.getFluidState().isEmpty())
-                    level.setBlockAndUpdate(bp, bsAdj);
+                BlockState bsAdj = placement.level.getBlockState(bpAdj);
+                if (!bsAdj.getFluidState().isEmpty()) {
+                    placement.level.setBlockAndUpdate(bp, bsAdj);
+                    break;
+                }
             }
         }
     }

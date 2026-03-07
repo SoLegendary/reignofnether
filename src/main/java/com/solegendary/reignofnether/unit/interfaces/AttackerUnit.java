@@ -208,7 +208,8 @@ public interface AttackerUnit {
     // if the nearest target is closer than the current target, retarget to the nearest
     default void retargetToClosestUnit(ServerLevel level) {
         float aggroRange = this.getAggroRange();
-        GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison((Unit) this);
+        BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this);
+        GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
         if (garr != null) {
             aggroRange = garr.getAttackRange();
         }
@@ -229,10 +230,11 @@ public interface AttackerUnit {
 
     default void attackClosestEnemy(ServerLevel level) {
         float aggroRange = this.getAggroRange();
-        GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison((Unit) this);
-        if (garr != null)
-            aggroRange  = garr.getAttackRange();
-
+        BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this);
+        GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+        if (garr != null) {
+            aggroRange = garr.getAttackRange();
+        }
         LivingEntity entity = MiscUtil.findClosestAttackableEntity((Mob) this, aggroRange, level);
         if (entity != null) {
             if (!((LivingEntity) this).isPassenger())

@@ -9,6 +9,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.abilities.ToggleShield;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
@@ -443,7 +444,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                     0
             ));
             String rangeStr;
-            GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison(unit);
+            BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
+            GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
             if (garr != null) {
                 rangeStr = String.valueOf(garr.getAttackRange());
             } else {

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
@@ -106,11 +107,13 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
         if (target != null && target.isAlive()) {
             this.mob.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
 
-            GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison((Unit) this.mob);
-            GarrisonableBuildingAddon targetGarr = null;
+            BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this.mob);
+            BuildingPlacement targetGarrPlacement = null;
             if (target instanceof Unit unit)
-                targetGarr = GarrisonableBuildingAddon.getGarrison(unit);
+                targetGarrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
 
+            GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+            GarrisonableBuildingAddon targetGarr = targetGarrPlacement != null ? targetGarrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
             boolean isGarrisoned = garr != null;
             boolean isTargetGarrisoned = targetGarr != null;
 

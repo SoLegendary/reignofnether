@@ -72,8 +72,8 @@ public abstract class AbstractArrowMixin extends Projectile {
     public void isNoPhysics(CallbackInfoReturnable<Boolean> cir) {
         if (this.getOwner() instanceof AttackerUnit aUnit) {
             // garrisoned unit -> ground
-            if (GarrisonableBuildingAddon.getGarrison((Unit) aUnit) instanceof BuildingPlacement building &&
-                    isInsideBuildingAndNotForeignEntity(building)) {
+            BuildingPlacement building = GarrisonableBuildingAddon.getGarrison((Unit) aUnit);
+            if (isInsideBuildingAndNotForeignEntity(building)) {
                 cir.setReturnValue(true);
             }
 

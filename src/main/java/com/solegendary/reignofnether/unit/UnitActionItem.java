@@ -215,8 +215,8 @@ public class UnitActionItem {
                     }
                 }
                 case UNGARRISON -> {
-                    GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison(unit);
-                    BuildingPlacement placement = GarrisonableBuildingAddon.getGarrisonPlacement(unit);
+                    BuildingPlacement placement = GarrisonableBuildingAddon.getGarrison(unit);
+                    GarrisonableBuildingAddon garr = placement != null ? placement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
                     if (garr != null && garr.getExitPosition(placement) != null ) {
                         BlockPos bp = garr.getExitPosition(placement);
                         ((LivingEntity) unit).teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);

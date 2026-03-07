@@ -177,7 +177,7 @@ public class BuildingPlacement {
     Object2ObjectArrayMap<Ability, Float> cooldowns = new Object2ObjectArrayMap<>();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
 
-    DataStorage dataStorage;
+    DataStorage dataStorage = new DataStorage();
 
     public List<AbilityButton> getAbilityButtons() {
         return abilityButtons;
@@ -529,7 +529,7 @@ public class BuildingPlacement {
     }
 
     private boolean isDestroyedAndNotNextToLiquid(BuildingBlock block) {
-        if (!(this instanceof BridgePlacement) && this.level.getBlockState(block.getBlockPos()).getFluidState().isEmpty() && (
+        if (!(getBuilding() instanceof AbstractBridge) && this.level.getBlockState(block.getBlockPos()).getFluidState().isEmpty() && (
             !this.level.getBlockState(block.getBlockPos().above()).getFluidState().isEmpty()
             || !this.level.getBlockState(block.getBlockPos().north()).getFluidState().isEmpty()
             || !this.level.getBlockState(block.getBlockPos().south()).getFluidState().isEmpty()

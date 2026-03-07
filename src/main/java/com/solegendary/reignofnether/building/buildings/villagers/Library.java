@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import org.joml.Vector3d;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
@@ -140,11 +141,14 @@ public class Library extends ProductionBuilding {
 
     @Override
     public void tick(Level tickLevel, BuildingPlacement bp) {
+        super.tick(tickLevel, bp);
+
         EnchantAbility autoCastEnchant = bp.getDataStorage().getData(AUTO_CAST_ENCHANT);
         if (bp.getTickAgeAfterBuilt() > 0 && bp.getTickAgeAfterBuilt() % 15 == 0 && bp.isBuilt && autoCastEnchant != null
                 && autoCastEnchant.isOffCooldown(bp)) {
 
-            List<Mob> mobs = MiscUtil.getEntitiesWithinRange(new Vector3d(
+            List<Mob> mobs = new ArrayList<>();
+            for (Mob e : MiscUtil.getEntitiesWithinRange(new Vector3d(
                             bp.centrePos.getX(),
                             bp.centrePos.getY(),
                             bp.centrePos.getZ()
@@ -152,10 +156,14 @@ public class Library extends ProductionBuilding {
                     autoCastEnchant.range - 1,
                     Mob.class,
                     tickLevel
-            ).stream().filter(e -> (
-                    autoCastEnchant.isCorrectUnitAndEquipment(e) && autoCastEnchant.canAfford(bp)
-                            && !autoCastEnchant.hasAnyEnchant(e)
-            )).toList();
+            )) {
+                if ((
+                        autoCastEnchant.isCorrectUnitAndEquipment(e) && autoCastEnchant.canAfford(bp)
+                                && !autoCastEnchant.hasAnyEnchant(e)
+                )) {
+                    mobs.add(e);
+                }
+            }
 
             if (!mobs.isEmpty()) {
                 autoCastEnchant.use(tickLevel, bp, mobs.get(0));

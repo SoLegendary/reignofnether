@@ -128,11 +128,13 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
 
         if ((target != null && target.isAlive()) || buildTarget != null) {
 
-            GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison((Unit) this.mob);
-            GarrisonableBuildingAddon targetGarr = null;
+            BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this.mob);
+            BuildingPlacement targetGarrPlacement = null;
             if (target instanceof Unit unit)
-                targetGarr = GarrisonableBuildingAddon.getGarrison(unit);
+                targetGarrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
 
+            GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+            GarrisonableBuildingAddon targetGarr = targetGarrPlacement != null ? targetGarrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
             boolean isGarrisoned = garr != null;
             boolean isTargetGarrisoned = targetGarr != null;
 

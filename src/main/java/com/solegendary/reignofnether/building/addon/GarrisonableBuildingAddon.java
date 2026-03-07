@@ -51,12 +51,12 @@ public interface GarrisonableBuildingAddon extends BuildingAddon{
     }
 
     // will only return actual Units, not any other LivingEntity
-    public default List<LivingEntity> getOccupants(BuildingPlacement placement) {
+    default List<LivingEntity> getOccupants(BuildingPlacement placement) {
         if (placement.level.isClientSide()) {
             List<LivingEntity> list = new ArrayList<>();
             for (LivingEntity le : UnitClientEvents.getAllUnits()) {
                 if (le instanceof Unit u &&
-                    GarrisonableBuildingAddon.getGarrison(u) == this) {
+                    GarrisonableBuildingAddon.getGarrison(u) == placement) {
                     list.add(le);
                 }
             }
@@ -66,71 +66,38 @@ public interface GarrisonableBuildingAddon extends BuildingAddon{
             List<LivingEntity> list = new ArrayList<>();
             for (LivingEntity le : UnitServerEvents.getAllUnits()) {
                 if (le instanceof Unit u &&
-                    GarrisonableBuildingAddon.getGarrison(u) == this) {
+                    GarrisonableBuildingAddon.getGarrison(u) == placement) {
                     list.add(le);
                 }
             }
             return list;
         }
-        return List.of();
     }
 
-    static GarrisonableBuildingAddon getGarrison(Unit unit) {
-        List<GarrisonableBuilding> buildings;
+    static BuildingPlacement getGarrison(Unit unit) {
+        List<BuildingPlacement> buildings;
         Entity entity = (Entity) unit;
         if (entity.level().isClientSide())
             buildings = BuildingClientEvents.getGarrisonableBuildings();
         else
             buildings = BuildingServerEvents.getGarrisonableBuildings();
 
-        for (GarrisonableBuilding garrisonableBuilding : buildings) {
-            if (!(garrisonableBuilding instanceof BuildingPlacement building)) return null;
-            boolean isAllied;
-            if (entity.level().isClientSide()) {
-                isAllied = AlliancesClient.isAllied(unit.getOwnerName(), building.ownerName);
-            }
-            else {
-                isAllied = AlliancesServerEvents.isAllied(unit.getOwnerName(), building.ownerName);
-            }
-
-            if ((!unit.getOwnerName().equals(building.ownerName) && !isAllied && (!unit.getOwnerName().isEmpty() || !building.ownerName.isEmpty())) ||
-                garrisonableBuilding.getCapacity() <= 0 || !building.isBuilt ||
-                !building.isPosInsideBuilding(((LivingEntity) unit).getOnPos().above())) {
-                continue;
-            }
-
-                if (building.getBuilding() instanceof CustomBuilding) {
-                    Block onBlock = entity.level().getBlockState(entity.getOnPos().above()).getBlock();
-                    if (onBlock == BlockRegistrar.GARRISON_ZONE_BLOCK.get() ||
-                            onBlock == BlockRegistrar.GARRISON_ENTRY_BLOCK.get())
-                        return garrisonableBuilding;
-            } else {
-                if (((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2) return garrisonableBuilding;
-            }
-        }
-        return null;
-    }
-
-    static BuildingPlacement getGarrisonPlacement(Unit unit) {
-        List<BuildingPlacement> buildings;
-        Entity entity = (Entity) unit;
-        if (entity.level().isClientSide())
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
-
         for (BuildingPlacement building : buildings) {
+            GarrisonableBuildingAddon gba = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class);
+            if (gba != null) {
+                boolean isAllied;
+                if (entity.level().isClientSide()) {
+                    isAllied = AlliancesClient.isAllied(unit.getOwnerName(), building.ownerName);
+                }
+                else {
+                    isAllied = AlliancesServerEvents.isAllied(unit.getOwnerName(), building.ownerName);
+                }
 
-            boolean isAllied;
-            if (entity.level().isClientSide())
-                isAllied = AlliancesClient.isAllied(unit.getOwnerName(), building.ownerName);
-            else
-                isAllied = AlliancesServerEvents.isAllied(unit.getOwnerName(), building.ownerName);
-
-            GarrisonableBuildingAddon garr;
-            if ((unit.getOwnerName().equals(building.ownerName) || isAllied || (unit.getOwnerName().isEmpty() && building.ownerName.isEmpty())) &&
-                    (garr = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null && building.isBuilt &&
-                    building.isPosInsideBuilding(((LivingEntity) unit).getOnPos().above())) {
+                if ((!unit.getOwnerName().equals(building.ownerName) && !isAllied && (!unit.getOwnerName().isEmpty() || !building.ownerName.isEmpty())) ||
+                        gba.getCapacity() <= 0 || !building.isBuilt ||
+                        !building.isPosInsideBuilding(((LivingEntity) unit).getOnPos().above())) {
+                    continue;
+                }
 
                 if (building.getBuilding() instanceof CustomBuilding) {
                     Block onBlock = entity.level().getBlockState(entity.getOnPos().above()).getBlock();
@@ -138,13 +105,47 @@ public interface GarrisonableBuildingAddon extends BuildingAddon{
                             onBlock == BlockRegistrar.GARRISON_ENTRY_BLOCK.get())
                         return building;
                 } else {
-                    if (((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2)
-                        return building;
+                    if (((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2) return building;
                 }
             }
         }
         return null;
     }
+
+//    static BuildingPlacement getGarrisonPlacement(Unit unit) {
+//        List<BuildingPlacement> buildings;
+//        Entity entity = (Entity) unit;
+//        if (entity.level().isClientSide())
+//            buildings = BuildingClientEvents.getBuildings();
+//        else
+//            buildings = BuildingServerEvents.getBuildings();
+//
+//        for (BuildingPlacement building : buildings) {
+//
+//            boolean isAllied;
+//            if (entity.level().isClientSide())
+//                isAllied = AlliancesClient.isAllied(unit.getOwnerName(), building.ownerName);
+//            else
+//                isAllied = AlliancesServerEvents.isAllied(unit.getOwnerName(), building.ownerName);
+//
+//            GarrisonableBuildingAddon garr;
+//            if ((unit.getOwnerName().equals(building.ownerName) || isAllied || (unit.getOwnerName().isEmpty() && building.ownerName.isEmpty())) &&
+//                    (garr = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null && building.isBuilt &&
+//                    building.isPosInsideBuilding(((LivingEntity) unit).getOnPos().above())) {
+//
+//                if (building.getBuilding() instanceof CustomBuilding) {
+//                    Block onBlock = entity.level().getBlockState(entity.getOnPos().above()).getBlock();
+//                    if (onBlock == BlockRegistrar.GARRISON_ZONE_BLOCK.get() ||
+//                            onBlock == BlockRegistrar.GARRISON_ENTRY_BLOCK.get())
+//                        return building;
+//                } else {
+//                    if (((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2)
+//                        return building;
+//                }
+//            }
+//        }
+//        return null;
+//    }
 
     static int getNumOccupants(BuildingPlacement building) {
         List<LivingEntity> entities;

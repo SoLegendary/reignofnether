@@ -100,13 +100,13 @@ public class BlazeUnitFireball extends SmallFireball {
 
     public boolean isNoPhysics() {
         if (this.getOwner() instanceof Unit unit) {
-            GarrisonableBuildingAddon garr = GarrisonableBuildingAddon.getGarrison(unit);
+            BuildingPlacement building = GarrisonableBuildingAddon.getGarrison(unit);
 
-            if (garr != null ) {
-                BuildingPlacement building = GarrisonableBuildingAddon.getGarrisonPlacement(unit);
+            if (building != null ) {
+                GarrisonableBuildingAddon garr = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class);
 
                 // only have nophysics at a high Y value so we can still attack enemies at the base of the building
-                if (building.isPosInsideBuilding(this.blockPosition()) &&
+                if (garr != null && building.isPosInsideBuilding(this.blockPosition()) &&
                         this.blockPosition().getY() > building.originPos.getY() + 5)
                     return true;
             }
