@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
@@ -348,7 +347,7 @@ public class BuildingClientboundPacket {
                     }
                     case CHANGE_PORTAL -> {
                         if (building instanceof PortalPlacement portal) {
-                            portal.changeStructure(portalType);
+                            portal.changePortalStructure(portalType);
                         }
                     }
                     case CLEAR_PRODUCTION -> {

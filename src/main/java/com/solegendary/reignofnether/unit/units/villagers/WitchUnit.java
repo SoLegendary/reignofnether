@@ -4,6 +4,8 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -18,6 +20,9 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,9 +44,11 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class WitchUnit extends Witch implements Unit {
+public class WitchUnit extends Witch implements Unit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new ThrowLingeringHarmingPotion(8), Keybindings.keyQ);
@@ -151,6 +158,18 @@ public class WitchUnit extends Witch implements Unit {
         updateAbilityButtons();
     }
 
+    @Override
+    public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
+        pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
+        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO)) {
+            pDamage *= 2.67; // 0.4 (60% less damage) after super's * 0.15
+        }
+        if (pSource.is(DamageTypes.ON_FIRE)) {
+            pDamage *= 0.4;
+        }
+        return pDamage;
+    }
+
     public int getPotionThrowRange() {
         if (GarrisonableBuildingAddon.getGarrison(this) != null)
             return 16;
@@ -193,7 +212,20 @@ public class WitchUnit extends Witch implements Unit {
         Unit.tick(this);
         this.throwPotionGoal.tick();
         PromoteIllager.checkAndApplyBuff(this);
+
+        if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
+            if (!lastOnPos.equals(getOnPos())) {
+                updateHighlightBps();
+            }
+            lastOnPos = getOnPos();
+        }
     }
+
+    private Set<BlockPos> highlightBps = new HashSet<>();
+    private BlockPos lastOnPos = new BlockPos(0,0,0);
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {

@@ -87,11 +87,11 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setSlantedBuilding(value);
             }
-        } else if (nodes.get(1).getNode().getName().equals("allowHeroes")) {
+        } else if (nodes.get(1).getNode().getName().equals("allowedHeroes")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
             if (args.containsKey("value")) {
-                boolean value = (boolean) args.get("value").getResult();
-                GameruleClientboundPacket.setAllowHeroes(value);
+                double value = ((Integer) args.get("value").getResult()).doubleValue();
+                GameruleClientboundPacket.setAllowedHeroes((long) value);
             }
         }
     }
@@ -124,8 +124,8 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setBeaconWinMinutes(beaconWinMinutes);
             boolean slantedBuilding = server.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get();
             GameruleClientboundPacket.setSlantedBuilding(slantedBuilding);
-            boolean allowHeroes = server.getGameRules().getRule(GameRuleRegistrar.ALLOW_HEROES).get();
-            GameruleClientboundPacket.setAllowHeroes(allowHeroes);
+            int allowHeroes = server.getGameRules().getRule(GameRuleRegistrar.ALLOWED_HEROES).get();
+            GameruleClientboundPacket.setAllowedHeroes(allowHeroes);
         }
     }
 }

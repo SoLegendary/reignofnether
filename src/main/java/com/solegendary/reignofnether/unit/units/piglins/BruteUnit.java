@@ -21,11 +21,13 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -48,7 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.solegendary.reignofnether.ability.abilities.Bloodlust.BLOODLUST_ATTACK_SPEED_MULTIPLIER;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -134,11 +136,9 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.BRUTE;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttacksPerSecond() {
-        if (bloodlustTicks > 0)
-            return attacksPerSecond * BLOODLUST_ATTACK_SPEED_MULTIPLIER;
-        return attacksPerSecond;
-    }
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -151,12 +151,6 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     // endregion
-
-    public int getAttackCooldown() {
-        if (bloodlustTicks > 0)
-            return (int) (20 / (attacksPerSecond * BLOODLUST_ATTACK_SPEED_MULTIPLIER));
-        return (int) (20 / attacksPerSecond);
-    }
 
     final static public float attackDamage = 5.0f;
     final static public float attacksPerSecond = 0.5f;
@@ -171,8 +165,6 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
     public int maxResources = 100;
 
-    public int bloodlustTicks = 0;
-
     public boolean isHoldingUpShield = false;
 
     private Abilities abilities = ABILITIES.clone();
@@ -185,7 +177,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     }
 
     @Override
-    public float getUnitRangedArmorPercentage() {
+    public double getUnitRangedArmorPercentage() {
         if (isHoldingUpShield) {
             return 1 - ((1 - ToggleShield.PROJECTILE_DAMAGE_RESIST) * (1 - rangedDamageResist));
         } else {
@@ -245,9 +237,6 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
-
-        if (bloodlustTicks > 0)
-            bloodlustTicks -= 1;
     }
 
     @Override
@@ -346,8 +335,13 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     }
 
     @Override
-    public boolean hasBonusAttackSpeed() {
-        return bloodlustTicks > 0;
+    public List<FormattedCharSequence> getAttackDamageStatTooltip() {
+        return hasEnchantedNetheriteSword() ? List.of(
+                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
+                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_fire_damage", 3, 3))
+        ) : List.of(
+                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true)
+        );
     }
 
     @Override

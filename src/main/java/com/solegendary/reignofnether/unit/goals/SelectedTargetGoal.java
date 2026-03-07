@@ -54,6 +54,7 @@ public class SelectedTargetGoal<T extends LivingEntity> extends TargetGoal {
             forced = false;
     }
 
+    @Nullable
     public LivingEntity getTarget() {
         return this.target;
     }

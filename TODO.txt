@@ -1,5 +1,5 @@
 
-1.20.1-1.2.4
+1.20.1-1.3.0
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -7,48 +7,40 @@
 
 
 
-Christmas
----------
-During christmas season, units spawn with santa hats, and the piglin merchant throws presents
-During new years, buildings explode with fireworks
-
 New Heroes
 ----------
-[❌] Change /gamerule allowHeroes (bool) to /gamerule allowedHeroes (int) (default 1)
 
-Wretched Wraith
-    [❌] New snow layer block that doesn't interfere with vanilla snow
-        - Maybe with a subtle particle effect?
+[❌] Overflowing graveyards
 
-Enchanter
-    [❌] Blacksmith armour upgrades
-
-Wildfire
-    [❌] Global toggle to turn all fire rendering into soulfires
-
-
-
-Seasons Greetings!
-[🟡] Between 19th and 26th December (inclusive), many units will spawn with Santa Hats
-[🟡] On 31st December and 1st January, buildings will create fireworks when damaged instead of explosions
-
+[❌] Wraiths
+    - No knockback on melee attacks
+    - Enemies hit by wraiths enough times get feared (uncontrollable and issued a move-away command from the last wraith that hit it)
+    - 2 population
+    - built at dungeons
+    - needs a lab upgrade - possession?
 
 
 Bugfixes
 --------
-[🟡] Fixed sculk catalysts not spreading any sculk
+[✔] Fixed a crash from putting a headhunter or evoker egg in a spawner
+[✔] Players can no longer build on barrier blocks
+[✔] Custom buildings no longer provide night range before being completed
+[✔] Fixed a possible crash from winning with a beacon
+[✔] You can no longer stack additional spawns at a unit spawner by pulling existing mobs away
 
+[✔] Fixed the royal guard's abilities not causing any knockback
 
 Quality of Life
 ---------------
-[🟡] Illager models now show worn armour (this will be used in a later update)
-
+[✔] Improved slime and magma cube pathfinding
+    - They will still sometimes get stuck at corners, no longer go in straight lines into walls and trees anymore
 
 Balance
 -------
-[❌] Ghasts can no longer attack and move 20% slower while over void or structure void blocks
-[❌] Prevent friendly fire from wither skeleton clouds
-    - Might need to create a new AreaEffectCloud entity
+[✔] The Wildfire's Molten Bomb no longer does any damage on impact
+[✔] The Royal Guard's mace slam mana cost increased from 40 to 60, but cooldown decreased from 30s to 20s
+[✔] The Royal Guard's taunting cry mana cost increased from 60 to 75, but cooldown decreased from 50s to 40s
+[✔] The Royal Guard's battle rage mana gain reduced from (0.4, 0.6, 0.8) to (0.3, 0.4, 0.5)
 
 
 Languages

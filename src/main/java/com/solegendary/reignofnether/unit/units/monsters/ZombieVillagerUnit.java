@@ -17,7 +17,6 @@ import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.unit.modelling.models.VillagerUnitModel;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -133,8 +132,9 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.ZOMBIE_VILLAGER;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}

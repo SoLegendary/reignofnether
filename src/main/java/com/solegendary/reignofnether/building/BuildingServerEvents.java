@@ -5,16 +5,12 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
-import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.placements.*;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
-import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
-import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -33,7 +29,6 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -186,20 +181,20 @@ public class BuildingServerEvents {
                     }
 
                     if (b.upgradeLevel > 0) {
-                        if (building.getBuilding() instanceof Castle) {
-                            building.changeStructure(Castle.upgradedStructureName);
-                        } else if (building.getBuilding() instanceof Laboratory) {
-                            building.changeStructure(Laboratory.upgradedStructureName);
-                        } else if (building instanceof PortalPlacement portal) {
+                        if (building instanceof PortalPlacement portal) {
                             if (!(building.getBuilding() instanceof NeutralTransportPortal)) {
-                                portal.changeStructure(b.portalType);
-                            } if (b.portalDestination != null && !b.portalDestination.equals(new BlockPos(0,0,0))) {
+                                portal.changePortalStructure(b.portalType);
+                            }
+                            if (b.portalDestination != null && !b.portalDestination.equals(new BlockPos(0, 0, 0))) {
                                 portal.destination = b.portalDestination;
                             }
-                        } else if (building.getBuilding() instanceof Library) {
-                            building.changeStructure(Library.upgradedStructureName);
                         } else if (building instanceof BeaconPlacement beacon) {
-                            beacon.changeStructure(b.upgradeLevel);
+                            beacon.changeBeaconStructure(b.upgradeLevel);
+                        } else {
+                            String upgradedStructureName = building.getBuilding().getUpgradedStructureName(b.upgradeLevel);
+                            if (!upgradedStructureName.equals(building.getBuilding().structureName)) {
+                                building.changeStructure(upgradedStructureName);
+                            }
                         }
                     }
                     // setNetherZone can only be run once - this supercedes where it normally happens in tick() ->

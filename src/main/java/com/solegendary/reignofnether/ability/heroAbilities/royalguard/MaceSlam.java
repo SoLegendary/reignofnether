@@ -33,9 +33,10 @@ public class MaceSlam extends HeroAbility {
     public static final float RANGE = 3;
     public float damage = 10f;
     public int stunDuration = 2 * ResourceCost.TICKS_PER_SECOND;
+    public static final float KNOCKBACK = 0.5f;
 
     public MaceSlam() {
-        super(3, 40, UnitAction.MACE_SLAM, 30 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
+        super(3, 60, UnitAction.MACE_SLAM, 20 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
     }
 
     @Override
@@ -74,8 +75,8 @@ public class MaceSlam extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Mace Slam",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/mace.png"),
+        AbilityButton button = new AbilityButton("Mace Slam",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/mace_slam.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.MACE_SLAM,
                 () -> getRank(hero) == 0,
@@ -86,13 +87,15 @@ public class MaceSlam extends HeroAbility {
                 this,
                 hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Mace Slam",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/mace.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/mace_slam.png"),
                 hero
         );
     }

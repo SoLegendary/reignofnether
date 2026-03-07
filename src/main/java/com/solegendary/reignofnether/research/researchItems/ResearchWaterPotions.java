@@ -23,6 +23,8 @@ public class ResearchWaterPotions extends ProductionItem {
     public final static String itemName = "Water Potions";
     public final static ResourceCost cost = ResourceCosts.RESEARCH_WATER_POTIONS;
 
+    public final static float DOWSE_RADIUS = 2f;
+
     public ResearchWaterPotions() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement building) -> {

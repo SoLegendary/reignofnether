@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -21,7 +22,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -69,17 +69,16 @@ public class TimeServerEvents {
         ArrayList<BuildingPlacement> enemyBuildings = new ArrayList<>(list);
         Collections.shuffle(enemyBuildings);
 
-        // one random building per enemyPlayerName
-        var enemyBuildingSet = new HashSet<>(enemyBuildings);
-
-        for (BuildingPlacement building : enemyBuildingSet) {
+        for (BuildingPlacement building : enemyBuildings) {
             int x = building.centrePos.getX() + random.nextInt(-10, 10);
             int z = building.centrePos.getZ() + random.nextInt(-10, 10);
 
             BlockPos bp = building.getClosestGroundPos(new BlockPos(x, building.minCorner.getY(), z), 3);
 
             EntityType<? extends Mob> mobType = zombieOrSkeleton ? EntityRegistrar.ZOMBIE_UNIT.get() : EntityRegistrar.SKELETON_UNIT.get();
-            UnitServerEvents.spawnMobs(mobType, (ServerLevel) level, bp, 1, BloodMoon.ENEMY_NAME);
+            List<Entity> spawnedMobs = UnitServerEvents.spawnMobs(mobType, (ServerLevel) level, bp, 1, BloodMoon.ENEMY_NAME);
+            if (!spawnedMobs.isEmpty())
+                break;
         }
         zombieOrSkeleton = !zombieOrSkeleton;
     }

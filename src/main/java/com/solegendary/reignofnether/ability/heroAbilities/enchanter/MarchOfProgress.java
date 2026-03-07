@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.heroAbilities.enchanter;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -20,20 +21,20 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
+import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class MarchOfProgress extends HeroAbility {
 
-    // TODO: only apply cooldown when the aura is turned off (either manually or when mana runs out)
-    private static final int CD_MAX = 5 * ResourceCost.TICKS_PER_SECOND;
+    private static final int CD_MAX = 3 * ResourceCost.TICKS_PER_SECOND;
 
-    private static final int RADIUS = 15;
+    public static final int RADIUS = 15;
 
     public static final int MANA_COST_PER_SECOND = 3;
 
     public MarchOfProgress() {
-        super(1, 0, UnitAction.MARCH_OF_PROGRESS, 0, 0, RADIUS, false);
+        super(1, 0, UnitAction.MARCH_OF_PROGRESS_TOGGLE,  CD_MAX, 0, RADIUS, false);
     }
 
     @Override
@@ -49,25 +50,27 @@ public class MarchOfProgress extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("March of Progress",
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/enchanted_book.png"),
+        AbilityButton button = new AbilityButton("March of Progress",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/march_of_progress.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == UnitAction.MARCH_OF_PROGRESS,
+                () -> ((EnchanterUnit) unit).auraEnabled,
                 () -> getRank(hero) == 0,
                 () -> true,
-                () -> CursorClientEvents.setLeftClickAction(UnitAction.MARCH_OF_PROGRESS),
+                () -> sendUnitCommand(UnitAction.MARCH_OF_PROGRESS_TOGGLE),
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "March of Progress",
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/enchanted_book.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/march_of_progress.png"),
                 hero
         );
     }
@@ -75,7 +78,7 @@ public class MarchOfProgress extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.march_of_progress"), true),
-                fcsIcons(I18n.get("abilities.reignofnether.march_of_progress.stats", CD_MAX / 20, radius)),
+                fcsIcons(I18n.get("abilities.reignofnether.march_of_progress.stats", CD_MAX / 20, radius, MANA_COST_PER_SECOND)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.march_of_progress.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.march_of_progress.tooltip2", MANA_COST_PER_SECOND))

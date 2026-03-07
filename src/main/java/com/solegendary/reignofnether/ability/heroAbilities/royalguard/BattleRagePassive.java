@@ -44,13 +44,13 @@ public class BattleRagePassive extends HeroAbility {
     public void updateStatsForRank(HeroUnit hero) {
         if (getRank(hero) == 1) {
             maxHpRegen = 1.2f;
-            manaPerDmgTaken = 0.4f;
+            manaPerDmgTaken = 0.3f;
         } else if (getRank(hero) == 2) {
             maxHpRegen = 1.8f;
-            manaPerDmgTaken = 0.6f;
+            manaPerDmgTaken = 0.4f;
         } else if (getRank(hero) == 3) {
             maxHpRegen = 2.4f;
-            manaPerDmgTaken = 0.8f;
+            manaPerDmgTaken = 0.5f;
         }
     }
 
@@ -62,7 +62,7 @@ public class BattleRagePassive extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Battle Rage",
+        AbilityButton button = new AbilityButton("Battle Rage",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/battle_rage.png"),
                 hotkey,
                 () -> false,
@@ -74,6 +74,8 @@ public class BattleRagePassive extends HeroAbility {
                 this,
                 hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override

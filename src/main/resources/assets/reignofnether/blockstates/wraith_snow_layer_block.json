@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "layers=1": {
+      "model": "reignofnether:block/wraith_snow_height2"
+    },
+    "layers=2": {
+      "model": "reignofnether:block/wraith_snow_height4"
+    },
+    "layers=3": {
+      "model": "reignofnether:block/wraith_snow_height6"
+    },
+    "layers=4": {
+      "model": "reignofnether:block/wraith_snow_height8"
+    },
+    "layers=5": {
+      "model": "reignofnether:block/wraith_snow_height10"
+    },
+    "layers=6": {
+      "model": "reignofnether:block/wraith_snow_height12"
+    },
+    "layers=7": {
+      "model": "reignofnether:block/wraith_snow_height14"
+    },
+    "layers=8": {
+      "model": "minecraft:block/snow_block"
+    }
+  }
+}

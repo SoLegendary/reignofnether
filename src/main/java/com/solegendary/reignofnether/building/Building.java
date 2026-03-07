@@ -125,6 +125,10 @@ public abstract class Building {
         return this == building;
     }
 
+    public String getUpgradedStructureName(int upgradeLevel) {
+        return structureName;
+    }
+
     @Nullable
     public <T extends BuildingAddon> T getActiveAddon(Class<T> addonClass) {
         return (T) activeAddons.get(addonClass);

@@ -1,13 +1,14 @@
 package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ability.EnchantAbility;
-import com.solegendary.reignofnether.ability.EnchantAbilityServerboundPacket;
+import com.solegendary.reignofnether.ability.EnchantEquipAbilityServerboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
@@ -18,24 +19,23 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class EnchantVigor extends EnchantAbility {
 
     private static final UnitAction ENCHANT_ACTION = UnitAction.ENCHANT_VIGOR;
-    public static final Enchantment actualEnchantment = Enchantments.BINDING_CURSE;
-    public static final int enchantLevel = 1;
-    public static final float cooldownMultiplier = 0.70f;
 
     public EnchantVigor() {
-        super(ENCHANT_ACTION, ResourceCosts.ENCHANT_VIGOR);
+        super(ENCHANT_ACTION, ResourceCosts.ENCHANT_VIGOR, 1, EquipmentSlot.MAINHAND);
         this.defaultHotkey = Keybindings.keyT;
+    }
+
+    @Override
+    public Enchantment getEnchantment() {
+        return EnchantmentRegistrar.VIGOR.get();
     }
 
     @Override
@@ -50,7 +50,7 @@ public class EnchantVigor extends EnchantAbility {
                 () -> placement.getUpgradeLevel() > 0,
                 () -> CursorClientEvents.setLeftClickAction(ENCHANT_ACTION),
                 () -> {
-                    EnchantAbilityServerboundPacket.setAutocastEnchant(ENCHANT_ACTION, placement.originPos);
+                    EnchantEquipAbilityServerboundPacket.setAutocastEnchantOrEquip(ENCHANT_ACTION, placement.originPos);
                     if (placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this)
                         placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
                     else
@@ -73,25 +73,15 @@ public class EnchantVigor extends EnchantAbility {
 
     @Override
     public boolean isCorrectUnitAndEquipment(LivingEntity entity) {
-        return entity instanceof EvokerUnit && entity.getItemBySlot(EquipmentSlot.MAINHAND).getItem() instanceof BowItem;
+        return entity instanceof EvokerUnit && entity.getItemBySlot(equipmentSlot).getItem() instanceof BowItem;
     }
 
     @Override
-    public boolean hasAnyEnchant(LivingEntity entity) {
-        return !entity.getItemBySlot(EquipmentSlot.MAINHAND).getAllEnchantments().isEmpty();
-    }
-
-    @Override
-    protected boolean hasSameEnchant(LivingEntity entity) {
-        return entity.getItemBySlot(EquipmentSlot.MAINHAND).getAllEnchantments().containsKey(actualEnchantment);
-    }
-
-    @Override
-    protected void doEnchant(LivingEntity entity) {
-        ItemStack item = entity.getItemBySlot(EquipmentSlot.MAINHAND);
-        if (item != ItemStack.EMPTY) {
-            EnchantmentHelper.setEnchantments(new HashMap<>(), item);
-            item.enchant(actualEnchantment, enchantLevel);
+    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
+        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
+            if (enchantment == Enchantments.MULTISHOT || enchantment == getEnchantment())
+                return enchantment;
         }
+        return null;
     }
 }

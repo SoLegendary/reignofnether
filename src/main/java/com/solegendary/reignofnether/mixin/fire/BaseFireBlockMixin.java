@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.mixin.fire;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -26,8 +27,8 @@ public abstract class BaseFireBlockMixin {
         if (state.getBlock() instanceof SoulFireBlock)
             return false;
 
-        if (entity instanceof Unit unit)
-            return ResearchServerEvents.playerHasResearch(unit.getOwnerName(), ProductionItems.RESEARCH_FIRE_RESISTANCE);
+        if (entity instanceof WitherSkeletonUnit witherSkeletonUnit)
+            return ResearchServerEvents.playerHasResearch(witherSkeletonUnit.getOwnerName(), ProductionItems.RESEARCH_FIRE_RESISTANCE);
 
         return false;
     }

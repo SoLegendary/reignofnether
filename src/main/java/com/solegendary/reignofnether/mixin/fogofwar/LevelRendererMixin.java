@@ -29,6 +29,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;

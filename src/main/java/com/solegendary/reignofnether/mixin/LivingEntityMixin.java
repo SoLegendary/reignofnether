@@ -1,8 +1,15 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.entities.BlazeUnitFireball;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,6 +19,9 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -116,17 +126,42 @@ public abstract class LivingEntityMixin extends Entity {
             cancellable = true
     )
     protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount, CallbackInfo ci) {
-        // ensure projectiles from units do the damage of the unit, not the item
-        if (pDamageSource.is(DamageTypeTags.IS_PROJECTILE) &&
-            pDamageSource.getEntity() instanceof AttackerUnit attackerUnit &&
-            this.getAbsorptionAmount() > 0) {
+
+
+        // ensure projectiles from units do the damage of the unit, not the item,
+        // and that armour and anti-armour effects are considered through absorption
+        if ((pDamageSource.is(DamageTypeTags.IS_PROJECTILE) ||
+            (!pDamageSource.is(DamageTypeTags.WITCH_RESISTANT_TO) &&
+            !pDamageSource.is(DamageTypeTags.BYPASSES_SHIELD) &&
+            !pDamageSource.is(DamageTypeTags.BYPASSES_ARMOR) &&
+            !pDamageSource.is(DamageTypeTags.BYPASSES_RESISTANCE) &&
+            pDamageSource.is(DamageTypes.MOB_ATTACK))) &&
+            pDamageSource.getEntity() instanceof AttackerUnit attackerUnit) {
 
             ci.cancel();
 
+            boolean isHuntableAnimal = ResourceSources.isHuntableAnimal((LivingEntity) (Object) this);
+
             float dmg = attackerUnit.getUnitAttackDamage();
+            boolean isMelee = pDamageSource.is(DamageTypes.MOB_ATTACK) && !pDamageSource.is(DamageTypeTags.IS_PROJECTILE);
+            if (isMelee && !(pDamageSource.getEntity() instanceof WorkerUnit))
+                dmg += AttackerUnit.getWeaponDamageModifier(attackerUnit);
+
+            if (isHuntableAnimal) {
+                if (pDamageSource.getEntity() instanceof MilitiaUnit)
+                    dmg = 1f;
+                else if (pDamageSource.getEntity() instanceof VillagerUnit vUnit &&
+                        vUnit.getUnitProfession() == VillagerUnitProfession.HUNTER) {
+                    dmg = vUnit.isVeteran() ? 2f : 1.5f;
+                } else if (!(pDamageSource.getEntity() instanceof WorkerUnit)) {
+                    dmg *= 0.5f;
+                }
+            }
+
             if (this instanceof Unit unit) {
                 dmg *= (1 - unit.getUnitPhysicalArmorPercentage());
-                dmg *= (1 - unit.getUnitRangedArmorPercentage());
+                if (pDamageSource.is(DamageTypeTags.IS_PROJECTILE))
+                    dmg *= (1 - unit.getUnitRangedArmorPercentage());
                 dmg *= (1 - unit.getUnitResistPercentage());
             }
 
@@ -135,7 +170,6 @@ public abstract class LivingEntityMixin extends Entity {
                 if (dmg <= 0.0F) {
                     return;
                 }
-                dmg = this.getDamageAfterArmorAbsorb(pDamageSource, dmg);
                 dmg = this.getDamageAfterMagicAbsorb(pDamageSource, dmg);
                 float f1 = Math.max(dmg - this.getAbsorptionAmount(), 0.0F);
                 this.setAbsorptionAmount(this.getAbsorptionAmount() - (dmg - f1));
@@ -153,6 +187,23 @@ public abstract class LivingEntityMixin extends Entity {
                     this.getCombatTracker().recordDamage(pDamageSource, f1);
                     this.gameEvent(GameEvent.ENTITY_DAMAGE);
                 }
+            }
+        }
+    }
+
+    @Shadow public boolean hasEffect(MobEffect pEffect) { return true; }
+    @Shadow public MobEffectInstance getEffect(MobEffect pEffect) { return null; }
+
+    @Inject(
+            method = "baseTick",
+            at = @At("TAIL")
+    )
+    public void baseTick(CallbackInfo ci) {
+        if (!this.level().isClientSide && this.remainingFireTicks > 0 && !fireImmune() && hasEffect(MobEffectRegistrar.INTENSE_HEAT.get())) {
+            int amp = Math.min(39, getEffect(MobEffectRegistrar.INTENSE_HEAT.get()).getAmplifier());
+            int fireTicks = (this.remainingFireTicks + 10);
+            if (fireTicks % (80 - (amp * 2)) == 0) {
+                this.hurt(this.damageSources().onFire(), 1.0F);
             }
         }
     }

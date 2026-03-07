@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -107,6 +108,12 @@ public class CursorClientEvents {
             leftClickAction = actionName;
         else if (actionName == null)
             leftClickAction = null;
+
+        if (HudClientEvents.hudSelectedEntity instanceof RangeIndicator ri) {
+            ri.updateHighlightBps();
+        } else if (HudClientEvents.hudSelectedPlacement instanceof RangeIndicator ri) {
+            ri.updateHighlightBps();
+        }
     }
 
     public static void setLeftClickSandboxAction(SandboxAction actionName) {
@@ -154,6 +161,9 @@ public class CursorClientEvents {
         cursorDrawY = Math.max(0, cursorDrawY);
         ResourceLocation texture;
 
+        int cursorXoffset = 0;
+        int cursorYoffset = 0;
+
         if (Keybindings.altMod.isDown() && (leftClickDown || rightClickDown)) {
             RenderSystem.setShaderTexture(0, TEXTURE_HAND_GRAB);
             texture = TEXTURE_HAND_GRAB;
@@ -169,13 +179,16 @@ public class CursorClientEvents {
         } else if (leftClickAction != null || leftClickSandboxAction != null) {
             RenderSystem.setShaderTexture(0, TEXTURE_CROSS);
             texture = TEXTURE_CROSS;
+            cursorXoffset = -8;
+            cursorYoffset = -8;
         } else {
             RenderSystem.setShaderTexture(0, TEXTURE_CURSOR);
             texture = TEXTURE_CURSOR;
         }
         evt.getGuiGraphics().pose().translate(0,0,2500);
         evt.getGuiGraphics().blit(texture,
-                cursorDrawX, cursorDrawY,
+                cursorDrawX + cursorXoffset,
+                cursorDrawY + cursorYoffset,
                 16,
                 16, 16,
                 16, 16,

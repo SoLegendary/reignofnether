@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -14,6 +15,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,8 +33,9 @@ import javax.annotation.Nullable;
 public interface AttackerUnit {
 
     public boolean getWillRetaliate();
-    public int getAttackCooldown();
+    public float getAttackCooldown();
     public float getAttacksPerSecond();
+    public float getBaseAttacksPerSecond();
     public float getAggroRange();
     public boolean getAggressiveWhenIdle();
     public float getAttackRange();
@@ -144,7 +147,8 @@ public interface AttackerUnit {
         }
 
         if (!unitMob.level().isClientSide && unitMob.tickCount % 4 == 0) {
-            if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null) {
+            if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null ||
+                ((LivingEntity) unit).getEffect(MobEffectRegistrar.FREEZE.get()) != null) {
                 Unit.fullResetBehaviours(unit);
                 return;
             }
@@ -215,7 +219,6 @@ public interface AttackerUnit {
         }
         LivingEntity currentTarget = ((Mob) this).getTarget();
         if (currentTarget == null) return;
-        if ((level.getServer().getTickCount() & 4) != 0) return;
         LivingEntity closestTarget = MiscUtil.findClosestAttackableEntity((Mob) this, aggroRange, level);
         if (closestTarget == null) return;
         double distClosestTarget =  ((Mob) this).distanceToSqr(closestTarget.position());
@@ -254,7 +257,7 @@ public interface AttackerUnit {
         }
     }
 
-    public static double getWeaponDamageModifier(AttackerUnit attackerUnit) {
+    static double getWeaponDamageModifier(AttackerUnit attackerUnit) {
         ItemStack itemStack = ((LivingEntity) attackerUnit).getItemBySlot(EquipmentSlot.MAINHAND);
 
         if (!itemStack.isEmpty())
@@ -262,5 +265,32 @@ public interface AttackerUnit {
                 if (attr.getOperation() == AttributeModifier.Operation.ADDITION)
                     return attr.getAmount();
         return 0;
+    }
+
+    public default @Nullable SoundAction getAttackSound() { return null; }
+
+    default float getBonusMeleeRange() {
+        return 0f;
+    }
+
+    public default boolean hasBonusDamage() {
+        return false;
+    }
+
+    public default float getAttackCooldownMultiplier() {
+        MobEffectInstance disarm = ((LivingEntity) (this)).getEffect(MobEffectRegistrar.DISARM.get());
+        if (disarm != null) {
+            return 999999;
+        }
+        MobEffectInstance attackSlowdown = ((LivingEntity) (this)).getEffect(MobEffectRegistrar.ATTACK_SLOWDOWN.get());
+        int attackSlowdownAmp = attackSlowdown != null ? attackSlowdown.getAmplifier() + 1 : 0;
+
+        MobEffectInstance bloodlust = ((LivingEntity) (this)).getEffect(MobEffectRegistrar.BLOODLUST.get());
+
+        return (1 + (attackSlowdownAmp * 0.05f)) / (bloodlust != null ? 1.6f : 1.0f);
+    }
+
+    public default float getBuildingDamageMultiplier() {
+        return 1.0f;
     }
 }

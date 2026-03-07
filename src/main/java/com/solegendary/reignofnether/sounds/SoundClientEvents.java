@@ -23,6 +23,8 @@ public class SoundClientEvents {
 
     public static FadeableMusicInstance customSong = null;
 
+    private static final ArrayList<FadeableSoundInstance> activeFadeableSounds = new ArrayList<>();
+
     public static int songTicksLeft = 0;
 
     private static final Minecraft MC = Minecraft.getInstance();
@@ -71,6 +73,16 @@ public class SoundClientEvents {
         }
     }
 
+    public static void stopSound(int id) {
+        activeFadeableSounds.removeIf(s -> {
+            if (s.id == id) {
+                s.fadeOut();
+                return true;
+            }
+            return false;
+        });
+    }
+
     public static void playSoundAtPos(SoundAction soundAction, BlockPos bp) {
         playSoundAtPos(soundAction, bp, 1.0f);
     }
@@ -81,6 +93,13 @@ public class SoundClientEvents {
         if (level != null) {
             level.playLocalSound(bp.getX(), bp.getY(), bp.getZ(), soundEvent, SoundSource.NEUTRAL, volume, 1.0F, false);
         }
+    }
+
+    public static void playFadeableSoundAtPos(SoundAction soundAction, BlockPos bp, float volume, int id, int tickDuration) {
+        SoundEvent soundEvent = SOUND_MAP.get(soundAction);
+        FadeableSoundInstance fsi = new FadeableSoundInstance(soundEvent, bp, id,true, volume, tickDuration);
+        MC.getSoundManager().play(fsi);
+        activeFadeableSounds.add(fsi);
     }
 
     public static void playSoundForLocalPlayer(SoundAction soundAction) {
@@ -125,8 +144,21 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.BELL, SoundEvents.BELL_BLOCK);
         SOUND_MAP.put(SoundAction.BEACON_DEACTIVATE, SoundEvents.BEACON_DEACTIVATE);
         SOUND_MAP.put(SoundAction.BEACON_ACTIVATE, SoundEvents.BEACON_ACTIVATE);
+        SOUND_MAP.put(SoundAction.BEACON_AMBIENT, SoundEvents.BEACON_AMBIENT);
+        SOUND_MAP.put(SoundAction.ENCHANT, SoundEvents.ENCHANTMENT_TABLE_USE);
+        SOUND_MAP.put(SoundAction.FORGE_ARMOUR, SoundEvents.SMITHING_TABLE_USE);
         SOUND_MAP.put(SoundAction.LEVEL_UP, SoundEvents.PLAYER_LEVELUP);
         SOUND_MAP.put(SoundAction.BLOODLUST, SoundRegistrar.BLOODLUST.get());
         SOUND_MAP.put(SoundAction.HEROISM, SoundRegistrar.HEROISM.get());
+        SOUND_MAP.put(SoundAction.WRETCHED_WRAITH_ATTACK_QUIET, SoundRegistrar.WRETCHED_WRAITH_ATTACK_QUIET.get());
+        SOUND_MAP.put(SoundAction.WRETCHED_WRAITH_ATTACK_LOUD, SoundRegistrar.WRETCHED_WRAITH_ATTACK_LOUD.get());
+        SOUND_MAP.put(SoundAction.WRETCHED_WRAITH_TELEPORT_START, SoundRegistrar.WRETCHED_WRAITH_TELEPORT_START.get());
+        SOUND_MAP.put(SoundAction.WRETCHED_WRAITH_TELEPORT_END, SoundRegistrar.WRETCHED_WRAITH_TELEPORT_END.get());
+        SOUND_MAP.put(SoundAction.WRETCHED_WRAITH_BLIZZARD, SoundRegistrar.WRETCHED_WRAITH_BLIZZARD.get());
+        SOUND_MAP.put(SoundAction.WILDFIRE_MOLTEN_BOMB, SoundRegistrar.WILDFIRE_MOLTEN_BOMB.get());
+        SOUND_MAP.put(SoundAction.WILDFIRE_SCORCHING_GAZE_START, SoundRegistrar.WILDFIRE_SCORCHING_GAZE_START.get());
+        SOUND_MAP.put(SoundAction.WILDFIRE_SCORCHING_GAZE_END, SoundRegistrar.WILDFIRE_SCORCHING_GAZE_END.get());
+        SOUND_MAP.put(SoundAction.WILDFIRE_SOULS_AFLAME, SoundRegistrar.WILDFIRE_SOULS_AFLAME.get());
+        SOUND_MAP.put(SoundAction.PIGLIN_MERCHANT_LOOT_EXPLOSION, SoundRegistrar.PIGLIN_MERCHANT_LOOT_EXPLOSION.get());
     }
 }

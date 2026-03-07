@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
-import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
-import com.solegendary.reignofnether.entities.NecromancerProjectile;
-import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
+import com.solegendary.reignofnether.entities.*;
 import com.solegendary.reignofnether.hero.HeroExperienceOrb;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
@@ -75,6 +72,12 @@ public class EntityRegistrar {
                     .sized(EntityType.STRAY.getWidth(), EntityType.STRAY.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "stray_unit").toString()));
+
+    public static final RegistryObject<EntityType<BoggedUnit>> BOGGED_UNIT = ENTITIES.register("bogged_unit",
+            () -> EntityType.Builder.of(BoggedUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bogged_unit").toString()));
 
     public static final RegistryObject<EntityType<CreeperUnit>> CREEPER_UNIT = ENTITIES.register("creeper_unit",
             () -> EntityType.Builder.of(CreeperUnit::new, MobCategory.CREATURE)
@@ -178,6 +181,12 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "headhunter_unit").toString()));
 
+    public static final RegistryObject<EntityType<MarauderUnit>> MARAUDER_UNIT = ENTITIES.register("marauder_unit",
+            () -> EntityType.Builder.of(MarauderUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "marauder_unit").toString()));
+
     public static final RegistryObject<EntityType<HoglinUnit>> HOGLIN_UNIT = ENTITIES.register("hoglin_unit",
             () -> EntityType.Builder.of(HoglinUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.HOGLIN.getWidth(), EntityType.HOGLIN.getHeight())
@@ -224,15 +233,15 @@ public class EntityRegistrar {
 
     public static final RegistryObject<EntityType<RoyalGuardUnit>> ROYAL_GUARD_UNIT = ENTITIES.register("royal_guard_unit",
             () -> EntityType.Builder.of(RoyalGuardUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.VINDICATOR.getWidth() * RoyalGuardRenderer.SCALE_MULT,
-                            EntityType.VINDICATOR.getHeight() * RoyalGuardRenderer.SCALE_MULT)
+                    .sized(EntityType.VINDICATOR.getWidth(),
+                            EntityType.VINDICATOR.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "royal_guard_unit").toString()));
 
     public static final RegistryObject<EntityType<EnchanterUnit>> ENCHANTER_UNIT = ENTITIES.register("enchanter_unit",
             () -> EntityType.Builder.of(EnchanterUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.VINDICATOR.getWidth() * EnchanterRenderer.SCALE_MULT,
-                            EntityType.VINDICATOR.getHeight() * EnchanterRenderer.SCALE_MULT)
+                    .sized(EntityType.VINDICATOR.getWidth(),
+                            EntityType.VINDICATOR.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "enchanter_unit").toString()));
 
@@ -245,8 +254,7 @@ public class EntityRegistrar {
 
     public static final RegistryObject<EntityType<WretchedWraithUnit>> WRETCHED_WRAITH_UNIT = ENTITIES.register("wretched_wraith_unit",
             () -> EntityType.Builder.of(WretchedWraithUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.ZOMBIE.getWidth() * WretchedWraithRenderer.SCALE_MULT,
-                            EntityType.ZOMBIE.getHeight() * WretchedWraithRenderer.SCALE_MULT)
+                    .sized(EntityType.ZOMBIE.getWidth(), EntityType.ZOMBIE.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wretched_wraith_unit").toString()));
 
@@ -340,6 +348,21 @@ public class EntityRegistrar {
                     .updateInterval(10)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "necromancer_projectile").toString()));
 
+    public static final RegistryObject<EntityType<WraithSnowball>> WRAITH_SNOWBALL = ENTITIES.register("wraith_snowball",
+            () -> EntityType.Builder.of(WraithSnowball::new, MobCategory.MISC)
+                    .fireImmune()
+                    .sized(0.3f, 0.3f)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .updateInterval(10)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith_snowball").toString()));
+
+    public static final RegistryObject<EntityType<MoltenBombProjectile>> MOLTEN_BOMB_PROJECTILE = ENTITIES.register("molten_bomb_projectile",
+            () -> EntityType.Builder.<MoltenBombProjectile>of(MoltenBombProjectile::new, MobCategory.MISC)
+                    .fireImmune()
+                    .sized(0.6f, 0.6f)
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .updateInterval(10)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "molten_bomb_projectile").toString()));
 
     public static void init(FMLJavaModLoadingContext context) {
         ENTITIES.register(context.getModEventBus());
@@ -351,6 +374,7 @@ public class EntityRegistrar {
             case SkeletonProd.itemName -> EntityRegistrar.SKELETON_UNIT.get();
             case ZombieProd.itemName -> EntityRegistrar.ZOMBIE_UNIT.get();
             case StrayProd.itemName -> EntityRegistrar.STRAY_UNIT.get();
+            case BoggedProd.itemName -> EntityRegistrar.BOGGED_UNIT.get();
             case HuskProd.itemName -> EntityRegistrar.HUSK_UNIT.get();
             case DrownedProd.itemName -> EntityRegistrar.DROWNED_UNIT.get();
             case SpiderProd.itemName -> EntityRegistrar.SPIDER_UNIT.get();
@@ -368,6 +392,7 @@ public class EntityRegistrar {
             case GruntProd.itemName -> EntityRegistrar.GRUNT_UNIT.get();
             case BruteProd.itemName -> EntityRegistrar.BRUTE_UNIT.get();
             case HeadhunterProd.itemName -> EntityRegistrar.HEADHUNTER_UNIT.get();
+            case MarauderProd.itemName -> EntityRegistrar.MARAUDER_UNIT.get();
             case HoglinProd.itemName -> EntityRegistrar.HOGLIN_UNIT.get();
             case BlazeProd.itemName -> EntityRegistrar.BLAZE_UNIT.get();
             case WitherSkeletonProd.itemName -> EntityRegistrar.WITHER_SKELETON_UNIT.get();

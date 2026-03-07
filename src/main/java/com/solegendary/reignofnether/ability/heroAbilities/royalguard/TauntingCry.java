@@ -30,12 +30,12 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 public class TauntingCry extends HeroAbility {
 
     public static final int RANGE = 6;
-    private static final int CD_MAX_SECONDS = 50 * ResourceCost.TICKS_PER_SECOND;
+    private static final int CD_MAX_SECONDS = 40 * ResourceCost.TICKS_PER_SECOND;
     public int duration = 4 * ResourceCost.TICKS_PER_SECOND;
     public static final float DAMAGE_MULT = 0.5f;
 
     public TauntingCry() {
-        super(3, 60, UnitAction.TAUNTING_CRY, CD_MAX_SECONDS, RANGE, 0, false);
+        super(3, 75, UnitAction.TAUNTING_CRY, CD_MAX_SECONDS, RANGE, 0, false);
     }
 
     @Override
@@ -61,8 +61,8 @@ public class TauntingCry extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Taunting Cry",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/ominous_banner.png"),
+        AbilityButton button = new AbilityButton("Taunting Cry",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/taunting_cry.png"),
                 hotkey,
                 () -> false,
                 () -> getRank(hero) <= 0,
@@ -73,13 +73,15 @@ public class TauntingCry extends HeroAbility {
                 this,
                 hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Taunting Cry",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/ominous_banner.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/taunting_cry.png"),
                 hero
         );
     }

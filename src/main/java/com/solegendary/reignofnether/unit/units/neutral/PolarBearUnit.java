@@ -110,8 +110,9 @@ public class PolarBearUnit extends PolarBear implements Unit, AttackerUnit {
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.POLAR_BEAR;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}

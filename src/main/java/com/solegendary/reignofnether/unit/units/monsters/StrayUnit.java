@@ -21,11 +21,10 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -39,6 +38,7 @@ import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -125,8 +125,9 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -297,7 +298,9 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
             FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
     }
 
-
-
-
+    @Override
+    @Nullable
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        return pSpawnData;
+    }
 }

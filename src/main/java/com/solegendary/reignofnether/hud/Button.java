@@ -37,6 +37,7 @@ public class Button {
     public static int DEFAULT_ICON_FRAME_SIZE = 22;
     public int tooltipOffsetY = 0;
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
+    public boolean stretchIconToBorders = false;
 
     public ResourceLocation iconResource;
     public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
@@ -184,24 +185,38 @@ public class Button {
 
         if (bgIconResource != null) {
             guiGraphics.pose().translate(0,0,1);
+            int iconX = frameResource != null ? x+4 + (7 - iconSize/2) : x + (7 - iconSize/2);
+            int iconY = frameResource != null ? y+4 + (7 - iconSize/2) : y + (7 - iconSize/2);
+            if (stretchIconToBorders) {
+                iconX -= 1;
+                iconY -= 1;
+            }
             MyRenderer.renderIcon(
                     guiGraphics,
                     bgIconResource,
-                    frameResource != null ? x+4 + (7 - iconSize/2) : x + (7 - iconSize/2),
-                    frameResource != null ? y+4 + (7 - iconSize/2) : y + (7 - iconSize/2),
-                    iconSize
+                    iconX,
+                    iconY,
+                    stretchIconToBorders ? iconSize + 2 : iconSize
             );
         }
         // item/unit icon
         if (iconResource != null) {
+            int iconX = x+4 + (7 - xyDiff - iconSize/2);
+            int iconY = y+4 + (7 - xyDiff - iconSize/2);
+            if (stretchIconToBorders) {
+                iconX -= 1;
+                iconY -= 1;
+            }
             guiGraphics.pose().translate(0,0,1);
             MyRenderer.renderIcon(
                     guiGraphics,
                     iconResource,
-                    x+4 + (7 - xyDiff - iconSize/2), y+4 + (7 - xyDiff - iconSize/2),
-                    DEFAULT_ICON_SIZE
+                    iconX, iconY,
+                    stretchIconToBorders ? DEFAULT_ICON_SIZE + 2 : DEFAULT_ICON_SIZE
             );
-        } else if (iconItem != null) {
+        }
+        if (iconItem != null) {
+            guiGraphics.pose().translate(0,0,1);
             MyRenderer.renderItem(guiGraphics, iconItem, x+4 + (7 - xyDiff - iconSize/2), y+4 + (7 - xyDiff - iconSize/2), 0.75f);
         }
 

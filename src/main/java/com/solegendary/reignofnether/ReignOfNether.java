@@ -4,14 +4,18 @@ import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
 import com.solegendary.reignofnether.faction.FactionRegistries;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.mixin.DownloadPackSourceAccessor;
 import com.solegendary.reignofnether.network.S2CReset;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.chat.Component;
@@ -26,6 +30,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -49,7 +54,7 @@ import java.util.function.Supplier;
 public class ReignOfNether {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "reignofnether";
-    public static final String VERSION_STRING = "1.2.4";
+    public static final String VERSION_STRING = "1.3.0";
 
     // Fields from ClientReset
     public static final Field handshakeField;
@@ -61,6 +66,8 @@ public class ReignOfNether {
 
     public ReignOfNether(FMLJavaModLoadingContext mlctx) {
         // Registering all components
+        EnchantmentRegistrar.init(mlctx);
+
         ItemRegistrar.init(mlctx);
         EntityRegistrar.init(mlctx);
         ContainerRegistrar.init(mlctx);
@@ -72,6 +79,8 @@ public class ReignOfNether {
         FactionRegistries.register();
         ProductionItems.init();
         MobEffectRegistrar.init(mlctx);
+        ParticleRegistrar.init(mlctx);
+
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);
 

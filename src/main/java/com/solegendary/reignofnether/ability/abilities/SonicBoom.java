@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -48,7 +49,7 @@ public class SonicBoom extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         return new AbilityButton("Sonic Boom",
-            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/note_block.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/sonic_boom.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.CAST_SONIC_BOOM,
             () -> false,

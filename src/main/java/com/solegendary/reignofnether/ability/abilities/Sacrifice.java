@@ -26,7 +26,7 @@ import java.util.List;
 public class Sacrifice extends Ability {
 
     private static final int CD_MAX = 0;
-    private static final int RANGE = 8;
+    public static final int RANGE = 8;
 
     public Sacrifice() {
         super(UnitAction.SACRIFICE, CD_MAX, RANGE, 0, true, true);

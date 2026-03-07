@@ -30,7 +30,7 @@ public class Roar extends Ability {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         return new AbilityButton("Roar",
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/ravager_roar.png"),
             hotkey,
             () -> false,
             () -> false,

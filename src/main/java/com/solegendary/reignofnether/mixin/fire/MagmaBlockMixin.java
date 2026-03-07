@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.mixin.fire;
 
 import com.solegendary.reignofnether.blocks.WalkableMagmaBlock;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
 import com.solegendary.reignofnether.faction.Faction;
@@ -27,14 +28,14 @@ public abstract class MagmaBlockMixin {
     public void stepOn(Level pLevel, BlockPos pPos, BlockState pState, Entity pEntity, CallbackInfo ci) {
         ci.cancel();
 
-        boolean isPiglinFaction = pEntity instanceof Unit unit && unit.getFaction() == Faction.PIGLINS;
+        boolean piglinImmunity = pEntity instanceof Unit unit && unit.getFaction() == Faction.PIGLINS && !pEntity.isOnFire();
         boolean isDamageTick = pEntity.tickCount % WalkableMagmaBlock.DAMAGE_DELAY == 0;
 
         if (!pEntity.isSteppingCarefully() &&
             pEntity instanceof LivingEntity &&
             !(pEntity instanceof GruntUnit) &&
             !EnchantmentHelper.hasFrostWalker((LivingEntity)pEntity) &&
-            !isPiglinFaction && isDamageTick) {
+            !piglinImmunity && isDamageTick) {
             pEntity.hurt(pEntity.damageSources().hotFloor(), WalkableMagmaBlock.DAMAGE);
         }
     }

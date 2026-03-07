@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.ability.abilities;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.enchantments.VigorEnchantment;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -74,8 +75,9 @@ public class CastSummonVexes extends Ability {
     @Override
     public void setCooldown(float cooldown, Unit unit) {
         EvokerUnit evokerUnit = (EvokerUnit) unit;
-        if (evokerUnit.hasVigorEnchant())
-            cooldown *= EnchantVigor.cooldownMultiplier;
+        int vigorLevel = evokerUnit.getVigorLevel();
+        if (vigorLevel > 0)
+            cooldown *= Math.pow(VigorEnchantment.CD_MULTIPLIER, vigorLevel);
         super.setCooldown(cooldown, unit);
     }
 
@@ -83,10 +85,13 @@ public class CastSummonVexes extends Ability {
     @Override
     public void setToMaxCooldown(Unit unit) {
         EvokerUnit evokerUnit = (EvokerUnit) unit;
-        if (evokerUnit.hasVigorEnchant())
-            setCooldown((int) (cooldownMax * EnchantVigor.cooldownMultiplier), unit);
-        else
-            setCooldown(cooldownMax, unit);
+
+        float cd = cooldownMax;
+        int vigorLevel = evokerUnit.getVigorLevel();
+        if (vigorLevel > 0)
+            cd *= Math.pow(VigorEnchantment.CD_MULTIPLIER, vigorLevel);
+
+        setCooldown(cd, unit);
     }
 
     @Override

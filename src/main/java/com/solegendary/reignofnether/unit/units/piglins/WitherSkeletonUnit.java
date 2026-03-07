@@ -7,7 +7,10 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -126,8 +129,9 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.WITHER_SKELETON;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -180,7 +184,19 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
                 .add(Attributes.MOVEMENT_SPEED, WitherSkeletonUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WitherSkeletonUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, WitherSkeletonUnit.armorValue);
+                .add(Attributes.ATTACK_KNOCKBACK, 0.5f)
+                .add(Attributes.ARMOR, WitherSkeletonUnit.armorValue)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.5f);
+    }
+
+    @Override
+    public void setRemainingFireTicks(int pRemainingFireTicks) {
+        if (!level().isClientSide()) {
+            boolean hasImmunityResearch = ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_FIRE_RESISTANCE);
+            if (hasImmunityResearch && !hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()))
+                pRemainingFireTicks = 0;
+        }
+        super.setRemainingFireTicks(pRemainingFireTicks);
     }
 
     @Override

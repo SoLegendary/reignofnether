@@ -2,12 +2,10 @@ package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProdDupeRule;
 import com.solegendary.reignofnether.building.production.*;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -29,7 +27,7 @@ public class ResearchPortalForCivilian extends ProductionItem {
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (placement instanceof PortalPlacement portal) {
                 if (!level.isClientSide()) {
-                    portal.changeStructure(PortalPlacement.PortalType.CIVILIAN);
+                    portal.changePortalStructure(PortalPlacement.PortalType.CIVILIAN);
                     BuildingClientboundPacket.changePortal(placement.originPos, PortalPlacement.PortalType.CIVILIAN);
                 }
             }

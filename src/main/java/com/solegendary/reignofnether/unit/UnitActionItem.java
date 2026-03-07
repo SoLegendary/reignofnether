@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.buildings.placements.FarmPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -149,7 +150,8 @@ public class UnitActionItem {
         actionableUnitsLoop:
         for (Unit unit : actionableUnits) {
 
-            if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null) {
+            if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null ||
+                ((LivingEntity) unit).getEffect(MobEffectRegistrar.FREEZE.get()) != null) {
                 Unit.fullResetBehaviours(unit);
                 continue;
             } else if (((LivingEntity) unit).getEffect(MobEffectRegistrar.UNCONTROLLABLE.get()) != null) {
@@ -229,7 +231,7 @@ public class UnitActionItem {
                     );
 
                     if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE
-                        && buildingAtPos == null) {
+                        && (buildingAtPos == null || buildingAtPos instanceof BridgePlacement)) {
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
                         goal.setTargetResourceName(resName);
                         goal.setMoveTarget(preselectedBlockPos);

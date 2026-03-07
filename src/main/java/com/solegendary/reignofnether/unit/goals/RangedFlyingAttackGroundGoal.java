@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -56,7 +57,6 @@ public class RangedFlyingAttackGroundGoal<T extends net.minecraft.world.entity.M
     }
 
     public void tick() {
-
         if (groundTarget != null) {
             float tx = groundTarget.getX() + 0.5f;
             float ty = groundTarget.getY() + 0.5f;

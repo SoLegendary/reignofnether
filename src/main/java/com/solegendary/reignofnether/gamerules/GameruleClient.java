@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -34,7 +35,7 @@ public class GameruleClient {
     public static boolean pvpModesOnly = false;
     public static double beaconWinMinutes = 10;
     public static boolean slantedBuilding = true;
-    public static boolean allowHeroes = true;
+    public static int allowedHeroes = 1;
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -156,9 +157,19 @@ public class GameruleClient {
             () -> GameruleServerboundPacket.setSlantedBuilding(!slantedBuilding),
             I18n.get("commands.reignofnether.gamerule.slanted_buildings")
         ));
-        buttons.add(new GameruleBooleanButton("allowHeroes", allowHeroes,
-            () -> GameruleServerboundPacket.setAllowHeroes(!allowHeroes),
-            I18n.get("commands.reignofnether.gamerule.allow_heroes")
+        buttons.add(new GameruleIntegerButton("allowedHeroes: " + Math.round(allowedHeroes),
+            () -> {
+                int value = Math.min(2, allowedHeroes + 1);
+                GameruleServerboundPacket.setAllowedHeroes(value);
+            },
+            () -> {
+                int value = Math.max(0, allowedHeroes - 1);
+                GameruleServerboundPacket.setAllowedHeroes(value);
+            },
+            List.of(
+                    fcs(I18n.get("commands.reignofnether.gamerule.allowed_heroes")),
+                    fcs(I18n.get("hud.gamerule.reignofnether.click"))
+            )
         ));
         buttons.add(new GameruleIntegerButton("maxPopulation: " + Math.round(maxPopulation),
             () -> {

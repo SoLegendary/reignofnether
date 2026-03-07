@@ -6,8 +6,10 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.enchantments.VigorEnchantment;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -38,8 +40,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Evoker;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.projectile.EvokerFangs;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -135,16 +136,18 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {
-        return (int) (20 * (hasVigorEnchant() ? EnchantVigor.cooldownMultiplier : 1) / attacksPerSecond);
+    public float getAttackCooldown() {
+        return (int) ((20 * (Math.pow(VigorEnchantment.CD_MULTIPLIER, getVigorLevel())) / attacksPerSecond)
+                * getAttackCooldownMultiplier());
     }
     public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);}
+    public float getBaseAttacksPerSecond() { return attacksPerSecond; }
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {
         return isUsingLineFangs ? EvokerUnit.FANGS_RANGE_LINE : EvokerUnit.FANGS_RANGE_CIRCLE;
     }
-    public float getUnitAttackDamage() {return attackDamage;}
+    public float getUnitAttackDamage() {return attackDamage + (getMainHandItem().getEnchantmentLevel(EnchantmentRegistrar.ZEAL.get()) * 2);}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
     public float getMovementSpeed() {return movementSpeed;}
@@ -243,6 +246,14 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
                 }
             }
         }
+    }
+
+    @Override
+    public boolean wantsToPickUp(ItemStack itemStack) {
+        if (itemStack.getItem().canEquip(itemStack, EquipmentSlot.MAINHAND, this))
+            return false;
+        else
+            return super.wantsToPickUp(itemStack);
     }
 
     @Override
@@ -417,7 +428,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     }
 
     public VillagerUnitModel.ArmPose getEvokerArmPose() {
-        Entity targetEntity = getTargetGoal().getTarget();
+        Entity targetEntity = getTargetGoal() != null ? getTargetGoal().getTarget() : null;
         if (this.isCastingSpell() || (targetEntity != null &&
             this.distanceTo(targetEntity) <= getAttackRange()) &&
             this.getAbilities().get().get(0).isOffCooldown(this)) {
@@ -444,9 +455,9 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         return !itemStack.getAllEnchantments().isEmpty();
     }
 
-    public boolean hasVigorEnchant() {
+    public int getVigorLevel() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getAllEnchantments().containsKey(EnchantVigor.actualEnchantment);
+        return itemStack.getEnchantmentLevel(EnchantmentRegistrar.VIGOR.get());
     }
 
     public Enchantment getEnchant() {
@@ -465,12 +476,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         return pSpawnData;
     }
 
-    @Override
-    public boolean hasBonusAttackSpeed() {
-        return hasVigorEnchant();
+    public boolean hasBonusDamage() {
+        return getUnitAttackDamage() > attackDamage;
     }
-
-
-
-
 }

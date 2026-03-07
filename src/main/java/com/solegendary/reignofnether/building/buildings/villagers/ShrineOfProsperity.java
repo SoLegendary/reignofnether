@@ -44,6 +44,8 @@ public class ShrineOfProsperity extends ProductionBuilding {
 
         this.productions.add(ProductionItems.ROYAL_GUARD, Keybindings.keyQ);
         this.productions.add(ProductionItems.ROYAL_GUARD_REVIVE, Keybindings.keyQ);
+        this.productions.add(ProductionItems.ENCHANTER, Keybindings.keyW);
+        this.productions.add(ProductionItems.ENCHANTER_REVIVE, Keybindings.keyW);
     }
 
     @Override
@@ -63,7 +65,7 @@ public class ShrineOfProsperity extends ProductionBuilding {
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/acacia_log_top.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.SHRINE_OF_PROSPERITY,
-                () -> (!SandboxClientEvents.isSandboxPlayer() && !GameruleClient.allowHeroes) || TutorialClientEvents.isEnabled(),
+                () -> (!SandboxClientEvents.isSandboxPlayer() && GameruleClient.allowedHeroes <= 0) || TutorialClientEvents.isEnabled(),
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(

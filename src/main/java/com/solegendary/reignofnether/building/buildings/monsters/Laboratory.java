@@ -33,9 +33,6 @@ public class Laboratory extends ProductionBuilding implements RangeIndicatorAddo
     public final static String upgradedStructureName = "laboratory_lightning";
     public final static ResourceCost cost = ResourceCosts.LABORATORY;
 
-    // distance you can move away from a town centre before being turned back into a villager
-    private final Set<BlockPos> lightningBorderBps = new HashSet<>();
-
     public Laboratory() {
         super(structureName, cost, false);
         this.name = buildingName;
@@ -54,13 +51,14 @@ public class Laboratory extends ProductionBuilding implements RangeIndicatorAddo
         this.productions.add(ProductionItems.RESEARCH_HUSKS, Keybindings.keyQ);
         this.productions.add(ProductionItems.RESEARCH_DROWNED, Keybindings.keyW);
         this.productions.add(ProductionItems.RESEARCH_STRAYS, Keybindings.keyE);
-        this.productions.add(ProductionItems.RESEARCH_SPIDER_JOCKEYS, Keybindings.keyR);
-        this.productions.add(ProductionItems.RESEARCH_POISON_SPIDERS, Keybindings.keyT);
-        this.productions.add(ProductionItems.RESEARCH_SPIDER_WEBS, Keybindings.keyY);
-        this.productions.add(ProductionItems.RESEARCH_SLIME_CONVERSION, Keybindings.keyU);
-        this.productions.add(ProductionItems.RESEARCH_LAB_LIGHTNING_ROD, Keybindings.keyI);
-        this.productions.add(ProductionItems.RESEARCH_SILVERFISH, Keybindings.keyO);
-        this.productions.add(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, Keybindings.keyP);
+        this.productions.add(ProductionItems.RESEARCH_BOGGED, Keybindings.keyR);
+        this.productions.add(ProductionItems.RESEARCH_SPIDER_JOCKEYS, Keybindings.keyT);
+        this.productions.add(ProductionItems.RESEARCH_POISON_SPIDERS, Keybindings.keyY);
+        this.productions.add(ProductionItems.RESEARCH_SPIDER_WEBS, Keybindings.keyU);
+        this.productions.add(ProductionItems.RESEARCH_SLIME_CONVERSION, Keybindings.keyI);
+        this.productions.add(ProductionItems.RESEARCH_LAB_LIGHTNING_ROD, Keybindings.keyO);
+        this.productions.add(ProductionItems.RESEARCH_SILVERFISH, Keybindings.keyP);
+        this.productions.add(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, Keybindings.keyJ);
 
         setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
@@ -111,6 +109,11 @@ public class Laboratory extends ProductionBuilding implements RangeIndicatorAddo
             ),
                 this
         );
+    }
+
+    @Override
+    public String getUpgradedStructureName(int upgradeLevel) {
+        return upgradeLevel > 0 ? upgradedStructureName : structureName;
     }
 
     @Override

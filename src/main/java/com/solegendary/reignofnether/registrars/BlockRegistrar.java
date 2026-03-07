@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -104,6 +105,19 @@ public class BlockRegistrar {
                             .randomTicks().strength(0.5F)
                             .isValidSpawn((p_187421_, p_187422_, p_187423_, p_187424_) -> p_187424_.fireImmune())
                             .hasPostProcess(BlockRegistrar::always).emissiveRendering(BlockRegistrar::always)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> WRAITH_SNOW_LAYER = registerBlock("wraith_snow_layer_block",
+            () -> new WraithSnowLayerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW)
+                    .replaceable()
+                    .forceSolidOff()
+                    .randomTicks()
+                    .strength(0.1F)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.SNOW)
+                    .noCollission()
+                    .isViewBlocking((bs, blockGetter, bp) -> bs.getValue(SnowLayerBlock.LAYERS) >= 8)
+                    .pushReaction(PushReaction.DESTROY)),
             CreativeModeTabs.BUILDING_BLOCKS);
 
     public static final RegistryObject<Block> RTS_START_BLOCK_BLUE = registerBlock("rts_start_block_blue", () ->
@@ -198,6 +212,14 @@ public class BlockRegistrar {
                             .noCollission()),
             CreativeModeTabs.FUNCTIONAL_BLOCKS);
 
+    public static final RegistryObject<Block> UNEXTINGUISHABLE_SOUL_FIRE = registerBlock("unextinguishable_soul_fire", () ->
+                    new UnextinguishableSoulFireBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_BLUE)
+                            .replaceable()
+                            .noCollission()
+                            .instabreak()
+                            .randomTicks()
+                            .lightLevel((p_152605_) -> 10)));
+
     private static boolean always(BlockState p_50775_, BlockGetter p_50776_, BlockPos p_50777_) {
         return true;
     }
@@ -205,8 +227,11 @@ public class BlockRegistrar {
     private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block, ResourceKey<CreativeModeTab> tab) {
         RegistryObject<T> toReturn = BLOCKS.register(name, block);
         registerBlockItem(name, toReturn, tab);
-
         return toReturn;
+    }
+
+    private static <T extends Block> RegistryObject<T> registerBlock(String name, Supplier<T> block) {
+        return BLOCKS.register(name, block);
     }
 
     private static <T extends Block> RegistryObject<Item> registerBlockItem(String name, RegistryObject<T> block,

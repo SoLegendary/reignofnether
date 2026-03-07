@@ -307,10 +307,17 @@ public class PlayerServerEvents {
             ResearchServerEvents.syncResearch(playerName);
             ResearchServerEvents.syncCheats(playerName);
         }
+
+        boolean inOrthoviewList = false;
         for (ServerPlayer orthoviewPlayer : orthoviewPlayers) {
-            if (orthoviewPlayer.getId() != evt.getEntity().getId()) continue;
-            orthoviewPlayers.add((ServerPlayer) evt.getEntity());
+            if (orthoviewPlayer.getId() == evt.getEntity().getId())  {
+                inOrthoviewList = true;
+                break;
+            }
         }
+        if (!inOrthoviewList)
+            orthoviewPlayers.add((ServerPlayer) evt.getEntity());
+
         if (!TutorialServerEvents.isEnabled()) {
             if (!isRTSPlayer(serverPlayer.getId())) {
                 serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.welcome")
@@ -837,7 +844,7 @@ public class PlayerServerEvents {
             // Remove the defeated player from the list
             rtsPlayers.removeIf(rtsPlayer -> {
                 if (rtsPlayer.name.equals(playerName)) {
-                    sendMessageToAllPlayers(playerName + " has " + reason + " and is defeated!", true);
+                    sendMessageToAllPlayers("server.reignofnether.is_defeated", true, playerName, reason);
                     sendMessageToAllPlayers("server.reignofnether.players_remaining", false, (rtsPlayers.size() - 1));
 
                     postGameRtsPlayers.add(rtsPlayer);
@@ -910,14 +917,18 @@ public class PlayerServerEvents {
 
     public static void beaconVictory(String playerName) {
         if (SurvivalServerEvents.isEnabled()) {
-            if (AlliancesServerEvents.getAllAllies(playerName).isEmpty())
-                sendMessageToAllPlayers("server.reignofnether.victorious", true, playerName);
-            else
-                sendMessageToAllPlayers("server.reignofnether.victory_alliance", true, playerName);
-            PlayerClientboundPacket.victory(playerName);
-            for (String allyName : AlliancesServerEvents.getAllAllies(playerName))
-                PlayerClientboundPacket.victory(allyName);
-            SurvivalServerEvents.endCurrentWave();
+            try {
+                if (AlliancesServerEvents.getAllAllies(playerName).isEmpty())
+                    sendMessageToAllPlayers("server.reignofnether.victorious", true, playerName);
+                else
+                    sendMessageToAllPlayers("server.reignofnether.victory_alliance", true, playerName);
+                PlayerClientboundPacket.victory(playerName);
+                for (String allyName : AlliancesServerEvents.getAllAllies(playerName))
+                    PlayerClientboundPacket.victory(allyName);
+                SurvivalServerEvents.endCurrentWave();
+            } catch (ConcurrentModificationException e) {
+                System.err.println("ConcurrentModificationException during beaconVictory: " + e.getMessage());
+            }
         } else {
             for (RTSPlayer p : rtsPlayers) {
                 String n = p.name;
@@ -981,9 +992,10 @@ public class PlayerServerEvents {
             if (!isSandbox)
                 UnitServerEvents.getAllUnits().removeIf(u -> (hardReset || (u instanceof Unit unit && !Unit.hasAnchor(unit))));
 
-            for (LivingEntity entity : UnitServerEvents.getAllUnits())
-                if (entity instanceof Unit unit)
-                    unit.setOwnerName("");
+            if (!isSandbox)
+                for (LivingEntity entity : UnitServerEvents.getAllUnits())
+                    if (entity instanceof Unit unit)
+                        unit.setOwnerName("");
 
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building instanceof ProductionPlacement productionBuilding)
@@ -993,8 +1005,11 @@ public class PlayerServerEvents {
             }
             if (!isSandbox)
                 BuildingServerEvents.getBuildings().removeIf(b -> b.getBuilding().shouldDestroyOnReset || hardReset);
-            for (BuildingPlacement building : BuildingServerEvents.getBuildings())
-                building.ownerName = "";
+
+            if (!isSandbox)
+                for (BuildingPlacement building : BuildingServerEvents.getBuildings())
+                    building.ownerName = "";
+
             ResearchServerEvents.removeAllResearch();
             ResearchServerEvents.removeAllCheats();
             PlayerClientboundPacket.resetRTS(hardReset);

@@ -26,20 +26,17 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class MoltenBomb extends HeroAbility {
 
-    public static final int RANGE = 15;
-
-    public static final int DAMAGE_RANK_1 = 6;
-    public static final int DAMAGE_RANK_2 = 8;
-    public static final int DAMAGE_RANK_3 = 10;
+    public static final int RANGE = 18;
 
     public static final int RADIUS_RANK_1 = 4;
     public static final int RADIUS_RANK_2 = 5;
     public static final int RADIUS_RANK_3 = 6;
 
-    public int damage = DAMAGE_RANK_1;
+    public static final int MIN_MAGMA_DURATION = 200;
+    public static final int MAX_MAGMA_DURATION = 300;
 
     public MoltenBomb() {
-        super(3, 60, UnitAction.MOLTEN_BOMB, 30 * ResourceCost.TICKS_PER_SECOND, RANGE, RADIUS_RANK_1, false);
+        super(3, 50, UnitAction.MOLTEN_BOMB, 30 * ResourceCost.TICKS_PER_SECOND, RANGE, RADIUS_RANK_1, false);
     }
 
     @Override
@@ -64,13 +61,10 @@ public class MoltenBomb extends HeroAbility {
     @Override
     public void updateStatsForRank(HeroUnit hero) {
         if (getRank(hero) == 1) {
-            damage = DAMAGE_RANK_1;
             radius = RADIUS_RANK_1;
         } else if (getRank(hero) == 2) {
-            damage = DAMAGE_RANK_2;
             radius = RADIUS_RANK_2;
         } else if (getRank(hero) == 3) {
-            damage = DAMAGE_RANK_3;
             radius = RADIUS_RANK_3;
         }
     }
@@ -78,8 +72,8 @@ public class MoltenBomb extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Molten Bomb",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/fireball.png"),
+        AbilityButton button = new AbilityButton("Molten Bomb",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/molten_bomb.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOLTEN_BOMB,
                 () -> getRank(hero) == 0,
@@ -90,13 +84,15 @@ public class MoltenBomb extends HeroAbility {
                 this,
                 hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Molten Bomb",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/fireball.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/molten_bomb.png"),
                 hero
         );
     }
@@ -104,7 +100,7 @@ public class MoltenBomb extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.molten_bomb") + " " + rankString(hero), true),
-                fcsIcons(I18n.get("abilities.reignofnether.molten_bomb.stats", damage, cooldownMax / 20, RANGE, manaCost)),
+                fcsIcons(I18n.get("abilities.reignofnether.molten_bomb.stats", cooldownMax / 20, RANGE, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.molten_bomb.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.molten_bomb.tooltip2"))
@@ -119,9 +115,9 @@ public class MoltenBomb extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.molten_bomb.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.molten_bomb.tooltip2")),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.molten_bomb.rank1", DAMAGE_RANK_1, RADIUS_RANK_1), getRank(hero) == 0),
-                fcs(I18n.get("abilities.reignofnether.molten_bomb.rank2", DAMAGE_RANK_2, RADIUS_RANK_2), getRank(hero) == 1),
-                fcs(I18n.get("abilities.reignofnether.molten_bomb.rank3", DAMAGE_RANK_3, RADIUS_RANK_3), getRank(hero) == 2)
+                fcs(I18n.get("abilities.reignofnether.molten_bomb.rank1", RADIUS_RANK_1), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.molten_bomb.rank2", RADIUS_RANK_2), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.molten_bomb.rank3", RADIUS_RANK_3), getRank(hero) == 2)
         );
     }
 

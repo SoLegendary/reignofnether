@@ -96,7 +96,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
 
     private void calcMoveTarget() {
         if (this.buildingTarget != null)
-            this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1);
+            this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1, true);
     }
 
     // only count as building if in range of the target - building is actioned in Building.tick()

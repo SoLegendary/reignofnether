@@ -67,7 +67,7 @@ public class UnitActionServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             if (this.action == UnitAction.DEBUG1) {
-                UnitServerEvents.debug1();
+                UnitServerEvents.debug1(this.preselectedBlockPos);
             }
             if (this.action == UnitAction.DEBUG2) {
                 UnitServerEvents.debug2();

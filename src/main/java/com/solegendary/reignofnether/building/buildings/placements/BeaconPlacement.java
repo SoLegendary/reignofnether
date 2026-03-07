@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
 import com.solegendary.reignofnether.building.buildings.neutral.CapturableBeacon;
@@ -10,7 +11,6 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
-import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
@@ -153,7 +153,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
         if (tickLevel.isClientSide && tickAgeAfterBuilt > 0 && tickAgeAfterBuilt % 100 == 0)
-            updateBorderBps();
+            updateHighlightBps();
 
         if (isBeaconActive() && tickAgeAfterBuilt > 0 && tickAgeAfterBuilt % 20 == 0 &&
                 !this.level.isClientSide()) {
@@ -233,16 +233,16 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
     }
 
     @Override
-    public void updateBorderBps() {
+    public void updateHighlightBps() {
         if (!level.isClientSide())
             return;
         this.borderBps.clear();
         this.borderBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(centrePos,
-                getBorderRange() - TimeClientEvents.VISIBLE_BORDER_ADJ, level));
+                getBorderRange() - BlockClientEvents.VISIBLE_BORDER_ADJ, level));
     }
 
     @Override
-    public Set<BlockPos> getBorderBps() {
+    public Set<BlockPos> getHighlightBps() {
         return borderBps;
     }
 
@@ -259,7 +259,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
         return block != Blocks.BEACON && blockAbove != Blocks.BEACON;
     }
 
-    public void changeStructure(int structureLevel) {
+    public void changeBeaconStructure(int structureLevel) {
         String newStructureName = switch (structureLevel) {
             case 1 -> Beacon.structureNameT1;
             case 2 -> Beacon.structureNameT2;

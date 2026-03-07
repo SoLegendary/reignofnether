@@ -42,6 +42,8 @@ public class InfernalPortal extends ProductionBuilding implements NetherConverti
 
         this.productions.add(ProductionItems.PIGLIN_MERCHANT, Keybindings.keyQ);
         this.productions.add(ProductionItems.PIGLIN_MERCHANT_REVIVE, Keybindings.keyQ);
+        this.productions.add(ProductionItems.WILDFIRE, Keybindings.keyW);
+        this.productions.add(ProductionItems.WILDFIRE_REVIVE, Keybindings.keyW);
 
         setActiveAddon(NetherConvertingAddon.class, this, true);
     }
@@ -63,7 +65,7 @@ public class InfernalPortal extends ProductionBuilding implements NetherConverti
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/crying_obsidian.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.INFERNAL_PORTAL,
-                () -> !SandboxClientEvents.isSandboxPlayer() && !GameruleClient.allowHeroes,
+                () -> !SandboxClientEvents.isSandboxPlayer() && GameruleClient.allowedHeroes <= 0,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.CENTRAL_PORTAL) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(

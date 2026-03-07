@@ -2,6 +2,12 @@
 Features
 --------
 
+[❌] /gamerule scenarioMap gamerule for sandbox, (default false), when active:
+    - Exiting sandbox does not change building or unit allegiances
+    - Exiting sandbox marks owned buildings to be assigned to the next player that logs in
+    - The next player that logs in starts in Scenario Mode instead of letting them choose the gamemode
+
+
 [❌] Let villagers repair iron golems with ore for 1hp per ore, masons repair faster
 
 [❌] Walls
@@ -19,6 +25,8 @@ Features
 
 [❌] AoE2-style markets
     - Start as neutral building
+    - Trade with trader units by passing between markets
+        - Striders for piglins, zombie horses for monsters, mules for villagers
 
 
 Bugfixes
@@ -27,11 +35,14 @@ Bugfixes
         resulting in a null name when calling the method in the prod queue
     - Same with FireResistance, SoulFireball, LabLightningRod, WaterPotions, HealingPotions
 
-[❌] keyframe animations are cancelled upon being hit
+[❌] Fix bug with not being able to choose superflat
+
 [❌] Avatar state is reset when unloaded
 
 [❌] Players logging in messes up the observer menu (and freezes resources?)
 [❌] bridge scroll bug (up and down vs left/right?)
+
+
 
 Quality of Life Features
 ------------------------

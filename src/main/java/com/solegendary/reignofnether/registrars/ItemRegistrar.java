@@ -42,6 +42,10 @@ public class ItemRegistrar {
             ITEMS.register("stray_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.STRAY_UNIT,
                     0x5B6F6F, 0xAEB8B8, new Item.Properties()));
 
+    public static final RegistryObject<ForgeSpawnEggItem> BOGGED_UNIT_SPAWN_EGG =
+            ITEMS.register("bogged_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.BOGGED_UNIT,
+                    0xa1a387, 0x3e4d12, new Item.Properties()));
+
     public static final RegistryObject<ForgeSpawnEggItem> CREEPER_UNIT_SPAWN_EGG =
             ITEMS.register("creeper_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.CREEPER_UNIT,
                     0x0c990a, 0x000000, new Item.Properties()));
@@ -112,6 +116,10 @@ public class ItemRegistrar {
 
     public static final RegistryObject<ForgeSpawnEggItem> HEADHUNTER_UNIT_SPAWN_EGG =
             ITEMS.register("headhunter_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.HEADHUNTER_UNIT,
+                    0x57290f, 0xC9C685, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> MARAUDER_UNIT_SPAWN_EGG =
+            ITEMS.register("marauder_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.MARAUDER_UNIT,
                     0x57290f, 0xC9C685, new Item.Properties()));
 
     public static final RegistryObject<ForgeSpawnEggItem> HOGLIN_UNIT_SPAWN_EGG =

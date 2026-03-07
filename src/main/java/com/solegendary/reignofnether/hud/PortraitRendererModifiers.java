@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.datafixers.util.Pair;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -105,7 +103,7 @@ public class PortraitRendererModifiers {
             yOffset = -35;
             scale = -27;
         } else if (entity instanceof RoyalGuardUnit royalGuardUnit) {
-            yOffset = -34;
+            yOffset = -14;
             scale = -16;
             float avatarPercent = (float) royalGuardUnit.avatarScaleTicks / royalGuardUnit.AVATAR_SCALE_TICKS_MAX;
             yOffset -= (26 * avatarPercent);
@@ -120,8 +118,11 @@ public class PortraitRendererModifiers {
             yOffset = -30;
             scale = -32;
         } else if (entity instanceof EnchanterUnit) {
-            yOffset = -36;
+            yOffset = -12;
             scale = -16;
+        } else if (entity instanceof MarauderUnit) {
+            yOffset = -34;
+            scale = -22;
         }
 
         return new Pair<>(yOffset, scale);

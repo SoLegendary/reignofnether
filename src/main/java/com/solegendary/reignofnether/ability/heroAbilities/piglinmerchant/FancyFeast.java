@@ -4,6 +4,7 @@ package com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant;
 //Higher levels raise the quality of food thrown
 //Greed is Good raises the amount of food thrown
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
@@ -38,21 +39,16 @@ public class FancyFeast extends HeroAbility {
     public static final int BONUS_ITEMS_PER_100_RESOURCES = 2;
     public static int MANA_REFUND_PER_100_RESOURCES = 10;
 
-    private static final float HEALTH_PER_BREAD = 10;
-    private static final float HEALTH_PER_CHICKEN = 15;
-    private static final float HEALTH_PER_BEEF = 20;
+    public static final float HEALTH_PER_BREAD = 12;
+    public static final float HEALTH_PER_CHICKEN = 18;
+    public static final float HEALTH_PER_BEEF = 24;
 
     public FancyFeast() {
         super(3, 70, UnitAction.FANCY_FEAST, CD_MAX_SECONDS, RANGE, 0, false);
     }
 
-    private ResourceLocation getIcon(int plusRank, HeroUnit hero) {
-        if (getRank(hero) + plusRank == 3)
-            return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/cooked_beef.png");
-        else if (getRank(hero) + plusRank == 2)
-            return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/cooked_chicken.png");
-        else
-            return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/bread.png");
+    private ResourceLocation getIcon() {
+        return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/fancy_feast.png");
     }
 
     public Item getFoodItem(HeroUnit hero) {
@@ -86,8 +82,8 @@ public class FancyFeast extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Fancy Feast",
-                getIcon(0, hero),
+        AbilityButton button = new AbilityButton("Fancy Feast",
+                getIcon(),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.FANCY_FEAST,
                 () -> getRank(hero) == 0,
@@ -98,13 +94,15 @@ public class FancyFeast extends HeroAbility {
                 this,
                 hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Fancy Feast",
-                getIcon(1, hero),
+                getIcon(),
                 hero
         );
     }
@@ -127,9 +125,9 @@ public class FancyFeast extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip2", BASE_ITEMS, BONUS_ITEMS_PER_100_RESOURCES, MANA_REFUND_PER_100_RESOURCES)),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.fancy_feast.rank1"), getRank(hero) == 0),
-                fcs(I18n.get("abilities.reignofnether.fancy_feast.rank2"), getRank(hero) == 1),
-                fcs(I18n.get("abilities.reignofnether.fancy_feast.rank3"), getRank(hero) == 2)
+                fcs(I18n.get("abilities.reignofnether.fancy_feast.rank1", HEALTH_PER_BREAD), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.fancy_feast.rank2", HEALTH_PER_CHICKEN), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.fancy_feast.rank3", HEALTH_PER_BEEF), getRank(hero) == 2)
         );
     }
 

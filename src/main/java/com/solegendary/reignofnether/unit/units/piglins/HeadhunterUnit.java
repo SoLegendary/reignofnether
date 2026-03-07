@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -21,12 +22,14 @@ import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -51,7 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.solegendary.reignofnether.ability.abilities.Bloodlust.BLOODLUST_ATTACK_SPEED_MULTIPLIER;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, RangedAttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -136,11 +139,8 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.HEADHUNTER;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttacksPerSecond() {
-        if (bloodlustTicks > 0)
-            return attacksPerSecond * BLOODLUST_ATTACK_SPEED_MULTIPLIER;
-        return attacksPerSecond;
-    }
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -156,11 +156,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
 
     // endregion
 
-    public int getAttackCooldown() {
-        if (bloodlustTicks > 0)
-            return (int) (20 / (attacksPerSecond * BLOODLUST_ATTACK_SPEED_MULTIPLIER));
-        return (int) (20 / attacksPerSecond);
-    }
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
 
     final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.3f;
@@ -173,8 +169,6 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.24f;
     public int maxResources = 100;
-
-    public int bloodlustTicks = 0;
 
     public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
     public int getFogRevealDuration() { return fogRevealDuration; }
@@ -216,7 +210,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     protected void customServerAiStep() { }
     @Override
     public LivingEntity getTarget() {
-        return this.targetGoal.getTarget();
+        return this.targetGoal != null ? this.targetGoal.getTarget() : null;
     }
 
     public void tick() {
@@ -225,9 +219,6 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
         Unit.tick(this);
         AttackerUnit.tick(this);
         this.mountGoal.tick();
-
-        if (bloodlustTicks > 0)
-            bloodlustTicks -= 1;
     }
 
     @Override
@@ -348,8 +339,13 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     }
 
     @Override
-    public boolean hasBonusAttackSpeed() {
-        return bloodlustTicks > 0;
+    public List<FormattedCharSequence> getAttackDamageStatTooltip() {
+        return hasFlameTrident() ? List.of(
+                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
+                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_fire_damage", 3, 3))
+        ) : List.of(
+                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true)
+        );
     }
 
     @Override

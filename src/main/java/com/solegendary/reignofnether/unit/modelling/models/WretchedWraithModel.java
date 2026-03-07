@@ -140,11 +140,11 @@ public class WretchedWraithModel<T extends Entity> extends KeyframeHierarchicalM
 
 		// any once-off animation like attack or cast spell
 		if (wretchedWraith.activeAnimDef != null && wretchedWraith.activeAnimState != null && wretchedWraith.animateTicks > 0) {
-			restartThenAnimate(wretchedWraith, wretchedWraith.activeAnimState, wretchedWraith.activeAnimDef, ageInTicks, wretchedWraith.animateScale);
+			restartThenAnimate(wretchedWraith, wretchedWraith.activeAnimState, wretchedWraith.activeAnimDef, ageInTicks, wretchedWraith.animateScale, wretchedWraith.getAnimationSpeed());
 		}
 		// walk animation
 		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
-			restart(wretchedWraith, wretchedWraith.walkAnimState, WretchedWraithAnimations.WALK, ageInTicks);
+			restart(wretchedWraith, wretchedWraith.walkAnimState, ageInTicks);
 			animateWalk(WretchedWraithAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}
 		// idle animation

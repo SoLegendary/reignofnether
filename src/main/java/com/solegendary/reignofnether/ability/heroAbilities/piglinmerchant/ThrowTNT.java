@@ -30,7 +30,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class ThrowTNT extends HeroAbility {
 
-    public static final int RANGE = 12;
+    public static final int RANGE = 14;
     public float explosionPower = 2;
 
     // for some reason 0 and negative cooldown values cause this to stop working
@@ -74,8 +74,8 @@ public class ThrowTNT extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Throw TNT",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
+        AbilityButton button = new AbilityButton("Throw TNT",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/throw_tnt.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.THROW_TNT,
                 () -> getRank(hero) == 0,
@@ -86,13 +86,15 @@ public class ThrowTNT extends HeroAbility {
                 this,
                 hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Throw TNT",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/throw_tnt.png"),
                 hero
         );
     }

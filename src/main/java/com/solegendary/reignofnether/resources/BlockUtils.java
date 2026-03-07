@@ -1,18 +1,25 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.SlabType;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class BlockUtils {
+
+    private static final Random RANDOM = new Random();
 
     public static boolean isLogBlock(BlockState bs) {
         return List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG,
@@ -65,15 +72,22 @@ public class BlockUtils {
         return false;
     }
 
-    public static int numAirOrLeafBlocksBelow(BlockPos bp, Level level) {
-        int blocks = 0;
-        for (int i = -1; i > -10; i--) {
-            BlockState bs = level.getBlockState(bp.offset(0,i,0));
-            if (bs.isAir() || isLeafBlock(bs))
-                blocks += 1;
-            else if (!isLogBlock(bs)) // stop counting if we hit a non-log solid block to avoid counting underground blocks
-                break;
-        }
-        return blocks;
+
+    private static boolean isWraithSnow(BlockState bs) {
+        return bs.getBlock() == BlockRegistrar.WRAITH_SNOW_LAYER.get();
+    }
+    private static boolean isVanillaSnow(BlockState bs) {
+        return bs.getBlock() == Blocks.SNOW;
+    }
+    public static int getWraithSnowLayers(BlockState bs) {
+        return isWraithSnow(bs) ? bs.getValue(BlockStateProperties.LAYERS) : 0;
+    }
+    public static int getSnowLayers(BlockState bs) {
+        return isWraithSnow(bs) || isVanillaSnow(bs) ? bs.getValue(BlockStateProperties.LAYERS) : 0;
+    }
+    public static boolean canPlaceSnow(Level level, BlockPos pos) {
+        return !MiscUtil.isSolidBlocking(level, pos) &&
+                MiscUtil.isSolidBlocking(level, pos.below()) &&
+                !BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), pos);
     }
 }

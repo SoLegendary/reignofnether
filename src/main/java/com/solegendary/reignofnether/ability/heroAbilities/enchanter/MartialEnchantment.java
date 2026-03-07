@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -32,7 +33,7 @@ import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
-public class MartialEnchantment extends HeroAbility {
+public class MartialEnchantment extends AbstractEnchantment {
 
     public static final int RANGE = 10;
 
@@ -40,19 +41,19 @@ public class MartialEnchantment extends HeroAbility {
     public static final int CHARGES_RANK_2 = 3;
     public static final int CHARGES_RANK_3 = 4;
 
-    public static final int CD_RANK_1 = 30;
-    public static final int CD_RANK_2 = 25;
-    public static final int CD_RANK_3 = 20;
+    public static final int CD_RANK_1 = 25;
+    public static final int CD_RANK_2 = 20;
+    public static final int CD_RANK_3 = 15;
 
-    public static final int MANA_COST_RANK_1 = 50;
-    public static final int MANA_COST_RANK_2 = 40;
-    public static final int MANA_COST_RANK_3 = 30;
+    public static final int MANA_COST_RANK_1 = 40;
+    public static final int MANA_COST_RANK_2 = 30;
+    public static final int MANA_COST_RANK_3 = 20;
 
     public MartialEnchantment() {
         super(3, MANA_COST_RANK_1, UnitAction.MARTIAL_ENCHANTMENT, CD_RANK_1 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
         maxCharges = CHARGES_RANK_1;
         this.autocastEnableAction = UnitAction.MARTIAL_ENCHANTMENT_AUTOCAST_ENABLE;
-        this.autocastDisableAction = UnitAction.MARTIAL_ENCHANTMENT_AUTOCAST_ENABLE;
+        this.autocastDisableAction = UnitAction.MARTIAL_ENCHANTMENT_AUTOCAST_DISABLE;
     }
 
     @Override
@@ -85,7 +86,7 @@ public class MartialEnchantment extends HeroAbility {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
         AbilityButton button = new AbilityButton("Martial Enchantment",
-                null,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/martial_enchantment.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.MARTIAL_ENCHANTMENT || isAutocasting(hero),
                 () -> getRank(hero) == 0,
@@ -96,8 +97,7 @@ public class MartialEnchantment extends HeroAbility {
                 this,
                 hero
         );
-        button.iconItem = new ItemStack(Items.IRON_SWORD);
-        button.iconItem.enchant(Enchantments.SHARPNESS, 1);
+        button.stretchIconToBorders = true;
         return button;
     }
 
@@ -105,11 +105,9 @@ public class MartialEnchantment extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         Button button = super.getRankUpButtonProtected(
                 "Martial Enchantment",
-                null,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/martial_enchantment.png"),
                 hero
         );
-        button.iconItem = new ItemStack(Items.IRON_SWORD);
-        button.iconItem.enchant(Enchantments.SHARPNESS, 1);
         return button;
     }
 
@@ -133,43 +131,53 @@ public class MartialEnchantment extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.martial_enchantment.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.martial_enchantment.tooltip2")),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.martial_enchantment.rank1"), getRank(hero) == 0),
-                fcs(I18n.get("abilities.reignofnether.martial_enchantment.rank2"), getRank(hero) == 1),
-                fcs(I18n.get("abilities.reignofnether.martial_enchantment.rank3"), getRank(hero) == 2)
+                fcs(I18n.get("abilities.reignofnether.martial_enchantment.rank1", CHARGES_RANK_1, CD_RANK_1), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.martial_enchantment.rank2", CHARGES_RANK_2, CD_RANK_2), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.martial_enchantment.rank3", CHARGES_RANK_3, CD_RANK_3), getRank(hero) == 2)
         );
     }
-
-    private final static List<EntityType<? extends Mob>> ALLOWED_MOB_TYPES = List.of(
-            EntityRegistrar.MILITIA_UNIT.get(),
-            EntityRegistrar.VINDICATOR_UNIT.get(),
-            EntityRegistrar.PILLAGER_UNIT.get(),
-            EntityRegistrar.EVOKER_UNIT.get()
-    );
 
     @Nullable
     public static Enchantment getEnchantmentForUnit(LivingEntity unit) {
         if (unit instanceof MilitiaUnit militiaUnit)
             return militiaUnit.isUsingBow() ? Enchantments.POWER_ARROWS : Enchantments.SHARPNESS;
         if (unit instanceof VindicatorUnit)
-            return Enchantments.SHARPNESS;
+            return EnchantmentRegistrar.BREACHING.get();
         if (unit instanceof PillagerUnit)
             return Enchantments.PIERCING;
         if (unit instanceof EvokerUnit)
-            return Enchantments.IMPALING;
+            return EnchantmentRegistrar.ZEAL.get();
         return null;
     }
 
-    public static boolean canEnchantUnit(LivingEntity unit) {
-        return ALLOWED_MOB_TYPES.contains(unit.getType()) &&
-                !unit.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() &&
-                !unit.getItemBySlot(EquipmentSlot.MAINHAND).getAllEnchantments().containsKey(getEnchantmentForUnit(unit));
+    @Override
+    public List<EntityType<? extends Mob>> getAllowedMobTypes() {
+        return List.of(
+                EntityRegistrar.MILITIA_UNIT.get(),
+                EntityRegistrar.VINDICATOR_UNIT.get(),
+                EntityRegistrar.PILLAGER_UNIT.get(),
+                EntityRegistrar.EVOKER_UNIT.get()
+        );
+    }
+
+    @Override
+    public boolean canEnchant(LivingEntity le) {
+        return getAllowedMobTypes().contains(le.getType()) &&
+                le instanceof Unit &&
+                !le.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() &&
+                !le.getItemBySlot(EquipmentSlot.MAINHAND).getAllEnchantments().containsKey(getEnchantmentForUnit(le));
     }
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        if (!ALLOWED_MOB_TYPES.contains(targetEntity.getType())) {
+        if (!getAllowedMobTypes().contains(targetEntity.getType())) {
             if (level.isClientSide())
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error3"));
+            return;
+        }
+        if (targetEntity.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty()) {
+            if (level.isClientSide())
+                HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error7"));
             return;
         }
         Enchantment enchantment = getEnchantmentForUnit(targetEntity);

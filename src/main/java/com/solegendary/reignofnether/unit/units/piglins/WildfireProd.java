@@ -18,6 +18,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class WildfireProd extends HeroProductionItem {
@@ -55,26 +56,23 @@ public class WildfireProd extends HeroProductionItem {
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new StartProductionButton(
-            itemName,
-            iconRl,
-            hotkey,
-            () -> itemIsBeingProduced(prodBuilding.ownerName) || heroOwned(prodBuilding.level.isClientSide(), prodBuilding.ownerName),
-            () -> true,
-            List.of(
-                    FormattedCharSequence.forward(
-                            I18n.get("units.piglins.reignofnether.wildfire") +
-                                    " (" + I18n.get("hud.units.reignofnether.hero") + ")",
-                            Style.EMPTY.withBold(true)),
+        ArrayList<FormattedCharSequence> tooltips = new ArrayList<>(List.of(
+                FormattedCharSequence.forward(
+                        I18n.get("units.piglins.reignofnether.wildfire") +
+                                " (" + I18n.get("hud.units.reignofnether.hero") + ")",
+                        Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wildfire.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wildfire.tooltip2"), Style.EMPTY)
-            ),
-            this
+        ));
+        tooltips.addAll(getAdditionalHeroTooltips());
+
+        return super.getStartButton(
+                prodBuilding,
+                hotkey,
+                tooltips
         );
     }
-
-
 }

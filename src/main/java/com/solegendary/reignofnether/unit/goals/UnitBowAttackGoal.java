@@ -51,12 +51,12 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
             this.attackCooldown -= 1;
     }
 
-    public int getAttackCooldown() {
+    public float getAttackCooldown() {
         return attackCooldown;
     }
 
     public void setToMaxAttackCooldown() {
-        this.attackCooldown = ((AttackerUnit) this.mob).getAttackCooldown();
+        this.attackCooldown = (int) ((AttackerUnit) this.mob).getAttackCooldown();
     }
 
     public void resetCooldown() {

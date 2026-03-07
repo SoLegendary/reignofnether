@@ -218,34 +218,6 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         guiGraphics.pose().translate(0,0,2000);
         name = WordUtils.capitalize(name);
 
-        /*
-        if ((entity instanceof BruteUnit bUnit && bUnit.hasEnchantedNetheriteSword()) ||
-            (entity instanceof HeadhunterUnit hUnit && hUnit.hasFlameTrident())) {
-            name += " (FA)";
-        }
-        if (entity instanceof VindicatorUnit pUnit && pUnit.getEnchant() == Enchantments.SHARPNESS) {
-            name += " (S)";
-        }
-        if (entity instanceof VindicatorUnit pUnit && pUnit.getEnchant() == EnchantMaiming.actualEnchantment) {
-            name += " (M)";
-        }
-        if (entity instanceof PillagerUnit pUnit && pUnit.getEnchant() == Enchantments.QUICK_CHARGE) {
-            name += " (QC)";
-        }
-        if (entity instanceof PillagerUnit pUnit && pUnit.getEnchant() == Enchantments.MULTISHOT) {
-            name += " (MS)";
-        }
-        if (entity instanceof EvokerUnit pUnit && pUnit.getEnchant() == EnchantVigor.actualEnchantment) {
-            name += " (V)";
-        }
-        if (entity instanceof ZombieUnit pUnit && pUnit.getThornsLevel() > 0) {
-            name += " (Thorns ";
-            for (int i = 0; i < pUnit.getThornsLevel(); i++)
-                name += "I";
-            name += ")";
-        }
-         */
-
         if (rs != Relationship.OWNED && entity instanceof Unit unit && unit.getOwnerName().length() > 0) {
             name += " (" + unit.getOwnerName() + ")";
         }
@@ -432,15 +404,25 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                     ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/sword.png"),
                     atkStr,
                     UnitStatType.ATTACK_DAMAGE,
-                    unit.hasBonusDamage() ? 0xFF2BFF2B : 0xFFFFFFFF,
+                    attackerUnit.hasBonusDamage() ? 0xFF2BFF2B : 0xFFFFFFFF,
                     0
             ));
             DecimalFormat df2 = new DecimalFormat("###.##");
+
+            int atkSpdColour = 0xFFFFFFFF;
+            float attacksPerSecond = Math.round(attackerUnit.getAttacksPerSecond() * 100f) / 100f;
+            float baseAttacksPerSecond = Math.round(attackerUnit.getBaseAttacksPerSecond() * 100f) / 100f;
+
+            if (attacksPerSecond > baseAttacksPerSecond) {
+                atkSpdColour = 0xFF2BFF2B;
+            } else if (attacksPerSecond < baseAttacksPerSecond) {
+                atkSpdColour = 0xFFFC3838;
+            }
             renderedStats.add(new RenderedStat(
                     ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/sparkler.png"),
                     String.valueOf(df2.format(attackerUnit.getAttacksPerSecond())),
                     UnitStatType.ATTACK_SPEED,
-                    unit.hasBonusAttackSpeed() ? 0xFF2BFF2B : 0xFFFFFFFF,
+                    atkSpdColour,
                     0
             ));
             String rangeStr;
@@ -459,34 +441,34 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         }
 
         int armourColor = 0xFFFFFFFF;
-        float physicalArmour = unit.getUnitPhysicalArmorPercentage();
-        float rangedArmour = unit.getUnitRangedArmorPercentage();
-        float magicArmour = unit.getUnitMagicArmorPercentage();
-        float resistArmour = unit.getUnitResistPercentage();
-        float avgArmourInv = 1;
+        double physicalArmour = unit.getUnitPhysicalArmorPercentage();
+        double rangedArmour = unit.getUnitRangedArmorPercentage();
+        double magicArmour = unit.getUnitMagicArmorPercentage();
+        double resistArmour = unit.getUnitResistPercentage();
+        double avgArmourInv = 1;
 
         String armourStr = "0%";
         int nonZeroArmourTypes = 0;
 
-        if (physicalArmour > 0) {
+        if (physicalArmour != 0) {
             armourStr = (int) (physicalArmour * 100) + "%";
             armourColor = 0xFF2BFF2B;
             avgArmourInv *= (1 - physicalArmour);
             nonZeroArmourTypes += 1;
         }
-        if (rangedArmour > 0) {
+        if (rangedArmour != 0) {
             armourStr = (int) (rangedArmour * 100) + "%";
             armourColor = 0xFFFCFC2B;
             avgArmourInv *= (1 - rangedArmour);
             nonZeroArmourTypes += 1;
         }
-        if (resistArmour > 0) {
+        if (resistArmour != 0) {
             armourStr = (int) (resistArmour * 100) + "%";
             armourColor = 0xFF42DDDD;
             avgArmourInv *= (1 - resistArmour);
             nonZeroArmourTypes += 1;
         }
-        if (magicArmour > 0 && resistArmour <= 0) { // resistArmour includes magicArmour
+        if (magicArmour != 0 && resistArmour <= 0) { // resistArmour includes magicArmour
             armourStr = (int) (magicArmour * 100) + "%";
             armourColor = 0xFF5B5BFC;
             avgArmourInv *= (1 - magicArmour);
@@ -496,13 +478,19 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             armourStr = "~" + (int) ((1 - avgArmourInv) * 100) + "%";
             armourColor = 0xFF42DDDD;
         }
+        if (armourStr.contains("~") && armourStr.contains("-")) {
+            armourStr = armourStr.replace("~", "");
+        }
+        if (armourStr.contains("-")) {
+            armourColor = 0xFFFC3838;
+        }
 
         renderedStats.add(new RenderedStat(
                 ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/chestplate.png"),
                 armourStr,
                 UnitStatType.ARMOUR,
                 armourColor,
-                armourStr.startsWith("~") ? -4 : 0
+                armourStr.startsWith("~") || armourStr.startsWith("-") ? -4 : 0
         ));
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
         int msInt = ms != null ? (int) (ms.getValue() * 101) : 0;

@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.time;
+package com.solegendary.reignofnether.blocks;
 
 public enum NightCircleMode {
     ALL,

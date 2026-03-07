@@ -26,7 +26,7 @@ public class EvokerUnitRenderer extends AbstractVillagerUnitRenderer<EvokerUnit>
         // do not render any held items
         this.addLayer(new ItemInHandLayer<EvokerUnit, VillagerUnitModel<EvokerUnit>>(this, p_174108_.getItemInHandRenderer()) {
             public void render(PoseStack p_114569_, MultiBufferSource p_114570_, int p_114571_, EvokerUnit evokerUnit, float p_114573_, float p_114574_, float p_114575_, float p_114576_, float p_114577_, float p_114578_) {
-                if (evokerUnit.isCastingSpell() && evokerUnit.hasVigorEnchant()) {
+                if (evokerUnit.isCastingSpell() && evokerUnit.getVigorLevel() > 0) {
                     super.render(p_114569_, p_114570_, p_114571_, evokerUnit, p_114573_, p_114574_, p_114575_, p_114576_, p_114577_, p_114578_);
                 }
             }

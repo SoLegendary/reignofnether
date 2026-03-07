@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.enchantments.VigorEnchantment;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -37,7 +38,7 @@ public class SetFangsLine extends Ability {
         if (!(unit instanceof EvokerUnit evokerUnit))
             return null;
         return new AbilityButton("Evoker Fangs (Line)",
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/shears.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/evoker_fangs_line.png"),
             hotkey,
             () -> evokerUnit.isUsingLineFangs,
             () -> false,
@@ -73,8 +74,9 @@ public class SetFangsLine extends Ability {
     @Override
     public void setCooldown(float cooldown, Unit unit) {
         EvokerUnit evokerUnit = (EvokerUnit) unit;
-        if (evokerUnit.hasVigorEnchant())
-            cooldown *= EnchantVigor.cooldownMultiplier;
+        int vigorLevel = evokerUnit.getVigorLevel();
+        if (vigorLevel > 0)
+            cooldown *= Math.pow(VigorEnchantment.CD_MULTIPLIER, vigorLevel);
 
         super.setCooldown(cooldown, unit);
         for (Ability ability : evokerUnit.getAbilities().get())

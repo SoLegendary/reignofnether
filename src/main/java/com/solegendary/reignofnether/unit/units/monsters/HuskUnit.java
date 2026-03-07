@@ -24,6 +24,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.monster.Monster;
@@ -114,8 +116,9 @@ public class HuskUnit extends Husk implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -158,7 +161,7 @@ public class HuskUnit extends Husk implements Unit, AttackerUnit {
     }
 
     @Override
-    public float getUnitRangedArmorPercentage() {
+    public double getUnitRangedArmorPercentage() {
         return rangedDamageResist;
     }
 
@@ -231,8 +234,4 @@ public class HuskUnit extends Husk implements Unit, AttackerUnit {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
         return pSpawnData;
     }
-
-
-
-
 }

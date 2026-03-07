@@ -140,13 +140,13 @@ public class EnchanterModel<T extends Entity> extends KeyframeHierarchicalModel<
 
 		// any once-off animation like attack or cast spell
 		if (enchanter.activeAnimDef != null && enchanter.activeAnimState != null && enchanter.animateTicks > 0) {
-			restartThenAnimate(enchanter, enchanter.activeAnimState, enchanter.activeAnimDef, ageInTicks, enchanter.animateScale);
+			restartThenAnimate(enchanter, enchanter.activeAnimState, enchanter.activeAnimDef, ageInTicks, enchanter.animateScale, enchanter.animateSpeed);
 			this.rArm.visible = true;
 			this.lArm.visible = true;
 		}
 		// walk animation
 		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
-			restart(enchanter, enchanter.walkAnimState, EnchanterAnimations.WALK, ageInTicks);
+			restart(enchanter, enchanter.walkAnimState, ageInTicks);
 			animateWalk(EnchanterAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}
 		// idle animation

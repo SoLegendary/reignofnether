@@ -44,7 +44,7 @@ public class ResourceCostConfigEntry {
     public static ResourceCostConfigEntry Building(int food, int wood, int ore, int supply, ResourceCost associatedCost, String comment) { // buildings
         return new ResourceCostConfigEntry(food, wood, ore, 0, supply, associatedCost, comment);
     }
-    public static ResourceCostConfigEntry Enchantment(int food, int wood, int ore, ResourceCost associatedCost, String comment) { // enchantments
+    public static ResourceCostConfigEntry Ability(int food, int wood, int ore, ResourceCost associatedCost, String comment) { // enchantments and equipment
         return new ResourceCostConfigEntry(food, wood, ore, 0, 0, associatedCost, comment);
     }
 

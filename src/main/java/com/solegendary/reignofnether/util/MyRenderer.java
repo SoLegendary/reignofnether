@@ -249,12 +249,43 @@ public class MyRenderer {
         drawSolidBox(matrixStack, vertexConsumer, aabb, dir, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
     }
 
+    public static void drawBlockFace(
+            PoseStack matrixStack,
+            VertexConsumer vertexConsumer,
+            Direction dir,
+            float yOffset,
+            BlockPos bp,
+            float r,
+            float g,
+            float b,
+            float a
+    ) {
+        AABB aabb = new AABB(bp);
+        aabb = aabb.setMaxY(aabb.maxY + 0.01f);
+        drawSolidBox(matrixStack, vertexConsumer, aabb, dir, yOffset, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
+    }
+
     // might be null RL for black.png as of 1.19?
+    public static void drawSolidBox(
+            PoseStack matrixStack,
+            VertexConsumer vertexConsumer0,
+            AABB aabb,
+            Direction dir,
+            float r,
+            float g,
+            float b,
+            float a,
+            ResourceLocation rl
+    ) {
+        drawSolidBox(matrixStack, vertexConsumer0, aabb, dir, 0, r, g, b, a, rl);
+    }
+
     public static void drawSolidBox(
             PoseStack matrixStack,
             VertexConsumer vertexConsumer0, //Generally, a VertexConsumer should be passed in, but this is currently not possible due to PoseStack conversions within this function. This may be fixed in the future.
             AABB aabb,
             Direction dir,
+            float yOffset,
             float r,
             float g,
             float b,
@@ -275,7 +306,7 @@ public class MyRenderer {
         float minY = (float) aabb.minY;
         float minZ = (float) aabb.minZ;
         float maxX = (float) aabb.maxX;
-        float maxY = (float) aabb.maxY;
+        float maxY = (float) aabb.maxY + yOffset;
         float maxZ = (float) aabb.maxZ;
 
         // Note that error: 'not filled all elements of vertex' means the vertex needs more elements,

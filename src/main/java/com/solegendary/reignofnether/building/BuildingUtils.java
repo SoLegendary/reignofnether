@@ -4,9 +4,13 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
+import com.solegendary.reignofnether.building.buildings.monsters.Stronghold;
+import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -42,6 +46,25 @@ public class BuildingUtils {
             }
         }
         return list.size();
+    }
+
+    public static boolean castleOwned(boolean isClientSide, String ownerName) {
+        List<BuildingPlacement> buildings;
+        if (isClientSide)
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
+        for (BuildingPlacement building : buildings) {
+            if (ownerName.equals(building.ownerName) &&
+                building.isBuilt &&
+                (building.getBuilding() instanceof Castle ||
+                building.getBuilding() instanceof Fortress ||
+                building.getBuilding() instanceof Stronghold)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean isBuildingBuildable(boolean isClientSide, BuildingPlacement building) {
@@ -236,6 +259,19 @@ public class BuildingUtils {
 
         for (BuildingPlacement building : buildings)
             if (building.isPosInsideBuilding(bp))
+                return true;
+        return false;
+    }
+
+    public static boolean isPosInsideAnyNonBridgeBuilding(boolean isClientSide, BlockPos bp) {
+        List<BuildingPlacement> buildings;
+        if (isClientSide)
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
+        for (BuildingPlacement building : buildings)
+            if (!(building instanceof BridgePlacement) && building.isPosInsideBuilding(bp))
                 return true;
         return false;
     }

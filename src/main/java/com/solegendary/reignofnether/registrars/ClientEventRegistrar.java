@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.registrars;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningServerEvents;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
@@ -73,6 +74,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CursorClientEvents.class);
         vanillaEventBus.register(MinimapClientEvents.class);
         vanillaEventBus.register(TimeClientEvents.class);
+        vanillaEventBus.register(BlockClientEvents.class);
         vanillaEventBus.register(FogOfWarClientEvents.class);
         vanillaEventBus.register(ResourcesClientEvents.class);
         vanillaEventBus.register(TPSClientEvents.class);

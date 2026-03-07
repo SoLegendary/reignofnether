@@ -2,6 +2,15 @@ package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.ActiveProduction;
+import com.solegendary.reignofnether.building.production.HeroProductionItem;
+import com.solegendary.reignofnether.building.production.ProductionBuilding;
+import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
@@ -12,6 +21,7 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.HeroUnitSave;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.packets.UnitSyncAbilityClientboundPacket;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
@@ -44,17 +54,6 @@ public interface HeroUnit extends Unit {
                 ResourceCosts.HERO_BASE_REVIVE_COST.population);
     }
 
-    static List<HeroUnit> getHeroes(boolean isClientside) {
-        List<LivingEntity> units = isClientside ? UnitClientEvents.getAllUnits() : UnitServerEvents.getAllUnits();
-        List<HeroUnit> list = new ArrayList<>();
-        for (LivingEntity e : units) {
-            if (e instanceof HeroUnit heroUnit) {
-                list.add(heroUnit);
-            }
-        }
-        return list;
-    }
-
     static List<HeroUnit> getHeroes(boolean isClientside, String ownerName) {
         return getHeroes(isClientside, ownerName, "");
     }
@@ -64,12 +63,23 @@ public interface HeroUnit extends Unit {
         List<HeroUnit> list = new ArrayList<>();
         for (LivingEntity e : units) {
             if (e instanceof HeroUnit heroUnit &&
-                heroUnit.getOwnerName().equals(ownerName) &&
-                (e.getName().getString().equals(unitName) || unitName.isBlank())) {
+                    heroUnit.getOwnerName().equals(ownerName) &&
+                    (e.getName().getString().equals(unitName) || unitName.isBlank())) {
                 list.add(heroUnit);
             }
         }
         return list;
+    }
+
+    static List<ActiveProduction> getHeroesInTraining(boolean isClientside, String ownerName) {
+        List<BuildingPlacement> buildings = isClientside ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<ActiveProduction> productions = new ArrayList<>();
+        for (BuildingPlacement b : buildings)
+            if (b instanceof ProductionPlacement pb && pb.ownerName.equals(ownerName))
+                for (ActiveProduction prod : pb.productionQueue)
+                    if (prod.item instanceof HeroProductionItem)
+                        productions.add(prod);
+        return productions;
     }
 
     @Nullable
@@ -80,6 +90,18 @@ public interface HeroUnit extends Unit {
                 return heroUnit;
         }
         return null;
+    }
+
+    static int getNumHeroesOwnedOrInTraining(boolean isClientside, String ownerName) {
+        return HeroUnit.getHeroes(isClientside, ownerName).size() +
+                HeroUnit.getFallenHeroes(isClientside, ownerName).size() +
+                HeroUnit.getHeroesInTraining(isClientside, ownerName).size();
+    }
+
+    static List<HeroUnitSave> getFallenHeroes(boolean isClientSide, String ownerName) {
+        ArrayList<HeroUnitSave> heroUnits = isClientSide ? HeroClientEvents.fallenHeroes : HeroServerEvents.fallenHeroes;
+        heroUnits.removeIf(h -> !h.ownerName.equals(ownerName));
+        return heroUnits;
     }
 
     int MAX_LEVEL = 10;
@@ -241,7 +263,7 @@ public interface HeroUnit extends Unit {
     }
 
     public default void syncToClients() {
-        Entity entity = (Entity) this;
+        LivingEntity entity = (LivingEntity) this;
         if (!entity.level().isClientSide()) {
             HeroClientboundPacket.setExperience(entity.getId(), this.getExperience());
             HeroClientboundPacket.setSkillPoints(entity.getId(), this.getSkillPoints());

@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;

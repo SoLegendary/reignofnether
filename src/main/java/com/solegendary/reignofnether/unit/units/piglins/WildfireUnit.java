@@ -4,52 +4,85 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.abilities.FirewallShot;
-import com.solegendary.reignofnether.ability.heroAbilities.necromancer.InsomniaCurse;
-import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
+import com.solegendary.reignofnether.ability.heroAbilities.wildfire.IntenseHeatPassive;
+import com.solegendary.reignofnether.ability.heroAbilities.wildfire.MoltenBomb;
+import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
+import com.solegendary.reignofnether.ability.heroAbilities.wildfire.SoulsAflame;
+import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.entities.BlazeUnitFireball;
+import com.solegendary.reignofnether.entities.MoltenBombProjectile;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
+import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.registrars.ParticleRegistrar;
+import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.Checkpoint;
-import com.solegendary.reignofnether.unit.UnitAnimationAction;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.modelling.animations.WildfireAnimations;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyMath;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AnimationState;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import oshi.util.tuples.Pair;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated {
-    public static final Abilities ABILITIES = new Abilities();
-    static {
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-    }
+public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
+    public final Abilities ABILITIES = new Abilities(
+            List.of(
+                    new Pair<>(new MoltenBomb(), Keybindings.keyQ),
+                    new Pair<>(new ScorchingGaze(), Keybindings.keyW),
+                    new Pair<>(new IntenseHeatPassive(), Keybindings.keyE),
+                    new Pair<>(new SoulsAflame(), Keybindings.keyR)
+            )
+    );
 
     @Override
     public Object2ObjectArrayMap<HeroAbility, Integer> getHeroAbilityRanks() {
@@ -143,8 +176,9 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -173,11 +207,11 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 110;
+    private float baseMaxMana = 120;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
     private float manaRegenPerSecond = 0.6f;
-    private float manaBonusPerLevel = 7;
+    private float manaBonusPerLevel = 8;
     @Override public float getBaseMaxMana() { return baseMaxMana; }
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
@@ -194,8 +228,8 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
     @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
-    final static public float attackDamage = 2.5f;
-    final static public float attackBonusPerLevel = 0.3f;
+    final static public float attackDamage = 2.0f;
+    final static public float attackBonusPerLevel = 0.25f;
     final static public float attacksPerSecond = 0.75f;
     final static public float maxHealth = 120.0f;
     final static public float maxHealthBonusPerLevel = 12.0f;
@@ -228,12 +262,24 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     public final AnimationState spellActivateAnimState = new AnimationState();
     public final AnimationState attackAnimState = new AnimationState();
 
+    private float ageInTicksOffset = 0;
+    public float getAgeInTicksOffset() { return ageInTicksOffset; }
+    public void setAgeInTicksOffset(float ticks) { ageInTicksOffset = ticks; }
+    public float getAnimationSpeed() {
+        return animateSpeed;
+    }
+
     // animation attack peak starts at 44% the way through, but we need to set it to 22% for some reason?
     final static private int ATTACK_WINDUP_TICKS = 6;
 
     // non-looping animations
     public AnimationDefinition activeAnimDef = null;
     public AnimationState activeAnimState = null;
+
+    // smoother look controls
+    private float targetYaw;
+    private float targetPitch;
+    private int rotateTicksRemaining = 0;
 
     public void stopAllAnimations() {
         idleAnimState.stop();
@@ -244,6 +290,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     }
     public int animateTicks = 0;
     public float animateScale = 1.0f;
+    public float animateSpeed = 1.0f;
     public boolean animateScaleReducing = false;
     public void setAnimateTicksLeft(int ticks) { animateTicks = ticks; }
     public int getAnimateTicksLeft() { return animateTicks; }
@@ -257,19 +304,29 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                 animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
-            case CHARGE_SPELL -> {
-                activeAnimDef = WildfireAnimations.SPELL_CHARGE;
-                activeAnimState = spellChargeAnimState;
-                animateScale = 1.0f;
-                startAnimation(activeAnimDef);
-            }
             case CAST_SPELL -> {
-                activeAnimDef = WildfireAnimations.SPELL_ACTIVATE;
+                activeAnimDef = WildfireAnimations.SPELL_SLAM;
                 activeAnimState = spellActivateAnimState;
                 animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
-            default -> animateScaleReducing = true;
+            case CAST_SPELL_ALT -> {
+                activeAnimDef = WildfireAnimations.SPELL_STARE;
+                activeAnimState = spellActivateAnimState;
+                animateScale = 1.0f;
+                animateSpeed = 0.75f;
+                startAnimation(activeAnimDef);
+            }
+            case ULTIMATE -> {
+                activeAnimDef = WildfireAnimations.ULTIMATE;
+                activeAnimState = spellActivateAnimState;
+                animateScale = 1.0f;
+                startAnimation(activeAnimDef);
+            }
+            default -> {
+                animateScaleReducing = true;
+                animateSpeed = 1.0f;
+            }
         }
     }
 
@@ -283,7 +340,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO))
+        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
             pDamage *= 0.7F;
         return pDamage;
     }
@@ -305,7 +362,8 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                 .add(Attributes.MOVEMENT_SPEED, WildfireUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WildfireUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, WildfireUnit.armorValue);
+                .add(Attributes.ARMOR, WildfireUnit.armorValue)
+                .add(Attributes.ATTACK_KNOCKBACK, 0);
     }
 
     public void tick() {
@@ -321,6 +379,68 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         this.castMoltenBombGoal.tick();
         this.castScorchingGazeGoal.tick();
         this.castSoulsAflameGoal.tick();
+
+        if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
+            if (!lastOnPos.equals(getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
+                updateHighlightBps();
+            }
+            lastOnPos = getOnPos();
+            lastCursorPos = CursorClientEvents.getPreselectedBlockPos();
+        }
+        if (rotateTicksRemaining > 0) {
+            float yawStep = Mth.wrapDegrees(targetYaw - getYRot()) / rotateTicksRemaining;
+            float pitchStep = (targetPitch - getXRot()) / rotateTicksRemaining;
+            setYRot(getYRot() + yawStep);
+            setXRot(getXRot() + pitchStep);
+            yRotO = getYRot();
+            xRotO = getXRot();
+            yBodyRot = getYRot();
+            yHeadRot = getYRot();
+            rotateTicksRemaining--;
+        }
+        if (!level().isClientSide() && getIntenseHeatPassive().getRank(this) > 0 && tickCount % 10 == 0) {
+            List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(position(), IntenseHeatPassive.MAX_RANGE, Mob.class, level());
+            ArrayList<Mob> nearbyEnemies = new ArrayList<>();
+            for (Mob mob : nearbyMobs)
+                if (UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY)
+                    nearbyEnemies.add(mob);
+            int maxAmp = getIntenseHeatPassive().getMaxAmp();
+
+            for (Mob mob : nearbyEnemies) {
+                double distSqr = distanceToSqr(mob);
+                double minSqr = IntenseHeatPassive.MIN_RANGE * IntenseHeatPassive.MIN_RANGE;
+                double maxSqr = IntenseHeatPassive.MAX_RANGE * IntenseHeatPassive.MAX_RANGE;
+                double t = (distSqr - minSqr) / (maxSqr - minSqr);
+                t = 1 - Mth.clamp(t, 0.0, 1.0);
+                int amp = (int) Math.round(t * maxAmp);
+                mob.addEffect(new MobEffectInstance(MobEffectRegistrar.INTENSE_HEAT.get(), 15, amp, true, true));
+            }
+        }
+    }
+
+    private Set<BlockPos> highlightBps = new HashSet<>();
+    private BlockPos lastOnPos = new BlockPos(0,0,0);
+    private BlockPos lastCursorPos = new BlockPos(0,0,0);
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
+
+    @Override public void updateHighlightBps() {
+        if (!level().isClientSide())
+            return;
+        this.highlightBps.clear();
+        if (CursorClientEvents.getLeftClickAction() == UnitAction.MOLTEN_BOMB) {
+            BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(getOnPos(), CursorClientEvents.getPreselectedBlockPos(), MoltenBomb.RANGE);
+            for (BlockPos pos : MiscUtil.getLine2D(getOnPos(), limitedBp)) {
+                this.highlightBps.add(MiscUtil.getHighestGroundBlock(level(), pos).above());
+            }
+            this.highlightBps.addAll(MiscUtil.getRangeIndicatorFilledCircleBlocks(limitedBp, (int) getMoltenBomb().radius - 1, level()));
+        } else if (CursorClientEvents.getLeftClickAction() == UnitAction.SCORCHING_GAZE) {
+            setHighlightBps(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(),
+                    ScorchingGaze.RANGE - 1,
+                    level()
+            ));
+        }
     }
 
     @Override
@@ -335,6 +455,17 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         this.readUnitSaveData(pCompound);
     }
 
+    @Override protected SoundEvent getAmbientSound() {
+        return SoundRegistrar.WILDFIRE_AMBIENT.get();
+    }
+    @Override protected SoundEvent getHurtSound(DamageSource pDamageSource) {
+        return SoundRegistrar.WILDFIRE_HURT.get();
+    }
+    @Override protected SoundEvent getDeathSound() {
+        return SoundRegistrar.WILDFIRE_DEATH.get();
+    }
+    @Override protected void playStepSound(BlockPos pPos, BlockState pBlock) { }
+
     public void initialiseGoals() {
         this.usePortalGoal = new UsePortalGoal(this);
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
@@ -344,30 +475,58 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
         this.castMoltenBombGoal = new GenericTargetedSpellGoal(
                 this,
-                0,
-                InsomniaCurse.RANGE,
+                20,
+                Integer.MAX_VALUE, // cast without moving to the target location first
                 UnitAnimationAction.CAST_SPELL,
                 null,
-                this::doFirebomb,
+                this::doMoltenBomb,
                 null
         );
+        this.castMoltenBombGoal.setOnStartChanneling((BlockPos bp) -> {
+            if (!this.level().isClientSide()) {
+                SoundClientboundPacket.playSoundAtPos(SoundAction.WILDFIRE_MOLTEN_BOMB, blockPosition());
+            }
+            setSmoothLookAtTarget(bp, 10);
+        });
         this.castScorchingGazeGoal = new GenericTargetedSpellGoal(
                 this,
-                0,
-                InsomniaCurse.RANGE,
-                UnitAnimationAction.CAST_SPELL,
+                40,
+                ScorchingGaze.RANGE,
+                UnitAnimationAction.CAST_SPELL_ALT,
                 this::scorchingGaze,
                 null,
                 null
         );
+        this.castScorchingGazeGoal.setOnStartChanneling((BlockPos bp) -> {
+            if (!this.level().isClientSide()) {
+                SoundClientboundPacket.playSoundAtPos(SoundAction.WILDFIRE_SCORCHING_GAZE_START, blockPosition(), 1.5f);
+            }
+            setSmoothLookAtTarget(bp, 10);
+        });
+        this.castScorchingGazeGoal.instantLook = true;
         this.castSoulsAflameGoal = new GenericUntargetedSpellGoal(
                 this,
-                RaiseDead.CHANNEL_TICKS,
+                54,
                 this::soulsAflame,
-                UnitAnimationAction.CHARGE_SPELL,
-                UnitAnimationAction.STOP,
-                UnitAnimationAction.CAST_SPELL
+                UnitAnimationAction.ULTIMATE,
+                null,
+                null
         );
+        this.castSoulsAflameGoal.setOnStartChanneling(() -> {
+            if (!this.level().isClientSide()) {
+                SoundClientboundPacket.playSoundAtPos(SoundAction.WILDFIRE_SOULS_AFLAME, blockPosition());
+            }
+        });
+    }
+
+    private void setSmoothLookAtTarget(BlockPos bp, int ticks) {
+        double dx = bp.getX() + 0.5 - getX();
+        double dy = bp.getY() + 0.5 - getEyeY();
+        double dz = bp.getZ() + 0.5 - getZ();
+        double horiz = Math.sqrt(dx * dx + dz * dz);
+        targetYaw = (float)(Math.atan2(dz, dx) * (180F / Math.PI)) - 90F;
+        targetPitch = (float)-(Math.atan2(dy, horiz) * (180F / Math.PI));
+        rotateTicksRemaining = 10;
     }
 
     @Override
@@ -382,6 +541,34 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         this.goalSelector.addGoal(3, moveGoal);
     }
 
+    public MoltenBomb getMoltenBomb() {
+        for (Ability ability : abilities.get())
+            if (ability instanceof MoltenBomb)
+                return (MoltenBomb) ability;
+        return null;
+    }
+
+    public ScorchingGaze getScorchingGaze() {
+        for (Ability ability : abilities.get())
+            if (ability instanceof ScorchingGaze)
+                return (ScorchingGaze) ability;
+        return null;
+    }
+
+    public IntenseHeatPassive getIntenseHeatPassive() {
+        for (Ability ability : abilities.get())
+            if (ability instanceof IntenseHeatPassive)
+                return (IntenseHeatPassive) ability;
+        return null;
+    }
+
+    public SoulsAflame getSoulsAflame() {
+        for (Ability ability : abilities.get())
+            if (ability instanceof SoulsAflame)
+                return (SoulsAflame) ability;
+        return null;
+    }
+
     @Override
     public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         if (!this.abilities.isEmpty() &&
@@ -394,11 +581,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
             double x = target.getX() - this.getX();
             double y = target.getY(0.5) - this.getY(0.5);
             double z = target.getZ() - this.getZ();
-            double distSqr = this.distanceToSqr(target);
-            double dist = Math.sqrt(Math.sqrt(distSqr)) * 0.5;
-            BlazeUnitFireball fireball = new BlazeUnitFireball(this.level(), this,
-                    this.getRandom().triangle(x, 2.297 * dist), y,
-                    this.getRandom().triangle(z, 2.297 * dist), false);
+            BlazeUnitFireball fireball = new BlazeUnitFireball(this.level(), this, x, y, z, false);
             fireball.setPos(fireball.getX(), this.getY(0.5) + 0.5, fireball.getZ());
             this.playSound(SoundEvents.BLAZE_SHOOT, 3.0F, 1.0F);
             this.level().addFreshEntity(fireball);
@@ -408,20 +591,115 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         }
     }
 
-    public void doFirebomb(BlockPos bp) {
+    public void doMoltenBomb(BlockPos bp) {
+        if (level().isClientSide())
+            return;
 
+        bp = MyMath.getXZRangeLimitedBlockPos(this.blockPosition(), bp, getMoltenBomb().range);
+
+        double x = bp.getCenter().x() - this.getX();
+        double y = bp.getCenter().y() - this.getY(0.5);
+        double z = bp.getCenter().z() - this.getZ();
+        MoltenBombProjectile proj = new MoltenBombProjectile(this.level(), this, x, y, z);
+        proj.setMaxTicks((int) (bp.getCenter().distanceTo(position())) * 2);
+        proj.setPos(this.getEyePosition());
+
+        level().addFreshEntity(proj);
+        proj.setInvulnerable(true);
+        this.level().addFreshEntity(proj);
     }
 
     public void scorchingGaze(LivingEntity targetEntity) {
-
+        if (!this.level().isClientSide()) {
+            SoundClientboundPacket.playSoundAtPos(SoundAction.WILDFIRE_SCORCHING_GAZE_END, blockPosition());
+        }
+        int durationTicks = getScorchingGaze().durationSeconds * 20;
+        targetEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks, getScorchingGaze().durationSeconds));
+        targetEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, durationTicks,0, true, true));
+        if (hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
+            targetEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks + 20, 0, true, true));
+        }
+        targetEntity.setSecondsOnFire(getScorchingGaze().durationSeconds);
     }
 
     public void soulsAflame() {
+        if (hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()))
+            return;
 
+        MiscUtil.addParticleExplosion(ParticleRegistrar.BIG_SOUL_FLAME.get(), 15, level(), position().add(0,2,0));
+        addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), SoulsAflame.DURATION, 0, true, true));
+        if (!level().isClientSide()) {
+            convertNearbyBlazes();
+            convertNearbyFires();
+        }
     }
+
+    private void convertNearbyBlazes() {
+        List<LivingEntity> nearbyUnits = MiscUtil.getEntitiesWithinRange(position(), SoulsAflame.RANGE, LivingEntity.class, level());
+        for (LivingEntity le : nearbyUnits) {
+            if (le instanceof BlazeUnit blazeUnit && UnitServerEvents.getUnitToEntityRelationship(this, blazeUnit) == Relationship.FRIENDLY) {
+                le.addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), SoulsAflame.DURATION, 0, true, true));
+            }
+        }
+    }
+
+    private void convertNearbyFires() {
+        int range = SoulsAflame.RANGE;
+        int x0 = blockPosition().getX();
+        int y0 = blockPosition().getY();
+        int z0 = blockPosition().getZ();
+        for (int x = -range + x0; x < range + x0; x++) {
+            for (int y = -range + y0; y < range + y0; y++) {
+                for (int z = -range + z0; z < range + z0; z++) {
+                    BlockPos pos = new BlockPos(x, y, z);
+                    if (blockPosition().distToCenterSqr(pos.getCenter()) < range * range) {
+                        System.out.println(z);
+                        BlockState bs = level().getBlockState(pos);
+                        if (bs.getBlock() == Blocks.FIRE) {
+                            level().setBlockAndUpdate(pos, BlockRegistrar.UNEXTINGUISHABLE_SOUL_FIRE.get().defaultBlockState());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // prevent vanilla logic for picking up items
+    @Override
+    protected void pickUpItem(ItemEntity pItemEntity) { }
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+    }
+
+    @Override
+    public AABB getInflatedSelectionBox() {
+        AABB aabb = this.getBoundingBox().inflate(0.6f, 0, 0.6f);
+        aabb.setMaxY(aabb.maxY + 1.2f);
+        return aabb;
+    }
+
+    @Override
+    public List<FormattedCharSequence> getAttackDamageStatTooltip() {
+        return List.of(
+                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
+                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_fire_damage", BlazeUnitFireball.FIRE_SECONDS, BlazeUnitFireball.FIRE_SECONDS))
+        );
+    }
+
+    @Override
+    public boolean hasBonusDamage() {
+        return true;
+    }
+
+    @Override
+    public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource) {
+        return false;
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        // disallow rising into the air (sometimes out of melee range) when attacking a nearby target)
     }
 }

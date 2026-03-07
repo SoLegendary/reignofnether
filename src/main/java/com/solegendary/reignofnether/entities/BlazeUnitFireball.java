@@ -1,16 +1,23 @@
-package com.solegendary.reignofnether.unit.units.piglins;
+package com.solegendary.reignofnether.entities;
 
 import com.solegendary.reignofnether.ability.abilities.FirewallShot;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.BlazeUnit;
+import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.projectile.SmallFireball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -24,6 +31,8 @@ public class BlazeUnitFireball extends SmallFireball {
     private static final int MAX_TICKS = 60;
     private static final int MAX_TICKS_FIREWALL = (int) (FirewallShot.RANGE * 1.5f);
 
+    public static final int FIRE_SECONDS = 5;
+
     public BlazeUnitFireball(Level pLevel, LivingEntity pShooter, double pOffsetX, double pOffsetY, double pOffsetZ, boolean isFirewallShot) {
         super(pLevel, pShooter, pOffsetX, pOffsetY, pOffsetZ);
         this.isFirewallShot = isFirewallShot;
@@ -33,27 +42,45 @@ public class BlazeUnitFireball extends SmallFireball {
     public void tick() {
         super.tick();
         if (!this.level().isClientSide() && isFirewallShot) {
+            BlockState fireState = Blocks.FIRE.defaultBlockState();
+            if (getOwner() instanceof Blaze blaze && blaze.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
+                fireState = BlockRegistrar.UNEXTINGUISHABLE_SOUL_FIRE.get().defaultBlockState();
+            }
             Block block = this.level().getBlockState(this.getOnPos()).getBlock();
             Block blockBelow = this.level().getBlockState(this.getOnPos().below()).getBlock();
             Block blockBelow2 = this.level().getBlockState(this.getOnPos().below().below()).getBlock();
 
-            if (List.of(Blocks.AIR, Blocks.TALL_GRASS, Blocks.GRASS, Blocks.CRIMSON_ROOTS).contains(blockBelow2)) {
+            List<Block> nonSolidBlocks = List.of(
+                    Blocks.AIR, Blocks.TALL_GRASS, Blocks.GRASS,
+                    Blocks.CRIMSON_ROOTS, Blocks.WARPED_ROOTS,
+                    Blocks.DEAD_BUSH, Blocks.SNOW,
+                    BlockRegistrar.WRAITH_SNOW_LAYER.get()
+            );
+            if (nonSolidBlocks.contains(blockBelow2)) {
+                meltSnow(this.getOnPos().below().below().below());
                 replacePathWithDirt(this.getOnPos().below().below().below());
-                this.level().setBlockAndUpdate(this.getOnPos().below().below(), Blocks.FIRE.defaultBlockState());
+                this.level().setBlockAndUpdate(this.getOnPos().below().below(), fireState);
             }
-            if (List.of(Blocks.AIR, Blocks.TALL_GRASS, Blocks.GRASS, Blocks.CRIMSON_ROOTS).contains(blockBelow)) {
+            if (nonSolidBlocks.contains(blockBelow)) {
+                meltSnow(this.getOnPos().below().below());
                 replacePathWithDirt(this.getOnPos().below().below());
-                this.level().setBlockAndUpdate(this.getOnPos().below(), Blocks.FIRE.defaultBlockState());
+                this.level().setBlockAndUpdate(this.getOnPos().below(), fireState);
             }
-            else if (List.of(Blocks.AIR, Blocks.TALL_GRASS, Blocks.GRASS, Blocks.CRIMSON_ROOTS).contains(block)) {
+            else if (nonSolidBlocks.contains(block)) {
+                meltSnow(this.getOnPos());
                 replacePathWithDirt(this.getOnPos());
-                this.level().setBlockAndUpdate(this.getOnPos(), Blocks.FIRE.defaultBlockState());
+                this.level().setBlockAndUpdate(this.getOnPos(), fireState);
             }
         }
         if (tickCount > MAX_TICKS || (tickCount > MAX_TICKS_FIREWALL && isFirewallShot))
             this.discard();
     }
 
+    private void meltSnow(BlockPos bp) {
+        if (this.level().getBlockState(bp).getBlock() == BlockRegistrar.WRAITH_SNOW_LAYER.get() ||
+            this.level().getBlockState(bp).getBlock() == Blocks.SNOW)
+            this.level().setBlockAndUpdate(bp, Blocks.AIR.defaultBlockState());
+    }
     private void replacePathWithDirt(BlockPos bp) {
         if (this.level().getBlockState(bp).getBlock() == Blocks.DIRT_PATH)
             this.level().setBlockAndUpdate(bp, Blocks.DIRT.defaultBlockState());
@@ -71,13 +98,17 @@ public class BlazeUnitFireball extends SmallFireball {
 
             this.onHitEntity(entityHitResult);
             this.level().gameEvent(GameEvent.PROJECTILE_LAND, pResult.getLocation(), GameEvent.Context.of(this, null));
-
+            if (this.getOwner() instanceof LivingEntity le && le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) &&
+                entityHitResult.getEntity() instanceof LivingEntity leTarget) {
+                leTarget.addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), 120, 0, false, false));
+            }
             if (!this.level().isClientSide && !targetOnFire && !this.isFirewallShot)
                 this.discard();
+            if (this.getOwner() instanceof WildfireUnit wildfireUnit)
+                entityHitResult.getEntity().hurt(damageSources().mobProjectile(this, wildfireUnit), wildfireUnit.getUnitAttackDamage());
 
         } else if (hitresult$type == HitResult.Type.BLOCK && !isNoPhysics()) {
             BlockHitResult blockhitresult = (BlockHitResult)pResult;
-            //this.onHitBlock(blockhitresult);
             BlockPos blockpos = blockhitresult.getBlockPos();
             this.level().gameEvent(GameEvent.PROJECTILE_LAND, blockpos, GameEvent.Context.of(this, this.level().getBlockState(blockpos)));
 
@@ -92,9 +123,9 @@ public class BlazeUnitFireball extends SmallFireball {
             Entity entity = pResult.getEntity();
             int i = entity.getRemainingFireTicks();
             if (i > 0) // if we just set to 100 every time, we reset the damage delay back to 20 ticks
-                entity.setRemainingFireTicks((i % 20) + 80);
+                entity.setRemainingFireTicks((i % 20) + (FIRE_SECONDS * 20) - 20);
             else
-                entity.setRemainingFireTicks(100);
+                entity.setRemainingFireTicks(FIRE_SECONDS * 20);
         }
     }
 

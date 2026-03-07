@@ -33,14 +33,10 @@ import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
-import com.solegendary.reignofnether.resources.BlockUtils;
-import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
-import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
@@ -75,6 +71,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -122,8 +119,6 @@ public class BuildingPlacement {
     public boolean isExploredClientside = false; // show on minimap
     public boolean isDestroyedServerside = false;
     public boolean isBuiltServerside = false;
-
-    public static String structureName;
 
     public final boolean isCapitol;
 
@@ -373,6 +368,9 @@ public class BuildingPlacement {
     // radius offset is the distance away from the building itself to have the returned pos
     // excludes positions inside the building so that workers  move out of the building foundations
     public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset) {
+        return getClosestGroundPos(bpTarget, radiusOffset, false);
+    }
+    public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset, boolean avoidAllBuildings) {
         float minDist = 999999;
         BlockPos minPos = this.minCorner;
         int minX = minPos.getX() - radiusOffset;
@@ -385,7 +383,7 @@ public class BuildingPlacement {
         for (int x = minX; x < maxX; x++) {
             for (int z = minZ; z < maxZ; z++) {
                 BlockPos bp = new BlockPos(x, minY, z);
-                if (!(getBuilding() instanceof AbstractBridge) && isPosInsideBuilding(bp))
+                if (!(getBuilding() instanceof AbstractBridge) && avoidAllBuildings ? BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), bp) : isPosInsideBuilding(bp))
                     continue;
 
                 float dist = (float) bpTarget.distToCenterSqr(bp.getX(), bp.getY(), bp.getZ());
@@ -796,7 +794,7 @@ public class BuildingPlacement {
             RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(ownerName);
             if (rtsPlayer == null) return;
             rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED);
-
+        } else {
             TutorialClientEvents.updateStage();
             if (this.isCapitol && !SandboxClientEvents.isSandboxPlayer() &&
                 getTotalCompletedBuildingsOwned(this.level.isClientSide(), ownerName) == 1)
@@ -917,7 +915,8 @@ public class BuildingPlacement {
                 else
                     builderCount += 1;
             }
-            if (((Mob) workerUnit).getActiveEffectsMap().containsKey(MobEffects.DIG_SPEED))
+            if (((Mob) workerUnit).getActiveEffectsMap().containsKey(MobEffects.DIG_SPEED) ||
+                ((Mob) workerUnit).getActiveEffectsMap().containsKey(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get()))
                 builderCount += 1;
         }
 
@@ -999,9 +998,26 @@ public class BuildingPlacement {
             if (level.isLoaded(bp)) {
                 level.setBlockAndUpdate(bp, bs);
                 if (bNbt != null) {
-                    BlockEntity be = BlockEntity.loadStatic(bp, bs, bNbt);
-                    if (be != null)
-                        level.setBlockEntity(be);
+                    if (bs.getBlock() == Blocks.SCULK_CATALYST) {
+                        BlockEntity be = level.getBlockEntity(bp);
+                        if (be != null) {
+                            CompoundTag safeTag = bNbt.copy();
+                            safeTag.remove("vibration");
+                            safeTag.remove("listener");
+                            safeTag.remove("vibration_data");
+                            safeTag.remove("VibrationSystem");
+                            safeTag.remove("event_delay");
+                            safeTag.remove("event_distance");
+                            safeTag.remove("selector");
+                            safeTag.remove("source");
+                            be.load(safeTag);
+                            be.setChanged();
+                        }
+                    } else {
+                        BlockEntity be = BlockEntity.loadStatic(bp, bs, bNbt);
+                        if (be != null)
+                            level.setBlockEntity(be);
+                    }
                 }
                 // avoid creating a bubble column block
                 if (bs.getFluidState().is(FluidTags.WATER)) {
@@ -1040,7 +1056,7 @@ public class BuildingPlacement {
             centrePos.getY(),
             centrePos.getZ()
         ), range, Animal.class, level)) {
-            if (animal.isInvertedHealAndHarm()) numNearbyAnimals++;
+            if (ResourceSources.isHuntableAnimal(animal)) numNearbyAnimals++;
         }
         int numNearbyChickens = MiscUtil.getEntitiesWithinRange(new Vector3d(centrePos.getX(),
                 centrePos.getY(),

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.registrars;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.blocks.GarrisonBlockEntity;
 import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
+import com.solegendary.reignofnether.blocks.WraithSnowBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -30,6 +31,12 @@ public class BlockEntityRegistrar {
                             BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
                             BlockRegistrar.GARRISON_ZONE_BLOCK.get())
                             .build(null)
+            );
+
+    public static final RegistryObject<BlockEntityType<WraithSnowBlockEntity>> WRAITH_SNOW_BLOCK_ENTITY =
+            register("wraith_snow_block_entity",
+                    () -> BlockEntityType.Builder.of(WraithSnowBlockEntity::new,
+                            BlockRegistrar.WRAITH_SNOW_LAYER.get()).build(null)
             );
 
     private static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> register(String name, Supplier<BlockEntityType<T>> blockEntity) {

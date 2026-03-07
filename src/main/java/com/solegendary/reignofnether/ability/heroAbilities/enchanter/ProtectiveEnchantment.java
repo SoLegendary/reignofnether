@@ -7,7 +7,9 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
@@ -30,23 +32,23 @@ import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
-public class ProtectiveEnchantment extends HeroAbility {
+public class ProtectiveEnchantment extends AbstractEnchantment {
 
     public static final int RANGE = 10;
+
+    public static final float MAX_ABSORB_HP = 20;
 
     public static final int CHARGES_RANK_1 = 2;
     public static final int CHARGES_RANK_2 = 3;
     public static final int CHARGES_RANK_3 = 4;
 
-    public static final int CD_RANK_1 = 30;
-    public static final int CD_RANK_2 = 25;
-    public static final int CD_RANK_3 = 20;
+    public static final int CD_RANK_1 = 25;
+    public static final int CD_RANK_2 = 20;
+    public static final int CD_RANK_3 = 15;
 
-    public static final int MANA_COST_RANK_1 = 50;
-    public static final int MANA_COST_RANK_2 = 40;
-    public static final int MANA_COST_RANK_3 = 30;
-
-    public static final int DURATION_SECONDS = 30;
+    public static final int MANA_COST_RANK_1 = 40;
+    public static final int MANA_COST_RANK_2 = 30;
+    public static final int MANA_COST_RANK_3 = 20;
 
     public ProtectiveEnchantment() {
         super(3, MANA_COST_RANK_1, UnitAction.PROTECTIVE_ENCHANTMENT, CD_RANK_1 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
@@ -85,7 +87,7 @@ public class ProtectiveEnchantment extends HeroAbility {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
         AbilityButton button = new AbilityButton("Protective Enchantment",
-                null,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/protective_enchantment.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.PROTECTIVE_ENCHANTMENT || isAutocasting(hero),
                 () -> getRank(hero) == 0,
@@ -96,8 +98,7 @@ public class ProtectiveEnchantment extends HeroAbility {
                 this,
                 hero
         );
-        button.iconItem = new ItemStack(Items.IRON_CHESTPLATE);
-        button.iconItem.enchant(Enchantments.MENDING, 1);
+        button.stretchIconToBorders = true;
         return button;
     }
 
@@ -105,11 +106,9 @@ public class ProtectiveEnchantment extends HeroAbility {
     public Button getRankUpButton(HeroUnit hero) {
         Button button = super.getRankUpButtonProtected(
                 "Protective Enchantment",
-                null,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/protective_enchantment.png"),
                 hero
         );
-        button.iconItem = new ItemStack(Items.IRON_SWORD);
-        button.iconItem.enchant(Enchantments.MENDING, 1);
         return button;
     }
 
@@ -119,7 +118,7 @@ public class ProtectiveEnchantment extends HeroAbility {
                 fcsIcons(I18n.get("abilities.reignofnether.protective_enchantment.stats", cooldownMax / 20, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.protective_enchantment.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.protective_enchantment.tooltip2", DURATION_SECONDS)),
+                fcs(I18n.get("abilities.reignofnether.protective_enchantment.tooltip2", MAX_ABSORB_HP)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.charges", maxCharges))
         );
@@ -131,29 +130,35 @@ public class ProtectiveEnchantment extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.protective_enchantment.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.protective_enchantment.tooltip2", DURATION_SECONDS)),
+                fcs(I18n.get("abilities.reignofnether.protective_enchantment.tooltip2", MAX_ABSORB_HP)),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.protective_enchantment.rank1"), getRank(hero) == 0),
-                fcs(I18n.get("abilities.reignofnether.protective_enchantment.rank2"), getRank(hero) == 1),
-                fcs(I18n.get("abilities.reignofnether.protective_enchantment.rank3"), getRank(hero) == 2)
+                fcs(I18n.get("abilities.reignofnether.protective_enchantment.rank1", CHARGES_RANK_1, CD_RANK_1), getRank(hero) == 0),
+                fcs(I18n.get("abilities.reignofnether.protective_enchantment.rank2", CHARGES_RANK_2, CD_RANK_2), getRank(hero) == 1),
+                fcs(I18n.get("abilities.reignofnether.protective_enchantment.rank3", CHARGES_RANK_3, CD_RANK_3), getRank(hero) == 2)
         );
     }
 
-    private final static List<EntityType<? extends Mob>> ALLOWED_MOB_TYPES = List.of(
-            EntityRegistrar.PILLAGER_UNIT.get(),
-            EntityRegistrar.VINDICATOR_UNIT.get(),
-            EntityRegistrar.EVOKER_UNIT.get()
-    );
+    @Override
+    public List<EntityType<? extends Mob>> getAllowedMobTypes() {
+        return List.of(
+                EntityRegistrar.MILITIA_UNIT.get(),
+                EntityRegistrar.PILLAGER_UNIT.get(),
+                EntityRegistrar.VINDICATOR_UNIT.get(),
+                EntityRegistrar.EVOKER_UNIT.get()
+        );
+    }
 
-    public static boolean canEnchantUnit(LivingEntity unit) {
-        return ALLOWED_MOB_TYPES.contains(unit.getType()) &&
-            !unit.getItemBySlot(EquipmentSlot.CHEST).isEmpty() &&
-            !unit.getItemBySlot(EquipmentSlot.MAINHAND).getAllEnchantments().containsKey(Enchantments.MENDING);
+    @Override
+    public boolean canEnchant(LivingEntity le) {
+        return getAllowedMobTypes().contains(le.getType()) &&
+                le instanceof Unit &&
+                !le.getItemBySlot(EquipmentSlot.CHEST).isEmpty() &&
+                !le.getItemBySlot(EquipmentSlot.CHEST).getAllEnchantments().containsKey(EnchantmentRegistrar.FORTYIFYING.get());
     }
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        if (!ALLOWED_MOB_TYPES.contains(targetEntity.getType())) {
+        if (!getAllowedMobTypes().contains(targetEntity.getType())) {
             if (level.isClientSide())
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error3"));
             return;
@@ -163,7 +168,7 @@ public class ProtectiveEnchantment extends HeroAbility {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error6"));
             return;
         }
-        if (targetEntity.getItemBySlot(EquipmentSlot.MAINHAND).getAllEnchantments().containsKey(Enchantments.MENDING)) {
+        if (targetEntity.getItemBySlot(EquipmentSlot.CHEST).getAllEnchantments().containsKey(EnchantmentRegistrar.FORTYIFYING.get())) {
             if (level.isClientSide())
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error4"));
             return;

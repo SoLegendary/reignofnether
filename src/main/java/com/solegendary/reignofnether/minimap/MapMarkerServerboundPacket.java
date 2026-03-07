@@ -66,7 +66,7 @@ public class MapMarkerServerboundPacket {
             for (ServerPlayer target : recipients) {
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> target), markerPacket);
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> target),
-                        new SoundClientboundPacket(SoundAction.ALLY, BlockPos.ZERO, "", 1.0f));
+                        new SoundClientboundPacket(SoundAction.ALLY, BlockPos.ZERO, "", 1.0f, -1));
             }
             success.set(true);
         });

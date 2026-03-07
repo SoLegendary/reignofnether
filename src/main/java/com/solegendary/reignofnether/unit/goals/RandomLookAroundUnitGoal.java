@@ -5,6 +5,7 @@
 
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -23,6 +24,10 @@ public class RandomLookAroundUnitGoal extends Goal {
     }
 
     public boolean canUse() {
+        if (mob.hasEffect(MobEffectRegistrar.FREEZE.get()) ||
+            mob.hasEffect(MobEffectRegistrar.STUN.get()))
+            return false;
+
         if (mob instanceof AttackerUnit attackerUnit)
             if (attackerUnit.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg && mabg.isAttacking())
                 return false;

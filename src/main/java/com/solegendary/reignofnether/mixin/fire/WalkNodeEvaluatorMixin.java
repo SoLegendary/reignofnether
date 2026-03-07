@@ -40,6 +40,8 @@ public abstract class WalkNodeEvaluatorMixin extends NodeEvaluator {
         if (block == Blocks.FIRE || blockBelow == Blocks.FIRE ||
             block == Blocks.MAGMA_BLOCK || blockBelow == Blocks.MAGMA_BLOCK)
             cir.setReturnValue(BlockPathTypes.WALKABLE);
+        else if (block == Blocks.POINTED_DRIPSTONE || blockBelow == Blocks.POINTED_DRIPSTONE)
+            cir.setReturnValue(BlockPathTypes.UNPASSABLE_RAIL);
         else if (BlockUtils.isLeafBlock(blockStateBelow))
             cir.setReturnValue(BlockPathTypes.DAMAGE_FIRE);
         else {

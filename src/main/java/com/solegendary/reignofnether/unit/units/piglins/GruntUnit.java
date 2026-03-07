@@ -5,14 +5,12 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -133,8 +131,9 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.GRUNT;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}

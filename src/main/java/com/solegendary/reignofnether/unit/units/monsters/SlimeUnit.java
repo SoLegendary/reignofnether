@@ -26,6 +26,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -130,8 +131,9 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() { return ((getSize() + 1) * 0.5f); }
@@ -182,12 +184,11 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public SlimeUnit(EntityType<? extends Slime> entityType, Level level) {
         super(entityType, level);
         this.moveControl = new SlimeUnitMoveControl(this);
-
         updateAbilityButtons();
     }
 
     // big slimes sometimes bounce off of each other midair
-    public final int PUSH_ATTACK_CD_MAX = getAttackCooldown();
+    public final int PUSH_ATTACK_CD_MAX = (int) getAttackCooldown();
     public int pushAttackCd = 0;
 
     public boolean isPushable() {
@@ -229,7 +230,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO))
+        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
             pDamage *= 0.5F;
         return pDamage;
     }
@@ -535,7 +536,13 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         return result;
     }
 
+    @Override
+    public float getBonusMeleeRange() {
+        return -0.3f * (Math.max(2, getSize()) - 2);
+    }
 
-
-
+    @Override
+    public float getBonusMeleeRangeForAttackers() {
+        return 0.3f * (Math.max(2, getSize()) - 2);
+    }
 }

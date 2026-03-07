@@ -17,7 +17,7 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> BEACON_WIN_MINUTES;
     public static GameRules.Key<GameRules.BooleanValue> PVP_MODES_ONLY;
     public static GameRules.Key<GameRules.BooleanValue> SLANTED_BUILDING;
-    public static GameRules.Key<GameRules.BooleanValue> ALLOW_HEROES;
+    public static GameRules.Key<GameRules.IntegerValue> ALLOWED_HEROES;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -69,8 +69,8 @@ public class GameRuleRegistrar {
                 GameRules.BooleanValue.create(false)
         );
         // enable heroes in all gamemodes
-        ALLOW_HEROES = GameRules.register("allowHeroes", GameRules.Category.PLAYER,
-                GameRules.BooleanValue.create(true)
+        ALLOWED_HEROES = GameRules.register("allowedHeroes", GameRules.Category.PLAYER,
+                GameRules.IntegerValue.create(1)
         );
     }
 }

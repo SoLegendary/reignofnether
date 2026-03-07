@@ -1,8 +1,9 @@
-package com.solegendary.reignofnether.unit.units.piglins;
+package com.solegendary.reignofnether.entities;
 
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;

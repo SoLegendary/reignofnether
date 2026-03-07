@@ -65,9 +65,7 @@ public class HeadhunterProd extends ProductionItem {
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.head_hunter.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.head_hunter.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.head_hunter.tooltip1"), Style.EMPTY)
         ));
 
         return new StartProductionButton(
@@ -75,7 +73,7 @@ public class HeadhunterProd extends ProductionItem {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/headhunter.png"),
                 hotkey,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BASTION),
+                () -> true,
                 tooltipLines,
                 this
         );

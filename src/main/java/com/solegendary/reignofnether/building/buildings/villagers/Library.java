@@ -140,6 +140,11 @@ public class Library extends ProductionBuilding {
     }
 
     @Override
+    public String getUpgradedStructureName(int upgradeLevel) {
+        return upgradeLevel > 0 ? upgradedStructureName : structureName;
+    }
+
+    @Override
     public void tick(Level tickLevel, BuildingPlacement bp) {
         super.tick(tickLevel, bp);
 

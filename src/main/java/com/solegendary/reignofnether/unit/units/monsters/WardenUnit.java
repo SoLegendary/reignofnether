@@ -4,8 +4,10 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.SonicBoom;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -48,9 +50,11 @@ import org.joml.Vector3d;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class WardenUnit extends Warden implements Unit, AttackerUnit {
+public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new SonicBoom(), Keybindings.keyQ);
@@ -127,8 +131,9 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -202,12 +207,24 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit {
 
     public void tick() {
         this.setCanPickUpLoot(false);
-
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
         this.sonicBoomGoal.tick();
+
+        if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
+            if (!lastOnPos.equals(getOnPos())) {
+                updateHighlightBps();
+            }
+            lastOnPos = getOnPos();
+        }
     }
+
+    private Set<BlockPos> highlightBps = new HashSet<>();
+    private BlockPos lastOnPos = new BlockPos(0,0,0);
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {

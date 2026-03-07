@@ -2,16 +2,17 @@ package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Sacrifice;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
-import com.solegendary.reignofnether.time.TimeClientEvents;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -50,9 +51,32 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         super.onBuilt();
         RangeIndicatorAddon ria;
         if ((ria = getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
-            ria.updateBorderBps(this);
+            ria.updateHighlightBps(this);
         }
         updateSculkBps();
+    }
+
+    @Override
+    public void updateBorderBps() {
+        if (!level.isClientSide()) {
+            return;
+        }
+        updateSculkBps();
+        this.nightBorderBps.clear();
+        this.nightBorderBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(centrePos,
+                getNightRange() - TimeClientEvents.VISIBLE_BORDER_ADJ,
+                level
+        ));
+    }
+
+    @Override
+    public Set<BlockPos> getBorderBps() {
+        return nightBorderBps;
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected() {
+        return false;
     }
 
     @Override
@@ -64,7 +88,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
                 if (tickLevel.isClientSide()) {
                     RangeIndicatorAddon ria;
                     if ((ria = getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
-                        ria.updateBorderBps(this);
+                        ria.updateHighlightBps(this);
                     }
                 } else {
                     updateSculkBps();
@@ -90,10 +114,6 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         return (int) (getBlocksPlaced() / MIN_BLOCKS_PERCENT) - getHighestBlockCountReached() + (int) (
                 sculkBps.size() * HP_PER_SCULK
         );
-    }
-
-    public static ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
-        return BuildingBlockData.getBuildingBlocksFromNbt(structureName, level);
     }
 
     public void updateSculkBps() {

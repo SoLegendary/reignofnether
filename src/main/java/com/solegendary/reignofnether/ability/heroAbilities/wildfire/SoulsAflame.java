@@ -2,11 +2,11 @@ package com.solegendary.reignofnether.ability.heroAbilities.wildfire;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.unit.goals.GenericUntargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
-import com.solegendary.reignofnether.unit.units.villagers.RoyalGuardUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -30,10 +29,11 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 public class SoulsAflame extends HeroAbility {
 
     private static final int CD_MAX = 360 * ResourceCost.TICKS_PER_SECOND;
-    public static final int DURATION = 60 * ResourceCost.TICKS_PER_SECOND;
+    public static final int DURATION = 45 * ResourceCost.TICKS_PER_SECOND;
+    public static final int RANGE = 20;
 
     public SoulsAflame() {
-        super(1, 140, UnitAction.SOULS_AFLAME, CD_MAX, 0, 0, false);
+        super(1, 140, UnitAction.SOULS_AFLAME, CD_MAX, 20, 0, false);
     }
 
     @Override
@@ -49,8 +49,8 @@ public class SoulsAflame extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Souls Aflame",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/fire.png"),
+        AbilityButton button = new AbilityButton("Souls Aflame",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/souls_aflame.png"),
             hotkey,
             () -> false,
             () -> getRank(hero) == 0,
@@ -61,13 +61,15 @@ public class SoulsAflame extends HeroAbility {
             this,
             hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Souls Aflame",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/fire.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/souls_aflame.png"),
                 hero
         );
     }
@@ -96,13 +98,24 @@ public class SoulsAflame extends HeroAbility {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        ((WildfireUnit) unitUsing).getCastSoulsAflameGoal().setAbility(this);
-        ((WildfireUnit) unitUsing).getCastSoulsAflameGoal().startCasting();
+        use(level, unitUsing);
     }
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        ((WildfireUnit) unitUsing).getCastSoulsAflameGoal().setAbility(this);
-        ((WildfireUnit) unitUsing).getCastSoulsAflameGoal().startCasting();
+        use(level, unitUsing);
+    }
+
+    private void use(Level level, Unit unitUsing) {
+        LivingEntity le = (LivingEntity) unitUsing;
+        boolean isSoulsAflameActive = le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get());
+
+        if (level.isClientSide() && isSoulsAflameActive) {
+            HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.souls_aflame.already_active"));
+        }
+        if (!isSoulsAflameActive) {
+            ((WildfireUnit) unitUsing).getCastSoulsAflameGoal().setAbility(this);
+            ((WildfireUnit) unitUsing).getCastSoulsAflameGoal().startCasting();
+        }
     }
 }

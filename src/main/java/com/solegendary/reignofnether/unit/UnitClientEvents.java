@@ -4,10 +4,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
+import com.solegendary.reignofnether.building.buildings.placements.IronGolemPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
@@ -68,6 +67,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -653,14 +653,15 @@ public class UnitClientEvents {
             // resolve any other abilities not explicitly covered here
             else if (CursorClientEvents.getLeftClickAction() != null && MC.player != null) {
                 sendUnitCommand(CursorClientEvents.getLeftClickAction());
-            } else if (
+            }
+            /*else if (
                     !selectedUnits.isEmpty() &&
                     BuildingClientEvents.getPreselectedBuilding() == null &&
                     preselectedUnits.isEmpty() &&
                     !BuildingClientEvents.isBuilt
             ) {
                 clearSelectedUnits();
-            }
+            }*/
 
             // left click -> select a single unit
             // if shift is held, deselect a unit or add it to the selected group
@@ -693,6 +694,8 @@ public class UnitClientEvents {
             lastLeftClickTime = System.currentTimeMillis();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            //UnitClientEvents.sendUnitCommand(UnitAction.DEBUG1);
+
             if (BuildingClientEvents.getBuildingToPlace() != null) {
                 BuildingClientEvents.setBuildingToPlace(null);
                 return;
@@ -798,9 +801,8 @@ public class UnitClientEvents {
                         continue;
 
                     AABB entityAABB = entity.getBoundingBox();
-                    if (entity instanceof PiglinMerchantUnit) {
-                        entityAABB = entityAABB.inflate(0.6f, 0, 0.6f);
-                        entityAABB.setMaxY(entityAABB.maxY + 0.8f);
+                    if (entity instanceof Unit unit) {
+                        entityAABB = unit.getInflatedSelectionBox();
                     }
 
                     boolean isPreselected = preselectedUnits.contains(entity);
@@ -831,8 +833,8 @@ public class UnitClientEvents {
 
                 // draw only the bottom of the outline boxes
                 AABB entityAABB = entity.getBoundingBox();
-                if (entity instanceof PiglinMerchantUnit) {
-                    entityAABB = entityAABB.inflate(0.6f, 0, 0.6f);
+                if (entity instanceof Unit unit) {
+                    entityAABB = unit.getInflatedSelectionBox();
                 }
                 entityAABB = entityAABB.setMaxY(entityAABB.minY);
                 boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
@@ -1338,6 +1340,32 @@ public class UnitClientEvents {
                     new BlockPos(0,0,0)
             ));
         }
+    }
+     */
+
+    /*
+    public static int pitch = 0;
+    public static int yaw = 0;
+
+    @SubscribeEvent
+    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT || evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
+            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_LEFT ? -1 : 1;
+            yaw += sign;
+        }
+        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP || evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
+            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_UP ? -1 : 1;
+            pitch += sign;
+        }
+    }
+
+
+    @SubscribeEvent
+    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
+                "pitch: " +  pitch,
+                "yaw: " + yaw,
+        });
     }
      */
 }

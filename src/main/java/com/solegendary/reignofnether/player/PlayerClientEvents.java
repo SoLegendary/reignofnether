@@ -356,17 +356,19 @@ public class PlayerClientEvents {
         UnitClientEvents.getPreselectedUnits().clear();
         if (!isSandbox)
             UnitClientEvents.getAllUnits().removeIf(u -> (hardReset || (u instanceof Unit unit && !Unit.hasAnchor(unit))));
-        for (LivingEntity entity : UnitClientEvents.getAllUnits())
-            if (entity instanceof Unit unit)
-                unit.setOwnerName("");
+        if (!isSandbox)
+            for (LivingEntity entity : UnitClientEvents.getAllUnits())
+                if (entity instanceof Unit unit)
+                    unit.setOwnerName("");
         UnitClientEvents.idleWorkerIds.clear();
         ResearchClient.removeAllResearch();
         ResearchClient.removeAllCheats();
         BuildingClientEvents.getSelectedBuildings().clear();
         if (!isSandbox)
             BuildingClientEvents.getBuildings().removeIf(b -> b.getBuilding().shouldDestroyOnReset || hardReset);
-        for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-            building.ownerName = "";
+        if (!isSandbox)
+            for (BuildingPlacement building : BuildingClientEvents.getBuildings())
+                building.ownerName = "";
         ResourcesClientEvents.resourcesList.clear();
         ClientGameModeHelper.gameMode = ClientGameModeHelper.DEFAULT_GAMEMODE;
         ClientGameModeHelper.gameModeLocked = false;

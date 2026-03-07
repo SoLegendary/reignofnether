@@ -44,6 +44,8 @@ public class AltarOfDarkness extends ProductionBuilding {
 
         this.productions.add(ProductionItems.NECROMANCER, Keybindings.keyQ);
         this.productions.add(ProductionItems.NECROMANCER_REVIVE, Keybindings.keyQ);
+        this.productions.add(ProductionItems.WRETCHED_WRAITH, Keybindings.keyW);
+        this.productions.add(ProductionItems.WRETCHED_WRAITH_REVIVE, Keybindings.keyW);
     }
 
     @Override
@@ -63,7 +65,7 @@ public class AltarOfDarkness extends ProductionBuilding {
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/dark_prismarine.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == Buildings.ALTAR_OF_DARKNESS,
-                () -> !SandboxClientEvents.isSandboxPlayer() && !GameruleClient.allowHeroes,
+                () -> !SandboxClientEvents.isSandboxPlayer() && GameruleClient.allowedHeroes <= 0,
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(

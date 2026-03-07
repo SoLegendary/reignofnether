@@ -132,6 +132,11 @@ public class Castle extends ProductionBuilding implements GarrisonableBuildingAd
         return 0;
     }
 
+    @Override
+    public String getUpgradedStructureName(int upgradeLevel) {
+        return upgradeLevel > 0 ? upgradedStructureName : structureName;
+    }
+
     public int getAttackRange() {
         return 30;
     }

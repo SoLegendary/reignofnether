@@ -51,6 +51,7 @@ public class NetherBlocks {
 
         if (bs.getBlock().getName().getContents() instanceof TranslatableContents contents &&
             (contents.getKey().contains("blackstone") ||
+            contents.getKey().contains("nylium") ||
             contents.getKey().contains("nether_brick"))) {
             return true;
         }

@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.mixin;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import org.joml.Vector3d;
@@ -162,19 +163,16 @@ public class BaseSpawnerMixin {
                             }
 
                             var nearbyNeutralUnitsOfTypeSum = 0;
-                            var isHaveNearbyNonNeutralUnit = false;
+                            var hasNearbyNonNeutralUnit = false;
 
-                            for (Mob mob : MiscUtil.getEntitiesWithinRange(new Vector3d(pPos.getX(), pPos.getY(), pPos.getZ()),
-                                    ACTIVATION_RANGE, Mob.class, pServerLevel)) {
-                                if (!(mob instanceof Unit unit)) continue;
-                                if (!unit.getOwnerName().isBlank() || !entity.getName().equals(((Entity) unit).getName())) continue;
-                                nearbyNeutralUnitsOfTypeSum++;
-                                if (unit.getOwnerName().isBlank()) continue;
-                                isHaveNearbyNonNeutralUnit = true;
+                            for (LivingEntity le : getUnitAnchoredInRange(pPos.getCenter(), (double) ACTIVATION_RANGE / 2)) {
+                                if (!(le instanceof Unit unit) || le.isDeadOrDying()) continue;
+                                if (unit.getOwnerName().isBlank() && le.getType() == entity.getType()) nearbyNeutralUnitsOfTypeSum++;
+                                if (!unit.getOwnerName().isBlank()) hasNearbyNonNeutralUnit = true;
                             }
 
                             if (nearbyNeutralUnitsOfTypeSum >= reignofnether$getMaxNearbyNeutralUnits(entity, nearbySameTypeSpawners) ||
-                                    !isHaveNearbyNonNeutralUnit) {
+                                    hasNearbyNonNeutralUnit) {
                                 this.delay(pServerLevel, pPos);
                                 return;
                             }
@@ -196,7 +194,7 @@ public class BaseSpawnerMixin {
                             }
                         }
                         MobSpawnEvent.FinalizeSpawn event = ForgeEventFactory.onFinalizeSpawnSpawner(mob, pServerLevel, pServerLevel.getCurrentDifficultyAt(entity.blockPosition()), (SpawnGroupData) null, compoundtag, (BaseSpawner)(Object)this);
-                        if (event != null && spawndata.getEntityToSpawn().size() == 1 && spawndata.getEntityToSpawn().contains("id", 8)) {
+                        if (event != null && !event.isSpawnCancelled()) {
                             ((Mob) entity).finalizeSpawn(pServerLevel, event.getDifficulty(), event.getSpawnType(), event.getSpawnData(), event.getSpawnTag());
                             if (entity instanceof Unit unit)
                                 unit.setAnchor(entity.getOnPos());
@@ -215,5 +213,16 @@ public class BaseSpawnerMixin {
                 this.delay(pServerLevel, pPos);
             }
         }
+    }
+
+    // returns all units that have an anchor set nearby
+    private List<LivingEntity> getUnitAnchoredInRange(Vec3 pos, double range) {
+        ArrayList<LivingEntity> entities = new ArrayList<>();
+        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+            if (le instanceof Unit unit && unit.getAnchor() != null && unit.getAnchor().distToCenterSqr(pos) < range * range) {
+                entities.add(le);
+            }
+        }
+        return entities;
     }
 }

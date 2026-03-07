@@ -63,8 +63,8 @@ public class BloodMoon extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Blood Moon",
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/blood_moon.png"),
+        AbilityButton button = new AbilityButton("Blood Moon",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/blood_moon.png"),
             hotkey,
             () -> CursorClientEvents.getLeftClickAction() == UnitAction.BLOOD_MOON,
             () -> getRank(hero) == 0,
@@ -75,13 +75,15 @@ public class BloodMoon extends HeroAbility {
             this,
             hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Blood Moon",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/blood_moon.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/blood_moon.png"),
                 hero
         );
     }
@@ -106,7 +108,7 @@ public class BloodMoon extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip2")),
                 fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip3")),
-                fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip4"))
+                fcs(I18n.get("abilities.reignofnether.blood_moon.tooltip4", DURATION / 20, BONUS_DURATION_PER_SOUL_RANK / 20))
         );
     }
 

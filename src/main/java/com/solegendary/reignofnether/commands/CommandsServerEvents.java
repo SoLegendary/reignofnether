@@ -22,8 +22,10 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -52,6 +54,7 @@ public class CommandsServerEvents {
         dispatcher.register(Commands.literal("rtsapi-place-building")
             .requires(source -> source.hasPermission(2))
             .then(Commands.argument("buildingName", StringArgumentType.string())
+                .then(placeBuildingTail(ctx -> ""))
                 .then(Commands.argument("ownerName", StringArgumentType.string())
                     .then(placeBuildingTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
                 )
@@ -70,6 +73,7 @@ public class CommandsServerEvents {
 
         dispatcher.register(Commands.literal("rtsapi-set-unit-owner")
             .requires(source -> source.hasPermission(2))
+            .then(unitSelectionTail(ctx -> ""))
             .then(Commands.argument("ownerName", StringArgumentType.string())
                 .then(unitSelectionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
             )
@@ -80,6 +84,7 @@ public class CommandsServerEvents {
 
         dispatcher.register(Commands.literal("rtsapi-set-building-owner")
             .requires(source -> source.hasPermission(2))
+            .then(buildingSelectionTail(ctx -> ""))
             .then(Commands.argument("ownerName", StringArgumentType.string())
                 .then(buildingSelectionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
             )
@@ -150,9 +155,38 @@ public class CommandsServerEvents {
                     StringArgumentType.getString(ctx, "buildingName"),
                     ownerResolver.resolve(ctx),
                     BoolArgumentType.getBool(ctx, "autoBuild"),
-                    BlockPosArgument.getLoadedBlockPos(ctx, "pos")
+                    BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+                    Rotation.NONE
                 ))
+                // with rotation
+                .then(Commands.argument("rotation", StringArgumentType.word())
+                    .suggests((ctx, builder) -> {
+                        return SharedSuggestionProvider.suggest(
+                                List.of("0", "90", "180", "270"),
+                                builder
+                        );
+                    })
+                    .executes(ctx -> placeBuilding(
+                            ctx,
+                            StringArgumentType.getString(ctx, "buildingName"),
+                            ownerResolver.resolve(ctx),
+                            BoolArgumentType.getBool(ctx, "autoBuild"),
+                            BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+                            parseRotation(StringArgumentType.getString(ctx, "rotation"))
+                    ))
+                )
             );
+    }
+
+    private static Rotation parseRotation(String input) throws CommandSyntaxException {
+        return switch (input.toLowerCase()) {
+            case "0" -> Rotation.NONE;
+            case "90" -> Rotation.CLOCKWISE_90;
+            case "180" -> Rotation.CLOCKWISE_180;
+            case "270" -> Rotation.COUNTERCLOCKWISE_90;
+            default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
+                    .create("Invalid rotation: " + input);
+        };
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> unitSelectionTail(NameResolver ownerResolver) {
@@ -193,7 +227,8 @@ public class CommandsServerEvents {
         String buildingName,
         String ownerName,
         boolean autoBuild,
-        BlockPos pos
+        BlockPos pos,
+        Rotation rotation
     ) throws CommandSyntaxException {
         Building building = resolveBuilding(buildingName);
         if (building == null) {
@@ -206,7 +241,7 @@ public class CommandsServerEvents {
         BuildingPlacement placement = BuildingServerEvents.placeBuilding(
             building,
             pos,
-            Rotation.NONE,
+            rotation,
             ownerName,
             new int[0],
             false,

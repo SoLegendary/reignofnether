@@ -51,7 +51,7 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
-    public int getAttackCooldown() {
+    public float getAttackCooldown() {
         return attackCooldown;
     }
 

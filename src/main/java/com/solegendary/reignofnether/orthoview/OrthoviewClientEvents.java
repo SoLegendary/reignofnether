@@ -119,7 +119,9 @@ public class OrthoviewClientEvents {
 
     public static void setMinOrthoviewY(double value) {
         minOrthoviewY = value;
-        if (MC.level != null && MC.player != null && MC.player.getY() < value + 15) {
+        if (MC.level != null && MC.player != null && MC.player.getY() < value + 15 && MC.gameMode != null &&
+            (MC.gameMode.getPlayerMode() == GameType.CREATIVE ||
+            MC.gameMode.getPlayerMode() == GameType.SPECTATOR) && isEnabled()) {
             MC.player.move(MoverType.SELF, new Vec3(0, minOrthoviewY - MC.player.getY() + 15, 0));
         }
     }
@@ -325,7 +327,7 @@ public class OrthoviewClientEvents {
         for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
             RangeIndicatorAddon ria;
             if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null)
-                ria.updateBorderBps(building);
+                ria.updateHighlightBps(building);
         }
 
         enabled = !enabled;

@@ -13,7 +13,7 @@ public class WildfireReviveProd extends ReviveHeroProductionItem {
         super(
             "Revive Wildfire",
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/wildfire.png"),
-            "units.monsters.reignofnether.wildfire.revive"
+            "units.piglins.reignofnether.wildfire.revive"
         );
     }
 

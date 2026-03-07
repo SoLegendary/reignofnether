@@ -7,13 +7,14 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CallToArmsUnit;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -53,6 +54,8 @@ import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -63,6 +66,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession.*;
@@ -148,8 +152,9 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.VILLAGER;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -281,6 +286,11 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             makeVeteran();
     }
 
+    public Item chestplate = Items.AIR;
+    public boolean chestplateEnchanted = false;
+    public boolean swordEnchanted = false;
+    public boolean bowEnchanted = false;
+
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
@@ -363,6 +373,13 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             AttackerUnit.tick(this);
             WorkerUnit.tick(this);
             this.callToArmsGoal.tick();
+
+            if (tickCount % 20 == 0) {
+                if (getMainHandItem().getAllEnchantments().containsKey(Enchantments.BLOCK_EFFICIENCY) &&
+                    !hasEffectWithDuration(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
+                    EnchantmentHelper.setEnchantments(new HashMap<>(), getMainHandItem());
+                }
+            }
         }
     }
 
@@ -377,6 +394,10 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         pCompound.putInt("masonExp", this.masonExp);
         pCompound.putInt("hunterExp", this.hunterExp);
         pCompound.putBoolean("isVeteran", this.isVeteran);
+        pCompound.putInt("chestplateId", Item.getId(chestplate));
+        pCompound.putBoolean("chestplateEnchanted", chestplateEnchanted);
+        pCompound.putBoolean("swordEnchanted", swordEnchanted);
+        pCompound.putBoolean("bowEnchanted", bowEnchanted);
         this.addUnitSaveData(pCompound);
     }
 
@@ -392,6 +413,14 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         this.minerExp = pCompound.getInt("minerExp");
         this.masonExp = pCompound.getInt("masonExp");
         this.hunterExp = pCompound.getInt("hunterExp");
+        if (pCompound.contains("chestplateId"))
+            this.chestplate = Item.byId(pCompound.getInt("chestplateId"));
+        if (pCompound.contains("chestplateEnchanted"))
+            this.chestplateEnchanted = pCompound.getBoolean("chestplateEnchanted");
+        if (pCompound.contains("swordEnchanted"))
+            this.swordEnchanted = pCompound.getBoolean("swordEnchanted");
+        if (pCompound.contains("bowEnchanted"))
+            this.bowEnchanted = pCompound.getBoolean("bowEnchanted");
         if (!level().isClientSide() && pCompound.getBoolean("isVeteran"))
             makeVeteran();
         this.readUnitSaveData(pCompound);
@@ -409,6 +438,14 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                 mUnit.minerExp = this.minerExp;
                 mUnit.masonExp = this.masonExp;
                 mUnit.hunterExp = this.hunterExp;
+                ItemStack chest = new ItemStack(this.chestplate);
+                if (chestplateEnchanted && chest.getItem() != Items.AIR) {
+                    chest.enchant(EnchantmentRegistrar.FORTYIFYING.get(), 1);
+                }
+                mUnit.setItemSlot(EquipmentSlot.CHEST, chest);
+                mUnit.swordEnchanted = swordEnchanted;
+                mUnit.bowEnchanted = bowEnchanted;
+                mUnit.swapWeapons(mUnit.isUsingBow());
 
                 UnitConvertClientboundPacket.syncConvertedUnits(getOwnerName(), List.of(getId()), List.of(newEntity.getId()));
                 converted = true;
@@ -518,10 +555,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         return this.getUnitProfession() != VillagerUnitProfession.NONE;
     }
 
-
-
-
-
     @Override
     public List<Button> getAbilityButtons() {
         List<Button> abilities = new ArrayList<>(getAbilities().getButtons(this));
@@ -530,6 +563,15 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             abilities.addAll(getBuildingButtons());
         }
         return abilities;
+    }
+
+    @Override
+    public void setItemSlot(EquipmentSlot pSlot, ItemStack pStack) {
+        if (pStack.getItem() != Items.AIR && pSlot == EquipmentSlot.MAINHAND &&
+            this.hasEffectWithDuration(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
+            pStack.enchant(Enchantments.BLOCK_EFFICIENCY, 1);
+        }
+        super.setItemSlot(pSlot, pStack);
     }
 
     static {

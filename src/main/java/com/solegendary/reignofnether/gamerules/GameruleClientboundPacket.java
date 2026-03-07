@@ -1,5 +1,9 @@
 package com.solegendary.reignofnether.gamerules;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -67,9 +71,9 @@ public class GameruleClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new GameruleClientboundPacket(GameruleAction.SET_SLANTED_BUILDING, "", slantedBuilding ? 1L : 0L));
     }
-    public static void setAllowHeroes(boolean allowHeroes) {
+    public static void setAllowedHeroes(long allowedHeroes) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new GameruleClientboundPacket(GameruleAction.SET_ALLOW_HEROES, "", allowHeroes ? 1L : 0L));
+                new GameruleClientboundPacket(GameruleAction.SET_ALLOWED_HEROES, "", allowedHeroes));
     }
 
     public GameruleClientboundPacket(GameruleAction action, String playerName, Long value) {
@@ -118,7 +122,14 @@ public class GameruleClientboundPacket {
                             }
                             case SET_BEACON_WIN_MINUTES -> GameruleClient.beaconWinMinutes = value;
                             case SET_SLANTED_BUILDING -> GameruleClient.slantedBuilding = value == 1L;
-                            case SET_ALLOW_HEROES -> GameruleClient.allowHeroes = value == 1L;
+                            case SET_ALLOWED_HEROES -> {
+                                GameruleClient.allowedHeroes = Math.toIntExact(value);
+                                for (BuildingPlacement buildingPlacement : BuildingClientEvents.getBuildings()) {
+                                    if (buildingPlacement instanceof ProductionPlacement pp) {
+                                        pp.updateButtons();
+                                    }
+                                }
+                            }
                         }
                         success.set(true);
                     });

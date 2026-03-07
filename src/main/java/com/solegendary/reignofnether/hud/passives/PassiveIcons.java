@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.hud.passives;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.abilities.EnchantMaiming;
 import com.solegendary.reignofnether.ability.abilities.EnchantVigor;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -44,7 +45,7 @@ public class PassiveIcons {
             )
     );
     public static final EnchantmentIcon MAIMING = new EnchantmentIcon(
-            EnchantMaiming.actualEnchantment,
+            EnchantmentRegistrar.MAIMING.get(),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.IRON_AXE),
             List.of(
@@ -62,7 +63,7 @@ public class PassiveIcons {
             )
     );
     public static final EnchantmentIcon VIGOR = new EnchantmentIcon(
-            EnchantVigor.actualEnchantment,
+            EnchantmentRegistrar.VIGOR.get(),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.STICK),
             List.of(
@@ -80,7 +81,7 @@ public class PassiveIcons {
             )
     );
     public static final EnchantmentIcon FORTIFYING = new EnchantmentIcon(
-            Enchantments.MENDING,
+            EnchantmentRegistrar.FORTYIFYING.get(),
             EquipmentSlot.CHEST,
             getEnchantedItemStack(Items.IRON_CHESTPLATE),
             List.of(
@@ -98,7 +99,7 @@ public class PassiveIcons {
             )
     );
     public static final EnchantmentIcon ZEAL = new EnchantmentIcon(
-            Enchantments.IMPALING,
+            EnchantmentRegistrar.ZEAL.get(),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.NETHER_STAR),
             List.of(
@@ -116,7 +117,7 @@ public class PassiveIcons {
             )
     );
     public static final EnchantmentIcon BREACHING = new EnchantmentIcon(
-            Enchantments.SWEEPING_EDGE,
+            EnchantmentRegistrar.BREACHING.get(),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.DIAMOND_AXE),
             List.of(
@@ -152,13 +153,24 @@ public class PassiveIcons {
             )
     );
 
+    public static final EnchantmentIcon ENCHANTMENT_AMPLIFIER = new EnchantmentIcon(
+            null,
+            EquipmentSlot.MAINHAND,
+            getEnchantedItemStack(Items.ENCHANTED_BOOK),
+            List.of(
+                    fcs(I18n.get("hud.enchant.reignofnether.march_of_progress"), true),
+                    fcs(I18n.get("hud.enchant.reignofnether.march_of_progress.tooltip"))
+            )
+    );
+
     public static final List<EnchantmentIcon> ENCHANTMENT_ICONS = List.of(
             MULTISHOT,
             QUICK_CHARGE,
             MAIMING,
             SHARPNESS,
             VIGOR,
-            EFFICIENCY,
+            ZEAL,
+            //EFFICIENCY,
             FORTIFYING,
             POWER,
             PIERCING,

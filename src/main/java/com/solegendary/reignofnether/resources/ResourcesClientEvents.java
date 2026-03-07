@@ -60,7 +60,7 @@ public class ResourcesClientEvents {
 
             BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
             ResourceSource res = ResourceSources.getFromBlockPos(preSelBp, MC.level);
-            if (res != null && res.resourceValue > 0 && !BuildingUtils.isPosInsideAnyBuilding(true, preSelBp)) {
+            if (res != null && res.resourceValue > 0 && !BuildingUtils.isPosInsideAnyNonBridgeBuilding(true, preSelBp)) {
                 String str = switch (res.resourceName) {
                     case FOOD -> "\uE000  " + res.resourceValue;
                     case WOOD -> "\uE001  " + res.resourceValue;

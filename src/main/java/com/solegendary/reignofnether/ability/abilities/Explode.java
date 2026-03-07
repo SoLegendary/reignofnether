@@ -32,7 +32,7 @@ public class Explode extends Ability {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         return new AbilityButton(
             "Explode",
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/creeper_explode.png"),
             hotkey,
             () -> false,//CursorClientEvents.getLeftClickAction() == UnitAction.EXPLODE,
             () -> false,

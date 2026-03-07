@@ -41,6 +41,7 @@ public class Graveyard extends ProductionBuilding {
         this.productions.add(ProductionItems.DROWNED, Keybindings.keyW);
         this.productions.add(ProductionItems.SKELETON, Keybindings.keyE);
         this.productions.add(ProductionItems.STRAY, Keybindings.keyE);
+        this.productions.add(ProductionItems.BOGGED, Keybindings.keyR);
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}

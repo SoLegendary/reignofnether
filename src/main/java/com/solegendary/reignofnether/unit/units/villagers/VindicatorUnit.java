@@ -2,9 +2,9 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.abilities.EnchantMaiming;
-import com.solegendary.reignofnether.ability.abilities.EnchantSharpness;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
+import com.solegendary.reignofnether.enchantments.MaimingEnchantment;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -120,13 +120,14 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
     public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage + (hasSharpnessEnchant() ? 2 : 0);}
+    public float getUnitAttackDamage() {return attackDamage + getSharpnessLevel();}
     public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
@@ -164,7 +165,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     @Override
-    public float getUnitRangedArmorPercentage() {
+    public double getUnitRangedArmorPercentage() {
         return rangedDamageResist;
     }
 
@@ -268,14 +269,14 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         return !itemStack.getAllEnchantments().isEmpty();
     }
 
-    public boolean hasMaimingEnchant() {
+    public int getMaimingLevel() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getAllEnchantments().containsKey(EnchantMaiming.actualEnchantment);
+        return itemStack.getEnchantmentLevel(EnchantmentRegistrar.MAIMING.get());
     }
 
-    public boolean hasSharpnessEnchant() {
+    public int getSharpnessLevel() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getAllEnchantments().containsKey(EnchantSharpness.actualEnchantment);
+        return itemStack.getEnchantmentLevel(Enchantments.SHARPNESS);
     }
 
     public Enchantment getEnchant() {
@@ -291,8 +292,9 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         boolean hurt = super.doHurtTarget(pEntity);
-        if (hurt && hasMaimingEnchant() && pEntity instanceof LivingEntity le)
-            le.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, EnchantMaiming.SLOWNESS_DURATION, 1));
+        int maimingLevel = getMaimingLevel();
+        if (hurt && maimingLevel > 0 && pEntity instanceof LivingEntity le)
+            le.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, MaimingEnchantment.SLOWNESS_DURATION, maimingLevel));
         return hurt;
     }
 
@@ -310,10 +312,6 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
 
     @Override
     public boolean hasBonusDamage() {
-        return hasSharpnessEnchant();
+        return getSharpnessLevel() > 0;
     }
-
-
-
-
 }

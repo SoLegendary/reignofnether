@@ -26,13 +26,15 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
     protected final int channelTicksMax; // max time required to cast a spell
     protected boolean isCasting = false;
     protected BlockPos castTarget = null; // pos that the spell will be cast at
-    protected final float range;
+    public float range;
     public Consumer<LivingEntity> onEntityCast;
     public Consumer<BlockPos> onGroundCast;
     public Consumer<BuildingPlacement> onBuildingCast;
     public boolean hasKeyframeAnimations = false;
     protected float bonusChannelingRange = 0; // extra range added while channeling
     protected final UnitAnimationAction animationStart;
+    private Consumer<BlockPos> onStartChanneling = null;
+    public boolean instantLook = false;
 
     public GenericTargetedSpellGoal(Mob mob, int channelTicksMax, float range,
                                     UnitAnimationAction animationStart,
@@ -79,6 +81,12 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
         this.setMoveTarget(building.centrePos);
         this.setTarget((LivingEntity) null);
     }
+    public int getChannelTicks() {
+        return channelTicks;
+    }
+    public int getChannelTicksMax() {
+        return channelTicksMax;
+    }
 
     public LivingEntity getTargetEntity() {
         return targetEntity;
@@ -86,6 +94,10 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
 
     public void setAbility(Ability ability) {
         this.ability = ability;
+    }
+
+    public void setOnStartChanneling(Consumer<BlockPos> onStartChanneling) {
+        this.onStartChanneling = onStartChanneling;
     }
 
     protected boolean isInRange() {
@@ -125,7 +137,32 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
             }
 
             if (isCasting && castTarget != null) {
-                this.mob.getLookControl().setLookAt(castTarget.getX(), castTarget.getY(), castTarget.getZ());
+                if (channelTicks == 1 && onStartChanneling != null) {
+                    onStartChanneling.accept(castTarget);
+                }
+                if (!instantLook) {
+                    this.mob.getLookControl().setLookAt(castTarget.getX(), castTarget.getY(), castTarget.getZ());
+                } else {
+                    double dx = castTarget.getX() + 0.5 - mob.getX();
+                    double dy = castTarget.getY() + 0.5 - mob.getEyeY();
+                    double dz = castTarget.getZ() + 0.5 - mob.getZ();
+
+                    double horizontalDist = Math.sqrt(dx * dx + dz * dz);
+
+                    float yaw = (float)(Math.atan2(dz, dx) * (180F / Math.PI)) - 90F;
+                    float pitch = (float)-(Math.atan2(dy, horizontalDist) * (180F / Math.PI));
+
+                    mob.setYRot(yaw);
+                    mob.setXRot(pitch);
+
+                    // Sync previous rotation so it doesn't lerp back
+                    mob.yRotO = yaw;
+                    mob.xRotO = pitch;
+                    mob.yBodyRot = yaw;
+                    mob.yHeadRot = yaw;
+                    mob.yBodyRotO = yaw;
+                    mob.yHeadRotO = yaw;
+                }
                 channelTicks += 1;
                 if (channelTicks >= channelTicksMax) {
                     if (onEntityCast != null && targetEntity != null)

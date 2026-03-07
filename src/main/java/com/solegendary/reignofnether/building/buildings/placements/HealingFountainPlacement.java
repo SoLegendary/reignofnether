@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;

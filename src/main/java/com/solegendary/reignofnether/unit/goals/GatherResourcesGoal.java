@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.ability.heroAbilities.enchanter.CivilEnchantment;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.TargetResourcesSave;
@@ -46,13 +48,13 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     private static final int REACH_RANGE = 5;
     private static final int DEFAULT_MAX_GATHER_TICKS = 600; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
-    private int gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
+    private float gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
     private int searchCdTicksLeft = 0;
     private int failedSearches = 0; // number of times we've failed to search for a new block - as this increases slow down or stop searching entirely to prevent lag
     private static final int MAX_FAILED_SEARCHES = 4;
-    private static final int TICK_CD = 20; // only tick down gather time once this many ticks to reduce processing requirements
-    private int cdTicksLeft = TICK_CD;
+    private static final float TICK_CD = 20; // only tick down gather time once this many ticks to reduce processing requirements
+    private float cdTicksLeft = TICK_CD;
     public static final int NO_TARGET_TIMEOUT = 50; // if we reach this time without progressing a gather tick while having navigation done, then switch a new target
     public static final int IDLE_TIMEOUT = 200; // ticks spent without a target to be considered idle
     private int ticksWithoutTarget = 0; // ticks spent without an active gather target (only increments serverside)
@@ -86,7 +88,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 return false;
         }
         // is not part of a building (unless farming)
-        else if (data.targetFarm == null && BuildingUtils.isPosInsideAnyBuilding(mob.level().isClientSide(), bp))
+        else if (data.targetFarm == null && BuildingUtils.isPosInsideAnyNonBridgeBuilding(mob.level().isClientSide(), bp))
             return false;
 
         // not covered by solid blocks
@@ -263,7 +265,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     }
                 }
                 else {
-                    int ticksToProgress;
+                    float ticksToProgress;
 
                     if (ResearchServerEvents.playerHasCheat(((Unit) mob).getOwnerName(), "operationcwal"))
                         ticksToProgress = (TICK_CD / 2) * 10;
@@ -285,14 +287,14 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             else
                                 ticksToProgress *= VillagerUnit.MINER_SPEED_MULT;
                         }
+                        ticksToProgress *= CivilEnchantment.getEfficiencyMultiplier(vUnit);
                     }
 
                     this.gatherTicksLeft -= ticksToProgress;
 
-                    gatherTicksLeft = Math.min(gatherTicksLeft, data.targetResourceSource.ticksToGather);
+                    gatherTicksLeft = Math.min(gatherTicksLeft, data.targetResourceSource != null ? data.targetResourceSource.ticksToGather : Integer.MAX_VALUE);
                     if (gatherTicksLeft <= 0) {
                         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
-                        ResourceName resourceName = ResourceSources.getBlockResourceName(this.data.gatherTarget, mob.level());
 
                         BlockState bs = this.mob.level().getBlockState(data.gatherTarget);
                         boolean isLogBlock = isLogBlock(bs);
@@ -320,7 +322,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             }
 
                             // replace workers' mine ores with cobble to prevent creating potholes
-                            if (data.targetResourceSource.resourceName == ResourceName.ORE && bsTarget.getBlock() != Blocks.POINTED_DRIPSTONE) {
+                            if (data.targetResourceSource != null && data.targetResourceSource.resourceName == ResourceName.ORE && bsTarget.getBlock() != Blocks.POINTED_DRIPSTONE) {
                                 BlockState replaceBs;
                                 if (BuildingUtils.isInNetherRange(mob.level().isClientSide(), data.gatherTarget))
                                     replaceBs = BlockRegistrar.WALKABLE_MAGMA_BLOCK.get().defaultBlockState();
@@ -405,7 +407,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
 
     private boolean isBlockInRange(BlockPos target) {
-        int reachRangeBonus = Math.min(5, ticksWithoutTarget / TICK_CD);
+        int reachRangeBonus = (int) Math.min(5, ticksWithoutTarget / TICK_CD);
         return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= Math.pow(REACH_RANGE + reachRangeBonus, 2);
     }
 
@@ -448,6 +450,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         return this.data.targetFarm != null;
     }
 
+    @Nullable public BuildingPlacement getTargetFarm() {
+        return this.data.targetFarm;
+    }
+
     // locks the worker to only gather from this specific building
     public void setTargetFarm(BuildingPlacement building) {
         if (building != null) {
@@ -483,7 +489,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     public int getGatherTicksLeft() {
-        return gatherTicksLeft;
+        return (int) gatherTicksLeft;
     }
 
     public boolean isIdle() {

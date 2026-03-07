@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.registrars;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.AbilityServerboundPacket;
-import com.solegendary.reignofnether.ability.EnchantAbilityServerboundPacket;
+import com.solegendary.reignofnether.ability.EnchantEquipAbilityServerboundPacket;
 import com.solegendary.reignofnether.alliance.*;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
@@ -159,9 +159,9 @@ public final class PacketHandler {
                 .encoder(AbilityServerboundPacket::encode).decoder(AbilityServerboundPacket::new)
                 .consumerMainThread(AbilityServerboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(EnchantAbilityServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(EnchantAbilityServerboundPacket::encode).decoder(EnchantAbilityServerboundPacket::new)
-                .consumerMainThread(EnchantAbilityServerboundPacket::handle).add();
+        INSTANCE.messageBuilder(EnchantEquipAbilityServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(EnchantEquipAbilityServerboundPacket::encode).decoder(EnchantEquipAbilityServerboundPacket::new)
+                .consumerMainThread(EnchantEquipAbilityServerboundPacket::handle).add();
 
         INSTANCE.messageBuilder(TPSClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(TPSClientBoundPacket::encode).decoder(TPSClientBoundPacket::new)

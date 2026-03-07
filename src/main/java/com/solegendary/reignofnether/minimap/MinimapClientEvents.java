@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
@@ -22,8 +23,7 @@ import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
-import com.solegendary.reignofnether.time.NightCircleMode;
-import com.solegendary.reignofnether.time.TimeClientEvents;
+import com.solegendary.reignofnether.blocks.NightCircleMode;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -45,7 +45,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -68,7 +67,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.solegendary.reignofnether.hud.HudClientEvents.isMouseOverAnyButton;
-import static com.solegendary.reignofnether.time.TimeClientEvents.nightCircleMode;
+import static com.solegendary.reignofnether.blocks.BlockClientEvents.nightCircleMode;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class MinimapClientEvents {
@@ -130,6 +129,11 @@ public class MinimapClientEvents {
     private static final float EXTRA_DARK = 0.10f;
 
     private static boolean lockedMap = false; // does map follow when moving offscreen?
+    private static boolean highlightAnimals = false; // apply glow effect (clientside only) to animals
+
+    public static boolean shouldHighlightAnimals() {
+        return highlightAnimals;
+    }
 
     // objects for tracking serverside Units that don't yet exist on clientside
     private static class MinimapUnit {
@@ -303,7 +307,7 @@ public class MinimapClientEvents {
                     for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
                         RangeIndicatorAddon ria;
                         if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null)
-                            ria.updateBorderBps(building);
+                            ria.updateHighlightBps(building);
                     }
                 },
                 null,
@@ -333,8 +337,30 @@ public class MinimapClientEvents {
                 },
                 null,
                 List.of(FormattedCharSequence.forward(lockedMap
-                                ? I18n.get("hud.map.reignofnether.lock_map.tooltip1.enabled")
-                                : I18n.get("hud.map.reignofnether.lock_map.tooltip1.disabled"), Style.EMPTY)
+                        ? I18n.get("hud.map.reignofnether.lock_map.tooltip1.enabled")
+                        : I18n.get("hud.map.reignofnether.lock_map.tooltip1.disabled"), Style.EMPTY)
+                )
+        );
+    }
+
+    public static Button getHighlightAnimalsButton() {
+        return new Button("Highlight Animals",
+                14,
+                highlightAnimals ?
+                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep.png") :
+                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep_dark.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                null,
+                () -> false,
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
+                () -> true,
+                () -> {
+                    highlightAnimals = !highlightAnimals;
+                },
+                null,
+                List.of(FormattedCharSequence.forward(highlightAnimals
+                        ? I18n.get("hud.map.reignofnether.highlight_animals.enabled")
+                        : I18n.get("hud.map.reignofnether.highlight_animals.disabled"), Style.EMPTY)
                 )
         );
     }
@@ -613,7 +639,7 @@ public class MinimapClientEvents {
         // get list of night source centre:range pairs
         ArrayList<Pair<BlockPos, Integer>> nightSources = new ArrayList<>();
 
-        for (Pair<BlockPos, Integer> ns : TimeClientEvents.nightSourceOrigins) {
+        for (Pair<BlockPos, Integer> ns : BlockClientEvents.nightSourceOrigins) {
 
             int xc = ns.getFirst().getX() + (BUILDING_RADIUS / 2);
             int zc = ns.getFirst().getZ() + (BUILDING_RADIUS / 2);
@@ -625,7 +651,7 @@ public class MinimapClientEvents {
 
         for (Pair<BlockPos, Integer> ns : nightSources) {
             Set<BlockPos> nightCircleBps;
-            if (TimeClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS)
+            if (BlockClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS)
                 nightCircleBps = MiscUtil.CircleUtil.getCircleWithCulledOverlaps(ns.getFirst(), ns.getSecond(), nightSources);
             else
                 nightCircleBps = MiscUtil.CircleUtil.getCircle(ns.getFirst(), ns.getSecond());
@@ -1070,7 +1096,7 @@ public class MinimapClientEvents {
 
         updateMapTerrain(terrainPartition, darkTerrainPartition);
         mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
-        if (TimeClientEvents.nightCircleMode != NightCircleMode.OFF)
+        if (BlockClientEvents.nightCircleMode != NightCircleMode.OFF)
             updateNightCircles();
         
         // Update map markers

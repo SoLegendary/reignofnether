@@ -28,7 +28,7 @@ public class Abilities {
 
     public Abilities() { }
 
-    private Abilities(List<Pair<Ability, Keybinding>> abilities) {this.abilities = abilities;}
+    public Abilities(List<Pair<Ability, Keybinding>> abilities) {this.abilities = abilities;}
 
     public void add(Ability ability) {
         abilities.add(new Pair<>(ability, null));

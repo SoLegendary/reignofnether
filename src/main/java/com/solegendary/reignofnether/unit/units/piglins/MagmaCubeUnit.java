@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.unit.controls.SlimeUnitMoveControl;
 import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -163,7 +164,6 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
             bps.add(bpOn.west().west().north());
         }
 
-        // Frostwalker effect provided in LivingEntityMixin, but it only happens on changing block positions on the ground
         for (BlockPos bp : bps) {
             BlockState bsOld = level().getBlockState(bp);
             if (MiscUtil.isSolidBlocking(level(), bp)) {

@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.ability.abilities.Eject;
 import com.solegendary.reignofnether.ability.abilities.SpiderClimbing;
 import com.solegendary.reignofnether.ability.abilities.SpinWebs;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
+import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -48,9 +49,11 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class SpiderUnit extends Spider implements Unit, AttackerUnit, ConvertableUnit {
+public class SpiderUnit extends Spider implements Unit, AttackerUnit, ConvertableUnit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new SpiderClimbing(), Keybindings.keyQ);
@@ -129,8 +132,9 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -184,6 +188,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
 
     public SpiderUnit(EntityType<? extends Spider> entityType, Level level) {
         super(entityType, level);
+        this.setMaxUpStep(1.0F);
     }
 
     public boolean isWallClimbing() { return wallClimbing; }
@@ -238,7 +243,19 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
             if (getWebGoal() != null)
                 getWebGoal().tick();
         }
+        if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
+            if (!lastOnPos.equals(getOnPos())) {
+                updateHighlightBps();
+            }
+            lastOnPos = getOnPos();
+        }
     }
+
+    private Set<BlockPos> highlightBps = new HashSet<>();
+    private BlockPos lastOnPos = new BlockPos(0,0,0);
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {

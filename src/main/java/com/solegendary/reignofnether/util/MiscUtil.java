@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
@@ -14,7 +15,7 @@ import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
-import com.solegendary.reignofnether.time.NightCircleMode;
+import com.solegendary.reignofnether.blocks.NightCircleMode;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -23,8 +24,10 @@ import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.goals.FlyingMoveToTargetGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.BoggedUnit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import net.minecraft.client.Minecraft;
@@ -71,6 +74,7 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -155,6 +159,41 @@ public class MiscUtil {
         }
     }
 
+    // returns a list of all BlockPos values between two points
+    public static List<BlockPos> getLine2D(BlockPos start, BlockPos end) {
+        List<BlockPos> result = new ArrayList<>();
+
+        int x0 = start.getX();
+        int z0 = start.getZ();
+        int x1 = end.getX();
+        int z1 = end.getZ();
+
+        int dx = Math.abs(x1 - x0);
+        int dz = Math.abs(z1 - z0);
+
+        int sx = x0 < x1 ? 1 : -1;
+        int sz = z0 < z1 ? 1 : -1;
+
+        int err = dx - dz;
+
+        while (true) {
+            result.add(new BlockPos(x0, 0, z0));
+
+            if (x0 == x1 && z0 == z1) break;
+
+            int e2 = 2 * err;
+            if (e2 > -dz) {
+                err -= dz;
+                x0 += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                z0 += sz;
+            }
+        }
+        return result;
+    }
+
     // excludes trees and buildings
     public static BlockPos getHighestGroundBlock(Level level, BlockPos blockPos) {
         int y = level.getHeight();
@@ -175,20 +214,25 @@ public class MiscUtil {
         return new BlockPos(blockPos.getX(), y, blockPos.getZ());
     }
 
-    public static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos, boolean ignoreLeaves) {
+    public static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos, boolean ignoreLeaves, boolean ignoreStructureVoid) {
         int y = level.getHeight();
         BlockState bs;
         BlockPos bp;
         do {
             bp = new BlockPos(blockPos.getX(), y, blockPos.getZ());
             bs = level.getBlockState(bp);
+            if (!ignoreStructureVoid && bs.getBlock() == Blocks.STRUCTURE_VOID) {
+                break;
+            }
             y -= 1;
         } while((bs.isAir() ||
                 bs.getBlock() == Blocks.LIGHT ||
-                bs.getBlock() == Blocks.STRUCTURE_VOID ||
                 (!isSolidBlocking(level, bp) && bs.getFluidState().isEmpty()) ||
                 (ignoreLeaves && bs.is(BlockTags.LEAVES))) && y > -63);
         return new BlockPos(blockPos.getX(), y, blockPos.getZ());
+    }
+    public static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos, boolean ignoreLeaves) {
+        return getHighestNonAirBlock(level, blockPos, ignoreLeaves, true);
     }
     public static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos) {
         return getHighestNonAirBlock(level, blockPos, false);
@@ -266,8 +310,6 @@ public class MiscUtil {
         return retBps;
     }
 
-    public static HashMap<Integer, LivingEntity> findClosestAttackableEntityCacheMap = new HashMap<>();
-
     public static LivingEntity findClosestAttackableEntity(Mob unitMob, float range, ServerLevel level) {
         Vector3d unitPosition = new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z);
         var pos = new Vec3(unitPosition.x, unitPosition.y, unitPosition.z);
@@ -281,22 +323,43 @@ public class MiscUtil {
                 unitPosition.z + range
         );
         var entities = level.getEntitiesOfClass(LivingEntity.class, aabb);
-        var key = unitMob.hashCode() + entities.hashCode();
-        if (findClosestAttackableEntityCacheMap.containsKey(key)) {
-            return findClosestAttackableEntityCacheMap.get(key);
-        }
         entities.sort(Comparator.comparingDouble(
                 it -> it.position().distanceTo(pos)
         ));
+
+        // prioritise unpoisoned enemies for bogged
+        if (unitMob instanceof BoggedUnit) {
+            for (LivingEntity entity : entities) {
+                if (!(entity.position().distanceTo(new Vec3(unitPosition.x, unitPosition.y, unitPosition.z)) <= range) ||
+                        !entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()) || entity.hasEffect(MobEffects.POISON)) {
+                    continue;
+                }
+                if (isIdleOrMoveAttackable(unitMob, entity, neutralAggro) && hasLineOfSightForAttacks(unitMob, entity)) {
+                    return entity;
+                }
+            }
+        }
+        // prioritise withered enemies for wither skeletons
+        else if (unitMob instanceof WitherSkeletonUnit) {
+            for (LivingEntity entity : entities) {
+                if (!(entity.position().distanceTo(new Vec3(unitPosition.x, unitPosition.y, unitPosition.z)) <= range) ||
+                        !entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()) || !entity.hasEffect(MobEffects.WITHER)) {
+                    continue;
+                }
+                if (isIdleOrMoveAttackable(unitMob, entity, neutralAggro) && hasLineOfSightForAttacks(unitMob, entity)) {
+                    return entity;
+                }
+            }
+        }
         for (LivingEntity entity : entities) {
             if (!(entity.position().distanceTo(new Vec3(unitPosition.x, unitPosition.y, unitPosition.z)) <= range) ||
-                !entity.level().getWorldBorder().isWithinBounds(entity.blockPosition())) continue;
+                !entity.level().getWorldBorder().isWithinBounds(entity.blockPosition())) {
+                continue;
+            }
             if (isIdleOrMoveAttackable(unitMob, entity, neutralAggro) && hasLineOfSightForAttacks(unitMob, entity)) {
-                findClosestAttackableEntityCacheMap.put(key, entity);
                 return entity;
             }
         }
-        findClosestAttackableEntityCacheMap.put(key, null);
         return null;
     }
 
@@ -514,20 +577,46 @@ public class MiscUtil {
         return CursorClientEvents.getRefinedCursorWorldPos(cursorWorldPosNear, cursorWorldPosFar);
     }
 
-    // get the tops of all blocks which are of at a certain horizontal distance away from the centrePos
     public static Set<BlockPos> getRangeIndicatorCircleBlocks(BlockPos centrePos, int radius, Level level) {
+        return getRangeIndicatorCircleBlocks(centrePos, radius, level, false);
+    }
+
+    // get the tops of all blocks which are of at a certain horizontal distance away from the centrePos
+    public static Set<BlockPos> getRangeIndicatorCircleBlocks(BlockPos centrePos, int radius, Level level, boolean isNightSource) {
+        if (radius <= 0)
+            return Set.of();
+
+        Set<BlockPos> circleBps;
+        if (BlockClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS && isNightSource)
+            circleBps = MiscUtil.CircleUtil.getCircleWithCulledOverlaps(centrePos, radius, BlockClientEvents.nightSourceOrigins);
+        else
+            circleBps = MiscUtil.CircleUtil.getCircle(centrePos, radius);
+
+        return new HashSet<>(getHeightAdjustedBlockPoses(level, circleBps.stream().toList()));
+    }
+
+    // like getRangeIndicatorCircleBlocks but returns ALL blocks in the circle, not just on the edge
+    public static Set<BlockPos> getRangeIndicatorFilledCircleBlocks(BlockPos centrePos, int radius, Level level) {
         if (radius <= 0)
             return Set.of();
 
         ArrayList<BlockPos> bps = new ArrayList<>();
 
-        Set<BlockPos> nightCircleBps;
-        if (TimeClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS)
-            nightCircleBps = MiscUtil.CircleUtil.getCircleWithCulledOverlaps(centrePos, radius, TimeClientEvents.nightSourceOrigins);
-        else
-            nightCircleBps = MiscUtil.CircleUtil.getCircle(centrePos, radius);
+        for (int x = -radius; x < radius; x++) {
+            for (int z = -radius; z < radius; z++) {
+                BlockPos bp = new BlockPos(centrePos.getX() + x, centrePos.getY(), centrePos.getZ() + z);
+                if (bp.distToCenterSqr(centrePos.getX(), centrePos.getY(), centrePos.getZ()) < radius * radius) {
+                    bps.add(bp);
+                }
+            }
+        }
+        return new HashSet<>(getHeightAdjustedBlockPoses(level, bps));
+    }
 
-        for (BlockPos bp : nightCircleBps) {
+    // given a 2d set of blockPoses, adjust them so they are of the topmost ground block within 3 blocks
+    private static List<BlockPos> getHeightAdjustedBlockPoses(Level level, List<BlockPos> bps) {
+        ArrayList<BlockPos> returnBps = new ArrayList<>();
+        for (BlockPos bp : bps) {
             for (int i = 0; i < 3 ; i++) {
                 int x = bp.getX();
                 int z = bp.getZ();
@@ -538,7 +627,7 @@ public class MiscUtil {
 
                 int groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1;
                 BlockPos topBp = new BlockPos(x, groundY, z);
-                bps.add(topBp);
+                returnBps.add(topBp);
 
                 int y = 1;
                 if (level.getBlockState(topBp).getBlock() instanceof LeavesBlock) {
@@ -550,15 +639,12 @@ public class MiscUtil {
                         y += 1;
                     } while (y < 30 && (bs.getBlock() instanceof LeavesBlock || !bs.isSolid()));
                     if (!level.getBlockState(bottomBp.above()).isSolid())
-                        bps.add(bottomBp);
+                        returnBps.add(bottomBp);
                 }
             }
         }
-        return new HashSet<>(bps);
+        return returnBps;
     }
-
-
-
 
     public static class CircleUtil {
 
@@ -584,7 +670,7 @@ public class MiscUtil {
                 return new HashSet<>();
 
             // skip rendering entirely if we are fully inside another circle
-            if (TimeClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS) {
+            if (BlockClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS) {
                 for (Pair<BlockPos, Integer> os : overlapSources) {
                     Vec2 centre1 = new Vec2(center.getX(),center.getZ());
                     Vec2 centre2 = new Vec2(os.getFirst().getX(), os.getFirst().getZ());
@@ -757,7 +843,11 @@ public class MiscUtil {
             double d0 = rand.nextGaussian() * 0.2;
             double d1 = rand.nextGaussian() * 0.2;
             double d2 = rand.nextGaussian() * 0.2;
-            level.addParticle(particleType, pos.x, pos.y, pos.z, d0, d1, d2);
+            if (level.isClientSide()) {
+                level.addParticle(particleType, pos.x, pos.y, pos.z, d0, d1, d2);
+            } else {
+                ((ServerLevel) level).sendParticles(particleType, pos.x, pos.y, pos.z, 1, d0, d1, d2, 0);
+            }
         }
     }
 
@@ -785,6 +875,7 @@ public class MiscUtil {
                 EntityRegistrar.DROWNED_UNIT.get(),
                 EntityRegistrar.SKELETON_UNIT.get(),
                 EntityRegistrar.STRAY_UNIT.get(),
+                EntityRegistrar.BOGGED_UNIT.get(),
                 EntityRegistrar.GRUNT_UNIT.get(),
                 EntityRegistrar.BRUTE_UNIT.get(),
                 EntityRegistrar.HEADHUNTER_UNIT.get(),

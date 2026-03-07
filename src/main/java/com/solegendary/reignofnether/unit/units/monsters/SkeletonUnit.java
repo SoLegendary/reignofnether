@@ -30,6 +30,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.AmphibiousPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -125,8 +127,9 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -306,5 +309,10 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
         return pSpawnData;
+    }
+
+    @Override
+    protected PathNavigation createNavigation(Level level) {
+        return new AmphibiousPathNavigation(this, level);
     }
 }

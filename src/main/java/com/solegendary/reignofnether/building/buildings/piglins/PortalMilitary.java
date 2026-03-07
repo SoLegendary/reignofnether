@@ -23,11 +23,12 @@ public class PortalMilitary extends AbstractPortal {
         this.canSetRallyPoint = true;
         productions.add(ProductionItems.BRUTE, Keybindings.keyQ);
         productions.add(ProductionItems.HEADHUNTER, Keybindings.keyW);
-        productions.add(ProductionItems.HOGLIN, Keybindings.keyE);
-        productions.add(ProductionItems.BLAZE, Keybindings.keyR);
-        productions.add(ProductionItems.WITHER_SKELETON, Keybindings.keyT);
-        productions.add(ProductionItems.MAGMA_CUBE, Keybindings.keyY);
-        productions.add(ProductionItems.GHAST, Keybindings.keyU);
+        productions.add(ProductionItems.MARAUDER, Keybindings.keyE);
+        productions.add(ProductionItems.HOGLIN, Keybindings.keyR);
+        productions.add(ProductionItems.BLAZE, Keybindings.keyT);
+        productions.add(ProductionItems.WITHER_SKELETON, Keybindings.keyY);
+        productions.add(ProductionItems.MAGMA_CUBE, Keybindings.keyU);
+        productions.add(ProductionItems.GHAST, Keybindings.keyI);
     }
 
     @Override

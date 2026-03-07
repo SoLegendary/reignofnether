@@ -39,6 +39,7 @@ public class Avatar extends HeroAbility {
     public static final float ATTACK_SPLASH_RADIUS = 2.5f;
     public static final float ATTACK_SPLASH_MULT = 0.5f;
     public static final float BONUS_HEALTH = 100;
+    public static final float KNOCKBACK = 0.5f;
 
     public Avatar() {
         super(1, 100, UnitAction.AVATAR, CD_MAX_SECONDS, 0, 0, false);
@@ -57,8 +58,8 @@ public class Avatar extends HeroAbility {
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Avatar",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
+        AbilityButton button = new AbilityButton("Avatar",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/avatar.png"),
                 hotkey,
                 () -> false,
                 () -> getRank(hero) == 0,
@@ -69,13 +70,15 @@ public class Avatar extends HeroAbility {
                 this,
                 hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Avatar",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/vindicator.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/avatar.png"),
                 hero
         );
     }

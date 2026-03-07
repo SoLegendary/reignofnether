@@ -22,6 +22,7 @@ public abstract class PlayerMixin {
     @Shadow public abstract int getId();
     @Shadow public Level level;
 
+    /*
     @Inject(
             method = "tick()V",
             at = @At("HEAD")
@@ -46,4 +47,5 @@ public abstract class PlayerMixin {
             }
         }
     }
+     */
 }

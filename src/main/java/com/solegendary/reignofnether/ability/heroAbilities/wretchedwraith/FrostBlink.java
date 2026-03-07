@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -26,16 +27,18 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class FrostBlink extends HeroAbility {
 
-    public static final int RANGE_RANK_1 = 7;
-    public static final int RANGE_RANK_2 = 9;
-    public static final int RANGE_RANK_3 = 11;
+    public static final int RANGE_RANK_1 = 8;
+    public static final int RANGE_RANK_2 = 10;
+    public static final int RANGE_RANK_3 = 12;
 
-    public static final int CD_RANK_1 = 30;
-    public static final int CD_RANK_2 = 25;
-    public static final int CD_RANK_3 = 20;
+    public static final int CD_RANK_1 = 20;
+    public static final int CD_RANK_2 = 15;
+    public static final int CD_RANK_3 = 10;
+
+    public static final int RADIUS = 3;
 
     public FrostBlink() {
-        super(3, 40, UnitAction.FROSTBLINK, CD_RANK_1 * ResourceCost.TICKS_PER_SECOND, RANGE_RANK_1, 0, false);
+        super(3, 30, UnitAction.FROSTBLINK, CD_RANK_1 * ResourceCost.TICKS_PER_SECOND, RANGE_RANK_1, RADIUS, false);
     }
 
     @Override
@@ -61,21 +64,24 @@ public class FrostBlink extends HeroAbility {
     public void updateStatsForRank(HeroUnit hero) {
         if (getRank(hero) == 1) {
             range = RANGE_RANK_1;
-            cooldownMax = CD_RANK_1;
+            cooldownMax = CD_RANK_1 * ResourceCost.TICKS_PER_SECOND;
         } else if (getRank(hero) == 2) {
             range = RANGE_RANK_2;
-            cooldownMax = CD_RANK_2;
+            cooldownMax = CD_RANK_2 * ResourceCost.TICKS_PER_SECOND;
         } else if (getRank(hero) == 3) {
             range = RANGE_RANK_3;
-            cooldownMax = CD_RANK_3;
+            cooldownMax = CD_RANK_3 * ResourceCost.TICKS_PER_SECOND;
+        }
+        if (hero instanceof WretchedWraithUnit wraith) {
+            wraith.castFrostblinkGoal.range = range;
         }
     }
 
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof HeroUnit hero)) return null;
-        return new AbilityButton("Frostblink",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/enderpearl.png"),
+        AbilityButton button = new AbilityButton("Frostblink",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/frostblink.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.FROSTBLINK,
                 () -> getRank(hero) == 0,
@@ -86,13 +92,15 @@ public class FrostBlink extends HeroAbility {
                 this,
                 hero
         );
+        button.stretchIconToBorders = true;
+        return button;
     }
 
     @Override
     public Button getRankUpButton(HeroUnit hero) {
         return super.getRankUpButtonProtected(
                 "Frostblink",
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/enderpearl.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/frostblink.png"),
                 hero
         );
     }
@@ -123,13 +131,16 @@ public class FrostBlink extends HeroAbility {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        ((WretchedWraithUnit) unitUsing).getCastFrostblinkGoal().setAbility(this);
-        ((WretchedWraithUnit) unitUsing).getCastFrostblinkGoal().setTarget(targetBp);
+        if (level.getWorldBorder().isWithinBounds(targetBp)) {
+            ((WretchedWraithUnit) unitUsing).getCastFrostblinkGoal().setAbility(this);
+            ((WretchedWraithUnit) unitUsing).getCastFrostblinkGoal().setTarget(targetBp);
+        } else if (level.isClientSide()) {
+            HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.frostblink.out_of_bounds"), 200);
+        }
     }
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        ((WretchedWraithUnit) unitUsing).getCastFrostblinkGoal().setAbility(this);
-        ((WretchedWraithUnit) unitUsing).getCastFrostblinkGoal().setTarget(targetEntity);
+        use(level, unitUsing, targetEntity.getOnPos());
     }
 }

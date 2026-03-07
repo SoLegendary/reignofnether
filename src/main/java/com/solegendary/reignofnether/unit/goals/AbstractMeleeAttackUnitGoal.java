@@ -3,11 +3,13 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
+import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinMerchantUnit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.pathfinder.Path;
@@ -146,18 +148,17 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
     }
 
     protected int getAttackInterval() {
-        return this.adjustedTickDelay(((AttackerUnit) this.mob).getAttackCooldown());
+        return this.adjustedTickDelay((int) ((AttackerUnit) this.mob).getAttackCooldown());
     }
 
     protected double getAttackReachSqr(LivingEntity target) {
         float width = mob.getBbWidth();
-        if (mob instanceof PiglinMerchantUnit)
-            width += 0.6f;
-        if (mob instanceof SlimeUnit slime)
-            width -= (0.3f * (Math.max(2, slime.getSize()) - 2));
+        if (mob instanceof AttackerUnit attackerUnit)
+            width += attackerUnit.getBonusMeleeRange();
         float targetWidth = target.getBbWidth();
-        if (target instanceof SlimeUnit targetSlime)
-            targetWidth += (0.3f * (Math.max(2, targetSlime.getSize()) - 2));
+        if (target instanceof Unit unit) {
+            targetWidth += unit.getBonusMeleeRangeForAttackers();
+        }
         return width * 2.0F * width * 2.0F + targetWidth;
     }
 }

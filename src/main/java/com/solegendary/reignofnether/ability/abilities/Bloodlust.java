@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -12,6 +15,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
+import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -20,6 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
@@ -31,9 +36,8 @@ public class Bloodlust extends Ability {
 
     private static final int HEALTH_COST = 12;
     private static final int HEALTH_COST_HOGLIN = 18;
+    private static final int HEALTH_COST_MARAUDER = 24;
     private static final int DURATION_SECONDS = 10;
-
-    public static final float BLOODLUST_ATTACK_SPEED_MULTIPLIER = 1.6f;
 
     public Bloodlust() {
         super(
@@ -46,33 +50,31 @@ public class Bloodlust extends Ability {
         );
     }
 
-    private static int getDurationLeft(Unit unit) {
-        if (unit instanceof HeadhunterUnit headhunterUnit) {
-            return headhunterUnit.bloodlustTicks;
-        } else if (unit instanceof BruteUnit bruteUnit) {
-            return bruteUnit.bloodlustTicks;
-        } else if (unit instanceof HoglinUnit hoglinUnit) {
-            return hoglinUnit.bloodlustTicks;
-        }
-        return 0;
+    private float getHealthCost(Unit unit) {
+        float healthCost = HEALTH_COST;
+        if (unit instanceof HoglinUnit)
+            healthCost = HEALTH_COST_HOGLIN;
+        else if (unit instanceof MarauderUnit)
+            healthCost = HEALTH_COST_MARAUDER;
+        return healthCost;
     }
 
     private List<FormattedCharSequence> getTooltip(Unit unit) {
         if (unit instanceof HoglinUnit) {
             return List.of(
                     fcs(I18n.get("abilities.reignofnether.bloodlust"), true),
-                    FormattedCharSequence.forward("\uE007  " + HEALTH_COST, MyRenderer.iconStyle),
+                    FormattedCharSequence.forward("\uE007  " + getHealthCost(unit), MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip1", HEALTH_COST_HOGLIN), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip1", getHealthCost(unit)), Style.EMPTY),
                     FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip2", DURATION_SECONDS), Style.EMPTY),
                     FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip3"), Style.EMPTY)
             );
         } else {
             return List.of(
                     fcs(I18n.get("abilities.reignofnether.bloodlust"), true),
-                    FormattedCharSequence.forward("\uE007  " + HEALTH_COST, MyRenderer.iconStyle),
+                    FormattedCharSequence.forward("\uE007  " + getHealthCost(unit), MyRenderer.iconStyle),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip1", HEALTH_COST), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip1", getHealthCost(unit)), Style.EMPTY),
                     FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip2", DURATION_SECONDS), Style.EMPTY)
             );
         }
@@ -82,9 +84,9 @@ public class Bloodlust extends Ability {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         return new AbilityButton(
                 "Bloodlust",
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/redstone_block.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/bloodlust.png"),
                 hotkey,
-                () -> getDurationLeft(unit) > 0,
+                () -> unit.hasEffectWithDuration(MobEffectRegistrar.BLOODLUST.get()),
                 () -> !ResearchClient.hasResearch(ProductionItems.RESEARCH_BLOODLUST),
                 () -> !((LivingEntity) unit).isVehicle() && !((LivingEntity) unit).isPassenger(),
                 () -> UnitClientEvents.sendUnitCommand(UnitAction.BLOOD_LUST),
@@ -94,31 +96,16 @@ public class Bloodlust extends Ability {
                 unit
         );
     }
-
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        float healthCost = HEALTH_COST;
-        if (unitUsing instanceof HoglinUnit)
-            healthCost = HEALTH_COST_HOGLIN;
-        int duration = DURATION_SECONDS * ResourceCost.TICKS_PER_SECOND;
-        if (((LivingEntity) unitUsing).getHealth() <= healthCost)
+
+        if (((LivingEntity) unitUsing).getHealth() <= getHealthCost(unitUsing))
             return;
         else
-            ((LivingEntity) unitUsing).hurt(level.damageSources().magic(), healthCost);
+            ((LivingEntity) unitUsing).hurt(level.damageSources().magic(), getHealthCost(unitUsing));
 
-        if (unitUsing instanceof HeadhunterUnit headhunterUnit) {
-            headhunterUnit.bloodlustTicks = duration;
-            headhunterUnit.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0));
-            headhunterUnit.addEffect(new MobEffectInstance(MobEffects.REGENERATION, (int) (healthCost * 20 * 2.5f) + 40, 0));
-        } else if (unitUsing instanceof BruteUnit bruteUnit) {
-            bruteUnit.bloodlustTicks = duration;
-            bruteUnit.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0));
-            bruteUnit.addEffect(new MobEffectInstance(MobEffects.REGENERATION, (int) (healthCost * 20 * 2.5f) + 40, 0));
-        } else if (unitUsing instanceof HoglinUnit hoglinUnit) {
-            hoglinUnit.bloodlustTicks = duration;
-            hoglinUnit.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, duration, 0));
-            hoglinUnit.addEffect(new MobEffectInstance(MobEffects.REGENERATION, (int) (healthCost * 20 * 2.5f) + 40, 0));
-        }
+        ((LivingEntity) unitUsing).addEffect(new MobEffectInstance(MobEffectRegistrar.BLOODLUST.get(), DURATION_SECONDS * 20, 0));
+        ((LivingEntity) unitUsing).addEffect(new MobEffectInstance(MobEffects.REGENERATION, (int) (getHealthCost(unitUsing) * 20 * 2.5f) + 40, 0));
     }
 
     @Override

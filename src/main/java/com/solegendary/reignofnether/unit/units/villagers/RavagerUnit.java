@@ -129,8 +129,9 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() {return (int) (20 / attacksPerSecond);}
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -277,7 +278,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                 for (Mob mob : nearbyMobs) {
                     if (mob instanceof Unit unit && UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY) {
                         this.strongKnockback(mob);
-                        mob.hurt(damageSources().mobAttack(this), ROAR_DAMAGE);
+                        mob.hurt(damageSources().generic(), ROAR_DAMAGE);
                         mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ROAR_SLOW_DURATION, 1));
                     }
                 }

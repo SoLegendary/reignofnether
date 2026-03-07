@@ -16,13 +16,15 @@ public class TemporaryBlock {
     public final BlockPos bp;
     public final BlockState bs;
     public final BlockState oldBs;
+    public final BlockState bsAbove;
     public int tickAge;
     public boolean isPlaced = false;
 
-    public TemporaryBlock(ServerLevel level, BlockPos bp, BlockState bs, BlockState oldBs, int lifespan) {
+    public TemporaryBlock(BlockPos bp, BlockState bs, BlockState oldBs, int lifespan, BlockState bsAbove) {
         this.bp = bp;
         this.bs = bs;
         this.oldBs = oldBs;
+        this.bsAbove = bsAbove;
         this.lifespan = lifespan + RANDOM.nextInt(-10,10);
         this.tickAge = RANDOM.nextInt(-5,-1);
     }
@@ -40,6 +42,9 @@ public class TemporaryBlock {
                 level.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
             }
             level.setBlockAndUpdate(bp, bs);
+            if (bsAbove != null) {
+                level.setBlockAndUpdate(bp.above(), bsAbove);
+            }
             isPlaced = true;
         }
         else if (isPlaced && tickAge >= lifespan &&
@@ -48,6 +53,9 @@ public class TemporaryBlock {
                 level.destroyBlock(bp, false);
             } else {
                 level.setBlockAndUpdate(bp, oldBs);
+            }
+            if (bsAbove != null && level.getBlockState(bp.above()).getBlock() == bsAbove.getBlock()) {
+                level.destroyBlock(bp.above(), false);
             }
             return true;
         }

@@ -50,6 +50,20 @@ public class SkeletonProd extends ProductionItem {
         return SkeletonProd.itemName;
     }
 
+    private static ResourceLocation getIcon() {
+        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS))
+            return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/stray.png");
+        else
+            return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png");
+    }
+
+    private static String getCancelName() {
+        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS))
+            return "Stray";
+        else
+            return "Skeleton";
+    }
+
     public UnitSpawnButton getPlaceButton() {
         return new UnitSpawnButton(
                 itemName,
@@ -67,9 +81,7 @@ public class SkeletonProd extends ProductionItem {
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(
             SkeletonProd.itemName,
-            ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS) ?
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/stray.png") :
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
+            getIcon(),
             hotkey,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS),
             () -> true,
@@ -88,10 +100,8 @@ public class SkeletonProd extends ProductionItem {
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         return new StopProductionButton(
-            ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS) ? "Stray" : "Skeleton",
-            ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS) ?
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/stray.png") :
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png"),
+            getCancelName(),
+            getIcon(),
             prodBuilding,
             this,
             first

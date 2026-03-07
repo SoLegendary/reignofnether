@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.survival.Wave;
@@ -97,19 +98,19 @@ public class IllagerWaveSpawner {
         Enchantment enchantment = null;
 
         if (entity instanceof VindicatorUnit vUnit && (tier == 2 || tier == 3)) {
-            enchantment = EnchantMaiming.actualEnchantment;
+            enchantment = EnchantmentRegistrar.MAIMING.get();
         }
         else if (entity instanceof VindicatorUnit vUnit && (tier == 4 || tier == 5)) {
-            enchantment = EnchantSharpness.actualEnchantment;
+            enchantment = Enchantments.SHARPNESS;
         }
         else if (entity instanceof PillagerUnit vUnit && (tier == 3 || tier == 4)) {
-            enchantment = EnchantQuickCharge.actualEnchantment;
+            enchantment = Enchantments.QUICK_CHARGE;
         }
         else if (entity instanceof PillagerUnit vUnit && (tier == 5 || tier == 6)) {
-            enchantment = EnchantMultishot.actualEnchantment;
+            enchantment = Enchantments.MULTISHOT;
         }
         else if (entity instanceof EvokerUnit vUnit && tier >= 6) {
-            enchantment = EnchantVigor.actualEnchantment;
+            enchantment = EnchantmentRegistrar.VIGOR.get();
         }
 
         ItemStack item = entity.getItemBySlot(EquipmentSlot.MAINHAND);

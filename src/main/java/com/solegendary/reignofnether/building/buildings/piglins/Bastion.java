@@ -50,6 +50,7 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuildingA
 
         this.productions.add(ProductionItems.RESEARCH_BRUTE_SHIELDS, Keybindings.keyQ);
         this.productions.add(ProductionItems.RESEARCH_HEAVY_TRIDENTS, Keybindings.keyW);
+        this.productions.add(ProductionItems.RESEARCH_CLEAVING_FLAILS, Keybindings.keyE);
 
         setActiveAddon(GarrisonableBuildingAddon.class, this, true);
     }

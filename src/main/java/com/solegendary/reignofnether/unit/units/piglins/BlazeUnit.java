@@ -3,23 +3,33 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.FirewallShot;
+import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyMath;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,9 +47,13 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttackerUnit {
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
+public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttackerUnit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new FirewallShot(), Keybindings.keyQ);
@@ -121,8 +135,9 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.BLAZE;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public int getAttackCooldown() { return (int) (20 / (attacksPerSecond)); }
-    public float getAttacksPerSecond() {return attacksPerSecond;}
+    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
+    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
     public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
@@ -138,7 +153,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     // endregion
 
-    final static public float attackDamage = 0.5f;
+    final static public float attackDamage = 0.0f;
     final static public float attacksPerSecond = 1.0f;
     final static public float attackRange = 14; // only used by ranged units or melee building attackers
     final static public float aggroRange = 14;
@@ -189,6 +204,32 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+        if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
+            if (!lastOnPos.equals(getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
+                updateHighlightBps();
+            }
+            lastOnPos = getOnPos();
+            lastCursorPos = CursorClientEvents.getPreselectedBlockPos();
+        }
+    }
+
+    private Set<BlockPos> highlightBps = new HashSet<>();
+    private BlockPos lastOnPos = new BlockPos(0,0,0);
+    private BlockPos lastCursorPos = new BlockPos(0,0,0);
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
+
+    @Override public void updateHighlightBps() {
+        if (!level().isClientSide())
+            return;
+        this.highlightBps.clear();
+        if (CursorClientEvents.getLeftClickAction() == UnitAction.SHOOT_FIREWALL) {
+            BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(getOnPos(), CursorClientEvents.getPreselectedBlockPos(), FirewallShot.RANGE + 1);
+            for (BlockPos pos : MiscUtil.getLine2D(getOnPos(), limitedBp)) {
+                this.highlightBps.add(MiscUtil.getHighestGroundBlock(level(), pos).above());
+            }
+        }
     }
 
     @Override
@@ -232,8 +273,8 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     @Override
     public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         if (!this.abilities.isEmpty() &&
-            this.abilities.get().get(0) instanceof FirewallShot firewallShot &&
-            !firewallShot.isOffCooldown(this))
+                this.abilities.get().get(0) instanceof FirewallShot firewallShot &&
+                !firewallShot.isOffCooldown(this))
             return;
 
         LivingEntity target = this.getTarget();
@@ -273,5 +314,23 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     @Override
     public void setupEquipmentAndUpgradesServer() {
         this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+    }
+
+    @Override
+    public List<FormattedCharSequence> getAttackDamageStatTooltip() {
+        return List.of(
+                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
+                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_fire_damage", BlazeUnitFireball.FIRE_SECONDS, BlazeUnitFireball.FIRE_SECONDS))
+        );
+    }
+
+    @Override
+    public boolean hasBonusDamage() {
+        return true;
+    }
+
+    @Override
+    public boolean causeFallDamage(float pFallDistance, float pMultiplier, DamageSource pSource) {
+        return false;
     }
 }
