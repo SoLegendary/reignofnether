@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
@@ -11,6 +12,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -92,7 +94,7 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
     public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
         super.tick(tickLevel, buildingPlacement);
         if (tickLevel.isClientSide && buildingPlacement.getTickAgeAfterBuilt() > 0 && buildingPlacement.getTickAgeAfterBuilt() % 100 == 0)
-            updateBorderBps(buildingPlacement);
+            updateHighlightBps(buildingPlacement);
     }
 
     @Override
@@ -102,12 +104,21 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
                 (!placement.level.isClientSide() && BuildingServerEvents.playerHasFinishedBuilding(this, placement.ownerName))) {
             nRange = nightRangeReduced;
         }
-        return placement.isBuiltServerside && placement.isBuilt ? nRange : 0;
+        return /*//TODO fix bug that isBuiltServerside wont be set in some cases  placement.isBuiltServerside &&*/ placement.isBuilt ? nRange : 0;
     }
 
     @Override
     public int getNightRange(BuildingPlacement placement) {
         return getRange(placement);
+    }
+
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ, placement.level, hasActiveAddon(NightSourceAddon.class)));
     }
 
     @Override

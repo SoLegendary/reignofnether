@@ -1,10 +1,8 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
@@ -16,6 +14,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -139,13 +138,13 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
         super.tick(tickLevel, buildingPlacement);
         if (tickLevel.isClientSide && buildingPlacement.getTickAgeAfterBuilt() > 0 && buildingPlacement.getTickAgeAfterBuilt() % 100 == 0)
-            updateBorderBps(buildingPlacement);
+            updateHighlightBps(buildingPlacement);
     }
 
     @Override
     public void onBuilt(BuildingPlacement buildingPlacement) {
         super.onBuilt(buildingPlacement);
-        updateBorderBps(buildingPlacement);
+        updateHighlightBps(buildingPlacement);
     }
 
     @Override
@@ -155,7 +154,16 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
     @Override
     public int getRange(BuildingPlacement placement) {
-        return (placement.isBuiltServerside && placement.isBuilt) ? nightRange : 0;
+        return (/*//TODO fix bug that isBuiltServerside wont be set in some cases  placement.isBuiltServerside &&*/ placement.isBuilt) ? nightRange : 0;
+    }
+
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ, placement.level, hasActiveAddon(NightSourceAddon.class)));
     }
 
     @Override

@@ -8,9 +8,9 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.buildings.placements.FarmPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -231,7 +231,7 @@ public class UnitActionItem {
                     );
 
                     if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE
-                        && (buildingAtPos == null || buildingAtPos instanceof BridgePlacement)) {
+                        && (buildingAtPos == null || buildingAtPos.getBuilding() instanceof AbstractBridge)) {
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
                         goal.setTargetResourceName(resName);
                         goal.setMoveTarget(preselectedBlockPos);

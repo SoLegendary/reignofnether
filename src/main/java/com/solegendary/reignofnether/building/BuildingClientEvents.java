@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransport
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
@@ -126,7 +125,7 @@ public class BuildingClientEvents {
         BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
         for (BuildingPlacement building : buildings)
             if (building.isPosInsideBuilding(preSelBp)) {
-                if (building instanceof BridgePlacement && ResourceSources.getBlockResourceName(preSelBp, MC.level) != ResourceName.NONE) {
+                if (building.getBuilding() instanceof AbstractBridge && ResourceSources.getBlockResourceName(preSelBp, MC.level) != ResourceName.NONE) {
                     return null;
                 }
                 return building;

@@ -5,8 +5,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
-import com.solegendary.reignofnether.building.buildings.placements.IronGolemPlacement;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
@@ -753,7 +752,7 @@ public class UnitClientEvents {
                 // right click -> build or repair preselected building
                 else if (hudSelectedEntity instanceof WorkerUnit && preSelBuilding != null &&
                         (getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED || AlliancesClient.canControlAlly(hudSelectedEntity)) ||
-                        preSelBuilding.getBuilding() instanceof AbstractBridge) {
+                        (preSelBuilding != null && preSelBuilding.getBuilding() instanceof AbstractBridge)) {
 
                     if (preSelBuilding.getBuilding() instanceof AbstractFarm && preSelBuilding.isBuilt)
                         sendUnitCommand(UnitAction.FARM);

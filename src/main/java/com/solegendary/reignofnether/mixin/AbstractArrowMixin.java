@@ -135,7 +135,7 @@ public abstract class AbstractArrowMixin extends Projectile {
     @Shadow protected abstract ItemStack getPickupItem();
     @Shadow protected void doPostHurtEffects(LivingEntity pTarget) { }
     @Shadow public boolean shotFromCrossbow() { return false; }
-    @Shadow @Final private IntOpenHashSet ignoredEntities;
+    @Shadow(remap = false) @Final private IntOpenHashSet ignoredEntities;
 
     @Unique
     private boolean reignofnether$collidedWithUntargetedAlly(Entity entity) {

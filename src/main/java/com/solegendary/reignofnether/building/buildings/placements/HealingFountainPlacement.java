@@ -34,11 +34,6 @@ public class HealingFountainPlacement extends BuildingPlacement {
         this.waterBlocks = new ArrayList<>(wbs);
     }
 
-    @Override
-    public void onBuilt() {
-        super.onBuilt();
-    }
-
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
 

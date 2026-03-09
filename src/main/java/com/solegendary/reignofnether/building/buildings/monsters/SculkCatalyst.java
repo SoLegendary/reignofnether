@@ -1,24 +1,23 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.abilities.Sacrifice;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
-import com.solegendary.reignofnether.building.data.DataType;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.time.TimeClientEvents;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -26,10 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
@@ -122,18 +118,25 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
     }
 
     @Override
-    public void updateBorderBps(BuildingPlacement placement) {
+    public void updateHighlightBps(BuildingPlacement placement) {
         if (!placement.level.isClientSide()) {
             return;
         }
         if (placement instanceof SculkCatalystPlacement scp) {
             scp.updateSculkBps();
         }
-        placement.getDataStorage().getData(RangeIndicatorAddon.BORDER_BPS_CACHE).clear();
-        placement.getDataStorage().getData(RangeIndicatorAddon.BORDER_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
-                getNightRange(placement) - TimeClientEvents.VISIBLE_BORDER_ADJ,
-                placement.level
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getNightRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ,
+                placement.level, true
         ));
+        if (CursorClientEvents.getLeftClickAction() == UnitAction.SACRIFICE) {
+            placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                    Sacrifice.RANGE - 1,
+                    placement.level
+            ));
+        }
+
     }
 
     @Override

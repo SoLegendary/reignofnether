@@ -4,7 +4,9 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.EnchantAbility;
 import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -17,7 +19,6 @@ import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +26,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
@@ -33,15 +33,21 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Library extends ProductionBuilding {
+public class Library extends ProductionBuilding implements RangeIndicatorAddon {
+    private static final EnchantMaiming ENCHANT_MAIMING = new EnchantMaiming();
+    private static final EnchantQuickCharge ENCHANT_QUICK_CHARGE = new EnchantQuickCharge();
+    private static final EnchantSharpness ENCHANT_SHARPNESS = new EnchantSharpness();
+    private static final EnchantMultishot ENCHANT_MULTISHOT = new EnchantMultishot();
+    private static final EnchantVigor ENCHANT_VIGOR = new EnchantVigor();
+
     public static final DataType<EnchantAbility> AUTO_CAST_ENCHANT = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "auto_cast_enchant"), (tag, server) -> {
         int id = tag.getInt("autocast-id");
         return switch (id) {
-            case 1: yield new EnchantMaiming();
-            case 2: yield new EnchantQuickCharge();
-            case 3: yield new EnchantSharpness();
-            case 4: yield new EnchantMultishot();
-            case 5: yield new EnchantVigor();
+            case 1: yield ENCHANT_MAIMING;
+            case 2: yield ENCHANT_QUICK_CHARGE;
+            case 3: yield ENCHANT_SHARPNESS;
+            case 4: yield ENCHANT_MULTISHOT;
+            case 5: yield ENCHANT_VIGOR;
             default: yield null;
         };
     }, enchantAbility -> {
@@ -82,11 +88,11 @@ public class Library extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        this.abilities.add(new EnchantMaiming(), Keybindings.keyQ);
-        this.abilities.add(new EnchantQuickCharge(), Keybindings.keyW);
-        this.abilities.add(new EnchantSharpness(), Keybindings.keyE);
-        this.abilities.add(new EnchantMultishot(), Keybindings.keyR);
-        this.abilities.add(new EnchantVigor(), Keybindings.keyT);
+        this.abilities.add(ENCHANT_MAIMING, Keybindings.keyQ);
+        this.abilities.add(ENCHANT_QUICK_CHARGE, Keybindings.keyW);
+        this.abilities.add(ENCHANT_SHARPNESS, Keybindings.keyE);
+        this.abilities.add(ENCHANT_MULTISHOT, Keybindings.keyR);
+        this.abilities.add(ENCHANT_VIGOR, Keybindings.keyT);
 
         this.productions.add(ProductionItems.RESEARCH_LINGERING_POTIONS, Keybindings.keyY);
         this.productions.add(ProductionItems.RESEARCH_HEALING_POTIONS, Keybindings.keyU);
@@ -145,10 +151,22 @@ public class Library extends ProductionBuilding {
     }
 
     @Override
+    public String getUpgradedName(BuildingPlacement placement) {
+        return I18n.get("buildings.villagers.reignofnether.library.upgraded");
+    }
+
+    @Override
+    public void onBuilt(BuildingPlacement buildingPlacement) {
+        super.onBuilt(buildingPlacement);
+        updateHighlightBps(buildingPlacement);
+    }
+
+    @Override
     public void tick(Level tickLevel, BuildingPlacement bp) {
         super.tick(tickLevel, bp);
 
         EnchantAbility autoCastEnchant = bp.getDataStorage().getData(AUTO_CAST_ENCHANT);
+
         if (bp.getTickAgeAfterBuilt() > 0 && bp.getTickAgeAfterBuilt() % 15 == 0 && bp.isBuilt && autoCastEnchant != null
                 && autoCastEnchant.isOffCooldown(bp)) {
 
@@ -164,15 +182,36 @@ public class Library extends ProductionBuilding {
             )) {
                 if ((
                         autoCastEnchant.isCorrectUnitAndEquipment(e) && autoCastEnchant.canAfford(bp)
-                                && !autoCastEnchant.hasAnyEnchant(e)
+                                && autoCastEnchant.getMutuallyExclusiveEnchant(e) == null
                 )) {
                     mobs.add(e);
                 }
             }
-
             if (!mobs.isEmpty()) {
                 autoCastEnchant.use(tickLevel, bp, mobs.get(0));
             }
         }
+        if (tickLevel.isClientSide && bp.getTickAgeAfterBuilt() > 0 && bp.getTickAgeAfterBuilt() % 100 == 0)
+            updateHighlightBps(bp);
+
+    }
+
+    @Override
+    public int getRange(BuildingPlacement placement) {
+        return EnchantAbility.RANGE;
+    }
+
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ, placement.level));
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected(BuildingPlacement placement) {
+        return false;
     }
 }

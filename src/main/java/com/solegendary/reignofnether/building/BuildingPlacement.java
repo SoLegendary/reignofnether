@@ -1260,11 +1260,7 @@ public class BuildingPlacement {
     }
 
     public String getUpgradedName() {
-        ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(getBuilding());
-        if (key == null) {
-            return "Unknown";
-        }
-        return I18n.get("buildings." + (getFaction() != null && getFaction() != Faction.NONE ? getFaction().toString().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
+        return getBuilding().getUpgradedName(this);
     }
 
     public float getMagicDamageMult() {

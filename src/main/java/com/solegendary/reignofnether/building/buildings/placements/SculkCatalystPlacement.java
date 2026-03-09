@@ -2,13 +2,10 @@ package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Sacrifice;
-import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -41,7 +38,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
 
     public int getUncappedNightRange() {
         if (isBuilt || isBuiltServerside) {
-            return (int) (getDataStorage().getData(RangeIndicatorAddon.BORDER_BPS_CACHE).size() * RANGE_PER_SCULK) + SculkCatalyst.nightRangeMin;
+            return (int) (getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).size() * RANGE_PER_SCULK) + SculkCatalyst.nightRangeMin;
         }
         return 0;
     }
@@ -54,29 +51,6 @@ public class SculkCatalystPlacement extends BuildingPlacement {
             ria.updateHighlightBps(this);
         }
         updateSculkBps();
-    }
-
-    @Override
-    public void updateBorderBps() {
-        if (!level.isClientSide()) {
-            return;
-        }
-        updateSculkBps();
-        this.nightBorderBps.clear();
-        this.nightBorderBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(centrePos,
-                getNightRange() - TimeClientEvents.VISIBLE_BORDER_ADJ,
-                level
-        ));
-    }
-
-    @Override
-    public Set<BlockPos> getBorderBps() {
-        return nightBorderBps;
-    }
-
-    @Override
-    public boolean showOnlyWhenSelected() {
-        return false;
     }
 
     @Override

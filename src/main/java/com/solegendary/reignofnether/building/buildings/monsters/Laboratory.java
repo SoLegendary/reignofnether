@@ -2,7 +2,9 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.ability.abilities.CallLightning;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -12,6 +14,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -20,9 +23,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
@@ -120,12 +121,21 @@ public class Laboratory extends ProductionBuilding implements RangeIndicatorAddo
     public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
         super.tick(tickLevel, buildingPlacement);
         if (tickLevel.isClientSide && buildingPlacement.getTickAgeAfterBuilt() > 0 && buildingPlacement.getTickAgeAfterBuilt() % 100 == 0)
-            updateBorderBps(buildingPlacement);
+            updateHighlightBps(buildingPlacement);
     }
 
     @Override
     public int getRange(BuildingPlacement placement) {
         return (getUpgradeLevel(placement) > 0 && placement.isBuilt) ? CallLightning.RANGE : 0;
+    }
+
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ, placement.level, hasActiveAddon(NightSourceAddon.class)));
     }
 
     @Override

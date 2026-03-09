@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ability.Abilities;
+import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.addon.BuildingAddon;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.faction.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -168,5 +170,13 @@ public abstract class Building {
 
     public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
 
+    }
+
+    public String getUpgradedName(BuildingPlacement buildingPlacement) {
+        ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
+        if (key == null) {
+            return "Unknown";
+        }
+        return I18n.get("buildings." + (getFaction() != null && getFaction() != Faction.NONE ? getFaction().toString().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
     }
 }

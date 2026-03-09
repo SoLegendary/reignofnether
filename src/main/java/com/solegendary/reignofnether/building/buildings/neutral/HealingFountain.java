@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.buildings.neutral;
 
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
@@ -9,6 +10,7 @@ import com.solegendary.reignofnether.building.buildings.placements.HealingFounta
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -76,6 +78,15 @@ public class HealingFountain extends Building implements RangeIndicatorAddon {
     @Override
     public int getRange(BuildingPlacement placement) {
         return HealingFountainPlacement.RANGE;
+    }
+
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ, placement.level));
     }
 
     @Override

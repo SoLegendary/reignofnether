@@ -41,7 +41,7 @@ public class DataStorage {
             ResourceLocation rl = ReignOfNetherRegistries.DATA_TYPE.getKey(type);
             CompoundTag element = new CompoundTag();
             element.putString("key", rl.toString());
-            element.put("data", type.encode.apply(dataTypeObjectEntry.getKey()));
+            element.put("data", type.encode.apply(dataTypeObjectEntry.getValue()));
             dataStorageTag.add(element);
         }
 
@@ -52,7 +52,7 @@ public class DataStorage {
     public <T> T getData(DataType<T> type) {
         ensureRegistered(type);
 
-        return (T) data.getOrDefault(type, type.getDefaultValue());
+        return (T) data.computeIfAbsent(type, (unused) -> type.getDefaultValue());
     }
 
     public <T> void setData(DataType<T> type, T data) {

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -18,7 +19,6 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -109,10 +109,11 @@ public class CursorClientEvents {
         else if (actionName == null)
             leftClickAction = null;
 
+        RangeIndicatorAddon hudSelectedRIA;
         if (HudClientEvents.hudSelectedEntity instanceof RangeIndicator ri) {
             ri.updateHighlightBps();
-        } else if (HudClientEvents.hudSelectedPlacement instanceof RangeIndicator ri) {
-            ri.updateHighlightBps();
+        } else if (HudClientEvents.hudSelectedPlacement != null && (hudSelectedRIA = HudClientEvents.hudSelectedPlacement.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
+            hudSelectedRIA.updateHighlightBps(HudClientEvents.hudSelectedPlacement);
         }
     }
 
