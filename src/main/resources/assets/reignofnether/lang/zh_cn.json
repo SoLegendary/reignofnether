@@ -1445,13 +1445,15 @@
   "sandbox.reignofnether.publish_scenario_tooltip1": "发布场景地图",
   "sandbox.reignofnether.publish_scenario_tooltip2": "将这张地图设为可供游玩的场景预设",
   "sandbox.reignofnether.publish_scenario_tooltip3": "禁用其他一切可选的游戏模式与游戏规则",
+  "sandbox.reignofnether.scenario.reset_role.tooltip1": "重置所选角色为默认值",
+  "sandbox.reignofnether.scenario.reset_role.tooltip2": "警告：此行为将移除所选角色绑定的所有单位与建筑！",
+
   "sandbox.reignofnether.custom_buildings_info.tooltip1": "使用此处展示的 RTS 结构方块",
   "sandbox.reignofnether.custom_buildings_info.tooltip2": "保存自定义的建筑",
   "sandbox.reignofnether.custom_buildings_info.tooltip3": "（点击以获取一个 RTS 结构方块）",
   "sandbox.reignofnether.custom_buildings_info.building_menu": "（鼠标右击以自定义）",
   "sandbox.reignofnether.custom_buildings.deregister.tooltip1": "注销建筑物",
   "sandbox.reignofnether.custom_buildings.deregister.tooltip2": "警告：将移除所有此类型的建筑物！",
-
   "sandbox.reignofnether.custom_buildings.change_icon.tooltip1": "修改图标方块",
   "sandbox.reignofnether.custom_buildings.set_capturable.label": "可占据",
   "sandbox.reignofnether.custom_buildings.set_capturable.tooltip1": "可以被邻近单位数量最多的玩家所占据",
