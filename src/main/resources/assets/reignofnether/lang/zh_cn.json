@@ -1445,6 +1445,9 @@
   "sandbox.reignofnether.publish_scenario_tooltip1": "发布场景地图",
   "sandbox.reignofnether.publish_scenario_tooltip2": "将这张地图设为可供游玩的场景预设",
   "sandbox.reignofnether.publish_scenario_tooltip3": "禁用其他一切可选的游戏模式与游戏规则",
+  "sandbox.reignofnether.configure_scenario": "配置场景",
+  "sandbox.reignofnether.cycle_scenario_role": "场景角色：%s",
+  "sandbox.reignofnether.scenario_role_none": "无",
   "sandbox.reignofnether.scenario.reset_role.tooltip1": "重置所选角色为默认值",
   "sandbox.reignofnether.scenario.reset_role.tooltip2": "警告：此行为将移除所选角色绑定的所有单位与建筑！",
 
