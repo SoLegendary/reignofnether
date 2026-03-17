@@ -1466,6 +1466,7 @@
   "sandbox.reignofnether.scenario.npc_role_true": "NPC 身份：是",
   "sandbox.reignofnether.scenario.npc_role_false": "NPC 身份：否",
   "sandbox.reignofnether.scenario.npc_role_tooltip": "玩家无法作为 NPC 身份游玩",
+  "sandbox.reignofnether.scenario.close_and_save": "关闭并保存场景",
   "sandbox.reignofnether.scenario.help_tooltip1": "配置游玩此场景地图的玩家可选择的身份。",
   "sandbox.reignofnether.scenario.help_tooltip2": "开始场景后，所选身份所属的建筑和单位",
   "sandbox.reignofnether.scenario.help_tooltip3": "将被分配给选择此身份的玩家。",
