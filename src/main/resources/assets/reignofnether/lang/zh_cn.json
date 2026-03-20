@@ -1410,6 +1410,7 @@
   "hud.gamemode.reignofnether.start_scenario": "开始场景",
   "hud.gamemode.reignofnether.choose_scenario_role": "身份：%s（%s 派系）",
   "hud.gamemode.reignofnether.taken_scenario_role": "（%s 已选定）",
+  "hud.gamemode.reignofnether.npc_scenario_role": "（NPC 专用）",
   "hud.gamemode.reignofnether.cycle_scenario_role": "（鼠标左击以切换）",
 
   "hud.gamerule.reignofnether.shift_click": "（按住 Shift 键以更快调整）",
@@ -1451,7 +1452,8 @@
   "sandbox.reignofnether.publish_scenario_tooltip3": "禁用其他一切可选的游戏模式与游戏规则",
   "sandbox.reignofnether.publish_scenario_tooltip_confirm": "你确定要发布吗？",
   "sandbox.reignofnether.publish_scenario_tooltip_cancel": "（鼠标右击以取消）",
-  "sandbox.reignofnether.publish_scenario_tooltip_error": "",
+  "sandbox.reignofnether.publish_scenario_tooltip_error1": "所有身份都没有分配到任何单位/建筑！",
+  "sandbox.reignofnether.publish_scenario_tooltip_error2": "至少需要设置一名非 NPC 身份！",
   "sandbox.reignofnether.configure_scenario": "配置场景身份",
   "sandbox.reignofnether.cycle_scenario_role": "场景身份：%s",
   "sandbox.reignofnether.scenario_role_none": "无",
@@ -1478,6 +1480,7 @@
   "sandbox.reignofnether.scenario.help_tooltip1": "配置游玩此场景地图的玩家可选择的身份。",
   "sandbox.reignofnether.scenario.help_tooltip2": "开始场景后，所选身份所属的建筑和单位",
   "sandbox.reignofnether.scenario.help_tooltip3": "将被分配给选择此身份的玩家。",
+  "sandbox.reignofnether.scenario.npc_role_error": "所选身份为 NPC 专用！",
 
   "sandbox.reignofnether.custom_buildings_info.tooltip1": "使用此处展示的 RTS 结构方块",
   "sandbox.reignofnether.custom_buildings_info.tooltip2": "保存自定义的建筑",
