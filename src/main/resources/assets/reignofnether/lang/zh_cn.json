@@ -1481,6 +1481,7 @@
   "sandbox.reignofnether.scenario.help_tooltip2": "开始场景后，所选身份所属的建筑和单位",
   "sandbox.reignofnether.scenario.help_tooltip3": "将被分配给选择此身份的玩家。",
   "sandbox.reignofnether.scenario.npc_role_error": "所选身份为 NPC 专用！",
+  "sandbox.reignofnether.scenario.saved_all_roles": "场景身份已全部保存！",
 
   "sandbox.reignofnether.custom_buildings_info.tooltip1": "使用此处展示的 RTS 结构方块",
   "sandbox.reignofnether.custom_buildings_info.tooltip2": "保存自定义的建筑",
