@@ -37,7 +37,7 @@ public class Wave {
             case VILLAGERS -> spawnIllagerWave(level, this);
             case MONSTERS -> spawnMonsterWave(level, this);
             case PIGLINS -> spawnPiglinWave(level, this);
-            case NONE -> {
+            case NONE, NEUTRAL -> {
                 switch (new Random().nextInt(3)) {
                     case 0 -> spawnIllagerWave(level, this);
                     case 1 -> spawnMonsterWave(level, this);
@@ -86,7 +86,7 @@ public class Wave {
                     else
                         newFaction = Faction.VILLAGERS;
                 }
-                case NONE -> {
+                case NONE, NEUTRAL -> {
                     switch (random.nextInt(3)) {
                         case 0 -> newFaction = Faction.MONSTERS;
                         case 1 -> newFaction = Faction.VILLAGERS;

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.network.FriendlyByteBuf;
@@ -49,6 +50,11 @@ public class PlayerClientboundPacket {
         }
     }
 
+    public static void publishScenarioMap() {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.PUBLISH_SCENARIO_MAP, "", 0L, 0, Faction.NONE));
+    }
+
     public static void syncRtsGameTime(Long rtsGameTicks) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new PlayerClientboundPacket(PlayerAction.SYNC_RTS_GAME_TIME, "", rtsGameTicks, 0, Faction.NONE));
@@ -77,6 +83,11 @@ public class PlayerClientboundPacket {
     public static void syncBeaconOwnerTicks(String playerName, long ticks) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new PlayerClientboundPacket(PlayerAction.SYNC_BEACON_OWNER_TICKS, playerName, ticks, 0, Faction.NONE));
+    }
+
+    public static void setRTSCamera(String playerName, boolean value) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.SET_RTS_CAMERA, playerName, (long) (value ? 1 : 0), 0, Faction.NONE));
     }
 
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1, int value2, Faction faction) {
@@ -117,12 +128,14 @@ public class PlayerClientboundPacket {
                             case REMOVE_RTS_PLAYER -> PlayerClientEvents.removeRTSPlayer(playerName);
                             case RESET_RTS -> PlayerClientEvents.resetRTS(false);
                             case RESET_RTS_HARD -> PlayerClientEvents.resetRTS(true);
+                            case PUBLISH_SCENARIO_MAP -> PlayerClientEvents.publishScenarioMap();
                             case SYNC_RTS_GAME_TIME -> PlayerClientEvents.syncRtsGameTime(value1);
                             case LOCK_RTS -> PlayerClientEvents.setRTSLock(true);
                             case UNLOCK_RTS -> PlayerClientEvents.setRTSLock(false);
                             case ENABLE_START_RTS -> PlayerClientEvents.setCanStartRTS(true);
                             case DISABLE_START_RTS -> PlayerClientEvents.setCanStartRTS(false);
                             case SYNC_BEACON_OWNER_TICKS -> PlayerClientEvents.syncBeaconOwnerTicks(playerName, value1);
+                            case SET_RTS_CAMERA -> OrthoviewClientEvents.tryToSetCamera(playerName, value1 == 1L);
                         }
                         success.set(true);
                     });

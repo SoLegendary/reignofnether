@@ -18,6 +18,8 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.BooleanValue> PVP_MODES_ONLY;
     public static GameRules.Key<GameRules.BooleanValue> SLANTED_BUILDING;
     public static GameRules.Key<GameRules.IntegerValue> ALLOWED_HEROES;
+    public static GameRules.Key<GameRules.BooleanValue> LOCK_ALLIANCES;
+    public static GameRules.Key<GameRules.BooleanValue> SCENARIO_MODE;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -70,7 +72,15 @@ public class GameRuleRegistrar {
         );
         // enable heroes in all gamemodes
         ALLOWED_HEROES = GameRules.register("allowedHeroes", GameRules.Category.PLAYER,
-                GameRules.IntegerValue.create(1)
+                GameRules.IntegerValue.create(2)
+        );
+        // only allow alliances to be made/broken with non-RTS players (ie. before a game starts)
+        LOCK_ALLIANCES = GameRules.register("lockAlliances", GameRules.Category.PLAYER,
+                GameRules.BooleanValue.create(false)
+        );
+        // map is set to be played as a scenario by the player that opens it
+        SCENARIO_MODE = GameRules.register("scenarioMode", GameRules.Category.MISC,
+                GameRules.BooleanValue.create(false)
         );
     }
 }

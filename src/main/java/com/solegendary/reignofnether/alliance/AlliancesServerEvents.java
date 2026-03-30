@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.alliance;
 
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -73,6 +75,24 @@ public class AlliancesServerEvents {
             }
         }
     }
+
+    public static void applyScenarioAlliances() {
+        alliances.clear();
+        for (ScenarioRole role1 : ScenarioServerEvents.scenarioRoles) {
+            for (ScenarioRole role2 : ScenarioServerEvents.scenarioRoles) {
+                if (role1.index != role2.index) {
+                    if (role1.teamNumber == role2.teamNumber &&
+                        !AlliancesServerEvents.isAllied(role1.name, role2.name)) {
+                        addAlliance(role1.name, role2.name);
+                    } else if (role1.teamNumber != role2.teamNumber &&
+                        AlliancesServerEvents.isAllied(role1.name, role2.name)) {
+                        removeAlliance(role1.name, role2.name);
+                    }
+                }
+            }
+        }
+    }
+
     public static void resetAllAlliances() {
         alliances.clear();
         AllianceClientboundPacket.resetAlliances();

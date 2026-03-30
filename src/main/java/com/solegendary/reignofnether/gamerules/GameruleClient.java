@@ -35,7 +35,9 @@ public class GameruleClient {
     public static boolean pvpModesOnly = false;
     public static double beaconWinMinutes = 10;
     public static boolean slantedBuilding = true;
-    public static int allowedHeroes = 1;
+    public static int allowedHeroes = 2;
+    public static boolean lockAlliances = false;
+    public static boolean scenarioMode = false;
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -46,7 +48,7 @@ public class GameruleClient {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/repeating_command_block_back.png"),
                 (Keybinding) null,
                 () -> gamerulesMenuOpen,
-                () -> false,
+                () -> scenarioMode,
                 () -> !StartPosClientEvents.isStarting,
                 () -> gamerulesMenuOpen = !gamerulesMenuOpen,
                 null,
@@ -154,8 +156,12 @@ public class GameruleClient {
             I18n.get("commands.reignofnether.gamerule.pvp_modes_only")
         ));
         buttons.add(new GameruleBooleanButton("slantedBuilding", slantedBuilding,
-            () -> GameruleServerboundPacket.setSlantedBuilding(!slantedBuilding),
-            I18n.get("commands.reignofnether.gamerule.slanted_buildings")
+                () -> GameruleServerboundPacket.setSlantedBuilding(!slantedBuilding),
+                I18n.get("commands.reignofnether.gamerule.slanted_buildings")
+        ));
+        buttons.add(new GameruleBooleanButton("lockAlliances", lockAlliances,
+                () -> GameruleServerboundPacket.setLockAlliances(!lockAlliances),
+                I18n.get("commands.reignofnether.gamerule.lock_alliances")
         ));
         buttons.add(new GameruleIntegerButton("allowedHeroes: " + Math.round(allowedHeroes),
             () -> {

@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
@@ -103,6 +104,10 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -124,10 +129,17 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(SpiderUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(SpiderUnit.class, EntityDataSerializers.INT);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
     // combat stats

@@ -109,42 +109,6 @@ public class Button {
         this.tooltipLines = tooltipLines;
     }
 
-    // constructor for unit selection buttons
-    public Button(String name, int iconSize, ResourceLocation iconRl, LivingEntity entity, Supplier<Boolean> isSelected,
-                  Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
-                  @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
-        this.name = name;
-        this.iconResource = iconRl;
-        this.iconSize = iconSize;
-        this.iconFrameSize = iconSize + 8;
-        this.iconSelectedFrameSize = iconSize + 10;
-        this.entity = entity;
-        this.isSelected = isSelected;
-        this.isHidden = isHidden;
-        this.isEnabled = isEnabled;
-        this.onLeftClick = onLeftClick;
-        this.onRightClick = onRightClick;
-        this.tooltipLines = tooltipLines;
-    }
-
-    // constructor for building selection buttons
-    public Button(String name, int iconSize, ResourceLocation iconRl, BuildingPlacement building, Supplier<Boolean> isSelected,
-                  Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, @Nullable Runnable onLeftClick,
-                  @Nullable Runnable onRightClick, @Nullable List<FormattedCharSequence> tooltipLines) {
-        this.name = name;
-        this.iconResource = iconRl;
-        this.iconSize = iconSize;
-        this.iconFrameSize = iconSize + 8;
-        this.iconSelectedFrameSize = iconSize + 10;
-        this.building = building;
-        this.isSelected = isSelected;
-        this.isHidden = isHidden;
-        this.isEnabled = isEnabled;
-        this.onLeftClick = onLeftClick;
-        this.onRightClick = onRightClick;
-        this.tooltipLines = tooltipLines;
-    }
-
     public void renderHealthBar(PoseStack poseStack) {
         if (entity != null)
             HealthBarClientEvents.renderForEntity(poseStack, entity,

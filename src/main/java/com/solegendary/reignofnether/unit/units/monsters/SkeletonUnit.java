@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
@@ -39,6 +40,7 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.NotNull;
@@ -97,6 +99,10 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     public int getMaxResources() {return maxResources;}
     public MountGoal getMountGoal() {return mountGoal;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -119,10 +125,17 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(SkeletonUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(SkeletonUnit.class, EntityDataSerializers.INT);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
     // combat stats
@@ -134,7 +147,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return attackRange;}
     public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage;}
+    public float getUnitAttackDamage() {return attackDamage + getPowerLevel();}
     public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
@@ -305,6 +318,11 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
         getMainHandItem().setDamageValue(0);
     }
 
+    public int getPowerLevel() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        return itemStack.getEnchantmentLevel(Enchantments.POWER_ARROWS);
+    }
+
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
@@ -314,5 +332,10 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     @Override
     protected PathNavigation createNavigation(Level level) {
         return new AmphibiousPathNavigation(this, level);
+    }
+
+    @Override
+    public boolean hasBonusDamage() {
+        return getPowerLevel() > 0;
     }
 }

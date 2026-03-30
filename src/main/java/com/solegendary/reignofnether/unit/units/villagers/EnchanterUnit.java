@@ -28,6 +28,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.EnchanterAnimations;
 import com.solegendary.reignofnether.unit.modelling.renderers.EnchanterRenderer;
 import com.solegendary.reignofnether.unit.modelling.renderers.RoyalGuardRenderer;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -126,6 +127,10 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private GenericTargetedSpellGoal castEnchantCivilGoal;
     public GenericTargetedSpellGoal getCastEnchantCivilGoal() { return castEnchantCivilGoal; }
     private GenericTargetedSpellGoal castEnchantMilitaryGoal;
@@ -158,10 +163,17 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(EnchanterUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(EnchanterUnit.class, EntityDataSerializers.INT);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
     // combat stats

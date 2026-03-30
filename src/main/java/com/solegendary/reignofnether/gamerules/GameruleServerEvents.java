@@ -93,6 +93,18 @@ public class GameruleServerEvents {
                 double value = ((Integer) args.get("value").getResult()).doubleValue();
                 GameruleClientboundPacket.setAllowedHeroes((long) value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("lockAlliances")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setLockAlliances(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("scenarioMode")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setScenarioMode(value);
+            }
         }
     }
 
@@ -126,6 +138,10 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setSlantedBuilding(slantedBuilding);
             int allowHeroes = server.getGameRules().getRule(GameRuleRegistrar.ALLOWED_HEROES).get();
             GameruleClientboundPacket.setAllowedHeroes(allowHeroes);
+            boolean lockAlliances = server.getGameRules().getRule(GameRuleRegistrar.LOCK_ALLIANCES).get();
+            GameruleClientboundPacket.setLockAlliances(lockAlliances);
+            boolean scenarioMode = server.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();
+            GameruleClientboundPacket.setScenarioMode(scenarioMode);
         }
     }
 }

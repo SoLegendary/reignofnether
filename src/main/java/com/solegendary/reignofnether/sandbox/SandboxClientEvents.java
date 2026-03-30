@@ -21,16 +21,18 @@ import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerboundPacket;
+import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.ArrayUtil;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -74,7 +76,7 @@ public class SandboxClientEvents {
             case VILLAGERS -> VillagerUnit.getBuildingButtons();
             case MONSTERS -> ZombieVillagerUnit.getBuildingButtons();
             case PIGLINS -> GruntUnit.getBuildingButtons();
-            case NONE -> getNeutralBuildingButtons();
+            case NONE, NEUTRAL-> getNeutralBuildingButtons();
         };
     }
 
@@ -158,7 +160,7 @@ public class SandboxClientEvents {
 
                 ProductionItems.WILDFIRE.getPlaceButton()
             );
-            case NONE -> List.of(
+            case NONE, NEUTRAL -> List.of(
                 ProductionItems.ENDERMAN.getPlaceButton(),
                 ProductionItems.POLAR_BEAR.getPlaceButton(),
                 ProductionItems.GRIZZLY_BEAR.getPlaceButton(),
@@ -174,7 +176,7 @@ public class SandboxClientEvents {
             case VILLAGERS -> I18n.get("hud.faction.reignofnether.villager");
             case MONSTERS -> I18n.get("hud.faction.reignofnether.monster");
             case PIGLINS -> I18n.get("hud.faction.reignofnether.piglin");
-            case NONE -> I18n.get("hud.faction.reignofnether.neutral");
+            case NONE, NEUTRAL -> I18n.get("hud.faction.reignofnether.neutral");
         };
     }
 
@@ -191,12 +193,7 @@ public class SandboxClientEvents {
         return new Button(
                 "Toggle Faction",
                 Button.itemIconSize,
-                switch (faction) {
-                    case VILLAGERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
-                    case MONSTERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
-                    case PIGLINS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
-                    case NONE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep.png");
-                },
+                MiscUtil.getFactionIcon(faction),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
@@ -206,7 +203,7 @@ public class SandboxClientEvents {
                         case VILLAGERS -> faction = Faction.MONSTERS;
                         case MONSTERS -> faction = Faction.PIGLINS;
                         case PIGLINS -> faction = Faction.NONE;
-                        case NONE -> faction = Faction.VILLAGERS;
+                        case NONE, NEUTRAL -> faction = Faction.VILLAGERS;
                     }
                 },
                 () -> {
@@ -214,7 +211,7 @@ public class SandboxClientEvents {
                         case VILLAGERS -> faction = Faction.NONE;
                         case MONSTERS -> faction = Faction.VILLAGERS;
                         case PIGLINS -> faction = Faction.MONSTERS;
-                        case NONE -> faction = Faction.PIGLINS;
+                        case NONE, NEUTRAL -> faction = Faction.PIGLINS;
                     }
                 },
                 List.of(
@@ -459,11 +456,54 @@ public class SandboxClientEvents {
                 PlayerServerboundPacket::resetRTS,
                 null,
                 List.of(
-                    fcs(I18n.get("sandbox.reignofnether.exit1")),
-                    fcs(I18n.get("sandbox.reignofnether.exit2"))
+                        fcs(I18n.get("sandbox.reignofnether.exit1"), true)
                 )
         );
     }
+
+    public static Button getPublishScenarioButton() {
+        List<FormattedCharSequence> tooltips = ScenarioClientEvents.confirmPublishScenario ? List.of(
+                fcs(I18n.get("sandbox.reignofnether.publish_scenario_tooltip1"), true),
+                fcs(I18n.get("sandbox.reignofnether.publish_scenario_tooltip_confirm"))
+        ) : List.of(
+                fcs(I18n.get("sandbox.reignofnether.publish_scenario_tooltip1"), true),
+                fcs(I18n.get("sandbox.reignofnether.publish_scenario_tooltip2")),
+                fcs(I18n.get("sandbox.reignofnether.publish_scenario_tooltip3"))
+        );
+        return new Button(
+                "Publish Scenario Map",
+                Button.itemIconSize,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/book.png"),
+                (Keybinding) null,
+                () -> ScenarioClientEvents.confirmPublishScenario,
+                () -> false,
+                () -> true,
+                ScenarioClientEvents::pressedPublishScenarioButton,
+                () -> ScenarioClientEvents.confirmPublishScenario = false,
+                tooltips
+        );
+    }
+
+    public static Button getConfigureScenarioButton() {
+        return new Button(
+                "Configure Scenario",
+                Button.itemIconSize,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_conditional.png"),
+                (Keybinding) null,
+                ScenarioClientEvents::isMenuOpen,
+                () -> false,
+                () -> true,
+                () -> ScenarioClientEvents.setMenuOpen(!ScenarioClientEvents.isMenuOpen()),
+                null,
+                List.of(
+                        fcs(I18n.get("sandbox.reignofnether.configure_scenario"))
+                )
+        );
+    }
+
+
+
+
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {

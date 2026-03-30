@@ -47,6 +47,13 @@ public class UnitSyncClientboundPacket {
         );
     }
 
+    public static void sendSyncScenarioRoleIndexPacket(Unit unit) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new UnitSyncClientboundPacket(UnitSyncAction.SYNC_SCENARIO_ROLE_INDEX,
+                        ((LivingEntity) unit).getId(), unit.getScenarioRoleIndex(),0,0,0,0,0,0,0,0, "")
+        );
+    }
+
     public static void sendSyncStatsPacket(LivingEntity entity) {
         boolean isBuilding = false;
         ResourceName gatherTarget = ResourceName.NONE;
@@ -171,6 +178,7 @@ public class UnitSyncClientboundPacket {
                     switch (this.syncAction) {
                         case LEAVE_LEVEL -> UnitClientEvents.onEntityLeave(this.entityId);
                         case SYNC_OWNERNAME -> UnitClientEvents.syncOwnerName(this.entityId, ownerName);
+                        case SYNC_SCENARIO_ROLE_INDEX -> UnitClientEvents.syncScenarioRoleIndex(this.entityId, this.targetId);
                         case SYNC_STATS -> UnitClientEvents.syncUnitStats(
                                 this.entityId,
                                 this.health,

@@ -22,6 +22,7 @@ import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.hud.TitleClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -32,6 +33,8 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
+import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
@@ -89,6 +92,8 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CustomBuildingClientEvents.class);
         vanillaEventBus.register(SoundClientEvents.class);
         vanillaEventBus.register(PlayerDisplayClientEvents.class);
+        vanillaEventBus.register(ScenarioClientEvents.class);
+        vanillaEventBus.register(TextInputClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(GameruleServerEvents.class);
@@ -112,5 +117,6 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(TimeServerEvents.class);
         vanillaEventBus.register(CustomBuildingServerEvents.class);
         vanillaEventBus.register(CommandsServerEvents.class);
+        vanillaEventBus.register(ScenarioServerEvents.class);
     }
 }

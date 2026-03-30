@@ -22,6 +22,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.MarauderAnimations;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -122,10 +123,17 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(MarauderUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(MarauderUnit.class, EntityDataSerializers.INT);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
     // combat stats
@@ -151,6 +159,10 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
+
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
 
     // endregion
 

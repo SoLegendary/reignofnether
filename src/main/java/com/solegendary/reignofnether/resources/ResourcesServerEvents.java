@@ -9,9 +9,12 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
@@ -215,13 +218,24 @@ public class ResourcesServerEvents {
         Resources resources;
         if (TutorialServerEvents.isEnabled()) {
             resources = new Resources(playerName,
-                STARTING_FOOD_TUTORIAL,
-                STARTING_WOOD_TUTORIAL,
-                STARTING_ORE_TUTORIAL
+                    STARTING_FOOD_TUTORIAL,
+                    STARTING_WOOD_TUTORIAL,
+                    STARTING_ORE_TUTORIAL
             );
         } else {
             resources = new Resources(playerName, STARTING_FOOD, STARTING_WOOD, STARTING_ORE);
         }
+        resourcesList.add(resources);
+        ResourcesClientboundPacket.syncResources(resourcesList);
+    }
+
+    public static void assignScenarioResources(RTSPlayer rtsPlayer) {
+        ScenarioRole role = ScenarioUtils.getScenarioRole(false, rtsPlayer.scenarioRoleIndex);
+        resourcesList.removeIf(r -> r.ownerName.equals(rtsPlayer.name));
+        Resources resources;
+        resources = role == null ?
+                new Resources(rtsPlayer.name, 0,0,0) :
+                new Resources(rtsPlayer.name, role.startingResources.food, role.startingResources.wood, role.startingResources.ore);
         resourcesList.add(resources);
         ResourcesClientboundPacket.syncResources(resourcesList);
     }

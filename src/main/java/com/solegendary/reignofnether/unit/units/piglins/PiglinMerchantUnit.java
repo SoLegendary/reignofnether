@@ -20,6 +20,7 @@ import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -29,6 +30,7 @@ import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.PiglinMerchantAnimations;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.core.BlockPos;
@@ -157,10 +159,17 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(PiglinMerchantUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(PiglinMerchantUnit.class, EntityDataSerializers.INT);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
     // combat stats
@@ -183,6 +192,10 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
+
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
 
     // endregion
 

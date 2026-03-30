@@ -209,4 +209,8 @@ public class MyMath {
         int scale = (int) Math.pow(10, precision);
         return (double) Math.round(value * scale) / scale;
     }
+
+    public static long getBlockPosHash(BlockPos bp) {
+        return ((long)(bp.getX() & 0x3FFFFFF) << 38) | ((long)(bp.getY() & 0xFFF) << 26) | (bp.getZ() & 0x3FFFFFF);
+    }
 }

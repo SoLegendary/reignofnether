@@ -4,7 +4,11 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.gamerules.GameruleClient;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
+import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -29,7 +33,7 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 
 public class TimeServerEvents {
 
-    private static Random RANDOM = new Random();
+    private static long serverStartTime = 0;
 
     private static int bloodMoonTicksLeft = 0;
     private static LivingEntity bloodMoonOwner = null;
@@ -87,6 +91,13 @@ public class TimeServerEvents {
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
             return;
+
+        if (serverStartTime == 0)
+            serverStartTime = evt.level.getDayTime();
+
+        if (PlayerServerEvents.rtsPlayers.isEmpty() && evt.level.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get()) {
+            ((ServerLevel) evt.level).setDayTime(serverStartTime);
+        }
 
         if (bloodMoonTicksLeft > 0 && bloodMoonOwner != null) {
             bloodMoonTicksLeft -= 1;

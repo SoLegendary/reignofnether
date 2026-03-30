@@ -94,7 +94,7 @@ public class SurvivalClientEvents {
             case VILLAGERS -> "units.villagers.reignofnether.";
             case MONSTERS -> "units.monsters.reignofnether.";
             case PIGLINS -> "units.piglins.reignofnether.";
-            case NONE -> "";
+            case NONE, NEUTRAL -> "";
         };
         return I18n.get(localePrefix + string);
     }
@@ -139,7 +139,7 @@ public class SurvivalClientEvents {
             case VILLAGERS -> I18n.get("hud.faction.reignofnether.villager");
             case MONSTERS -> I18n.get("hud.faction.reignofnether.monster");
             case PIGLINS -> I18n.get("hud.faction.reignofnether.piglin");
-            case NONE -> I18n.get("hud.faction.reignofnether.random");
+            case NONE, NEUTRAL -> I18n.get("hud.faction.reignofnether.random");
         };
     }
 

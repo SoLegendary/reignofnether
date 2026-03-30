@@ -154,6 +154,9 @@ public interface Unit {
     String getOwnerName();
     void setOwnerName(String name);
 
+    int getScenarioRoleIndex(); // if -1, no role
+    void setScenarioRoleIndex(int index);
+
     default double getDamageTakenIncrease() {
         MobEffectInstance mei = ((LivingEntity) this).getEffect(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get());
         double value = mei == null ? 0 : (mei.getAmplifier() + 1) * 0.05d;
@@ -469,6 +472,7 @@ public interface Unit {
     // call from addAdditionalSaveData
     public default void addUnitSaveData(@NotNull CompoundTag pCompound) {
         pCompound.putString("ownerName", getOwnerName());
+        pCompound.putInt("scenarioRoleIndex", getScenarioRoleIndex());
         if (getAnchor() != null) {
             pCompound.putInt("anchorPosX", getAnchor().getX());
             pCompound.putInt("anchorPosY", getAnchor().getY());
@@ -487,6 +491,7 @@ public interface Unit {
     // call from readAdditionalSaveData
     public default void readUnitSaveData(@NotNull CompoundTag pCompound) {
         setOwnerName(pCompound.getString("ownerName"));
+        setScenarioRoleIndex(pCompound.getInt("scenarioRoleIndex"));
         BlockPos anchorPos = new BlockPos(
             pCompound.getInt("anchorPosX"),
             pCompound.getInt("anchorPosY"),

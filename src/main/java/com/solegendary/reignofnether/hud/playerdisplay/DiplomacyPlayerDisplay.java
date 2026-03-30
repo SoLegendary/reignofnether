@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AllianceAction;
 import com.solegendary.reignofnether.alliance.AllianceServerboundPacket;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -21,6 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -312,6 +314,10 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     }
 
     private void requestAlliance() {
+        if (GameruleClient.lockAlliances && MC.player != null) {
+            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+            return;
+        }
         AllianceServerboundPacket.doAllianceAction(AllianceAction.REQUEST, playerName);
         AlliancesClient.outboundPendingAlliances.add(playerName);
     }
@@ -326,6 +332,10 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     }
 
     private void disbandAlliance() {
+        if (GameruleClient.lockAlliances && MC.player != null) {
+            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+            return;
+        }
         AllianceServerboundPacket.doAllianceAction(AllianceAction.DISBAND, playerName);
     }
 

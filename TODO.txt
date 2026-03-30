@@ -1,47 +1,91 @@
 
-1.20.1-1.3.0
+1.20.1-1.3.1
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
 
+[✔] New button in sandbox mode for every unit and building next to the allegiance button to mark it as player 1-8
+    [🟡] Should also be saved to building data
+    [❌] Use start menu colours for each icon
 
-New Heroes
-----------
+[✔] New button next to the usual exit and reset button, when pressed:
+    [✔] Sets /gamerule scenarioMode true
+    [✔] Does not change building or unit allegiances
+    [✔] Disabled if there are no role 1-8 buildings set
 
-[❌] Overflowing graveyards
 
-[❌] Wraiths
-    - No knockback on melee attacks
-    - Enemies hit by wraiths enough times get feared (uncontrollable and issued a move-away command from the last wraith that hit it)
-    - 2 population
-    - built at dungeons
-    - needs a lab upgrade - possession?
+When /gamerule scenarioMode true:
+    [🟡] All usual gamemode /gamerule options are hidden, only 'Start Game' and 'Change Role'
+        [🟡] Can be clicked to cycle through roles (icon changes to the same faction and tooltip shows the name)
+        [🟡] When pressed grants control of all the selected role's units and buildings
+        [🟡] Cannot select a role that has no units/buildings assigned, or that another player already chose
+            [🟡] Save role selection to RTSPlayer and RTSPlayerSaveData
+        [❌] When role is cycled, move camera to the first found building (or unit if no building)
 
+    [🟡] Can revert to usual options by manually setting /gamerule scenarioMode false
+    [🟡] time does not change
+
+[✔] Save all roles and scenario settings to map data
+
+[❌] Show different colours for each different assigned role
+[❌] Fire events for addons to use when a scenario starts
+[✔] Command block API for UnitActionItem commands
+[✔] Command block API to grant victory to a player, all allies and defeat all enemies
+[✔] /rtsapi-summon <Owner> <CreatureName> <coords> [<nbt>]
+[✔] /rtsapi-add/remove-research <ResearchItem> <PlayerName>
+[✔] /rtsapi-set-rts-camera <PlayerName> true/false
+[🟡] Change /rtsapi-set-unit-owner to target oldOwner -> newOwner
+
+[❌] Custom Building commands
+    [❌] GUI menu:
+    - Use EditBox from TextInputClientEvents
+    - Replace "More options coming soon" with a toggle to switch to the commands page
+    - On commands page:
+         - List of command string inputs (by default 1 empty)
+         - On left of each, trigger condition
+            - On built, on destroy, periodically while built (with extra timer button)
+         - On right of each, delete button
+         - Below last list, add new command line
+
+    [❌] Send packets to server
+    [❌] Save and load data
 
 Bugfixes
 --------
-[✔] Fixed a crash from putting a headhunter or evoker egg in a spawner
-[✔] Players can no longer build on barrier blocks
-[✔] Custom buildings no longer provide night range before being completed
-[✔] Fixed a possible crash from winning with a beacon
-[✔] You can no longer stack additional spawns at a unit spawner by pulling existing mobs away
+[✔] Spawners no longer spawn units when there are nearby player-owned units
+[✔] Fixed an issue where custom buildings sometimes did not complete all of their blocks
+[✔] Fixed neutral/hostile units not showing where they are moving to in sandbox mode
+[✔] Fixed not being able to control non-RoN units in sandbox or when the wouldyoukindly cheat was enabled
+[✔] Nether zones on placed buildings no longer disappear after exiting sandbox mode
 
-[✔] Fixed the royal guard's abilities not causing any knockback
+[✔] Added a confirm step to the de-register custom building button
+
+[✔] Units aren't considered garrisoned after reloading a save (pillagers in watchtower)
+
+[❌] rts-hard-reset doesn't destroy buildings but rts-reset does?
+
 
 Quality of Life
 ---------------
-[✔] Improved slime and magma cube pathfinding
-    - They will still sometimes get stuck at corners, no longer go in straight lines into walls and trees anymore
+[✔] In sandbox mode, pressing F3 will show info for the moused-over block
+[✔] /rts-reset and /rts-reset-hard can now only be run with permission level 2 or higher (ie. command blocks or higher)
+[✔] The default for /gamerule allowedHeroes is now 2
+[✔] Added /gamerule lockAlliances true/false
+     - While enabled, alliances can only be made/broken with players who have not yet joined the match
+[❌] Ready check instead of start game countdown
 
 Balance
 -------
-[✔] The Wildfire's Molten Bomb no longer does any damage on impact
-[✔] The Royal Guard's mace slam mana cost increased from 40 to 60, but cooldown decreased from 30s to 20s
-[✔] The Royal Guard's taunting cry mana cost increased from 60 to 75, but cooldown decreased from 50s to 40s
-[✔] The Royal Guard's battle rage mana gain reduced from (0.4, 0.6, 0.8) to (0.3, 0.4, 0.5)
-
+[🟡] The Enchanter can now enchant allied units of other factions:
+     - Skeletons and Headhunters get power (+1 damage)
+     - Brutes get sharpness (+1 damage)
+     - Any unit wearing a chestplate (except Marauders and Hoglins)
+     - Grunts and Zombie villagers can be enchanted with Efficiency
+[✔] Chainmail chestplates at the superior blacksmith cost reduced from 60 ore to 45 ore
+[✔] Cost of Hoglin Rider research increased from (350 food, 300 wood, 120s) to (450 food, 350 wood, 180s)
+[✔] Wildfire attack speed reduced from 0.75 to 0.6
 
 Languages
 ---------

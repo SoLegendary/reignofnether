@@ -66,6 +66,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     public int numGarrisonZones = 0;
     public int numGarrisonEntries = 0;
     public int numGarrisonExits = 0;
+    public ArrayList<CustomBuildingCommand> commands = new ArrayList<>(List.of(new CustomBuildingCommand()));
     private final Random random = new Random();
 
     public CustomBuilding(String structureName, Vec3i structureSize, Block portraitBlock, CompoundTag structureNbt) {

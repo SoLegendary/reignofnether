@@ -9,26 +9,42 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.player.PlayerClientboundPacket;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
+import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitActionItem;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.server.level.ServerPlayer;
@@ -72,14 +88,38 @@ public class CommandsServerEvents {
         );
 
         dispatcher.register(Commands.literal("rtsapi-set-unit-owner")
-            .requires(source -> source.hasPermission(2))
-            .then(unitSelectionTail(ctx -> ""))
-            .then(Commands.argument("ownerName", StringArgumentType.string())
-                .then(unitSelectionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
-            )
-            .then(Commands.argument("ownerSelector", EntityArgument.player())
-                .then(unitSelectionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
-            )
+                .requires(source -> source.hasPermission(2))
+                .then(setUnitOwnerTail(ctx -> ""))
+                .then(Commands.argument("ownerName", StringArgumentType.string())
+                        .then(setUnitOwnerTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+                        .then(Commands.argument("newOwnerName", StringArgumentType.string())
+                                .then(setUnitOwnerTail(
+                                        ctx -> StringArgumentType.getString(ctx, "ownerName"),
+                                        ctx -> StringArgumentType.getString(ctx, "newOwnerName")
+                                ))
+                        )
+                        .then(Commands.argument("newOwnerSelector", EntityArgument.player())
+                                .then(setUnitOwnerTail(
+                                        ctx -> StringArgumentType.getString(ctx, "ownerName"),
+                                        ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "newOwnerSelector"))
+                                ))
+                        )
+                )
+                .then(Commands.argument("ownerSelector", EntityArgument.player())
+                        .then(setUnitOwnerTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+                        .then(Commands.argument("newOwnerName", StringArgumentType.string())
+                                .then(setUnitOwnerTail(
+                                        ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
+                                        ctx -> StringArgumentType.getString(ctx, "newOwnerName")
+                                ))
+                        )
+                        .then(Commands.argument("newOwnerSelector", EntityArgument.player())
+                                .then(setUnitOwnerTail(
+                                        ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
+                                        ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "newOwnerSelector"))
+                                ))
+                        )
+                )
         );
 
         dispatcher.register(Commands.literal("rtsapi-set-building-owner")
@@ -145,6 +185,165 @@ public class CommandsServerEvents {
                 )
             )
         );
+
+        dispatcher.register(Commands.literal("rtsapi-unit-action")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.argument("ownerName", StringArgumentType.string())
+                        .then(unitActionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+                )
+                .then(Commands.argument("ownerSelector", EntityArgument.player())
+                        .then(unitActionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+                )
+        );
+
+        dispatcher.register(Commands.literal("rtsapi-unit-action")
+            .requires(source -> source.hasPermission(2))
+            .then(Commands.argument("ownerName", StringArgumentType.string())
+                .then(unitActionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+            )
+            .then(Commands.argument("ownerSelector", EntityArgument.player())
+                .then(unitActionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+            )
+        );
+
+        dispatcher.register(Commands.literal("rtsapi-victory")
+            .requires(source -> source.hasPermission(2))
+            .then(Commands.argument("ownerName", StringArgumentType.string())
+                .then(Commands.argument("reason", StringArgumentType.string())
+                    .executes(ctx -> victoryPlayer(
+                        StringArgumentType.getString(ctx, "ownerName"),
+                        StringArgumentType.getString(ctx, "reason")
+                ))))
+            .then(Commands.argument("ownerSelector", EntityArgument.player())
+                .then(Commands.argument("reason", StringArgumentType.string())
+                    .executes(ctx -> victoryPlayer(
+                        StringArgumentType.getString(ctx, "ownerName"),
+                        StringArgumentType.getString(ctx, "reason")
+                    ))))
+        );
+
+        dispatcher.register(Commands.literal("rtsapi-defeat")
+            .requires(source -> source.hasPermission(2))
+            .then(Commands.argument("ownerName", StringArgumentType.string())
+                .then(Commands.argument("reason", StringArgumentType.string())
+                    .executes(ctx -> defeatPlayer(
+                        StringArgumentType.getString(ctx, "ownerName"),
+                        StringArgumentType.getString(ctx, "reason")
+                    ))))
+            .then(Commands.argument("ownerSelector", EntityArgument.player())
+                .then(Commands.argument("reason", StringArgumentType.string())
+                    .executes(ctx -> defeatPlayer(
+                        StringArgumentType.getString(ctx, "ownerName"),
+                        StringArgumentType.getString(ctx, "reason")
+                    ))))
+        );
+
+        dispatcher.register(Commands.literal("rtsapi-summon")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.argument("ownerName", StringArgumentType.string())
+                        .then(Commands.argument("entity", ResourceLocationArgument.id())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
+                                        BuiltInRegistries.ENTITY_TYPE.keySet().stream(), builder))
+                                .executes(ctx -> summonEntity(
+                                        ctx,
+                                        StringArgumentType.getString(ctx, "ownerName"),
+                                        ResourceLocationArgument.getId(ctx, "entity"),
+                                        BlockPos.containing(ctx.getSource().getPosition()),
+                                        null
+                                ))
+                                .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                                        .executes(ctx -> summonEntity(
+                                                ctx,
+                                                StringArgumentType.getString(ctx, "ownerName"),
+                                                ResourceLocationArgument.getId(ctx, "entity"),
+                                                BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+                                                null
+                                        ))
+                                        .then(Commands.argument("nbt", CompoundTagArgument.compoundTag())
+                                                .executes(ctx -> summonEntity(
+                                                        ctx,
+                                                        StringArgumentType.getString(ctx, "ownerName"),
+                                                        ResourceLocationArgument.getId(ctx, "entity"),
+                                                        BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+                                                        CompoundTagArgument.getCompoundTag(ctx, "nbt")
+                                                ))
+                                        )
+                                )
+                        )
+                )
+        );
+
+        dispatcher.register(Commands.literal("rtsapi-add-research")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.argument("researchItem", ResourceLocationArgument.id())
+                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
+                                ReignOfNetherRegistries.PRODUCTION_ITEM.keySet().stream(), builder))
+                        .then(Commands.argument("playerName", StringArgumentType.string())
+                                .executes(ctx -> addResearch(
+                                        ctx,
+                                        ResourceLocationArgument.getId(ctx, "researchItem"),
+                                        StringArgumentType.getString(ctx, "playerName")
+                                ))
+                        )
+                        .then(Commands.argument("playerSelector", EntityArgument.player())
+                                .executes(ctx -> addResearch(
+                                        ctx,
+                                        ResourceLocationArgument.getId(ctx, "researchItem"),
+                                        getPlayerName(EntityArgument.getPlayer(ctx, "playerSelector"))
+                                ))
+                        )
+                )
+        );
+
+        dispatcher.register(Commands.literal("rtsapi-remove-research")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.argument("researchItem", ResourceLocationArgument.id())
+                        .suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
+                                ReignOfNetherRegistries.PRODUCTION_ITEM.keySet().stream(), builder))
+                        .then(Commands.argument("playerName", StringArgumentType.string())
+                                .executes(ctx -> removeResearch(
+                                        ctx,
+                                        ResourceLocationArgument.getId(ctx, "researchItem"),
+                                        StringArgumentType.getString(ctx, "playerName")
+                                ))
+                        )
+                        .then(Commands.argument("playerSelector", EntityArgument.player())
+                                .executes(ctx -> removeResearch(
+                                        ctx,
+                                        ResourceLocationArgument.getId(ctx, "researchItem"),
+                                        getPlayerName(EntityArgument.getPlayer(ctx, "playerSelector"))
+                                ))
+                        )
+                )
+        );
+
+        dispatcher.register(Commands.literal("rtsapi-set-unit-enemy-search")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.argument("ownerName", StringArgumentType.string())
+                        .then(searchBehaviourTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+                )
+                .then(Commands.argument("ownerSelector", EntityArgument.player())
+                        .then(searchBehaviourTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+                )
+        );
+
+        dispatcher.register(Commands.literal("rtsapi-set-camera")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.argument("playerName", StringArgumentType.string())
+                        .then(Commands.argument("value", BoolArgumentType.bool())
+                                .executes(ctx -> setRTSCamera(
+                                        ctx,
+                                        StringArgumentType.getString(ctx, "playerName"),
+                                        BoolArgumentType.getBool(ctx, "value")
+                                ))))
+                .then(Commands.argument("playerSelector", EntityArgument.player())
+                        .then(Commands.argument("value", BoolArgumentType.bool())
+                                .executes(ctx -> setRTSCamera(
+                                        ctx,
+                                        StringArgumentType.getString(ctx, "playerSelector"),
+                                        BoolArgumentType.getBool(ctx, "value")
+                                ))))
+        );
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> placeBuildingTail(NameResolver ownerResolver) {
@@ -178,6 +377,224 @@ public class CommandsServerEvents {
             );
     }
 
+    private static ArgumentBuilder<CommandSourceStack, ?> unitActionTail(NameResolver ownerResolver) {
+        return Commands.argument("selectFrom", BlockPosArgument.blockPos())
+                .then(Commands.argument("selectTo", BlockPosArgument.blockPos())
+                        .then(Commands.argument("action", StringArgumentType.word())
+                                .suggests((ctx, builder) ->
+                                        SharedSuggestionProvider.suggest(
+                                                List.of(
+                                                        UnitAction.NONE.name(),
+                                                        UnitAction.ATTACK.name(),
+                                                        UnitAction.ATTACK_BUILDING.name(),
+                                                        UnitAction.STOP.name(),
+                                                        UnitAction.HOLD.name(),
+                                                        UnitAction.MOVE.name(),
+                                                        UnitAction.GARRISON.name(),
+                                                        UnitAction.UNGARRISON.name(),
+                                                        UnitAction.ATTACK_MOVE.name(),
+                                                        UnitAction.FOLLOW.name(),
+                                                        UnitAction.BUILD_REPAIR.name(),
+                                                        UnitAction.FARM.name(),
+                                                        UnitAction.RETURN_RESOURCES.name(),
+                                                        UnitAction.RETURN_RESOURCES_TO_CLOSEST.name(),
+                                                        UnitAction.DELETE.name()
+                                                ),
+                                                builder
+                                        )
+                                )
+                                // (1) action only – no position or entity target
+                                .executes(ctx -> issueUnitAction(
+                                        ctx,
+                                        ownerResolver.resolve(ctx),
+                                        BlockPosArgument.getLoadedBlockPos(ctx, "selectFrom"),
+                                        BlockPosArgument.getLoadedBlockPos(ctx, "selectTo"),
+                                        StringArgumentType.getString(ctx, "action"),
+                                        null,   // targetPos
+                                        null
+                                ))
+                                // (2) action + targetPos (MOVE, ATTACK_MOVE, GARRISON, BUILD_REPAIR, FARM, RETURN_RESOURCES, etc)
+                                .then(Commands.argument("targetPos", BlockPosArgument.blockPos())
+                                        .executes(ctx -> issueUnitAction(
+                                                ctx,
+                                                ownerResolver.resolve(ctx),
+                                                BlockPosArgument.getLoadedBlockPos(ctx, "selectFrom"),
+                                                BlockPosArgument.getLoadedBlockPos(ctx, "selectTo"),
+                                                StringArgumentType.getString(ctx, "action"),
+                                                BlockPosArgument.getLoadedBlockPos(ctx, "targetPos"),
+                                                null
+                                        ))
+                                )
+                                // (3) action + target unit (first unit found between targetFrom to targetTo) (ATTACK, FOLLOW, entity-targeting abilities)
+                                .then(Commands.argument("targetFrom", BlockPosArgument.blockPos())
+                                    .then(Commands.argument("targetTo", BlockPosArgument.blockPos())
+                                            .executes(ctx -> issueUnitAction(
+                                                    ctx,
+                                                    ownerResolver.resolve(ctx),
+                                                    BlockPosArgument.getLoadedBlockPos(ctx, "selectFrom"),
+                                                    BlockPosArgument.getLoadedBlockPos(ctx, "selectTo"),
+                                                    StringArgumentType.getString(ctx, "action"),
+                                                    BlockPosArgument.getLoadedBlockPos(ctx, "targetFrom"),
+                                                    BlockPosArgument.getLoadedBlockPos(ctx, "targetTo")
+                                            ))
+                                    )
+                                )
+                        )
+                );
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> searchBehaviourTail(NameResolver ownerResolver) {
+        return Commands.argument("selectFrom", BlockPosArgument.blockPos())
+                .then(Commands.argument("selectTo", BlockPosArgument.blockPos())
+                        .then(Commands.argument("behaviour", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+                                        List.of(
+                                                EnemySearchBehaviour.NEAREST_ENEMY_BUILDING.name(),
+                                                EnemySearchBehaviour.NEAREST_ENEMY_UNIT.name(),
+                                                EnemySearchBehaviour.NEAREST_ENEMY_WORKER.name(),
+                                                EnemySearchBehaviour.NONE.name()
+                                        ),
+                                        builder
+                                ))
+                                .executes(ctx -> setUnitSearchBehaviour(
+                                        ctx,
+                                        ownerResolver.resolve(ctx),
+                                        BlockPosArgument.getLoadedBlockPos(ctx, "selectFrom"),
+                                        BlockPosArgument.getLoadedBlockPos(ctx, "selectTo"),
+                                        StringArgumentType.getString(ctx, "behaviour")
+                                ))
+                        )
+                );
+    }
+
+    /**
+     * Command-block friendly way to issue UnitActions
+     * @param ownerName  selects only units with this ownerName
+     * @param selectFrom start of unit selection range
+     * @param selectTo   end of unit selection range
+     * @param actionName string value of UnitAction to enact
+     * @param targetFrom targeted pos (or start of target selection range if targetTo is non-null)
+     * @param targetTo   end of target selection range
+     */
+    private static int issueUnitAction(
+            CommandContext<CommandSourceStack> ctx,
+            String ownerName,
+            BlockPos selectFrom,
+            BlockPos selectTo,
+            String actionName,
+            BlockPos targetFrom,
+            BlockPos targetTo
+    ) {
+        UnitAction action;
+        try {
+            action = UnitAction.valueOf(actionName.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            ctx.getSource().sendFailure(Component.literal(
+                    "Unknown action '" + actionName + "'. Valid values: " +
+                            java.util.Arrays.stream(UnitAction.values())
+                                    .map(a -> a.name().toLowerCase())
+                                    .collect(java.util.stream.Collectors.joining(", "))
+            ));
+            return 0;
+        }
+        int[] unitIds = collectUnitIds(selectFrom, selectTo);
+        if (unitIds.length == 0) {
+            ctx.getSource().sendFailure(Component.literal("No units found in the selection"));
+            return 0;
+        }
+        int[] targetUnitIds = new int[]{};
+        if (targetFrom != null && targetTo != null) { // find one
+            targetUnitIds = collectUnitIds(targetFrom, targetTo);
+        }
+
+        UnitActionItem item = new UnitActionItem(
+                ownerName,
+                action,
+                targetUnitIds.length != 0 ? targetUnitIds[0] : -1,
+                unitIds,
+                targetFrom != null ? targetFrom : new BlockPos(0,0,0),
+                new BlockPos(0,0,0)
+        );
+        item.action(ctx.getSource().getLevel());
+
+        ctx.getSource().sendSuccess(
+                () -> Component.literal(
+                        "Issued " + action.name().toLowerCase() +
+                                " to " + unitIds.length + " unit(s)" +
+                                (ownerName.isEmpty() ? "" : " (owner: " + ownerName + ")")
+                ),
+                true
+        );
+        return unitIds.length;
+    }
+
+    private static int victoryPlayer(
+            String ownerName,
+            String reason
+    ) {
+        int playersDefeated = 0;
+        ArrayList<String> playersToDefeat = new ArrayList<>();
+        synchronized (PlayerServerEvents.rtsPlayers) {
+            if (PlayerServerEvents.isRTSPlayer(ownerName))
+                for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
+                    if (!rtsPlayer.name.equals(ownerName) && !AlliancesServerEvents.isAllied(rtsPlayer.name, ownerName))
+                        playersToDefeat.add(rtsPlayer.name);
+        }
+        for (String playerName : playersToDefeat) {
+            PlayerServerEvents.defeat(playerName, reason);
+            playersDefeated += 1;
+        }
+        return playersDefeated;
+    }
+
+    private static int defeatPlayer(
+            String ownerName,
+            String reason
+    ) {
+        synchronized (PlayerServerEvents.rtsPlayers) {
+            if (PlayerServerEvents.isRTSPlayer(ownerName)) {
+                PlayerServerEvents.defeat(ownerName, reason);
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    private static int summonEntity(
+            CommandContext<CommandSourceStack> ctx,
+            String ownerName,
+            ResourceLocation entityId,
+            BlockPos pos,
+            CompoundTag nbt
+    ) {
+        ServerLevel level = ctx.getSource().getLevel();
+
+        CompoundTag tag = nbt != null ? nbt.copy() : new CompoundTag();
+        tag.putString("id", entityId.toString());
+
+        Entity entity = EntityType.loadEntityRecursive(tag, level, e -> {
+                    e.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5,
+                            e.getYRot(), e.getXRot());
+                    return e;
+                });
+
+        if (entity == null) {
+            ctx.getSource().sendFailure(Component.literal("Failed to create entity: " + entityId));
+            return 0;
+        }
+        level.addFreshEntity(entity);
+
+        if (entity instanceof Unit unit) {
+            unit.setOwnerName(ownerName);
+            UnitSyncClientboundPacket.sendSyncOwnerNamePacket(unit);
+        }
+
+        ctx.getSource().sendSuccess(
+                () -> Component.literal("Summoned " + entityId + " for " + ownerName + " at " + formatPos(pos)), true
+        );
+        return 1;
+    }
+
     private static Rotation parseRotation(String input) throws CommandSyntaxException {
         return switch (input.toLowerCase()) {
             case "0" -> Rotation.NONE;
@@ -189,16 +606,21 @@ public class CommandsServerEvents {
         };
     }
 
-    private static ArgumentBuilder<CommandSourceStack, ?> unitSelectionTail(NameResolver ownerResolver) {
+    private static ArgumentBuilder<CommandSourceStack, ?> setUnitOwnerTail(NameResolver ownerResolver) {
+        return setUnitOwnerTail(null, ownerResolver);
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> setUnitOwnerTail(NameResolver currentOwnerResolver, NameResolver newOwnerResolver) {
         return Commands.argument("from", BlockPosArgument.blockPos())
-            .then(Commands.argument("to", BlockPosArgument.blockPos())
-                .executes(ctx -> setUnitOwner(
-                    ctx,
-                    ownerResolver.resolve(ctx),
-                    BlockPosArgument.getLoadedBlockPos(ctx, "from"),
-                    BlockPosArgument.getLoadedBlockPos(ctx, "to")
-                ))
-            );
+                .then(Commands.argument("to", BlockPosArgument.blockPos())
+                        .executes(ctx -> setUnitOwner(
+                                ctx,
+                                currentOwnerResolver != null ? currentOwnerResolver.resolve(ctx) : null,
+                                newOwnerResolver.resolve(ctx),
+                                BlockPosArgument.getLoadedBlockPos(ctx, "from"),
+                                BlockPosArgument.getLoadedBlockPos(ctx, "to")
+                        ))
+                );
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> buildingSelectionTail(NameResolver ownerResolver) {
@@ -283,6 +705,7 @@ public class CommandsServerEvents {
 
     private static int setUnitOwner(
         CommandContext<CommandSourceStack> ctx,
+        String currentOwnerName,
         String ownerName,
         BlockPos from,
         BlockPos to
@@ -292,7 +715,9 @@ public class CommandsServerEvents {
 
         List<Integer> ids = new ArrayList<>();
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
-            if (entity instanceof Unit unit && isWithin(entity.getOnPos(), min, max)) {
+            if (entity instanceof Unit unit &&
+                (currentOwnerName == null || unit.getOwnerName().equals(currentOwnerName)) &&
+                isWithin(entity.getOnPos(), min, max)) {
                 ids.add(entity.getId());
             }
         }
@@ -379,6 +804,80 @@ public class CommandsServerEvents {
         ctx.getSource().sendSuccess(
             () -> Component.literal("Changed " + resource.name().toLowerCase() + " by " + amount + " for " + playerName),
             true
+        );
+        return 1;
+    }
+
+    private static int addResearch(
+            CommandContext<CommandSourceStack> ctx,
+            ResourceLocation researchItemName,
+            String playerName
+    ) {
+        ResearchServerEvents.addResearch(playerName, researchItemName);
+        ResearchServerEvents.syncResearch(playerName);
+        ctx.getSource().sendSuccess(
+                () -> Component.literal("Added research '" + researchItemName + "' for " + playerName),
+                true
+        );
+        return 1;
+    }
+
+    private static int removeResearch(
+            CommandContext<CommandSourceStack> ctx,
+            ResourceLocation researchItemName,
+            String playerName
+    ) {
+        ResearchServerEvents.removeResearch(playerName, researchItemName);
+        ResearchServerEvents.syncResearch(playerName);
+        ctx.getSource().sendSuccess(
+                () -> Component.literal("Removed research '" + researchItemName + "' for " + playerName),
+                true
+        );
+        return 1;
+    }
+
+    private static int setUnitSearchBehaviour(
+            CommandContext<CommandSourceStack> ctx,
+            String ownerName,
+            BlockPos from,
+            BlockPos to,
+            String behaviourName
+    ) {
+        EnemySearchBehaviour behaviour = EnemySearchBehaviour.valueOf(behaviourName.trim().toUpperCase());
+        BlockPos min = min(from, to);
+        BlockPos max = max(from, to);
+
+        int changed = 0;
+        for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
+            if (entity instanceof AttackerUnit attacker
+                    && entity instanceof Unit unit
+                    && unit.getOwnerName().equals(ownerName)
+                    && isWithin(entity.getOnPos(), min, max)) {
+                attacker.setEnemySearchBehaviour(behaviour);
+                changed++;
+            }
+        }
+        if (changed == 0) {
+            ctx.getSource().sendFailure(Component.literal("No attacker units owned by '" + ownerName + "' found in selection"));
+        } else {
+            int finalChanged = changed;
+            ctx.getSource().sendSuccess(
+                    () -> Component.literal("Set search behaviour to " + behaviour.name() + " for " + finalChanged + " unit(s)"),
+                    true
+            );
+        }
+        return changed;
+    }
+
+    private static int setRTSCamera(
+            CommandContext<CommandSourceStack> ctx,
+            String playerName,
+            Boolean value
+    ) {
+        PlayerClientboundPacket.setRTSCamera(playerName, value);
+        ctx.getSource().sendSuccess(
+                () -> Component.literal("Set RTS camera '" + value + "' for " + playerName),
+                true
         );
         return 1;
     }

@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.RectZone;
+import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -147,9 +148,10 @@ public class PlayerDisplayClientEvents {
 
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
-        if (MC.screen == null || !MC.screen.getTitle().getString().contains("topdowngui_container")) {
+        if (TextInputClientEvents.isAnyInputFocused())
             return;
-        }
+        if (MC.screen == null || !MC.screen.getTitle().getString().contains("topdowngui_container"))
+            return;
         for (Button button : renderedButtons)
             button.checkPressed(evt.getKeyCode());
     }

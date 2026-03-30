@@ -138,31 +138,16 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
         );
     }
 
-    @Override
-    public List<EntityType<? extends Mob>> getAllowedMobTypes() {
-        return List.of(
-                EntityRegistrar.MILITIA_UNIT.get(),
-                EntityRegistrar.PILLAGER_UNIT.get(),
-                EntityRegistrar.VINDICATOR_UNIT.get(),
-                EntityRegistrar.EVOKER_UNIT.get()
-        );
-    }
 
     @Override
     public boolean canEnchant(LivingEntity le) {
-        return getAllowedMobTypes().contains(le.getType()) &&
-                le instanceof Unit &&
+        return le instanceof Unit &&
                 !le.getItemBySlot(EquipmentSlot.CHEST).isEmpty() &&
                 !le.getItemBySlot(EquipmentSlot.CHEST).getAllEnchantments().containsKey(EnchantmentRegistrar.FORTYIFYING.get());
     }
 
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
-        if (!getAllowedMobTypes().contains(targetEntity.getType())) {
-            if (level.isClientSide())
-                HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error3"));
-            return;
-        }
         if (targetEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
             if (level.isClientSide())
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error6"));

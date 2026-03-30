@@ -2,11 +2,16 @@
 Features
 --------
 
-[❌] /gamerule scenarioMap gamerule for sandbox, (default false), when active:
-    - Exiting sandbox does not change building or unit allegiances
-    - Exiting sandbox marks owned buildings to be assigned to the next player that logs in
-    - The next player that logs in starts in Scenario Mode instead of letting them choose the gamemode
+[❌] Overflowing graveyards
 
+[❌] Wraiths
+    - No knockback on melee attacks
+    - Enemies hit by wraiths enough times get feared (uncontrollable and issued a move-away command from the last wraith that hit it)
+    - 2 population
+    - built at dungeons
+    - needs a lab upgrade - possession?
+
+[❌] Invisible block that units avoid
 
 [❌] Let villagers repair iron golems with ore for 1hp per ore, masons repair faster
 
@@ -55,8 +60,6 @@ Quality of Life Features
     - Start/complete research
     - Created unit
     - Used ability
-
-[❌] Command block API for UnitActionItem commands
 
 [❌] Added /gamerule for bridges over void
 

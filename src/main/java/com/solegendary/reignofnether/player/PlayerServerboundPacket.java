@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -81,11 +82,13 @@ public class PlayerServerboundPacket {
                 HudClientEvents.showTemporaryMessage(I18n.get("hud.reignofnether.invalid_start_location"));
                 return;
             }
+            if (faction == Faction.NEUTRAL)
+                faction = Faction.NONE;
             PlayerAction playerAction = switch (faction) {
                 case VILLAGERS -> PlayerAction.START_RTS_VILLAGERS;
                 case MONSTERS -> PlayerAction.START_RTS_MONSTERS;
                 case PIGLINS -> PlayerAction.START_RTS_PIGLINS;
-                case NONE -> PlayerAction.START_RTS_SANDBOX;
+                case NONE, NEUTRAL -> PlayerAction.START_RTS_SANDBOX;
             };
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(playerAction, MC.player.getId(), x, y, z));
             GameModeServerboundPacket.setAndLockAllClientGameModes(ClientGameModeHelper.gameMode);
@@ -153,6 +156,13 @@ public class PlayerServerboundPacket {
         }
     }
 
+    public static void startRTSScenario(int roleIndex) {
+        Minecraft MC = Minecraft.getInstance();
+        if (MC.player != null && MC.level != null) {
+            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.START_RTS_SCENARIO, MC.player.getId(), (double) roleIndex, 0d, 0d));
+        }
+    }
+
     public static void cancelStartRTSEveryone() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null && MC.level != null) {
@@ -162,6 +172,10 @@ public class PlayerServerboundPacket {
 
     public static void resetRTS() {
         PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.RESET_RTS, -1, 0d, 0d, 0d));
+    }
+
+    public static void publishScenario() {
+        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.PUBLISH_SCENARIO_MAP, -1, 0d, 0d, 0d));
     }
 
     // resets and also removes all neutral units and buildings
@@ -180,14 +194,6 @@ public class PlayerServerboundPacket {
                 0d
             ));
         }
-    }
-
-    public static void lockRTS() {
-        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.LOCK_RTS, -1, 0d, 0d, 0d));
-    }
-
-    public static void unlockRTS() {
-        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.UNLOCK_RTS, -1, 0d, 0d, 0d));
     }
 
     public static void enableRTSSyncing() {
@@ -219,6 +225,15 @@ public class PlayerServerboundPacket {
         this.z = z;
     }
 
+    public PlayerServerboundPacket(PlayerAction action, int playerId) {
+        this.action = action;
+        this.playerId = playerId;
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+    }
+
+
     public PlayerServerboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(PlayerAction.class);
         this.playerId = buffer.readInt();
@@ -235,6 +250,11 @@ public class PlayerServerboundPacket {
         buffer.writeDouble(this.z);
     }
 
+    private static final List<PlayerAction> opOnlyActions = List.of(
+            PlayerAction.RESET_RTS,
+            PlayerAction.RESET_RTS_HARD
+    );
+
     // server-side packet-consuming functions
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
@@ -247,6 +267,10 @@ public class PlayerServerboundPacket {
                 return;
             } else if (playerId != -1 && player.getId() != playerId) {
                 ReignOfNether.LOGGER.warn("PlayerServerboundPacket: Tried to process packet from " + player.getName() + " for id: " + this.playerId);
+                success.set(false);
+                return;
+            } else if (opOnlyActions.contains(action) && !player.hasPermissions(4)) {
+                ReignOfNether.LOGGER.warn("PlayerServerboundPacket: Non-op player " + player.getName() + " tried to run action: " + this.action.name());
                 success.set(false);
                 return;
             }
@@ -263,6 +287,10 @@ public class PlayerServerboundPacket {
                     PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.PIGLINS);
                 case START_RTS_SANDBOX ->
                     PlayerServerEvents.startRTS(this.playerId, new Vec3(this.x, this.y, this.z), Faction.NONE);
+                case START_RTS_SCENARIO ->
+                        PlayerServerEvents.startRTSScenario(this.playerId, (int) this.x);
+                case PUBLISH_SCENARIO_MAP ->
+                        PlayerServerEvents.publishScenarioMap();
                 case START_RTS_EVERYONE -> StartPosServerEvents.startGameCountdown();
                 case CANCEL_START_RTS_EVERYONE -> StartPosServerEvents.cancelStartGameCountdown(false);
                 case DEFEAT -> PlayerServerEvents.defeat(this.playerId, Component.translatable("server.reignofnether.surrendered").getString());

@@ -7,16 +7,18 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioServerboundPacket;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.ArrayUtil;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
@@ -199,6 +201,62 @@ public class SandboxActionButtons {
                         fcs(I18n.get("hud.relationship.reignofnether.enemy"), relationship == Relationship.HOSTILE)
                 )
         );
+    }
+
+    public static Button getCycleScenarioRoleButton() {
+        return new Button(
+                "Switch Building Scenario Role",
+                Button.itemIconSize,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_conditional.png"),
+                (Keybinding) null,
+                () -> false,
+                () -> false,
+                () -> true,
+                () -> cycleUnitOrBuildingRoleIndex(false),
+                () -> cycleUnitOrBuildingRoleIndex(true),
+                List.of(
+                        fcs(I18n.get("sandbox.reignofnether.cycle_scenario_role", getHudSelectedScenarioRoleName()))
+                )
+        );
+    }
+
+    private static void cycleUnitOrBuildingRoleIndex(boolean reverse) {
+        int currentRoleIndex = 0;
+        if (HudClientEvents.hudSelectedPlacement != null) {
+            currentRoleIndex = HudClientEvents.hudSelectedPlacement.scenarioRoleIndex;
+        } else if (HudClientEvents.hudSelectedEntity instanceof Unit unit) {
+            currentRoleIndex = unit.getScenarioRoleIndex();
+        }
+        currentRoleIndex += reverse ? -1 : 1;
+        if (currentRoleIndex > ScenarioClientEvents.scenarioRoles.size() - 1)
+            currentRoleIndex = -1;
+        if (currentRoleIndex < -1)
+            currentRoleIndex = ScenarioClientEvents.scenarioRoles.size() - 1;
+
+        for (LivingEntity le : UnitClientEvents.getSelectedUnits()) {
+            if (le instanceof Unit unit) {
+                ScenarioServerboundPacket.setUnitRole(currentRoleIndex, le.getId());
+                unit.setScenarioRoleIndex(currentRoleIndex);
+            }
+        }
+        for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings()) {
+            ScenarioServerboundPacket.setBuildingRole(currentRoleIndex, bpl.originPos);
+            bpl.scenarioRoleIndex = currentRoleIndex;
+        }
+    }
+
+    private static String getHudSelectedScenarioRoleName() {
+        ScenarioRole role = null;
+        if (HudClientEvents.hudSelectedEntity instanceof Unit unit) {
+            role = ScenarioUtils.getScenarioRole(true, unit.getScenarioRoleIndex());
+        } else if (HudClientEvents.hudSelectedPlacement != null) {
+            int index = HudClientEvents.hudSelectedPlacement.scenarioRoleIndex;
+            role = ScenarioUtils.getScenarioRole(true, index);
+        }
+        if (role != null) {
+            return role.name;
+        }
+        return I18n.get("sandbox.reignofnether.scenario_role_none");
     }
 
     static {

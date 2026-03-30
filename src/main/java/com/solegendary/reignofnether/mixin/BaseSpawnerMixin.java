@@ -165,10 +165,16 @@ public class BaseSpawnerMixin {
                             var nearbyNeutralUnitsOfTypeSum = 0;
                             var hasNearbyNonNeutralUnit = false;
 
-                            for (LivingEntity le : getUnitAnchoredInRange(pPos.getCenter(), (double) ACTIVATION_RANGE / 2)) {
+                            for (LivingEntity le : UnitServerEvents.getAllUnits()) {
                                 if (!(le instanceof Unit unit) || le.isDeadOrDying()) continue;
-                                if (unit.getOwnerName().isBlank() && le.getType() == entity.getType()) nearbyNeutralUnitsOfTypeSum++;
-                                if (!unit.getOwnerName().isBlank()) hasNearbyNonNeutralUnit = true;
+                                double range = (double) ACTIVATION_RANGE / 2;
+                                boolean anchoredInRange = unit.getAnchor() != null &&
+                                        unit.getAnchor().distToCenterSqr(pPos.getCenter()) < range * range;
+                                if (anchoredInRange && unit.getOwnerName().isBlank() && le.getType() == entity.getType()) {
+                                    nearbyNeutralUnitsOfTypeSum++;
+                                } else if (!unit.getOwnerName().isBlank()) {
+                                    hasNearbyNonNeutralUnit = true;
+                                }
                             }
 
                             if (nearbyNeutralUnitsOfTypeSum >= reignofnether$getMaxNearbyNeutralUnits(entity, nearbySameTypeSpawners) ||
@@ -213,16 +219,5 @@ public class BaseSpawnerMixin {
                 this.delay(pServerLevel, pPos);
             }
         }
-    }
-
-    // returns all units that have an anchor set nearby
-    private List<LivingEntity> getUnitAnchoredInRange(Vec3 pos, double range) {
-        ArrayList<LivingEntity> entities = new ArrayList<>();
-        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
-            if (le instanceof Unit unit && unit.getAnchor() != null && unit.getAnchor().distToCenterSqr(pos) < range * range) {
-                entities.add(le);
-            }
-        }
-        return entities;
     }
 }

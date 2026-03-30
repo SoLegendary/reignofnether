@@ -1,12 +1,13 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
@@ -29,6 +30,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public interface AttackerUnit {
 
@@ -45,6 +49,10 @@ public interface AttackerUnit {
 
     public Goal getAttackGoal(); // not necessarily the same goal, eg. could be melee or ranged
     public Goal getAttackBuildingGoal();
+
+    public EnemySearchBehaviour getEnemySearchBehaviour(); // not necessarily the same goal, eg. could be melee or ranged
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour);
+
 
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setUnitAttackTarget(@Nullable LivingEntity target) {
@@ -103,6 +111,8 @@ public interface AttackerUnit {
             rabg.stop();
         else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
             mabg.stopAttacking();
+
+        unit.setEnemySearchBehaviour(EnemySearchBehaviour.NONE);
     }
 
     // this setter sets a Unit field and so can't be defaulted
@@ -207,6 +217,25 @@ public interface AttackerUnit {
                 attackerUnit.retargetToClosestUnit((ServerLevel) unitMob.level());
             }
         }
+
+        if (!unitMob.level().isClientSide && unitMob.tickCount % 40 == 0) {
+            if (attackerUnit.getAttackMoveTarget() != null && attackerUnit.getEnemySearchBehaviour() != EnemySearchBehaviour.NONE) {
+                boolean hasNoTargets = ((Unit) attackerUnit).getTargetGoal().getTarget() == null;
+                if (attackerUnit.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg && mabg.getBuildingTarget() != null)
+                    hasNoTargets = false;
+                else if (attackerUnit.getAttackBuildingGoal() instanceof RangedAttackBuildingGoal<?> rabg && rabg.getBuildingTarget() != null)
+                    hasNoTargets = false;
+                if (hasNoTargets && unitMob.distanceToSqr(attackerUnit.getAttackMoveTarget().getCenter()) < 4)
+                    attackerUnit.setAttackMoveTarget(null);
+            }
+            if (attackerUnit.getAttackMoveTarget() == null || unit.isIdle()) {
+                switch (attackerUnit.getEnemySearchBehaviour()) {
+                    case NEAREST_ENEMY_BUILDING -> attackerUnit.attackMoveNearestEnemyBuilding();
+                    case NEAREST_ENEMY_UNIT -> attackerUnit.attackMoveNearestEnemyUnit(false);
+                    case NEAREST_ENEMY_WORKER -> attackerUnit.attackMoveNearestEnemyUnit(true);
+                }
+            }
+        }
     }
 
     // if the nearest target is closer than the current target, retarget to the nearest
@@ -292,5 +321,54 @@ public interface AttackerUnit {
 
     public default float getBuildingDamageMultiplier() {
         return 1.0f;
+    }
+
+    public default void attackMoveNearestEnemyBuilding() {
+        Mob mob = (Mob) this;
+        Unit unit = (Unit) this;
+        List<BuildingPlacement> buildings;
+        if (mob.level().isClientSide())
+            buildings = BuildingClientEvents.getBuildings();
+        else
+            buildings = BuildingServerEvents.getBuildings();
+
+        ArrayList<BuildingPlacement> eligibleTargets = new ArrayList<>();
+        for (BuildingPlacement buildingPlacement : buildings) {
+            if (!unit.getOwnerName().equals(buildingPlacement.ownerName) &&
+                    !AlliancesServerEvents.isAllied(unit.getOwnerName(), buildingPlacement.ownerName) &&
+                    !buildingPlacement.ownerName.isBlank() &&
+                    !buildingPlacement.getBuilding().invulnerable) {
+                eligibleTargets.add(buildingPlacement);
+            }
+        }
+        eligibleTargets.sort(Comparator.comparing(b -> b.centrePos.distToCenterSqr(((Entity) unit).position())));
+
+        if (!eligibleTargets.isEmpty())
+            setAttackMoveTarget(eligibleTargets.get(0).getClosestGroundPos(((Entity) unit).getOnPos(), 1));
+    }
+
+    public default void attackMoveNearestEnemyUnit(boolean workersOnly) {
+        Mob mob = (Mob) this;
+        Unit unit = (Unit) this;
+        List<LivingEntity> units;
+        if (mob.level().isClientSide())
+            units = UnitClientEvents.getAllUnits();
+        else
+            units = UnitClientEvents.getAllUnits();
+
+        ArrayList<LivingEntity> eligibleTargets = new ArrayList<>();
+        for (LivingEntity entity : units) {
+            if (entity instanceof Unit otherUnit &&
+                    (!workersOnly || entity instanceof WorkerUnit) &&
+                    !unit.getOwnerName().equals(otherUnit.getOwnerName()) &&
+                    !AlliancesServerEvents.isAllied(unit.getOwnerName(), otherUnit.getOwnerName()) &&
+                    !otherUnit.getOwnerName().isBlank()) {
+                eligibleTargets.add(entity);
+            }
+        }
+        eligibleTargets.sort(Comparator.comparing(e -> e.position().distanceToSqr(((Entity) unit).position())));
+
+        if (!eligibleTargets.isEmpty())
+            setAttackMoveTarget(eligibleTargets.get(0).getOnPos());
     }
 }

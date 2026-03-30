@@ -35,7 +35,6 @@ public class StartButtons {
                     fcs(LanguageUtil.getTranslation("hud.gamemode.reignofnether.sandbox_confirm"))
             )
     );
-
     public static Button villagerStartButton = new Button(
         "Villagers",
             ICON_SIZE,

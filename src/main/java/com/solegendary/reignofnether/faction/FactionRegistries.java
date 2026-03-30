@@ -24,7 +24,7 @@ public class FactionRegistries {
             case VILLAGERS -> VILLAGERS;
             case MONSTERS -> MONSTERS;
             case PIGLINS -> PIGLINS;
-            case NONE -> NONE;
+            case NONE, NEUTRAL -> NONE;
         };
     }
 

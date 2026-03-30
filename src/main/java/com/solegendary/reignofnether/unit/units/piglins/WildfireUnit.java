@@ -29,6 +29,7 @@ import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.modelling.animations.WildfireAnimations;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -133,6 +134,10 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     public int getMaxResources() {return maxResources;}
     public MountGoal getMountGoal() {return mountGoal;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -168,10 +173,17 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(WildfireUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(WildfireUnit.class, EntityDataSerializers.INT);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
     // combat stats
@@ -230,7 +242,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     final static public float attackDamage = 2.0f;
     final static public float attackBonusPerLevel = 0.25f;
-    final static public float attacksPerSecond = 0.75f;
+    final static public float attacksPerSecond = 0.6f;
     final static public float maxHealth = 120.0f;
     final static public float maxHealthBonusPerLevel = 12.0f;
     final static public float armorValue = 0.0f;

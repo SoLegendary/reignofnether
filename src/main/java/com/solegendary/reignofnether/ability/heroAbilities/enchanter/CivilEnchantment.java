@@ -146,7 +146,9 @@ public class CivilEnchantment extends AbstractEnchantment {
     @Override
     public List<EntityType<? extends Mob>> getAllowedMobTypes() {
         return List.of(
-                EntityRegistrar.VILLAGER_UNIT.get()
+                EntityRegistrar.VILLAGER_UNIT.get(),
+                EntityRegistrar.GRUNT_UNIT.get(),
+                EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get()
         );
     }
 

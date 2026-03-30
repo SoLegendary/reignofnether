@@ -219,9 +219,11 @@ public class BuildingServerboundPacket {
                     }
                 }
                 case START_PRODUCTION -> {
-                    boolean prodSuccess = ((ProductionPlacement) building).startProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)));
-                    if (prodSuccess)
-                        BuildingClientboundPacket.startProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)));
+                    if (building instanceof ProductionPlacement pBuilding) {
+                        boolean prodSuccess = pBuilding.startProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)));
+                        if (prodSuccess)
+                            BuildingClientboundPacket.startProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)));
+                    }
                 }
                 case CANCEL_PRODUCTION -> {
                     if (building instanceof ProductionPlacement pBuilding) {

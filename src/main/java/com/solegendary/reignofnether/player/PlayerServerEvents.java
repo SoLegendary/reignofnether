@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamemode.GameModeClientboundPacket;
+import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
@@ -20,6 +21,9 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.time.TimeServerEvents;
@@ -257,6 +261,7 @@ public class PlayerServerEvents {
             if (entity instanceof Unit unit) {
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                 UnitSyncClientboundPacket.sendSyncOwnerNamePacket(unit);
+                UnitSyncClientboundPacket.sendSyncScenarioRoleIndexPacket(unit);
                 UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
             }
             if (entity instanceof HeroUnit hero) {
@@ -418,7 +423,7 @@ public class PlayerServerEvents {
                 case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
                 case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
                 case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
-                case NONE -> null;
+                case NONE, NEUTRAL -> null;
             };
             rtsPlayers.add(RTSPlayer.getNewPlayer(
                     serverPlayer.getName().getString(),
@@ -533,7 +538,7 @@ public class PlayerServerEvents {
                 case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
                 case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
                 case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
-                case NONE -> null;
+                case NONE, NEUTRAL -> null;
             };
             RTSPlayer bot = RTSPlayer.getNewBot(name, faction);
             rtsPlayers.add(bot);
@@ -559,6 +564,73 @@ public class PlayerServerEvents {
                 sendMessageToAllPlayers("server.reignofnether.bot_added", true, bot.name);
                 sendMessageToAllPlayers("server.reignofnether.total_players", false, rtsPlayers.size());
             }
+            saveRTSPlayers();
+        }
+    }
+
+    public static void startRTSScenario(int playerId, int roleIndex) {
+        synchronized (rtsPlayers) {
+            ServerPlayer serverPlayer = null;
+            for (ServerPlayer player : players)
+                if (player.getId() == playerId)
+                    serverPlayer = player;
+
+            ScenarioRole role = ScenarioUtils.getScenarioRole(false, roleIndex);
+
+            if (serverPlayer == null || role == null) {
+                return;
+            }
+            if (role.isNpc) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                serverPlayer.sendSystemMessage(Component.translatable("sandbox.reignofnether.scenario.npc_role_error"));
+                serverPlayer.sendSystemMessage(Component.literal(""));
+            }
+            if (rtsLocked) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                serverPlayer.sendSystemMessage(Component.translatable("server.reignofnether.locked"));
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                return;
+            }
+            if (isRTSPlayer(serverPlayer.getId())) {
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                serverPlayer.sendSystemMessage(Component.translatable("server.reignofnether.already_started_scenario"));
+                serverPlayer.sendSystemMessage(Component.literal(""));
+                return;
+            }
+            for (RTSPlayer rtsPlayer : rtsPlayers) {
+                if (rtsPlayer.scenarioRoleIndex == roleIndex) {
+                    serverPlayer.sendSystemMessage(Component.literal(""));
+                    serverPlayer.sendSystemMessage(Component.translatable("server.reignofnether.scenario_role_taken"));
+                    serverPlayer.sendSystemMessage(Component.literal(""));
+                    return;
+                }
+            }
+            RTSPlayer rtsPlayer = RTSPlayer.getNewScenarioPlayer(
+                    serverPlayer.getName().getString(),
+                    role.faction,
+                    serverPlayer.getId(),
+                    roleIndex
+            );
+            rtsPlayers.add(rtsPlayer);
+            String playerName = serverPlayer.getName().getString();
+            ResourcesServerEvents.assignScenarioResources(rtsPlayer);
+            PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0);
+
+            for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
+                if (building.scenarioRoleIndex == roleIndex) {
+                    building.ownerName = playerName;
+                    BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(), playerName, building.scenarioRoleIndex);
+                }
+            }
+            for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+                if (le instanceof Unit unit && unit.getScenarioRoleIndex() == roleIndex) {
+                    unit.setOwnerName(playerName);
+                    UnitSyncClientboundPacket.sendSyncOwnerNamePacket(unit);
+                }
+            }
+
+            sendMessageToAllPlayers("server.reignofnether.started_scenario", true, playerName, role.name, role.faction.name());
+            PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
             saveRTSPlayers();
         }
     }
@@ -675,7 +747,8 @@ public class PlayerServerEvents {
 
     public static void enableOrthoview(int id) {
         ServerPlayer player = getPlayerById(id);
-        player.removeAllEffects();
+        if (player != null)
+            player.removeAllEffects();
 
         orthoviewPlayers.removeIf(p -> p.getId() == id);
         orthoviewPlayers.add(player);
@@ -750,7 +823,8 @@ public class PlayerServerEvents {
 
     public static void movePlayer(int playerId, double x, double y, double z) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
-        serverPlayer.teleportTo(x, y, z);
+        if (serverPlayer != null && (serverPlayer.isCreative() || serverPlayer.isSpectator()))
+            serverPlayer.teleportTo(x, y, z);
     }
 
     public static void sendMessageToAllPlayers(String msg) {
@@ -980,19 +1054,19 @@ public class PlayerServerEvents {
     public static void resetRTS(boolean hardReset) {
         StartPosServerEvents.cancelStartGameCountdown(true);
 
-        boolean isSandbox = SandboxServer.isAnyoneASandboxPlayer();
+        boolean isSandboxOrScenario = SandboxServer.isAnyoneASandboxPlayer() || serverLevel.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();
 
         synchronized (rtsPlayers) {
             rtsPlayers.clear();
 
             for (LivingEntity entity : UnitServerEvents.getAllUnits())
-                if (hardReset || (entity instanceof Unit unit && !Unit.hasAnchor(unit) && !isSandbox))
+                if (hardReset || (entity instanceof Unit unit && !Unit.hasAnchor(unit) && !isSandboxOrScenario))
                     entity.kill();
 
-            if (!isSandbox)
+            if (!isSandboxOrScenario)
                 UnitServerEvents.getAllUnits().removeIf(u -> (hardReset || (u instanceof Unit unit && !Unit.hasAnchor(unit))));
 
-            if (!isSandbox)
+            if (!isSandboxOrScenario)
                 for (LivingEntity entity : UnitServerEvents.getAllUnits())
                     if (entity instanceof Unit unit)
                         unit.setOwnerName("");
@@ -1000,13 +1074,13 @@ public class PlayerServerEvents {
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building instanceof ProductionPlacement productionBuilding)
                     productionBuilding.productionQueue.clear();
-                if ((building.getBuilding().shouldDestroyOnReset || hardReset) && !isSandbox)
+                if ((building.getBuilding().shouldDestroyOnReset || hardReset) && !isSandboxOrScenario)
                     building.destroy((ServerLevel) building.getLevel());
             }
-            if (!isSandbox)
+            if (!isSandboxOrScenario)
                 BuildingServerEvents.getBuildings().removeIf(b -> b.getBuilding().shouldDestroyOnReset || hardReset);
 
-            if (!isSandbox)
+            if (!isSandboxOrScenario)
                 for (BuildingPlacement building : BuildingServerEvents.getBuildings())
                     building.ownerName = "";
 
@@ -1020,16 +1094,7 @@ public class PlayerServerEvents {
                     sendMessageToAllPlayers("server.reignofnether.match_reset", true);
             }
             ResourcesServerEvents.resourcesList.clear();
-            BuildingServerEvents.netherZones.forEach(NetherZone::startRestoring);
-
-            // clear all saved data
-            saveRTSPlayers();
-            postGameRtsPlayers.clear();
-            saveBuildings(serverLevel);
-            BuildingServerEvents.saveNetherZones(serverLevel);
-            UnitServerEvents.saveGatherTargets(serverLevel);
-            ResourcesServerEvents.saveResources(serverLevel);
-            ResearchServerEvents.saveResearch();
+            saveAll();
 
             if (rtsLocked)
                 setRTSLock(false);
@@ -1044,6 +1109,70 @@ public class PlayerServerEvents {
         playerDefaultGameModes.replaceAll((key, oldValue) -> GameType.SPECTATOR);
         AlliancesServerEvents.playersWithAlliedControl.clear();
         TimeServerEvents.resetBloodMoon();
+    }
+
+    public static void publishScenarioMap() {
+        if (ScenarioServerEvents.getNumScenarioUnits() == 0 && ScenarioServerEvents.getNumScenarioBuildings() == 0) {
+            sendMessageToAllPlayers("server.reignofnether.scenario_published_error1");
+            return;
+        }
+
+        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+            if (le instanceof Unit unit) {
+                ScenarioRole role = ScenarioUtils.getScenarioRole(false, unit.getScenarioRoleIndex());
+                unit.setOwnerName(role != null ? role.name : "");
+                UnitSyncClientboundPacket.sendSyncScenarioRoleIndexPacket(unit);
+            }
+        }
+        for (BuildingPlacement bpl : BuildingServerEvents.getBuildings()) {
+            ScenarioRole role = ScenarioUtils.getScenarioRole(false, bpl.scenarioRoleIndex);
+            bpl.ownerName = role != null ? role.name : "";
+            BuildingClientEvents.syncBuilding(bpl, bpl.getBlocksPlaced(), bpl.ownerName, bpl.scenarioRoleIndex);
+        }
+
+        synchronized (rtsPlayers) {
+            rtsPlayers.clear();
+
+            for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
+                if (building instanceof ProductionPlacement productionBuilding)
+                    productionBuilding.productionQueue.clear();
+            }
+            ResearchServerEvents.removeAllResearch();
+            ResearchServerEvents.removeAllCheats();
+            PlayerClientboundPacket.publishScenarioMap();
+            sendMessageToAllPlayers("server.reignofnether.scenario_published", true);
+            sendMessageToAllPlayers("server.reignofnether.scenario_published_tooltip1");
+            sendMessageToAllPlayers("server.reignofnether.scenario_published_tooltip2");
+            ResourcesServerEvents.resourcesList.clear();
+            saveAll();
+
+            if (rtsLocked)
+                setRTSLock(false);
+            AlliancesServerEvents.applyScenarioAlliances();
+            SurvivalServerEvents.reset();
+        }
+        HeroServerEvents.fallenHeroes.clear();
+
+        for (ServerPlayer player : serverLevel.players())
+            player.setGameMode(GameType.SPECTATOR);
+
+        playerDefaultGameModes.replaceAll((key, oldValue) -> GameType.SPECTATOR);
+        AlliancesServerEvents.playersWithAlliedControl.clear();
+        TimeServerEvents.resetBloodMoon();
+
+        serverLevel.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).set(true, serverLevel.getServer());
+        GameruleClientboundPacket.setScenarioMode(true);
+        GameModeClientboundPacket.setAndLockAllClientGameModes(GameMode.SCENARIO);
+    }
+
+    private static void saveAll() {
+        saveRTSPlayers();
+        postGameRtsPlayers.clear();
+        saveBuildings(serverLevel);
+        BuildingServerEvents.saveNetherZones(serverLevel);
+        UnitServerEvents.saveGatherTargets(serverLevel);
+        ResourcesServerEvents.saveResources(serverLevel);
+        ResearchServerEvents.saveResearch();
     }
 
     public static void setRTSLock(boolean lock) {

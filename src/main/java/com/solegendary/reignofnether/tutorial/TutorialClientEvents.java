@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -210,14 +211,17 @@ public class TutorialClientEvents {
 
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyReleased.Pre evt) {
+        if (TextInputClientEvents.isAnyInputFocused())
+            return;
         updateStage();
     }
 
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled()) {
+        if (TextInputClientEvents.isAnyInputFocused())
             return;
-        }
+        if (!OrthoviewClientEvents.isEnabled())
+            return;
 
         if (Keybindings.ctrlMod.isDown() && Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
             nextStage();

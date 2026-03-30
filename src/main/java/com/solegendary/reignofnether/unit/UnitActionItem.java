@@ -134,12 +134,15 @@ public class UnitActionItem {
 
             if (entity instanceof Unit unit) {
                 boolean alliedControl;
-                if (level.isClientSide())
+                boolean fullControl;
+                if (level.isClientSide()) {
                     alliedControl = AlliancesClient.canControlAlly(unit.getOwnerName());
-                else
+                    fullControl = NonUnitClientEvents.canControlAllMobs();
+                } else {
                     alliedControl = AlliancesServerEvents.canControlAlly(this.ownerName, unit.getOwnerName());
-
-                if (unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer || alliedControl) {
+                    fullControl = NonUnitServerEvents.canControlAllMobs(entity.level(), this.ownerName);
+                }
+                if (unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer || alliedControl || fullControl) {
                     actionableUnits.add(unit);
                 }
             }

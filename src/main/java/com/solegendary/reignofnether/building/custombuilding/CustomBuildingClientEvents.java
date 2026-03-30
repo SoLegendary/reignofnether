@@ -39,11 +39,15 @@ public class CustomBuildingClientEvents {
     private static final ArrayList<Button> renderedButtons = new ArrayList<>();
     private static final ArrayList<RectZone> hudZones = new ArrayList<>();
 
+    public static boolean showCommandsMenu = false;
+    public static boolean deregisterConfirm = false;
+
     public static void setCustomBuildingToEdit(CustomBuilding customBuilding) {
         if (customBuildingToEdit != customBuilding)
             customBuildingToEdit = customBuilding;
         else
             customBuildingToEdit = null;
+        CustomBuildingClientEvents.deregisterConfirm = false;
     }
 
     public static CustomBuilding getCustomBuildingToEdit() {
@@ -116,10 +120,12 @@ public class CustomBuildingClientEvents {
             renderedButtons.add(CustomBuildingMenu.renderIconButtonNameAndPortrait(evt, customBuildingToEdit, blitX + 18, blitY + 18));
             renderedButtons.add(CustomBuildingMenu.renderCloseButton(evt, blitX + width - Button.itemIconSize - 12, blitY + 4));
             renderedButtons.add(CustomBuildingMenu.renderDeregisterButton(evt, blitX + width - Button.itemIconSize - 12, blitY + height - 26));
-            renderedButtons.addAll(CustomBuildingMenu.renderCustomisationButtons(evt, blitX + 6, blitY + 38));
-
-            evt.getGuiGraphics().drawString(MC.font, "More options coming soon!", blitX + 10, blitY + height - 18, 0xFFFFFF);
-
+            if (!showCommandsMenu) {
+                renderedButtons.addAll(CustomBuildingMenu.renderCustomisationButtons(evt, customBuildingToEdit,blitX + 8, blitY + 38));
+            } else {
+                renderedButtons.addAll(CustomBuildingMenu.renderCommandsButtonsAndInputs(evt, customBuildingToEdit, blitX + 6, blitY + 38));
+            }
+            renderedButtons.add(CustomBuildingMenu.renderCommandsMenuButton(evt, blitX + 10, blitY + height - 32));
             hudZones.add(new RectZone(blitX, blitY, blitX + width, blitY + height));
         }
     }

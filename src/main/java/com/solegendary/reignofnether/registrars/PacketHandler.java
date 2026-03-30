@@ -33,6 +33,8 @@ import com.solegendary.reignofnether.research.ResearchServerboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerboundPacket;
 import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
+import com.solegendary.reignofnether.scenario.ScenarioClientboundPacket;
+import com.solegendary.reignofnether.scenario.ScenarioServerboundPacket;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
@@ -307,6 +309,18 @@ public final class PacketHandler {
                 .encoder(MapMarkerClientboundPacket::encode)
                 .decoder(MapMarkerClientboundPacket::new)
                 .consumerMainThread(MapMarkerClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ScenarioServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ScenarioServerboundPacket::encode)
+                .decoder(ScenarioServerboundPacket::new)
+                .consumerMainThread(ScenarioServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ScenarioClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ScenarioClientboundPacket::encode)
+                .decoder(ScenarioClientboundPacket::new)
+                .consumerMainThread(ScenarioClientboundPacket::handle)
                 .add();
     }
 }

@@ -71,7 +71,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -143,6 +142,7 @@ public class BuildingPlacement {
     protected int totalBlocks = 0;
     protected ArrayList<BuildingBlock> blockPlaceQueue = new ArrayList<>();
     public String ownerName;
+    public int scenarioRoleIndex = -1;  // if -1, no role
     public int serverBlocksPlaced = 1;
     private int totalBlocksEverBroken = 0;
 
@@ -156,7 +156,7 @@ public class BuildingPlacement {
     private final int ANIMAL_SPAWN_RANGE_MIN = 15;
 
     protected long tickAgeAfterBuilt = 0; // not saved
-    protected long tickAge = 0; // not saved
+    public long tickAge = 0; // not saved
 
     public final BlockPos minCorner;
     public final BlockPos maxCorner;
@@ -303,7 +303,8 @@ public class BuildingPlacement {
     }
 
     public void addToBlockPlaceQueue(BuildingBlock block) {
-        this.blockPlaceQueue.add(block);
+        if (!block.getBlockState().isAir())
+            this.blockPlaceQueue.add(block);
     }
 
     public ArrayList<WorkerUnit> getBuilders(Level level) {
@@ -505,7 +506,7 @@ public class BuildingPlacement {
                     validBlocks.sort(Comparator.comparing(bb -> bb.getBlockPos().distSqr(builderPos)));
                 }
             }
-            this.blockPlaceQueue.add(validBlocks.get(0));
+            addToBlockPlaceQueue(validBlocks.get(0));
         }
     }
 

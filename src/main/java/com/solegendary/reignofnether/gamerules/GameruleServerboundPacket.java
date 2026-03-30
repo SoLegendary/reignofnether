@@ -75,6 +75,10 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_ALLOWED_HEROES, "", allowedHeroes));
     }
+    public static void setLockAlliances(boolean lockAlliances) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_LOCK_ALLIANCES, "", lockAlliances ? 1L : 0L));
+    }
 
     public GameruleServerboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -173,6 +177,10 @@ public class GameruleServerboundPacket {
                 case SET_ALLOWED_HEROES -> {
                     gameRules.getRule(GameRuleRegistrar.ALLOWED_HEROES).set(Math.toIntExact(value), server);
                     GameruleClientboundPacket.setAllowedHeroes(value);
+                }
+                case SET_LOCK_ALLIANCES -> {
+                    gameRules.getRule(GameRuleRegistrar.LOCK_ALLIANCES).set(booleanValue, server);
+                    GameruleClientboundPacket.setLockAlliances(booleanValue);
                 }
             }
             success.set(true);

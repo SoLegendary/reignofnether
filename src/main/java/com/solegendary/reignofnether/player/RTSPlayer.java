@@ -22,6 +22,7 @@ public class RTSPlayer {
     public int beaconOwnerTicks = 0; // ticks owning a beacon - will win upon reaching
     public int startPosColorId = 0;
     public RTSPlayerScores scores = new RTSPlayerScores();
+    public int scenarioRoleIndex = -1;
 
     private RTSPlayer(String playerName, Faction faction, int id) {
         this.name = playerName;
@@ -53,17 +54,18 @@ public class RTSPlayer {
         this.name = name;
     }
 
-    private RTSPlayer(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks, int[] scores) {
+    private RTSPlayer(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks, int[] scores, int scenarioRoleIndex) {
         this.name = name;
         this.id = id;
         this.ticksWithoutCapitol = ticksWithoutCapitol;
         this.faction = faction;
         this.beaconOwnerTicks = beaconOwnerTicks;
         this.scores.setScoreListFromArray(scores);
+        this.scenarioRoleIndex = scenarioRoleIndex;
     }
 
-    public static RTSPlayer getFromSave(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks, int[] scores) {
-        return new RTSPlayer(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores);
+    public static RTSPlayer getFromSave(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks, int[] scores, int scenarioRoleIndex) {
+        return new RTSPlayer(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores, scenarioRoleIndex);
     }
 
     public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id) {
@@ -72,6 +74,12 @@ public class RTSPlayer {
 
     public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id, int startPosColorId) {
         return new RTSPlayer(playerName, faction, id, startPosColorId);
+    }
+
+    public static RTSPlayer getNewScenarioPlayer(String playerName, Faction faction, int id, int scenarioRoleIndex) {
+        RTSPlayer rtsPlayer = new RTSPlayer(playerName, faction, id);
+        rtsPlayer.scenarioRoleIndex = scenarioRoleIndex;
+        return rtsPlayer;
     }
 
     public static RTSPlayer getNewBot(String name, Faction faction) {
