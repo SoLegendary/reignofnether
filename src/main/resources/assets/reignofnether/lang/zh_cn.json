@@ -1531,7 +1531,6 @@
   "sandbox.reignofnether.custom_buildings.switch_to_general_menu": "切换至普通菜单",
   "sandbox.reignofnether.custom_buildings.commands_count": "命令集：%d 个命令",
   "sandbox.reignofnether.custom_buildings.commands.multiple_entries": "\uE009   检测到多个进驻入口方块！",
-  "sandbox.reignofnether.custom_buildings.commands.multiple_entries": "\uE009   检测到多个进驻入口方块！",
 
   "startpos.reignofnether.positions_button.tooltip1": "起始位置",
   "startpos.reignofnether.positions_button.tooltip2": "已占据/起始位置总数：%d/%d",

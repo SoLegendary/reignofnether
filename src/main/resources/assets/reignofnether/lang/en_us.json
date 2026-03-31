@@ -1531,7 +1531,6 @@
     "sandbox.reignofnether.custom_buildings.switch_to_general_menu": "Switch to General Menu",
     "sandbox.reignofnether.custom_buildings.commands_count": "Commands Set: %d",
     "sandbox.reignofnether.custom_buildings.commands.multiple_entries": "\uE009   Multiple    garrison    entry    blocks    detected!",
-    "sandbox.reignofnether.custom_buildings.commands.multiple_entries": "\uE009   Multiple    garrison    entry    blocks    detected!",
 
     "startpos.reignofnether.positions_button.tooltip1": "Starting Locations",
     "startpos.reignofnether.positions_button.tooltip2": "%d/%d locations taken",
