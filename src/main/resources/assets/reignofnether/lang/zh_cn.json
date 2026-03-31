@@ -1326,8 +1326,7 @@
 
   "alliance.reignofnether.sent_request": "\n已向%s发送结盟请求。\n",
   "alliance.reignofnether.ally_self": "\n你无法与自己结盟！\n",
-  "alliance.reignofnether.ally_confirm": "\n%s想要同你结盟。请在外交菜单中确认。\n",
-  "alliance.reignofnether.ally_confirm_survival": "\n%s想要同你结盟。请在聊天框输入 /allyconfirm %s 以确认结盟。\n",
+  "alliance.reignofnether.ally_confirm": "\n%s想要同你结盟。请在外交菜单中确认，或在聊天框输入 /allyconfirm %s 以确认。\n",
   "alliance.reignofnether.now_allied": "\n你现在已经同%s结盟了。\n",
   "alliance.reignofnether.ally_accepted": "\n%s已经同意了你的结盟请求。\n",
   "alliance.reignofnether.ally_request_cancelled_self": "\n你已经撤销了向%s发送的结盟请求。\n",
