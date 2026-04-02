@@ -63,7 +63,7 @@ public class ScenarioMenu {
         evt.getGuiGraphics().drawString(MC.font, fcs(I18n.get("sandbox.reignofnether.scenario.role_number", role.index + 1), true), xr, yr, 0xFFFFFF);
         evt.getGuiGraphics().drawString(MC.font, fcs(I18n.get("sandbox.reignofnether.scenario.role_name"), true), xr, yr + 24, 0xFFFFFF);
 
-        roleNameInput.setX(xr + 35);
+        roleNameInput.setX(xr + 1 + MC.font.width(fcs(I18n.get("sandbox.reignofnether.scenario.role_name"), true)));
         roleNameInput.setY(yr + 22);
         roleNameInput.render(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY(), evt.getPartialTick());
 
