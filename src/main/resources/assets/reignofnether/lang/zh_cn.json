@@ -1541,6 +1541,7 @@
   "sandbox.reignofnether.custom_buildings.commands.add": "添加新命令",
   "sandbox.reignofnether.custom_buildings.commands.delete": "删除命令",
   "sandbox.reignofnether.custom_buildings.commands.cooldown": "倒计时（秒）",
+  "sandbox.reignofnether.custom_buildings.commands.invalid": "无效命令",
 
   "startpos.reignofnether.positions_button.tooltip1": "起始位置",
   "startpos.reignofnether.positions_button.tooltip2": "已占据/起始位置总数：%d/%d",
