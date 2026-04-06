@@ -1534,7 +1534,7 @@
   "sandbox.reignofnether.custom_buildings.commands.trigger.on_build_complete": "建筑完成-触发",
   "sandbox.reignofnether.custom_buildings.commands.trigger.on_destroy": "被摧毁-触发",
   "sandbox.reignofnether.custom_buildings.commands.trigger.on_damage_taken": "受到伤害-触发",
-  "sandbox.reignofnether.custom_buildings.commands.trigger.on_capture": "被占领控制-触发",
+  "sandbox.reignofnether.custom_buildings.commands.trigger.on_capture": "被非盟友占领控制-触发",
   "sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_complete": "倒计时结束后若建筑完成-触发",
   "sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_garrisoned": "倒计时结束后若被进驻-触发",
   "sandbox.reignofnether.custom_buildings.commands.trigger.none": "无-触发",
