@@ -35,6 +35,8 @@ public class Watchtower extends Building implements GarrisonableBuildingAddon {
 
         this.startingBlockTypes.add(Blocks.STONE_BRICKS);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_SLAB);
+
+        setActiveAddon(GarrisonableBuildingAddon.class, this, true);
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}

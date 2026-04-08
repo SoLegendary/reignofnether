@@ -37,6 +37,8 @@ public class DarkWatchtower extends Building implements GarrisonableBuildingAddo
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICK_SLAB);
         this.startingBlockTypes.add(Blocks.CRACKED_DEEPSLATE_BRICKS);
+
+        setActiveAddon(GarrisonableBuildingAddon.class, this, true);
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
