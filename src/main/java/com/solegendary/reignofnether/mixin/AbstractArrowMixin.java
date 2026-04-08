@@ -64,7 +64,7 @@ public abstract class AbstractArrowMixin extends Projectile {
             GarrisonableBuildingAddon.getGarrison(unit1) == GarrisonableBuildingAddon.getGarrison(unit2))
             insideForeignEntity = false;
 
-        return building.isPosInsideBuilding(this.blockPosition()) && !insideForeignEntity;
+        return building != null && building.isPosInsideBuilding(this.blockPosition()) && !insideForeignEntity;
     }
 
     // prevent arrows from colliding with the building that a garrisoned unit is inside of
