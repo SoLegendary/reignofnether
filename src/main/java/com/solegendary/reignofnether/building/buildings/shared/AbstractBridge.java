@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.shared;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingBlockData;
-import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import net.minecraft.core.BlockPos;
@@ -44,7 +41,7 @@ public abstract class AbstractBridge extends Building {
     }
 
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName, boolean diagonal) {
-        BuildingPlacement placement = createBuildingPlacement(level, pos, rotation, ownerName);
+        BuildingPlacement placement = new BuildingPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level, diagonal), level, pos, rotation), this.isCapitol);
         //Is this still necessary?
         placement.getDataStorage().setData(DIAGONAL, diagonal);
         return placement;
