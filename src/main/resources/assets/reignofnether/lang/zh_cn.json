@@ -1557,6 +1557,7 @@
   "startpos.reignofnether.starting_game": "游戏将在 %d 秒后开始",
   "startpos.reignofnether.started_game": "游戏已开始！",
   "startpos.reignofnether.max_positions": "起始位置已达上限（16）",
+  "startpos.reignofnether.rts_map_info_used": "所选地图使用了 rtsmap.json 文件的起始位置（起始方块已忽略）",
 
   "unitstats.reignofnether.attack_damage": "攻击伤害",
   "unitstats.reignofnether.attack_damage_bonus_buildings": "对建筑 +%s",
