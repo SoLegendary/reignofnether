@@ -2,11 +2,11 @@ package com.solegendary.reignofnether.building;
 
 // class for static building functions
 
+import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
 import com.solegendary.reignofnether.building.buildings.monsters.Stronghold;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.Castle;
@@ -270,7 +270,7 @@ public class BuildingUtils {
             buildings = BuildingServerEvents.getBuildings();
 
         for (BuildingPlacement building : buildings)
-            if (!(building instanceof BridgePlacement) && building.isPosInsideBuilding(bp))
+            if (!(building.getBuilding() instanceof AbstractBridge) && building.isPosInsideBuilding(bp))
                 return true;
         return false;
     }
@@ -303,8 +303,9 @@ public class BuildingUtils {
         List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings) {
-            if (building instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0) {
-                double maxRangeSquared = Math.pow(ncb.getMaxNetherRange(), 2);
+            NetherConvertingAddon ncb;
+            if ((ncb = building.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(building) > 0) {
+                double maxRangeSquared = Math.pow(ncb.getMaxNetherRange(building), 2);
                 if (bp.distSqr(building.centrePos) <= maxRangeSquared) {
                     return true;
                 }

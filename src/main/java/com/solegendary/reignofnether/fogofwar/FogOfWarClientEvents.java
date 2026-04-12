@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -287,7 +287,7 @@ public class FogOfWarClientEvents {
         for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
             if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
                     isPlayerRevealed(building.ownerName)) {
-                if ((building instanceof GarrisonableBuilding garr && garr.getCapacity() > 0 && GarrisonableBuilding.getNumOccupants(building) > 0 && building.isBuilt) ||
+                if ((building.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class) && GarrisonableBuildingAddon.getNumOccupants(building) > 0 && building.isBuilt) ||
                         building.isCapitol)
                     farViewerChunks.add(new ChunkPos(building.centrePos));
                 else

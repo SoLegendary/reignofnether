@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
@@ -35,9 +35,10 @@ public class CustomBuildingCommand {
     }
 
     public boolean checkTickingCondition(BuildingPlacement bpl) {
+        GarrisonableBuildingAddon gba;
         return switch (condition) {
             case OFF_COOLDOWN_IF_COMPLETE -> bpl.isBuilt;
-            case OFF_COOLDOWN_IF_GARRISONED -> bpl instanceof GarrisonableBuilding garr && !garr.getOccupants().isEmpty();
+            case OFF_COOLDOWN_IF_GARRISONED -> (gba = bpl.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null && !gba.getOccupants(bpl).isEmpty();
             default -> false;
         };
     }

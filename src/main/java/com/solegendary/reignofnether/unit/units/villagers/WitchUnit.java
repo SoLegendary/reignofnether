@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -179,7 +179,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     }
 
     public int getPotionThrowRange() {
-        if (GarrisonableBuilding.getGarrison(this) != null)
+        if (GarrisonableBuildingAddon.getGarrison(this) != null)
             return 16;
         return 8;
     }

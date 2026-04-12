@@ -104,7 +104,7 @@ public class ProductionPlacement extends BuildingPlacement {
     // start with the centre pos then go down and look at adjacent blocks until we reach a non-solid block
     public BlockPos getIndoorSpawnPoint(ServerLevel level) {
         ProductionBuilding building = (ProductionBuilding) getBuilding();
-        return building.getIndoorSpawnPoint(level, centrePos);
+        return building.getIndoorSpawnPoint(level, this);
     }
 
     // start with the centre pos then go down and look at adjacent blocks until we reach a non-solid block

@@ -1,18 +1,25 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ability.Abilities;
+import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.building.addon.BuildingAddon;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.faction.Faction;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 // Registered object in Buildings
 // is a member of BuildingPlacement and is generally not instantiated directly
@@ -48,6 +55,8 @@ public abstract class Building {
     public int foundationYLayers = 1; // how many Y layers from the bottom are part of the foundation
 
     protected final Abilities abilities = new Abilities();
+
+    private Map<Class<BuildingAddon>, BuildingAddon> activeAddons = new HashMap<>();
 
     public Abilities getAbilities() {
         return this.abilities;
@@ -120,5 +129,54 @@ public abstract class Building {
 
     public String getUpgradedStructureName(int upgradeLevel) {
         return structureName;
+    }
+
+    @Nullable
+    public <T extends BuildingAddon> T getActiveAddon(Class<T> addonClass) {
+        return (T) activeAddons.get(addonClass);
+    }
+
+    public <T extends BuildingAddon> void setActiveAddon(Class<T> addonClass, T addon, boolean active) {
+        if (active) {
+            activeAddons.put((Class<BuildingAddon>) addonClass, addon);
+        } else {
+            activeAddons.remove(addonClass);
+        }
+    }
+
+    public boolean hasActiveAddon(Class<? extends BuildingAddon> addonClass) {
+        return activeAddons.containsKey(addonClass);
+    }
+
+    public boolean canDestroyBlock(BlockPos relativeBp, BuildingPlacement placement) {
+        return true;
+    }
+
+    public void onBlockBuilt(BlockPos bp, BlockState bs, BuildingPlacement buildingPlacement) {
+
+    }
+
+    public void onBuilt(BuildingPlacement buildingPlacement) {
+
+    }
+
+    public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks, BuildingPlacement placement) {
+
+    }
+
+    public void destroy(ServerLevel serverLevel, BuildingPlacement placement) {
+
+    }
+
+    public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
+
+    }
+
+    public String getUpgradedName(BuildingPlacement buildingPlacement) {
+        ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
+        if (key == null) {
+            return "Unknown";
+        }
+        return I18n.get("buildings." + (getFaction() != null && getFaction() != Faction.NONE ? getFaction().toString().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
     }
 }

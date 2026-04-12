@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.orthoview;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
@@ -324,9 +324,11 @@ public class OrthoviewClientEvents {
             return;
         }
 
-        for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-            if (building instanceof RangeIndicator ri)
-                ri.updateHighlightBps();
+        for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
+            RangeIndicatorAddon ria;
+            if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null)
+                ria.updateHighlightBps(building);
+        }
 
         enabled = !enabled;
 

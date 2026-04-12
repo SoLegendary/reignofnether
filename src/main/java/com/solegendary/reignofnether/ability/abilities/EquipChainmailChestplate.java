@@ -1,9 +1,9 @@
 package com.solegendary.reignofnether.ability.abilities;
 
-import com.solegendary.reignofnether.ability.EnchantEquipAbilityServerboundPacket;
+import com.solegendary.reignofnether.ability.EnchantEquipAbilityServersidePacket;
 import com.solegendary.reignofnether.ability.EquipAbility;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.BlacksmithPlacement;
+import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -33,21 +33,20 @@ public class EquipChainmailChestplate extends EquipAbility {
 
     @Override
     public AbilityButton getButton(Keybinding hotkey, BuildingPlacement placement) {
-        if (!(placement instanceof BlacksmithPlacement blacksmith)) return null;
         return new AbilityButton(
                 "Chainmail Chestplate",
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/chainmail_chestplate.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == EQUIP_ACTION || placement.autocast == this,
+                () -> CursorClientEvents.getLeftClickAction() == EQUIP_ACTION || placement.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP) == this,
                 () -> false,
-                () -> blacksmith.getUpgradeLevel() > 0,
+                () -> placement.getUpgradeLevel() > 0,
                 () -> CursorClientEvents.setLeftClickAction(EQUIP_ACTION),
                 () -> {
-                    EnchantEquipAbilityServerboundPacket.setAutocastEnchantOrEquip(EQUIP_ACTION, blacksmith.originPos);
-                    if (blacksmith.autoCastEquip == this)
-                        blacksmith.autoCastEquip = null;
+                    EnchantEquipAbilityServersidePacket.setAutocastEnchantOrEquipServerside(EQUIP_ACTION, placement.originPos);
+                    if (placement.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP) == this)
+                        placement.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, null);
                     else
-                        blacksmith.autoCastEquip = this;
+                        placement.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, this);
                 },
                 List.of(
                         fcs(I18n.get("ability.reignofnether.equip.chainmail_chestplate"), Style.EMPTY.withBold(true)),

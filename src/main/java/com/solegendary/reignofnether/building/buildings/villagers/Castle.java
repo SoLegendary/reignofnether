@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.placements.CastlePlacement;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -16,23 +18,43 @@ import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Castle extends ProductionBuilding {
+public class Castle extends ProductionBuilding implements GarrisonableBuildingAddon {
+    public final static int MAX_OCCUPANTS = 7;
 
     public final static String buildingName = "Castle";
     public final static String structureName = "castle";
     public final static String upgradedStructureName = "castle_with_flag";
     public final static ResourceCost cost = ResourceCosts.CASTLE;
+
+    public final static DataType<LivingEntity> PROMOTED_ILLAGER = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "promoted_illager"), (tag, server) -> {
+        UUID uuid = tag.getUUID("entity_uuid");
+        for (ServerLevel level : server.getAllLevels()) {
+            Entity entity = level.getEntity(uuid);
+            if (entity instanceof LivingEntity livingEntity) {
+                return livingEntity;
+            }
+        }
+        return null;
+    }, livingEntity -> {
+        CompoundTag tag = new CompoundTag();
+        tag.putUUID("entity_uuid", livingEntity.getUUID());
+        return tag;
+    });
+
     public Castle() {
         super(structureName, cost, false);
         this.name = buildingName;
@@ -53,15 +75,12 @@ public class Castle extends ProductionBuilding {
         this.productions.add(ProductionItems.RAVAGER, Keybindings.keyQ);
         this.productions.add(ProductionItems.RESEARCH_RAVAGER_CAVALRY, Keybindings.keyW);
         this.productions.add(ProductionItems.RESEARCH_CASTLE_FLAG, Keybindings.keyE);
+
+        setActiveAddon(GarrisonableBuildingAddon.class, this, true);
     }
 
     public Faction getFaction() {
         return Faction.VILLAGERS;
-    }
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new CastlePlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
@@ -89,7 +108,7 @@ public class Castle extends ProductionBuilding {
                 ),
                 FormattedCharSequence.forward(I18n.get(
                     "buildings.villagers.reignofnether.castle.tooltip2",
-                        CastlePlacement.MAX_OCCUPANTS
+                        MAX_OCCUPANTS
                 ), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
@@ -116,5 +135,35 @@ public class Castle extends ProductionBuilding {
     @Override
     public String getUpgradedStructureName(int upgradeLevel) {
         return upgradeLevel > 0 ? upgradedStructureName : structureName;
+    }
+
+    public int getAttackRange() {
+        return 30;
+    }
+
+    // bonus for units attacking garrisoned units
+    public int getExternalAttackRangeBonus() {
+        return 15;
+    }
+    public boolean canDestroyBlock(BlockPos relativeBp) {
+        return relativeBp.getY() != 15 && relativeBp.getY() != 17;
+    }
+
+    @Override
+    public BlockPos getEntryPosition(BuildingPlacement placement) {
+        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(5, 16, 5), placement.rotation));
+    }
+
+    @Override
+    public BlockPos getExitPosition(BuildingPlacement placement) {
+        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(5, 2, 5), placement.rotation));
+    }
+
+    @Override
+    public int getCapacity() { return MAX_OCCUPANTS; }
+
+    @Override
+    public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
+        return getExitPosition(placement);
     }
 }

@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -128,11 +128,13 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
 
         if ((target != null && target.isAlive()) || buildTarget != null) {
 
-            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this.mob);
-            GarrisonableBuilding targetGarr = null;
+            BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this.mob);
+            BuildingPlacement targetGarrPlacement = null;
             if (target instanceof Unit unit)
-                targetGarr = GarrisonableBuilding.getGarrison(unit);
+                targetGarrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
 
+            GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+            GarrisonableBuildingAddon targetGarr = targetGarrPlacement != null ? targetGarrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
             boolean isGarrisoned = garr != null;
             boolean isTargetGarrisoned = targetGarr != null;
 

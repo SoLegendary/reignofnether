@@ -9,8 +9,8 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.RangeIndicator;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
@@ -304,9 +304,11 @@ public class MinimapClientEvents {
                     } else if (nightCircleMode == NightCircleMode.OFF) {
                         nightCircleMode = NightCircleMode.ALL;
                     }
-                    for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-                        if (building instanceof RangeIndicator ri)
-                            ri.updateHighlightBps();
+                    for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
+                        RangeIndicatorAddon ria;
+                        if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null)
+                            ria.updateHighlightBps(building);
+                    }
                 },
                 null,
                 List.of(
@@ -673,7 +675,7 @@ public class MinimapClientEvents {
         // draw buildings
         for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
 
-            if (!building.isExploredClientside || building instanceof BridgePlacement)
+            if (!building.isExploredClientside || building.getBuilding() instanceof AbstractBridge)
                 continue;
 
             int xc = building.centrePos.getX() + (BUILDING_RADIUS / 2);

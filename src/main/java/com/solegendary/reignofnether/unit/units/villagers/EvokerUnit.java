@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.abilities.*;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.enchantments.VigorEnchantment;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
@@ -411,7 +411,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     }
 
     public int getVexTargetRange() {
-        if (GarrisonableBuilding.getGarrison(this) != null)
+        if (GarrisonableBuildingAddon.getGarrison(this) != null)
             return VEX_TARGET_RANGE_GARRISON;
         return VEX_TARGET_RANGE;
     }

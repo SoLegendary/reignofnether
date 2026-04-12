@@ -1,7 +1,12 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -15,23 +20,37 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import org.apache.commons.lang3.text.WordUtils;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class CustomBuilding extends Building {
+public class CustomBuilding extends Building implements GarrisonableBuildingAddon, NetherConvertingAddon, NightSourceAddon, RangeIndicatorAddon {
+    public static final List<Block> INVULNERABLE_BLOCKS = List.of(
+            BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
+            BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
+            BlockRegistrar.GARRISON_ZONE_BLOCK.get(),
+            Blocks.NETHER_PORTAL,
+            Blocks.LIGHT,
+            Blocks.COMMAND_BLOCK,
+            Blocks.CHAIN_COMMAND_BLOCK,
+            Blocks.REPEATING_COMMAND_BLOCK
+    );
+
+    public static final List<Block> INVULNERABLE_ABOVE_BLOCKS = List.of(
+            BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
+            BlockRegistrar.GARRISON_ZONE_BLOCK.get()
+    );
 
     public Vec3i structureSize;
     public final CompoundTag structureNbt;
@@ -48,6 +67,7 @@ public class CustomBuilding extends Building {
     public int numGarrisonEntries = 0;
     public int numGarrisonExits = 0;
     public ArrayList<CustomBuildingCommand> commands = new ArrayList<>(List.of(new CustomBuildingCommand()));
+    private final Random random = new Random();
 
     public CustomBuilding(String structureName, Vec3i structureSize, Block portraitBlock, CompoundTag structureNbt) {
         this(structureName, structureSize, portraitBlock, structureNbt, null);
@@ -94,6 +114,12 @@ public class CustomBuilding extends Building {
                 numGarrisonExits += 1;
             }
         }
+
+        //TODO made this toggelable
+        setActiveAddon(GarrisonableBuildingAddon.class, this, true);
+        setActiveAddon(NetherConvertingAddon.class, this, true);
+        setActiveAddon(NightSourceAddon.class, this, true);
+        setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
 
     public void packAttributesNbt() {
@@ -232,5 +258,93 @@ public class CustomBuilding extends Building {
             portraitBlock = blockOptions.get(0);
 
         CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_PORTRAIT_BLOCK, name, getPortraitBlockRegistryKey());
+    }
+
+    // GarrisonableBuilding
+    @Override
+    public int getAttackRange() { return garrisonRange; }
+
+    @Override
+    public int getExternalAttackRangeBonus() { return Math.min(15, garrisonRange / 2); }
+
+    @Override
+    public int getCapacity() { return garrisonCapacity; }
+
+    @Override
+    public BlockPos getEntryPosition(BuildingPlacement placement) {
+        CustomBuildingPlacement cbp = (CustomBuildingPlacement) placement;
+        if (!cbp.garrisonEntries.isEmpty()) {
+            return cbp.garrisonEntries.get(random.nextInt(cbp.garrisonEntries.size())).above();
+        }
+        return null;
+    }
+
+    @Override
+    public BlockPos getExitPosition(BuildingPlacement placement) {
+        CustomBuildingPlacement cbp = (CustomBuildingPlacement) placement;
+        if (!cbp.garrisonExits.isEmpty()) {
+            return cbp.garrisonExits.get(random.nextInt(cbp.garrisonExits.size())).above();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean canDestroyBlock(BlockPos relativeBp, BuildingPlacement placement) {
+        if (getCapacity() <= 0)
+            return true;
+        BlockPos worldBp = relativeBp.offset(placement.originPos);
+        Block block = placement.getLevel().getBlockState(worldBp).getBlock();
+        BlockPos worldBpAbove = relativeBp.offset(placement.originPos.above());
+        Block blockAbove = placement.getLevel().getBlockState(worldBpAbove).getBlock();
+        return !INVULNERABLE_BLOCKS.contains(block) && !INVULNERABLE_ABOVE_BLOCKS.contains(blockAbove);
+    }
+
+    // NetherConvertingBuilding
+    @Override public double getMaxNetherRange(BuildingPlacement placement) { return this.netherRadius; }
+    @Override public double getStartingNetherRange(BuildingPlacement placement) { return 3; }
+
+    @Override
+    public void onBuilt(BuildingPlacement buildingPlacement) {
+        super.onBuilt(buildingPlacement);
+        updateHighlightBps(buildingPlacement);
+        if (getMaxNetherRange(buildingPlacement) > 0)
+            setNetherZone(buildingPlacement, new NetherZone(new BlockPos(buildingPlacement.centrePos.getX(), buildingPlacement.originPos.getY() + 1, buildingPlacement.centrePos.getZ()), getMaxNetherRange(buildingPlacement), getStartingNetherRange(buildingPlacement)), true);
+    }
+
+    @Nullable
+    @Override
+    public NetherZone getNetherZone(BuildingPlacement placement) {
+        if (this.netherRadius > 0)
+            return NetherConvertingAddon.super.getNetherZone(placement);
+        return null;
+    }
+
+    // NightSource
+    @Override
+    public int getNightRange(BuildingPlacement placement) {
+        return placement.isBuilt ? nightRadius : 0;
+    }
+
+    @Override
+    public int getRange(BuildingPlacement placement) {
+        return getNightRange(placement);
+    }
+
+    // RangeIndicator
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide() || this.getNightRange(placement) <= 0) {
+            return;
+        }
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getNightRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ,
+                placement.level, true
+        ));
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected(BuildingPlacement placement) {
+        return false;
     }
 }

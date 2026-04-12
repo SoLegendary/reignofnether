@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class PortalPlacement extends ProductionPlacement implements NetherConvertingBuilding {
+public class PortalPlacement extends ProductionPlacement {
     public enum PortalType {
         BASIC, CIVILIAN, MILITARY, TRANSPORT
     }
@@ -70,24 +70,6 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
         super.destroy(serverLevel);
     }
 
-    @Override
-    public void setNetherZone(NetherZone nz, boolean save) {
-        if (netherConversionZone == null) {
-            netherConversionZone = nz;
-            if (!level.isClientSide()) {
-                BuildingServerEvents.netherZones.add(netherConversionZone);
-                if (save)
-                    BuildingServerEvents.saveNetherZones((ServerLevel) level);
-            }
-        }
-    }
-
-    @Override
-    public void onBuilt() {
-        super.onBuilt();
-        setNetherZone(new NetherZone(centrePos.offset(0, -2, 0), getMaxNetherRange(), getStartingNetherRange()), true);
-    }
-
     public void disconnectPortal() {
         if (destination != null) {
             BuildingPlacement targetBuilding = BuildingUtils.findBuilding(getLevel().isClientSide(), destination);
@@ -128,17 +110,6 @@ public class PortalPlacement extends ProductionPlacement implements NetherConver
             setBlocks(getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation));
             super.refreshBlocks();
         }
-    }
-
-    public double getMaxNetherRange() { return 20; }
-
-    public double getStartingNetherRange() {
-        return 3;
-    }
-
-    @Override
-    public NetherZone getNetherZone() {
-        return netherConversionZone;
     }
 
     public void checkAndConsumeChestItems() {

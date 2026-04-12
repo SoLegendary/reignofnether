@@ -2,11 +2,10 @@ package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Sacrifice;
-import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -20,13 +19,13 @@ import java.util.*;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.isPosInsideAnyBuilding;
 
-public class SculkCatalystPlacement extends BuildingPlacement implements RangeIndicator, NightSource {
+public class SculkCatalystPlacement extends BuildingPlacement {
 
-    private final Set<BlockPos> nightBorderBps = new HashSet<>();
+    //private final Set<BlockPos> nightBorderBps = new HashSet<>();
 
     private final static int SCULK_SEARCH_RANGE = 30;
     private final static float HP_PER_SCULK = 0.5f;
-    private final static float RANGE_PER_SCULK = 0.30f;
+    public final static float RANGE_PER_SCULK = 0.30f;
 
     public String autoSacrificeUnitType = "";
 
@@ -39,57 +38,19 @@ public class SculkCatalystPlacement extends BuildingPlacement implements RangeIn
 
     public int getUncappedNightRange() {
         if (isBuilt || isBuiltServerside) {
-            return (int) (sculkBps.size() * RANGE_PER_SCULK) + SculkCatalyst.nightRangeMin;
+            return (int) (getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).size() * RANGE_PER_SCULK) + SculkCatalyst.nightRangeMin;
         }
         return 0;
-    }
-
-    public int getRange() {
-        if (isBuilt || isBuiltServerside) {
-            return (int) Math.min(SculkCatalyst.nightRangeMin + (sculkBps.size() * RANGE_PER_SCULK), SculkCatalyst.nightRangeMax);
-        }
-        return 0;
-    }
-
-    @Override
-    public int getNightRange() {
-        return getRange();
     }
 
     @Override
     public void onBuilt() {
         super.onBuilt();
-        updateHighlightBps();
-        updateSculkBps();
-    }
-
-    @Override
-    public void updateHighlightBps() {
-        if (!level.isClientSide()) {
-            return;
+        RangeIndicatorAddon ria;
+        if ((ria = getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
+            ria.updateHighlightBps(this);
         }
         updateSculkBps();
-        this.nightBorderBps.clear();
-        this.nightBorderBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(centrePos,
-                getNightRange() - BlockClientEvents.VISIBLE_BORDER_ADJ,
-                level, true
-        ));
-        if (CursorClientEvents.getLeftClickAction() == UnitAction.SACRIFICE) {
-            this.nightBorderBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(centrePos,
-                    Sacrifice.RANGE - 1,
-                    level
-            ));
-        }
-    }
-
-    @Override
-    public Set<BlockPos> getHighlightBps() {
-        return nightBorderBps;
-    }
-
-    @Override
-    public boolean showOnlyWhenSelected() {
-        return false;
     }
 
     @Override
@@ -99,16 +60,20 @@ public class SculkCatalystPlacement extends BuildingPlacement implements RangeIn
         if (tickAgeAfterBuilt > 0) {
             if (tickAgeAfterBuilt % 100 == 0) {
                 if (tickLevel.isClientSide()) {
-                    updateHighlightBps();
+                    RangeIndicatorAddon ria;
+                    if ((ria = getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
+                        ria.updateHighlightBps(this);
+                    }
                 } else {
                     updateSculkBps();
                 }
             }
             if (tickAgeAfterBuilt % 30 == 0) {
                 for (Ability ability : abilities) {
+                    NightSourceAddon nsa;
                     if (ability instanceof Sacrifice sacrifice &&
                         sacrifice.isAutocasting(this) &&
-                        getNightRange() < SculkCatalyst.nightRangeMax) {
+                        (nsa = getBuilding().getActiveAddon(NightSourceAddon.class)) != null && nsa.getNightRange(this) < SculkCatalyst.nightRangeMax) {
                         sacrifice.autoSacrifice(this);
                     }
                 }
@@ -125,7 +90,7 @@ public class SculkCatalystPlacement extends BuildingPlacement implements RangeIn
         );
     }
 
-    private void updateSculkBps() {
+    public void updateSculkBps() {
         sculkBps.clear();
         for (int x = centrePos.getX() - SCULK_SEARCH_RANGE / 2; x < centrePos.getX() + SCULK_SEARCH_RANGE / 2; x++) {
             for (int z = centrePos.getZ() - SCULK_SEARCH_RANGE / 2;

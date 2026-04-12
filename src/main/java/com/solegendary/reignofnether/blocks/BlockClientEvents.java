@@ -4,8 +4,9 @@ package com.solegendary.reignofnether.blocks;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.NightSource;
 import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -37,13 +38,14 @@ public class BlockClientEvents {
         }
         // draw range indicators for buildings with abilities and monster night sources
         for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-            if (building instanceof RangeIndicator ri) {
-                for (BlockPos bp : ri.getHighlightBps()) {
+            RangeIndicatorAddon ria;
+            if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
+                for (BlockPos bp : ria.getHighlightBps(building)) {
                     int snowLayers = BlockUtils.getSnowLayers(building.level.getBlockState(bp.above()));
                     float yOffset = snowLayers * 0.125f;
                     if (BuildingClientEvents.getSelectedBuildings().contains(building)) {
                         MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, yOffset, bp, 0f, 0.8f, 0f, 0.3f);
-                    } else if (!ri.showOnlyWhenSelected()) {
+                    } else if (!ria.showOnlyWhenSelected(building)) {
                         MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, yOffset, bp, 0f, 0f, 0f, 0.6f);
                     }
                 }
@@ -80,10 +82,11 @@ public class BlockClientEvents {
 
             // get list of night source centre:range pairs
             for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-                if (!building.isExploredClientside || !(building instanceof NightSource ns) || ns.getNightRange() <= 0) {
+                NightSourceAddon nsa;
+                if (!building.isExploredClientside || (nsa = building.getBuilding().getActiveAddon(NightSourceAddon.class)) == null || nsa.getNightRange(building) <= 0) {
                     continue;
                 }
-                nightSourceOrigins.add(new Pair<>(building.centrePos, ns.getNightRange() - VISIBLE_BORDER_ADJ));
+                nightSourceOrigins.add(new Pair<>(building.centrePos, nsa.getNightRange(building) - VISIBLE_BORDER_ADJ));
             }
         }
     }

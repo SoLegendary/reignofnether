@@ -1,9 +1,8 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -27,7 +26,7 @@ import java.util.List;
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class InfernalPortal extends ProductionBuilding {
+public class InfernalPortal extends ProductionBuilding implements NetherConvertingAddon {
 
     public final static String buildingName = "Infernal Portal";
     public final static String structureName = "infernal_portal";
@@ -45,6 +44,8 @@ public class InfernalPortal extends ProductionBuilding {
         this.productions.add(ProductionItems.PIGLIN_MERCHANT_REVIVE, Keybindings.keyQ);
         this.productions.add(ProductionItems.WILDFIRE, Keybindings.keyW);
         this.productions.add(ProductionItems.WILDFIRE_REVIVE, Keybindings.keyW);
+
+        setActiveAddon(NetherConvertingAddon.class, this, true);
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}
@@ -76,5 +77,21 @@ public class InfernalPortal extends ProductionBuilding {
                 ),
                 this
         );
+    }
+
+    @Override
+    public void onBuilt(BuildingPlacement buildingPlacement) {
+        super.onBuilt(buildingPlacement);
+        setNetherZone(buildingPlacement, new NetherZone(buildingPlacement.centrePos.offset(0, -2, 0), getMaxNetherRange(buildingPlacement), getStartingNetherRange(buildingPlacement)), true);
+    }
+
+    @Override
+    public double getMaxNetherRange(BuildingPlacement placement) {
+        return 20;
+    }
+
+    @Override
+    public double getStartingNetherRange(BuildingPlacement placement) {
+        return 3;
     }
 }

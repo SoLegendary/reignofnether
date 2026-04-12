@@ -3,7 +3,8 @@ package com.solegendary.reignofnether.registrars;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.AbilityServerboundPacket;
-import com.solegendary.reignofnether.ability.EnchantEquipAbilityServerboundPacket;
+import com.solegendary.reignofnether.ability.EnchantEquipAbilityClientsidePacket;
+import com.solegendary.reignofnether.ability.EnchantEquipAbilityServersidePacket;
 import com.solegendary.reignofnether.alliance.*;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
@@ -161,9 +162,13 @@ public final class PacketHandler {
                 .encoder(AbilityServerboundPacket::encode).decoder(AbilityServerboundPacket::new)
                 .consumerMainThread(AbilityServerboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(EnchantEquipAbilityServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(EnchantEquipAbilityServerboundPacket::encode).decoder(EnchantEquipAbilityServerboundPacket::new)
-                .consumerMainThread(EnchantEquipAbilityServerboundPacket::handle).add();
+        INSTANCE.messageBuilder(EnchantEquipAbilityServersidePacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(EnchantEquipAbilityServersidePacket::encode).decoder(EnchantEquipAbilityServersidePacket::new)
+                .consumerMainThread(EnchantEquipAbilityServersidePacket::handle).add();
+
+        INSTANCE.messageBuilder(EnchantEquipAbilityClientsidePacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(EnchantEquipAbilityClientsidePacket::encode).decoder(EnchantEquipAbilityClientsidePacket::new)
+                .consumerMainThread(EnchantEquipAbilityClientsidePacket::handle).add();
 
         INSTANCE.messageBuilder(TPSClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(TPSClientBoundPacket::encode).decoder(TPSClientBoundPacket::new)

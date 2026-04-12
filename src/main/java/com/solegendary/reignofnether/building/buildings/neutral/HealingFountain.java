@@ -1,13 +1,16 @@
 package com.solegendary.reignofnether.building.buildings.neutral;
 
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.HealingFountainPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -21,7 +24,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class HealingFountain extends Building {
+public class HealingFountain extends Building implements RangeIndicatorAddon {
 
     public final static String buildingName = "Healing Fountain";
     public final static String structureName = "healing_fountain";
@@ -43,6 +46,8 @@ public class HealingFountain extends Building {
         this.capturable = false;
         this.invulnerable = true;
         this.shouldDestroyOnReset = false;
+
+        setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
 
     public Faction getFaction() {return Faction.NONE;}
@@ -68,5 +73,24 @@ public class HealingFountain extends Building {
             ),
             this
         );
+    }
+
+    @Override
+    public int getRange(BuildingPlacement placement) {
+        return HealingFountainPlacement.RANGE;
+    }
+
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ, placement.level));
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected(BuildingPlacement placement) {
+        return true;
     }
 }

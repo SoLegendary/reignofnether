@@ -4,6 +4,8 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
 import com.solegendary.reignofnether.building.buildings.piglins.Bastion;
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
@@ -11,12 +13,12 @@ import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
 import com.solegendary.reignofnether.building.buildings.villagers.Watchtower;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
+import com.solegendary.reignofnether.building.data.DataStorage;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
@@ -170,6 +172,8 @@ public class BuildingPlacement {
     Object2ObjectArrayMap<Ability, Float> cooldowns = new Object2ObjectArrayMap<>();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
 
+    DataStorage dataStorage = new DataStorage();
+
     public List<AbilityButton> getAbilityButtons() {
         return abilityButtons;
     }
@@ -213,8 +217,7 @@ public class BuildingPlacement {
         Rotation rotation,
         String ownerName,
         ArrayList<BuildingBlock> blocks,
-        boolean isCapitol
-    ) {
+        boolean isCapitol) {
         Objects.requireNonNull(building, "Building can't be null");
         this.building = building;
         this.level = level;
@@ -521,11 +524,11 @@ public class BuildingPlacement {
 
     // are we allowed to destroy this blockPos using destroyRandomBlocks
     public boolean canDestroyBlock(BlockPos relativeBp) {
-        return true;
+        return getBuilding().canDestroyBlock(relativeBp, this);
     }
 
     private boolean isDestroyedAndNotNextToLiquid(BuildingBlock block) {
-        if (!(this instanceof BridgePlacement) && this.level.getBlockState(block.getBlockPos()).getFluidState().isEmpty() && (
+        if (!(getBuilding() instanceof AbstractBridge) && this.level.getBlockState(block.getBlockPos()).getFluidState().isEmpty() && (
             !this.level.getBlockState(block.getBlockPos().above()).getFluidState().isEmpty()
             || !this.level.getBlockState(block.getBlockPos().north()).getFluidState().isEmpty()
             || !this.level.getBlockState(block.getBlockPos().south()).getFluidState().isEmpty()
@@ -657,6 +660,8 @@ public class BuildingPlacement {
             awardBounty();
         }
         placedBlockPosSet.clear();
+
+        getBuilding().destroy(serverLevel, this);
     }
 
     private void awardBounty() {
@@ -804,7 +809,8 @@ public class BuildingPlacement {
                     this.level.setBlockAndUpdate(bb.getBlockPos(), Blocks.AIR.defaultBlockState());
 
         if (!level.isClientSide() && ownerName.equals(ENEMY_OWNER_NAME)) {
-            if (this instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
+            GarrisonableBuildingAddon garr;
+            if ((garr = getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null) {
                 int numUnits = 7;
                 if (getBuilding() instanceof DarkWatchtower || getBuilding() instanceof Watchtower)
                     numUnits = 3;
@@ -820,20 +826,22 @@ public class BuildingPlacement {
                     else if (getFaction() == Faction.PIGLINS)
                         entityType = EntityRegistrar.HEADHUNTER_UNIT.get();
 
-                    if (entityType != null && garr.getEntryPosition() != null) {
+                    if (entityType != null && garr.getEntryPosition(this) != null) {
                         UnitServerEvents.spawnMob(
                             entityType,
                             (ServerLevel) level,
-                            garr.getEntryPosition(),
+                            garr.getEntryPosition(this),
                             ENEMY_OWNER_NAME
                         );
                     }
                 }
             }
         }
+        getBuilding().onBuilt(this);
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) {
+        getBuilding().onBlockBuilt(bp, bs, this);
     }
 
     public void tick(Level tickLevel) {
@@ -886,6 +894,8 @@ public class BuildingPlacement {
             tickAgeAfterBuilt += 1;
         }
         tickAge += 1;
+
+        getBuilding().tick(tickLevel, this);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -1130,8 +1140,9 @@ public class BuildingPlacement {
         double addedRange = 0;
 
         if (extendedRange) {
-            if (this instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0) {
-                double range = ncb.getMaxNetherRange();
+            NetherConvertingAddon ncb;
+            if ((ncb = getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(this) > 0) {
+                double range = ncb.getMaxNetherRange(this);
                 addedRange = (16 * Math.ceil(Math.abs(range / 16))) + 16; // round up to next multiple of 16
             } else if (getBuilding() instanceof AbstractStockpile) {
                 addedRange = 32;
@@ -1250,11 +1261,7 @@ public class BuildingPlacement {
     }
 
     public String getUpgradedName() {
-        ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(getBuilding());
-        if (key == null) {
-            return "Unknown";
-        }
-        return I18n.get("buildings." + (getFaction() != null && getFaction() != Faction.NONE ? getFaction().toString().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
+        return getBuilding().getUpgradedName(this);
     }
 
     public float getMagicDamageMult() {
@@ -1323,5 +1330,13 @@ public class BuildingPlacement {
 
     public void setAutocast(Ability autocast) {
         this.autocast = autocast;
+    }
+
+    public DataStorage getDataStorage() {
+        return dataStorage;
+    }
+
+    public long getTickAgeAfterBuilt() {
+        return tickAgeAfterBuilt;
     }
 }

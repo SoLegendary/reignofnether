@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.neutral.EndPortal;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.EndPortalPlacement;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
@@ -48,7 +48,7 @@ public class FrustumMixin {
         if (player != null && OrthoviewClientEvents.isEnabled() && infAABB) {
             for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
                 if (building instanceof BeaconPlacement ||
-                    building instanceof EndPortalPlacement) {
+                    building.getBuilding() instanceof EndPortal) {
                     BlockPos equalYBp = new BlockPos(player.getOnPos().getX(), building.centrePos.getY(), player.getOnPos().getZ());
                     if (building.centrePos.distSqr(equalYBp) < (zoom * zoom))
                         cir.setReturnValue(true);

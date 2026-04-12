@@ -3,8 +3,8 @@ package com.solegendary.reignofnether.ability;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.placements.BlacksmithPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.LibraryPlacement;
+import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
+import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.client.Minecraft;
@@ -16,24 +16,24 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class EnchantEquipAbilityServerboundPacket {
+public class EnchantEquipAbilityServersidePacket {
 
     UnitAction abilityAction;
     BlockPos buildingPos;
 
-    public static void setAutocastEnchantOrEquip(UnitAction ability, BlockPos buildingPos) {
+    public static void setAutocastEnchantOrEquipServerside(UnitAction ability, BlockPos buildingPos) {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null)
-            PacketHandler.INSTANCE.sendToServer(new EnchantEquipAbilityServerboundPacket(ability, buildingPos));
+            PacketHandler.INSTANCE.sendToServer(new EnchantEquipAbilityServersidePacket(ability, buildingPos));
     }
 
     // packet-handler functions
-    public EnchantEquipAbilityServerboundPacket(UnitAction ability, BlockPos buildingPos) {
+    public EnchantEquipAbilityServersidePacket(UnitAction ability, BlockPos buildingPos) {
         this.abilityAction = ability;
         this.buildingPos = buildingPos;
     }
 
-    public EnchantEquipAbilityServerboundPacket(FriendlyByteBuf buffer) {
+    public EnchantEquipAbilityServersidePacket(FriendlyByteBuf buffer) {
         this.abilityAction = buffer.readEnum(UnitAction.class);
         this.buildingPos = buffer.readBlockPos();
     }
@@ -56,9 +56,9 @@ public class EnchantEquipAbilityServerboundPacket {
             }
 
             BuildingPlacement building = BuildingUtils.findBuilding(false, buildingPos);
-            if (building instanceof LibraryPlacement library) {
+            if (building.getBuilding() instanceof Library) {
                 if (!player.getName().getString().equals(building.ownerName)) {
-                    ReignOfNether.LOGGER.warn("EnchantEquipAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + library.ownerName);
+                    ReignOfNether.LOGGER.warn("EnchantEquipAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);
                     success.set(false);
                     return;
                 }
@@ -67,15 +67,15 @@ public class EnchantEquipAbilityServerboundPacket {
                     if (abl.action == abilityAction)
                         ability = abl;
                 if (ability instanceof EnchantAbility enchantAbility) {
-                    if (library.autoCastEnchant == enchantAbility)
-                        library.autoCastEnchant = null;
+                    if (building.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == enchantAbility)
+                        building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
                     else
-                        library.autoCastEnchant = enchantAbility;
+                        building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, enchantAbility);
                 }
             }
-            else if (building instanceof BlacksmithPlacement blacksmith) {
+            else if (building.getBuilding() instanceof Blacksmith blacksmith) {
                 if (!player.getName().getString().equals(building.ownerName)) {
-                    ReignOfNether.LOGGER.warn("EnchantEquipAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + blacksmith.ownerName);
+                    ReignOfNether.LOGGER.warn("EnchantEquipAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);
                     success.set(false);
                     return;
                 }
@@ -84,10 +84,10 @@ public class EnchantEquipAbilityServerboundPacket {
                     if (abl.action == abilityAction)
                         ability = abl;
                 if (ability instanceof EquipAbility equipAbility) {
-                    if (blacksmith.autoCastEquip == equipAbility)
-                        blacksmith.autoCastEquip = null;
+                    if (building.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP) == equipAbility)
+                        building.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, null);
                     else
-                        blacksmith.autoCastEquip = equipAbility;
+                        building.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, equipAbility);
                 }
             }
             success.set(true);

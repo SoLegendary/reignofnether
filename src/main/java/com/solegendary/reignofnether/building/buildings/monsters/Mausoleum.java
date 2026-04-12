@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.placements.DarknessProductionBuilding;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -10,6 +12,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -17,7 +20,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +27,7 @@ import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Mausoleum extends ProductionBuilding {
+public class Mausoleum extends ProductionBuilding implements NightSourceAddon, RangeIndicatorAddon {
 
     public final static String buildingName = "Mausoleum";
     public final static String structureName = "mausoleum";
@@ -51,20 +53,13 @@ public class Mausoleum extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
 
         this.productions.add(ProductionItems.ZOMBIE_VILLAGER, Keybindings.keyQ);
+
+        setActiveAddon(RangeIndicatorAddon.class, this, true);
+        setActiveAddon(NightSourceAddon.class, this, true);
     }
 
     public Faction getFaction() {
         return Faction.MONSTERS;
-    }
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        int nRange = nightRange;
-        if ((level.isClientSide() && BuildingClientEvents.playerHasFinishedBuilding(this, ownerName)) ||
-            (!level.isClientSide() && BuildingServerEvents.playerHasFinishedBuilding(this, ownerName))) {
-            nRange = nightRangeReduced;
-        }
-        return new DarknessProductionBuilding(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), true, nRange,false, true);
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
@@ -93,5 +88,41 @@ public class Mausoleum extends ProductionBuilding {
             ),
             this
         );
+    }
+
+    @Override
+    public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
+        super.tick(tickLevel, buildingPlacement);
+        if (tickLevel.isClientSide && buildingPlacement.getTickAgeAfterBuilt() > 0 && buildingPlacement.getTickAgeAfterBuilt() % 100 == 0)
+            updateHighlightBps(buildingPlacement);
+    }
+
+    @Override
+    public int getRange(BuildingPlacement placement) {
+        int nRange = nightRange;
+        if ((placement.level.isClientSide() && BuildingClientEvents.playerHasFinishedBuilding(this, placement.ownerName)) ||
+                (!placement.level.isClientSide() && BuildingServerEvents.playerHasFinishedBuilding(this, placement.ownerName))) {
+            nRange = nightRangeReduced;
+        }
+        return /*//TODO fix bug that isBuiltServerside wont be set in some cases  placement.isBuiltServerside &&*/ placement.isBuilt ? nRange : 0;
+    }
+
+    @Override
+    public int getNightRange(BuildingPlacement placement) {
+        return getRange(placement);
+    }
+
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ, placement.level, hasActiveAddon(NightSourceAddon.class)));
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected(BuildingPlacement placement) {
+        return false;
     }
 }

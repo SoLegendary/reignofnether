@@ -5,11 +5,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
@@ -92,7 +92,7 @@ public class BuildingClientEvents {
 
     // clientside buildings used for tracking position (for cursor selection)
     private static final ArrayList<BuildingPlacement> buildings = new ArrayList<>();
-    private static final ArrayList<GarrisonableBuilding>  garrisonableBuildings = new ArrayList<>();
+    private static final ArrayList<BuildingPlacement>  garrisonableBuildings = new ArrayList<>();
     private static final ArrayList<BuildingPlacement> selectedBuildings = new ArrayList<>();
     private static Building buildingToPlace = null;
     private static Building lastBuildingToPlace = null;
@@ -126,7 +126,7 @@ public class BuildingClientEvents {
         BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
         for (BuildingPlacement building : buildings)
             if (building.isPosInsideBuilding(preSelBp)) {
-                if (building instanceof BridgePlacement && ResourceSources.getBlockResourceName(preSelBp, MC.level) != ResourceName.NONE) {
+                if (building.getBuilding() instanceof AbstractBridge && ResourceSources.getBlockResourceName(preSelBp, MC.level) != ResourceName.NONE) {
                     return null;
                 }
                 return building;
@@ -142,7 +142,7 @@ public class BuildingClientEvents {
         return buildings;
     }
 
-    public static List<GarrisonableBuilding> getGarrisonableBuildings() {
+    public static List<BuildingPlacement> getGarrisonableBuildings() {
         return garrisonableBuildings;
     }
 
@@ -1081,8 +1081,8 @@ public class BuildingClientEvents {
                 }
             }
             buildings.add(newBuilding);
-            if (newBuilding instanceof GarrisonableBuilding garrison) {
-                garrisonableBuildings.add(garrison);
+            if (newBuilding.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class)) {
+                garrisonableBuildings.add(newBuilding);
             }
             if (FogOfWarClientEvents.isEnabled()) {
                 newBuilding.freezeChunks(MC.player.getName().getString(), forPlayerLoggingIn);

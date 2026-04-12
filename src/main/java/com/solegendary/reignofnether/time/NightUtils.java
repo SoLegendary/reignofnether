@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -23,10 +24,11 @@ public class NightUtils {
 
         for (BuildingPlacement building : buildings) {
             if (building.isDestroyedServerside) continue;
-            if (building instanceof NightSource ns && ns.getNightRange() > 0) {
+            NightSourceAddon nsa;
+            if ((nsa = building.getBuilding().getActiveAddon(NightSourceAddon.class)) != null && nsa.getNightRange(building) > 0) {
                 BlockPos centrePos = BuildingUtils.getCentrePos(building.getBlocks());
                 Vec2 centrePos2d = new Vec2(centrePos.getX(), centrePos.getZ());
-                float nightRangeSqr = ns.getNightRange() * ns.getNightRange();
+                float nightRangeSqr = nsa.getNightRange(building) * nsa.getNightRange(building);
                 if (centrePos2d.distanceToSqr(pos2d) < nightRangeSqr) {
                     return true;
                 }

@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -192,7 +193,7 @@ public interface AttackerUnit {
                 boolean isMeleeAttackedByFlyingOrGarrisoned = false;
                 if (lastDSEntity instanceof Unit unitDS &&
                     (unitDS.getMoveGoal() instanceof FlyingMoveToTargetGoal ||
-                        GarrisonableBuilding.getGarrison(unitDS) != null ||
+                        GarrisonableBuildingAddon.getGarrison(unitDS) != null ||
                         unitDS instanceof PhantomSummon ||
                         unitDS instanceof Vex) &&
                     attackerUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal) {
@@ -241,7 +242,8 @@ public interface AttackerUnit {
     // if the nearest target is closer than the current target, retarget to the nearest
     default void retargetToClosestUnit(ServerLevel level) {
         float aggroRange = this.getAggroRange();
-        GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this);
+        BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this);
+        GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
         if (garr != null) {
             aggroRange = garr.getAttackRange();
         }
@@ -261,10 +263,11 @@ public interface AttackerUnit {
 
     default void attackClosestEnemy(ServerLevel level) {
         float aggroRange = this.getAggroRange();
-        GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this);
-        if (garr != null)
-            aggroRange  = garr.getAttackRange();
-
+        BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this);
+        GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+        if (garr != null) {
+            aggroRange = garr.getAttackRange();
+        }
         LivingEntity entity = MiscUtil.findClosestAttackableEntity((Mob) this, aggroRange, level);
         if (entity != null) {
             if (!((LivingEntity) this).isPassenger())

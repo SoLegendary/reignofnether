@@ -19,7 +19,8 @@ import org.joml.Vector3d;
 
 import java.util.*;
 
-public class HealingFountainPlacement extends BuildingPlacement implements RangeIndicator {
+public class HealingFountainPlacement extends BuildingPlacement {
+    public static final int RANGE = 20;
     private final ArrayList<BuildingBlock> waterBlocks;
     public HealingFountainPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
@@ -31,11 +32,6 @@ public class HealingFountainPlacement extends BuildingPlacement implements Range
             }
         }
         this.waterBlocks = new ArrayList<>(wbs);
-    }
-
-    @Override
-    public void onBuilt() {
-        super.onBuilt();
     }
 
     public void tick(Level tickLevel) {
@@ -65,27 +61,5 @@ public class HealingFountainPlacement extends BuildingPlacement implements Range
             double d2 = (double)(col >> 0 & 255) / 255.0;
             this.level.addParticle(ParticleTypes.ENTITY_EFFECT, bp.getX(), bp.getY() + 1, bp.getZ(), d0, d1, d2);
         }
-    }
-
-    public static final int RANGE = 20;
-    private final Set<BlockPos> borderBps = new HashSet<>();
-
-    @Override
-    public void updateHighlightBps() {
-        if (!level.isClientSide())
-            return;
-        this.borderBps.clear();
-        this.borderBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(centrePos,
-                RANGE - BlockClientEvents.VISIBLE_BORDER_ADJ, level));
-    }
-
-    @Override
-    public Set<BlockPos> getHighlightBps() {
-        return borderBps;
-    }
-
-    @Override
-    public boolean showOnlyWhenSelected() {
-        return true;
     }
 }

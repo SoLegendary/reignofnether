@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
@@ -864,9 +865,9 @@ public class HudClientEvents {
                 actionButtons.add(ActionButtons.buildRepair);
                 actionButtons.add(ActionButtons.gather);
             }
-            if (unit.canGarrison() && GarrisonableBuilding.getGarrison(unit) == null) {
+            if (unit.canGarrison() && GarrisonableBuildingAddon.getGarrison(unit) == null) {
                 actionButtons.add(ActionButtons.garrison);
-            } else if (GarrisonableBuilding.getGarrison(unit) != null) {
+            } else if (GarrisonableBuildingAddon.getGarrison(unit) != null) {
                 actionButtons.add(ActionButtons.ungarrison);
             }
 

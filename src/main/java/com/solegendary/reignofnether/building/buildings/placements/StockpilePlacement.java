@@ -21,7 +21,7 @@ public class StockpilePlacement extends ProductionPlacement {
     public StockpilePlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
         this.findMostAbundantNearbyResource();
-        findMostAbundantNearbyResource();
+        findMostAbundantNearbyResource(); // Why call twice
     }
 
     public void findMostAbundantNearbyResource() {
