@@ -44,6 +44,22 @@
   "item.reignofnether.throwable_tnt": "可投掷的 TNT",
   "item.reignofnether.thrown_hero_experience_bottle": "英雄经验之瓶",
 
+  "attribute.reignofnether.attack_damage": "攻击伤害",
+  "attribute.reignofnether.attacks_per_second": "攻击次数（每秒）",
+  "attribute.reignofnether.attack_range": "攻击范围",
+  "attribute.reignofnether.aggro_range": "警戒范围",
+  "attribute.reignofnether.ranged_damage_resist": "远程伤害抗性",
+  "attribute.reignofnether.magic_damage_resist": "魔法伤害抗性",
+
+  "attribute.reignofnether.base_max_health": "基础最大生命值",
+  "attribute.reignofnether.base_max_mana": "基础最大魔力值",
+  "attribute.reignofnether.mana_regen_per_second": "魔力再生（每秒）",
+  "attribute.reignofnether.max_mana_bonus_per_level": "最大魔力值增幅（每级）",
+  "attribute.reignofnether.max_health_bonus_per_level": "最大生命值增幅（每级）",
+  "attribute.reignofnether.attack_damage_bonus_per_level": "攻击伤害增幅（每级）",
+
+
+
   "sounds.reignofnether.under_attack": "遭到袭击！",
   "sounds.reignofnether.victory": "胜利！",
   "sounds.reignofnether.defeat": "失败",
