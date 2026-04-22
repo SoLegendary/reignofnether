@@ -59,7 +59,6 @@
   "attribute.reignofnether.attack_damage_bonus_per_level": "攻击伤害增幅（每级）",
 
 
-
   "sounds.reignofnether.under_attack": "遭到袭击！",
   "sounds.reignofnether.victory": "胜利！",
   "sounds.reignofnether.defeat": "失败",
@@ -1557,7 +1556,7 @@
   "sandbox.reignofnether.custom_buildings.commands.trigger.none": "无-触发",
   "sandbox.reignofnether.custom_buildings.commands.add": "添加新命令",
   "sandbox.reignofnether.custom_buildings.commands.delete": "删除命令",
-  "sandbox.reignofnether.custom_buildings.commands.cooldown": "倒计时（秒）",
+  "sandbox.reignofnether.custom_buildings.commands.cooldown": "倒计时（刻）",
   "sandbox.reignofnether.custom_buildings.commands.invalid": "无效命令",
 
   "startpos.reignofnether.positions_button.tooltip1": "起始位置",
