@@ -1600,6 +1600,7 @@
 
   "message.reignofnether.rts_map_info_author.singular": "作者：",
   "message.reignofnether.rts_map_info_author.multiple": "作者：",
+  "message.reignofnether.commands.scores.player_not_available": "“%s” 所指的玩家不存在，或该玩家正处于旁观模式。",
 
   "unitstats.reignofnether.attack_damage": "攻击伤害",
   "unitstats.reignofnether.attack_damage_bonus_buildings": "对建筑 +%s",

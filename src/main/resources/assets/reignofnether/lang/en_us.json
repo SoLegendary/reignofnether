@@ -1600,6 +1600,7 @@
 
     "message.reignofnether.rts_map_info_author.singular": "Author:",
     "message.reignofnether.rts_map_info_author.multiple": "Authors:",
+    "message.reignofnether.commands.scores.player_not_available": "Player '%s' is either currently in a match but is a spectator, or doesn't exist.",
 
     "unitstats.reignofnether.attack_damage": "Attack damage",
     "unitstats.reignofnether.attack_damage_bonus_buildings": "+%s to buildings",
