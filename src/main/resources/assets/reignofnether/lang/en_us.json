@@ -1598,6 +1598,9 @@
     "startpos.reignofnether.max_positions": "Max starting positions reached (16)",
     "startpos.reignofnether.rts_map_info_used": "This map uses rtsmap.json start positions (start blocks are ignored)",
 
+    "message.reignofnether.rts_map_info_author.singular": "Author:",
+    "message.reignofnether.rts_map_info_author.multiple": "Authors:",
+
     "unitstats.reignofnether.attack_damage": "Attack damage",
     "unitstats.reignofnether.attack_damage_bonus_buildings": "+%s to buildings",
     "unitstats.reignofnether.attack_damage_bonus_poison_damage": "+%d poison damage over %d seconds",

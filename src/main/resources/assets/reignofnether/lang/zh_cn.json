@@ -1598,6 +1598,9 @@
   "startpos.reignofnether.max_positions": "起始位置已达上限（16）",
   "startpos.reignofnether.rts_map_info_used": "所选地图使用了 rtsmap.json 文件的起始位置（起始方块已忽略）",
 
+  "message.reignofnether.rts_map_info_author.singular": "作者：",
+  "message.reignofnether.rts_map_info_author.multiple": "作者：",
+
   "unitstats.reignofnether.attack_damage": "攻击伤害",
   "unitstats.reignofnether.attack_damage_bonus_buildings": "对建筑 +%s",
   "unitstats.reignofnether.attack_damage_bonus_poison_damage": "在 %2$d 秒内 +%1$d 中毒伤害",
