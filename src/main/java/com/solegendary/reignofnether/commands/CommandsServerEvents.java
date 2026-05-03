@@ -109,6 +109,7 @@ public class CommandsServerEvents {
 					.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.executes(ctx -> destroyBuildingsAt(BlockPosArgument.getLoadedBlockPos(ctx, "pos"), ctx.getSource()))
 					)
+					.then(Commands.argument("targets", BuildingArgument.buildings()).executes((p_137810_) -> destroyBuildings(p_137810_.getSource(), BuildingArgument.getBuildings(p_137810_, "targets"))))
 				)
 				.then(Commands.literal("owner")
 					.then(buildingSelectionTail(ctx -> ""))
@@ -759,6 +760,13 @@ public class CommandsServerEvents {
 			);
 		}
 		return removed;
+	}
+	
+	private static int destroyBuildings(CommandSourceStack source, List<? extends BuildingPlacement> buildingPlacement) {
+		for (BuildingPlacement building : buildingPlacement) {
+			building.destroy(source.getLevel());
+		}
+		return 1;
 	}
 	
 	private static int setUnitOwner(
