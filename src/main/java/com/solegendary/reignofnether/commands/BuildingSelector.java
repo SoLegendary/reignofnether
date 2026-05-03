@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -23,7 +22,6 @@ import javax.annotation.Nullable;
 
 public class BuildingSelector {
 	
-	public static final int INFINITE = Integer.MAX_VALUE;
 	public static final BiConsumer<Vec3, List<? extends BuildingPlacement>> ORDER_ARBITRARY = (p_261404_, p_261405_) -> {
 	};
 	

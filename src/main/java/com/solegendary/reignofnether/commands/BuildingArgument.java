@@ -17,6 +17,8 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -63,7 +65,6 @@ public class BuildingArgument implements ArgumentType<BuildingSelector> {
 	}
 	
 	public BuildingSelector parse(StringReader pReader) throws CommandSyntaxException {
-		int i = 0;
 		BuildingSelectorParser buildingselectorparser = new BuildingSelectorParser(pReader);
 		BuildingSelector buildingselector = buildingselectorparser.parse();
 		if (buildingselector.getMaxResults() > 1 && this.single) {
@@ -109,7 +110,7 @@ public class BuildingArgument implements ArgumentType<BuildingSelector> {
 		}
 		
 		@Override
-		public Template deserializeFromNetwork(FriendlyByteBuf pBuffer) {
+		public @NotNull Template deserializeFromNetwork(FriendlyByteBuf pBuffer) {
 			byte b0 = pBuffer.readByte();
 			return new Template((b0 & FLAG_SINGLE) != 0);
 		}
@@ -121,7 +122,7 @@ public class BuildingArgument implements ArgumentType<BuildingSelector> {
 		}
 		
 		@Override
-		public Template unpack(BuildingArgument pArgument) {
+		public @NotNull Template unpack(BuildingArgument pArgument) {
 			return new Template(pArgument.single);
 		}
 		
@@ -133,12 +134,12 @@ public class BuildingArgument implements ArgumentType<BuildingSelector> {
 			}
 			
 			@Override
-			public BuildingArgument instantiate(CommandBuildContext pContext) {
+			public @NotNull BuildingArgument instantiate(@NotNull CommandBuildContext pContext) {
 				return new BuildingArgument(this.single);
 			}
 			
 			@Override
-			public ArgumentTypeInfo<BuildingArgument, ?> type() {
+			public @NotNull ArgumentTypeInfo<BuildingArgument, ?> type() {
 				return Info.this;
 			}
 		}
