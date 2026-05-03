@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -48,6 +49,8 @@ public class CustomBuildingClientEvents {
         else
             customBuildingToEdit = null;
         CustomBuildingClientEvents.deregisterConfirm = false;
+        if (showCommandsMenu)
+            CustomBuildingMenu.forceRefreshCommandEditBoxes();
     }
 
     public static CustomBuilding getCustomBuildingToEdit() {
@@ -61,7 +64,7 @@ public class CustomBuildingClientEvents {
         return null;
     }
 
-    public static void registerCustomBuilding(String playerName, String name, Vec3i structureSize, CompoundTag structureNbt, CompoundTag attributesNbt) {
+    public static void registerCustomBuilding(String playerName, String name, Vec3i structureSize, CompoundTag structureNbt, CompoundTag attributesNbt, ListTag commandsNbt) {
         if (MC.player == null || (!playerName.isEmpty() && !MC.player.getName().getString().equals(playerName)))
             return;
 
@@ -79,7 +82,7 @@ public class CustomBuildingClientEvents {
                 portraitBlock = bs.getBlock();
             }
         }
-        CustomBuilding building = new CustomBuilding(name, structureSize, portraitBlock, structureNbt, attributesNbt);
+        CustomBuilding building = new CustomBuilding(name, structureSize, portraitBlock, structureNbt, attributesNbt, commandsNbt);
 
         customBuildings.add(building);
     }
@@ -112,9 +115,9 @@ public class CustomBuildingClientEvents {
         renderedButtons.clear();
         if (customBuildingToEdit != null && MC.screen instanceof TopdownGui) {
             int blitX = 100;
-            int blitY = 40;
-            int width = 310;
-            int height = 200;
+            int blitY = 30;
+            int width = 315;
+            int height = 225;
             MyRenderer.renderFrameWithBg(evt.getGuiGraphics(), blitX, blitY, width, height, 0xA0000000);
 
             renderedButtons.add(CustomBuildingMenu.renderIconButtonNameAndPortrait(evt, customBuildingToEdit, blitX + 18, blitY + 18));

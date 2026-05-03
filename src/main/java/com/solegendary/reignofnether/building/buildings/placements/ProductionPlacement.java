@@ -37,7 +37,6 @@ public class ProductionPlacement extends BuildingPlacement {
     private LivingEntity rallyPointEntity;
     public List<Button> productionButtons;
     public final List<ActiveProduction> productionQueue = new ArrayList<>();
-    private ActiveProduction active;
 
     public ProductionPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
@@ -215,7 +214,7 @@ public class ProductionPlacement extends BuildingPlacement {
                     case ALLOW -> true;
                 };
 
-                if (allow && prodItem.canAfford(getLevel(), ownerName)) {
+                if (allow && prodItem.canAfford(this)) {
                     ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);
                     productionQueue.add(activeProduction);
                     ResourcesServerEvents.addSubtractResources(new Resources(
@@ -227,9 +226,9 @@ public class ProductionPlacement extends BuildingPlacement {
                     success = true;
                 }
                 else {
-                    if (!prodItem.isBelowMaxPopulation(level, ownerName))
+                    if (!prodItem.isBelowMaxPopulation(this))
                         ResourcesClientboundPacket.warnMaxPopulation(ownerName);
-                    else if (!prodItem.canAffordPopulation(getLevel(), ownerName))
+                    else if (!prodItem.canAffordPopulation(this))
                         ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
                     else
                         ResourcesClientboundPacket.warnInsufficientResources(ownerName,
@@ -250,7 +249,6 @@ public class ProductionPlacement extends BuildingPlacement {
             if (frontItem) {
                 ActiveProduction prodItem = productionQueue.get(0);
                 productionQueue.remove(0);
-                active = null;
                 if (!getLevel().isClientSide()) {
                     ResourcesServerEvents.addSubtractResources(new Resources(
                             ownerName,
@@ -300,7 +298,6 @@ public class ProductionPlacement extends BuildingPlacement {
             ActiveProduction nextItem = productionQueue.get(0);
             if (nextItem.item.tick(this, nextItem)) {
                 if (!tickLevel.isClientSide()) {
-                    active = null;
                     productionQueue.remove(0);
                     if (productionQueue.isEmpty())
                         BuildingClientboundPacket.clearQueue(this.originPos);

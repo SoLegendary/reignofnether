@@ -45,11 +45,13 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.CREEPER_UNIT.get(), CreeperUnit.createAttributes().build());
         evt.put(EntityRegistrar.SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
         evt.put(EntityRegistrar.POISON_SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
+        evt.put(EntityRegistrar.WRAITH_UNIT.get(), WraithUnit.createAttributes().build());
         evt.put(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.MILITIA_UNIT.get(), MilitiaUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), ZombieVillagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.PILLAGER_UNIT.get(), PillagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.VINDICATOR_UNIT.get(), VindicatorUnit.createAttributes().build());
+        evt.put(EntityRegistrar.WINDCALLER_UNIT.get(), WindcallerUnit.createAttributes().build());
         evt.put(EntityRegistrar.IRON_GOLEM_UNIT.get(), IronGolemUnit.createAttributes().build());
         evt.put(EntityRegistrar.WITCH_UNIT.get(), WitchUnit.createAttributes().build());
         evt.put(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnit.createAttributes().build());
@@ -101,11 +103,13 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.CREEPER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.SPIDER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.POISON_SPIDER_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.WRAITH_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.VILLAGER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.MILITIA_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.ZOMBIE_VILLAGER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.VINDICATOR_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.PILLAGER_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.WINDCALLER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.IRON_GOLEM_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.WITCH_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.EVOKER_UNIT_SPAWN_EGG);

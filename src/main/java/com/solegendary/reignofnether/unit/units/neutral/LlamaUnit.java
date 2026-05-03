@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.neutral;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -112,20 +113,10 @@ public class LlamaUnit extends Llama implements Unit, AttackerUnit, RangedAttack
         this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
-
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.LLAMA;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
@@ -173,7 +164,13 @@ public class LlamaUnit extends Llama implements Unit, AttackerUnit, RangedAttack
                 .add(Attributes.MOVEMENT_SPEED, LlamaUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, LlamaUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, LlamaUnit.armorValue);
+                .add(Attributes.ARMOR, LlamaUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override // prevent vanilla logic for picking up items

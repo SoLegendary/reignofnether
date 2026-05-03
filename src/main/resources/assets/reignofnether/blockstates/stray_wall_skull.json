@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "powered=false,facing=north": { "model": "reignofnether:block/stray_wall_skull" },
+    "powered=false,facing=south": { "model": "reignofnether:block/stray_wall_skull", "y": 180 },
+    "powered=false,facing=west":  { "model": "reignofnether:block/stray_wall_skull", "y": 270 },
+    "powered=false,facing=east":  { "model": "reignofnether:block/stray_wall_skull", "y": 90  },
+    "powered=true,facing=north":  { "model": "reignofnether:block/stray_wall_skull" },
+    "powered=true,facing=south":  { "model": "reignofnether:block/stray_wall_skull", "y": 180 },
+    "powered=true,facing=west":   { "model": "reignofnether:block/stray_wall_skull", "y": 270 },
+    "powered=true,facing=east":   { "model": "reignofnether:block/stray_wall_skull", "y": 90  }
+  }
+}

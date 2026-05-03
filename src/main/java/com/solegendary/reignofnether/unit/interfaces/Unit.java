@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveE
 import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.FancyFeast;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -13,6 +14,7 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -28,7 +30,6 @@ import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
@@ -51,6 +52,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
@@ -143,8 +145,19 @@ public interface Unit {
     SelectedTargetGoal<?> getTargetGoal();
     ReturnResourcesGoal getReturnResourcesGoal();
 
-    public float getMovementSpeed();
-    public float getUnitMaxHealth();
+    public default float getMovementSpeed() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(Attributes.MOVEMENT_SPEED);
+        return (float) (attr != null ?  attr.getValue() : Attributes.MOVEMENT_SPEED.getDefaultValue());
+    }
+    public default float getUnitMaxHealth() {
+        float bonus = 0;
+        if (this instanceof HeroUnit heroUnit) {
+            bonus = heroUnit.getHealthBonusPerLevel() * heroUnit.getHeroLevel();
+        }
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(Attributes.MAX_HEALTH);
+        return (float) (attr != null ?  attr.getValue() : Attributes.MAX_HEALTH.getDefaultValue()) + bonus;
+    }
+
     public ResourceCost getCost();
 
     LivingEntity getFollowTarget();
@@ -173,13 +186,14 @@ public interface Unit {
 
     // SOURCE: inherent unit stats and abilities
     default double getUnitRangedArmorPercentage() {
-        return 0;
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.RANGED_DAMAGE_RESIST.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.RANGED_DAMAGE_RESIST.get().getDefaultValue());
     }
 
     // SOURCE: inherent unit stats and vanilla mechanics (like resistance)
     default double getUnitMagicArmorPercentage() {
-        Mob mob = (Mob) this;
-        return 1 - mob.getDamageAfterMagicAbsorb(mob.damageSources().magic(), 1);
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.MAGIC_DAMAGE_RESIST.get().getDefaultValue());
     }
 
     // SOURCE: resistance mob effect
@@ -282,8 +296,9 @@ public interface Unit {
             }
         }
 
-        if (le.isInWater() && // stuck in bridge
-                BuildingUtils.findBuilding(le.level().isClientSide(), le.getOnPos().above()).getBuilding() instanceof AbstractBridge) {
+        // stuck in bridge
+        BuildingPlacement bpl = BuildingUtils.findBuilding(le.level().isClientSide(), le.getOnPos().above());
+        if (le.isInWater() && bpl != null && bpl.getBuilding() instanceof AbstractBridge) {
             le.setDeltaMovement(0, 0.2, 0);
         }
 
@@ -305,8 +320,11 @@ public interface Unit {
         }
 
         if (unitMob.tickCount % 20 == 0) {
-            if (unit.hasEffectWithDuration(MobEffectRegistrar.UNCONTROLLABLE.get())) {
+            if (unit.hasEffectWithDuration(MobEffectRegistrar.ANGRY.get())) {
                 addParticlesAroundSelf(unit, ParticleTypes.ANGRY_VILLAGER);
+            }
+            if (unit.hasEffectWithDuration(MobEffectRegistrar.FEARFUL.get())) {
+                addParticlesAroundSelf(unit, ParticleTypes.SCULK_SOUL);
             }
         }
 

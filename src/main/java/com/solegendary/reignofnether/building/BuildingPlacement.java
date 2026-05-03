@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
@@ -107,7 +108,6 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getTotalCompl
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
 import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_BUILDING_BOUNTY_PERCENT;
-import static com.solegendary.reignofnether.survival.SurvivalServerEvents.ENEMY_OWNER_NAME;
 
 public class BuildingPlacement {
     private Building building;
@@ -793,8 +793,8 @@ public class BuildingPlacement {
                     spawnHuntableAnimalsNearby(ANIMAL_SPAWN_BLOCK_RANGE / 2);
             }
             RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(ownerName);
-            if (rtsPlayer == null) return;
-            rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED);
+            if (rtsPlayer != null)
+                rtsPlayer.scores.addToScore(RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED);
         } else {
             TutorialClientEvents.updateStage();
             if (this.isCapitol && !SandboxClientEvents.isSandboxPlayer() &&
@@ -808,35 +808,6 @@ public class BuildingPlacement {
                 if (!this.level.getBlockState(bb.getBlockPos()).isAir())
                     this.level.setBlockAndUpdate(bb.getBlockPos(), Blocks.AIR.defaultBlockState());
 
-        if (!level.isClientSide() && ownerName.equals(ENEMY_OWNER_NAME)) {
-            GarrisonableBuildingAddon garr;
-            if ((garr = getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null) {
-                int numUnits = 7;
-                if (getBuilding() instanceof DarkWatchtower || getBuilding() instanceof Watchtower)
-                    numUnits = 3;
-                else if (getBuilding() instanceof Bastion)
-                    numUnits = 4;
-
-                for (int i = 0; i < numUnits; i++) {
-                    EntityType<? extends Mob> entityType = null;
-                    if (getFaction() == Faction.VILLAGERS)
-                        entityType = EntityRegistrar.PILLAGER_UNIT.get();
-                    else if (getFaction() == Faction.MONSTERS)
-                        entityType = EntityRegistrar.SKELETON_UNIT.get();
-                    else if (getFaction() == Faction.PIGLINS)
-                        entityType = EntityRegistrar.HEADHUNTER_UNIT.get();
-
-                    if (entityType != null && garr.getEntryPosition(this) != null) {
-                        UnitServerEvents.spawnMob(
-                            entityType,
-                            (ServerLevel) level,
-                            garr.getEntryPosition(this),
-                            ENEMY_OWNER_NAME
-                        );
-                    }
-                }
-            }
-        }
         getBuilding().onBuilt(this);
     }
 
@@ -1219,9 +1190,9 @@ public class BuildingPlacement {
         refreshBlocks();
     }
 
-    private void checkIfCaptured(ServerLevel serverLevel) {
+    protected boolean checkIfCaptured(ServerLevel serverLevel) {
         if (PlayerServerEvents.rtsPlayers.isEmpty())
-            return;
+            return false;
 
         List<Mob> nearbyUnits = MiscUtil.getEntitiesWithinRange(
                 new Vector3d(centrePos.getX(), minCorner.getY(), centrePos.getZ()),
@@ -1252,12 +1223,16 @@ public class BuildingPlacement {
                 }
             }
             if (highestPop > 0 && highestPopPlayer != null) {
+                boolean capturedByAlly = AlliancesServerEvents.isAllied(ownerName, highestPopPlayer);
                 ownerName = highestPopPlayer;
 
                 if (this instanceof BeaconPlacement beacon)
                     beacon.sendWarning("capture_warning");
+
+                return !capturedByAlly;
             }
         }
+        return false;
     }
 
     public String getUpgradedName() {

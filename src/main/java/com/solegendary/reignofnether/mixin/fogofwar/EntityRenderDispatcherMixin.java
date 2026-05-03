@@ -40,7 +40,6 @@ public abstract class EntityRenderDispatcherMixin {
     @Shadow public Camera camera;
     @Shadow private static void fireVertex(PoseStack.Pose pMatrixEntry, VertexConsumer pBuffer, float pX, float pY, float pZ, float pTexU, float pTexV) { }
 
-    // TODO: cache this?
     @Unique private static boolean reignofnether$shouldRenderSoulfire(Entity entity) {
         if (entity instanceof LivingEntity le) {
             return le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get());

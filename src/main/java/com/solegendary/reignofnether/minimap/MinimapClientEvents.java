@@ -836,9 +836,10 @@ public class MinimapClientEvents {
                         if (!(x0 < START_POS_THICKNESS || x0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS ||
                                 z0 < START_POS_THICKNESS || z0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS
                         )) {
-                            rgb = PlayerColors.getPlayerDisplayColorHex(startPos.playerName);
-                            if (startPos.faction == Faction.NONE)
-                                rgb = 0xFFFF00;
+                            //rgb = PlayerColors.getPlayerDisplayColorHex(startPos.playerName);
+                            //if (startPos.faction == Faction.NONE)
+                            //    rgb = 0xFFFF00;
+                            rgb = startPos.colorId;
                         }
 
                         int xN = x - xc_world + (mapGuiRadius * 2);

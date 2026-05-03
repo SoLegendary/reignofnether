@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ability.EnchantAbility;
-import com.solegendary.reignofnether.ability.EnchantEquipAbilityServersidePacket;
+import com.solegendary.reignofnether.ability.BuildingAbilityServerboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -48,7 +48,7 @@ public class EnchantMaiming extends EnchantAbility {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(ENCHANT_ACTION),
                 () -> {
-                    EnchantEquipAbilityServersidePacket.setAutocastEnchantOrEquipServerside(ENCHANT_ACTION, placement.originPos);
+                    BuildingAbilityServerboundPacket.doAbility(ENCHANT_ACTION, placement.originPos);
                     if (placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this)
                         placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
                     else

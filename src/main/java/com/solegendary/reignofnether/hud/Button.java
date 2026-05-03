@@ -61,6 +61,7 @@ public class Button {
     public Runnable onLeftClick;
     public Runnable onRightClick;
     public List<FormattedCharSequence> tooltipLines;
+    public boolean lightUpOnHover = true;
 
     public Supplier<Boolean> isFlashing = () -> false;
 
@@ -205,7 +206,7 @@ public class Button {
             }
         }
         // light up on hover
-        if (isEnabled.get() && isMouseOver(mouseX, mouseY)) {
+        if (isEnabled.get() && isMouseOver(mouseX, mouseY) && lightUpOnHover) {
             guiGraphics.pose().translate(0,0,1);
             guiGraphics.fill( // x1,y1, x2,y2,
                     x + xyDiff, y + xyDiff,

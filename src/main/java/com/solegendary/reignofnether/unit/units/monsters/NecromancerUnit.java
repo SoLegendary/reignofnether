@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -178,15 +179,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage + (attackBonusPerLevel * getHeroLevel());}
-    public float getUnitMaxHealth() {return maxHealth + (maxHealthBonusPerLevel * getHeroLevel());}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.NECROMANCER;}
@@ -209,12 +202,11 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 150;
+    final static private float baseMaxMana = 150;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    private float manaRegenPerSecond = 1;
-    private float manaBonusPerLevel = 10;
-    @Override public float getBaseMaxMana() { return baseMaxMana; }
+    final static private float manaRegenPerSecond = 1;
+    final static private float manaBonusPerLevel = 10;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
         this.maxMana = amount;
@@ -227,8 +219,6 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         if (!level().isClientSide())
             HeroClientboundPacket.setMana(getId(), this.mana);
     }
-    @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
-    @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
     final static public float attackDamage = 4.0f;
     final static public float attackBonusPerLevel = 0.4f;
@@ -241,14 +231,10 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     final static public float aggroRange = 12;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
+    final static public double magicDamageResist = 0.3d;
     public int maxResources = 100;
 
     public int souls = 0;
-
-    @Override public float getHealthBonusPerLevel() { return maxHealthBonusPerLevel; };
-    @Override public float getAttackBonusPerLevel() { return attackBonusPerLevel; };
-    @Override public float getBaseHealth() { return maxHealth; };
-    @Override public float getBaseAttack() { return attackDamage; };
 
     public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
     public int getFogRevealDuration() { return fogRevealDuration; }
@@ -331,7 +317,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
         if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
-            pDamage *= 0.7F;
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
 
@@ -352,7 +338,19 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 .add(Attributes.MOVEMENT_SPEED, NecromancerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, NecromancerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, NecromancerUnit.armorValue);
+                .add(Attributes.ARMOR, NecromancerUnit.armorValue)
+                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), NecromancerUnit.maxHealth)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
+                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
+                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
+                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
+                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
+                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
     }
 
     public void tick() {

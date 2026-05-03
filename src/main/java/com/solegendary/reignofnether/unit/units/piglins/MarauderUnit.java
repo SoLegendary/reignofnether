@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -22,7 +23,6 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.MarauderAnimations;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -136,18 +136,10 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
-
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.MARAUDER;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
     public float getUnitAttackDamage() {
         if (useCleavingHitDamage) {
             return cleavingHitDamage;
@@ -165,8 +157,6 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
 
     // endregion
-
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
 
     final static public float attackDamage = 7.0f;
     final static public float bigHitDamage = 10.0f;
@@ -251,11 +241,6 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     }
 
     @Override
-    public double getUnitRangedArmorPercentage() {
-        return rangedDamageResist;
-    }
-
-    @Override
     protected boolean onSoulSpeedBlock() {
         return false;
     }
@@ -271,7 +256,13 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, MarauderUnit.armorValue)
                 .add(Attributes.ATTACK_KNOCKBACK, 0f)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 0.66f);
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.66f)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override

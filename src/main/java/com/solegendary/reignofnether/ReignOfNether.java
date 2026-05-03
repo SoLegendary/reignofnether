@@ -54,7 +54,7 @@ import java.util.function.Supplier;
 public class ReignOfNether {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "reignofnether";
-    public static final String VERSION_STRING = "1.3.1";
+    public static final String VERSION_STRING = "1.3.2e";
 
     // Fields from ClientReset
     public static final Field handshakeField;
@@ -68,6 +68,7 @@ public class ReignOfNether {
         // Registering all components
         EnchantmentRegistrar.init(mlctx);
 
+        AttributeRegistrar.init(mlctx);
         ItemRegistrar.init(mlctx);
         EntityRegistrar.init(mlctx);
         ContainerRegistrar.init(mlctx);

@@ -29,6 +29,7 @@
         "VexMixin",
         "WebBlockMixin",
         "WitchMixin",
+        "WitherRoseMixin",
         "fire.BaseFireBlockMixin",
         "fire.CampfireBlockMixin",
         "fire.FireBlockMixin",

@@ -74,12 +74,12 @@ public class DarkWatchtower extends Building implements GarrisonableBuildingAddo
     public int getExternalAttackRangeBonus() { return 10; }
     @Override
     public BlockPos getEntryPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(2,11,2), placement.rotation));
+        return placement.originPos.offset(BuildingUtils.rotatePos(new BlockPos(2,11,2), placement.rotation));
     }
 
     @Override
     public BlockPos getExitPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(2,1,2), placement.rotation));
+        return placement.originPos.offset(BuildingUtils.rotatePos(new BlockPos(2,1,2), placement.rotation));
     }
 
     @Override

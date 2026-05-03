@@ -2,12 +2,13 @@ package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.sounds.SoundAction;
-import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -38,13 +40,33 @@ import java.util.List;
 public interface AttackerUnit {
 
     public boolean getWillRetaliate();
-    public float getAttackCooldown();
-    public float getAttacksPerSecond();
-    public float getBaseAttacksPerSecond();
-    public float getAggroRange();
+    public default float getAttacksPerSecond() {
+        return 20f / getAttackCooldown();
+    }
+    public default float getAttackCooldown() {
+        return ((20 / getBaseAttacksPerSecond()) * getAttackCooldownMultiplier());
+    }
     public boolean getAggressiveWhenIdle();
-    public float getAttackRange();
-    public float getUnitAttackDamage();
+    public default float getBaseAttacksPerSecond() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACKS_PER_SECOND.get().getDefaultValue());
+    }
+    public default float getAggroRange() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.AGGRO_RANGE.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.AGGRO_RANGE.get().getDefaultValue());
+    }
+    public default float getAttackRange() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
+    }
+    public default float getUnitAttackDamage() {
+        float bonus = 0;
+        if (this instanceof HeroUnit heroUnit) {
+            bonus = heroUnit.getAttackBonusPerLevel() * heroUnit.getHeroLevel();
+        }
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
+    }
     public BlockPos getAttackMoveTarget();
     public boolean canAttackBuildings();
 

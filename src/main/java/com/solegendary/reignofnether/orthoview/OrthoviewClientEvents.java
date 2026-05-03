@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -265,6 +266,14 @@ public class OrthoviewClientEvents {
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END) {
             return;
+        }
+
+        long windowHandle = MC.getWindow().getWindow();
+        int cursorMode = GLFW.glfwGetInputMode(windowHandle, GLFW.GLFW_CURSOR);
+        boolean grabbed = cursorMode == GLFW.GLFW_CURSOR_DISABLED;
+        if (MC.screen == null && !grabbed && MC.isWindowActive()) {
+            MC.mouseHandler.releaseMouse();
+            MC.mouseHandler.grabMouse();
         }
 
         if (isEnabled() && MC.gameMode != null && (
@@ -575,7 +584,7 @@ public class OrthoviewClientEvents {
 
         float panKeyStep = 1.5f * (getZoom() / ZOOM_MAX);
 
-        if (!isCameraLocked() && !Keybindings.altMod.isDown()) {
+        if (!isCameraLocked() && !Keybindings.altMod.isDown() && !TextInputClientEvents.isAnyInputFocused()) {
             // pan camera with keys
             if (Keybindings.panPlusX.isDown()) {
                 panCam(getEdgeCamPanSensitivity(), 0, 0);

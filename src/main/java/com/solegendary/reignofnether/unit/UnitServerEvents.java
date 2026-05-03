@@ -38,6 +38,7 @@ import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.EnchantmentUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
@@ -55,6 +56,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -75,11 +77,9 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.world.ForgeChunkManager;
+import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -119,6 +119,8 @@ public class UnitServerEvents {
 
     public static final ArrayList<TargetResourcesSave> savedTargetResources = new ArrayList<>();
 
+    private static boolean isServerStopping = false;
+
     private static final int SAVE_TICKS_MAX = 600;
     private static int saveTicks = 0;
     @SubscribeEvent
@@ -137,6 +139,7 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent evt) {
+        isServerStopping = true;
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null) {
             saveFallenHeroUnits(level);
@@ -221,7 +224,7 @@ public class UnitServerEvents {
         }
     }
 
-    public static int getCurrentPopulation(ServerLevel level, String ownerName) {
+    public static int getCurrentPopulation(String ownerName) {
         int currentPopulation = 0;
         for (LivingEntity entity : allUnits)
             if (entity instanceof Unit unit) {
@@ -395,6 +398,8 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
+        if (isServerStopping) return;
+
         if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof LivingEntity entity
             && !evt.getLevel().isClientSide) {
 
@@ -664,7 +669,9 @@ public class UnitServerEvents {
                             MobEffectRegistrar.DISARM.get(),
                             MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get(),
                             MobEffectRegistrar.SCORCHING_FIRE.get(),
-                            MobEffectRegistrar.SOULS_AFLAME.get()
+                            MobEffectRegistrar.SOULS_AFLAME.get(),
+                            MobEffectRegistrar.ANGRY.get(),
+                            MobEffectRegistrar.FEARFUL.get()
                     )) {
                         MobEffectInstance mei = entity.getEffect(me);
                         if (mei != null)
@@ -786,6 +793,8 @@ public class UnitServerEvents {
             );
         }
         if (sourceEntity instanceof WretchedWraithUnit)
+            return true;
+        if (sourceEntity instanceof WraithUnit)
             return true;
         if (sourceEntity instanceof SlimeUnit slimeUnit && slimeUnit.isTiny())
             return true;
@@ -1021,7 +1030,7 @@ public class UnitServerEvents {
             evt.setCanceled(true);
         if (evt.getEntity() instanceof GhastUnit)
             evt.setCanceled(true);
-        else if (evt.getEntity() instanceof WretchedWraithUnit wraith && wraith.isBlizzardInProgress())
+        else if (evt.getEntity() instanceof WraithUnit)
             evt.setCanceled(true);
         else if (evt.getEntity() instanceof BruteUnit bruteUnit && bruteUnit.isHoldingUpShield)
             evt.setCanceled(true);

@@ -1,11 +1,13 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
@@ -13,14 +15,12 @@ import java.util.EnumSet;
 // allows use of the AttackGroundAbility
 // dependent on the unit having a UnitBowAttackGoal
 
-public class RangedFlyingAttackGroundGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
+public class MountedRangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
     private final T mob;
     private BlockPos groundTarget = null;
-    private final UnitBowAttackGoal<?> bowAttackGoal;
 
-    public RangedFlyingAttackGroundGoal(T mob, UnitBowAttackGoal<?> bowAttackGoal) {
+    public MountedRangedAttackGroundGoal(T mob) {
         this.mob = mob;
-        this.bowAttackGoal = bowAttackGoal;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
@@ -62,26 +62,33 @@ public class RangedFlyingAttackGroundGoal<T extends net.minecraft.world.entity.M
             float ty = groundTarget.getY() + 0.5f;
             float tz = groundTarget.getZ() + 0.5f;
 
-            this.mob.getLookControl().setLookAt(tx, ty, tz);
-
-            if (this.mob.level().isClientSide())
+            Entity passenger = null;
+            if (this.mob.isVehicle()) {
+                passenger = this.mob.getFirstPassenger();
+            }
+            if (!(passenger instanceof Mob pMob))
                 return;
 
-            float attackRange = ((AttackerUnit) this.mob).getAttackRange();
+            pMob.getLookControl().setLookAt(tx, ty, tz);
 
-            double distToTarget = Math.sqrt(this.mob.distanceToSqr(tx, ty, tz));
+            if (pMob.level().isClientSide())
+                return;
+
+            float attackRange = ((AttackerUnit) pMob).getAttackRange();
+
+            double distToTarget = Math.sqrt(pMob.distanceToSqr(tx, ty, tz));
 
             if ((distToTarget > attackRange - 1) &&
-                !((Unit) this.mob).getHoldPosition()) {
+                !((Unit) pMob).getHoldPosition()) {
                 this.moveTo(this.groundTarget);
             } else {
                 this.stopMoving();
             }
-            if (distToTarget <= attackRange) { // start drawing bowstring
-                if (bowAttackGoal.getAttackCooldown() <= 0) {
-                    if (mob instanceof RangedAttackerUnit rangedAttackerUnit)
-                        rangedAttackerUnit.performUnitRangedAttack(tx, ty, tz, 20);
-                    bowAttackGoal.setToMaxAttackCooldown();
+            if (distToTarget <= attackRange && pMob instanceof PillagerUnit pillagerUnit &&
+                pillagerUnit.getAttackGoal() instanceof UnitCrossbowAttackGoal<?> cbowAttackGoal) {
+                if (cbowAttackGoal.getAttackCooldown() <= 0) {
+                    pillagerUnit.performUnitRangedAttack(tx, ty, tz, 20);
+                    cbowAttackGoal.setToMaxAttackCooldown();
                 }
             }
         }

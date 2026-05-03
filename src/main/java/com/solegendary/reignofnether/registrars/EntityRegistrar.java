@@ -97,6 +97,12 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "cave_spider_unit").toString()));
 
+    public static final RegistryObject<EntityType<WraithUnit>> WRAITH_UNIT = ENTITIES.register("wraith_unit",
+            () -> EntityType.Builder.of(WraithUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.BLAZE.getWidth(), EntityType.BLAZE.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith_unit").toString()));
+
     public static final RegistryObject<EntityType<VillagerUnit>> VILLAGER_UNIT = ENTITIES.register("villager_unit",
             () -> EntityType.Builder.of(VillagerUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.VILLAGER.getWidth(), EntityType.VILLAGER.getHeight())
@@ -120,6 +126,12 @@ public class EntityRegistrar {
                     .sized(EntityType.PILLAGER.getWidth(), EntityType.PILLAGER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "pillager_unit").toString()));
+
+    public static final RegistryObject<EntityType<WindcallerUnit>> WINDCALLER_UNIT = ENTITIES.register("windcaller_unit",
+            () -> EntityType.Builder.of(WindcallerUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.PILLAGER.getWidth(), EntityType.PILLAGER.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "windcaller_unit").toString()));
 
     public static final RegistryObject<EntityType<IronGolemUnit>> IRON_GOLEM_UNIT = ENTITIES.register("iron_golem_unit",
             () -> EntityType.Builder.of(IronGolemUnit::new, MobCategory.CREATURE)
@@ -379,10 +391,12 @@ public class EntityRegistrar {
             case DrownedProd.itemName -> EntityRegistrar.DROWNED_UNIT.get();
             case SpiderProd.itemName -> EntityRegistrar.SPIDER_UNIT.get();
             case PoisonSpiderProd.itemName -> EntityRegistrar.POISON_SPIDER_UNIT.get();
+            case WraithProd.itemName -> EntityRegistrar.WRAITH_UNIT.get();
             case VillagerProd.itemName -> EntityRegistrar.VILLAGER_UNIT.get();
             case ZombieVillagerProd.itemName -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
             case VindicatorProd.itemName -> EntityRegistrar.VINDICATOR_UNIT.get();
             case PillagerProd.itemName -> EntityRegistrar.PILLAGER_UNIT.get();
+            case WindcallerProd.itemName -> EntityRegistrar.WINDCALLER_UNIT.get();
             case IronGolemProd.itemName -> EntityRegistrar.IRON_GOLEM_UNIT.get();
             case WitchProd.itemName -> EntityRegistrar.WITCH_UNIT.get();
             case EvokerProd.itemName -> EntityRegistrar.EVOKER_UNIT.get();

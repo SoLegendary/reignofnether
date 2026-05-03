@@ -21,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -204,10 +205,16 @@ public class SandboxActionButtons {
     }
 
     public static Button getCycleScenarioRoleButton() {
+        ScenarioRole role = getHudSelectedScenarioRole();
+        String roleName = I18n.get("sandbox.reignofnether.scenario_role_none");
+        if (role != null) {
+            roleName = role.name;
+        }
         return new Button(
                 "Switch Building Scenario Role",
                 Button.itemIconSize,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_conditional.png"),
+                role != null ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_conditional.png") :
+                                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_conditional_dark.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
@@ -215,7 +222,7 @@ public class SandboxActionButtons {
                 () -> cycleUnitOrBuildingRoleIndex(false),
                 () -> cycleUnitOrBuildingRoleIndex(true),
                 List.of(
-                        fcs(I18n.get("sandbox.reignofnether.cycle_scenario_role", getHudSelectedScenarioRoleName()))
+                        fcs(I18n.get("sandbox.reignofnether.cycle_scenario_role", roleName))
                 )
         );
     }
@@ -245,7 +252,8 @@ public class SandboxActionButtons {
         }
     }
 
-    private static String getHudSelectedScenarioRoleName() {
+    @Nullable
+    private static ScenarioRole getHudSelectedScenarioRole() {
         ScenarioRole role = null;
         if (HudClientEvents.hudSelectedEntity instanceof Unit unit) {
             role = ScenarioUtils.getScenarioRole(true, unit.getScenarioRoleIndex());
@@ -253,10 +261,7 @@ public class SandboxActionButtons {
             int index = HudClientEvents.hudSelectedPlacement.scenarioRoleIndex;
             role = ScenarioUtils.getScenarioRole(true, index);
         }
-        if (role != null) {
-            return role.name;
-        }
-        return I18n.get("sandbox.reignofnether.scenario_role_none");
+        return role;
     }
 
     static {

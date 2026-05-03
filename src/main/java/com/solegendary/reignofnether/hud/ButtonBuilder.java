@@ -40,6 +40,7 @@ public class ButtonBuilder {
     // Optional with defaults
     private int iconSize = Button.DEFAULT_ICON_SIZE;
     private ResourceLocation frameResource = null;
+    private boolean lightUpOnHover = true;
     private ResourceLocation bgIconResource = null;
     private Keybinding hotkey = null;
     private LivingEntity entity = null;
@@ -76,6 +77,11 @@ public class ButtonBuilder {
 
     public ButtonBuilder frameResource(ResourceLocation frameResource) {
         this.frameResource = frameResource;
+        return this;
+    }
+
+    public ButtonBuilder lightUpOnHover(boolean lightUpOnHover) {
+        this.lightUpOnHover = lightUpOnHover;
         return this;
     }
 
@@ -202,6 +208,7 @@ public class ButtonBuilder {
         button.greyPercent = greyPercent;
         button.stretchIconToBorders = stretchIconToBorders;
         button.tooltipOffsetY = tooltipOffsetY;
+        button.lightUpOnHover = lightUpOnHover;
 
         return button;
     }

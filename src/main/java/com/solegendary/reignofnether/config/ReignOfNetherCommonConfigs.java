@@ -27,6 +27,7 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.DROWNED.define(BUILDER);
         UnitCosts.SPIDER.define(BUILDER);
         UnitCosts.POISON_SPIDER.define(BUILDER);
+        UnitCosts.WRAITH.define(BUILDER);
         UnitCosts.SLIME.define(BUILDER);
         UnitCosts.WARDEN.define(BUILDER);
         UnitCosts.ZOMBIE_PIGLIN.define(BUILDER);
@@ -39,6 +40,7 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.MILITIA.define(BUILDER);
         UnitCosts.IRON_GOLEM.define(BUILDER);
         UnitCosts.PILLAGER.define(BUILDER);
+        UnitCosts.WINDCALLER.define(BUILDER);
         UnitCosts.VINDICATOR.define(BUILDER);
         UnitCosts.WITCH.define(BUILDER);
         UnitCosts.EVOKER.define(BUILDER);
@@ -131,6 +133,8 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_DROWNED.define(BUILDER);
         ResearchCosts.RESEARCH_STRAYS.define(BUILDER);
         ResearchCosts.RESEARCH_BOGGED.define(BUILDER);
+        ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD.define(BUILDER);
+        ResearchCosts.RESEARCH_MASS_BURIALS.define(BUILDER);
         ResearchCosts.RESEARCH_SLIME_CONVERSION.define(BUILDER);
         ResearchCosts.RESEARCH_LINGERING_POTIONS.define(BUILDER);
         ResearchCosts.RESEARCH_HEALING_POTIONS.define(BUILDER);
@@ -185,6 +189,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry DROWNED = ResourceCostConfigEntry.Unit(75,0,0,18,1, ResourceCosts.DROWNED, "Drowned Config");
         public static final ResourceCostConfigEntry SPIDER = ResourceCostConfigEntry.Unit(80,20,20,25,2, ResourceCosts.SPIDER, "Spider Config");
         public static final ResourceCostConfigEntry POISON_SPIDER = ResourceCostConfigEntry.Unit(80,20,20,25,2, ResourceCosts.POISON_SPIDER, "Poison Spider Config");
+        public static final ResourceCostConfigEntry WRAITH = ResourceCostConfigEntry.Unit(70,0,70,30,2, ResourceCosts.WRAITH, "Wraith Config");
         public static final ResourceCostConfigEntry SLIME = ResourceCostConfigEntry.Unit(40,40,40,25,2, ResourceCosts.SLIME, "Slime Config");
         public static final ResourceCostConfigEntry WARDEN = ResourceCostConfigEntry.Unit(275,0,125,50,5, ResourceCosts.WARDEN, "Warden Config");
         public static final ResourceCostConfigEntry NECROMANCER = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.NECROMANCER, "Necromancer Config");
@@ -198,6 +203,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry MILITIA = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.MILITIA, "Militia Config");
         public static final ResourceCostConfigEntry IRON_GOLEM = ResourceCostConfigEntry.Unit(0,50,250,45,4, ResourceCosts.IRON_GOLEM, "Iron Golem Config");
         public static final ResourceCostConfigEntry PILLAGER = ResourceCostConfigEntry.Unit(120,80,0,32,3, ResourceCosts.PILLAGER, "Pillager Config");
+        public static final ResourceCostConfigEntry WINDCALLER = ResourceCostConfigEntry.Unit(150,60,60,32,3, ResourceCosts.WINDCALLER, "Windcaller Config");
         public static final ResourceCostConfigEntry VINDICATOR = ResourceCostConfigEntry.Unit(170,0,0,32,3, ResourceCosts.VINDICATOR, "Vindicator Config");
         public static final ResourceCostConfigEntry WITCH = ResourceCostConfigEntry.Unit(90,90,90,35,3, ResourceCosts.WITCH, "Witch Config");
         public static final ResourceCostConfigEntry EVOKER = ResourceCostConfigEntry.Unit(150,0,120,35,3, ResourceCosts.EVOKER, "Evoker Config");
@@ -289,6 +295,8 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_DROWNED = ResourceCostConfigEntry.Research(500,0,500, 200, ResourceCosts.RESEARCH_DROWNED, "Drowned Research Config");
         public static final ResourceCostConfigEntry RESEARCH_STRAYS = ResourceCostConfigEntry.Research(500,500,0, 200, ResourceCosts.RESEARCH_STRAYS, "Stray Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BOGGED = ResourceCostConfigEntry.Research(300,300,0, 140, ResourceCosts.RESEARCH_BOGGED, "Bogged Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_OVERFLOWING_GRAVEYARD = ResourceCostConfigEntry.Research(0,75,75, 60, ResourceCosts.RESEARCH_OVERFLOWING_GRAVEYARD, "Overflowing Graveyard Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_MASS_BURIALS = ResourceCostConfigEntry.Research(0,300,300, 140, ResourceCosts.RESEARCH_MASS_BURIALS, "Mass Burials Research Config");
         public static final ResourceCostConfigEntry RESEARCH_SLIME_CONVERSION = ResourceCostConfigEntry.Research(300,0,300, 140, ResourceCosts.RESEARCH_SLIME_CONVERSION, "Slime Conversion Research Config");
         public static final ResourceCostConfigEntry RESEARCH_LINGERING_POTIONS = ResourceCostConfigEntry.Research(0,250,250, 140, ResourceCosts.RESEARCH_LINGERING_POTIONS, "Extended Lingering Potion Research Config");
         public static final ResourceCostConfigEntry RESEARCH_HEALING_POTIONS = ResourceCostConfigEntry.Research(0,350,350, 180, ResourceCosts.RESEARCH_HEALING_POTIONS, "Healing Potion Research Config");

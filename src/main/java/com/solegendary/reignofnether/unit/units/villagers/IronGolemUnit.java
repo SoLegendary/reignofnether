@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -122,15 +123,7 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.IRON_GOLEM;}
@@ -170,10 +163,6 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     }
 
     final static public float rangedDamageResist = 0.4f;
-    @Override
-    public double getUnitRangedArmorPercentage() {
-        return rangedDamageResist;
-    }
 
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
@@ -185,7 +174,13 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
                 .add(Attributes.ARMOR, IronGolemUnit.armorValue)
                 .add(Attributes.MAX_HEALTH, IronGolemUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D);
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), rangedDamageResist)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     private LivingEntity lastTarget = null;

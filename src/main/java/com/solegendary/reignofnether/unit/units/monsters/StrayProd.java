@@ -2,10 +2,9 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
+import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
-import com.solegendary.reignofnether.building.production.ProductionItem;
-import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.building.production.StopProductionButton;
+import com.solegendary.reignofnether.building.production.*;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
@@ -17,7 +16,6 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
@@ -28,7 +26,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class StrayProd extends ProductionItem {
+public class StrayProd extends GraveyardUnitProductionItem {
 
     public final static String itemName = "Stray";
     public final static ResourceCost cost = ResourceCosts.STRAY;
@@ -36,8 +34,13 @@ public class StrayProd extends ProductionItem {
     public StrayProd() {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (!level.isClientSide())
-                placement.produceUnit((ServerLevel) level, EntityRegistrar.STRAY_UNIT.get(), placement.ownerName, true);
+            if (!level.isClientSide()) {
+                if (placement instanceof GraveyardPlacement gy && placement.getUpgradeLevel() > 0) {
+                    gy.createSkull(EntityRegistrar.STRAY_UNIT.get());
+                } else {
+                    placement.produceUnit((ServerLevel) level, EntityRegistrar.STRAY_UNIT.get(), placement.ownerName, true);
+                }
+            }
         };
     }
 

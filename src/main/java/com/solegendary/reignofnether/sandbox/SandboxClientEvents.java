@@ -122,6 +122,7 @@ public class SandboxClientEvents {
                 ProductionItems.IRON_GOLEM.getPlaceButton(),
                 ProductionItems.WITCH.getPlaceButton(),
                 ProductionItems.EVOKER.getPlaceButton(),
+                ProductionItems.WINDCALLER.getPlaceButton(),
                 ProductionItems.RAVAGER.getPlaceButton(),
                 ProductionItems.ROYAL_GUARD.getPlaceButton(),
 
@@ -138,6 +139,8 @@ public class SandboxClientEvents {
                 ProductionItems.SPIDER.getPlaceButton(),
                 ProductionItems.POISON_SPIDER.getPlaceButton(),
                 ProductionItems.CREEPER.getPlaceButton(),
+                ProductionItems.WRAITH.getPlaceButton(),
+                ProductionItems.STRAY.getPlaceButton(),
                 ProductionItems.SLIME.getPlaceButton(),
                 ProductionItems.WARDEN.getPlaceButton(),
                 ProductionItems.ZOMBIE_PIGLIN.getPlaceButton(),

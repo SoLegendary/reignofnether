@@ -55,6 +55,10 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
         return attackCooldown;
     }
 
+    public CrossbowState getCrossbowState() {
+        return crossbowState;
+    }
+
     public void setToMaxAttackCooldown() {
         this.attackCooldown = this.attackCooldownMax;
     }
@@ -193,12 +197,16 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                     this.crossbowState = READY_TO_ATTACK;
                 }
             } else if (this.crossbowState == READY_TO_ATTACK && canSeeTarget && distToTarget < attackRange) {
-                this.mob.performCrossbowAttack(this.mob, 1.6F);
-                ItemStack itemstack1 = this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof CrossbowItem));
-                CrossbowItem.setCharged(itemstack1, false);
-                this.crossbowState = UNCHARGED;
+                performAttack();
             }
         }
+    }
+
+    public void performAttack() {
+        this.mob.performCrossbowAttack(this.mob, 1.6F);
+        ItemStack itemstack1 = this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof CrossbowItem));
+        CrossbowItem.setCharged(itemstack1, false);
+        this.crossbowState = UNCHARGED;
     }
 
     private boolean canRun() {

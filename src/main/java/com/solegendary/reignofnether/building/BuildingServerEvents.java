@@ -2,8 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.EnchantAbility;
-import com.solegendary.reignofnether.ability.EnchantEquipAbilityClientsidePacket;
-import com.solegendary.reignofnether.ability.EnchantEquipAbilityServersidePacket;
+import com.solegendary.reignofnether.ability.BuildingAbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.EquipAbility;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
@@ -176,10 +175,8 @@ public class BuildingServerEvents {
                     b.isDiagonalBridge
                 );
 
-                // Maybe add inside the BuildingPlacement Constructor
-                building.dataStorage = b.dataStorage;
-
                 if (building != null) {
+                    building.dataStorage = b.dataStorage;
                     building.scenarioRoleIndex = b.scenarioRoleIndex;
                     building.isBuilt = b.isBuilt;
                     BuildingServerEvents.getBuildings().add(building);
@@ -240,6 +237,8 @@ public class BuildingServerEvents {
         if (level != null) {
             saveNetherZones(level);
             saveBuildings(level);
+            netherZones.clear();
+            buildings.clear();
         }
     }
 
@@ -265,13 +264,27 @@ public class BuildingServerEvents {
 
     @Nullable
     public static BuildingPlacement placeBuilding(
+            Building building,
+            BlockPos pos,
+            Rotation rotation,
+            String ownerName,
+            int[] builderUnitIds,
+            boolean queue,
+            boolean isDiagonalBridge
+    ) {
+        return placeBuilding(building, pos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, false);
+    }
+
+    @Nullable
+    public static BuildingPlacement placeBuilding(
         Building building,
         BlockPos pos,
         Rotation rotation,
         String ownerName,
         int[] builderUnitIds,
         boolean queue,
-        boolean isDiagonalBridge
+        boolean isDiagonalBridge,
+        boolean fromCommand // ignore resources, terrain or any other restrictions and self-build
     ) {
         BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
             serverLevel,
@@ -290,7 +303,7 @@ public class BuildingServerEvents {
         if (newBuilding != null && !buildingExists) {
             // Handle special building (Iron Golem)
             if (newBuilding.getBuilding() instanceof IronGolemBuilding) {
-                int currentPop = UnitServerEvents.getCurrentPopulation(serverLevel, ownerName);
+                int currentPop = UnitServerEvents.getCurrentPopulation(ownerName);
                 int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 
                 boolean canAffordPop = false;
@@ -302,15 +315,16 @@ public class BuildingServerEvents {
                     }
                 }
 
-                if (!canAffordPop) {
+                if (!canAffordPop && !fromCommand) {
                     ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
                     return null;
                 }
             }
 
-            if (newBuilding.canAfford(ownerName)) {
-                if (serverLevel.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get() &&
-                    !(newBuilding.getBuilding() instanceof AbstractBridge)) {
+            if (fromCommand || newBuilding.canAfford(ownerName)) {
+                if (fromCommand ||
+                    (serverLevel.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get() &&
+                    !(newBuilding.getBuilding() instanceof AbstractBridge))) {
                     BuildingUtils.clearBuildingArea(newBuilding);
                 }
                 buildings.add(newBuilding);
@@ -345,13 +359,15 @@ public class BuildingServerEvents {
                     pos,
                     false
                 );
-                ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
-                    -newBuilding.getBuilding().cost.food,
-                    -newBuilding.getBuilding().cost.wood,
-                    -newBuilding.getBuilding().cost.ore
-                ));
+                if (!fromCommand) {
+                    ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
+                            -newBuilding.getBuilding().cost.food,
+                            -newBuilding.getBuilding().cost.wood,
+                            -newBuilding.getBuilding().cost.ore
+                    ));
+                }
 
-                if (ownerName.isEmpty() || ownerName.equals("Enemy"))
+                if ((SandboxServer.isAnyoneASandboxPlayer() && (ownerName.isEmpty() || ownerName.equals("Enemy"))) || fromCommand)
                     newBuilding.selfBuilding = true;
 
                 assignBuilderUnits(builderUnitIds, queue, newBuilding);
@@ -364,7 +380,6 @@ public class BuildingServerEvents {
                         moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
                     }
                 }
-
             } else if (!PlayerServerEvents.isBot(ownerName)) {
                 warnInsufficientResources(newBuilding);
             }
@@ -538,12 +553,12 @@ public class BuildingServerEvents {
             if (building.getBuilding() instanceof Library) {
                 EnchantAbility ability = building.getDataStorage().getData(Library.AUTO_CAST_ENCHANT);
                 if (ability != null) {
-                    EnchantEquipAbilityClientsidePacket.setAutocastEnchantOrEquipServerside(ability.action, building.originPos);
+                    BuildingAbilityClientboundPacket.doAbility(ability.action, building.originPos);
                 }
             }else if (building.getBuilding() instanceof Blacksmith) {
                 EquipAbility ability = building.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP);
                 if (ability != null) {
-                    EnchantEquipAbilityClientsidePacket.setAutocastEnchantOrEquipServerside(ability.action, building.originPos);
+                    BuildingAbilityClientboundPacket.doAbility(ability.action, building.originPos);
                 }
             }
         }
@@ -600,10 +615,11 @@ public class BuildingServerEvents {
     public static void onLivingSpawn(MobSpawnEvent.FinalizeSpawn evt) {
         if (evt.getSpawnType() == MobSpawnType.SPAWNER) {
             if (evt.getSpawner() != null && evt.getSpawner().getSpawnerBlockEntity() != null) {
-                BlockEntity be = evt.getSpawner().getSpawnerBlockEntity();
                 BlockPos bp = evt.getSpawner().getSpawnerBlockEntity().getBlockPos();
-                if (BuildingUtils.findBuilding(false, bp).getBuilding() instanceof Dungeon ||
-                    BuildingUtils.findBuilding(false, bp).getBuilding() instanceof FlameSanctuary) {
+                BuildingPlacement bpl = BuildingUtils.findBuilding(false, bp);
+                if (bpl != null &&
+                   (bpl.getBuilding() instanceof Dungeon ||
+                    bpl.getBuilding() instanceof FlameSanctuary)) {
                     evt.getEntity().discard();
                 }
             }
@@ -658,6 +674,15 @@ public class BuildingServerEvents {
         int nzSizeAfter = netherZones.size();
         if (nzSizeBefore != nzSizeAfter) {
             saveNetherZones(serverLevel);
+        }
+
+        for (BuildingPlacement bpl : getBuildings()) {
+            if (bpl instanceof GraveyardPlacement gy && gy.getUpgradeLevel() > 0 && gy.autoRelease) {
+                int currentPop = UnitServerEvents.getCurrentPopulation(gy.ownerName);
+                int popSupply = BuildingServerEvents.getTotalPopulationSupply(gy.ownerName);
+                if (popSupply > currentPop)
+                    gy.releaseNextUnit();
+            }
         }
     }
 

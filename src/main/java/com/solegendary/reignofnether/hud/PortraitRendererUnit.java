@@ -386,7 +386,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             if (unit instanceof CreeperUnit cUnit && cUnit.isPowered()) {
                 atkDmg *= CreeperUnit.CHARGED_DAMAGE_MULT;
             }
-            if (unit instanceof WorkerUnit wUnit) {
+            if (unit instanceof WorkerUnit) {
                 atkDmg = (int) attackerUnit.getUnitAttackDamage();
             }
             double atkDmgRounded = Math.round(atkDmg);

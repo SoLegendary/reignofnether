@@ -14,8 +14,10 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
+import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -150,9 +152,9 @@ public class MartialEnchantment extends AbstractEnchantment {
             return Enchantments.PIERCING;
         if (unit instanceof EvokerUnit)
             return EnchantmentRegistrar.ZEAL.get();
-        if (unit instanceof SkeletonUnit || unit instanceof HeadhunterUnit)
+        if (unit instanceof SkeletonUnit || unit instanceof StrayUnit || unit instanceof HeadhunterUnit)
             return Enchantments.POWER_ARROWS;
-        if (unit instanceof BruteUnit)
+        if (unit instanceof BruteUnit || unit instanceof WitherSkeletonUnit)
             return Enchantments.SHARPNESS;
         return null;
     }
@@ -165,6 +167,9 @@ public class MartialEnchantment extends AbstractEnchantment {
                 EntityRegistrar.PILLAGER_UNIT.get(),
                 EntityRegistrar.EVOKER_UNIT.get(),
                 EntityRegistrar.SKELETON_UNIT.get(),
+                EntityRegistrar.STRAY_UNIT.get(),
+                EntityRegistrar.BOGGED_UNIT.get(),
+                EntityRegistrar.WITHER_SKELETON_UNIT.get(),
                 EntityRegistrar.HEADHUNTER_UNIT.get(),
                 EntityRegistrar.BRUTE_UNIT.get()
         );

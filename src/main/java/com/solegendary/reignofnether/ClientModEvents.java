@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether;
 
 import com.solegendary.reignofnether.blocks.GarrisonBlockRenderer;
+import com.solegendary.reignofnether.blocks.SkullTypes;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
@@ -18,10 +19,17 @@ import com.solegendary.reignofnether.unit.units.neutral.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.model.SkullModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SkullBlock;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -31,6 +39,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+
+import java.util.HashSet;
 
 @Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID, bus = Bus.MOD, value = Dist.CLIENT)
 public class ClientModEvents {
@@ -72,11 +82,13 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.CREEPER_UNIT.get(), CreeperRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SPIDER_UNIT.get(), SpiderRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.POISON_SPIDER_UNIT.get(), PoisonSpiderUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.WRAITH_UNIT.get(), WraithRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MILITIA_UNIT.get(), VillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), ZombieVillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.PILLAGER_UNIT.get(), PillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.VINDICATOR_UNIT.get(), VindicatorUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.WINDCALLER_UNIT.get(), WindcallerRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.IRON_GOLEM_UNIT.get(), IronGolemRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WITCH_UNIT.get(), WitchRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnitRenderer::new);
@@ -130,6 +142,61 @@ public class ClientModEvents {
                     RenderType.cutout()
             );
         });
+        evt.enqueueWork(() -> {
+            SkullBlockRenderer.SKIN_BY_TYPE.put(
+                    SkullTypes.DROWNED,
+                    ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/zombie/drowned.png")
+            );
+        });
+        evt.enqueueWork(() -> {
+            SkullBlockRenderer.SKIN_BY_TYPE.put(
+                    SkullTypes.HUSK,
+                    ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/zombie/husk.png")
+            );
+        });
+        evt.enqueueWork(() -> {
+            SkullBlockRenderer.SKIN_BY_TYPE.put(
+                    SkullTypes.STRAY,
+                    ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/skeleton/stray.png")
+            );
+        });
+        evt.enqueueWork(() -> {
+            SkullBlockRenderer.SKIN_BY_TYPE.put(
+                    SkullTypes.BOGGED,
+                    ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/entities/bogged_overlay.png")
+            );
+        });
+
+        BlockEntityType.SKULL.validBlocks = new HashSet<>(BlockEntityType.SKULL.validBlocks);
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.DROWNED_HEAD.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.HUSK_HEAD.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.STRAY_SKULL.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.BOGGED_SKULL.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.DROWNED_WALL_HEAD.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.HUSK_WALL_HEAD.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.STRAY_WALL_SKULL.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.BOGGED_WALL_SKULL.get());
+    }
+
+    @SubscribeEvent
+    public static void onCreateSkullModels(EntityRenderersEvent.CreateSkullModels evt) {
+        EntityModelSet modelSet = evt.getEntityModelSet();
+        evt.registerSkullModel(
+                SkullTypes.DROWNED,
+                new SkullModel(modelSet.bakeLayer(ModelLayers.ZOMBIE_HEAD))
+        );
+        evt.registerSkullModel(
+                SkullTypes.HUSK,
+                new SkullModel(modelSet.bakeLayer(ModelLayers.ZOMBIE_HEAD))
+        );
+        evt.registerSkullModel(
+                SkullTypes.STRAY,
+                new SkullModel(modelSet.bakeLayer(ModelLayers.SKELETON_SKULL))
+        );
+        evt.registerSkullModel(
+                SkullTypes.BOGGED,
+                new SkullModel(modelSet.bakeLayer(ModelLayers.SKELETON_SKULL))
+        );
     }
 
     @SubscribeEvent
@@ -149,6 +216,8 @@ public class ClientModEvents {
         event.registerLayerDefinition(EnchanterModel.LAYER_LOCATION, EnchanterModel::createBodyLayer);
         event.registerLayerDefinition(WretchedWraithModel.LAYER_LOCATION, WretchedWraithModel::createBodyLayer);
         event.registerLayerDefinition(WildfireModel.LAYER_LOCATION, WildfireModel::createBodyLayer);
+        event.registerLayerDefinition(WindcallerModel.LAYER_LOCATION, WindcallerModel::createBodyLayer);
+        event.registerLayerDefinition(WraithModel.LAYER_LOCATION, WraithModel::createBodyLayer);
         event.registerLayerDefinition(AbstractVillagerUnitRenderer.VILLAGER_ARMOR_OUTER_LAYER, IllagerArmorModel::createOuterArmorLayer);
         event.registerLayerDefinition(AbstractVillagerUnitRenderer.VILLAGER_ARMOR_INNER_LAYER, IllagerArmorModel::createInnerArmorLayer);
     }

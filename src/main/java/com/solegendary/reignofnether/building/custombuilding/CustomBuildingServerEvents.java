@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -116,11 +115,13 @@ public class CustomBuildingServerEvents {
         customBuildingData.customBuildings.clear();
         customBuildings.forEach(b -> {
             b.packAttributesNbt();
+            b.packCommandsNbt();
             customBuildingData.customBuildings.add(new CustomBuildingSave(
                     b.structureNbt,
                     b.name,
                     b.structureSize,
-                    b.attributesNbt
+                    b.attributesNbt,
+                    b.commandsNbt
             ));
         });
         customBuildingData.save();
@@ -130,7 +131,7 @@ public class CustomBuildingServerEvents {
     public static void loadCustomBuildings(ServerLevel level) {
         CustomBuildingSaveData customBuildingData = CustomBuildingSaveData.getInstance(level);
         customBuildingData.customBuildings.forEach(bSave -> {
-            CustomBuilding building = new CustomBuilding(bSave.buildingName, bSave.structureSize, Blocks.COMMAND_BLOCK, bSave.structureNbt, bSave.attributesNbt);
+            CustomBuilding building = new CustomBuilding(bSave.buildingName, bSave.structureSize, Blocks.COMMAND_BLOCK, bSave.structureNbt, bSave.attributesNbt, bSave.commandsNbt);
             boolean buildingExists = false;
             for (CustomBuilding customBuilding : customBuildings) {
                 if (customBuilding.name.equals(building.name)) {

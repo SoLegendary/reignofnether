@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -153,20 +154,10 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
             SynchedEntityData.defineId(VillagerUnit.class, EntityDataSerializers.INT);
 
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
-
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.VILLAGER;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
@@ -361,7 +352,13 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                 .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, VillagerUnit.armorValue);
+                .add(Attributes.ARMOR, VillagerUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override
@@ -571,7 +568,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     @Override
     public List<Button> getAbilityButtons() {
         List<Button> abilities = new ArrayList<>(getAbilities().getButtons(this));
-        //TODO Remove need for I18n
         if (FMLEnvironment.dist == Dist.CLIENT) {
             abilities.addAll(getBuildingButtons());
         }

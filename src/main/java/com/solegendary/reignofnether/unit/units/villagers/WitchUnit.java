@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -152,6 +153,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
+    final static public double magicDamageResist = 0.6d;
     public int maxResources = 100;
 
     final static public int LINGERING_POTION_DURATION = 5 * ResourceCost.TICKS_PER_SECOND;
@@ -173,7 +175,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
             pDamage *= 2.67; // 0.4 (60% less damage) after super's * 0.15
         }
         if (pSource.is(DamageTypes.ON_FIRE)) {
-            pDamage *= 0.4;
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         }
         return pDamage;
     }
@@ -211,7 +213,9 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
                 .add(Attributes.MOVEMENT_SPEED, WitchUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WitchUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, WitchUnit.armorValue);
+                .add(Attributes.ARMOR, WitchUnit.armorValue)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
     }
 
     public void tick() {

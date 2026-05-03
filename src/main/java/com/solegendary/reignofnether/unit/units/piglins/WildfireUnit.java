@@ -17,10 +17,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.registrars.BlockRegistrar;
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
-import com.solegendary.reignofnether.registrars.ParticleRegistrar;
-import com.solegendary.reignofnether.registrars.SoundRegistrar;
+import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -30,6 +27,7 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.modelling.animations.WildfireAnimations;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -188,15 +186,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage + (attackBonusPerLevel * getHeroLevel());}
-    public float getUnitMaxHealth() {return maxHealth + (maxHealthBonusPerLevel * getHeroLevel());}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.WILDFIRE;}
@@ -219,12 +209,11 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 120;
+    final static private float baseMaxMana = 120;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    private float manaRegenPerSecond = 0.6f;
-    private float manaBonusPerLevel = 8;
-    @Override public float getBaseMaxMana() { return baseMaxMana; }
+    final static private float manaRegenPerSecond = 0.6f;
+    final static private float manaBonusPerLevel = 8;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
         this.maxMana = amount;
@@ -237,8 +226,6 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         if (!level().isClientSide())
             HeroClientboundPacket.setMana(getId(), this.mana);
     }
-    @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
-    @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
     final static public float attackDamage = 2.0f;
     final static public float attackBonusPerLevel = 0.25f;
@@ -249,14 +236,10 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 12.0F; // only used by ranged units or melee building attackers
     final static public float aggroRange = 12;
+    final static public double magicDamageResist = 0.3d;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     public int maxResources = 100;
-
-    @Override public float getHealthBonusPerLevel() { return maxHealthBonusPerLevel; };
-    @Override public float getAttackBonusPerLevel() { return attackBonusPerLevel; };
-    @Override public float getBaseHealth() { return maxHealth; };
-    @Override public float getBaseAttack() { return attackDamage; };
 
     public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
     public int getFogRevealDuration() { return fogRevealDuration; }
@@ -353,7 +336,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
         if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
-            pDamage *= 0.7F;
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
 
@@ -375,7 +358,19 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                 .add(Attributes.MAX_HEALTH, WildfireUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, WildfireUnit.armorValue)
-                .add(Attributes.ATTACK_KNOCKBACK, 0);
+                .add(Attributes.ATTACK_KNOCKBACK, 0)
+                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), WildfireUnit.maxHealth)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
+                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
+                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
+                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
+                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
+                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
     }
 
     public void tick() {

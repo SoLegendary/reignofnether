@@ -19,6 +19,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
@@ -56,11 +58,13 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     public final CompoundTag structureNbt;
     public Set<Block> portraitBlockOptions = new HashSet<>();
     public CompoundTag attributesNbt = new CompoundTag(); // NBT containing all the below fields (including portrait block key)
+    public ListTag commandsNbt = new ListTag();
     public int nightRadius = 0;
     public int netherRadius = 0;
     public boolean buildableByVillagers = false;
     public boolean buildableByMonsters = false;
     public boolean buildableByPiglins = false;
+    public boolean netherTerrainOnly = false;
     public int garrisonCapacity = 0;
     public int garrisonRange = 20;
     public int numGarrisonZones = 0;
@@ -70,10 +74,10 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     private final Random random = new Random();
 
     public CustomBuilding(String structureName, Vec3i structureSize, Block portraitBlock, CompoundTag structureNbt) {
-        this(structureName, structureSize, portraitBlock, structureNbt, null);
+        this(structureName, structureSize, portraitBlock, structureNbt, null, null);
     }
 
-    public CustomBuilding(String structureName, Vec3i structureSize, Block portraitBlock, CompoundTag structureNbt, CompoundTag attributesNbt) {
+    public CustomBuilding(String structureName, Vec3i structureSize, Block portraitBlock, CompoundTag structureNbt, CompoundTag attributesNbt, ListTag commandsNbt) {
         super(structureName, ResourceCost.Building(0,0,0,0), false);
         this.name = WordUtils.capitalize(structureName
                 .replace("minecraft:", "")
@@ -104,6 +108,11 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
             this.attributesNbt = attributesNbt;
             this.unpackAttributesNbt();
         }
+        this.packCommandsNbt();
+        if (commandsNbt != null) {
+            this.commandsNbt = commandsNbt;
+            this.unpackCommandsNbt();
+        }
 
         for (BuildingBlock bb : BuildingBlockData.getBuildingBlocksFromNbt(structureNbt)) {
             if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_ZONE_BLOCK.get()) {
@@ -133,6 +142,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         attributesNbt.putBoolean("buildableByVillagers", this.buildableByVillagers);
         attributesNbt.putBoolean("buildableByMonsters", this.buildableByMonsters);
         attributesNbt.putBoolean("buildableByPiglins", this.buildableByPiglins);
+        attributesNbt.putBoolean("netherTerrainOnly", this.netherTerrainOnly);
         attributesNbt.putInt("foodCost", this.cost.food);
         attributesNbt.putInt("woodCost", this.cost.wood);
         attributesNbt.putInt("oreCost", this.cost.ore);
@@ -151,11 +161,31 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         this.buildableByVillagers = attributesNbt.getBoolean("buildableByVillagers");
         this.buildableByMonsters = attributesNbt.getBoolean("buildableByMonsters");
         this.buildableByPiglins = attributesNbt.getBoolean("buildableByPiglins");
+        this.netherTerrainOnly = attributesNbt.getBoolean("netherTerrainOnly");
         this.cost.food = attributesNbt.getInt("foodCost");
         this.cost.wood = attributesNbt.getInt("woodCost");
         this.cost.ore = attributesNbt.getInt("oreCost");
         this.garrisonCapacity = attributesNbt.getInt("garrisonCapacity");
         this.garrisonRange = attributesNbt.getInt("garrisonRange");
+    }
+
+    public void packCommandsNbt() {
+        this.commandsNbt.clear();
+        for (CustomBuildingCommand command : commands) {
+            CompoundTag ctag = new CompoundTag();
+            ctag.putInt("tickCooldown", command.tickCooldown);
+            ctag.putInt("tickCooldownMax", command.tickCooldownMax);
+            ctag.putString("commandStr", command.commandStr);
+            ctag.putString("condition", command.condition.toString());
+            this.commandsNbt.add(ctag);
+        }
+    }
+
+    private void unpackCommandsNbt() {
+        this.commands.clear();
+        for (Tag tag : this.commandsNbt) {
+            this.commands.add(CustomBuildingCommand.getFromNbt((CompoundTag) tag));
+        }
     }
 
     @Override
@@ -260,6 +290,56 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_PORTRAIT_BLOCK, name, getPortraitBlockRegistryKey());
     }
 
+    public void addCommand() {
+        this.commands.add(new CustomBuildingCommand());
+    }
+
+    public void deleteCommand(int index) {
+        try {
+            this.commands.remove(index);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("IndexOutOfBoundsException in deleteCommand");
+        }
+    }
+
+    public void setCommandText(int index, String text) {
+        try {
+            this.commands.get(index).commandStr = text;
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("IndexOutOfBoundsException in setCommandText");
+        }
+    }
+
+    public void setCommandCooldownTicks(int index, String cooldownTicksStr) {
+        int cooldownTicks;
+        try {
+            cooldownTicks = Integer.parseInt(cooldownTicksStr);
+        } catch (NumberFormatException e) {
+            System.out.println("NumberFormatException in setCommandCooldown");
+            return;
+        }
+        try {
+            this.commands.get(index).tickCooldownMax = cooldownTicks;
+            this.commands.get(index).tickCooldown = cooldownTicks;
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("IndexOutOfBoundsException in setCommandCooldown");
+        }
+    }
+
+    public void setCommandTrigger(int index, String triggerStr) {
+        CustomBuildingCommand.TriggerCondition triggerCond;
+        try {
+            triggerCond = CustomBuildingCommand.TriggerCondition.valueOf(triggerStr);
+        } catch (IllegalArgumentException e) {
+            System.out.println("IllegalArgumentException in setCommandTrigger");
+            return;
+        }
+        try {
+            this.commands.get(index).condition = triggerCond;
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("IndexOutOfBoundsException in setCommandTrigger");
+        }
+    }
     // GarrisonableBuilding
     @Override
     public int getAttackRange() { return garrisonRange; }

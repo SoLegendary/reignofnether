@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
-import com.solegendary.reignofnether.ability.EnchantEquipAbilityServersidePacket;
+import com.solegendary.reignofnether.ability.BuildingAbilityServerboundPacket;
 import com.solegendary.reignofnether.ability.EquipAbility;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
@@ -42,7 +42,7 @@ public class EquipLeatherChestplate extends EquipAbility {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(EQUIP_ACTION),
                 () -> {
-                    EnchantEquipAbilityServersidePacket.setAutocastEnchantOrEquipServerside(EQUIP_ACTION, placement.originPos);
+                    BuildingAbilityServerboundPacket.doAbility(EQUIP_ACTION, placement.originPos);
                     if (placement.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP) == this)
                         placement.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, null);
                     else

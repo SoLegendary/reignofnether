@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.NightUtils;
@@ -22,7 +23,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -115,14 +115,12 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     // which player owns this unit? this format ensures its synched to client without having to use packets
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
-    public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> ownerDataAccessor = SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
 
     // which scenario role does this unit use?
     public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
     public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
-    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
-            SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.INT);
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor = SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.INT);
 
     @Override
     protected void defineSynchedData() {
@@ -133,15 +131,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage;}
-    public float getUnitMaxHealth() {return maxHealth;}
     @Nullable
     public ResourceCost getCost() {
         return isSummonedByNecromancer() ?
@@ -191,11 +181,6 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     }
 
     @Override
-    public double getUnitRangedArmorPercentage() {
-        return rangedDamageResist;
-    }
-
-    @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -205,6 +190,12 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
                 .add(Attributes.ARMOR, ZombieUnit.armorValue)
                 .add(Attributes.MAX_HEALTH, ZombieUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), rangedDamageResist)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, 0); // needs to be added for parent to work
     }
 

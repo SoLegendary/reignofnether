@@ -244,7 +244,7 @@ public class PlayerClientEvents {
             rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId));
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
-                if (!SandboxClientEvents.isSandboxPlayer()) {
+                if (faction != Faction.NONE) {
                     MC.getMusicManager().stopPlaying();
                     ResearchClient.removeAllCheats();
                 }

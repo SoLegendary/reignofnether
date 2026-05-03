@@ -631,6 +631,25 @@ public class PlayerServerEvents {
 
             sendMessageToAllPlayers("server.reignofnether.started_scenario", true, playerName, role.name, role.faction.name());
             PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
+
+            // add NPC rtsPlayers
+            int id = -1;
+            for (ScenarioRole scenarioRole : ScenarioServerEvents.scenarioRoles) {
+                int numUnits = ScenarioServerEvents.getNumScenarioUnits(scenarioRole);
+                int numBuilds = ScenarioServerEvents.getNumScenarioBuildings(scenarioRole);
+                if (!isRTSPlayer(scenarioRole.name) && (numUnits > 0 || numBuilds > 0) && scenarioRole.isNpc) {
+                    RTSPlayer npcRtsPlayer = RTSPlayer.getNewScenarioPlayer(
+                            scenarioRole.name,
+                            role.faction,
+                            id,
+                            roleIndex
+                    );
+                    rtsPlayers.add(npcRtsPlayer);
+                    ResourcesServerEvents.assignScenarioResources(npcRtsPlayer);
+                    PlayerClientboundPacket.addRTSPlayer(scenarioRole.name, role.faction, (long) id, 0);
+                    id -= 1;
+                }
+            }
             saveRTSPlayers();
         }
     }

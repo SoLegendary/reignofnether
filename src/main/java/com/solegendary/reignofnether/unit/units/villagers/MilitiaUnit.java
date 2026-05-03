@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -143,21 +144,18 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
 
     // combat stats
     public float getMovementSpeed() {return isUsingBow() ? rangedMovementSpeed : movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     public ResourceCost getCost() {return ResourceCosts.MILITIA;}
     public boolean getWillRetaliate() {return willRetaliate;}
     public float getAttackCooldown() {return ((20 / (isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond)) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
     public float getBaseAttacksPerSecond() {return isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return isUsingBow() ? attackRange : 2;}
+    public float getAttackRange() {return isUsingBow() ? AttackerUnit.super.getAttackRange() : 2;}
     public float getUnitAttackDamage() {
         if (isUsingBow()) {
-            return rangedAttackDamage + getPowerLevel();
+            return AttackerUnit.super.getUnitAttackDamage() + getPowerLevel();
         } else {
-            return attackDamage + getSharpnessLevel();
+            return AttackerUnit.super.getUnitAttackDamage() + getSharpnessLevel();
         }
     }
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
@@ -196,7 +194,6 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public boolean bowEnchanted = false;
 
     final static public float attackDamage = 3.0f;
-    final static public float rangedAttackDamage = 3.0f;
     final static public float attacksPerSecond = 0.5f;
     final static public float rangedAttacksPerSecond = 0.3f;
     final static public float attackRange = 10; // only used by ranged units or melee building attackers
@@ -237,9 +234,6 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
         AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), damageMod, AttributeModifier.Operation.ADDITION);
         weaponStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
         this.setItemSlot(EquipmentSlot.MAINHAND, weaponStack);
-        AttributeInstance ai1 = getAttribute(Attributes.ATTACK_DAMAGE);
-        if (ai1 != null)
-            ai1.setBaseValue(useBow ? rangedAttackDamage : attackDamage);
         AttributeInstance ai2 = getAttribute(Attributes.MOVEMENT_SPEED);
         if (ai2 != null)
             ai2.setBaseValue(useBow ? rangedMovementSpeed : movementSpeed);
@@ -290,7 +284,13 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
                 .add(Attributes.MOVEMENT_SPEED, MilitiaUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, MilitiaUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, MilitiaUnit.armorValue);
+                .add(Attributes.ARMOR, MilitiaUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override

@@ -33,7 +33,7 @@ public class RTSPlayerScoresCommand {
                     return Command.SINGLE_SUCCESS;
                 }
             }
-            player.sendSystemMessage(Component.literal("Player is either currently in a match, is a spectator or doesn't exist."));
+            player.sendSystemMessage(Component.translatable("message.reignofnether.commands.scores.player_not_available", targetName));
         }
 
         return Command.SINGLE_SUCCESS;

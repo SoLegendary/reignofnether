@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.scenario;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
@@ -66,6 +67,7 @@ public class ScenarioServerEvents {
             if (!scenarioRoleSaveData.scenarioRoleSaves.isEmpty()) {
                 scenarioRoles.clear();
                 scenarioRoles.addAll(scenarioRoleSaveData.scenarioRoleSaves);
+                AlliancesServerEvents.applyScenarioAlliances();
             }
             ReignOfNether.LOGGER.info("loaded scenario roles in serverevents");
         }
@@ -87,6 +89,26 @@ public class ScenarioServerEvents {
                     ScenarioAction.LOAD_SCENARIO_ROLE, role.nbt
             ));
         }
+    }
+
+    public static int getNumScenarioUnits(ScenarioRole role) {
+        int count = 0;
+        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+            if (role != null && le instanceof Unit unit && unit.getScenarioRoleIndex() == role.index) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public static int getNumScenarioBuildings(ScenarioRole role) {
+        int count = 0;
+        for (BuildingPlacement bpl : BuildingServerEvents.getBuildings()) {
+            if (role != null && bpl.scenarioRoleIndex == role.index) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public static int getNumScenarioUnits() {

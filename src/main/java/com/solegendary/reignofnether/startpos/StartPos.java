@@ -10,6 +10,7 @@ public class StartPos {
     public Faction faction = Faction.NONE; // if != NONE, is reserved by a player
     public String playerName = ""; // name of player who has reserved this spot
     public int colorId;
+    public boolean isFromStartBlock = true;
 
     public StartPos(BlockPos pos, int colorId) {
         this.pos = pos;

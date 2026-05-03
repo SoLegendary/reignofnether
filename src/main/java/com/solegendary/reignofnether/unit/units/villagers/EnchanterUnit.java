@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.ParticleRegistrar;
@@ -29,6 +30,7 @@ import com.solegendary.reignofnether.unit.modelling.animations.EnchanterAnimatio
 import com.solegendary.reignofnether.unit.modelling.renderers.EnchanterRenderer;
 import com.solegendary.reignofnether.unit.modelling.renderers.RoyalGuardRenderer;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -178,15 +180,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage + (attackBonusPerLevel * getHeroLevel());}
-    public float getUnitMaxHealth() {return maxHealth + (maxHealthBonusPerLevel * getHeroLevel());}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.ENCHANTER;}
@@ -209,12 +203,11 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 150;
+    final static private float baseMaxMana = 150;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    private float manaRegenPerSecond = 1f;
-    private float manaBonusPerLevel = 10;
-    @Override public float getBaseMaxMana() { return baseMaxMana; }
+    final static private float manaRegenPerSecond = 1f;
+    final static private float manaBonusPerLevel = 10;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
         this.maxMana = amount;
@@ -227,8 +220,6 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         if (!level().isClientSide())
             HeroClientboundPacket.setMana(getId(), this.mana);
     }
-    @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
-    @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
     final static public float attackDamage = 4.0f;
     final static public float attackBonusPerLevel = 0.4f;
@@ -239,14 +230,10 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
+    final static public double magicDamageResist = 0.3d;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     public int maxResources = 100;
-
-    @Override public float getHealthBonusPerLevel() { return maxHealthBonusPerLevel; };
-    @Override public float getAttackBonusPerLevel() { return attackBonusPerLevel; };
-    @Override public float getBaseHealth() { return maxHealth; };
-    @Override public float getBaseAttack() { return attackDamage; };
 
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
@@ -331,24 +318,8 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
         if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
-            pDamage *= 0.7F;
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
-    }
-
-    @Override
-    public void setStatsForLevel(boolean heal) {
-        AttributeInstance aiMaxHealth = this.getAttribute(Attributes.MAX_HEALTH);
-        float newHealth = getBaseHealth() + ((getHeroLevel() - 1) * getHealthBonusPerLevel());
-        if (aiMaxHealth != null)
-            aiMaxHealth.setBaseValue(newHealth);
-        AttributeInstance aiAttackDamage = this.getAttribute(Attributes.ATTACK_DAMAGE);
-        if (aiAttackDamage != null)
-            aiAttackDamage.setBaseValue(getBaseAttack() + ((getHeroLevel() - 1) * getAttackBonusPerLevel()));
-        this.setMaxMana(getBaseMaxMana() + ((getHeroLevel() - 1) * getManaBonusPerLevel()));
-        if (heal)
-            this.setHealth(this.getMaxHealth());
-        if (getHealth() > getMaxHealth())
-            setHealth(getMaxHealth());
     }
 
     @Override
@@ -361,7 +332,19 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
                 .add(Attributes.ARMOR, EnchanterUnit.armorValue)
                 .add(Attributes.MAX_HEALTH, EnchanterUnit.maxHealth)
                 .add(Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_RESISTANCE)
-                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange());
+                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
+                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), EnchanterUnit.maxHealth)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
+                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
+                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
+                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
+                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
+                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
     }
 
     public void tick() {

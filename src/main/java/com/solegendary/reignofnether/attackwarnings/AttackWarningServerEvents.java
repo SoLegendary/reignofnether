@@ -14,7 +14,7 @@ public class AttackWarningServerEvents {
 
         if (evt.getEntity() instanceof Unit unit &&
                 !evt.getSource().is(DamageTypeTags.IS_FALL) &&
-                evt.getSource() != evt.getEntity().damageSources().starve()  &&
+                evt.getSource() != evt.getEntity().damageSources().starve() &&
                 evt.getSource() != evt.getEntity().damageSources().inWall() &&
                 evt.getSource() != evt.getEntity().damageSources().outOfBorder())
             AttackWarningClientboundPacket.sendWarning(unit.getOwnerName(), evt.getEntity().getOnPos());

@@ -5,7 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -25,14 +27,17 @@ public class CustomBuildingClientboundPacket {
     public BlockPos structureSize;
     public CompoundTag structureNbt;
     public CompoundTag attributesNbt;
+    public CompoundTag commandsNbt;
 
     public static void registerCustomBuilding(CustomBuilding building) {
         registerCustomBuilding("", building);
     }
 
     public static void registerCustomBuilding(String playerName, CustomBuilding building) {
+        CompoundTag commandsTag = new CompoundTag();
+        commandsTag.put("commands", building.commandsNbt);
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new CustomBuildingClientboundPacket(
-                playerName, building.name, new BlockPos(building.structureSize), building.structureNbt, building.attributesNbt
+                playerName, building.name, new BlockPos(building.structureSize), building.structureNbt, building.attributesNbt, commandsTag
         ));
     }
 
@@ -41,13 +46,15 @@ public class CustomBuildingClientboundPacket {
             String name,
             BlockPos structureSize,
             CompoundTag structureNbt,
-            CompoundTag attributesNbt
+            CompoundTag attributesNbt,
+            CompoundTag commandsNbt
     ) {
         this.playerName = playerName;
         this.name = name;
         this.structureSize = structureSize;
         this.structureNbt = structureNbt;
         this.attributesNbt = attributesNbt;
+        this.commandsNbt = commandsNbt;
     }
 
     private static void writeCompressedNbt(FriendlyByteBuf buffer, CompoundTag tag) {
@@ -84,6 +91,7 @@ public class CustomBuildingClientboundPacket {
         this.structureSize = buffer.readBlockPos();
         this.structureNbt = readCompressedNbt(buffer);
         this.attributesNbt = buffer.readNbt();
+        this.commandsNbt = buffer.readNbt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -92,6 +100,7 @@ public class CustomBuildingClientboundPacket {
         buffer.writeBlockPos(this.structureSize);
         writeCompressedNbt(buffer, this.structureNbt);
         buffer.writeNbt(this.attributesNbt);
+        buffer.writeNbt(this.commandsNbt);
     }
 
     // server-side packet-consuming functions
@@ -100,7 +109,7 @@ public class CustomBuildingClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 CustomBuildingClientEvents.registerCustomBuilding(
-                        playerName, name, structureSize, structureNbt, attributesNbt
+                        playerName, name, structureSize, structureNbt, attributesNbt, commandsNbt.getList("commands", Tag.TAG_COMPOUND)
                 );
                 success.set(true);
             });

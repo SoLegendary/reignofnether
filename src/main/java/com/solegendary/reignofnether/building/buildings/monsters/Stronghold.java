@@ -123,12 +123,12 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
     @Override
     public BlockPos getEntryPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(5, 14, 5), placement.rotation));
+        return placement.originPos.offset(BuildingUtils.rotatePos(new BlockPos(5, 14, 5), placement.rotation));
     }
 
     @Override
     public BlockPos getExitPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(5, 2, 6), placement.rotation));
+        return placement.originPos.offset(BuildingUtils.rotatePos(new BlockPos(5, 2, 6), placement.rotation));
     }
 
     @Override

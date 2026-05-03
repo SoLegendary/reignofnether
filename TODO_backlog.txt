@@ -2,14 +2,13 @@
 Features
 --------
 
-[❌] Overflowing graveyards
 
-[❌] Wraiths
-    - No knockback on melee attacks
-    - Enemies hit by wraiths enough times get feared (uncontrollable and issued a move-away command from the last wraith that hit it)
-    - 2 population
-    - built at dungeons
-    - needs a lab upgrade - possession?
+
+Scenario roles:
+    [❌] Use start menu colours for each role
+    [❌] When role is cycled, move camera to the first found building (or unit if no building)
+    [❌] Show different colours for each different assigned role
+    [❌] Fire events for addons to use when a scenario starts
 
 [❌] Invisible block that units avoid
 

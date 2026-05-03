@@ -21,6 +21,7 @@ public class ResourceCosts {
     public static final ResourceCost DROWNED = new ResourceCost(ID, "DROWNED");
     public static final ResourceCost SPIDER = new ResourceCost(ID, "SPIDER");
     public static final ResourceCost POISON_SPIDER = new ResourceCost(ID, "POISON_SPIDER");
+    public static final ResourceCost WRAITH = new ResourceCost(ID, "WRAITH");
     public static final ResourceCost SLIME = new ResourceCost(ID, "SLIME");
     public static final ResourceCost WARDEN = new ResourceCost(ID, "WARDEN");
     public static final ResourceCost ZOMBIE_PIGLIN = new ResourceCost(ID, "ZOMBIE_PIGLIN");
@@ -29,6 +30,7 @@ public class ResourceCosts {
     public static final ResourceCost MILITIA = new ResourceCost(ID, "MILITIA");
     public static final ResourceCost IRON_GOLEM = new ResourceCost(ID, "IRON_GOLEM");
     public static final ResourceCost PILLAGER = new ResourceCost(ID, "PILLAGER");
+    public static final ResourceCost WINDCALLER = new ResourceCost(ID, "WINDCALLER");
     public static final ResourceCost VINDICATOR = new ResourceCost(ID, "VINDICATOR");
     public static final ResourceCost WITCH = new ResourceCost(ID, "WITCH");
     public static final ResourceCost EVOKER = new ResourceCost(ID, "EVOKER");
@@ -118,6 +120,8 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_DROWNED = new ResourceCost(ID, "RESEARCH_DROWNED");
     public static final ResourceCost RESEARCH_STRAYS = new ResourceCost(ID, "RESEARCH_STRAYS");
     public static final ResourceCost RESEARCH_BOGGED = new ResourceCost(ID, "RESEARCH_BOGGED");
+    public static final ResourceCost RESEARCH_OVERFLOWING_GRAVEYARD = new ResourceCost(ID, "RESEARCH_OVERFLOWING_GRAVEYARD");
+    public static final ResourceCost RESEARCH_MASS_BURIALS = new ResourceCost(ID, "RESEARCH_MASS_BURIALS");
     public static final ResourceCost RESEARCH_SLIME_CONVERSION = new ResourceCost(ID, "RESEARCH_SLIME_CONVERSION");
     public static final ResourceCost RESEARCH_LINGERING_POTIONS = new ResourceCost(ID, "RESEARCH_LINGERING_POTIONS");
     public static final ResourceCost RESEARCH_HEALING_POTIONS = new ResourceCost(ID, "RESEARCH_HEALING_POTIONS");
@@ -208,6 +212,7 @@ public class ResourceCosts {
         DROWNED.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.DROWNED);
         SPIDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SPIDER);
         POISON_SPIDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.POISON_SPIDER);
+        WRAITH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WRAITH);
         SLIME.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SLIME);
         WARDEN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WARDEN);
         NECROMANCER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.NECROMANCER);
@@ -219,6 +224,7 @@ public class ResourceCosts {
         MILITIA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.MILITIA);
         IRON_GOLEM.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.IRON_GOLEM);
         PILLAGER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PILLAGER);
+        WINDCALLER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WINDCALLER);
         VINDICATOR.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.VINDICATOR);
         WITCH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WITCH);
         EVOKER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.EVOKER);
@@ -305,6 +311,8 @@ public class ResourceCosts {
         RESEARCH_DROWNED.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_DROWNED);
         RESEARCH_STRAYS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_STRAYS);
         RESEARCH_BOGGED.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BOGGED);
+        RESEARCH_OVERFLOWING_GRAVEYARD.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD);
+        RESEARCH_MASS_BURIALS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_MASS_BURIALS);
         RESEARCH_SLIME_CONVERSION.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_SLIME_CONVERSION);
         RESEARCH_LINGERING_POTIONS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_LINGERING_POTIONS);
         RESEARCH_WATER_POTIONS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_WATER_POTIONS);

@@ -4,16 +4,12 @@ import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import org.stringtemplate.v4.ST;
-
-import java.util.List;
 
 
 public class MobEffectRegistrar {
@@ -33,6 +29,10 @@ public class MobEffectRegistrar {
     // Prevents players from issuing any new commands
     // usually used in conjunction with a force-attack command for a taunt effect, or a move command for a fear effect
     public static final RegistryObject<MobEffect> UNCONTROLLABLE = MOB_EFFECTS.register("uncontrollable", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0xFF0000));
+
+    public static final RegistryObject<MobEffect> ANGRY = MOB_EFFECTS.register("angry", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0xFF0000));
+
+    public static final RegistryObject<MobEffect> FEARFUL = MOB_EFFECTS.register("scared", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x0000FF));
 
     // Causes a mob to turn into a zombie villager, drowned, zombie piglin or zoglin upon death depending on the unit type
     public static final RegistryObject<MobEffect> ZOMBIE_INFECTED = MOB_EFFECTS.register("zombie_infected", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x000000));

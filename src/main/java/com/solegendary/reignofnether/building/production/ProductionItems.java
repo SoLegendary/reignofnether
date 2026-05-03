@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class ProductionItems {
     public static final CreeperProd CREEPER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "creeper"), new CreeperProd());
+    public static final WraithProd WRAITH = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith"), new WraithProd());
     public static final SkeletonProd SKELETON = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "skeleton"), new SkeletonProd());
     public static final BoggedProd BOGGED = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bogged"), new BoggedProd());
     public static final ZombieProd ZOMBIE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie"), new ZombieProd());
@@ -27,6 +28,7 @@ public class ProductionItems {
     public static final IronGolemProd IRON_GOLEM = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "iron_golem"), new IronGolemProd());
     public static final WitchProd WITCH = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "witch"), new WitchProd());
     public static final EvokerProd EVOKER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "evoker"), new EvokerProd());
+    public static final WindcallerProd WINDCALLER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "windcaller"), new WindcallerProd());
     public static final SlimeProd SLIME = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "slime"), new SlimeProd());
     public static final WardenProd WARDEN = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "warden"), new WardenProd());
     public static final RavagerProd RAVAGER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ravager"), new RavagerProd());
@@ -72,6 +74,8 @@ public class ProductionItems {
     public static final ResearchDrowned RESEARCH_DROWNED = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_drowned"), new ResearchDrowned());
     public static final ResearchStrays RESEARCH_STRAYS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_strays"), new ResearchStrays());
     public static final ResearchBogged RESEARCH_BOGGED = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_bogged"), new ResearchBogged());
+    public static final ResearchOverflowingGraveyard RESEARCH_OVERFLOWING_GRAVEYARD = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_overflowing_graveyard"), new ResearchOverflowingGraveyard());
+    public static final ResearchMassBurials RESEARCH_MASS_BURIAL = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_mass_burial"), new ResearchMassBurials());
     public static final ResearchSlimeConversion RESEARCH_SLIME_CONVERSION = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "slime_conversion"), new ResearchSlimeConversion());
     public static final ResearchLingeringPotions RESEARCH_LINGERING_POTIONS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "lingering_potions"), new ResearchLingeringPotions());
     public static final ResearchWaterPotions RESEARCH_WATER_POTIONS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "water_potions"), new ResearchWaterPotions());

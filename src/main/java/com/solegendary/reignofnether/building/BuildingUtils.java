@@ -354,4 +354,16 @@ public class BuildingUtils {
                             building.getLevel().setBlockAndUpdate(new BlockPos(x,y,z), Blocks.AIR.defaultBlockState());
         }
     }
+
+    public static BlockPos rotatePos(BlockPos pos, Rotation rot) {
+        if (rot == Rotation.NONE) {
+            return new BlockPos(pos.getX(), pos.getY(), pos.getZ());
+        } else if (rot == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-pos.getX(), pos.getY(), pos.getZ());
+        } else if (rot == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-pos.getX(), pos.getY(), -pos.getZ());
+        } else {
+            return new BlockPos(pos.getX(), pos.getY(), -pos.getZ());
+        }
+    }
 }

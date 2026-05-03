@@ -5,13 +5,14 @@ Inspired the classic Real Time Strategy games of the early 2000s including Starc
 Reign of Nether doesn't try to imitate one of these games exactly, but instead aims to have uniquely-minecraft features. For example, buildings health is proportional to their blocks placed and all units are based on vanilla Minecraft mobs like Illagers, Creepers, and Piglins.
 
 # Soft roadmap
-These plans are not set in stone but are roughly what I plan to look at next in order of priority:
-1. Custom building customisation menu
-2. Improved API for command blocks
-3. New set of heroes for each faction
-4. Walls
-5. Fog of war rework
-6. Hero equippable items
+These plans are not set in stone but are roughly what I plan to look at next in order of priority (last updated 27 Apr 2026):
+1. New units for each faction
+2. Market buildings & resource trading
+3. Hero equippable items
+4. Further API and Scenario improvements
+5. Third set of heroes for each faction
+6. Fog of war rework
+
 
 # Release
 Download release files here:

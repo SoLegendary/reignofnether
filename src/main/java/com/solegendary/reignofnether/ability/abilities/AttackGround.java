@@ -6,9 +6,13 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.goals.RangedFlyingAttackGroundGoal;
+import com.solegendary.reignofnether.unit.goals.MountedRangedAttackGroundGoal;
+import com.solegendary.reignofnether.unit.goals.RangedAttackGroundGoal;
+import com.solegendary.reignofnether.unit.goals.RangedAttackGroundGoal;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -41,7 +45,11 @@ public class AttackGround extends Ability {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/fireball.png"),
                 hotkey,
                 () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK_GROUND,
-                () -> false,
+                () -> {
+                    if (unit instanceof RavagerUnit ravagerUnit)
+                        return !ravagerUnit.isVehicle();
+                    return false;
+                },
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK_GROUND),
                 null,
@@ -55,8 +63,14 @@ public class AttackGround extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
-        RangedFlyingAttackGroundGoal<?> attackGroundGoal = ((RangedAttackerUnit)unitUsing).getRangedAttackGroundGoal();
-        if (attackGroundGoal != null)
-            attackGroundGoal.setGroundTarget(targetBp);
+        if (unitUsing instanceof RavagerUnit ravagerUnit && ravagerUnit.getFirstPassenger() instanceof RangedAttackerUnit rangedPassenger) {
+            RangedAttackGroundGoal<?> attackGroundGoal = rangedPassenger.getRangedAttackGroundGoal();
+            if (attackGroundGoal != null)
+                attackGroundGoal.setGroundTarget(targetBp);
+        } else {
+            RangedAttackGroundGoal<?> attackGroundGoal = ((RangedAttackerUnit)unitUsing).getRangedAttackGroundGoal();
+            if (attackGroundGoal != null)
+                attackGroundGoal.setGroundTarget(targetBp);
+        }
     }
 }

@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -95,12 +92,12 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuildingA
 
     @Override
     public BlockPos getEntryPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(2,11,2), placement.rotation));
+        return placement.originPos.offset(BuildingUtils.rotatePos(new BlockPos(2,11,2), placement.rotation));
     }
 
     @Override
     public BlockPos getExitPosition(BuildingPlacement placement) {
-        return placement.originPos.offset(GarrisonableBuildingAddon.rotatePos(new BlockPos(2,1,2), placement.rotation));
+        return placement.originPos.offset(BuildingUtils.rotatePos(new BlockPos(2,1,2), placement.rotation));
     }
 
     @Override

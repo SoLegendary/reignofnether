@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.neutral;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -168,62 +169,19 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
         this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
-
     @Nullable
     public ResourceCost getCost() {
         return ResourceCosts.PANDA;
     }
 
-    public boolean getWillRetaliate() {
-        return willRetaliate;
-    }
-
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-
-    public float getAggroRange() {
-        return aggroRange;
-    }
-
-    public boolean getAggressiveWhenIdle() {
-        return aggressiveWhenIdle && !isVehicle();
-    }
-
-    public float getAttackRange() {
-        return attackRange;
-    }
-
-    public float getUnitAttackDamage() {
-        return attackDamage;
-    }
-
-    public BlockPos getAttackMoveTarget() {
-        return attackMoveTarget;
-    }
-
-    public boolean canAttackBuildings() {
-        return getAttackBuildingGoal() != null;
-    }
-
-    public Goal getAttackGoal() {
-        return attackGoal;
-    }
-
-    public Goal getAttackBuildingGoal() {
-        return attackBuildingGoal;
-    }
-
-    public void setAttackMoveTarget(@Nullable BlockPos bp) {
-        this.attackMoveTarget = bp;
-    }
-
-    public void setFollowTarget(@Nullable LivingEntity target) {
-        this.followTarget = target;
-    }
+    public boolean getWillRetaliate() { return willRetaliate; }
+    public boolean getAggressiveWhenIdle() { return aggressiveWhenIdle && !isVehicle(); }
+    public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
+    public boolean canAttackBuildings() { return getAttackBuildingGoal() != null; }
+    public Goal getAttackGoal() { return attackGoal; }
+    public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
+    public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
+    public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
     private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
     public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
@@ -263,7 +221,13 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
                 .add(Attributes.MOVEMENT_SPEED, PandaUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, PandaUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, PandaUnit.armorValue);
+                .add(Attributes.ARMOR, PandaUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override // prevent vanilla logic for picking up items

@@ -40,7 +40,6 @@ public class Abilities {
 
     public List<AbilityButton> getButtons(BuildingPlacement placement) {
         List<AbilityButton> buttons = new ArrayList<>();
-        //TODO Remove need for Minecraft
         if (FMLEnvironment.dist == Dist.CLIENT) {
             for (int i = 0; i < abilities.size(); i++) {
                 Pair<Ability, Keybinding> ability = abilities.get(i);
@@ -52,7 +51,6 @@ public class Abilities {
 
     public List<Button> getButtons(Unit unit) {
         List<Button> buttons = new ArrayList<>();
-        //TODO Remove need for I18n
         if (FMLEnvironment.dist == Dist.CLIENT) {
             for (int i = 0; i < abilities.size(); i++) {
                 Pair<Ability, Keybinding> ability = abilities.get(i);

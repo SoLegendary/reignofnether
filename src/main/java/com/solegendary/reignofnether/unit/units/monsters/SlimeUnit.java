@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ConsumeSlime;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -143,13 +144,8 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() { return ((getSize() + 1) * 0.5f); }
-    public float getMovementSpeed() {return movementSpeed;}
 
     public ResourceCost getCost() {
         int popCost = Math.min(getSize(), MAX_POP_COST);
@@ -179,6 +175,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
+    final static public double magicDamageResist = 0.5d;
 
     protected boolean forceTiny = false; // prevent split on death temporarily
     public boolean shouldSpawnSlimes = true; // prevent split on death without changing size
@@ -243,7 +240,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
         if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
-            pDamage *= 0.5F;
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
 
@@ -273,7 +270,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     }
 
     public float getUnitAttackDamage() {
-        return attackDamagePerSize * getSize();
+        return AttackerUnit.super.getUnitAttackDamage() + (attackDamagePerSize * getSize());
     }
     public float getUnitMaxHealth() { return getMaxHealthForSize(getSize()); }
     public float getKnockbackResistance() {
@@ -296,7 +293,8 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         this.refreshDimensions();
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(getUnitMaxHealth());
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(getMovementSpeed());
-        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(getUnitAttackDamage());
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0);
+        this.getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get()).setBaseValue(0);
         this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(getKnockbackResistance());
         this.getAttribute(Attributes.ARMOR).setBaseValue(pSize == 1 ? 0 : armorPerSize * pSize);
 
@@ -366,7 +364,13 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
                 .add(Attributes.ATTACK_DAMAGE, SlimeUnit.attackDamagePerSize)
                 .add(Attributes.ARMOR, SlimeUnit.armorPerSize)
                 .add(Attributes.MAX_HEALTH, 10)
-                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange());
+                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamagePerSize)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), 2)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
     }
 
     public void tick() {

@@ -457,7 +457,8 @@ public class BuildingClientEvents {
         if (isBuildingToPlaceABridge()) {
             return true;
         }
-        if (buildingToPlace.getFaction() != Faction.PIGLINS || buildingToPlace instanceof CentralPortal) {
+        boolean netherTerrainCustomBuilding = buildingToPlace instanceof CustomBuilding cb && cb.netherTerrainOnly;
+        if (!netherTerrainCustomBuilding && buildingToPlace.getFaction() != Faction.PIGLINS || buildingToPlace instanceof CentralPortal) {
             return true;
         }
         if (buildingToPlace instanceof PortalBasic) {

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.ability.abilities.MountRavager;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -149,7 +150,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     // combat stats
     public boolean getWillRetaliate() { return willRetaliate; }
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
+    public float getAttackCooldown() {return ((20 / AttackerUnit.super.getBaseAttacksPerSecond()) * getAttackCooldownMultiplier());}
     public float getAttacksPerSecond() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
         return 20f / (getAttackCooldown() + (CrossbowItem.getChargeDuration(itemStack)));
@@ -157,14 +158,11 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     public float getBaseAttacksPerSecond() {
         return 20f / (getAttackCooldown() + 35);
     }
-    public float getAggroRange() { return aggroRange; }
     public boolean getAggressiveWhenIdle() { return aggressiveWhenIdle && !isVehicle(); }
-    public float getAttackRange() { return attackRange; }
-    public float getMovementSpeed() { return movementSpeed; }
     public float getUnitAttackDamage() {
-        return isPassenger() ? attackDamage + 1 : attackDamage;
+        float baseDamage = AttackerUnit.super.getUnitAttackDamage();
+        return isPassenger() ? baseDamage + 1 : baseDamage;
     }
-    public float getUnitMaxHealth() { return maxHealth; }
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.PILLAGER;}
 
@@ -218,7 +216,13 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
                 .add(Attributes.MOVEMENT_SPEED, PillagerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, PillagerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, PillagerUnit.armorValue);
+                .add(Attributes.ARMOR, PillagerUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     public void tick() {

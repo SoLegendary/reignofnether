@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -141,19 +142,11 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
         this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
-
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.HEADHUNTER;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage + (hasFlameTrident() ? 1 : 0) + getPowerLevel();}
+    public float getUnitAttackDamage() {return AttackerUnit.super.getUnitAttackDamage() + (hasFlameTrident() ? 1 : 0) + getPowerLevel();}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
@@ -168,8 +161,6 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     private UnitBowAttackGoal<? extends LivingEntity> attackGoal;
 
     // endregion
-
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
 
     final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.3f;
@@ -210,7 +201,13 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
                 .add(Attributes.MOVEMENT_SPEED, HeadhunterUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, HeadhunterUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, HeadhunterUnit.armorValue);
+                .add(Attributes.ARMOR, HeadhunterUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override

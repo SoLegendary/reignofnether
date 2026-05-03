@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.enchantments.VigorEnchantment;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -150,21 +151,16 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
     public float getAttackCooldown() {
-        return (int) ((20 * (Math.pow(VigorEnchantment.CD_MULTIPLIER, getVigorLevel())) / attacksPerSecond)
+        return (int) ((20 * (Math.pow(VigorEnchantment.CD_MULTIPLIER, getVigorLevel())) / getBaseAttacksPerSecond())
                 * getAttackCooldownMultiplier());
     }
     public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);}
-    public float getBaseAttacksPerSecond() { return attacksPerSecond; }
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {
         return isUsingLineFangs ? EvokerUnit.FANGS_RANGE_LINE : EvokerUnit.FANGS_RANGE_CIRCLE;
     }
     public float getUnitAttackDamage() {return attackDamage + (getMainHandItem().getEnchantmentLevel(EnchantmentRegistrar.ZEAL.get()) * 2);}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
-
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.EVOKER;}
@@ -231,7 +227,11 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
                 .add(Attributes.MOVEMENT_SPEED, EvokerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, EvokerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, EvokerUnit.armorValue);
+                .add(Attributes.ARMOR, EvokerUnit.armorValue)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), EvokerUnit.attacksPerSecond)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override
