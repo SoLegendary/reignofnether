@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.ability;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
@@ -22,10 +23,19 @@ public class BuildingAbilityServerboundPacket {
     UnitAction abilityAction;
     BlockPos buildingPos;
 
-    public static void doAbility(UnitAction ability, BlockPos buildingPos) {
+    public static void doAbility(UnitAction ability, BlockPos buildingPos, boolean oneClickOneUse) {
         Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null)
-            PacketHandler.INSTANCE.sendToServer(new BuildingAbilityServerboundPacket(ability, buildingPos));
+        if (MC.player != null) {
+            if (oneClickOneUse) {
+                PacketHandler.INSTANCE.sendToServer(new BuildingAbilityServerboundPacket(ability, buildingPos));
+            } else {
+                BuildingPlacement firstBpl = BuildingUtils.findBuilding(true, buildingPos);
+                if (firstBpl != null)
+                    for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings())
+                        if (bpl.getBuilding().structureName.equals(firstBpl.getBuilding().structureName))
+                            PacketHandler.INSTANCE.sendToServer(new BuildingAbilityServerboundPacket(ability, bpl.originPos));
+            }
+        }
     }
 
     // packet-handler functions

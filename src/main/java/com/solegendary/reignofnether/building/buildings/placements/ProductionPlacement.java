@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
+import com.solegendary.reignofnether.building.production.GraveyardUnitProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.hud.Button;
@@ -228,8 +229,13 @@ public class ProductionPlacement extends BuildingPlacement {
                 else {
                     if (!prodItem.isBelowMaxPopulation(this))
                         ResourcesClientboundPacket.warnMaxPopulation(ownerName);
-                    else if (!prodItem.canAffordPopulation(this))
-                        ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                    else if (!prodItem.canAffordPopulation(this)) {
+                        if (prodItem instanceof GraveyardUnitProductionItem && this instanceof GraveyardPlacement gy && gy.getUpgradeLevel() > 0) {
+                            ResourcesClientboundPacket.warnFullGraveyard(ownerName);
+                        } else {
+                            ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                        }
+                    }
                     else
                         ResourcesClientboundPacket.warnInsufficientResources(ownerName,
                                 ResourcesServerEvents.canAfford(ownerName, ResourceName.FOOD, prodItem.getCost(level.isClientSide(), ownerName).food),

@@ -42,7 +42,7 @@ public class EquipChainmailChestplate extends EquipAbility {
                 () -> placement.getUpgradeLevel() > 0,
                 () -> CursorClientEvents.setLeftClickAction(EQUIP_ACTION),
                 () -> {
-                    BuildingAbilityServerboundPacket.doAbility(EQUIP_ACTION, placement.originPos);
+                    BuildingAbilityServerboundPacket.doAbility(EQUIP_ACTION, placement.originPos, this.oneClickOneUse);
                     if (placement.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP) == this)
                         placement.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, null);
                     else

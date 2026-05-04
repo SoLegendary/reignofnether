@@ -42,7 +42,7 @@ public class EquipLeatherChestplate extends EquipAbility {
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(EQUIP_ACTION),
                 () -> {
-                    BuildingAbilityServerboundPacket.doAbility(EQUIP_ACTION, placement.originPos);
+                    BuildingAbilityServerboundPacket.doAbility(EQUIP_ACTION, placement.originPos, this.oneClickOneUse);
                     if (placement.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP) == this)
                         placement.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, null);
                     else

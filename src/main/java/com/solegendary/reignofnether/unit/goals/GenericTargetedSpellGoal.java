@@ -164,7 +164,7 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
                     mob.yHeadRotO = yaw;
                 }
                 channelTicks += 1;
-                if (channelTicks >= channelTicksMax) {
+                if (channelTicks >= getChannelTicksMax()) {
                     if (onEntityCast != null && targetEntity != null)
                         onEntityCast.accept(targetEntity);
                     else if (onGroundCast != null || onBuildingCast != null) {
@@ -213,7 +213,7 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
         this.isCasting = false;
         this.channelTicks = 0;
         this.castTarget = null;
-        if (!this.mob.level().isClientSide() && channelTicks < channelTicksMax) {
+        if (!this.mob.level().isClientSide() && channelTicks < getChannelTicksMax()) {
             if (!hasKeyframeAnimations) {
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.NON_KEYFRAME_STOP, this.mob);
             } else {

@@ -25,7 +25,7 @@ import java.util.List;
 public class ResearchSpiderWebs extends ProductionItem {
 
     public final static String itemName = "Sticky Webbing";
-    public final static ResourceCost cost = ResourceCosts.RESEARCH_SPIDER_JOCKEYS;
+    public final static ResourceCost cost = ResourceCosts.RESEARCH_SPIDER_WEBS;
 
     public ResearchSpiderWebs() {
         super(cost, ProdDupeRule.DISALLOW);

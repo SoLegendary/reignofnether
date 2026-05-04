@@ -99,14 +99,27 @@ public class ResourcesClientboundPacket {
 
     public static void warnInsufficientPopulation(String ownerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new ResourcesClientboundPacket(ResourcesAction.SHOW_WARNING,
-                ownerName,
-                0,
-                0,
-                0,
-                new BlockPos(0, 0, 0),
-                "server.resources.reignofnether.not_enough_pop"
-            )
+                new ResourcesClientboundPacket(ResourcesAction.SHOW_WARNING,
+                        ownerName,
+                        0,
+                        0,
+                        0,
+                        new BlockPos(0, 0, 0),
+                        "server.resources.reignofnether.not_enough_pop"
+                )
+        );
+    }
+
+    public static void warnFullGraveyard(String ownerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new ResourcesClientboundPacket(ResourcesAction.SHOW_WARNING,
+                        ownerName,
+                        0,
+                        0,
+                        0,
+                        new BlockPos(0, 0, 0),
+                        "server.resources.reignofnether.full_graveyard"
+                )
         );
     }
 

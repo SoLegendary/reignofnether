@@ -25,7 +25,7 @@ public class SetGraveyardReleaseOff extends Ability {
             0,
             0,
             false,
-            true
+            false
         );
         this.defaultHotkey = Keybindings.keyO;
     }
@@ -43,7 +43,7 @@ public class SetGraveyardReleaseOff extends Ability {
             () -> true,
             () -> {
                 if (gy.getUpgradeLevel() >= 1)
-                    BuildingAbilityServerboundPacket.doAbility(UnitAction.SET_GRAVEYARD_RELEASE_OFF, gy.originPos);
+                    BuildingAbilityServerboundPacket.doAbility(UnitAction.SET_GRAVEYARD_RELEASE_OFF, gy.originPos, this.oneClickOneUse);
             },
             null,
             List.of(

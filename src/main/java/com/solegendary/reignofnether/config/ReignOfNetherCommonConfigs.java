@@ -135,6 +135,7 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_BOGGED.define(BUILDER);
         ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD.define(BUILDER);
         ResearchCosts.RESEARCH_MASS_BURIALS.define(BUILDER);
+        ResearchCosts.RESEARCH_POSSESSION.define(BUILDER);
         ResearchCosts.RESEARCH_SLIME_CONVERSION.define(BUILDER);
         ResearchCosts.RESEARCH_LINGERING_POTIONS.define(BUILDER);
         ResearchCosts.RESEARCH_HEALING_POTIONS.define(BUILDER);
@@ -297,6 +298,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_BOGGED = ResourceCostConfigEntry.Research(300,300,0, 140, ResourceCosts.RESEARCH_BOGGED, "Bogged Research Config");
         public static final ResourceCostConfigEntry RESEARCH_OVERFLOWING_GRAVEYARD = ResourceCostConfigEntry.Research(0,75,75, 60, ResourceCosts.RESEARCH_OVERFLOWING_GRAVEYARD, "Overflowing Graveyard Research Config");
         public static final ResourceCostConfigEntry RESEARCH_MASS_BURIALS = ResourceCostConfigEntry.Research(0,300,300, 140, ResourceCosts.RESEARCH_MASS_BURIALS, "Mass Burials Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_POSSESSION = ResourceCostConfigEntry.Research(400,0,400, 160, ResourceCosts.RESEARCH_POSSESSION, "Possession Research Config");
         public static final ResourceCostConfigEntry RESEARCH_SLIME_CONVERSION = ResourceCostConfigEntry.Research(300,0,300, 140, ResourceCosts.RESEARCH_SLIME_CONVERSION, "Slime Conversion Research Config");
         public static final ResourceCostConfigEntry RESEARCH_LINGERING_POTIONS = ResourceCostConfigEntry.Research(0,250,250, 140, ResourceCosts.RESEARCH_LINGERING_POTIONS, "Extended Lingering Potion Research Config");
         public static final ResourceCostConfigEntry RESEARCH_HEALING_POTIONS = ResourceCostConfigEntry.Research(0,350,350, 180, ResourceCosts.RESEARCH_HEALING_POTIONS, "Healing Potion Research Config");

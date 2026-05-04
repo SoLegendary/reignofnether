@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
@@ -213,7 +214,8 @@ public class UnitClientEvents {
                 if (building.ownerName.equals(playerName))
                     if (building instanceof ProductionPlacement prodBuilding) {
                         for (ActiveProduction prodItem : prodBuilding.productionQueue)
-                            currentPopulation += prodItem.item.getCost(true, playerName).population;
+                            if (!(prodBuilding instanceof GraveyardPlacement gy) || gy.getUpgradeLevel() <= 0)
+                                currentPopulation += prodItem.item.getCost(true, playerName).population;
                     } else if (building.getBuilding() instanceof IronGolemBuilding) {
                         currentPopulation += ResourceCosts.IRON_GOLEM.population;
                     }

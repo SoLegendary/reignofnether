@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.alliance;
 
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.scenario.ScenarioRole;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -78,15 +81,29 @@ public class AlliancesServerEvents {
 
     public static void applyScenarioAlliances() {
         alliances.clear();
-        for (ScenarioRole role1 : ScenarioServerEvents.scenarioRoles) {
-            for (ScenarioRole role2 : ScenarioServerEvents.scenarioRoles) {
-                if (role1.index != role2.index) {
-                    if (role1.teamNumber == role2.teamNumber &&
-                        !AlliancesServerEvents.isAllied(role1.name, role2.name)) {
-                        addAlliance(role1.name, role2.name);
-                    } else if (role1.teamNumber != role2.teamNumber &&
-                        AlliancesServerEvents.isAllied(role1.name, role2.name)) {
-                        removeAlliance(role1.name, role2.name);
+        Map<String, Integer> nameAndTeam = new HashMap<>();
+        for (ScenarioRole role : ScenarioServerEvents.scenarioRoles) {
+            nameAndTeam.put(role.name, role.teamNumber);
+        }
+        for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers) {
+            ScenarioRole role = ScenarioUtils.getScenarioRole(false, rtsPlayer.scenarioRoleIndex);
+            if (role != null)
+                nameAndTeam.put(rtsPlayer.name, role.teamNumber);
+        }
+
+        for (String name1 : nameAndTeam.keySet()) {
+            int team1 = nameAndTeam.get(name1);
+
+            for (String name2 : nameAndTeam.keySet()) {
+                int team2 = nameAndTeam.get(name2);
+
+                if (!name1.equals(name2)) {
+                    if (team1 == team2 &&
+                        !AlliancesServerEvents.isAllied(name1, name2)) {
+                        addAlliance(name1, name2);
+                    } else if (team1 != team2 &&
+                        AlliancesServerEvents.isAllied(name1, name2)) {
+                        removeAlliance(name1, name2);
                     }
                 }
             }

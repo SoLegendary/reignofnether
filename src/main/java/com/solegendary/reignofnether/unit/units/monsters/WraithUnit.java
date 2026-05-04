@@ -2,6 +2,9 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.Fear;
+import com.solegendary.reignofnether.ability.abilities.Possess;
+import com.solegendary.reignofnether.ability.abilities.SpinWebs;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -42,7 +45,8 @@ import java.util.List;
 public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeAnimated {
     public static final Abilities ABILITIES = new Abilities();
     static {
-
+        ABILITIES.add(new Fear(), Keybindings.keyQ);
+        ABILITIES.add(new Possess(), Keybindings.keyW);
     }
 
     //region
@@ -91,6 +95,26 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
     private ReturnResourcesGoal returnResourcesGoal;
     private AbstractMeleeAttackUnitGoal attackGoal;
     private MeleeAttackBuildingGoal attackBuildingGoal;
+    private GenericTargetedSpellGoal fearGoal;
+    public GenericTargetedSpellGoal getFearGoal() { return fearGoal; }
+    private GenericTargetedSpellGoal possessGoal;
+    public GenericTargetedSpellGoal getPossessGoal() { return fearGoal; }
+
+    @Nullable
+    public Fear getFearAbility() {
+        for (Ability ability : this.getAbilities().get())
+            if (ability instanceof Fear fear)
+                return fear;
+        return null;
+    }
+
+    @Nullable
+    public Possess getPossessAbility() {
+        for (Ability ability : this.getAbilities().get())
+            if (ability instanceof Possess possess)
+                return possess;
+        return null;
+    }
 
     public LivingEntity getFollowTarget() { return followTarget; }
     public boolean getHoldPosition() { return holdPosition; }
@@ -196,13 +220,24 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
                 animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
-            default -> animateScaleReducing = true;
+            case CAST_SPELL -> {
+                activeAnimDef = WraithAnimations.POSSESS;
+                activeAnimState = attackAnimState;
+                animateScale = 1.0f;
+                animateSpeed = 0.5f;
+                startAnimation(activeAnimDef);
+            }
+            default -> {
+                animateScaleReducing = true;
+                animateSpeed = 1.0f;
+            }
         }
     }
 
     public WraithUnit(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
         updateAbilityButtons();
+        this.autocast = getAbilities().get().get(0); // Fear
     }
 
     @Override
@@ -241,11 +276,25 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
         return this.targetGoal.getTarget();
     }
 
+    @Override
+    public void resetBehaviours() {
+        this.getMoveGoal().setMoveTarget(this.getOnPos());
+        if (getFearGoal() != null)
+            getFearGoal().stop();
+        if (getPossessGoal() != null)
+            getPossessGoal().stop();
+    }
+
     public void tick() {
         this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+
+        if (getFearGoal() != null)
+            getFearGoal().tick();
+        if (getPossessGoal() != null)
+            getPossessGoal().tick();
 
         if (level().isClientSide() && animateTicks > 0) {
             animateTicks -= 1;
@@ -254,8 +303,14 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
 
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
-        boolean result = super.doHurtTarget(pEntity);
-        return result;
+        if (super.doHurtTarget(pEntity) && pEntity instanceof LivingEntity le) {
+            Ability ability = getFearAbility();
+            if (ability != null && ability.isAutocasting(this))
+                ability.use(this.level(), this, le);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -287,6 +342,8 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
+        this.fearGoal = new GenericTargetedSpellGoal(this, 0, Fear.RANGE, this::onCastFear, null, null);
+        this.possessGoal = new GenericTargetedSpellGoal(this, Possess.BASE_CHANNEL_TICKS, Possess.RANGE, this::onCastPossess, null, null);
     }
 
     @Override
@@ -318,5 +375,18 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
         if (entity.getClass() == this.getClass()) {
             super.push(entity);
         }
+    }
+
+    public void onCastFear(LivingEntity targetEntity) {
+
+    }
+
+    public void onCastPossess(LivingEntity targetEntity) {
+
+    }
+
+    // check current possession stacks, if >= popCost, take control of the unit, otherwise add stacks
+    public void doPossess(LivingEntity targetEntity) {
+
     }
 }

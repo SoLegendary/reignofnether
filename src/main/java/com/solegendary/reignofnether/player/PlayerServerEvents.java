@@ -650,6 +650,7 @@ public class PlayerServerEvents {
                     id -= 1;
                 }
             }
+            AlliancesServerEvents.applyScenarioAlliances();
             saveRTSPlayers();
         }
     }

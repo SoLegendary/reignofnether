@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.rtsmap;
 import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -39,14 +40,12 @@ public class RTSMapInfoServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         if (rtsMapInfo != null) {
             evt.getEntity().sendSystemMessage(Component.literal(rtsMapInfo.getName() + " " + rtsMapInfo.getVersion()).withStyle(Style.EMPTY.withBold(true)));
-            StringBuilder authors = new StringBuilder(
-                    rtsMapInfo.getAuthor().size() > 1
-                            ? I18n.get("message.reignofnether.rts_map_info_author.multiple")
-                            : I18n.get("message.reignofnether.rts_map_info_author.singular")
-            );
+            MutableComponent authors = rtsMapInfo.getAuthor().size() > 1
+                    ? Component.translatable("message.reignofnether.rts_map_info_author.multiple")
+                    : Component.translatable("message.reignofnether.rts_map_info_author.singular");
             for (String author : rtsMapInfo.getAuthor())
                 authors.append(" ").append(author);
-            evt.getEntity().sendSystemMessage(Component.literal(authors.toString()));
+            evt.getEntity().sendSystemMessage(authors);
             evt.getEntity().sendSystemMessage(Component.literal(""));
             evt.getEntity().sendSystemMessage(Component.literal(rtsMapInfo.getDescription()));
         }

@@ -153,7 +153,7 @@ public class WraithAnimations {
             ))
             .build();
 
-    public static final AnimationDefinition FEAR = AnimationDefinition.Builder.withLength(0.8207F).looping()
+    public static final AnimationDefinition POSSESS = AnimationDefinition.Builder.withLength(0.8207F).looping()
             .addAnimation("left_arm", new AnimationChannel(AnimationChannel.Targets.ROTATION,
                     new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
                     new Keyframe(0.1894F, KeyframeAnimations.degreeVec(51.1183F, -6.7177F, -18.8817F), AnimationChannel.Interpolations.CATMULLROM),

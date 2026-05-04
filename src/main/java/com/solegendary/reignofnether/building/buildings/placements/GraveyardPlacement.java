@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
+import com.solegendary.reignofnether.building.production.ActiveProduction;
+import com.solegendary.reignofnether.building.production.GraveyardUnitProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -121,6 +123,16 @@ public class GraveyardPlacement extends ProductionPlacement {
             return ResearchServerEvents.playerHasResearch(this.ownerName, ProductionItems.RESEARCH_MASS_BURIAL) ?
                     Graveyard.OVERFLOW_AMOUNT_UPGRADED : Graveyard.OVERFLOW_AMOUNT;
         }
+    }
+
+    public int getSkullsInProgress() {
+        if (getUpgradeLevel() <= 0)
+            return 0;
+        int i = 0;
+        for (ActiveProduction activeProd : productionQueue)
+            if (activeProd.item instanceof GraveyardUnitProductionItem)
+                i++;
+        return i;
     }
 
     // create a skull at the first empty pos

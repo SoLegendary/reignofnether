@@ -1,5 +1,5 @@
 
-1.20.1-1.3.2e
+1.20.1-1.3.2f
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -18,17 +18,16 @@
     - 2 population
     - built at dungeons
     - needs a lab upgrade - possession?
+    [❌] Add mob effect for partial possession
+        - Causes stacking slow and prevents deletion
 
 
 Bugfixes
 --------
 [❌] Tridents summoned from commands no longer pierce all units
 
-[✔] Using the gamemode switcher with F3+F4 no longer messes up your cursor
-[✔] Fixed a crash related to castle promotions
-[✔] Rejoining a singleplayer scenario no longer revokes your RTS player status
-[✔] Scenario alliances auto-set after publishing a map are now saved on exit
-    - This was causing units set under allied roles to fight each other before the game began
+[❌] Fixed scenarios NPCs not allying with the player when set to the same scenario team number
+
 
 Quality of Life
 ---------------
@@ -37,8 +36,12 @@ Quality of Life
 [❌] Ravager artillery now have an attack-ground button
 [❌] Review packets that can be modified to only send to some players for performance, TRACKING_ENTITY for updating units only for players who have it loaded clientside
 
+[❌] /rtsapi commands now work from datapacks
+
 Balance
 -------
+[🟡] Fixed a bug where Spider Web research was actually using the cost of Spider Jockey research
+    - This changes the cost from (300 food, 250 wood, 100s) to (300 wood, 300 ore, 120s)
 
 Languages
 ---------

@@ -50,7 +50,7 @@ public class EnchantVigor extends EnchantAbility {
                 () -> placement.getUpgradeLevel() > 0,
                 () -> CursorClientEvents.setLeftClickAction(ENCHANT_ACTION),
                 () -> {
-                    BuildingAbilityServerboundPacket.doAbility(ENCHANT_ACTION, placement.originPos);
+                    BuildingAbilityServerboundPacket.doAbility(ENCHANT_ACTION, placement.originPos, this.oneClickOneUse);
                     if (placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this)
                         placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
                     else

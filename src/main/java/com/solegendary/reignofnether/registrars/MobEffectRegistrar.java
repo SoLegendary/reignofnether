@@ -34,6 +34,9 @@ public class MobEffectRegistrar {
 
     public static final RegistryObject<MobEffect> FEARFUL = MOB_EFFECTS.register("scared", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x0000FF));
 
+    public static final RegistryObject<MobEffect> PARTIALLY_POSSESSED = MOB_EFFECTS.register("partially_possessed", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x000000)
+            .addAttributeModifier(Attributes.MOVEMENT_SPEED, "34787f7c-2718-415f-b15d-9c22ab6d7e84", -0.05, AttributeModifier.Operation.MULTIPLY_BASE));
+
     // Causes a mob to turn into a zombie villager, drowned, zombie piglin or zoglin upon death depending on the unit type
     public static final RegistryObject<MobEffect> ZOMBIE_INFECTED = MOB_EFFECTS.register("zombie_infected", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x000000));
 

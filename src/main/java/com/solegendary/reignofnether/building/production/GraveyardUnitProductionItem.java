@@ -29,7 +29,7 @@ public abstract class GraveyardUnitProductionItem extends ProductionItem {
             return super.canAffordPopulation(pp);
         } else {
             GraveyardPlacement gy = (GraveyardPlacement) pp;
-            int currentSkulls = gy.getTotalSkulls();
+            int currentSkulls = gy.getTotalSkulls() + gy.getSkullsInProgress();
             return (currentSkulls + getCost(pp.getLevel().isClientSide(), pp.ownerName).population) <= maxSkulls;
         }
     }
@@ -44,7 +44,7 @@ public abstract class GraveyardUnitProductionItem extends ProductionItem {
             return super.canAffordPopulation(pp);
         } else {
             GraveyardPlacement gy = (GraveyardPlacement) pp;
-            return gy.getTotalSkulls() <= maxSkulls;
+            return (gy.getTotalSkulls() + gy.getSkullsInProgress()) <= maxSkulls;
         }
     }
 
