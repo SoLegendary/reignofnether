@@ -5,8 +5,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -14,12 +18,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BuildingSelectorOptions {
 	
@@ -30,6 +38,8 @@ public class BuildingSelectorOptions {
 	public static final DynamicCommandExceptionType ERROR_SORT_UNKNOWN = new DynamicCommandExceptionType((p_121508_) -> Component.translatable("argument.building.options.sort.irreversible", p_121508_));
 	public static final DynamicCommandExceptionType ERROR_BUILDING_TYPE_INVALID = new DynamicCommandExceptionType((p_121452_) -> Component.translatable("argument.building.options.type.invalid", p_121452_));
 	private static final Map<String, BuildingSelectorOptions.Option> OPTIONS = Maps.newHashMap();
+	private static final SimpleCommandExceptionType UNKNOWN_BUILDING =
+		new SimpleCommandExceptionType(Component.translatable("commands.reignofnether.error.unknown_building"));
 	
 	public static void register(String pId, BuildingSelectorOptions.Modifier pHandler, Predicate<BuildingSelectorParser> pPredicate, Component pTooltip) {
 		OPTIONS.put(pId, new BuildingSelectorOptions.Option(pHandler, pPredicate, pTooltip));
@@ -86,22 +96,50 @@ public class BuildingSelectorOptions {
 				p_247983_.setSorted(true);
 			}, (p_121544_) -> !p_121544_.isSorted(), Component.translatable("argument.building.options.sort.description"));
 			register("type", (p_121534_) -> {
-				p_121534_.setSuggestions((p_258162_, p_258163_) -> {
-					SharedSuggestionProvider.suggestResource(ReignOfNetherRegistries.BUILDING.keySet(), p_258162_);
-					
-					return p_258162_.buildFuture();
-				});
-				int i = p_121534_.getReader().getCursor();
+				p_121534_.setSuggestions((ctx, builder) ->
+					SharedSuggestionProvider.suggestResource(
+						Stream.concat(
+							ReignOfNetherRegistries.BUILDING.stream(),
+							CustomBuildingClientEvents.customBuildings.stream()
+						).collect(Collectors.toList()),
+						ctx,
+						building -> {
+							ResourceLocation id = ReignOfNetherRegistries.BUILDING.getKey(building);
+							return id != null ? id : ResourceLocation.fromNamespaceAndPath(
+								"custom",
+								building.structureName.toLowerCase().replace(' ', '_'));
+						},
+						building -> Component.literal(building.name))
+				);
 				
 				ResourceLocation resourcelocation = ResourceLocation.read(p_121534_.getReader());
-				String buildingType = ReignOfNetherRegistries.BUILDING.getOptional(resourcelocation).orElseThrow(() -> {
-					p_121534_.getReader().setCursor(i);
-					return ERROR_BUILDING_TYPE_INVALID.createWithContext(p_121534_.getReader(), resourcelocation.toString());
-				}).name;
-				p_121534_.limitToType(buildingType);
-				
+				Building building = resolveBuilding(resourcelocation.toString());
+				if (building == null) {
+					throw UNKNOWN_BUILDING.create();
+				}
+				p_121534_.limitToType(building.name);
 			}, (p_121532_) -> !p_121532_.isTypeLimited(), Component.translatable("argument.building.options.type.description"));
 		}
+	}
+	
+	private static Building resolveBuilding(String input) {
+		ResourceLocation location;
+		if (input.contains(":")) {
+			location = ResourceLocation.tryParse(input);
+		} else {
+			location = ResourceLocation.tryParse(ReignOfNether.MOD_ID + ":" + input);
+		}
+		Building building = location == null ? null : ReignOfNetherRegistries.BUILDING.get(location);
+		if (building == null) {
+			building = CustomBuildingServerEvents.getCustomBuilding(
+				StringUtils.capitalize(
+					input
+						.replace("custom:", "")
+						.replace("_", " ")
+				)
+			);
+		}
+		return building;
 	}
 	
 	public static BuildingSelectorOptions.Modifier get(BuildingSelectorParser pParser, String pId, int pCursor) throws CommandSyntaxException {

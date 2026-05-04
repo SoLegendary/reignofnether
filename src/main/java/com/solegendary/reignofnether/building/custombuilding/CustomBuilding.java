@@ -22,7 +22,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -83,6 +82,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
                 .replace("minecraft:", "")
                 .replace("reignofnether:", "")
                 .replace("_", " "));
+        this.structureName = structureName;
         this.structureSize = structureSize;
         this.structureNbt = structureNbt;
         this.portraitBlock = portraitBlock;

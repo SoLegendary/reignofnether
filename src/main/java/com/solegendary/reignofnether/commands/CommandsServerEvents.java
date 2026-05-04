@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -40,7 +41,6 @@ import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
-import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -55,13 +55,31 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CommandsServerEvents {
 	
-	public static final SuggestionProvider<CommandSourceStack> BUILDINGS = SuggestionProviders.register(ResourceLocation.fromNamespaceAndPath("reignofnether", "buildings"), (p_258164_, p_258165_) -> SharedSuggestionProvider.suggestResource(ReignOfNetherRegistries.BUILDING.keySet(), p_258165_));
+	public static final SuggestionProvider<CommandSourceStack> BUILDINGS = (ctx, builder) ->
+		SharedSuggestionProvider.suggestResource(
+			Stream.concat(
+				ReignOfNetherRegistries.BUILDING.stream(),
+				CustomBuildingClientEvents.customBuildings.stream()
+			).collect(Collectors.toList()),
+			builder,
+			building -> {
+				ResourceLocation id = ReignOfNetherRegistries.BUILDING.getKey(building);
+				return id != null ? id : ResourceLocation.fromNamespaceAndPath(
+					"custom",
+					building.structureName.toLowerCase().replace(' ', '_'));
+			},
+			building -> Component.literal(building.name)
+		);
 	private static final SimpleCommandExceptionType UNKNOWN_BUILDING =
 		new SimpleCommandExceptionType(Component.translatable("commands.reignofnether.error.unknown_building"));
 	private static final SimpleCommandExceptionType UNKNOWN_RESOURCE =
@@ -103,8 +121,8 @@ public class CommandsServerEvents {
 							false,
 							Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
 							Rotation.NONE))
-						)
 					)
+				)
 				.then(Commands.literal("destroy")
 					.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.executes(ctx -> destroyBuildingsAt(BlockPosArgument.getLoadedBlockPos(ctx, "pos"), ctx.getSource()))
@@ -179,7 +197,7 @@ public class CommandsServerEvents {
 				)
 			)
 		);
-		
+
 //		dispatcher.register(Commands.literal("rtsapi-set-building-owner")
 //			.requires(source -> source.hasPermission(2))
 //			.then(buildingSelectionTail(ctx -> ""))
@@ -966,7 +984,7 @@ public class CommandsServerEvents {
 	}
 	
 	private static Building resolveBuilding(String input) {
-		ResourceLocation location = null;
+		ResourceLocation location;
 		if (input.contains(":")) {
 			location = ResourceLocation.tryParse(input);
 		} else {
@@ -974,7 +992,13 @@ public class CommandsServerEvents {
 		}
 		Building building = location == null ? null : ReignOfNetherRegistries.BUILDING.get(location);
 		if (building == null) {
-			building = CustomBuildingServerEvents.getCustomBuilding(input);
+			building = CustomBuildingServerEvents.getCustomBuilding(
+				StringUtils.capitalize(
+					input
+						.replace("custom:", "")
+						.replace("_", " ")
+				)
+			);
 		}
 		return building;
 	}

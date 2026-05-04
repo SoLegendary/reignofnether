@@ -124,18 +124,28 @@ public class BuildingSelectorParser {
 		if (!this.reader.canRead()) {
 			throw ERROR_MISSING_SELECTOR_TYPE.createWithContext(this.reader);
 		} else {
+			int i = this.reader.getCursor();
 			char c0 = this.reader.read();
-			if (c0 == 'b') {
+			if (c0 == 'n') {
+				this.maxResults = 1;
+				this.order = ORDER_NEAREST;
+			} else if (c0 == 'r') {
+				this.maxResults = 1;
+				this.order = ORDER_RANDOM;
+			} else {
+				if (c0 != 'b') {
+					this.reader.setCursor(i);
+					throw ERROR_UNKNOWN_SELECTOR_TYPE.createWithContext(this.reader, "@" + c0);
+				}
 				this.maxResults = Integer.MAX_VALUE;
 				this.order = BuildingSelector.ORDER_ARBITRARY;
+				this.suggestions = this::suggestOpenOptions;
+				if (this.reader.canRead() && this.reader.peek() == '[') {
+					this.reader.skip();
+					this.suggestions = this::suggestOptionsKeyOrClose;
+					this.parseOptions();
+				}
 			}
-			this.suggestions = this::suggestOpenOptions;
-			if (this.reader.canRead() && this.reader.peek() == '[') {
-				this.reader.skip();
-				this.suggestions = this::suggestOptionsKeyOrClose;
-				this.parseOptions();
-			}
-			
 		}
 	}
 	
@@ -337,7 +347,6 @@ public class BuildingSelectorParser {
 	public void limitToType(String pBuildingName) {
 		this.buildingName = pBuildingName;
 	}
-	
 	
 	public boolean isTypeLimited() {
 		return this.buildingName != null;
