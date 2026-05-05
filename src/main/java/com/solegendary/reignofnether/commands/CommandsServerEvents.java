@@ -42,7 +42,6 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -54,6 +53,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -109,9 +109,23 @@ public class CommandsServerEvents {
 						.suggests(BUILDINGS)
 						.then(placeBuildingTail(ctx -> ""))
 						.then(Commands.argument("ownerName", StringArgumentType.string())
+							.executes(ctx -> placeBuilding(
+								ctx,
+								ResourceLocationArgument.getId(ctx, "buildingName").toString(),
+								StringArgumentType.getString(ctx, "ownerName"),
+								false,
+								Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
+								Rotation.NONE))
 							.then(placeBuildingTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
 						)
 						.then(Commands.argument("ownerSelector", EntityArgument.player())
+							.executes(ctx -> placeBuilding(
+								ctx,
+								ResourceLocationArgument.getId(ctx, "buildingName").toString(),
+								getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
+								false,
+								Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
+								Rotation.NONE))
 							.then(placeBuildingTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
 						)
 						.executes(ctx -> placeBuilding(
@@ -127,7 +141,16 @@ public class CommandsServerEvents {
 					.then(Commands.argument("pos", BlockPosArgument.blockPos())
 						.executes(ctx -> destroyBuildingsAt(BlockPosArgument.getLoadedBlockPos(ctx, "pos"), ctx.getSource()))
 					)
-					.then(Commands.argument("targets", BuildingArgument.buildings()).executes((p_137810_) -> destroyBuildings(p_137810_.getSource(), BuildingArgument.getBuildings(p_137810_, "targets"))))
+					.then(Commands.argument("targets", BuildingArgument.buildings())
+						.executes((p_137810_) -> destroyBuildings(p_137810_.getSource(), BuildingArgument.getBuildings(p_137810_, "targets", Objects.requireNonNull(p_137810_.getSource().getPlayer()).getName().getString())))
+						.then(Commands.argument("ownerName", StringArgumentType.string())
+							.executes((p_137810_) -> destroyBuildings(p_137810_.getSource(), BuildingArgument.getBuildings(p_137810_, "targets", StringArgumentType.getString(p_137810_, "ownerName"))))
+						)
+						.then(Commands.argument("ownerSelector", EntityArgument.player())
+							.executes((p_137810_) -> destroyBuildings(p_137810_.getSource(), BuildingArgument.getBuildings(p_137810_, "targets", getPlayerName(EntityArgument.getPlayer(p_137810_, "ownerSelector"))))
+							)
+						)
+					)
 				)
 				.then(Commands.literal("owner")
 					.then(buildingSelectionTail(ctx -> ""))
@@ -141,27 +164,27 @@ public class CommandsServerEvents {
 			)
 		);
 		dispatcher.register(Commands.literal("ron").requires((p_139013_) -> p_139013_.hasPermission(2)).redirect(literalcommandnode));
-		dispatcher.register(Commands.literal("rts").requires((p_139013_) -> p_139013_.hasPermission(2)).redirect(literalcommandnode));
-
-//        dispatcher.register(Commands.literal("rtsapi-place-building")
-//            .requires(source -> source.hasPermission(2))
-//            .then(Commands.argument("buildingName", StringArgumentType.string())
-//                .then(placeBuildingTail(ctx -> ""))
-//                .then(Commands.argument("ownerName", StringArgumentType.string())
-//                    .then(placeBuildingTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
-//                )
-//                .then(Commands.argument("ownerSelector", EntityArgument.player())
-//                    .then(placeBuildingTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
-//                )
-//            )
-//        );
-
-//        dispatcher.register(Commands.literal("rtsapi-destroy-building")
-//            .requires(source -> source.hasPermission(2))
-//            .then(Commands.argument("pos", BlockPosArgument.blockPos())
-//                .executes(ctx -> destroyBuildingsAt(BlockPosArgument.getLoadedBlockPos(ctx, "pos"), ctx.getSource()))
-//            )
-//        );
+		dispatcher.register(Commands.literal("rtsapi").requires((p_139013_) -> p_139013_.hasPermission(2)).redirect(literalcommandnode));
+		
+		dispatcher.register(Commands.literal("rtsapi-place-building")
+			.requires(source -> source.hasPermission(2))
+			.then(Commands.argument("buildingName", StringArgumentType.string())
+				.then(placeBuildingTail(ctx -> ""))
+				.then(Commands.argument("ownerName", StringArgumentType.string())
+					.then(placeBuildingTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+				)
+				.then(Commands.argument("ownerSelector", EntityArgument.player())
+					.then(placeBuildingTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+				)
+			)
+		);
+		
+		dispatcher.register(Commands.literal("rtsapi-destroy-building")
+			.requires(source -> source.hasPermission(2))
+			.then(Commands.argument("pos", BlockPosArgument.blockPos())
+				.executes(ctx -> destroyBuildingsAt(BlockPosArgument.getLoadedBlockPos(ctx, "pos"), ctx.getSource()))
+			)
+		);
 		
 		dispatcher.register(Commands.literal("rtsapi-set-unit-owner")
 			.requires(source -> source.hasPermission(2))
@@ -197,17 +220,17 @@ public class CommandsServerEvents {
 				)
 			)
 		);
-
-//		dispatcher.register(Commands.literal("rtsapi-set-building-owner")
-//			.requires(source -> source.hasPermission(2))
-//			.then(buildingSelectionTail(ctx -> ""))
-//			.then(Commands.argument("ownerName", StringArgumentType.string())
-//				.then(buildingSelectionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
-//			)
-//			.then(Commands.argument("ownerSelector", EntityArgument.player())
-//				.then(buildingSelectionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
-//			)
-//		);
+		
+		dispatcher.register(Commands.literal("rtsapi-set-building-owner")
+			.requires(source -> source.hasPermission(2))
+			.then(buildingSelectionTail(ctx -> ""))
+			.then(Commands.argument("ownerName", StringArgumentType.string())
+				.then(buildingSelectionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+			)
+			.then(Commands.argument("ownerSelector", EntityArgument.player())
+				.then(buildingSelectionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+			)
+		);
 		
 		dispatcher.register(Commands.literal("rtsapi-set-anchor")
 			.requires(source -> source.hasPermission(2))
@@ -319,7 +342,7 @@ public class CommandsServerEvents {
 			.then(Commands.argument("ownerName", StringArgumentType.string())
 				.then(Commands.argument("entity", ResourceLocationArgument.id())
 					.suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
-						BuiltInRegistries.ENTITY_TYPE.keySet().stream(), builder))
+						ForgeRegistries.ENTITY_TYPES.getKeys().stream(), builder))
 					.executes(ctx -> summonEntity(
 						ctx,
 						StringArgumentType.getString(ctx, "ownerName"),
@@ -784,7 +807,7 @@ public class CommandsServerEvents {
 		for (BuildingPlacement building : buildingPlacement) {
 			building.destroy(source.getLevel());
 		}
-		return 1;
+		return buildingPlacement.size();
 	}
 	
 	private static int setUnitOwner(

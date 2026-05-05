@@ -51,8 +51,9 @@ public class BuildingArgument implements ArgumentType<BuildingSelector> {
 		return new BuildingArgument(false);
 	}
 	
-	public static List<? extends BuildingPlacement> getBuildings(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
-		List<? extends BuildingPlacement> collection = getOptionalBuildings(pContext, pName);
+	public static List<? extends BuildingPlacement> getBuildings(CommandContext<CommandSourceStack> pContext, String pName, String pOwner) throws CommandSyntaxException {
+		List<? extends BuildingPlacement> collection = getOptionalBuildings(pContext, pName, pOwner
+		);
 		if (collection.isEmpty()) {
 			throw NO_BUILDINGS_FOUND.create();
 		} else {
@@ -60,8 +61,10 @@ public class BuildingArgument implements ArgumentType<BuildingSelector> {
 		}
 	}
 	
-	public static List<? extends BuildingPlacement> getOptionalBuildings(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
-		return pContext.getArgument(pName, BuildingSelector.class).findBuildings(pContext.getSource());
+	public static List<? extends BuildingPlacement> getOptionalBuildings(CommandContext<CommandSourceStack> pContext, String pName, String pOwner) throws CommandSyntaxException {
+		BuildingSelector selector = pContext.getArgument(pName, BuildingSelector.class);
+		selector.setOwnerName(pOwner);
+		return selector.findBuildings(pContext.getSource());
 	}
 	
 	public BuildingSelector parse(StringReader pReader) throws CommandSyntaxException {

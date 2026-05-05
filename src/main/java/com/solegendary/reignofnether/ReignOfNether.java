@@ -3,6 +3,7 @@ package com.solegendary.reignofnether;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.commands.BuildingArgument;
+import com.solegendary.reignofnether.commands.BuildingSelectorOptions;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.mixin.DownloadPackSourceAccessor;
@@ -97,6 +98,7 @@ public class ReignOfNether {
         MobEffectRegistrar.init(mlctx);
         ParticleRegistrar.init(mlctx);
         CommandArgumentRegistrar.init(mlctx);
+        BuildingSelectorOptions.bootStrap();
         
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);

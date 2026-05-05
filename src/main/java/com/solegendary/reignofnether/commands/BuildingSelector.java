@@ -31,18 +31,17 @@ public class BuildingSelector {
 	private final AABB aabb;
 	private final BiConsumer<Vec3, List<? extends BuildingPlacement>> order;
 	@Nullable
-	private final String ownerName;
+	private String ownerName;
 	@Nullable
 	private final String buildingName;
 	private final boolean usesSelector;
 	private final String rotation;
 	
-	public BuildingSelector(int pMaxResults, Function<Vec3, Vec3> pPositions, @Nullable AABB pAabb, BiConsumer<Vec3, List<? extends BuildingPlacement>> pOrder, @Nullable String pOwnerName, @Nullable String pType, boolean pUsesSelector, String rotation) {
+	public BuildingSelector(int pMaxResults, Function<Vec3, Vec3> pPositions, @Nullable AABB pAabb, BiConsumer<Vec3, List<? extends BuildingPlacement>> pOrder, @Nullable String pType, boolean pUsesSelector, String rotation) {
 		this.maxResults = pMaxResults;
 		this.position = pPositions;
 		this.aabb = pAabb;
 		this.order = pOrder;
-		this.ownerName = pOwnerName;
 		this.buildingName = pType;
 		this.usesSelector = pUsesSelector;
 		this.rotation = rotation;
@@ -153,4 +152,7 @@ public class BuildingSelector {
 		return this.order == ORDER_ARBITRARY ? this.maxResults : Integer.MAX_VALUE;
 	}
 	
+	public void setOwnerName(@Nullable String ownerName) {
+		this.ownerName = ownerName;
+	}
 }

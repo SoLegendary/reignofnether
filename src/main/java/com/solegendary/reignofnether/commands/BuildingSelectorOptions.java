@@ -58,7 +58,6 @@ public class BuildingSelectorOptions {
 					throw ERROR_RANGE_NEGATIVE.createWithContext(p_121421_.getReader());
 				}
 			}, (p_121419_) -> p_121419_.getDistance().isAny(), Component.translatable("argument.building.options.distance.description"));
-			register("owner_name", (selector) -> selector.setOwnerName(selector.getReader().readString()), (p_121411_) -> p_121411_.getOwnerName() == null, Component.translatable("argument.building.options.owner_name.description"));
 			register("rotation", (selector) -> selector.setRotation(selector.getReader().readString()), (p_121411_) -> p_121411_.getRotation() == null, Component.translatable("argument.building.options.rotation.description"));
 			register("x", (p_121413_) -> p_121413_.setX(p_121413_.getReader().readDouble()), (p_121411_) -> p_121411_.getX() == null, Component.translatable("argument.building.options.x.description"));
 			register("y", (p_121409_) -> p_121409_.setY(p_121409_.getReader().readDouble()), (p_121407_) -> p_121407_.getY() == null, Component.translatable("argument.building.options.y.description"));

@@ -61,8 +61,6 @@ public class BuildingSelectorParser {
 	@Nullable
 	private Double deltaZ;
 	private BiConsumer<Vec3, List<? extends BuildingPlacement>> order = BuildingSelector.ORDER_ARBITRARY;
-	@Nullable
-	private String ownerName;
 	private BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
 	private boolean isLimited;
 	private boolean isSorted;
@@ -102,7 +100,7 @@ public class BuildingSelectorParser {
 			function = (p_121258_) -> new Vec3(this.x == null ? p_121258_.x : this.x, this.y == null ? p_121258_.y : this.y, this.z == null ? p_121258_.z : this.z);
 		}
 		
-		return new BuildingSelector(this.maxResults, function, aabb, this.order, this.ownerName, this.buildingName, this.usesSelectors, rotation);
+		return new BuildingSelector(this.maxResults, function, aabb, this.order, this.buildingName, this.usesSelectors, rotation);
 	}
 	
 	private AABB createAabb(double pSizeX, double pSizeY, double pSizeZ) {
@@ -350,14 +348,6 @@ public class BuildingSelectorParser {
 	
 	public boolean isTypeLimited() {
 		return this.buildingName != null;
-	}
-	
-	public @Nullable String getOwnerName() {
-		return this.ownerName;
-	}
-	
-	public void setOwnerName(@Nullable String ownerName) {
-		this.ownerName = ownerName;
 	}
 	
 	public String getRotation() {
