@@ -269,8 +269,14 @@ public class OrthoviewClientEvents {
         }
 
         long windowHandle = MC.getWindow().getWindow();
-        if (windowHandle == 0L) return;
-        int cursorMode = GLFW.glfwGetInputMode(windowHandle, GLFW.GLFW_CURSOR);
+        int cursorMode;
+
+        try {
+            cursorMode = GLFW.glfwGetInputMode(windowHandle, GLFW.GLFW_CURSOR);
+        } catch (NullPointerException | IllegalStateException e) {
+            cursorMode = GLFW.GLFW_CURSOR_NORMAL;
+        }
+        
         boolean grabbed = cursorMode == GLFW.GLFW_CURSOR_DISABLED;
         if (MC.screen == null && !grabbed && MC.isWindowActive()) {
             MC.mouseHandler.releaseMouse();
