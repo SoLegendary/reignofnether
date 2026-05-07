@@ -75,6 +75,10 @@ public class CursorClientEvents {
     // pos of cursor on screen for box selections
     private static Vec2 cursorLeftClickDownPos = new Vec2(-1, -1);
     private static Vec2 cursorLeftClickDragPos = new Vec2(-1, -1);
+    private static Vec2 cursorRightClickDownPos = new Vec2(-1, -1);
+    private static Vec2 cursorRightClickDragPos = new Vec2(-1, -1);
+    private static BlockPos rightClickStartBp = new BlockPos(0, 0, 0);
+    private static final int DRAG_THRESHOLD = 5;
     // action that is performed on the next left click
     private static UnitAction leftClickAction = null;
     private static SandboxAction leftClickSandboxAction = null;
@@ -93,6 +97,26 @@ public class CursorClientEvents {
 
     public static SandboxAction getLeftClickSandboxAction() {
         return leftClickSandboxAction;
+    }
+
+    public static boolean isRightDragCouldStart() {
+        return rightClickDown;
+    }
+
+    public static boolean isRightDragActive() {
+        return rightClickDown && cursorRightClickDownPos.distanceToSqr(cursorRightClickDragPos) > (DRAG_THRESHOLD * DRAG_THRESHOLD);
+    }
+
+    public static Vec2 getCursorRightClickDownPos() {
+        return cursorRightClickDownPos;
+    }
+
+    public static Vec2 getCursorRightClickDragPos() {
+        return cursorRightClickDragPos;
+    }
+
+    public static BlockPos getRightClickStartBp() {
+        return rightClickStartBp;
     }
 
     public static void setLeftClickAction(UnitAction actionName) {
@@ -327,17 +351,23 @@ public class CursorClientEvents {
             leftClickDown = true;
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            cursorRightClickDownPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+            cursorRightClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+            rightClickStartBp = getPreselectedBlockPos();
             rightClickDown = true;
         }
     }
 
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled() ||
-                (cursorLeftClickDownPos.x < 0 && cursorLeftClickDownPos.y < 0))
+        if (!OrthoviewClientEvents.isEnabled())
             return;
 
-        cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+        if (cursorLeftClickDownPos.x >= 0 || cursorLeftClickDownPos.y >= 0)
+            cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+
+        if (rightClickDown)
+            cursorRightClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
     }
 
     @SubscribeEvent
@@ -392,6 +422,8 @@ public class CursorClientEvents {
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = false;
+            cursorRightClickDownPos = new Vec2(-1, -1);
+            cursorRightClickDragPos = new Vec2(-1, -1);
         }
     }
 

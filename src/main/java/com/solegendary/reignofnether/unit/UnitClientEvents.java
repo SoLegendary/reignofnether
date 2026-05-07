@@ -157,6 +157,8 @@ public class UnitClientEvents {
         return allUnits;
     }
 
+    private static boolean rightClickMoveDeferred = false;
+
     public static void addPreselectedUnit(LivingEntity unit) {
         if (unit instanceof Player player && (player.isSpectator() || player.isCreative()))
             return;
@@ -364,6 +366,14 @@ public class UnitClientEvents {
     }
 
     private static void resolveMoveAction() {
+        if (CursorClientEvents.isRightDragCouldStart() && !selectedUnits.isEmpty()) {
+            rightClickMoveDeferred = true;
+            return;
+        }
+        doResolveMoveAction();
+    }
+
+    private static void doResolveMoveAction() {
         // follow friendly unit
         if (preselectedUnits.size() == 1 && !targetingSelf()) {
             if (hudSelectedEntity instanceof WitchUnit witchUnit) {
@@ -789,7 +799,95 @@ public class UnitClientEvents {
         markSelectedUnitsChanged();
     }
 
-    public static RenderLevelStageEvent.Stage stage = AFTER_ENTITIES;
+    @SubscribeEvent
+    public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
+        if (!OrthoviewClientEvents.isEnabled() || MC.level == null)
+            return;
+
+        if (!CursorClientEvents.isRightDragActive())
+            return;
+
+        ArrayList<LivingEntity> selUnits = getSelectedUnits();
+        if (selUnits.isEmpty())
+            return;
+
+        BlockPos currentBp = CursorClientEvents.getPreselectedBlockPos();
+        ArrayList<LivingEntity> actionableUnits = new ArrayList<>();
+        for (LivingEntity unit : selUnits) {
+            if ((getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
+                    NonUnitClientEvents.canControlAllMobs() ||
+                    AlliancesClient.canControlAlly(unit)) && unit instanceof Unit) {
+                actionableUnits.add(unit);
+            }
+        }
+
+        if (actionableUnits.isEmpty())
+            return;
+
+        if (!FormationDragMove.isDragging()) {
+            FormationDragMove.startDrag(CursorClientEvents.getRightClickStartBp());
+        }
+
+        FormationDragMove.updateDrag(currentBp, actionableUnits.size(), MC.level);
+    }
+
+    @SubscribeEvent
+    public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
+        if (!OrthoviewClientEvents.isEnabled() || MC.level == null)
+            return;
+
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            boolean wasFormationDrag = FormationDragMove.isDragging();
+            if (wasFormationDrag) {
+                ArrayList<LivingEntity> selUnits = getSelectedUnits();
+                ArrayList<LivingEntity> actionableUnits = new ArrayList<>();
+                for (LivingEntity unit : selUnits) {
+                    if ((getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
+                            NonUnitClientEvents.canControlAllMobs() ||
+                            AlliancesClient.canControlAlly(unit)) && unit instanceof Unit) {
+                        actionableUnits.add(unit);
+                    }
+                }
+                resolveFormationMove(actionableUnits);
+            }
+            if (rightClickMoveDeferred) {
+                rightClickMoveDeferred = false;
+                if (!wasFormationDrag) {
+                    doResolveMoveAction();
+                }
+            }
+        }
+    }
+
+    private static void resolveFormationMove(ArrayList<LivingEntity> units) {
+        if (MC.player == null || MC.level == null) return;
+
+        List<com.mojang.datafixers.util.Pair<LivingEntity, BlockPos>> pairs = FormationDragMove.endDrag(units);
+        String playerName = MC.player.getName().getString();
+
+        for (var pair : pairs) {
+            LivingEntity le = pair.getFirst();
+            BlockPos targetBp = pair.getSecond();
+            if (le instanceof Unit) {
+                int[] singleUnitId = new int[]{le.getId()};
+
+                new UnitActionItem(
+                    playerName,
+                    UnitAction.MOVE, -1, singleUnitId,
+                    targetBp,
+                    new BlockPos(0, 0, 0)
+                ).action(MC.level);
+
+                PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
+                    playerName,
+                    UnitAction.MOVE, -1, singleUnitId,
+                    targetBp,
+                    new BlockPos(0, 0, 0),
+                    false
+                ));
+            }
+        }
+    }
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
@@ -963,6 +1061,36 @@ public class UnitClientEvents {
                         }
                     }
                      */
+                }
+            }
+
+            if (FormationDragMove.isDragging()) {
+                VertexConsumer vertexConsumerLineFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
+                VertexConsumer vertexConsumerEntityTranslucentFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(ResourceLocation.parse("forge:textures/white.png")));
+                float a = 0.5f;
+
+                Vec3 lineStart = FormationDragMove.getLineStart();
+                Vec3 lineEnd = FormationDragMove.getLineEnd();
+                MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLineFd, lineStart, lineEnd, 0, 1, 0, a);
+
+                for (BlockPos bp : FormationDragMove.getFormationTargets()) {
+                    if (MC.level.getBlockState(bp.offset(0, 1, 0)).getBlock() instanceof SnowLayerBlock) {
+                        AABB aabb = new AABB(bp);
+                        aabb = aabb.setMaxY(aabb.maxY + 0.13f);
+                        MyRenderer.drawSolidBox(
+                                evt.getPoseStack(),
+                                vertexConsumerEntityTranslucentFd,
+                                aabb,
+                                Direction.UP,
+                                0,
+                                1,
+                                0,
+                                a,
+                                ResourceLocation.parse("forge:textures/white.png")
+                        );
+                    } else {
+                        MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucentFd, Direction.UP, bp, 0, 1, 0, a);
+                    }
                 }
             }
         }
