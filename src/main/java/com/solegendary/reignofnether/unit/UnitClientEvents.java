@@ -889,6 +889,8 @@ public class UnitClientEvents {
         }
     }
 
+    public static RenderLevelStageEvent.Stage stage = AFTER_ENTITIES;
+
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (MC.level == null)
