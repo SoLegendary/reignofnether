@@ -85,6 +85,7 @@ public class UnitActionServerboundPacket {
                 success.set(false);
             }
             else {
+                ReignOfNether.LOGGER.info("[UnitAction] {} issued {} (unitIds: {})", player.getName(), this.action, java.util.Arrays.toString(this.unitIds));
                 UnitServerEvents.addActionItem(
                         this.ownerName,
                         this.action,

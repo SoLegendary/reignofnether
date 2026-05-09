@@ -1282,6 +1282,12 @@
     "startpos.reignofnether.starting_game": "遊戲將在 %d 秒內開始",
     "startpos.reignofnether.started_game": "遊戲開始！",
     "startpos.reignofnether.max_positions": "已達到最大起始位置（16）",
+    "startpos.reignofnether.ready_check_started": "準備確認已開始！所有玩家必須準備好才能開始倒數。",
+    "startpos.reignofnether.player_ready": "%s 已準備！",
+    "startpos.reignofnether.player_not_ready": "%s 已取消準備。",
+    "startpos.reignofnether.ready_button.ready": "準備",
+    "startpos.reignofnether.ready_button.unready": "取消準備",
+    "startpos.reignofnether.ready_button.tooltip2": "已準備：%d/%d 玩家",
 
     "unitstats.reignofnether.attack_damage": "攻擊傷害",
     "unitstats.reignofnether.attack_damage_bonus_buildings": "對建築 +%s",

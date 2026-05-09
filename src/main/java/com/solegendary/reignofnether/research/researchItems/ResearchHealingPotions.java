@@ -38,6 +38,10 @@ public class ResearchHealingPotions extends ProductionItem {
         };
     }
 
+    public String getItemName() {
+        return ResearchHealingPotions.itemName;
+    }
+
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(ResearchHealingPotions.itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_healing.png"),

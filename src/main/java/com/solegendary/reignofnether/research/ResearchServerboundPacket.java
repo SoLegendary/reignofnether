@@ -65,6 +65,7 @@ public class ResearchServerboundPacket {
             }
 
             if (isCheat) {
+                ReignOfNether.LOGGER.info("[Research] {} {} cheat research: {}", player.getName(), add ? "added" : "removed", this.itemName);
                 if (!player.hasPermissions(4)) {
                     ReignOfNether.LOGGER.warn("ResearchServerboundPacket (cheats): Tried to process packet from " + player.getName() + " with insufficient permissions");
                     success.set(false);

@@ -27,7 +27,9 @@ Bugfixes
 
 Quality of Life
 ---------------
-[❌] Ready check instead of start game countdown
+
+[✔] Ready check instead of start game countdown
+[❌] Ravager artillery now have an attack-ground button
 [❌] Review packets that can be modified to only send to some players for performance, TRACKING_ENTITY for updating units only for players who have it loaded clientside
 [❌] /rtsapi commands now work from datapacks
 [❌] add an @enemy and @owner argument to custom building commands

@@ -67,6 +67,7 @@ public class BuildingAbilityServerboundPacket {
             }
 
             BuildingPlacement building = BuildingUtils.findBuilding(false, buildingPos);
+            ReignOfNether.LOGGER.info("[BuildingAbility] {} performed {} at {}", player.getName(), abilityAction, buildingPos);
             if (building != null && building.getBuilding() instanceof Library) {
                 if (!player.getName().getString().equals(building.ownerName)) {
                     ReignOfNether.LOGGER.warn("EnchantEquipAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);

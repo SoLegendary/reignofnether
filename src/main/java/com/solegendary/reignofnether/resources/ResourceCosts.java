@@ -60,6 +60,8 @@ public class ResourceCosts {
     public static final ResourceCost PANDA = new ResourceCost(ID, "PANDA");
     public static final ResourceCost WOLF = new ResourceCost(ID, "WOLF");
     public static final ResourceCost LLAMA = new ResourceCost(ID, "LLAMA");
+    public static final ResourceCost KILLER_RABBIT = new ResourceCost(ID, "KILLER_RABBIT");
+    public static final ResourceCost SILVERFISH = new ResourceCost(ID, "SILVERFISH");
 
     //BUILDINGS
     public static final ResourceCost BEACON = new ResourceCost(ID, "BEACON");
@@ -163,10 +165,9 @@ public class ResourceCosts {
     public static final ResourceCost EQUIP_LEATHER_ARMOR = new ResourceCost(ID, "EQUIP_LEATHER_ARMOR");
     public static final ResourceCost EQUIP_CHAINMAIL_ARMOR = new ResourceCost(ID, "EQUIP_CHAINMAIL_ARMOR");
 
-    // UNUSED
-
-    public static final ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 150);
-    public static final ResourceCost RESEARCH_PILLAGER_CROSSBOWS = ResourceCost.Research(0,600,300, 180);
+    // Research (previously unused, now configurable)
+    public static final ResourceCost RESEARCH_VINDICATOR_AXES = new ResourceCost(ID, "RESEARCH_VINDICATOR_AXES");
+    public static final ResourceCost RESEARCH_PILLAGER_CROSSBOWS = new ResourceCost(ID, "RESEARCH_PILLAGER_CROSSBOWS");
 
     public static FormattedCharSequence getFormattedCost(ResourceCost resCost) {
         String str = "";
@@ -251,6 +252,8 @@ public class ResourceCosts {
         PANDA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PANDA);
         WOLF.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WOLF);
         LLAMA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.LLAMA);
+        KILLER_RABBIT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.KILLER_RABBIT);
+        SILVERFISH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SILVERFISH);
 
         HERO_BASE_REVIVE_COST.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HERO_BASE_REVIVE_COST);
         HERO_EXTRA_REVIVE_COST_PER_LEVEL.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HERO_EXTRA_REVIVE_COST_PER_LEVEL);
@@ -344,6 +347,8 @@ public class ResourceCosts {
         RESEARCH_BEACON_LEVEL3.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL3);
         RESEARCH_BEACON_LEVEL4.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL4);
         RESEARCH_BEACON_LEVEL5.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL5);
+        RESEARCH_VINDICATOR_AXES.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_VINDICATOR_AXES);
+        RESEARCH_PILLAGER_CROSSBOWS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_PILLAGER_CROSSBOWS);
         // ******************* ABILITIES ******************* //
         ENCHANT_MAIMING.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.ENCHANT_MAIMING);
         ENCHANT_QUICK_CHARGE.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.ENCHANT_QUICK_CHARGE);

@@ -67,6 +67,8 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.PANDA.define(BUILDER);
         UnitCosts.WOLF.define(BUILDER);
         UnitCosts.LLAMA.define(BUILDER);
+        UnitCosts.KILLER_RABBIT.define(BUILDER);
+        UnitCosts.SILVERFISH.define(BUILDER);
 
         UnitCosts.HERO_BASE_REVIVE_COST.define(BUILDER);
         UnitCosts.HERO_EXTRA_REVIVE_COST_PER_LEVEL.define(BUILDER);
@@ -165,6 +167,8 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_BEACON_LEVEL3.define(BUILDER);
         ResearchCosts.RESEARCH_BEACON_LEVEL4.define(BUILDER);
         ResearchCosts.RESEARCH_BEACON_LEVEL5.define(BUILDER);
+        ResearchCosts.RESEARCH_VINDICATOR_AXES.define(BUILDER);
+        ResearchCosts.RESEARCH_PILLAGER_CROSSBOWS.define(BUILDER);
 
         //*Abilities*
         BUILDER.comment("Ability Cost Configurations");
@@ -231,6 +235,9 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry PANDA = ResourceCostConfigEntry.Unit(250,0,0,40,4, ResourceCosts.PANDA, "Panda Config");
         public static final ResourceCostConfigEntry WOLF = ResourceCostConfigEntry.Unit(120,0,0,25,2, ResourceCosts.WOLF, "Wolf Config");
         public static final ResourceCostConfigEntry LLAMA = ResourceCostConfigEntry.Unit(180,0,0,25,2, ResourceCosts.LLAMA, "Llama Config");
+
+        public static final ResourceCostConfigEntry KILLER_RABBIT = ResourceCostConfigEntry.Unit(150,0,0,30,2, ResourceCosts.KILLER_RABBIT, "Killer Rabbit Config");
+        public static final ResourceCostConfigEntry SILVERFISH = ResourceCostConfigEntry.Unit(0,0,0,0,0, ResourceCosts.SILVERFISH, "Silverfish Config");
 
         public static final ResourceCostConfigEntry HERO_BASE_REVIVE_COST = ResourceCostConfigEntry.Unit(100,0,0,30, 5, ResourceCosts.HERO_BASE_REVIVE_COST, "Hero Base Revive Cost Config");
         public static final ResourceCostConfigEntry HERO_EXTRA_REVIVE_COST_PER_LEVEL = ResourceCostConfigEntry.Unit(50,0,0,5, 0, ResourceCosts.HERO_EXTRA_REVIVE_COST_PER_LEVEL, "Hero Extra Revive Cost Per Level Config");
@@ -329,6 +336,9 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL3 = ResourceCostConfigEntry.Research(0, 0, 400, 120, ResourceCosts.RESEARCH_BEACON_LEVEL3, "Beacon Level 3 Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL4 = ResourceCostConfigEntry.Research(0, 0, 500, 120, ResourceCosts.RESEARCH_BEACON_LEVEL4, "Beacon Level 4 Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL5 = ResourceCostConfigEntry.Research(0, 0, 600, 120, ResourceCosts.RESEARCH_BEACON_LEVEL5, "Beacon Level 5 Research Config");
+
+        public static final ResourceCostConfigEntry RESEARCH_VINDICATOR_AXES = ResourceCostConfigEntry.Research(0, 200, 400, 150, ResourceCosts.RESEARCH_VINDICATOR_AXES, "Vindicator Axes Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_PILLAGER_CROSSBOWS = ResourceCostConfigEntry.Research(0, 600, 300, 180, ResourceCosts.RESEARCH_PILLAGER_CROSSBOWS, "Pillager Crossbows Research Config");
     }
     public static class AbilityCosts implements Costs {
         public static final ResourceCostConfigEntry ENCHANT_MAIMING = ResourceCostConfigEntry.Ability(0,20, 30, ResourceCosts.ENCHANT_MAIMING, "Maiming Enchantment Config");

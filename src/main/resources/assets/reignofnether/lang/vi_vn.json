@@ -1261,6 +1261,12 @@
     "startpos.reignofnether.starting_game": "Trò chơi bắt đầu trong %d giây nữa",
     "startpos.reignofnether.started_game": "Trò chơi đã bắt đầu!",
     "startpos.reignofnether.max_positions": "Đạt tối đa số lượng điểm bắt đầu (16)",
+    "startpos.reignofnether.ready_check_started": "Kiểm tra sẵn sàng đã bắt đầu! Tất cả người chơi phải sẵn sàng trước khi đếm ngược bắt đầu.",
+    "startpos.reignofnether.player_ready": "%s đã sẵn sàng!",
+    "startpos.reignofnether.player_not_ready": "%s không còn sẵn sàng.",
+    "startpos.reignofnether.ready_button.ready": "Sẵn sàng",
+    "startpos.reignofnether.ready_button.unready": "Chưa sẵn sàng",
+    "startpos.reignofnether.ready_button.tooltip2": "Sẵn sàng: %d/%d người chơi",
 
     "unitstats.reignofnether.attack_damage": "Sát thương",
     "unitstats.reignofnether.attack_damage_bonus_buildings": "tăng %s lên công trình",

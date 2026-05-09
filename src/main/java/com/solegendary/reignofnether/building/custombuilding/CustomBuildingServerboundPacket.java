@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -81,6 +82,8 @@ public class CustomBuildingServerboundPacket {
         ctx.get().enqueueWork(() -> {
             if (!SandboxServer.isAnyoneASandboxPlayer())
                 return;
+
+            ReignOfNether.LOGGER.info("[CustomBuilding] action={}, buildingName={}, boolValue={}, intValue={}, strValue={}", this.action, this.buildingName, this.boolValue, this.intValue, this.strValue);
 
             CustomBuilding customBuilding = CustomBuildingServerEvents.getCustomBuilding(this.buildingName);
 

@@ -122,6 +122,8 @@ public class GameruleServerboundPacket {
             GameRules gameRules = player.level().getGameRules();
             boolean booleanValue = value == 1L;
 
+            ReignOfNether.LOGGER.info("[Gamerule] {} set {} to {} (value: {})", player.getName(), action, booleanValue ? "ON" : "OFF", value);
+
             switch (action) {
                 case SET_LOG_FALLING -> {
                     gameRules.getRule(GameRuleRegistrar.LOG_FALLING).set(booleanValue, server);

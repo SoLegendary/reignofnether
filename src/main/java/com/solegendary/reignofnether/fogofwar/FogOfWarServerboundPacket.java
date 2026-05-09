@@ -49,6 +49,8 @@ public class FogOfWarServerboundPacket {
                 return;
             }
 
+            ReignOfNether.LOGGER.info("[FogOfWar] {} set fog of war to {}", player.getName(), enable);
+
             FogOfWarServerEvents.setEnabled(enable);
             success.set(true);
         });

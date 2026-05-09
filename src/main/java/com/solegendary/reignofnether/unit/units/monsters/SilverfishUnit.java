@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -119,7 +120,7 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
     public boolean getWillRetaliate() {return willRetaliate;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
 
-    public ResourceCost getCost() {return ResourceCost.Unit(0,0, 0, 0,0);}
+    public ResourceCost getCost() {return ResourceCosts.SILVERFISH;}
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
 
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }

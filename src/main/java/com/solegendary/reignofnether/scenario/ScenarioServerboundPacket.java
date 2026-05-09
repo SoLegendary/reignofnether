@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.scenario;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -138,6 +139,8 @@ public class ScenarioServerboundPacket {
         ctx.get().enqueueWork(() -> {
             if (!SandboxServer.isAnyoneASandboxPlayer())
                 return;
+
+            ReignOfNether.LOGGER.info("[Scenario] action={}(roleIndex={}, intValue={}, strValue={})", this.action, this.roleIndex, this.intValue, this.strValue);
 
             ScenarioRole role = ScenarioUtils.getScenarioRole(false, roleIndex);
             if (role == null && !NON_ROLE_EDIT_ACTIONS.contains(action))

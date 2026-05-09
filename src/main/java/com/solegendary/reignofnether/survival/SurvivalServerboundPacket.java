@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.survival;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -43,8 +44,10 @@ public class SurvivalServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             if (this.waveNumber <= 0) {
+                ReignOfNether.LOGGER.info("[Survival] Enabling survival mode with difficulty: {}", difficulty);
                 SurvivalServerEvents.enable(difficulty);
             } else {
+                ReignOfNether.LOGGER.info("[Survival] Setting wave number to: {}", waveNumber);
                 SurvivalServerEvents.setWaveNumber(waveNumber);
             }
             success.set(true);

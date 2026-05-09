@@ -1266,6 +1266,12 @@
     "startpos.reignofnether.starting_game": "بازی شروع میشود در %d ثانیه",
     "startpos.reignofnether.started_game": "بازی شروع شد!",
     "startpos.reignofnether.max_positions": "به حداکثر جای شروع رسیدید! (16)",
+    "startpos.reignofnether.ready_check_started": "بررسی آمادگی شروع شد! همه بازیکنان باید آماده شوند قبل از شروع شمارش معکوس.",
+    "startpos.reignofnether.player_ready": "%s آماده است!",
+    "startpos.reignofnether.player_not_ready": "%s دیگر آماده نیست.",
+    "startpos.reignofnether.ready_button.ready": "آماده",
+    "startpos.reignofnether.ready_button.unready": "آماده نیست",
+    "startpos.reignofnether.ready_button.tooltip2": "آماده: %d/%d بازیکن",
 
     "unitstats.reignofnether.attack_damage": "قدرت حمله",
     "unitstats.reignofnether.attack_damage_bonus_buildings": "+%s به ساختمان ها",

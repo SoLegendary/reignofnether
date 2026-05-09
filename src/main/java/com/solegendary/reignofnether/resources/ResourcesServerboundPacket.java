@@ -73,6 +73,7 @@ public class ResourcesServerboundPacket {
                 return;
             }
             if (action == ResourcesAction.SEND_RESOURCES) {
+                ReignOfNether.LOGGER.info("[Resources] {} sent resources to {} (food: {}, wood: {}, ore: {})", senderName, this.receiverName, this.food, this.wood, this.ore);
                 ResourcesServerEvents.trySendingAnyResources(this.receiverName, new Resources(this.senderName, this.food, this.wood, this.ore));
             }
             success.set(true);

@@ -119,7 +119,7 @@ public class KillerRabbitUnit extends Rabbit implements Unit, AttackerUnit {
     }
 
     @Nullable
-    public ResourceCost getCost() {return ResourceCosts.GRIZZLY_BEAR;}
+    public ResourceCost getCost() {return ResourceCosts.KILLER_RABBIT;}
     public boolean getWillRetaliate() {return willRetaliate;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }

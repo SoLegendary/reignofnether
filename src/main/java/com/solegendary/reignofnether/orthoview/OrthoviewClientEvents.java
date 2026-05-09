@@ -662,8 +662,14 @@ public class OrthoviewClientEvents {
             || evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_3) {
             cameraMovingByMouse = true;
 
-            float moveX = (float) evt.getDragX() * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult();
-            float moveZ = (float) evt.getDragY() * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult();
+            // Normalize drag delta by frame time to prevent drift when Vsync is off
+            float frameTimeNormalizer = Math.min((float) MC.getDeltaFrameTime(), 5.0f);
+            if (frameTimeNormalizer <= 0) frameTimeNormalizer = 1.0f;
+            float normalizedX = (float) evt.getDragX() / frameTimeNormalizer;
+            float normalizedZ = (float) evt.getDragY() / frameTimeNormalizer;
+
+            float moveX = normalizedX * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
+            float moveZ = normalizedZ * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
             panCam(moveX, 0, moveZ);
         } else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;

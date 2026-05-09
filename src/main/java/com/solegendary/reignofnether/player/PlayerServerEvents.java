@@ -389,6 +389,7 @@ public class PlayerServerEvents {
     // - spawns workers outside the foundations
     // - no start messages are sent other than the one from the countdown
     public static void startRTS(int playerId, Vec3 pos, Faction faction, int startPosColorId) {
+        ReignOfNether.LOGGER.info("[Player] startRTS: playerId={}, pos=[{},{},{}], faction={}, startPosColorId={}", playerId, pos.x, pos.y, pos.z, faction, startPosColorId);
         synchronized (rtsPlayers) {
             boolean readiedStart = startPosColorId != 0;
 
@@ -942,6 +943,7 @@ public class PlayerServerEvents {
     }
 
     public static void defeat(String playerName, String reason) {
+        ReignOfNether.LOGGER.info("[Player] defeat: playerName={}, reason={}", playerName, reason);
         if (SandboxServer.isSandboxPlayer(playerName))
             return;
 
@@ -1023,6 +1025,7 @@ public class PlayerServerEvents {
     }
 
     public static void beaconVictory(String playerName) {
+        ReignOfNether.LOGGER.info("[Player] beaconVictory: playerName={}", playerName);
         if (SurvivalServerEvents.isEnabled()) {
             try {
                 if (AlliancesServerEvents.getAllAllies(playerName).isEmpty())
@@ -1085,6 +1088,7 @@ public class PlayerServerEvents {
     }
 
     public static void resetRTS(boolean hardReset) {
+        ReignOfNether.LOGGER.info("[Player] resetRTS: hardReset={}", hardReset);
         StartPosServerEvents.cancelStartGameCountdown(true);
 
         boolean isSandboxOrScenario = SandboxServer.isAnyoneASandboxPlayer() || serverLevel.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();

@@ -38,6 +38,10 @@ public class ResearchFireResistance extends ProductionItem {
         };
     }
 
+    public String getItemName() {
+        return ResearchFireResistance.itemName;
+    }
+
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(ResearchFireResistance.itemName,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/mob_effect/fire_resistance.png"),

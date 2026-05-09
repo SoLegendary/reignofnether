@@ -35,6 +35,10 @@ public class ResearchLabLightningRod extends ProductionItem {
         };
     }
 
+    public String getItemName() {
+        return ResearchLabLightningRod.itemName;
+    }
+
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(ResearchLabLightningRod.itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/lightbulb_off.png"),

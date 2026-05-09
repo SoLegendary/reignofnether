@@ -41,14 +41,39 @@ public class StartPosServerEvents {
     private static int ticksToStart = TICKS_TO_START_MAX;
     private static boolean startingGame = false;
 
+    // Ready-check state
+    private static boolean readyCheckActive = false;
+
     private static int cullTicksMax = 100;
     private static int cullTicks = 0;
+
+    public static boolean isReadyCheckActive() {
+        return readyCheckActive;
+    }
 
     public static void reset(ServerLevel serverLevel) {
         for (StartPos startPos : startPoses) {
             startPos.reset();
         }
+        readyCheckActive = false;
         savePositions(serverLevel);
+    }
+
+    /**
+     * Check if all reserved players are ready.
+     * Returns true if there is at least one reserved player and all reserved players are ready.
+     */
+    public static boolean areAllPlayersReady() {
+        boolean hasReservedPlayer = false;
+        for (StartPos startPos : startPoses) {
+            if (startPos.faction != Faction.NONE) {
+                hasReservedPlayer = true;
+                if (!startPos.ready) {
+                    return false;
+                }
+            }
+        }
+        return hasReservedPlayer;
     }
 
     @SubscribeEvent
@@ -89,6 +114,10 @@ public class StartPosServerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         for (StartPos startPos : startPoses)
             StartPosClientboundPacket.addPos(startPos);
+        // Sync ready-check state to newly joined player
+        if (readyCheckActive) {
+            StartPosClientboundPacket.readyCheckStarted();
+        }
     }
 
     private static void cullInvalidPoses(ServerLevel serverLevel) {
@@ -103,19 +132,83 @@ public class StartPosServerEvents {
         }
     }
 
+    /**
+     * Called when a player initiates the start game process.
+     * Instead of immediately starting the countdown, this begins a ready-check phase
+     * where all reserved players must signal ready before the countdown begins.
+     */
     public static void startGameCountdown() {
+        if (!startingGame && !readyCheckActive) {
+            readyCheckActive = true;
+            // Clear any previous ready states
+            for (StartPos startPos : startPoses) {
+                startPos.ready = false;
+            }
+            StartPosClientboundPacket.readyCheckStarted();
+            PlayerServerEvents.sendMessageToAllPlayers("startpos.reignofnether.ready_check_started", true);
+            // Check if all players are already ready (edge case: no reserved players)
+            checkReadyAndStartCountdown();
+        }
+    }
+
+    /**
+     * Toggle the ready state of a player at a given position.
+     * If all reserved players become ready, start the countdown.
+     * If a player un-readies, cancel any active countdown.
+     */
+    public static void toggleReady(String playerName) {
+        for (StartPos startPos : startPoses) {
+            if (startPos.playerName.equals(playerName) && startPos.faction != Faction.NONE) {
+                startPos.ready = !startPos.ready;
+                StartPosClientboundPacket.syncReadyState(startPos.pos, startPos.ready);
+                if (startPos.ready) {
+                    PlayerServerEvents.sendMessageToAllPlayers("startpos.reignofnether.player_ready", true, playerName);
+                    checkReadyAndStartCountdown();
+                } else {
+                    PlayerServerEvents.sendMessageToAllPlayers("startpos.reignofnether.player_not_ready", true, playerName);
+                    // If countdown was active, cancel it
+                    if (startingGame) {
+                        cancelStartGameCountdown(false);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    /**
+     * Check if all reserved players are ready, and if so, start the countdown.
+     */
+    private static void checkReadyAndStartCountdown() {
+        if (!readyCheckActive) return;
+        if (areAllPlayersReady()) {
+            startCountdownAfterReadyCheck();
+        }
+    }
+
+    /**
+     * Begins the actual countdown after all players are ready.
+     */
+    private static void startCountdownAfterReadyCheck() {
         if (!startingGame) {
             ticksToStart = TICKS_TO_START_MAX;
             startingGame = true;
+            readyCheckActive = false; // ready-check phase complete
             StartPosClientboundPacket.startGameCountdown();
         }
     }
 
     public static void cancelStartGameCountdown(boolean noMsg) {
-        if (startingGame) {
+        if (startingGame || readyCheckActive) {
             ticksToStart = TICKS_TO_START_MAX;
             startingGame = false;
+            readyCheckActive = false;
+            // Clear all ready states
+            for (StartPos startPos : startPoses) {
+                startPos.ready = false;
+            }
             StartPosClientboundPacket.cancelStartGameCountdown();
+            StartPosClientboundPacket.readyCheckCancelled();
             if (!noMsg)
                 PlayerServerEvents.sendMessageToAllPlayers("startpos.reignofnether.cancelled_start_game", true);
         }
@@ -238,6 +331,10 @@ public class StartPosServerEvents {
                     startPos.playerName.equals(player.getName().getString())) {
                 StartPosClientboundPacket.unreservePos(startPos.pos);
                 startPos.reset();
+                // If a player leaves during ready-check, cancel the ready-check
+                if (readyCheckActive) {
+                    cancelStartGameCountdown(false);
+                }
             }
         }
     }

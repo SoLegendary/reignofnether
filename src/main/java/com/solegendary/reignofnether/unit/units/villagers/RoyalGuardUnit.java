@@ -474,6 +474,10 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
         this.addUnitSaveData(pCompound);
+        // Persist avatar state so it survives chunk unloads
+        pCompound.putInt("AvatarTicksLeft", avatarTicksLeft);
+        pCompound.putBoolean("AvatarScalingStarted", avatarScalingStarted);
+        pCompound.putInt("AvatarScaleTicks", avatarScaleTicks);
     }
 
     @Override
@@ -481,6 +485,10 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         super.readAdditionalSaveData(pCompound);
         this.readUnitSaveData(pCompound);
         this.setNeedsStatSync(true);
+        // Restore avatar state after chunk reload
+        avatarTicksLeft = pCompound.getInt("AvatarTicksLeft");
+        avatarScalingStarted = pCompound.getBoolean("AvatarScalingStarted");
+        avatarScaleTicks = pCompound.getInt("AvatarScaleTicks");
     }
 
     public MaceSlam getMaceSlam() {

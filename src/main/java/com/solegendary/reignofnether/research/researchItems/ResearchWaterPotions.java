@@ -36,6 +36,10 @@ public class ResearchWaterPotions extends ProductionItem {
         };
     }
 
+    public String getItemName() {
+        return ResearchWaterPotions.itemName;
+    }
+
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(ResearchWaterPotions.itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/splash_potion_water.png"),

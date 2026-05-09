@@ -275,6 +275,8 @@ public class PlayerServerboundPacket {
                 return;
             }
 
+            ReignOfNether.LOGGER.info("[Player] {} performed {} (pos: [{}, {}, {}])", player.getName(), action, this.x, this.y, this.z);
+
             switch (action) {
                 case TELEPORT -> PlayerServerEvents.movePlayer(this.playerId, this.x, this.y, this.z);
                 case ENABLE_ORTHOVIEW -> PlayerServerEvents.enableOrthoview(this.playerId);

@@ -38,6 +38,10 @@ public class ResearchSoulFireballs extends ProductionItem {
         };
     }
 
+    public String getItemName() {
+        return ResearchSoulFireballs.itemName;
+    }
+
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(ResearchSoulFireballs.itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/soul_fireball.png"),

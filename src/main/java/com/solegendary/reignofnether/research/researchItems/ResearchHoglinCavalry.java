@@ -38,6 +38,10 @@ public class ResearchHoglinCavalry extends ProductionItem {
         };
     }
 
+    public String getItemName() {
+        return ResearchHoglinCavalry.itemName;
+    }
+
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(ResearchHoglinCavalry.itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/hoglin.png"),

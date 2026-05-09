@@ -1649,6 +1649,12 @@
     "startpos.reignofnether.started_game": "Game started!",
     "startpos.reignofnether.max_positions": "Max starting positions reached (16)",
     "startpos.reignofnether.rts_map_info_used": "This map uses rtsmap.json start positions (start blocks are ignored)",
+    "startpos.reignofnether.ready_check_started": "Ready check started! All players must ready up before the countdown begins.",
+    "startpos.reignofnether.player_ready": "%s is ready!",
+    "startpos.reignofnether.player_not_ready": "%s is no longer ready.",
+    "startpos.reignofnether.ready_button.ready": "Ready",
+    "startpos.reignofnether.ready_button.unready": "Unready",
+    "startpos.reignofnether.ready_button.tooltip2": "Ready: %d/%d players",
 
     "message.reignofnether.rts_map_info_author.singular": "Author:",
     "message.reignofnether.rts_map_info_author.multiple": "Authors:",
