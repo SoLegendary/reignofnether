@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.EnumSet;
@@ -12,20 +13,24 @@ import java.util.EnumSet;
 // allows use of the AttackGroundAbility
 // dependent on the unit having a UnitBowAttackGoal
 
-public class RangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
+public class RangedAttackGroundGoal<T extends Mob> extends Goal {
     private final T mob;
     private BlockPos groundTarget = null;
     private UnitBowAttackGoal<?> bowAttackGoal = null;
     private UnitCrossbowAttackGoal<?> cbowAttackGoal = null;
+    private final boolean attackWhileMoving;
+    private boolean reachedTarget = false;
 
-    public RangedAttackGroundGoal(T mob, UnitBowAttackGoal<?> bowAttackGoal) {
+    public RangedAttackGroundGoal(T mob, boolean attackWhileMoving, UnitBowAttackGoal<?> bowAttackGoal) {
         this.mob = mob;
+        this.attackWhileMoving = attackWhileMoving;
         this.bowAttackGoal = bowAttackGoal;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
-    public RangedAttackGroundGoal(T mob, UnitCrossbowAttackGoal<?> cbowAttackGoal) {
+    public RangedAttackGroundGoal(T mob, boolean attackWhileMoving, UnitCrossbowAttackGoal<?> cbowAttackGoal) {
         this.mob = mob;
+        this.attackWhileMoving = attackWhileMoving;
         this.cbowAttackGoal = cbowAttackGoal;
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
@@ -49,6 +54,7 @@ public class RangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> ex
         super.stop();
         this.setGroundTarget(null);
         this.mob.setAggressive(false);
+        this.reachedTarget = false;
     }
 
     public BlockPos getGroundTarget() {
@@ -59,6 +65,8 @@ public class RangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> ex
         this.groundTarget = groundTarget;
         if (groundTarget != null) {
             MiscUtil.addUnitCheckpoint(((Unit) mob), groundTarget, false);
+        } else {
+            reachedTarget = false;
         }
     }
 
@@ -77,11 +85,16 @@ public class RangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> ex
 
             double distToTarget = Math.sqrt(this.mob.distanceToSqr(tx, ty, tz));
 
-            if ((distToTarget > attackRange - 1) &&
-                !((Unit) this.mob).getHoldPosition()) {
-                this.moveTo(this.groundTarget);
-            } else {
-                this.stopMoving();
+            if (distToTarget > attackRange - 1)
+                reachedTarget = true;
+
+            if (!attackWhileMoving || !reachedTarget) {
+                if ((distToTarget > attackRange - 1) &&
+                        !((Unit) this.mob).getHoldPosition()) {
+                    this.moveTo(this.groundTarget);
+                } else if (!attackWhileMoving) {
+                    this.stopMoving();
+                }
             }
             if (distToTarget <= attackRange) { // start drawing bowstring
                 if (bowAttackGoal != null) {
@@ -91,12 +104,9 @@ public class RangedAttackGroundGoal<T extends net.minecraft.world.entity.Mob> ex
                         bowAttackGoal.setToMaxAttackCooldown();
                     }
                 }
-                else if (cbowAttackGoal != null) {
-                    if (cbowAttackGoal.getCrossbowState() == UnitCrossbowAttackGoal.CrossbowState.CHARGED) {
-                        cbowAttackGoal.performAttack();
-                    }
-                }
             }
+            // handle crossbow attacks (ie. pillager artillery attacking grounding) in UnitCrossbowAttackGoal
+            // because we can't directly use mob.performUnitRangedAttack()
         }
     }
 

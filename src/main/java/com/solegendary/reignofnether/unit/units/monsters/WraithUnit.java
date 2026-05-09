@@ -4,13 +4,15 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Fear;
 import com.solegendary.reignofnether.ability.abilities.Possess;
-import com.solegendary.reignofnether.ability.abilities.SpinWebs;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
@@ -19,13 +21,18 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.WraithAnimations;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -36,6 +43,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -98,7 +106,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
     private GenericTargetedSpellGoal fearGoal;
     public GenericTargetedSpellGoal getFearGoal() { return fearGoal; }
     private GenericTargetedSpellGoal possessGoal;
-    public GenericTargetedSpellGoal getPossessGoal() { return fearGoal; }
+    public GenericTargetedSpellGoal getPossessGoal() { return possessGoal; }
 
     @Nullable
     public Fear getFearAbility() {
@@ -191,7 +199,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
     public int getAttackWindupTicks() { return 8; }
 
     @Override
-    public float getAnimationSpeed() { return 1.0f; }
+    public float getAnimationSpeed() { return animateSpeed; }
 
     // non-looping animations
     public AnimationDefinition activeAnimDef = null;
@@ -215,16 +223,25 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
         animateScaleReducing = false;
         switch (animAction) {
             case ATTACK_UNIT, ATTACK_BUILDING -> {
-                activeAnimDef = WraithAnimations.ATTACK;
+                if (getFearAbility() != null && getFearAbility().isAutocasting(this) && getFearAbility().isOffCooldown(this))
+                    activeAnimDef = WraithAnimations.FEAR;
+                else
+                    activeAnimDef = WraithAnimations.ATTACK;
                 activeAnimState = attackAnimState;
                 animateScale = 1.0f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
+                activeAnimDef = WraithAnimations.FEAR;
+                activeAnimState = attackAnimState;
+                animateScale = 1.0f;
+                startAnimation(activeAnimDef);
+            }
+            case CAST_SPELL_ALT -> {
                 activeAnimDef = WraithAnimations.POSSESS;
                 activeAnimState = attackAnimState;
                 animateScale = 1.0f;
-                animateSpeed = 0.5f;
+                animateSpeed = 0.15f;
                 startAnimation(activeAnimDef);
             }
             default -> {
@@ -238,6 +255,14 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
         super(entityType, level);
         updateAbilityButtons();
         this.autocast = getAbilities().get().get(0); // Fear
+    }
+
+    @Override
+    public void kill() {
+        if (!level().isClientSide()) {
+            SoundClientboundPacket.stopSoundWithId(getId());
+        }
+        super.kill();
     }
 
     @Override
@@ -256,7 +281,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, WraithUnit.armorValue)
                 .add(Attributes.ATTACK_KNOCKBACK, 0f)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0f)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 9999.0f)
                 .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
@@ -326,12 +351,26 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
     }
 
     @Override
+    public MobType getMobType() {
+        return MobType.UNDEAD;
+    }
+
+    @Override
     public SunlightEffect getSunlightEffect() {
         if (hasItemInSlot(EquipmentSlot.HEAD) && getItemBySlot(EquipmentSlot.HEAD).getItem() != Items.CARVED_PUMPKIN) {
             return SunlightEffect.SLOWNESS_II;
         } else {
             return SunlightEffect.FIRE;
         }
+    }
+    @Override protected SoundEvent getAmbientSound() {
+        return SoundRegistrar.WRAITH_AMBIENT.get();
+    }
+    @Override protected SoundEvent getHurtSound(DamageSource pDamageSource) {
+        return SoundRegistrar.WRAITH_HURT.get();
+    }
+    @Override protected SoundEvent getDeathSound() {
+        return SoundRegistrar.WRAITH_DEATH.get();
     }
 
     public void initialiseGoals() {
@@ -342,8 +381,21 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
-        this.fearGoal = new GenericTargetedSpellGoal(this, 0, Fear.RANGE, this::onCastFear, null, null);
-        this.possessGoal = new GenericTargetedSpellGoal(this, Possess.BASE_CHANNEL_TICKS, Possess.RANGE, this::onCastPossess, null, null);
+        this.fearGoal = new GenericTargetedSpellGoal(this,
+                0,
+                Fear.RANGE,
+                UnitAnimationAction.CAST_SPELL,
+                this::onCastFear,
+                null,
+                null
+        );
+        this.possessGoal = new PossessSpellGoal(this,
+                Possess.BASE_CHANNEL_TICKS,
+                Possess.RANGE,
+                UnitAnimationAction.CAST_SPELL_ALT,
+                this::onCastPossess
+        );
+        this.possessGoal.instantLook = true;
     }
 
     @Override
@@ -378,15 +430,54 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
     }
 
     public void onCastFear(LivingEntity targetEntity) {
+        if (level().isClientSide())
+            return;
+        if (!(targetEntity instanceof Unit targetUnit))
+            return;
+        if (targetUnit.uninterruptable())
+            return;
 
+        if (!this.level().isClientSide()) {
+            SoundClientboundPacket.playSoundAtPos(SoundAction.WRAITH_FEAR, blockPosition());
+        }
+
+        // Calculate a flee position 5 blocks directly away from this wraith
+        Vec3 toTarget = targetEntity.position().subtract(this.position()).normalize();
+        Vec3 fleePos = targetEntity.position().add(toTarget.scale(Fear.DURATION_SECONDS * 2));
+        BlockPos fleeBp = new BlockPos((int) fleePos.x, (int) fleePos.y, (int) fleePos.z);
+
+        Unit.fullResetBehaviours(targetUnit);
+        targetUnit.getMoveGoal().setMoveTarget(fleeBp);
+        targetEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.UNCONTROLLABLE.get(), Fear.DURATION_SECONDS * 20, 0, true, false));
+        targetEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.FEARFUL.get(), Fear.DURATION_SECONDS * 20, 0, true, false));
     }
+
 
     public void onCastPossess(LivingEntity targetEntity) {
-
-    }
-
-    // check current possession stacks, if >= popCost, take control of the unit, otherwise add stacks
-    public void doPossess(LivingEntity targetEntity) {
-
+        MobEffectInstance mei = targetEntity.getEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get());
+        int amp = 0;
+        if (mei != null) {
+            amp = mei.getAmplifier() + 1;
+        }
+        // play possess sound
+        kill();
+        if (targetEntity instanceof Unit unit && unit.getCost().population <= (amp + 1) * Possess.POP_PER_WRAITH) {
+            targetEntity.removeEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get());
+            unit.setOwnerName(this.getOwnerName());
+            MiscUtil.addParticleExplosion(ParticleTypes.SCULK_SOUL, 40, level(), targetEntity.getEyePosition(), 0.15f);
+            if (!this.level().isClientSide())
+                SoundClientboundPacket.playSoundAtPos(SoundAction.WRAITH_POSSESS_FULL, targetEntity.blockPosition());
+        } else {
+            targetEntity.addEffect(new MobEffectInstance(
+                    MobEffectRegistrar.PARTIALLY_POSSESSED.get(),
+                    Possess.PARTIAL_POSSESS_DURATION_SECONDS * 20,
+                    amp,
+                    false,
+                    true
+            ));
+            MiscUtil.addParticleExplosion(ParticleTypes.SCULK_SOUL, 10, level(), targetEntity.getEyePosition(), 0.10f);
+            if (!this.level().isClientSide())
+                SoundClientboundPacket.playSoundAtPos(SoundAction.WRAITH_POSSESS_PARTIAL, targetEntity.blockPosition());
+        }
     }
 }

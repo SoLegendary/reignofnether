@@ -640,13 +640,13 @@ public class PlayerServerEvents {
                 if (!isRTSPlayer(scenarioRole.name) && (numUnits > 0 || numBuilds > 0) && scenarioRole.isNpc) {
                     RTSPlayer npcRtsPlayer = RTSPlayer.getNewScenarioPlayer(
                             scenarioRole.name,
-                            role.faction,
+                            scenarioRole.faction,
                             id,
-                            roleIndex
+                            scenarioRole.index
                     );
                     rtsPlayers.add(npcRtsPlayer);
                     ResourcesServerEvents.assignScenarioResources(npcRtsPlayer);
-                    PlayerClientboundPacket.addRTSPlayer(scenarioRole.name, role.faction, (long) id, 0);
+                    PlayerClientboundPacket.addScenarioNPCRTSPlayer(scenarioRole.name, scenarioRole.faction, (long) id, scenarioRole.index);
                     id -= 1;
                 }
             }

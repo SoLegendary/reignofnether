@@ -32,18 +32,16 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance {
 
     @Override
     public void tick() {
-        if (ticksLeft > 0) {
+        if (ticksLeft > 0)
             ticksLeft -= 1;
-            if (ticksLeft <= 0)
-                fadeOut();
-        }
+        if (ticksLeft <= 0)
+            fadeOut();
         if (fadingIn) {
             if (volume < volumeMult)
                 volume += FADE_SPEED * volumeMult;
             else
                 fadingIn = false;
-        }
-        if (fadingOut) {
+        } else if (fadingOut) {
             volume -= FADE_SPEED * volumeMult;
             if (volume <= 0.0f) {
                 stop();
@@ -52,6 +50,7 @@ public class FadeableSoundInstance extends AbstractTickableSoundInstance {
     }
 
     public void fadeOut() {
+        fadingIn = false;
         fadingOut = true;
     }
 }

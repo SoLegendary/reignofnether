@@ -68,6 +68,34 @@ public class SoundRegistrar {
             SOUND_EVENTS.register("soul_resonance_calm", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "soul_resonance_calm")));
 
+    public static final RegistryObject<SoundEvent> WRAITH_AMBIENT =
+            SOUND_EVENTS.register("wraith_ambient", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith_ambient")));
+
+    public static final RegistryObject<SoundEvent> WRAITH_HURT =
+            SOUND_EVENTS.register("wraith_hurt", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith_hurt")));
+
+    public static final RegistryObject<SoundEvent> WRAITH_DEATH =
+            SOUND_EVENTS.register("wraith_death", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith_death")));
+
+    public static final RegistryObject<SoundEvent> WRAITH_FEAR =
+            SOUND_EVENTS.register("wraith_fear", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith_fear")));
+
+    public static final RegistryObject<SoundEvent> WRAITH_POSSESS_CHANNEL =
+            SOUND_EVENTS.register("wraith_possess_channel", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith_possess_channel")));
+
+    public static final RegistryObject<SoundEvent> WRAITH_POSSESS_PARTIAL =
+            SOUND_EVENTS.register("wraith_possess_partial", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith_possess_partial")));
+
+    public static final RegistryObject<SoundEvent> WRAITH_POSSESS_FULL =
+            SOUND_EVENTS.register("wraith_possess_full", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wraith_possess_full")));
+
     public static final RegistryObject<SoundEvent> WRETCHED_WRAITH_AMBIENT =
             SOUND_EVENTS.register("wretchedwraith_ambient", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wretchedwraith_ambient")));

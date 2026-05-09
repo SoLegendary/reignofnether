@@ -25,6 +25,11 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(PlayerAction.ADD_RTS_PLAYER, playerName, id, startPosColorId, faction));
     }
 
+    public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.ADD_SCENARIO_NPC_RTS_PLAYER, playerName, id, scenarioRoleIndex, faction));
+    }
+
     public static void removeRTSPlayer(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new PlayerClientboundPacket(PlayerAction.REMOVE_RTS_PLAYER, playerName, 0L, 0, Faction.NONE));
@@ -125,6 +130,7 @@ public class PlayerClientboundPacket {
                             case DEFEAT -> PlayerClientEvents.defeat(playerName);
                             case VICTORY -> PlayerClientEvents.victory(playerName);
                             case ADD_RTS_PLAYER -> PlayerClientEvents.addRTSPlayer(playerName, faction, value1, value2);
+                            case ADD_SCENARIO_NPC_RTS_PLAYER -> PlayerClientEvents.addScenarioNPCRTSPlayer(playerName, faction, value1, value2);
                             case REMOVE_RTS_PLAYER -> PlayerClientEvents.removeRTSPlayer(playerName);
                             case RESET_RTS -> PlayerClientEvents.resetRTS(false);
                             case RESET_RTS_HARD -> PlayerClientEvents.resetRTS(true);

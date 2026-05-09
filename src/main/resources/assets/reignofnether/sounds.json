@@ -75,6 +75,51 @@
             "stream": true
         }]
     },
+    "wraith_death": {
+        "subtitle": "sounds.reignofnether.wraith_death",
+        "sounds": [
+            "reignofnether:wraith_death_01",
+            "reignofnether:wraith_death_02"
+        ]
+    },
+    "wraith_hurt": {
+        "subtitle": "sounds.reignofnether.wraith_hurt",
+        "sounds": [
+            "reignofnether:wraith_hurt_01",
+            "reignofnether:wraith_hurt_02",
+            "reignofnether:wraith_hurt_03"
+        ]
+    },
+    "wraith_ambient": {
+        "subtitle": "sounds.reignofnether.wraith_ambient",
+        "sounds": [
+            "reignofnether:wraith_ambient_01",
+            "reignofnether:wraith_ambient_02",
+            "reignofnether:wraith_ambient_03",
+            "reignofnether:wraith_ambient_04",
+            "reignofnether:wraith_ambient_05"
+        ]
+    },
+    "wraith_fear": {
+        "subtitle": "sounds.reignofnether.wraith_fear",
+        "sounds": [
+            "reignofnether:wraith_fear_01",
+            "reignofnether:wraith_fear_02",
+            "reignofnether:wraith_fear_03"
+        ]
+    },
+    "wraith_possess_channel": {
+        "subtitle": "sounds.reignofnether.wraith_possess_channel",
+        "sounds": [ "reignofnether:wraith_possess_channel" ]
+    },
+    "wraith_possess_partial": {
+        "subtitle": "sounds.reignofnether.wraith_possess_partial",
+        "sounds": [ "reignofnether:wraith_possess_partial" ]
+    },
+    "wraith_possess_full": {
+        "subtitle": "sounds.reignofnether.wraith_possess_full",
+        "sounds": [ "reignofnether:wraith_possess_full" ]
+    },
     "wretchedwraith_death": {
         "subtitle": "sounds.reignofnether.wretchedwraith_death",
         "sounds": [
@@ -97,7 +142,8 @@
             "reignofnether:wretchedwraith_ambient_02",
             "reignofnether:wretchedwraith_ambient_03",
             "reignofnether:wretchedwraith_ambient_04",
-            "reignofnether:wretchedwraith_ambient_05"
+            "reignofnether:wretchedwraith_ambient_05",
+            "reignofnether:wretchedwraith_ambient_06"
         ]
     },
     "wildfire_death": {

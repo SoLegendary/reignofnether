@@ -52,8 +52,8 @@ public class ResearchPossession extends ProductionItem {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("research.reignofnether.possession.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("research.reignofnether.possession.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("research.reignofnether.possession.tooltip3"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("research.reignofnether.possession.tooltip4"), Style.EMPTY)
+                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("research.reignofnether.possession.tooltip3"), Style.EMPTY)
                 ),
                 this
         );

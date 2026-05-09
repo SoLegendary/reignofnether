@@ -200,6 +200,11 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
+    private RangedAttackGroundGoal<?> attackGroundGoal;
+    @Override public RangedAttackGroundGoal<?> getRangedAttackGroundGoal() {
+        return attackGroundGoal;
+    }
+
     public PillagerUnit(EntityType<? extends Pillager> entityType, Level level) {
         super(entityType, level);
 
@@ -233,6 +238,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         this.mountGoal.tick();
         PromoteIllager.checkAndApplyBuff(this);
         this.attackGoal.tickChargeCrossbow();
+        if (attackGroundGoal != null)
+            attackGroundGoal.tick();
     }
 
     @Override
@@ -256,14 +263,16 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
         this.mountGoal = new MountGoal(this);
         this.attackBuildingGoal = new RangedAttackBuildingGoal<>(this, this.attackGoal);
+        this.attackGroundGoal = new RangedAttackGroundGoal<>(this, true, this.attackGoal);
     }
 
     @Override
     public void resetBehaviours() {
         this.mountGoal.stop();
-        if (this.attackGoal != null) {
+        if (this.attackGoal != null)
             this.attackGoal.stop();
-        }
+        if (this.attackGroundGoal != null)
+            this.attackGroundGoal.stop();
     }
 
     @Override
@@ -275,6 +284,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, mountGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
+        this.goalSelector.addGoal(2, attackGroundGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
@@ -318,9 +328,15 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     public void shootCrossbowProjectile(LivingEntity pUser, LivingEntity pTarget, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
         // bit of a hacky fix to attack buildings since this function is called from CrossbowItem
         try {
-            if (pTarget == null && this.getAttackBuildingGoal() instanceof RangedAttackBuildingGoal<?> rabg) {
-                shootCrossbowProjectileAtBuilding(pUser, rabg, pProjectile, pProjectileAngle, pVelocity);
-                return;
+            if (pTarget == null) {
+                if (this.getAttackBuildingGoal() instanceof RangedAttackBuildingGoal<?> rabg && rabg.getBuildingTarget() != null) {
+                    shootCrossbowProjectileAtBuilding(pUser, rabg, pProjectile, pProjectileAngle, pVelocity);
+                    return;
+                }
+                if (this.getRangedAttackGroundGoal() != null && this.getRangedAttackGroundGoal().getGroundTarget() != null) {
+                    shootCrossbowProjectileAtGround(pUser, this.getRangedAttackGroundGoal(), pProjectile, pProjectileAngle, pVelocity);
+                    return;
+                }
             }
         } catch (NullPointerException e) {
             System.out.println("Caught NullPointerException in shootCrossbowProjectile: " + e.getMessage());
@@ -345,9 +361,6 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     }
 
     private void shootCrossbowProjectileAtBuilding(LivingEntity pUser, RangedAttackBuildingGoal<?> rabg, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
-        if (rabg.getBuildingTarget() == null) {
-            return;
-        }
         double d0 = rabg.getBuildingTarget().centrePos.getX() - pUser.getX();
         double d1 = rabg.getBuildingTarget().centrePos.getZ() - pUser.getZ();
 
@@ -357,6 +370,15 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
         if (!level().isClientSide())
             FogOfWarClientboundPacket.revealRangedUnit(rabg.getBuildingTarget().ownerName, this.getId());
+    }
+
+    private void shootCrossbowProjectileAtGround(LivingEntity pUser, RangedAttackGroundGoal<?> ragg, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
+        double d0 = ragg.getGroundTarget().getX() - pUser.getX();
+        double d1 = ragg.getGroundTarget().getZ() - pUser.getZ();
+
+        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
+        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
+        pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
     }
 
     @Override

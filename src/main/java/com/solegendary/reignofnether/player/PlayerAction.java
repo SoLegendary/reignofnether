@@ -15,6 +15,7 @@ public enum PlayerAction {
     DEFEAT,
     VICTORY,
     ADD_RTS_PLAYER,
+    ADD_SCENARIO_NPC_RTS_PLAYER,
     REMOVE_RTS_PLAYER,
     RESET_RTS,
     RESET_RTS_HARD,

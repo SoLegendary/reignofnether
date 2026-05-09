@@ -324,7 +324,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         this.moveGoal = new FlyingMoveToTargetGoal(this, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new UnitBowAttackGoal<>(this);
-        this.attackGroundGoal = new RangedAttackGroundGoal<>(this, this.attackGoal);
+        this.attackGroundGoal = new RangedAttackGroundGoal<>(this, false, this.attackGoal);
         this.attackBuildingGoal = new RangedAttackBuildingGoal<>(this, this.attackGoal);
     }
 
