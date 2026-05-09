@@ -55,7 +55,7 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,16 +86,6 @@ public class CommandsServerEvents {
 		new SimpleCommandExceptionType(Component.translatable("commands.reignofnether.error.unknown_resource"));
 	private static final SimpleCommandExceptionType NO_SERVER_LEVEL =
 		new SimpleCommandExceptionType(Component.translatable("commands.reignofnether.error.no_server_level"));
-	
-	
-	/*
-	 * reignofnether
-	 * - building
-	 * -- place <buildingName> [ownerName]/[ownerSelector]
-	 * -- destroy <pos>
-	 * -- setowner <ownerName> [newOwnerName]/[newOwnerSelector]
-	 * -
-	 *  */
 	
 	@SubscribeEvent
 	public static void onRegisterCommands(RegisterCommandsEvent event) {
@@ -142,23 +132,57 @@ public class CommandsServerEvents {
 						.executes(ctx -> destroyBuildingsAt(BlockPosArgument.getLoadedBlockPos(ctx, "pos"), ctx.getSource()))
 					)
 					.then(Commands.argument("targets", BuildingArgument.buildings())
-						.executes((p_137810_) -> destroyBuildings(p_137810_.getSource(), BuildingArgument.getBuildings(p_137810_, "targets", Objects.requireNonNull(p_137810_.getSource().getPlayer()).getName().getString())))
+						.executes((ctx) -> destroyBuildings(ctx.getSource(), BuildingArgument.getBuildings(ctx, "targets", null)))
 						.then(Commands.argument("ownerName", StringArgumentType.string())
-							.executes((p_137810_) -> destroyBuildings(p_137810_.getSource(), BuildingArgument.getBuildings(p_137810_, "targets", StringArgumentType.getString(p_137810_, "ownerName"))))
+							.executes((ctx) -> destroyBuildings(ctx.getSource(), BuildingArgument.getBuildings(ctx, "targets", StringArgumentType.getString(ctx, "ownerName"))))
 						)
 						.then(Commands.argument("ownerSelector", EntityArgument.player())
-							.executes((p_137810_) -> destroyBuildings(p_137810_.getSource(), BuildingArgument.getBuildings(p_137810_, "targets", getPlayerName(EntityArgument.getPlayer(p_137810_, "ownerSelector"))))
+							.executes((ctx) -> destroyBuildings(ctx.getSource(), BuildingArgument.getBuildings(ctx, "targets", getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
 							)
 						)
 					)
 				)
 				.then(Commands.literal("owner")
-					.then(buildingSelectionTail(ctx -> ""))
-					.then(Commands.argument("ownerName", StringArgumentType.string())
-						.then(buildingSelectionTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
-					)
-					.then(Commands.argument("ownerSelector", EntityArgument.player())
-						.then(buildingSelectionTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+					.then(Commands.argument("from", BlockPosArgument.blockPos())
+						.then(Commands.argument("to", BlockPosArgument.blockPos())
+							.executes(ctx -> setBuildingOwner(
+								ctx,
+								"",
+								BlockPosArgument.getLoadedBlockPos(ctx, "from"),
+								BlockPosArgument.getLoadedBlockPos(ctx, "to")
+							))
+							.then(Commands.argument("ownerName", StringArgumentType.string())
+								.executes(ctx -> setBuildingOwner(
+									ctx,
+									StringArgumentType.getString(ctx, "ownerName"),
+									BlockPosArgument.getLoadedBlockPos(ctx, "from"),
+									BlockPosArgument.getLoadedBlockPos(ctx, "to")
+								))
+							)
+							.then(Commands.argument("ownerSelector", EntityArgument.player())
+								.executes(ctx -> setBuildingOwner(
+									ctx,
+									getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
+									BlockPosArgument.getLoadedBlockPos(ctx, "from"),
+									BlockPosArgument.getLoadedBlockPos(ctx, "to")
+								))
+							)
+						))
+					.then(Commands.argument("targets", BuildingArgument.buildings())
+						.executes(ctx -> setBuildingsOwner("", BuildingArgument.getBuildings(ctx, "targets", null), ctx))
+						.then(Commands.argument("newOwnerName", StringArgumentType.string())
+							.executes((ctx) -> setBuildingsOwner(StringArgumentType.getString(ctx, "newOwnerName"), BuildingArgument.getBuildings(ctx, "targets", null), ctx))
+							.then(Commands.argument("ownerName", StringArgumentType.string())
+								.executes((ctx) -> setBuildingsOwner(StringArgumentType.getString(ctx, "newOwnerName"), BuildingArgument.getBuildings(ctx, "targets", StringArgumentType.getString(ctx, "ownerName")), ctx))
+							)
+						)
+						.then(Commands.argument("newOwnerSelector", EntityArgument.player())
+							.executes((ctx) -> setBuildingsOwner(getPlayerName(EntityArgument.getPlayer(ctx, "newOwnerSelector")), BuildingArgument.getBuildings(ctx, "targets", null), ctx))
+							.then(Commands.argument("ownerSelector", EntityArgument.player())
+								.executes((ctx) -> setBuildingsOwner(getPlayerName(EntityArgument.getPlayer(ctx, "newOwnerSelector")), BuildingArgument.getBuildings(ctx, "targets", getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))), ctx)
+								)
+							)
+						)
 					)
 				)
 			)
@@ -739,6 +763,7 @@ public class CommandsServerEvents {
 			);
 	}
 	
+	
 	private static String getPlayerName(ServerPlayer player) {
 		return player.getName().getString();
 	}
@@ -865,6 +890,17 @@ public class CommandsServerEvents {
 			);
 		}
 		return changed;
+	}
+	
+	private static int setBuildingsOwner(String ownerName, List<? extends BuildingPlacement> buildingPlacement, CommandContext<CommandSourceStack> ctx) {
+		for (BuildingPlacement building : buildingPlacement) {
+			building.ownerName = ownerName;
+		}
+		ctx.getSource().sendSuccess(
+			() -> Component.translatable("Updated owner for " + buildingPlacement.size() + " building(s)"),
+			true
+		);
+		return buildingPlacement.size();
 	}
 	
 	private static int setAnchor(
@@ -1016,7 +1052,7 @@ public class CommandsServerEvents {
 		Building building = location == null ? null : ReignOfNetherRegistries.BUILDING.get(location);
 		if (building == null) {
 			building = CustomBuildingServerEvents.getCustomBuilding(
-				StringUtils.capitalize(
+				WordUtils.capitalize(
 					input
 						.replace("custom:", "")
 						.replace("_", " ")
