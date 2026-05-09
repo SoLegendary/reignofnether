@@ -30,7 +30,7 @@ public class SoundClientboundPacket {
     }
     public static void playFadeableLoopingSoundAtPos(SoundAction soundAction, BlockPos bp, float volume, int id, int tickDuration) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new SoundClientboundPacket(soundAction, bp, "", volume, id));
+                new SoundClientboundPacket(soundAction, bp, "", volume, id, tickDuration));
     }
     public static void playSoundForAllPlayers(SoundAction soundAction) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),

@@ -5,10 +5,13 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,7 +26,7 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
     protected Ability ability; // used for syncing cooldown with clientside
     protected int channelTicks = 0; // how long have we spent trying to cast this spell
     public boolean isCasting() { return isCasting; }
-    protected final int channelTicksMax; // max time required to cast a spell
+    protected int channelTicksMax; // max time required to cast a spell
     protected boolean isCasting = false;
     protected BlockPos castTarget = null; // pos that the spell will be cast at
     public float range;

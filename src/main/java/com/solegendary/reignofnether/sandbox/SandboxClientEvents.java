@@ -125,7 +125,6 @@ public class SandboxClientEvents {
                 ProductionItems.WINDCALLER.getPlaceButton(),
                 ProductionItems.RAVAGER.getPlaceButton(),
                 ProductionItems.ROYAL_GUARD.getPlaceButton(),
-
                 ProductionItems.ENCHANTER.getPlaceButton()
             );
             case MONSTERS -> List.of(
@@ -140,13 +139,11 @@ public class SandboxClientEvents {
                 ProductionItems.POISON_SPIDER.getPlaceButton(),
                 ProductionItems.CREEPER.getPlaceButton(),
                 ProductionItems.WRAITH.getPlaceButton(),
-                ProductionItems.STRAY.getPlaceButton(),
                 ProductionItems.SLIME.getPlaceButton(),
                 ProductionItems.WARDEN.getPlaceButton(),
                 ProductionItems.ZOMBIE_PIGLIN.getPlaceButton(),
                 ProductionItems.ZOGLIN.getPlaceButton(),
                 ProductionItems.NECROMANCER.getPlaceButton(),
-
                 ProductionItems.WRETCHED_WRAITH.getPlaceButton()
             );
             case PIGLINS -> List.of(
@@ -160,7 +157,6 @@ public class SandboxClientEvents {
                 ProductionItems.MAGMA_CUBE.getPlaceButton(),
                 ProductionItems.GHAST.getPlaceButton(),
                 ProductionItems.PIGLIN_MERCHANT.getPlaceButton(),
-
                 ProductionItems.WILDFIRE.getPlaceButton()
             );
             case NONE, NEUTRAL -> List.of(

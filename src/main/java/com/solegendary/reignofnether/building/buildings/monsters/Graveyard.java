@@ -46,8 +46,8 @@ public class Graveyard extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        //this.abilities.add(new SetGraveyardReleaseOff(), Keybindings.keyO);
-        //this.abilities.add(new SetGraveyardReleaseOn(), Keybindings.keyO);
+        this.abilities.add(new SetGraveyardReleaseOff(), Keybindings.keyO);
+        this.abilities.add(new SetGraveyardReleaseOn(), Keybindings.keyO);
 
         this.productions.add(ProductionItems.ZOMBIE, Keybindings.keyQ);
         this.productions.add(ProductionItems.HUSK, Keybindings.keyQ);
@@ -55,7 +55,7 @@ public class Graveyard extends ProductionBuilding {
         this.productions.add(ProductionItems.SKELETON, Keybindings.keyE);
         this.productions.add(ProductionItems.STRAY, Keybindings.keyE);
         this.productions.add(ProductionItems.BOGGED, Keybindings.keyR);
-        //this.productions.add(ProductionItems.RESEARCH_OVERFLOWING_GRAVEYARD, Keybindings.keyT);
+        this.productions.add(ProductionItems.RESEARCH_OVERFLOWING_GRAVEYARD, Keybindings.keyT);
     }
 
     @Override

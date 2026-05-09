@@ -252,6 +252,21 @@ public class PlayerClientEvents {
         }
     }
 
+    public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
+        if (!isRTSPlayer(playerName)) {
+            RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0);
+            rtsPlayer.scenarioRoleIndex = scenarioRoleIndex;
+            rtsPlayers.add(rtsPlayer);
+            if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
+                GameruleClient.gamerulesMenuOpen = false;
+                if (faction != Faction.NONE) {
+                    MC.getMusicManager().stopPlaying();
+                    ResearchClient.removeAllCheats();
+                }
+            }
+        }
+    }
+
     public static void removeRTSPlayer(String playerName) {
         boolean removed = rtsPlayers.removeIf(p -> p.name.equals(playerName));
         if (removed && MC.player != null && MC.player.getName().getString().equals(playerName)) {

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.scenario;
 
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
@@ -11,6 +12,7 @@ import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,14 +36,17 @@ public class ScenarioServerboundPacket {
     public String strValue;
 
     public static void setUnitRole(int roleIndex, int unitId) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(ScenarioAction.SET_UNIT_ROLE, roleIndex, 0,0,0, false, unitId, ""));
     }
 
     public static void setBuildingRole(int roleIndex, BlockPos bp) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(ScenarioAction.SET_BUILDING_ROLE, roleIndex, bp.getX(), bp.getY(), bp.getZ(), false, 0, ""));
     }
 
     public static void setStartingResources(int roleIndex, ResourceName resName, int amount) {
+        if (!MiscUtil.isConnected()) return;
         ScenarioAction scenarioAction = switch (resName) {
             case FOOD -> ScenarioAction.SET_ROLE_STARTING_FOOD;
             case WOOD -> ScenarioAction.SET_ROLE_STARTING_WOOD;
@@ -53,10 +58,12 @@ public class ScenarioServerboundPacket {
     }
 
     public static void setTeamNumber(int roleIndex, int teamNumber) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(ScenarioAction.SET_ROLE_TEAM_NUMBER, roleIndex, 0,0,0, false, teamNumber, ""));
     }
 
     public static void setRoleFaction(int roleIndex, Faction faction) {
+        if (!MiscUtil.isConnected()) return;
         ScenarioAction scenarioAction = switch (faction) {
             case VILLAGERS -> ScenarioAction.SET_ROLE_FACTION_VILLAGER;
             case MONSTERS -> ScenarioAction.SET_ROLE_FACTION_MONSTER;
@@ -67,14 +74,17 @@ public class ScenarioServerboundPacket {
     }
 
     public static void setRoleIsNpc(int roleIndex, boolean isNpc) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(ScenarioAction.SET_ROLE_NPC, roleIndex, 0,0,0, isNpc, 0, ""));
     }
 
     public static void setRoleName(int roleIndex, String name) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(ScenarioAction.SET_ROLE_NAME, roleIndex, 0,0,0, false, 0, name));
     }
 
     public static void saveScenario() {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(ScenarioAction.SAVE_SCENARIO, 0, 0,0,0, false, 0, ""));
     }
 
@@ -143,7 +153,10 @@ public class ScenarioServerboundPacket {
                     // since this is sent from a text input that is updated on defocus, save here in case the user pressed close & save while still focused
                     ScenarioServerEvents.saveScenarioRoles();
                 }
-                case SET_ROLE_TEAM_NUMBER -> role.teamNumber = intValue;
+                case SET_ROLE_TEAM_NUMBER -> {
+                    role.teamNumber = intValue;
+                    AlliancesServerEvents.applyScenarioAlliances();
+                }
                 case SET_ROLE_NPC -> role.isNpc = boolValue;
                 case SET_UNIT_ROLE -> {
                     for (LivingEntity le : UnitServerEvents.getAllUnits()) {

@@ -599,9 +599,6 @@ public class UnitServerEvents {
                 }
             }
         }
-        if (evt.getEntity() instanceof WretchedWraithUnit wretchedWraithUnit) {
-            SoundClientboundPacket.stopSoundWithId(wretchedWraithUnit.getId());
-        }
     }
 
     // prevent onDropItem firing twice if the same animal is killed by two workers on the same tick

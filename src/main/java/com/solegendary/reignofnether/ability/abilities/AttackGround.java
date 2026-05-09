@@ -6,12 +6,9 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.goals.MountedRangedAttackGroundGoal;
-import com.solegendary.reignofnether.unit.goals.RangedAttackGroundGoal;
 import com.solegendary.reignofnether.unit.goals.RangedAttackGroundGoal;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import net.minecraft.core.BlockPos;
@@ -44,7 +41,14 @@ public class AttackGround extends Ability {
                 "Attack Ground",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/fireball.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK_GROUND,
+                () -> {
+                    boolean actionSelected = CursorClientEvents.getLeftClickAction() == UnitAction.ATTACK_GROUND;
+                    boolean isGroundAttacking =
+                            unit instanceof RangedAttackerUnit rau &&
+                            rau.getRangedAttackGroundGoal() != null &&
+                            rau.getRangedAttackGroundGoal().getGroundTarget() != null;
+                    return actionSelected || isGroundAttacking;
+                },
                 () -> {
                     if (unit instanceof RavagerUnit ravagerUnit)
                         return !ravagerUnit.isVehicle();
@@ -67,8 +71,8 @@ public class AttackGround extends Ability {
             RangedAttackGroundGoal<?> attackGroundGoal = rangedPassenger.getRangedAttackGroundGoal();
             if (attackGroundGoal != null)
                 attackGroundGoal.setGroundTarget(targetBp);
-        } else {
-            RangedAttackGroundGoal<?> attackGroundGoal = ((RangedAttackerUnit)unitUsing).getRangedAttackGroundGoal();
+        } else if (unitUsing instanceof RangedAttackerUnit rangedUnit){
+            RangedAttackGroundGoal<?> attackGroundGoal = rangedUnit.getRangedAttackGroundGoal();
             if (attackGroundGoal != null)
                 attackGroundGoal.setGroundTarget(targetBp);
         }

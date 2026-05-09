@@ -20,6 +20,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -59,6 +61,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     static {
         ABILITIES.add(new Roar(), Keybindings.keyQ);
         ABILITIES.add(new Eject(), Keybindings.keyW);
+        ABILITIES.add(new AttackGround(PillagerUnit.attackRange), Keybindings.keyE);
     }
 
     //region
@@ -174,7 +177,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     private final List<ItemStack> items = new ArrayList<>();
 
     public final static float ROAR_DAMAGE = 8.0f;
-    public final static float ROAR_RANGE = 4.0f;
+    public final static float ROAR_RANGE = 5.0f;
     public final static float ROAR_KNOCKBACK = 6f;
     public final static int ROAR_SLOW_DURATION = 10 * ResourceCost.TICKS_PER_SECOND;
 
@@ -255,11 +258,15 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
-    private void strongKnockback(Entity pEntity) {
-        double d0 = pEntity.getX() - this.getX();
-        double d1 = pEntity.getZ() - this.getZ();
+    private void strongKnockback(Mob mob) {
+        double d0 = mob.getX() - this.getX();
+        double d1 = mob.getZ() - this.getZ();
         double d2 = Math.max(d0 * d0 + d1 * d1, 0.001);
-        pEntity.push(d0 / d2 * ROAR_KNOCKBACK, 0.2, d1 / d2 * ROAR_KNOCKBACK);
+        AttributeInstance ai = mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+        float knockbackMult = 1.0f;
+        if (ai != null)
+            knockbackMult = (float) Math.min(0, 1 - ai.getValue());
+        mob.push((d0 / d2 * ROAR_KNOCKBACK) * knockbackMult, 0.2 * knockbackMult, (d1 / d2 * ROAR_KNOCKBACK) * knockbackMult);
     }
 
     public void startToRoar() {
@@ -279,8 +286,6 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public void roar() {
         if (this.isAlive()) {
             if (!level().isClientSide()) {
-                LivingEntity livingentity;
-
                 List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
                         new Vector3d(this.position().x, this.position().y, this.position().z),
                         ROAR_RANGE,

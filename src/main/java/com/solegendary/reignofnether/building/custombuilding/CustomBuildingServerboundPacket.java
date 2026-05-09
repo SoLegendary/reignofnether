@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.custombuilding;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -17,26 +18,32 @@ public class CustomBuildingServerboundPacket {
     public String strValue;
 
     public static void deregisterBuilding(String buildingName) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(CustomBuildingAction.DEREGISTER, buildingName, false, 0, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, boolean boolValue) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, boolValue, 0, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, int intValue) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, intValue, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, String strValue) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, 0, strValue));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, 0, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, int intValue, String strValue) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, intValue, strValue));
     }
 

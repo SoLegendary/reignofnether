@@ -344,6 +344,14 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         setStatsForLevel();
     }
 
+    @Override
+    public void kill() {
+        if (!level().isClientSide()) {
+            SoundClientboundPacket.stopSoundWithId(getId());
+        }
+        super.kill();
+    }
+
     // prevent vanilla logic for picking up items
     @Override
     protected void pickUpItem(ItemEntity pItemEntity) { }
