@@ -505,16 +505,24 @@ public class PlayerServerEvents {
                 }
             }
 
+            boolean coopMode = serverLevel.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get();
+
             if (!TutorialServerEvents.isEnabled() && !readiedStart) {
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 if (faction == Faction.NONE)
                     sendMessageToAllPlayers("server.reignofnether.started_sandbox", true, playerName);
+                else if (coopMode)
+                    sendMessageToAllPlayers("server.reignofnether.started_ally", true, playerName);
                 else
                     sendMessageToAllPlayers("server.reignofnether.started", true, playerName);
                 sendMessageToAllPlayers("server.reignofnether.total_players", false, rtsPlayers.size());
             }
+            if (coopMode)
+                AlliancesServerEvents.applyCoopAlliances();
+
             PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
             saveRTSPlayers();
+
         }
     }
 
@@ -650,7 +658,10 @@ public class PlayerServerEvents {
                     id -= 1;
                 }
             }
-            AlliancesServerEvents.applyScenarioAlliances();
+            if (serverLevel.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get())
+                AlliancesServerEvents.applyScenarioAlliances();
+            if (serverLevel.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get())
+                AlliancesServerEvents.applyCoopAlliances();
             saveRTSPlayers();
         }
     }
@@ -978,33 +989,35 @@ public class PlayerServerEvents {
             ResourcesServerEvents.resourcesList.removeIf(rl -> rl.ownerName.equals(playerName));
 
             // Check if only allied players are left or if a single player remains
-            if (rtsPlayers.size() > 1) {
-                // Get the set of remaining player names
-                Set<String> remainingPlayers = new HashSet<>();
-                for (RTSPlayer player : rtsPlayers) {
-                    String name = player.name;
-                    remainingPlayers.add(name);
-                }
-
-                // Use the first remaining player as a reference to find all connected allies
-                String referencePlayer = remainingPlayers.iterator().next();
-                Set<String> factionGroup = AlliancesServerEvents.getAllConnectedAllies(referencePlayer);
-
-                // Check if all remaining players are part of the same alliance group
-                if (remainingPlayers.equals(factionGroup)) {
-                    // Declare victory for all players in the faction group
-                    for (String winner : remainingPlayers) {
-                        postGameRtsPlayers.add(getRTSPlayer(winner));
-                        sendMessageToAllPlayers("server.reignofnether.victory_alliance", true, winner);
-                        PlayerClientboundPacket.victory(winner);
+            if (!serverLevel.getServer().getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get()) {
+                if (rtsPlayers.size() > 1) {
+                    // Get the set of remaining player names
+                    Set<String> remainingPlayers = new HashSet<>();
+                    for (RTSPlayer player : rtsPlayers) {
+                        String name = player.name;
+                        remainingPlayers.add(name);
                     }
+
+                    // Use the first remaining player as a reference to find all connected allies
+                    String referencePlayer = remainingPlayers.iterator().next();
+                    Set<String> factionGroup = AlliancesServerEvents.getAllConnectedAllies(referencePlayer);
+
+                    // Check if all remaining players are part of the same alliance group
+                    if (remainingPlayers.equals(factionGroup)) {
+                        // Declare victory for all players in the faction group
+                        for (String winner : remainingPlayers) {
+                            postGameRtsPlayers.add(getRTSPlayer(winner));
+                            sendMessageToAllPlayers("server.reignofnether.victory_alliance", true, winner);
+                            PlayerClientboundPacket.victory(winner);
+                        }
+                    }
+                } else if (rtsPlayers.size() == 1) {
+                    // Single remaining player - declare victory
+                    RTSPlayer winner = rtsPlayers.get(0);
+                    postGameRtsPlayers.add(winner);
+                    sendMessageToAllPlayers("server.reignofnether.victorious", true, winner.name);
+                    PlayerClientboundPacket.victory(winner.name);
                 }
-            } else if (rtsPlayers.size() == 1) {
-                // Single remaining player - declare victory
-                RTSPlayer winner = rtsPlayers.get(0);
-                postGameRtsPlayers.add(winner);
-                sendMessageToAllPlayers("server.reignofnether.victorious", true, winner.name);
-                PlayerClientboundPacket.victory(winner.name);
             }
         }
     }
@@ -1168,7 +1181,10 @@ public class PlayerServerEvents {
 
             if (rtsLocked)
                 setRTSLock(false);
-            AlliancesServerEvents.applyScenarioAlliances();
+            if (serverLevel.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get())
+                AlliancesServerEvents.applyScenarioAlliances();
+            if (serverLevel.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get())
+                AlliancesServerEvents.applyCoopAlliances();
             SurvivalServerEvents.reset();
         }
         HeroServerEvents.fallenHeroes.clear();

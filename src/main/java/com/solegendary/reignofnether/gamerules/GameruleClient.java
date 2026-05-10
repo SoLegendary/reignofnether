@@ -38,6 +38,7 @@ public class GameruleClient {
     public static int allowedHeroes = 2;
     public static boolean lockAlliances = false;
     public static boolean scenarioMode = false;
+    public static boolean coopMode = false;
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -66,7 +67,7 @@ public class GameruleClient {
         public GameruleBooleanButton(String label, boolean enabled, Runnable onLeftClick, String tooltip) {
             super(
                     "Boolean Game Rule",
-                    10,
+                    8,
                     enabled ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png") :
                             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
                     (Keybinding) null,
@@ -77,13 +78,14 @@ public class GameruleClient {
                     null,
                     List.of(fcs(tooltip))
             );
+            this.imageSize = 12;
             this.label = label;
             this.frameResource = null;
         }
         @Override
         public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
             super.render(guiGraphics, x, y, mouseX, mouseY);
-            guiGraphics.drawString(MC.font, label,x + 23, y + 7, 0xFFFFFF);
+            guiGraphics.drawString(MC.font, label,x + 22, y + 6, 0xFFFFFF);
         }
         @Override
         public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -96,7 +98,7 @@ public class GameruleClient {
         public GameruleIntegerButton(String label, Runnable onLeftClick, Runnable onRightClick, List<FormattedCharSequence> tooltipLines) {
             super(
                 "Integer Game Rule",
-                10,
+                8,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png"),
                 (Keybinding) null,
                 () -> false,
@@ -106,13 +108,14 @@ public class GameruleClient {
                 onRightClick,
                 tooltipLines
             );
+            this.imageSize = 12;
             this.label = label;
         }
         @Override
         public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
             super.render(guiGraphics, x, y, mouseX, mouseY);
             guiGraphics.drawString(MC.font, label,
-                    x + 23, y + 7, 0xFFFFFF);
+                    x + 23, y + 6, 0xFFFFFF);
         }
         @Override
         public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -124,8 +127,8 @@ public class GameruleClient {
     public static List<Button> renderGamerulesGUI(GuiGraphics guiGraphics, int xTR, int yTR, int mouseX, int mouseY) {
         ArrayList<Button> buttons = new ArrayList<>();
         int width = 145;
-        int x = xTR - width - 10;
-        int y = yTR - 30;
+        int x = xTR - width - 8;
+        int y = yTR - 36;
 
         buttons.add(new GameruleBooleanButton("doLogFalling", doLogFalling,
             () -> GameruleServerboundPacket.setLogFalling(!doLogFalling),
@@ -162,6 +165,10 @@ public class GameruleClient {
         buttons.add(new GameruleBooleanButton("lockAlliances", lockAlliances,
                 () -> GameruleServerboundPacket.setLockAlliances(!lockAlliances),
                 I18n.get("commands.reignofnether.gamerule.lock_alliances")
+        ));
+        buttons.add(new GameruleBooleanButton("coopMode", coopMode,
+                () -> GameruleServerboundPacket.setCoopMode(!coopMode),
+                I18n.get("commands.reignofnether.gamerule.coop_mode")
         ));
         buttons.add(new GameruleIntegerButton("allowedHeroes: " + Math.round(allowedHeroes),
             () -> {
@@ -238,13 +245,12 @@ public class GameruleClient {
             )
         ));
 
-        int height = (buttons.size() * 20) - 5;
+        int height = (buttons.size() * 18) - 8;
         MyRenderer.renderFrameWithBg(guiGraphics, x, y, width, height, 0xA0000000);
 
-        int i = 0;
         for (Button button : buttons) {
             button.render(guiGraphics, x + 5, y + 5, mouseX, mouseY);
-            y += 18;
+            y += 16;
         }
         return buttons;
     }

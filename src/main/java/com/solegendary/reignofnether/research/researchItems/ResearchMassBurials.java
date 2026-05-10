@@ -45,7 +45,8 @@ public class ResearchMassBurials extends ProductionItem {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/research/mass_burials.png"),
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
-                () -> prodBuilding.getUpgradeLevel() > 0,
+            () -> ProductionItems.RESEARCH_SPIDER_WEBS.itemIsBeingProduced(prodBuilding.ownerName) ||
+                    ResearchClient.hasResearch(ProductionItems.RESEARCH_SPIDER_WEBS),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD),
             List.of(
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.research_mass_burials"), Style.EMPTY.withBold(true)),

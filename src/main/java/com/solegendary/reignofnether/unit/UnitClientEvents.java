@@ -37,7 +37,7 @@ import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncServerboundPacket;
@@ -66,6 +66,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -943,14 +945,41 @@ public class UnitClientEvents {
                                     vertexConsumerEntityTranslucent,
                                     aabb,
                                     Direction.UP,
-                                    1,
-                                    1,
-                                    0,
-                                    a,
+                                    1, 1, 0, a,
                                     ResourceLocation.parse("forge:textures/white.png")
                             );
                         } else {
                             MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, ap, 1, 1, 0, a);
+                        }
+                    }
+
+                    // draw mounted units' target lines
+                    if (entity.isVehicle()) {
+                        BlockPos blockTarget = null;
+                        if (entity.getFirstPassenger() instanceof RangedAttackerUnit rau &&
+                            rau.getRangedAttackGroundGoal() != null &&
+                            rau.getRangedAttackGroundGoal().getGroundTarget() != null) {
+                            blockTarget = rau.getRangedAttackGroundGoal().getGroundTarget();
+                        }
+                        float a = MiscUtil.getOscillatingFloat(0.25f, 0.75f);
+
+                        if (blockTarget != null) {
+                            Vec3 btVec3 = new Vec3(blockTarget.getX() + 0.5f, blockTarget.getY() + 1.0f, blockTarget.getZ() + 0.5f);
+                            MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, firstPos, btVec3, 1, 0, 0, a);
+                            if (MC.level.getBlockState(blockTarget.offset(0,1,0)).getBlock() instanceof SnowLayerBlock) {
+                                AABB aabb = new AABB(blockTarget);
+                                aabb = aabb.setMaxY(aabb.maxY + 0.13f);
+                                MyRenderer.drawSolidBox(
+                                        evt.getPoseStack(),
+                                        vertexConsumerEntityTranslucent,
+                                        aabb,
+                                        Direction.UP,
+                                        1, 0, 0, MiscUtil.getOscillatingFloat(0.25f, 0.75f),
+                                        ResourceLocation.parse("forge:textures/white.png")
+                                );
+                            }  else {
+                                MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, blockTarget, 1, 0, 0, a);
+                            }
                         }
                     }
 

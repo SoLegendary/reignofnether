@@ -361,8 +361,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     }
 
     private void shootCrossbowProjectileAtBuilding(LivingEntity pUser, RangedAttackBuildingGoal<?> rabg, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
-        double d0 = rabg.getBuildingTarget().centrePos.getX() - pUser.getX();
-        double d1 = rabg.getBuildingTarget().centrePos.getZ() - pUser.getZ();
+        double d0 = rabg.getBuildingTarget().centrePos.getX() - pUser.getX() + 0.5f;
+        double d1 = rabg.getBuildingTarget().centrePos.getZ() - pUser.getZ() + 0.5f;
 
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
         pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
@@ -373,8 +373,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     }
 
     private void shootCrossbowProjectileAtGround(LivingEntity pUser, RangedAttackGroundGoal<?> ragg, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
-        double d0 = ragg.getGroundTarget().getX() - pUser.getX();
-        double d1 = ragg.getGroundTarget().getZ() - pUser.getZ();
+        double d0 = ragg.getGroundTarget().getX() - pUser.getX() + 0.5f;
+        double d1 = ragg.getGroundTarget().getZ() - pUser.getZ() + 0.5f;
 
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
         pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);

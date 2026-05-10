@@ -118,9 +118,9 @@ public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
         if (buildingTarget != null && buildingTarget.getBlocksPlaced() <= 0) {
             stop();
         }
-        if (blockTarget != null) {
+        if (blockTarget != null && buildingTarget != null) {
             float tx = blockTarget.getX() + 0.5f;
-            float ty = blockTarget.getY() + 0.5f;
+            float ty = blockTarget.getY() + 1.0f;
             float tz = blockTarget.getZ() + 0.5f;
 
             this.mob.getLookControl().setLookAt(tx, ty, tz);

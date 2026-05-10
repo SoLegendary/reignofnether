@@ -41,7 +41,7 @@ public abstract class GraveyardUnitProductionItem extends ProductionItem {
 
         int maxSkulls = getMaxSkulls(pp);
         if (maxSkulls <= 0) {
-            return super.canAffordPopulation(pp);
+            return super.isBelowPopulationSupply(pp);
         } else {
             GraveyardPlacement gy = (GraveyardPlacement) pp;
             return (gy.getTotalSkulls() + gy.getSkullsInProgress()) <= maxSkulls;

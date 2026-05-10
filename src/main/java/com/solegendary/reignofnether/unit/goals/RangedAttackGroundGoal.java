@@ -73,7 +73,7 @@ public class RangedAttackGroundGoal<T extends Mob> extends Goal {
     public void tick() {
         if (groundTarget != null) {
             float tx = groundTarget.getX() + 0.5f;
-            float ty = groundTarget.getY() + 0.5f;
+            float ty = groundTarget.getY() + 1.0f;
             float tz = groundTarget.getZ() + 0.5f;
 
             this.mob.getLookControl().setLookAt(tx, ty, tz);
@@ -85,11 +85,15 @@ public class RangedAttackGroundGoal<T extends Mob> extends Goal {
 
             double distToTarget = Math.sqrt(this.mob.distanceToSqr(tx, ty, tz));
 
-            if (distToTarget > attackRange - 1)
+            if (distToTarget <= attackRange) {
+                if (!reachedTarget) {
+                    this.stopMoving();
+                }
                 reachedTarget = true;
+            }
 
             if (!attackWhileMoving || !reachedTarget) {
-                if ((distToTarget > attackRange - 1) &&
+                if ((distToTarget > attackRange) &&
                         !((Unit) this.mob).getHoldPosition()) {
                     this.moveTo(this.groundTarget);
                 } else if (!attackWhileMoving) {

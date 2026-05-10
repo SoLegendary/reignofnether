@@ -34,9 +34,9 @@ public class Possess extends Ability {
     public static final int RANGE = 6;
     public static final int BONUS_CHANNELING_RANGE = 6;
 
-    public static final int BASE_CHANNEL_TICKS = 60;
-    public static final int CHANNEL_TICKS_PER_POP_COST = 20;
-    public static final int MAX_CHANNEL_TICKS = 120;
+    public static final int BASE_CHANNEL_TICKS = 40;
+    public static final int CHANNEL_TICKS_PER_POP_COST = 30;
+    public static final int MAX_CHANNEL_TICKS = 140;
     public static final int POP_PER_WRAITH = 3; // units of pop <= 3 can be possessed by 1 wraith, 4-6 takes 2 wraiths, 7+ takes 3 wraiths
     public static final int PARTIAL_POSSESS_DURATION_SECONDS = 30;
 

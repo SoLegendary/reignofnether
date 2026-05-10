@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
@@ -15,6 +16,8 @@ import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -155,7 +158,16 @@ public class ScenarioServerboundPacket {
                 }
                 case SET_ROLE_TEAM_NUMBER -> {
                     role.teamNumber = intValue;
-                    AlliancesServerEvents.applyScenarioAlliances();
+                    ServerPlayer serverPlayer = ctx.get().getSender();
+                    if (serverPlayer != null) {
+                        MinecraftServer server = serverPlayer.level().getServer();
+                        if (server != null) {
+                            if (server.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get())
+                                AlliancesServerEvents.applyScenarioAlliances();
+                            if (server.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get())
+                                AlliancesServerEvents.applyCoopAlliances();
+                        }
+                    }
                 }
                 case SET_ROLE_NPC -> role.isNpc = boolValue;
                 case SET_UNIT_ROLE -> {

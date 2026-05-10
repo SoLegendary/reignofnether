@@ -79,6 +79,10 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_LOCK_ALLIANCES, "", lockAlliances ? 1L : 0L));
     }
+    public static void setCoopMode(boolean coopMode) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_COOP_MODE, "", coopMode ? 1L : 0L));
+    }
 
     public GameruleServerboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -181,6 +185,10 @@ public class GameruleServerboundPacket {
                 case SET_LOCK_ALLIANCES -> {
                     gameRules.getRule(GameRuleRegistrar.LOCK_ALLIANCES).set(booleanValue, server);
                     GameruleClientboundPacket.setLockAlliances(booleanValue);
+                }
+                case SET_COOP_MODE -> {
+                    gameRules.getRule(GameRuleRegistrar.COOP_MODE).set(booleanValue, server);
+                    GameruleClientboundPacket.setCoopMode(booleanValue);
                 }
             }
             success.set(true);

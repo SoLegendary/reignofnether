@@ -36,6 +36,7 @@ public class Button {
     public static int DEFAULT_ICON_SIZE = 14;
     public static int DEFAULT_ICON_FRAME_SIZE = 22;
     public int tooltipOffsetY = 0;
+    public int imageSize = DEFAULT_ICON_SIZE;
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
     public boolean stretchIconToBorders = false;
 
@@ -172,12 +173,14 @@ public class Button {
                 iconX -= 1;
                 iconY -= 1;
             }
+            iconX += (DEFAULT_ICON_SIZE - imageSize) / 2;
+            iconY += (DEFAULT_ICON_SIZE - imageSize) / 2;
             guiGraphics.pose().translate(0,0,1);
             MyRenderer.renderIcon(
                     guiGraphics,
                     iconResource,
                     iconX, iconY,
-                    stretchIconToBorders ? DEFAULT_ICON_SIZE + 2 : DEFAULT_ICON_SIZE
+                    stretchIconToBorders ? imageSize + 2 : imageSize
             );
         }
         if (iconItem != null) {

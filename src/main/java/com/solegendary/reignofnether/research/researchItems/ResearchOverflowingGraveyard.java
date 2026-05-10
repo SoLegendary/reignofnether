@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.buildings.villagers.Castle;
 import com.solegendary.reignofnether.building.production.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
@@ -45,7 +46,8 @@ public class ResearchOverflowingGraveyard extends ProductionItem {
             () -> ProductionItems.RESEARCH_OVERFLOWING_GRAVEYARD.itemIsBeingProducedAt(prodBuilding) || (
                 prodBuilding.getBuilding() instanceof Graveyard && prodBuilding.getUpgradeLevel() > 0
             ),
-            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD),
+            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD) ||
+                    ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.research_overflowing_graveyard"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),

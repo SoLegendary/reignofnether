@@ -105,6 +105,12 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setScenarioMode(value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("coopMode")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setCoopMode(value);
+            }
         }
     }
 
@@ -142,6 +148,8 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setLockAlliances(lockAlliances);
             boolean scenarioMode = server.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();
             GameruleClientboundPacket.setScenarioMode(scenarioMode);
+            boolean coopMode = server.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get();
+            GameruleClientboundPacket.setCoopMode(coopMode);
         }
     }
 }

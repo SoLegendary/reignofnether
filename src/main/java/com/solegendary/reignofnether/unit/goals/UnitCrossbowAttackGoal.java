@@ -96,7 +96,7 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
         windupTime = random.nextInt(0,6);
     }
 
-    private BuildingPlacement getBuildingTarget() {
+    public BuildingPlacement getBuildingTarget() {
         if (this.mob instanceof PillagerUnit pUnit &&
                 pUnit.getAttackBuildingGoal() instanceof RangedAttackBuildingGoal<?> rabg) {
             return rabg.getBuildingTarget();
@@ -171,9 +171,14 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
             if (target != null)
                 distToTarget = this.mob.distanceTo(target);
             else
-                distToTarget = Math.sqrt(this.mob.distanceToSqr(groundTarget.getX(), groundTarget.getY(), groundTarget.getZ()));
+                distToTarget = Math.sqrt(this.mob.distanceToSqr(groundTarget.getX() + 0.5f, groundTarget.getY() + 1.0f, groundTarget.getZ() + 0.5f));
 
             float attackRange = ((AttackerUnit) this.mob).getAttackRange();
+            if (buildTarget != null) {
+                float avgBuildingWidth = ((buildTarget.centrePos.getX() - buildTarget.minCorner.getX()) +
+                                          (buildTarget.centrePos.getZ() - buildTarget.minCorner.getZ())) / 2f;
+                attackRange += Math.max(0, avgBuildingWidth - 1);
+            }
 
             if (isGarrisoned) {
                 attackRange = garr.getAttackRange();
