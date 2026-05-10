@@ -373,6 +373,14 @@ public class UnitClientEvents {
         doResolveMoveAction();
     }
 
+    private static void resolveMoveActionDeferred() {
+        if (!selectedUnits.isEmpty()) {
+            rightClickMoveDeferred = true;
+            return;
+        }
+        doResolveMoveAction();
+    }
+
     private static void doResolveMoveAction() {
         // follow friendly unit
         if (preselectedUnits.size() == 1 && !targetingSelf()) {
@@ -787,11 +795,11 @@ public class UnitClientEvents {
                     else if (BuildingUtils.isBuildingBuildable(true, preSelBuilding))
                         sendUnitCommand(UnitAction.BUILD_REPAIR);
                     else
-                        resolveMoveAction();
+                        resolveMoveActionDeferred();
                 }
                 // right click -> follow friendly unit or go to preselected blockPos
                 else
-                    resolveMoveAction();
+                    resolveMoveActionDeferred();
             }
         }
         // clear all cursor actions
@@ -802,6 +810,9 @@ public class UnitClientEvents {
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.level == null)
+            return;
+
+        if (Keybindings.altMod.isDown())
             return;
 
         if (!CursorClientEvents.isRightDragActive())
@@ -837,6 +848,9 @@ public class UnitClientEvents {
             return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            if (Keybindings.altMod.isDown() && FormationDragMove.isDragging()) {
+                FormationDragMove.cancelDrag();
+            }
             boolean wasFormationDrag = FormationDragMove.isDragging();
             if (wasFormationDrag) {
                 ArrayList<LivingEntity> selUnits = getSelectedUnits();
@@ -848,7 +862,7 @@ public class UnitClientEvents {
                         actionableUnits.add(unit);
                     }
                 }
-                resolveFormationMove(actionableUnits);
+                resolveFormationMove(actionableUnits, Keybindings.shiftMod.isDown());
             }
             if (rightClickMoveDeferred) {
                 rightClickMoveDeferred = false;
@@ -859,7 +873,7 @@ public class UnitClientEvents {
         }
     }
 
-    private static void resolveFormationMove(ArrayList<LivingEntity> units) {
+    private static void resolveFormationMove(ArrayList<LivingEntity> units, boolean queueOrders) {
         if (MC.player == null || MC.level == null) return;
 
         List<com.mojang.datafixers.util.Pair<LivingEntity, BlockPos>> pairs = FormationDragMove.endDrag(units);
@@ -871,19 +885,21 @@ public class UnitClientEvents {
             if (le instanceof Unit) {
                 int[] singleUnitId = new int[]{le.getId()};
 
-                new UnitActionItem(
-                    playerName,
-                    UnitAction.MOVE, -1, singleUnitId,
-                    targetBp,
-                    new BlockPos(0, 0, 0)
-                ).action(MC.level);
+                if (!queueOrders) {
+                    new UnitActionItem(
+                        playerName,
+                        UnitAction.MOVE, -1, singleUnitId,
+                        targetBp,
+                        new BlockPos(0, 0, 0)
+                    ).action(MC.level);
+                }
 
                 PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
                     playerName,
                     UnitAction.MOVE, -1, singleUnitId,
                     targetBp,
                     new BlockPos(0, 0, 0),
-                    false
+                    queueOrders
                 ));
             }
         }

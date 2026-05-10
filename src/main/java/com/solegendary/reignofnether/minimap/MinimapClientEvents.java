@@ -997,7 +997,6 @@ public class MinimapClientEvents {
             return;
         }
 
-        // when clicking on map move player there
         if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_1 &&
             !Keybindings.shiftMod.isDown() && !OrthoviewClientEvents.isCameraLocked() &&
             lastDragTeleportTimestamp < System.currentTimeMillis() - 100) {
@@ -1010,6 +1009,16 @@ public class MinimapClientEvents {
                     MC.player.getY(),
                     (double) moveTo.getZ()
                 );
+            }
+        }
+        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 &&
+            lastDragTeleportTimestamp < System.currentTimeMillis() - 100) {
+            lastDragTeleportTimestamp = System.currentTimeMillis();
+            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
+            if (moveTo != null && !UnitClientEvents.getSelectedUnits().isEmpty()) {
+                var ids = UnitClientEvents.getSelectedUnits();
+                var idArray = ArrayUtil.livingEntityListToIdArray(ids);
+                UnitClientEvents.sendUnitCommandManual(UnitAction.MOVE, -1, idArray, moveTo);
             }
         }
     }
