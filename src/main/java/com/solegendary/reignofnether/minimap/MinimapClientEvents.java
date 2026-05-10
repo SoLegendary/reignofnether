@@ -1060,10 +1060,10 @@ public class MinimapClientEvents {
                         MC.player.getY(),
                         (double) moveTo.getZ()
                     );
-                }
             }
-    }
-        } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            }
+        }
+        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (FormationDragMove.isDragging()) {
                 FormationDragMove.endDrag(UnitClientEvents.getSelectedUnits());
                 minimapDragStartBp = null;
@@ -1081,6 +1081,7 @@ public class MinimapClientEvents {
                     UnitClientEvents.sendUnitCommandManual(UnitAction.MOVE, -1, idArray, moveTo);
                 }
             }
+        }
     }
 
     @SubscribeEvent
