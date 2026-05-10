@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.unit.FormationDragMove;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -102,6 +103,7 @@ public class MinimapClientEvents {
 
     // rate-limit teleporting from dragging the minimap to prevent being kicked from packet spamming
     private static long lastDragTeleportTimestamp = System.currentTimeMillis();
+    private static BlockPos minimapDragStartBp = null;
 
     private static DynamicTexture mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
     private static RenderType mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance().textureManager.register(
@@ -1011,14 +1013,17 @@ public class MinimapClientEvents {
                 );
             }
         }
-        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 &&
-            lastDragTeleportTimestamp < System.currentTimeMillis() - 100) {
-            lastDragTeleportTimestamp = System.currentTimeMillis();
-            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
-            if (moveTo != null && !UnitClientEvents.getSelectedUnits().isEmpty()) {
-                var ids = UnitClientEvents.getSelectedUnits();
-                var idArray = ArrayUtil.livingEntityListToIdArray(ids);
-                UnitClientEvents.sendUnitCommandManual(UnitAction.MOVE, -1, idArray, moveTo);
+        else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            BlockPos currentPos = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
+            if (currentPos == null) return;
+
+            if (minimapDragStartBp == null) {
+                minimapDragStartBp = currentPos;
+                FormationDragMove.startDrag(currentPos);
+            }
+
+            if (FormationDragMove.isDragging()) {
+                FormationDragMove.updateDrag(currentPos, UnitClientEvents.getSelectedUnits().size(), MC.level);
             }
         }
     }
@@ -1057,26 +1062,25 @@ public class MinimapClientEvents {
                     );
                 }
             }
+    }
         } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
-            if (moveTo == null) {
-                return;
+            if (FormationDragMove.isDragging()) {
+                FormationDragMove.endDrag(UnitClientEvents.getSelectedUnits());
+                minimapDragStartBp = null;
+            } else {
+                BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
+                if (moveTo == null) return;
+                if (altDown) {
+                    addMapMarkerForSelfAndAllies((int) evt.getMouseX(), (int) evt.getMouseY());
+                    evt.setCanceled(true);
+                    return;
+                }
+                if (!UnitClientEvents.getSelectedUnits().isEmpty()) {
+                    var ids = UnitClientEvents.getSelectedUnits();
+                    var idArray = ArrayUtil.livingEntityListToIdArray(ids);
+                    UnitClientEvents.sendUnitCommandManual(UnitAction.MOVE, -1, idArray, moveTo);
+                }
             }
-            if (altDown) {
-                addMapMarkerForSelfAndAllies((int) evt.getMouseX(), (int) evt.getMouseY());
-                evt.setCanceled(true);
-                return;
-            }
-            if (!UnitClientEvents.getSelectedUnits().isEmpty()) {
-                var ids = UnitClientEvents.getSelectedUnits();
-                var idArray = ArrayUtil.livingEntityListToIdArray(ids);
-                UnitClientEvents.sendUnitCommandManual(UnitAction.MOVE,
-                    -1,
-                    idArray,
-                    moveTo
-                );
-            }
-        }
     }
 
     @SubscribeEvent

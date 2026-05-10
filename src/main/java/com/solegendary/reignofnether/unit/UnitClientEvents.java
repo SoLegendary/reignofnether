@@ -158,6 +158,7 @@ public class UnitClientEvents {
     }
 
     private static boolean rightClickMoveDeferred = false;
+    private static boolean rightClickActionTaken = false;
 
     public static void addPreselectedUnit(LivingEntity unit) {
         if (unit instanceof Player player && (player.isSpectator() || player.isCreative()))
@@ -735,6 +736,7 @@ public class UnitClientEvents {
                 BuildingClientEvents.setBuildingToPlace(null);
                 return;
             }
+rightClickActionTaken = false;
             if (!selectedUnits.isEmpty()) {
                 BuildingPlacement preSelBuilding = BuildingClientEvents.getPreselectedBuilding();
 
@@ -767,6 +769,7 @@ public class UnitClientEvents {
                      } else {
                          sendUnitCommand(UnitAction.ATTACK);
                      }
+rightClickActionTaken = true;
                 }
                 // right click -> attack unfriendly building
                 else if (hudSelectedEntity instanceof AttackerUnit &&
@@ -776,6 +779,7 @@ public class UnitClientEvents {
                         ((GameruleClient.neutralAggro && getPlayerToBuildingRelationship(preSelBuilding) == Relationship.NEUTRAL) ||
                         getPlayerToBuildingRelationship(preSelBuilding) == Relationship.HOSTILE)) {
                     sendUnitCommand(UnitAction.ATTACK_BUILDING);
+rightClickActionTaken = true;
                 }
                 // right click -> return resources
                 else if (hudSelectedEntity instanceof Unit unit &&
@@ -816,6 +820,10 @@ public class UnitClientEvents {
             return;
 
         if (!CursorClientEvents.isRightDragActive())
+            return;
+
+        // don't allow formation drag if an attack command was issued on right-click press
+        if (rightClickActionTaken)
             return;
 
         ArrayList<LivingEntity> selUnits = getSelectedUnits();
