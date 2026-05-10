@@ -1082,21 +1082,25 @@ public class MinimapClientEvents {
                     LivingEntity le = pair.getFirst();
                     BlockPos targetBp = pair.getSecond();
                     if (le instanceof Unit unit) {
-                        int[] singleUnitId = new int[]{le.getId()};
-                        new UnitActionItem(
-                            MC.player.getName().getString(),
-                            UnitAction.MOVE, -1, singleUnitId,
-                            targetBp,
-                            new BlockPos(0, 0, 0)
-                        ).action(MC.level);
-                        PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-                            MC.player.getName().getString(),
-                            UnitAction.MOVE, -1, singleUnitId,
-                            targetBp,
-                            new BlockPos(0, 0, 0),
-                            Keybindings.shiftMod.isDown()
-                        ));
-                    }
+					int[] singleUnitId = new int[]{le.getId()};
+					boolean queueOrders = Keybindings.shiftMod.isDown();
+					if (!queueOrders) {
+						new UnitActionItem(
+							MC.player.getName().getString(),
+							UnitAction.MOVE, -1, singleUnitId,
+							targetBp,
+							new BlockPos(0, 0, 0)
+						).action(MC.level);
+					} else {
+						MiscUtil.addUnitCheckpoint(unit, targetBp, true);
+					}
+					PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
+						MC.player.getName().getString(),
+						UnitAction.MOVE, -1, singleUnitId,
+						targetBp,
+						new BlockPos(0, 0, 0),
+						queueOrders
+					));
                 }
                 minimapDragStartBp = null;
             } else {
