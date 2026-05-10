@@ -890,7 +890,7 @@ rightClickActionTaken = true;
         for (var pair : pairs) {
             LivingEntity le = pair.getFirst();
             BlockPos targetBp = pair.getSecond();
-            if (le instanceof Unit) {
+            if (le instanceof Unit unit) {
                 int[] singleUnitId = new int[]{le.getId()};
 
                 if (!queueOrders) {
@@ -900,6 +900,8 @@ rightClickActionTaken = true;
                         targetBp,
                         new BlockPos(0, 0, 0)
                     ).action(MC.level);
+                } else {
+                    MiscUtil.addUnitCheckpoint(unit, targetBp, true);
                 }
 
                 PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(

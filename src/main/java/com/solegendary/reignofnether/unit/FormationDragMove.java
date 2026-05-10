@@ -4,6 +4,8 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
@@ -87,6 +89,9 @@ public class FormationDragMove {
 
     private static BlockPos getHeightAdjustedPos(Level level, BlockPos bp) {
         int groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, bp.getX(), bp.getZ()) - 1;
+        while (groundY > level.getMinBuildHeight() && level.getBlockState(new BlockPos(bp.getX(), groundY, bp.getZ())).getBlock() instanceof LeavesBlock) {
+            groundY--;
+        }
         return new BlockPos(bp.getX(), groundY, bp.getZ());
     }
 

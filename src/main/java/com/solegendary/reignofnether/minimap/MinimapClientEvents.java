@@ -28,7 +28,9 @@ import com.solegendary.reignofnether.blocks.NightCircleMode;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.UnitActionItem;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.ArrayUtil;
@@ -1063,16 +1065,45 @@ public class MinimapClientEvents {
             }
             }
         }
-        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+    }
+
+    @SubscribeEvent
+    public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
+        if (!OrthoviewClientEvents.isEnabled() ||
+            OrthoviewClientEvents.isCameraLocked() ||
+            !(MC.screen instanceof TopdownGui)) {
+            return;
+        }
+
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             if (FormationDragMove.isDragging()) {
-                FormationDragMove.endDrag(UnitClientEvents.getSelectedUnits());
+                var pairs = FormationDragMove.endDrag(UnitClientEvents.getSelectedUnits());
+                for (var pair : pairs) {
+                    LivingEntity le = pair.getFirst();
+                    BlockPos targetBp = pair.getSecond();
+                    if (le instanceof Unit unit) {
+                        int[] singleUnitId = new int[]{le.getId()};
+                        new UnitActionItem(
+                            MC.player.getName().getString(),
+                            UnitAction.MOVE, -1, singleUnitId,
+                            targetBp,
+                            new BlockPos(0, 0, 0)
+                        ).action(MC.level);
+                        PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
+                            MC.player.getName().getString(),
+                            UnitAction.MOVE, -1, singleUnitId,
+                            targetBp,
+                            new BlockPos(0, 0, 0),
+                            Keybindings.shiftMod.isDown()
+                        ));
+                    }
+                }
                 minimapDragStartBp = null;
             } else {
                 BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
                 if (moveTo == null) return;
-                if (altDown) {
+                if (Keybindings.altMod.isDown()) {
                     addMapMarkerForSelfAndAllies((int) evt.getMouseX(), (int) evt.getMouseY());
-                    evt.setCanceled(true);
                     return;
                 }
                 if (!UnitClientEvents.getSelectedUnits().isEmpty()) {

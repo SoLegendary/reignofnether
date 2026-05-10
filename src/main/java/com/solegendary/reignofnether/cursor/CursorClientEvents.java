@@ -78,7 +78,7 @@ public class CursorClientEvents {
     private static Vec2 cursorRightClickDownPos = new Vec2(-1, -1);
     private static Vec2 cursorRightClickDragPos = new Vec2(-1, -1);
     private static BlockPos rightClickStartBp = new BlockPos(0, 0, 0);
-    private static final int DRAG_THRESHOLD = 5;
+    private static final int DRAG_THRESHOLD = 10;
     // action that is performed on the next left click
     private static UnitAction leftClickAction = null;
     private static SandboxAction leftClickSandboxAction = null;
