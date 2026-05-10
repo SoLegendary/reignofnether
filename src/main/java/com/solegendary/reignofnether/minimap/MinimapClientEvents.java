@@ -1102,6 +1102,7 @@ public class MinimapClientEvents {
 						queueOrders
 					));
                 }
+			}
                 minimapDragStartBp = null;
             } else {
                 BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
