@@ -860,7 +860,7 @@
     "server.reignofnether.scenario_role_taken": "Another player has already taken this role!",
     "server.reignofnether.outside_border": "Cannot start outside map border",
     "server.reignofnether.started": "%s has started their game!",
-    "server.reignofnether.started_ally": "%s has started their as your ally!",
+    "server.reignofnether.started_ally": "%s has started their game as your ally!",
     "server.reignofnether.started_sandbox": "%s has started their game (SANDBOX)",
     "server.reignofnether.started_scenario": "%s has joined the scenario as %s (%s)",
     "server.reignofnether.total_players": "There are now %d total RTS player(s)",
