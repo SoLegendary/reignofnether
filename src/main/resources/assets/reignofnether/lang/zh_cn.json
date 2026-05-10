@@ -655,6 +655,7 @@
   "commands.reignofnether.gamerule.slanted_buildings": "允许在非平坦地形上建造",
   "commands.reignofnether.gamerule.lock_alliances": "不允许在对局中途修改同盟关系",
   "commands.reignofnether.gamerule.allowed_heroes": "玩家能够训练的英雄总数",
+  "commands.reignofnether.gamerule.coop_mode": "所有真人玩家均为同盟。当前仅可通过命令/信标获胜",
 
   "commands.reignofnether.error.unknown_building": "未知建筑名称",
   "commands.reignofnether.error.unknown_resource": "未知资源名称",
@@ -859,6 +860,7 @@
   "server.reignofnether.scenario_role_taken": "所选身份已经被其他玩家选定了！",
   "server.reignofnether.outside_border": "无法在地图边界外开始对局",
   "server.reignofnether.started": "%s已经开始游戏了！",
+  "server.reignofnether.started_ally": "%s已经作为你的盟友开始游戏了！",
   "server.reignofnether.started_sandbox": "%s已经开始其游戏了（沙盒模式）",
   "server.reignofnether.started_scenario": "%s作为 %s（%s派系）加入了场景",
   "server.reignofnether.total_players": "当前共有 %d 名 RTS 玩家",
@@ -1381,6 +1383,7 @@
   "alliance.reignofnether.ally_request_cancelled": "\n%s已经撤销了其发送的结盟请求。\n",
   "alliance.reignofnether.no_request": "\n目前尚无来自%s的结盟请求。\n",
   "alliance.reignofnether.alliances_lock": "\n你无法在对局中途修改同盟关系（游戏规则 lockAlliances 项已启用）\n",
+  "alliance.reignofnether.alliances_lock_coop": "\n你无法在对局中途修改同盟关系 (游戏规则 coopMode 项已启用)\n",
   "alliance.reignofnether.disbanded": "\n你与%s的同盟已经解散了。\n",
   "alliance.reignofnether.disbanding": "\n将在 30 秒内解散与%s的同盟……\n",
   "alliance.reignofnether.disband_self": "\n你无法解除与自己的同盟。\n",
