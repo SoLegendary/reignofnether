@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.commands.BuildingArgument;
+import com.solegendary.reignofnether.commands.argument.BuildingArgument;
 
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;

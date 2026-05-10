@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.commands;
+package com.solegendary.reignofnether.commands.argument;
 
 import com.google.common.primitives.Doubles;
 import com.mojang.brigadier.StringReader;
@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.commands.argument.options.BuildingSelectorOptions;
 
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.network.chat.Component;
@@ -124,7 +125,7 @@ public class BuildingSelectorParser {
 		} else {
 			int i = this.reader.getCursor();
 			char c0 = this.reader.read();
-			if (c0 == 'n') {
+			if (c0 == 'p') {
 				this.maxResults = 1;
 				this.order = ORDER_NEAREST;
 			} else if (c0 == 'r') {
@@ -137,12 +138,13 @@ public class BuildingSelectorParser {
 				}
 				this.maxResults = Integer.MAX_VALUE;
 				this.order = BuildingSelector.ORDER_ARBITRARY;
-				this.suggestions = this::suggestOpenOptions;
-				if (this.reader.canRead() && this.reader.peek() == '[') {
-					this.reader.skip();
-					this.suggestions = this::suggestOptionsKeyOrClose;
-					this.parseOptions();
-				}
+			}
+			this.suggestions = this::suggestOpenOptions;
+			if (this.reader.canRead() && this.reader.peek() == '[') {
+				this.reader.skip();
+				this.suggestions = this::suggestOptionsKeyOrClose;
+				this.parseOptions();
+				
 			}
 		}
 	}
@@ -281,15 +283,18 @@ public class BuildingSelectorParser {
 	
 	private CompletableFuture<Suggestions> suggestNameOrSelector(SuggestionsBuilder p_121287_, Consumer<SuggestionsBuilder> p_121288_) {
 		p_121288_.accept(p_121287_);
-		p_121287_.suggest("@b", Component.translatable("argument.buildingPlacement.selector.nearestPlayer"));
-		
+		p_121287_.suggest("@b", Component.translatable("argument.buildingPlacement.selector.allPlayer"));
+		p_121287_.suggest("@r", Component.translatable("argument.buildingPlacement.selector.randomPlayer"));
+		p_121287_.suggest("@p", Component.translatable("argument.buildingPlacement.selector.nearestPlayer"));
 		return p_121287_.buildFuture();
 	}
 	
 	
 	private CompletableFuture<Suggestions> suggestSelector(SuggestionsBuilder p_121323_, Consumer<SuggestionsBuilder> p_121324_) {
 		SuggestionsBuilder suggestionsbuilder = p_121323_.createOffset(p_121323_.getStart() - 1);
-		suggestionsbuilder.suggest("@b", Component.translatable("argument.buildingPlacement.selector.nearestPlayer"));
+		suggestionsbuilder.suggest("@b", Component.translatable("argument.buildingPlacement.selector.allPlayer"));
+		suggestionsbuilder.suggest("@r", Component.translatable("argument.buildingPlacement.selector.randomPlayer"));
+		suggestionsbuilder.suggest("@p", Component.translatable("argument.buildingPlacement.selector.nearestPlayer"));
 		p_121323_.add(suggestionsbuilder);
 		return p_121323_.buildFuture();
 	}

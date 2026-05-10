@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.commands;
+package com.solegendary.reignofnether.commands.argument.options;
 
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -11,6 +11,8 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.commands.argument.BuildingSelector;
+import com.solegendary.reignofnether.commands.argument.BuildingSelectorParser;
 
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;

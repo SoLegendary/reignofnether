@@ -2,8 +2,8 @@ package com.solegendary.reignofnether;
 
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.commands.BuildingArgument;
-import com.solegendary.reignofnether.commands.BuildingSelectorOptions;
+import com.solegendary.reignofnether.commands.argument.BuildingArgument;
+import com.solegendary.reignofnether.commands.argument.options.BuildingSelectorOptions;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.mixin.DownloadPackSourceAccessor;

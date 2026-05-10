@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.commands;
+package com.solegendary.reignofnether.commands.argument;
 
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;

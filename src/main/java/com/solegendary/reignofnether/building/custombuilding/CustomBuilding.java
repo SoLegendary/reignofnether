@@ -82,7 +82,6 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
                 .replace("minecraft:", "")
                 .replace("reignofnether:", "")
                 .replace("_", " "));
-        this.structureName = structureName;
         this.structureSize = structureSize;
         this.structureNbt = structureNbt;
         this.portraitBlock = portraitBlock;

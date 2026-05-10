@@ -125,7 +125,7 @@ public class ItemRegistrar {
     public static final RegistryObject<ForgeSpawnEggItem> HEADHUNTER_UNIT_SPAWN_EGG =
             ITEMS.register("headhunter_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.HEADHUNTER_UNIT,
                     0x57290f, 0xC9C685, new Item.Properties()));
-    
+
     public static final RegistryObject<ForgeSpawnEggItem> MARAUDER_UNIT_SPAWN_EGG =
             ITEMS.register("marauder_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.MARAUDER_UNIT,
                     0x57290f, 0xC9C685, new Item.Properties()));

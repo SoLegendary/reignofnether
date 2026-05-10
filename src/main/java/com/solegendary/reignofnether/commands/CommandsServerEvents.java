@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.commands.argument.BuildingArgument;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
@@ -97,7 +98,7 @@ public class CommandsServerEvents {
 				.then(Commands.literal("place")
 					.then(Commands.argument("buildingName", ResourceLocationArgument.id())
 						.suggests(BUILDINGS)
-						.then(placeBuildingTail(ctx -> ""))
+						.then(placeBuilding(ctx -> ""))
 						.then(Commands.argument("ownerName", StringArgumentType.string())
 							.executes(ctx -> placeBuilding(
 								ctx,
@@ -106,7 +107,7 @@ public class CommandsServerEvents {
 								false,
 								Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
 								Rotation.NONE))
-							.then(placeBuildingTail(ctx -> StringArgumentType.getString(ctx, "ownerName")))
+							.then(placeBuilding(ctx -> StringArgumentType.getString(ctx, "ownerName")))
 						)
 						.then(Commands.argument("ownerSelector", EntityArgument.player())
 							.executes(ctx -> placeBuilding(
@@ -116,7 +117,7 @@ public class CommandsServerEvents {
 								false,
 								Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
 								Rotation.NONE))
-							.then(placeBuildingTail(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
+							.then(placeBuilding(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
 						)
 						.executes(ctx -> placeBuilding(
 							ctx,
@@ -470,6 +471,35 @@ public class CommandsServerEvents {
 	}
 	
 	private static ArgumentBuilder<CommandSourceStack, ?> placeBuildingTail(NameResolver ownerResolver) {
+		return Commands.argument("autoBuild", BoolArgumentType.bool())
+			.then(Commands.argument("pos", BlockPosArgument.blockPos())
+				.executes(ctx -> placeBuilding(
+					ctx,
+					StringArgumentType.getString(ctx, "buildingName"),
+					ownerResolver.resolve(ctx),
+					BoolArgumentType.getBool(ctx, "autoBuild"),
+					BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+					Rotation.NONE
+				))
+				// with rotation
+				.then(Commands.argument("rotation", StringArgumentType.word())
+					.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
+						List.of("0", "90", "180", "270"),
+						builder
+					))
+					.executes(ctx -> placeBuilding(
+						ctx,
+						StringArgumentType.getString(ctx, "buildingName"),
+						ownerResolver.resolve(ctx),
+						BoolArgumentType.getBool(ctx, "autoBuild"),
+						BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+						parseRotation(StringArgumentType.getString(ctx, "rotation"))
+					))
+				)
+			);
+	}
+	
+	private static ArgumentBuilder<CommandSourceStack, ?> placeBuilding(NameResolver ownerResolver) {
 		return Commands.argument("pos", BlockPosArgument.blockPos())
 			.executes(ctx -> placeBuilding(
 				ctx,
@@ -791,7 +821,8 @@ public class CommandsServerEvents {
 			ownerName,
 			new int[0],
 			false,
-			false
+			false,
+			true
 		);
 		if (placement == null) {
 			ctx.getSource().sendFailure(Component.literal("Unable to place building at " + formatPos(pos)));
