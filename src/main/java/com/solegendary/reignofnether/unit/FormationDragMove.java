@@ -1,11 +1,10 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 
@@ -88,12 +87,14 @@ public class FormationDragMove {
     }
 
     private static BlockPos getHeightAdjustedPos(Level level, BlockPos bp) {
-        int groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, bp.getX(), bp.getZ()) - 1;
-        while (groundY > level.getMinBuildHeight() && level.getBlockState(new BlockPos(bp.getX(), groundY, bp.getZ())).getBlock() instanceof LeavesBlock) {
-            groundY--;
-        }
-        return new BlockPos(bp.getX(), groundY, bp.getZ());
-    }
+		int groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, bp.getX(), bp.getZ()) - 1;
+		BlockPos checkBp = new BlockPos(bp.getX(), groundY, bp.getZ());
+		while (groundY > level.getMinBuildHeight() && !MiscUtil.isSolidBlocking(level, checkBp) && level.getBlockState(checkBp).getFluidState().isEmpty()) {
+			groundY--;
+			checkBp = new BlockPos(bp.getX(), groundY, bp.getZ());
+		}
+		return new BlockPos(bp.getX(), groundY, bp.getZ());
+	}
 
     private static List<Pair<LivingEntity, BlockPos>> assignUnitsToPositions(List<LivingEntity> units) {
         List<Pair<LivingEntity, BlockPos>> result = new ArrayList<>();

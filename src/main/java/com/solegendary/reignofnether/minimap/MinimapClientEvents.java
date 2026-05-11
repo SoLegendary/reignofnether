@@ -106,6 +106,7 @@ public class MinimapClientEvents {
     // rate-limit teleporting from dragging the minimap to prevent being kicked from packet spamming
     private static long lastDragTeleportTimestamp = System.currentTimeMillis();
     private static BlockPos minimapDragStartBp = null;
+	private static boolean minimapRightClickDown = false;
 
     private static DynamicTexture mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
     private static RenderType mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance().textureManager.register(
@@ -1016,6 +1017,7 @@ public class MinimapClientEvents {
             }
         }
         else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+			if (!minimapRightClickDown) return;
             BlockPos currentPos = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
             if (currentPos == null) return;
 
@@ -1065,6 +1067,9 @@ public class MinimapClientEvents {
             }
             }
         }
+		if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+			minimapRightClickDown = isPointInsideMinimap(evt.getMouseX(), evt.getMouseY());
+		}
     }
 
     @SubscribeEvent
@@ -1076,6 +1081,10 @@ public class MinimapClientEvents {
         }
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+		if (!minimapRightClickDown) {
+			minimapRightClickDown = false;
+			return;
+		}
             if (FormationDragMove.isDragging()) {
                 var pairs = FormationDragMove.endDrag(UnitClientEvents.getSelectedUnits());
                 for (var pair : pairs) {
@@ -1117,6 +1126,7 @@ public class MinimapClientEvents {
                     UnitClientEvents.sendUnitCommandManual(UnitAction.MOVE, -1, idArray, moveTo);
                 }
             }
+		minimapRightClickDown = false;
         }
     }
 
