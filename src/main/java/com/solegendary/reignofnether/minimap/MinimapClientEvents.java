@@ -1017,7 +1017,7 @@ public class MinimapClientEvents {
             }
         }
         else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-			if (!minimapRightClickDown) return;
+			if (!minimapRightClickDown || Keybindings.altMod.isDown() || UnitClientEvents.getSelectedUnits().isEmpty()) return;
             BlockPos currentPos = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
             if (currentPos == null) return;
 
@@ -1068,7 +1068,7 @@ public class MinimapClientEvents {
             }
         }
 		if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-			minimapRightClickDown = isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()) && !UnitClientEvents.getSelectedUnits().isEmpty();
+			minimapRightClickDown = isPointInsideMinimap(evt.getMouseX(), evt.getMouseY());
 		}
     }
 
@@ -1081,10 +1081,6 @@ public class MinimapClientEvents {
         }
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-		if (!minimapRightClickDown) {
-			minimapRightClickDown = false;
-			return;
-		}
             if (FormationDragMove.isDragging()) {
                 var pairs = FormationDragMove.endDrag(UnitClientEvents.getSelectedUnits());
                 for (var pair : pairs) {
