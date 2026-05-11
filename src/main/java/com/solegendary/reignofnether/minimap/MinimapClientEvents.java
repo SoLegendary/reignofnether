@@ -1068,7 +1068,7 @@ public class MinimapClientEvents {
             }
         }
 		if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-			minimapRightClickDown = isPointInsideMinimap(evt.getMouseX(), evt.getMouseY());
+			minimapRightClickDown = isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()) && !UnitClientEvents.getSelectedUnits().isEmpty();
 		}
     }
 
