@@ -858,7 +858,7 @@ rightClickActionTaken = true;
             return;
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-		if (MinimapClientEvents.isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()))
+		if (MinimapClientEvents.isPointInsideMinimap(evt.getMouseX(), evt.getMouseY()) && !FormationDragMove.isDragging())
 			return;
             if (Keybindings.altMod.isDown() && FormationDragMove.isDragging()) {
                 FormationDragMove.cancelDrag();

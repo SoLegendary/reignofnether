@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -86,10 +88,14 @@ public class FormationDragMove {
         }
     }
 
-    private static BlockPos getHeightAdjustedPos(Level level, BlockPos bp) {
+	private static BlockPos getHeightAdjustedPos(Level level, BlockPos bp) {
 		int groundY = level.getHeight(Heightmap.Types.MOTION_BLOCKING, bp.getX(), bp.getZ()) - 1;
 		BlockPos checkBp = new BlockPos(bp.getX(), groundY, bp.getZ());
-		while (groundY > level.getMinBuildHeight() && !MiscUtil.isSolidBlocking(level, checkBp) && level.getBlockState(checkBp).getFluidState().isEmpty()) {
+		while (groundY > level.getMinBuildHeight()) {
+			BlockState bs = level.getBlockState(checkBp);
+			boolean isLeaves = bs.getBlock() instanceof LeavesBlock;
+			boolean isPassable = !MiscUtil.isSolidBlocking(level, checkBp) && bs.getFluidState().isEmpty();
+			if (!isLeaves && !isPassable) break;
 			groundY--;
 			checkBp = new BlockPos(bp.getX(), groundY, bp.getZ());
 		}
