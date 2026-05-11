@@ -106,7 +106,7 @@ public class MinimapClientEvents {
     // rate-limit teleporting from dragging the minimap to prevent being kicked from packet spamming
     private static long lastDragTeleportTimestamp = System.currentTimeMillis();
     private static BlockPos minimapDragStartBp = null;
-	private static boolean minimapRightClickDown = false;
+	public static boolean minimapRightClickDown = false;
 
     private static DynamicTexture mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
     private static RenderType mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance().textureManager.register(
