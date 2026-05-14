@@ -1,0 +1,8 @@
+{
+  "": "Needs to have (max > 0.0002 and min < 0.0002) > 0 due to surrounding logic in `final_density`",
+  "type": "minecraft:y_clamped_gradient",
+  "from_y": 0,
+  "to_y": 1,
+  "from_value": 0.00019,
+  "to_value": 0.00021
+}

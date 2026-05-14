@@ -1,4 +1,5 @@
 {
-  "type": "minecraft:constant",
-  "argument": 0.5
+  "": "Needs to be in the range (0, 0.3) due to surrounding logic in `final_density`",
+  "type": "constant",
+  "argument": 0.25
 }

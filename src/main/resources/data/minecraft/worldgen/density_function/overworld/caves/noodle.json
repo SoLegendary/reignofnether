@@ -1,0 +1,5 @@
+{
+  "": "Needs to be in the range (0, 0.458333) due to surrounding logic in `final_density`",
+  "type": "constant",
+  "argument": 0.25
+}

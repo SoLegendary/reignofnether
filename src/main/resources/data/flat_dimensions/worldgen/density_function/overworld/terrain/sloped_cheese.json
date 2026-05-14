@@ -1,0 +1,18 @@
+{
+  "": "Cave logic short-circuit, must not exceed 1.5625; The rest are required for validation",
+  "type": "minecraft:clamp",
+  "input": {
+    "type": "minecraft:mul",
+    "argument1": 4,
+    "argument2": {
+      "type": "minecraft:quarter_negative",
+      "argument": {
+        "type": "minecraft:mul",
+        "argument1": "flat_dimensions:overworld/depth",
+        "argument2": 6.3
+      }
+    }
+  },
+  "min": -1000000,
+  "max": 1.5
+}
