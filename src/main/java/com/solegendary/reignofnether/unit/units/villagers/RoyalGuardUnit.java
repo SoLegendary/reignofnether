@@ -73,10 +73,10 @@ import java.util.Set;
 public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated {
     public final Abilities ABILITIES = new Abilities(
             List.of(
-                    new Pair<>(new MaceSlam(), Keybindings.keyQ),
-                    new Pair<>(new TauntingCry(), Keybindings.keyW),
-                    new Pair<>(new BattleRagePassive(), Keybindings.keyE),
-                    new Pair<>(new Avatar(), Keybindings.keyR)
+                    new Pair<>(new MaceSlam(), Keybindings.abilitySlot1),
+                    new Pair<>(new TauntingCry(), Keybindings.abilitySlot2),
+                    new Pair<>(new BattleRagePassive(), Keybindings.abilitySlot3),
+                    new Pair<>(new Avatar(), Keybindings.abilitySlot4)
             )
     );
 

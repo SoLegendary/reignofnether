@@ -23,7 +23,7 @@ public class BeaconStrength extends BeaconAbility {
 
     public BeaconStrength() {
         super(UnitAction.BEACON_STRENGTH, AURA_EFFECT);
-        this.defaultHotkey = Keybindings.keyT;
+        this.defaultHotkey = Keybindings.abilitySlot5;
     }
 
     @Override

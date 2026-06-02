@@ -31,7 +31,7 @@ public class DisconnectPortal extends Ability {
             0,
             true
         );
-        this.defaultHotkey = Keybindings.keyE;
+        this.defaultHotkey = Keybindings.abilitySlot3;
     }
 
     @Override

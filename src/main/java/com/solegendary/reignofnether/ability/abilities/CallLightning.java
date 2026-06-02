@@ -38,7 +38,7 @@ public class CallLightning extends Ability {
             false,
             true
         );
-        this.defaultHotkey = Keybindings.keyL;
+        this.defaultHotkey = Keybindings.hotkey2;
     }
 
     @Override

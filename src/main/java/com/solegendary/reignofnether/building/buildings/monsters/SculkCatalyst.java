@@ -52,7 +52,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
 
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
 
-        this.abilities.add(new Sacrifice(), Keybindings.keyQ);
+        this.abilities.add(new Sacrifice(), Keybindings.abilitySlot1);
 
         setActiveAddon(NightSourceAddon.class, this, true);
         setActiveAddon(RangeIndicatorAddon.class, this, true);

@@ -42,10 +42,10 @@ public class AltarOfDarkness extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.DARK_PRISMARINE);
         this.startingBlockTypes.add(Blocks.TINTED_GLASS);
 
-        this.productions.add(ProductionItems.NECROMANCER, Keybindings.keyQ);
-        this.productions.add(ProductionItems.NECROMANCER_REVIVE, Keybindings.keyQ);
-        this.productions.add(ProductionItems.WRETCHED_WRAITH, Keybindings.keyW);
-        this.productions.add(ProductionItems.WRETCHED_WRAITH_REVIVE, Keybindings.keyW);
+        this.productions.add(ProductionItems.NECROMANCER, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.NECROMANCER_REVIVE, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.WRETCHED_WRAITH, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.WRETCHED_WRAITH_REVIVE, Keybindings.abilitySlot2);
     }
 
     @Override

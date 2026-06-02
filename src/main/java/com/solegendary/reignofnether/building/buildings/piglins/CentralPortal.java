@@ -42,7 +42,7 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
 
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
 
-        this.productions.add(ProductionItems.GRUNT, Keybindings.keyQ);
+        this.productions.add(ProductionItems.GRUNT, Keybindings.abilitySlot1);
 
         setActiveAddon(NetherConvertingAddon.class, this, true);
     }

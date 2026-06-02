@@ -27,7 +27,7 @@ public class SetGraveyardReleaseOn extends Ability {
             false,
             false
         );
-        this.defaultHotkey = Keybindings.keyO;
+        this.defaultHotkey = Keybindings.abilitySlot9;
     }
 
     @Override

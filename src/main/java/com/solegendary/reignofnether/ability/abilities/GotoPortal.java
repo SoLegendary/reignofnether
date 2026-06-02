@@ -34,7 +34,7 @@ public class GotoPortal extends Ability {
             0,
             true
         );
-        this.defaultHotkey = Keybindings.keyW;
+        this.defaultHotkey = Keybindings.abilitySlot2;
     }
 
     @Override

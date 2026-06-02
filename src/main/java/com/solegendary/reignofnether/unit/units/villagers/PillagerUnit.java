@@ -54,7 +54,7 @@ import java.util.Optional;
 public class PillagerUnit extends Pillager implements Unit, AttackerUnit, RangedAttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new MountRavager(), Keybindings.keyQ);
+        ABILITIES.add(new MountRavager(), Keybindings.abilitySlot1);
     }
 
     //region

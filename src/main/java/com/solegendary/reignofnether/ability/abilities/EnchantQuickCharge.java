@@ -29,7 +29,7 @@ public class EnchantQuickCharge extends EnchantAbility {
 
     public EnchantQuickCharge() {
         super(ENCHANT_ACTION, ResourceCosts.ENCHANT_QUICK_CHARGE, 2, EquipmentSlot.MAINHAND);
-        this.defaultHotkey = Keybindings.keyW;
+        this.defaultHotkey = Keybindings.abilitySlot2;
     }
 
     @Override

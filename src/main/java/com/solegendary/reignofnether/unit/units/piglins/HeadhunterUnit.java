@@ -62,8 +62,8 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, RangedAttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new MountHoglin(), Keybindings.keyQ);
-        ABILITIES.add(new Bloodlust(), Keybindings.keyW);
+        ABILITIES.add(new MountHoglin(), Keybindings.abilitySlot1);
+        ABILITIES.add(new Bloodlust(), Keybindings.abilitySlot2);
     }
 
     //region

@@ -65,10 +65,10 @@ import java.util.*;
 public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
         List.of(
-            new Pair<>(new ChillingScreech(), Keybindings.keyQ),
-            new Pair<>(new FrostBlink(), Keybindings.keyW),
-            new Pair<>(new BitterFrostPassive(), Keybindings.keyE),
-            new Pair<>(new Blizzard(), Keybindings.keyR)
+            new Pair<>(new ChillingScreech(), Keybindings.abilitySlot1),
+            new Pair<>(new FrostBlink(), Keybindings.abilitySlot2),
+            new Pair<>(new BitterFrostPassive(), Keybindings.abilitySlot3),
+            new Pair<>(new Blizzard(), Keybindings.abilitySlot4)
         )
     );
 

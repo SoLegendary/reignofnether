@@ -60,9 +60,9 @@ import java.util.Set;
 public class SpiderUnit extends Spider implements Unit, AttackerUnit, ConvertableUnit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new ToggleSpiderClimbing(), Keybindings.keyQ);
-        ABILITIES.add(new Eject(), Keybindings.keyW);
-        ABILITIES.add(new SpinWebs(), Keybindings.keyE);
+        ABILITIES.add(new ToggleSpiderClimbing(), Keybindings.abilitySlot1);
+        ABILITIES.add(new Eject(), Keybindings.abilitySlot2);
+        ABILITIES.add(new SpinWebs(), Keybindings.abilitySlot3);
     }
 
     //region

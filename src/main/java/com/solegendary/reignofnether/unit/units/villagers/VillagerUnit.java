@@ -78,7 +78,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, AttackerUnit, ArmSwingingUnit, VillagerDataHolder, ConvertableUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new CallToArmsUnit(), Keybindings.keyQ);
+        ABILITIES.add(new CallToArmsUnit(), Keybindings.abilitySlot1);
     }
 
     //region

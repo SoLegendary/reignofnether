@@ -49,7 +49,7 @@ public class FlameSanctuary extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        this.productions.add(ProductionItems.RESEARCH_BLAZE_FIREWALL, Keybindings.keyQ);
+        this.productions.add(ProductionItems.RESEARCH_BLAZE_FIREWALL, Keybindings.abilitySlot1);
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}

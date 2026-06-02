@@ -50,11 +50,11 @@ public class TownCentre extends ProductionBuilding implements RangeIndicatorAddo
         this.startingBlockTypes.add(Blocks.POLISHED_ANDESITE_STAIRS);
 
         Ability callToArms = new CallToArmsBuilding();
-        this.abilities.add(callToArms, Keybindings.keyV);
+        this.abilities.add(callToArms, Keybindings.hotkey1);
         BackToWorkBuilding backToWork = new BackToWorkBuilding();
         this.abilities.add(backToWork, Keybindings.build);
 
-        this.productions.add(ProductionItems.VILLAGER, Keybindings.keyQ);
+        this.productions.add(ProductionItems.VILLAGER, Keybindings.abilitySlot1);
 
         setActiveAddon(RangeIndicatorAddon.class, this, true);
     }

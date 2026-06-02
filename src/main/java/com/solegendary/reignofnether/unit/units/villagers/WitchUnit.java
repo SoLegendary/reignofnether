@@ -53,10 +53,10 @@ import java.util.Set;
 public class WitchUnit extends Witch implements Unit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new ThrowLingeringHarmingPotion(8), Keybindings.keyQ);
-        ABILITIES.add(new ThrowLingeringRegenPotion(8), Keybindings.keyW);
-        ABILITIES.add(new ThrowHealingPotion(8), Keybindings.keyE);
-        ABILITIES.add(new ThrowWaterPotion(8), Keybindings.keyR);
+        ABILITIES.add(new ThrowLingeringHarmingPotion(8), Keybindings.abilitySlot1);
+        ABILITIES.add(new ThrowLingeringRegenPotion(8), Keybindings.abilitySlot2);
+        ABILITIES.add(new ThrowHealingPotion(8), Keybindings.abilitySlot3);
+        ABILITIES.add(new ThrowWaterPotion(8), Keybindings.abilitySlot4);
     }
 
     //region

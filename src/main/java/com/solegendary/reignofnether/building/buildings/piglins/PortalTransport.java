@@ -27,9 +27,9 @@ public class PortalTransport extends AbstractPortal {
         this.canSetRallyPoint = false;
         this.startingBlockTypes.add(Blocks.LAPIS_BLOCK);
 
-        this.abilities.add(new ConnectPortal(), Keybindings.keyQ);
-        this.abilities.add(new GotoPortal(), Keybindings.keyW);
-        this.abilities.add(new DisconnectPortal(), Keybindings.keyE);
+        this.abilities.add(new ConnectPortal(), Keybindings.abilitySlot1);
+        this.abilities.add(new GotoPortal(), Keybindings.abilitySlot2);
+        this.abilities.add(new DisconnectPortal(), Keybindings.abilitySlot3);
     }
 
     @Override

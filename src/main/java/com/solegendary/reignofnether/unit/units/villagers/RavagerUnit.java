@@ -60,10 +60,10 @@ import java.util.function.Predicate;
 public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new Roar(), Keybindings.keyQ);
-        ABILITIES.add(new Eject(), Keybindings.keyW);
-        ABILITIES.add(new CastSummonVexes(), Keybindings.keyE);
-        ABILITIES.add(new AttackGround(PillagerUnit.attackRange), Keybindings.keyE);
+        ABILITIES.add(new Roar(), Keybindings.abilitySlot1);
+        ABILITIES.add(new Eject(), Keybindings.abilitySlot2);
+        ABILITIES.add(new CastSummonVexes(), Keybindings.abilitySlot3);
+        ABILITIES.add(new AttackGround(PillagerUnit.attackRange), Keybindings.abilitySlot3);
     }
 
     //region

@@ -68,10 +68,10 @@ import java.util.Set;
 public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
         List.of(
-            new Pair<>(new CivilEnchantment(), Keybindings.keyQ),
-            new Pair<>(new MartialEnchantment(), Keybindings.keyW),
-            new Pair<>(new ProtectiveEnchantment(), Keybindings.keyE),
-            new Pair<>(new MarchOfProgress(), Keybindings.keyR)
+            new Pair<>(new CivilEnchantment(), Keybindings.abilitySlot1),
+            new Pair<>(new MartialEnchantment(), Keybindings.abilitySlot2),
+            new Pair<>(new ProtectiveEnchantment(), Keybindings.abilitySlot3),
+            new Pair<>(new MarchOfProgress(), Keybindings.abilitySlot4)
         )
     );
 

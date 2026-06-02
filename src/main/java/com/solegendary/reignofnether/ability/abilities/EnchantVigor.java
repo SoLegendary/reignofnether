@@ -30,7 +30,7 @@ public class EnchantVigor extends EnchantAbility {
 
     public EnchantVigor() {
         super(ENCHANT_ACTION, ResourceCosts.ENCHANT_VIGOR, 1, EquipmentSlot.MAINHAND);
-        this.defaultHotkey = Keybindings.keyT;
+        this.defaultHotkey = Keybindings.abilitySlot5;
     }
 
     @Override

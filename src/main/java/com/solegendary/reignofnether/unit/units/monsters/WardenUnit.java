@@ -59,7 +59,7 @@ import java.util.Set;
 public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new SonicBoom(), Keybindings.keyQ);
+        ABILITIES.add(new SonicBoom(), Keybindings.abilitySlot1);
     }
 
     //region

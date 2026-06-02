@@ -42,10 +42,10 @@ public class ShrineOfProsperity extends ProductionBuilding {
 
         this.startingBlockTypes.add(Blocks.COBBLESTONE);
 
-        this.productions.add(ProductionItems.ROYAL_GUARD, Keybindings.keyQ);
-        this.productions.add(ProductionItems.ROYAL_GUARD_REVIVE, Keybindings.keyQ);
-        this.productions.add(ProductionItems.ENCHANTER, Keybindings.keyW);
-        this.productions.add(ProductionItems.ENCHANTER_REVIVE, Keybindings.keyW);
+        this.productions.add(ProductionItems.ROYAL_GUARD, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.ROYAL_GUARD_REVIVE, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.ENCHANTER, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.ENCHANTER_REVIVE, Keybindings.abilitySlot2);
     }
 
     @Override

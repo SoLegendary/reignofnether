@@ -277,7 +277,7 @@ public class Button {
         if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
             return;
 
-        if (hotkey != null && hotkey.key == key) {
+        if (hotkey != null && hotkey.getKey() == key) {
             if (MC.player != null)
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
             this.onLeftClick.run();

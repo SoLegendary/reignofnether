@@ -73,10 +73,10 @@ import java.util.*;
 public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
         List.of(
-            new Pair<>(new ThrowTNT(), Keybindings.keyQ),
-            new Pair<>(new FancyFeast(), Keybindings.keyW),
-            new Pair<>(new GreedIsGoodPassive(), Keybindings.keyE),
-            new Pair<>(new LootExplosion(), Keybindings.keyR)
+            new Pair<>(new ThrowTNT(), Keybindings.abilitySlot1),
+            new Pair<>(new FancyFeast(), Keybindings.abilitySlot2),
+            new Pair<>(new GreedIsGoodPassive(), Keybindings.abilitySlot3),
+            new Pair<>(new LootExplosion(), Keybindings.abilitySlot4)
         )
     );
 

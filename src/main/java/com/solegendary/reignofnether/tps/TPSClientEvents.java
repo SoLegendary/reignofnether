@@ -25,7 +25,7 @@ public class TPSClientEvents {
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) {
-            if (evt.getKey() == Keybindings.getFnum(7).key)
+            if (evt.getKey() == Keybindings.getFnum(7).getKey())
                 enabled = !enabled;
         }
     }

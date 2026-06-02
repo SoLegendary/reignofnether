@@ -17,12 +17,12 @@ import java.util.List;
 
 public class Abilities {
     public static final List<Keybinding> ABILITY_KEYBINDS = List.of(
-            Keybindings.keyQ,
-            Keybindings.keyW,
-            Keybindings.keyE,
-            Keybindings.keyR,
-            Keybindings.keyT,
-            Keybindings.keyY
+            Keybindings.abilitySlot1,
+            Keybindings.abilitySlot2,
+            Keybindings.abilitySlot3,
+            Keybindings.abilitySlot4,
+            Keybindings.abilitySlot5,
+            Keybindings.abilitySlot6
     );
     List<Pair<Ability, Keybinding>> abilities = new ArrayList<>();
 

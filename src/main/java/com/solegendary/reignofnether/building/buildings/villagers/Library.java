@@ -92,16 +92,16 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
 
         this.explodeChance = 0.2f;
 
-        this.abilities.add(ENCHANT_MAIMING, Keybindings.keyQ);
-        this.abilities.add(ENCHANT_QUICK_CHARGE, Keybindings.keyW);
-        this.abilities.add(ENCHANT_SHARPNESS, Keybindings.keyE);
-        this.abilities.add(ENCHANT_MULTISHOT, Keybindings.keyR);
-        this.abilities.add(ENCHANT_VIGOR, Keybindings.keyT);
-        this.abilities.add(ENCHANT_GUST, Keybindings.keyY);
+        this.abilities.add(ENCHANT_MAIMING, Keybindings.abilitySlot1);
+        this.abilities.add(ENCHANT_QUICK_CHARGE, Keybindings.abilitySlot2);
+        this.abilities.add(ENCHANT_SHARPNESS, Keybindings.abilitySlot3);
+        this.abilities.add(ENCHANT_MULTISHOT, Keybindings.abilitySlot4);
+        this.abilities.add(ENCHANT_VIGOR, Keybindings.abilitySlot5);
+        this.abilities.add(ENCHANT_GUST, Keybindings.abilitySlot6);
 
-        this.productions.add(ProductionItems.RESEARCH_EVOKER_VEXES, Keybindings.keyU);
-        this.productions.add(ProductionItems.RESEARCH_UPGRADED_WINDCALLERS, Keybindings.keyI);
-        this.productions.add(ProductionItems.RESEARCH_GRAND_LIBRARY, Keybindings.keyO);
+        this.productions.add(ProductionItems.RESEARCH_EVOKER_VEXES, Keybindings.abilitySlot7);
+        this.productions.add(ProductionItems.RESEARCH_UPGRADED_WINDCALLERS, Keybindings.abilitySlot8);
+        this.productions.add(ProductionItems.RESEARCH_GRAND_LIBRARY, Keybindings.abilitySlot9);
 
         setActiveAddon(RangeIndicatorAddon.class, this, true);
     }

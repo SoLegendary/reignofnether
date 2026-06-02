@@ -56,7 +56,7 @@ import java.util.List;
 public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, KeyframeAnimated {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new Bloodlust(), Keybindings.keyQ);
+        ABILITIES.add(new Bloodlust(), Keybindings.abilitySlot1);
     }
 
     //region

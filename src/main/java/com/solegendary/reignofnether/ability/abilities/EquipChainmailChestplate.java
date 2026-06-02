@@ -28,7 +28,7 @@ public class EquipChainmailChestplate extends EquipAbility {
 
     public EquipChainmailChestplate() {
         super(EQUIP_ACTION, ResourceCosts.EQUIP_CHAINMAIL_ARMOR, Items.CHAINMAIL_CHESTPLATE, EquipmentSlot.CHEST);
-        this.defaultHotkey = Keybindings.keyT;
+        this.defaultHotkey = Keybindings.abilitySlot5;
     }
 
     @Override

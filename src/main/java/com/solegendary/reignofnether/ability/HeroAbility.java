@@ -126,7 +126,7 @@ public abstract class HeroAbility extends Ability {
             hero.isRankUpMenuOpen() ?
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross2.png") :
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/level_up.png"),
-            Keybindings.keyU,
+            Keybindings.abilitySlot7,
             () -> false,
             () -> allSkillsLearnt(hero) || !PlayerClientEvents.isRTSPlayer(),
             () -> true,

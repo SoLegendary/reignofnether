@@ -51,7 +51,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_WALL);
         this.startingBlockTypes.add(Blocks.DEEPSLATE);
 
-        this.productions.add(ProductionItems.WARDEN, Keybindings.keyQ);
+        this.productions.add(ProductionItems.WARDEN, Keybindings.abilitySlot1);
 
         setActiveAddon(GarrisonableBuildingAddon.class, this, true);
         setActiveAddon(RangeIndicatorAddon.class, this, true);

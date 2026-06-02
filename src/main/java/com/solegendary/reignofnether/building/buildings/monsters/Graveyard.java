@@ -46,16 +46,16 @@ public class Graveyard extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        this.abilities.add(new SetGraveyardReleaseOff(), Keybindings.keyO);
-        this.abilities.add(new SetGraveyardReleaseOn(), Keybindings.keyO);
+        this.abilities.add(new SetGraveyardReleaseOff(), Keybindings.abilitySlot9);
+        this.abilities.add(new SetGraveyardReleaseOn(), Keybindings.abilitySlot9);
 
-        this.productions.add(ProductionItems.ZOMBIE, Keybindings.keyQ);
-        this.productions.add(ProductionItems.HUSK, Keybindings.keyQ);
-        this.productions.add(ProductionItems.DROWNED, Keybindings.keyW);
-        this.productions.add(ProductionItems.SKELETON, Keybindings.keyE);
-        this.productions.add(ProductionItems.STRAY, Keybindings.keyE);
-        this.productions.add(ProductionItems.BOGGED, Keybindings.keyR);
-        this.productions.add(ProductionItems.RESEARCH_OVERFLOWING_GRAVEYARD, Keybindings.keyT);
+        this.productions.add(ProductionItems.ZOMBIE, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.HUSK, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.DROWNED, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.SKELETON, Keybindings.abilitySlot3);
+        this.productions.add(ProductionItems.STRAY, Keybindings.abilitySlot3);
+        this.productions.add(ProductionItems.BOGGED, Keybindings.abilitySlot4);
+        this.productions.add(ProductionItems.RESEARCH_OVERFLOWING_GRAVEYARD, Keybindings.abilitySlot5);
     }
 
     @Override

@@ -59,7 +59,7 @@ import java.util.List;
 public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new ConsumeSlime(), Keybindings.keyQ);
+        ABILITIES.add(new ConsumeSlime(), Keybindings.abilitySlot1);
     }
 
     //region

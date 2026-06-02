@@ -55,8 +55,8 @@ import java.util.List;
 public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeAnimated {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new Fear(), Keybindings.keyQ);
-        ABILITIES.add(new Possess(), Keybindings.keyW);
+        ABILITIES.add(new Fear(), Keybindings.abilitySlot1);
+        ABILITIES.add(new Possess(), Keybindings.abilitySlot2);
     }
 
     //region

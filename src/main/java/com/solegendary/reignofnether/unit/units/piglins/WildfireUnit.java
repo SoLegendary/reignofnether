@@ -76,10 +76,10 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
             List.of(
-                    new Pair<>(new MoltenBomb(), Keybindings.keyQ),
-                    new Pair<>(new ScorchingGaze(), Keybindings.keyW),
-                    new Pair<>(new IntenseHeatPassive(), Keybindings.keyE),
-                    new Pair<>(new SoulsAflame(), Keybindings.keyR)
+                    new Pair<>(new MoltenBomb(), Keybindings.abilitySlot1),
+                    new Pair<>(new ScorchingGaze(), Keybindings.abilitySlot2),
+                    new Pair<>(new IntenseHeatPassive(), Keybindings.abilitySlot3),
+                    new Pair<>(new SoulsAflame(), Keybindings.abilitySlot4)
             )
     );
 

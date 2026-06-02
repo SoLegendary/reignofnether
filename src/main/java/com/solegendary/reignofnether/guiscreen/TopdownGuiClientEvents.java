@@ -77,7 +77,7 @@ public class TopdownGuiClientEvents {
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
         if (OrthoviewClientEvents.isEnabled()) {
-            if (evt.getKeyCode() == Keybindings.pause.key)
+            if (evt.getKeyCode() == Keybindings.pause.getKey())
                 shouldPause = true;
             else if (evt.getKeyCode() == MC.options.keyInventory.getKey().getValue())
                 evt.setCanceled(true);

@@ -38,8 +38,8 @@ public class WitherShrine extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        this.productions.add(ProductionItems.RESEARCH_WITHER_CLOUDS, Keybindings.keyQ);
-        this.productions.add(ProductionItems.RESEARCH_FIRE_RESISTANCE, Keybindings.keyW);
+        this.productions.add(ProductionItems.RESEARCH_WITHER_CLOUDS, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.RESEARCH_FIRE_RESISTANCE, Keybindings.abilitySlot2);
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}

@@ -29,7 +29,7 @@ public class Ability {
     public void setAutocast(boolean value, BuildingPlacement placement) { placement.setAutocast(value ? this : null); }
     public boolean isAutocasting(Unit unit) { return unit.hasAutocast(this); }
     public boolean isAutocasting(BuildingPlacement placement) { return placement.hasAutocast(this); }
-    protected Keybinding defaultHotkey = Keybindings.keyQ;
+    protected Keybinding defaultHotkey = Keybindings.abilitySlot1;
 
     public Ability(UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
         this.action = action;

@@ -422,10 +422,10 @@ public class OrthoviewClientEvents {
         // Prevent repeated key actions
         if (evt.getAction() == GLFW.GLFW_PRESS) {
 
-            if (evt.getKey() == Keybindings.getFnum(12).key) {
+            if (evt.getKey() == Keybindings.getFnum(12).getKey()) {
                 tryToToggleEnable();
             }
-            else if (evt.getKey() == Keybindings.reset.key) {
+            else if (evt.getKey() == Keybindings.reset.getKey()) {
                 reset();
             }
         }

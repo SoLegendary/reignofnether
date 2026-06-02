@@ -39,7 +39,7 @@ public class HoglinStables extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        this.productions.add(ProductionItems.RESEARCH_HOGLIN_CAVALRY, Keybindings.keyQ);
+        this.productions.add(ProductionItems.RESEARCH_HOGLIN_CAVALRY, Keybindings.abilitySlot1);
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}

@@ -43,10 +43,10 @@ public class WitchHut extends ProductionBuilding {
         this.buildTimeModifier = 0.7f;
         this.explodeChance = 0.2f;
 
-        this.productions.add(ProductionItems.WITCH, Keybindings.keyQ);
-        this.productions.add(ProductionItems.RESEARCH_LINGERING_POTIONS, Keybindings.keyW);
-        this.productions.add(ProductionItems.RESEARCH_HEALING_POTIONS, Keybindings.keyE);
-        this.productions.add(ProductionItems.RESEARCH_WATER_POTIONS, Keybindings.keyR);
+        this.productions.add(ProductionItems.WITCH, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.RESEARCH_LINGERING_POTIONS, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.RESEARCH_HEALING_POTIONS, Keybindings.abilitySlot3);
+        this.productions.add(ProductionItems.RESEARCH_WATER_POTIONS, Keybindings.abilitySlot4);
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}

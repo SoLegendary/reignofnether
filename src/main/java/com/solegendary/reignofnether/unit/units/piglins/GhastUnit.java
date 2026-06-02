@@ -70,7 +70,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new AttackGround(attackRange), Keybindings.keyQ);
+        ABILITIES.add(new AttackGround(attackRange), Keybindings.abilitySlot1);
     }
 
     //region

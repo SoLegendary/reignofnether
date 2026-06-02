@@ -653,7 +653,7 @@ public class HudClientEvents {
                         Button returnButton = new Button("Return resources",
                             Button.itemIconSize,
                             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
-                            Keybindings.keyD,
+                            Keybindings.hotkey5,
                             () -> unit.getReturnResourcesGoal().getBuildingTarget() != null,
                             () -> false,
                             () -> true,
@@ -881,7 +881,7 @@ public class HudClientEvents {
             if (hudSelectedEntity instanceof VillagerUnit vUnit)
                 for (Ability ability : vUnit.getAbilities().get())
                     if (ability instanceof CallToArmsUnit callToArmsUnit)
-                        actionButtons.add(callToArmsUnit.getButton(Keybindings.keyV, vUnit));
+                        actionButtons.add(callToArmsUnit.getButton(Keybindings.hotkey1, vUnit));
 
             for (Button actionButton : actionButtons) {
                 // GATHER button does not have a static icon
@@ -1904,13 +1904,13 @@ public class HudClientEvents {
         // Prevent spectator mode options from showing up
         if (OrthoviewClientEvents.isEnabled()) {
             for (Keybinding numKey : Keybindings.nums)
-                if (numKey.key == evt.getKeyCode()) {
+                if (numKey.getKey() == evt.getKeyCode()) {
                     evt.setCanceled(true);
                 }
         }
 
         // Deselect everything
-        if (evt.getKeyCode() == Keybindings.deselect.key) {
+        if (evt.getKeyCode() == Keybindings.deselect.getKey()) {
             UnitClientEvents.clearSelectedUnits();
             BuildingClientEvents.clearSelectedBuildings();
             BuildingClientEvents.setBuildingToPlace(null);
@@ -1927,7 +1927,7 @@ public class HudClientEvents {
         // Access and save to controlGroups if index is within bounds
         for (Keybinding keybinding : Keybindings.nums) {
             int index = Integer.parseInt(keybinding.buttonLabel);
-            if (index >= 0 && index < controlGroups.size() && evt.getKeyCode() == keybinding.key) {  // Bounds check
+            if (index >= 0 && index < controlGroups.size() && evt.getKeyCode() == keybinding.getKey()) {  // Bounds check
                 if (Keybindings.ctrlMod.isDown()) {
                     controlGroups.get(index).saveFromSelected(keybinding, true);
                 } else if (Keybindings.shiftMod.isDown()) {
@@ -1945,12 +1945,12 @@ public class HudClientEvents {
         }
 
         // Open chat while orthoview is enabled
-        if (OrthoviewClientEvents.isEnabled() && evt.getKeyCode() == Keybindings.chat.key) {
+        if (OrthoviewClientEvents.isEnabled() && evt.getKeyCode() == Keybindings.chat.getKey()) {
             MC.setScreen(new ChatScreen(""));
         }
 
         // Cycle through selected units
-        if (evt.getKeyCode() == Keybindings.tab.key) {
+        if (evt.getKeyCode() == Keybindings.tab.getKey()) {
             cycleUnitSubgroups();
             cycleBuildingSubgroups();
         }

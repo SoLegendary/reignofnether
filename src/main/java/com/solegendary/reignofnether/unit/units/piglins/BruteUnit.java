@@ -58,8 +58,8 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new ToggleShield(), Keybindings.keyQ);
-        ABILITIES.add(new Bloodlust(), Keybindings.keyW);
+        ABILITIES.add(new ToggleShield(), Keybindings.abilitySlot1);
+        ABILITIES.add(new Bloodlust(), Keybindings.abilitySlot2);
     }
 
     //region

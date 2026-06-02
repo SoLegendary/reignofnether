@@ -45,9 +45,9 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
         this.startingBlockTypes.add(Blocks.POLISHED_BASALT);
         this.startingBlockTypes.add(Blocks.NETHER_BRICK_STAIRS);
 
-        this.productions.add(ProductionItems.RESEARCH_ADVANCED_PORTALS, Keybindings.keyQ);
-        this.productions.add(ProductionItems.RESEARCH_BLOODLUST, Keybindings.keyW);
-        this.productions.add(ProductionItems.RESEARCH_SOUL_FIREBALLS, Keybindings.keyE);
+        this.productions.add(ProductionItems.RESEARCH_ADVANCED_PORTALS, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.RESEARCH_BLOODLUST, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.RESEARCH_SOUL_FIREBALLS, Keybindings.abilitySlot3);
 
         setActiveAddon(GarrisonableBuildingAddon.class, this, true);
     }

@@ -105,7 +105,7 @@ public class FogOfWarClientEvents {
                 return;
 
             // resetFogChunks
-            if (evt.getKey() == Keybindings.getFnum(8).key && isEnabled()) {
+            if (evt.getKey() == Keybindings.getFnum(8).getKey() && isEnabled()) {
                 resetFogChunks();
             }
         }

@@ -44,8 +44,8 @@ public class ArcaneTower extends ProductionBuilding {
         this.buildTimeModifier = 0.7f;
         this.explodeChance = 0.2f;
 
-        this.productions.add(ProductionItems.EVOKER, Keybindings.keyQ);
-        this.productions.add(ProductionItems.WINDCALLER, Keybindings.keyW);
+        this.productions.add(ProductionItems.EVOKER, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.WINDCALLER, Keybindings.abilitySlot2);
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}

@@ -65,7 +65,7 @@ public class HelperButtons {
                 "Idle workers (CTRL-click to select all)",
                 ICON_SIZE,
                 getIdleWorkerIcon(),
-                Keybindings.keyJ,
+                Keybindings.hotkey6,
                 () -> false,
                 idleWorkerIds::isEmpty,
                 () -> true,
@@ -129,7 +129,7 @@ public class HelperButtons {
                 "Select all military units",
                 ICON_SIZE,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sword_and_bow.png"),
-                Keybindings.keyK,
+                Keybindings.hotkey7,
                 () -> false,
                 () -> {
                     var flag = false;

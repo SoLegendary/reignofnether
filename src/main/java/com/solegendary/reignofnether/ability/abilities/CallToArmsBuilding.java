@@ -40,7 +40,7 @@ public class CallToArmsBuilding extends Ability {
                 false,
                 false
         );
-        this.defaultHotkey = Keybindings.keyV;
+        this.defaultHotkey = Keybindings.hotkey1;
     }
 
     @Override

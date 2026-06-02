@@ -22,7 +22,7 @@ public class PortalCivilian extends AbstractPortal {
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/cyan_glazed_terracotta.png");
         this.canSetRallyPoint = false;
         this.canAcceptResources = true;
-        productions.add(ProductionItems.RESEARCH_RESOURCE_CAPACITY, Keybindings.keyQ);
+        productions.add(ProductionItems.RESEARCH_RESOURCE_CAPACITY, Keybindings.abilitySlot1);
     }
 
     @Override

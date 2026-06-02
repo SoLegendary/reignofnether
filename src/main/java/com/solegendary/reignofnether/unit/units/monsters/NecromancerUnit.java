@@ -69,10 +69,10 @@ import java.util.Set;
 public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
         List.of(
-            new Pair<>(new RaiseDead(), Keybindings.keyQ),
-            new Pair<>(new InsomniaCurse(), Keybindings.keyW),
-            new Pair<>(new SoulSiphonPassive(), Keybindings.keyE),
-            new Pair<>(new BloodMoon(), Keybindings.keyR)
+            new Pair<>(new RaiseDead(), Keybindings.abilitySlot1),
+            new Pair<>(new InsomniaCurse(), Keybindings.abilitySlot2),
+            new Pair<>(new SoulSiphonPassive(), Keybindings.abilitySlot3),
+            new Pair<>(new BloodMoon(), Keybindings.abilitySlot4)
         )
     );
 

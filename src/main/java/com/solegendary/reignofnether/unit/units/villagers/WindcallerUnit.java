@@ -71,7 +71,7 @@ import java.util.Set;
 public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, RangedAttackerUnit, KeyframeAnimated, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new ToggleFlying(), Keybindings.keyQ);
+        ABILITIES.add(new ToggleFlying(), Keybindings.abilitySlot1);
     }
 
     //region

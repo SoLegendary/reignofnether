@@ -51,7 +51,7 @@ public class ControlGroup {
     public ControlGroup() { }
 
     public int getKey() {
-        return keybinding != null ? keybinding.key : -1;
+        return keybinding != null ? keybinding.getKey() : -1;
     }
 
     public void clearAll() {

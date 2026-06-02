@@ -47,19 +47,19 @@ public class Laboratory extends ProductionBuilding implements RangeIndicatorAddo
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.BLACKSTONE);
 
-        this.abilities.add(new CallLightning(), Keybindings.keyL);
+        this.abilities.add(new CallLightning(), Keybindings.hotkey2);
 
-        this.productions.add(ProductionItems.RESEARCH_HUSKS, Keybindings.keyQ);
-        this.productions.add(ProductionItems.RESEARCH_DROWNED, Keybindings.keyW);
-        this.productions.add(ProductionItems.RESEARCH_STRAYS, Keybindings.keyE);
-        this.productions.add(ProductionItems.RESEARCH_BOGGED, Keybindings.keyR);
-        this.productions.add(ProductionItems.RESEARCH_SPIDER_JOCKEYS, Keybindings.keyT);
-        this.productions.add(ProductionItems.RESEARCH_POISON_SPIDERS, Keybindings.keyY);
-        this.productions.add(ProductionItems.RESEARCH_SPIDER_WEBS, Keybindings.keyU);
-        this.productions.add(ProductionItems.RESEARCH_SLIME_CONVERSION, Keybindings.keyI);
-        this.productions.add(ProductionItems.RESEARCH_LAB_LIGHTNING_ROD, Keybindings.keyO);
-        this.productions.add(ProductionItems.RESEARCH_SILVERFISH, Keybindings.keyP);
-        this.productions.add(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, Keybindings.keyJ);
+        this.productions.add(ProductionItems.RESEARCH_HUSKS, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.RESEARCH_DROWNED, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.RESEARCH_STRAYS, Keybindings.abilitySlot3);
+        this.productions.add(ProductionItems.RESEARCH_BOGGED, Keybindings.abilitySlot4);
+        this.productions.add(ProductionItems.RESEARCH_SPIDER_JOCKEYS, Keybindings.abilitySlot5);
+        this.productions.add(ProductionItems.RESEARCH_POISON_SPIDERS, Keybindings.abilitySlot6);
+        this.productions.add(ProductionItems.RESEARCH_SPIDER_WEBS, Keybindings.abilitySlot7);
+        this.productions.add(ProductionItems.RESEARCH_SLIME_CONVERSION, Keybindings.abilitySlot8);
+        this.productions.add(ProductionItems.RESEARCH_LAB_LIGHTNING_ROD, Keybindings.abilitySlot9);
+        this.productions.add(ProductionItems.RESEARCH_SILVERFISH, Keybindings.abilitySlot10);
+        this.productions.add(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, Keybindings.hotkey6);
         this.productions.add(ProductionItems.RESEARCH_MASS_BURIAL, null);
         this.productions.add(ProductionItems.RESEARCH_POSSESSION, null);
 

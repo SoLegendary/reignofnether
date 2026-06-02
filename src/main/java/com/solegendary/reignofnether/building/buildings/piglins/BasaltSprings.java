@@ -39,7 +39,7 @@ public class BasaltSprings extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        this.productions.add(ProductionItems.RESEARCH_CUBE_MAGMA, Keybindings.keyQ);
+        this.productions.add(ProductionItems.RESEARCH_CUBE_MAGMA, Keybindings.abilitySlot1);
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}

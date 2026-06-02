@@ -60,7 +60,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttackerUnit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new FirewallShot(), Keybindings.keyQ);
+        ABILITIES.add(new FirewallShot(), Keybindings.abilitySlot1);
     }
 
     //region

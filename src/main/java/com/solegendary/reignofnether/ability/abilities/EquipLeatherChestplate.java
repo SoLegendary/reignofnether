@@ -28,7 +28,7 @@ public class EquipLeatherChestplate extends EquipAbility {
 
     public EquipLeatherChestplate() {
         super(EQUIP_ACTION, ResourceCosts.EQUIP_LEATHER_ARMOR, Items.LEATHER_CHESTPLATE, EquipmentSlot.CHEST);
-        this.defaultHotkey = Keybindings.keyT;
+        this.defaultHotkey = Keybindings.abilitySlot5;
     }
 
     @Override

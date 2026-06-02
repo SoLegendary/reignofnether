@@ -41,7 +41,7 @@ public class SlimePit extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        this.productions.add(ProductionItems.SLIME, Keybindings.keyQ);
+        this.productions.add(ProductionItems.SLIME, Keybindings.abilitySlot1);
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}

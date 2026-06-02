@@ -31,7 +31,7 @@ public class EnchantGust extends EnchantAbility {
 
     public EnchantGust() {
         super(ENCHANT_ACTION, ResourceCosts.ENCHANT_GUST, 1, EquipmentSlot.MAINHAND);
-        this.defaultHotkey = Keybindings.keyY;
+        this.defaultHotkey = Keybindings.abilitySlot6;
     }
 
     @Override
