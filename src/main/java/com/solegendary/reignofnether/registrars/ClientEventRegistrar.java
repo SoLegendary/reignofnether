@@ -10,6 +10,8 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.commands.CommandsServerEvents;
+import com.solegendary.reignofnether.commands.RtsDebug;
+import com.solegendary.reignofnether.commands.RtsDebugClientEvents;
 import com.solegendary.reignofnether.config.ConfigClientEvents;
 import com.solegendary.reignofnether.config.ConfigVanillaServerEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -95,6 +97,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(PlayerDisplayClientEvents.class);
         vanillaEventBus.register(ScenarioClientEvents.class);
         vanillaEventBus.register(TextInputClientEvents.class);
+        vanillaEventBus.register(RtsDebugClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(GameruleServerEvents.class);
@@ -119,6 +122,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(TimeServerEvents.class);
         vanillaEventBus.register(CustomBuildingServerEvents.class);
         vanillaEventBus.register(CommandsServerEvents.class);
+        vanillaEventBus.register(RtsDebug.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
     }
 }
