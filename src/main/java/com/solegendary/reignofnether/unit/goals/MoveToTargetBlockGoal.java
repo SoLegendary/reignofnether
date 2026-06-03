@@ -89,33 +89,21 @@ public class MoveToTargetBlockGoal extends Goal {
 
     public void start() {
         if (moveTarget != null) {
-            AttributeInstance ai = mob.getAttribute(Attributes.FOLLOW_RANGE);
-            boolean improvedPathfinding = ai != null && ai.getBaseValue() == FOLLOW_RANGE_IMPROVED;
-            Path bestPath;
-            if (improvedPathfinding) {
-                ai.setBaseValue(FOLLOW_RANGE);
-                Path shortPath = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
-                BlockPos shortFinalPos = getFinalNodePos(shortPath);
-                ai.setBaseValue(FOLLOW_RANGE_IMPROVED);
-                if (shortFinalPos != null && shortFinalPos.equals(moveTarget)) {
-                    bestPath = shortPath;
-                } else {
-                    // use the shorter path if it has closer horizontal distance so armies can be force-moved over short rivers
-                    Path longPath = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
-                    BlockPos longFinalPos = getFinalNodePos(longPath);
-                    bestPath = longPath;
-                    if (shortFinalPos != null && longFinalPos != null) {
-                        BlockPos moveTargetXZ = new BlockPos(moveTarget.getX(), 0, moveTarget.getZ());
-                        double shortXZDist = new BlockPos(shortFinalPos.getX(), 0, shortFinalPos.getZ()).distSqr(moveTargetXZ);
-                        double longXZDist = new BlockPos(longFinalPos.getX(), 0, longFinalPos.getZ()).distSqr(moveTargetXZ);
-                        if (shortXZDist < longXZDist)
-                            bestPath = shortPath;
-                    }
+            // Single createPath call. The improvedPathfinding (FOLLOW_RANGE_IMPROVED) attribute is left
+            // in place if present, so vanilla A* searches at the configured range. If the resulting path
+            // ends up suboptimal, the backoff in canContinueToUse handles retries / give-up.
+            Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
+            if (path == null) {
+                AttributeInstance ai = mob.getAttribute(Attributes.FOLLOW_RANGE);
+                if (ai != null && ai.getBaseValue() == FOLLOW_RANGE_IMPROVED) {
+                    // Fallback: long-range search bailed (eg. hit maxVisitedNodes). Retry with the short
+                    // range — vanilla A* may give up sooner and return a useful partial path.
+                    ai.setBaseValue(FOLLOW_RANGE);
+                    path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
+                    ai.setBaseValue(FOLLOW_RANGE_IMPROVED);
                 }
-            } else {
-                bestPath = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
             }
-            this.mob.getNavigation().moveTo(bestPath, Unit.getSpeedModifier((Unit) this.mob));
+            this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier((Unit) this.mob));
         }
         else
             this.mob.getNavigation().stop();
