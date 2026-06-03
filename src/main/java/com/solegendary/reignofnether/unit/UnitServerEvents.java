@@ -118,6 +118,26 @@ public class UnitServerEvents {
 
     private static final ArrayList<Pair<Integer, ChunkAccess>> forcedUnitChunks = new ArrayList<>();
 
+    // Time-sliced formation dispatch: large group MOVE commands are spread across multiple ticks
+    // to avoid the spike from N units all running A* in the same tick. LinkedHashMap preserves
+    // insertion order while letting a re-queued unit overwrite its old target (supersession).
+    private static final int FORMATION_DISPATCH_PER_TICK = 5;
+    private static final LinkedHashMap<Integer, Pair<LivingEntity, BlockPos>> formationDispatchQueue = new LinkedHashMap<>();
+
+    public static void queueFormationMove(List<Pair<LivingEntity, BlockPos>> pairs) {
+        synchronized (formationDispatchQueue) {
+            for (Pair<LivingEntity, BlockPos> p : pairs) {
+                formationDispatchQueue.put(p.getFirst().getId(), p);
+            }
+        }
+    }
+
+    public static int formationDispatchQueueSize() {
+        synchronized (formationDispatchQueue) {
+            return formationDispatchQueue.size();
+        }
+    }
+
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
     }
@@ -640,6 +660,27 @@ public class UnitServerEvents {
         }
     }
 
+
+    @SubscribeEvent
+    public static void onFormationDispatchTick(TickEvent.LevelTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
+            return;
+        synchronized (formationDispatchQueue) {
+            if (formationDispatchQueue.isEmpty())
+                return;
+            int processed = 0;
+            Iterator<Pair<LivingEntity, BlockPos>> it = formationDispatchQueue.values().iterator();
+            while (processed < FORMATION_DISPATCH_PER_TICK && it.hasNext()) {
+                Pair<LivingEntity, BlockPos> pair = it.next();
+                it.remove();
+                LivingEntity le = pair.getFirst();
+                if (le != null && le.isAlive() && le instanceof Unit unit) {
+                    unit.setMoveTarget(pair.getSecond());
+                }
+                processed += 1;
+            }
+        }
+    }
 
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns
     // null
