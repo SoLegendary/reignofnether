@@ -671,7 +671,6 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                 for (int z = -range + z0; z < range + z0; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     if (blockPosition().distToCenterSqr(pos.getCenter()) < range * range) {
-                        System.out.println(z);
                         BlockState bs = level().getBlockState(pos);
                         if (bs.getBlock() == Blocks.FIRE) {
                             level().setBlockAndUpdate(pos, BlockRegistrar.UNEXTINGUISHABLE_SOUL_FIRE.get().defaultBlockState());

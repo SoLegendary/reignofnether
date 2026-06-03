@@ -8,6 +8,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -78,11 +79,14 @@ public class FogOfWarServerEvents {
 
         ArrayList<Pair<BlockPos, BlockState>> plants = new ArrayList<>();
 
+        // The 16³ region lies entirely in one chunk — fetch it once instead of looking it up per read.
+        LevelChunk chunk = serverLevel.getChunkAt(renderChunkOrigin);
+
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
                     BlockPos bp = renderChunkOrigin.offset(x,y,z);
-                    BlockState bs = serverLevel.getBlockState(bp);
+                    BlockState bs = chunk.getBlockState(bp);
                     if (bs.is(BlockTags.REPLACEABLE_BY_TREES) || bs.getBlock() instanceof IPlantable) {
                         plants.add(new Pair<>(bp, bs));
                     }
@@ -96,7 +100,7 @@ public class FogOfWarServerEvents {
             for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
                     BlockPos bp = renderChunkOrigin.offset(x,y,z);
-                    BlockState bs = serverLevel.getBlockState(bp);
+                    BlockState bs = chunk.getBlockState(bp);
                     serverLevel.setBlockAndUpdate(bp, Blocks.BEDROCK.defaultBlockState());
                     serverLevel.setBlockAndUpdate(bp, bs);
                 }

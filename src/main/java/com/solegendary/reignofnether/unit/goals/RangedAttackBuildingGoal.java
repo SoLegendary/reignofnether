@@ -26,6 +26,19 @@ public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
     private UnitCrossbowAttackGoal<?> cbowAttackGoal = null;
     private BuildingPlacement buildingTarget = null;
 
+    // Cached on first use — Unit's moveGoal is stable across the goal's lifetime
+    private boolean moveGoalResolved = false;
+    private FlyingMoveToTargetGoal cachedFlyingMoveGoal = null;
+
+    private FlyingMoveToTargetGoal getFlyingMoveGoal() {
+        if (!moveGoalResolved) {
+            moveGoalResolved = true;
+            if (((Unit) this.mob).getMoveGoal() instanceof FlyingMoveToTargetGoal fmg)
+                cachedFlyingMoveGoal = fmg;
+        }
+        return cachedFlyingMoveGoal;
+    }
+
     public RangedAttackBuildingGoal(T mob, UnitBowAttackGoal<?> bowAttackGoal) {
         this.mob = mob;
         this.bowAttackGoal = bowAttackGoal;
@@ -160,25 +173,25 @@ public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
 
     // moveGoal controllers
     private boolean isDoneMoving() {
-        Unit unit = (Unit) this.mob;
-        if (unit.getMoveGoal() instanceof FlyingMoveToTargetGoal flyingMoveGoal)
-            return flyingMoveGoal.isAtDestination();
+        FlyingMoveToTargetGoal fmg = getFlyingMoveGoal();
+        if (fmg != null)
+            return fmg.isAtDestination();
         else
             return this.mob.getNavigation().isDone();
     }
 
     private void stopMoving() {
-        Unit unit = (Unit) this.mob;
-        if (unit.getMoveGoal() instanceof FlyingMoveToTargetGoal flyingMoveGoal)
-            flyingMoveGoal.stopMoving();
+        FlyingMoveToTargetGoal fmg = getFlyingMoveGoal();
+        if (fmg != null)
+            fmg.stopMoving();
         else
             this.mob.getNavigation().stop();
     }
 
     private void moveTo(BlockPos bp) {
-        Unit unit = (Unit) this.mob;
-        if (unit.getMoveGoal() instanceof FlyingMoveToTargetGoal flyingMoveGoal)
-            flyingMoveGoal.setMoveTarget(bp);
+        FlyingMoveToTargetGoal fmg = getFlyingMoveGoal();
+        if (fmg != null)
+            fmg.setMoveTarget(bp);
         else
             this.mob.getNavigation().moveTo(bp.getX(), bp.getY(), bp.getZ(), 1.0f);
     }

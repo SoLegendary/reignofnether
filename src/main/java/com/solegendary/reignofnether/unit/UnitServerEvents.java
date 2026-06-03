@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.unit;
 
-import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.SoulSiphonPassive;
@@ -116,7 +115,31 @@ public class UnitServerEvents {
 
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
-    private static final ArrayList<Pair<Integer, ChunkAccess>> forcedUnitChunks = new ArrayList<>();
+    private static final HashMap<Integer, ChunkAccess> forcedUnitChunks = new HashMap<>();
+
+    private static final List<MobEffect> SYNCED_MOB_EFFECTS = List.of(
+        MobEffects.DAMAGE_RESISTANCE,
+        MobEffectRegistrar.STUN.get(),
+        MobEffectRegistrar.FREEZE.get(),
+        MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(),
+        MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(),
+        MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(),
+        MobEffectRegistrar.ATTACK_SLOWDOWN.get(),
+        MobEffectRegistrar.TEMPORARY_EFFICIENCY.get(),
+        MobEffectRegistrar.BLOODLUST.get(),
+        MobEffectRegistrar.FROST_DAMAGE.get(),
+        MobEffectRegistrar.DISARM.get(),
+        MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get(),
+        MobEffectRegistrar.SCORCHING_FIRE.get(),
+        MobEffectRegistrar.SOULS_AFLAME.get(),
+        MobEffectRegistrar.ANGRY.get(),
+        MobEffectRegistrar.FEARFUL.get(),
+        MobEffectRegistrar.PARTIALLY_POSSESSED.get(),
+        MobEffects.LEVITATION
+    );
+
+    // Per-entity last-synced mob effect amplifiers. Null amp means "absent last sync".
+    private static final HashMap<Integer, HashMap<MobEffect, Byte>> lastSyncedEffects = new HashMap<>();
 
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
@@ -399,7 +422,7 @@ public class UnitServerEvents {
                 true,
                 true
             );
-            forcedUnitChunks.add(new Pair<>(entity.getId(), chunk));
+            forcedUnitChunks.put(entity.getId(), chunk);
         }
     }
 
@@ -411,6 +434,7 @@ public class UnitServerEvents {
             && !evt.getLevel().isClientSide) {
 
             allUnits.removeIf(e -> e.getId() == entity.getId());
+            lastSyncedEffects.remove(entity.getId());
             UnitSyncClientboundPacket.sendLeavePacket(entity);
 
             //ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
@@ -434,7 +458,7 @@ public class UnitServerEvents {
                     }
                 }
             } catch (ConcurrentModificationException e) {
-                System.out.println("Caught ConcurrentModificationException in UnitServerEvents EntityLeaveLevelEvent: " + e.getMessage());
+                ReignOfNether.LOGGER.error("Caught ConcurrentModificationException in UnitServerEvents EntityLeaveLevelEvent", e);
             }
         }
     }
@@ -659,31 +683,20 @@ public class UnitServerEvents {
                     UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                     UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
 
-                    for (MobEffect me : List.of(
-                            MobEffects.DAMAGE_RESISTANCE,
-                            MobEffectRegistrar.STUN.get(),
-                            MobEffectRegistrar.FREEZE.get(),
-                            MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(),
-                            MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(),
-                            MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(),
-                            MobEffectRegistrar.ATTACK_SLOWDOWN.get(),
-                            MobEffectRegistrar.TEMPORARY_EFFICIENCY.get(),
-                            MobEffectRegistrar.BLOODLUST.get(),
-                            MobEffectRegistrar.FROST_DAMAGE.get(),
-                            MobEffectRegistrar.DISARM.get(),
-                            MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get(),
-                            MobEffectRegistrar.SCORCHING_FIRE.get(),
-                            MobEffectRegistrar.SOULS_AFLAME.get(),
-                            MobEffectRegistrar.ANGRY.get(),
-                            MobEffectRegistrar.FEARFUL.get(),
-                            MobEffectRegistrar.PARTIALLY_POSSESSED.get(),
-                            MobEffects.LEVITATION
-                    )) {
+                    HashMap<MobEffect, Byte> lastState = lastSyncedEffects.computeIfAbsent(entity.getId(), k -> new HashMap<>());
+                    for (MobEffect me : SYNCED_MOB_EFFECTS) {
                         MobEffectInstance mei = entity.getEffect(me);
-                        if (mei != null)
-                            UnitSyncMobEffectsClientboundPacket.addEffectClientside(entity, mei);
-                        else
+                        Byte lastAmp = lastState.get(me);
+                        if (mei != null) {
+                            byte amp = (byte) mei.getAmplifier();
+                            if (lastAmp == null || lastAmp != amp) {
+                                UnitSyncMobEffectsClientboundPacket.addEffectClientside(entity, mei);
+                                lastState.put(me, amp);
+                            }
+                        } else if (lastAmp != null) {
                             UnitSyncMobEffectsClientboundPacket.removeEffectClientside(entity, me);
+                            lastState.remove(me);
+                        }
                     }
 
                     if (unit.getAnchor() != null)
@@ -698,28 +711,21 @@ public class UnitServerEvents {
                 }
 
                 // remove old chunk // add current chunk
-                boolean chunkNeedsUpdate = false;
                 ChunkAccess newChunk = evt.level.getChunk(entity.getOnPos());
+                ChunkAccess oldChunk = forcedUnitChunks.get(entity.getId());
+                boolean chunkNeedsUpdate = oldChunk != null && (
+                    oldChunk.getPos().x != newChunk.getPos().x || oldChunk.getPos().z != newChunk.getPos().z
+                );
 
-                for (Pair<Integer, ChunkAccess> forcedChunk : forcedUnitChunks) {
-                    int id = forcedChunk.getFirst();
-                    ChunkAccess chunk = forcedChunk.getSecond();
-                    if (id == entity.getId() && (
-                        chunk.getPos().x != newChunk.getPos().x || chunk.getPos().z != newChunk.getPos().z
-                    )) {
-                        ForgeChunkManager.forceChunk((ServerLevel) evt.level,
-                            ReignOfNether.MOD_ID,
-                            entity,
-                            chunk.getPos().x,
-                            chunk.getPos().z,
-                            false,
-                            true
-                        );
-                        chunkNeedsUpdate = true;
-                    }
-                }
                 if (chunkNeedsUpdate) {
-                    forcedUnitChunks.removeIf(p -> p.getFirst() == entity.getId());
+                    ForgeChunkManager.forceChunk((ServerLevel) evt.level,
+                        ReignOfNether.MOD_ID,
+                        entity,
+                        oldChunk.getPos().x,
+                        oldChunk.getPos().z,
+                        false,
+                        true
+                    );
                     ForgeChunkManager.forceChunk((ServerLevel) evt.level,
                         ReignOfNether.MOD_ID,
                         entity,
@@ -728,7 +734,7 @@ public class UnitServerEvents {
                         true,
                         true
                     );
-                    forcedUnitChunks.add(new Pair<>(entity.getId(), newChunk));
+                    forcedUnitChunks.put(entity.getId(), newChunk);
                     //ReignOfNether.LOGGER.info("Updated forced chunk for entity: " + entity.getId() + " at: " +
                     // newChunk.getPos().x + "," + newChunk.getPos().z);
                 }
