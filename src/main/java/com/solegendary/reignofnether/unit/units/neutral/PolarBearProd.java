@@ -44,7 +44,7 @@ public class PolarBearProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/polar_bear.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.polar_bear"), Style.EMPTY.withBold(true))
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.polar_bear_unit"), Style.EMPTY.withBold(true))
                 )
         );
     }

@@ -46,12 +46,12 @@ public class BoggedProd extends GraveyardUnitProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/bogged.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip3"), Style.EMPTY)
                 )
         );
     }
@@ -64,14 +64,14 @@ public class BoggedProd extends GraveyardUnitProductionItem {
             () -> false,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_BOGGED),
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip3"), Style.EMPTY)
             ),
             this
         );

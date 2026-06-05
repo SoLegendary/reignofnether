@@ -43,12 +43,12 @@ public class WraithProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/wraith.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wraith"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wraith_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wraith.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wraith.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wraith_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wraith_unit.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wraith.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wraith_unit.tooltip3"), Style.EMPTY)
                 )
         );
     }
@@ -61,14 +61,14 @@ public class WraithProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wraith"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wraith_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wraith.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wraith.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wraith_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wraith_unit.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wraith.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wraith_unit.tooltip3"), Style.EMPTY)
             ),
             this
         );

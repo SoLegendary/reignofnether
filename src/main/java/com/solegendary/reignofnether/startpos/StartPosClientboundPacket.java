@@ -55,6 +55,26 @@ public class StartPosClientboundPacket {
                 new StartPosClientboundPacket(StartPosAction.UNSET_GAME_STARTING, new BlockPos(0,0,0), Faction.NONE, "", 0));
     }
 
+    public static void readyPlayer(String playerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new StartPosClientboundPacket(StartPosAction.PLAYER_READY, new BlockPos(0,0,0), Faction.NONE, playerName, 0));
+    }
+
+    public static void unreadyPlayer(String playerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new StartPosClientboundPacket(StartPosAction.PLAYER_UNREADY, new BlockPos(0,0,0), Faction.NONE, playerName, 0));
+    }
+
+    public static void enablePos(BlockPos pos) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new StartPosClientboundPacket(StartPosAction.ENABLE, pos, Faction.NONE, "", 0));
+    }
+
+    public static void disablePos(BlockPos pos) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new StartPosClientboundPacket(StartPosAction.DISABLE, pos, Faction.NONE, "", 0));
+    }
+
     public StartPosClientboundPacket(StartPosAction action, BlockPos blockPos, Faction faction, String playerName, int colorId) {
         this.action = action;
         this.blockPos = blockPos;
@@ -97,9 +117,11 @@ public class StartPosClientboundPacket {
                             case RESERVE -> {
                                 for (StartPos startPos : StartPosClientEvents.startPoses) {
                                     if (startPos.pos.equals(blockPos)) {
+                                        startPos.reset();
                                         startPos.faction = faction;
                                         startPos.playerName = playerName;
-                                        break;
+                                    } else if (startPos.playerName.equals(playerName)) {
+                                        startPos.reset();
                                     }
                                 }
                             }
@@ -114,6 +136,10 @@ public class StartPosClientboundPacket {
                             case RESET -> StartPosClientEvents.resetAll();
                             case SET_GAME_STARTING -> StartPosClientEvents.isStarting = true;
                             case UNSET_GAME_STARTING -> StartPosClientEvents.isStarting = false;
+                            case PLAYER_READY -> StartPosClientEvents.setPlayerReady(playerName, true);
+                            case PLAYER_UNREADY -> StartPosClientEvents.setPlayerReady(playerName, false);
+                            case ENABLE -> StartPosClientEvents.setPosEnabled(blockPos, true);
+                            case DISABLE -> StartPosClientEvents.setPosEnabled(blockPos, false);
                         }
                         success.set(true);
                     });

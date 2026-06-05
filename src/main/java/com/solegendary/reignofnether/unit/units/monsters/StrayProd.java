@@ -53,11 +53,11 @@ public class StrayProd extends GraveyardUnitProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.stray_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.stray_unit.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.stray_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
@@ -70,15 +70,15 @@ public class StrayProd extends GraveyardUnitProductionItem {
             () -> false,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS),
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.stray_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.stray_unit.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.stray_unit.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.stray.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.stray_unit.tooltip3"), Style.EMPTY)
             ),
             this
         );

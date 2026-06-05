@@ -44,7 +44,7 @@ public class WolfProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/wolf.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.wolf"), Style.EMPTY.withBold(true))
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wolf_unit"), Style.EMPTY.withBold(true))
                 )
         );
     }

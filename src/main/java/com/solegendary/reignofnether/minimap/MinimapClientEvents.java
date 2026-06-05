@@ -7,15 +7,16 @@ import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
+import com.solegendary.reignofnether.blocks.NightCircleMode;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
-import com.solegendary.reignofnether.unit.FormationDragMove;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -24,15 +25,14 @@ import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
-import com.solegendary.reignofnether.blocks.NightCircleMode;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
+import com.solegendary.reignofnether.unit.FormationDragMove;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitActionItem;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.util.ArrayUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -69,8 +69,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static com.solegendary.reignofnether.hud.HudClientEvents.isMouseOverAnyButton;
 import static com.solegendary.reignofnether.blocks.BlockClientEvents.nightCircleMode;
+import static com.solegendary.reignofnether.hud.HudClientEvents.*;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class MinimapClientEvents {
@@ -844,9 +844,8 @@ public class MinimapClientEvents {
                             //rgb = PlayerColors.getPlayerDisplayColorHex(startPos.playerName);
                             //if (startPos.faction == Faction.NONE)
                             //    rgb = 0xFFFF00;
-                            rgb = startPos.colorId;
+                            rgb = startPos.getHexColor();
                         }
-
                         int xN = x - xc_world + (mapGuiRadius * 2);
                         int zN = z - zc_world + (mapGuiRadius * 2);
 
@@ -855,6 +854,20 @@ public class MinimapClientEvents {
                 }
             }
         }
+    }
+
+    /** Converts a world XZ coordinate to a minimap screen XY position (centre of that pixel). */
+    public static Vec2 worldPosToMinimapScreen(int worldX, int worldZ) {
+        float pixelsToBlocks = (float) worldRadius / (float) mapGuiRadius;
+
+        // normalised offset from map centre in pixels (pre-rotation)
+        float dx = (worldX - xc_world) / pixelsToBlocks;
+        float dz = (worldZ - zc_world) / pixelsToBlocks;
+
+        // rotate -45° to go from axis-aligned → diamond orientation
+        Vec2 rotated = MyMath.rotateCoords((float) (dx / Math.sqrt(2)), (float) (dz / Math.sqrt(2)), -45);
+
+        return new Vec2(xc + rotated.x, yc + rotated.y);
     }
 
     private static void drawMapMarker(MapMarker marker) {
@@ -994,6 +1007,7 @@ public class MinimapClientEvents {
     public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         if (!OrthoviewClientEvents.isEnabled() ||
                 OrthoviewClientEvents.isCameraLocked() ||
+                HudClientEvents.isMouseOverAnyButton() ||
                 !(MC.screen instanceof TopdownGui)) {
             return;
         }
@@ -1042,8 +1056,11 @@ public class MinimapClientEvents {
         boolean altDown = Keybindings.altMod.isDown();
 
         // when clicking on map move player there
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && !isMouseOverAnyButton()) {
-            BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
+        Button startPosButton = getMousedOverStartPosButton();
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1 && (!isMouseOverAnyButton() || startPosButton != null)) {
+            BlockPos moveTo = startPosButton != null ?
+                    getWorldPosOnMinimap((float) startPosButton.x + 11, startPosButton.y + 11, true) :
+                    getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
 
             if (MC.player != null && moveTo != null) {
                 if (markerMode) {
@@ -1122,7 +1139,7 @@ public class MinimapClientEvents {
                     UnitClientEvents.sendUnitCommandManual(UnitAction.MOVE, -1, idArray, moveTo);
                 }
             }
-		minimapRightClickDown = false;
+		    minimapRightClickDown = false;
         }
     }
 

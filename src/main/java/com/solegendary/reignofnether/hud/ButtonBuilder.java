@@ -39,6 +39,7 @@ public class ButtonBuilder {
 
     // Optional with defaults
     private int iconSize = Button.DEFAULT_ICON_SIZE;
+    private int imageSize = Button.DEFAULT_ICON_SIZE;
     private ResourceLocation frameResource = null;
     private boolean lightUpOnHover = true;
     private ResourceLocation bgIconResource = null;
@@ -72,6 +73,11 @@ public class ButtonBuilder {
 
     public ButtonBuilder iconSize(int iconSize) {
         this.iconSize = iconSize;
+        return this;
+    }
+
+    public ButtonBuilder imageSize(int imageSize) {
+        this.imageSize = imageSize;
         return this;
     }
 
@@ -209,6 +215,7 @@ public class ButtonBuilder {
         button.stretchIconToBorders = stretchIconToBorders;
         button.tooltipOffsetY = tooltipOffsetY;
         button.lightUpOnHover = lightUpOnHover;
+        button.imageSize = imageSize;
 
         return button;
     }

@@ -82,11 +82,11 @@ public class ZombieProd extends GraveyardUnitProductionItem {
                 ZombieProd.itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
@@ -99,13 +99,13 @@ public class ZombieProd extends GraveyardUnitProductionItem {
                 () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS) || ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED),
                 () -> true,
                 List.of(
-                    FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie"), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
                     ResourceCosts.getFormattedPopAndTime(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie.tooltip1"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit.tooltip1"), Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie.tooltip2"), Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit.tooltip2"), Style.EMPTY)
                 ),
                 this
         );

@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.CrashReport;
@@ -16,12 +17,14 @@ import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -595,5 +598,37 @@ public class MyRenderer {
             }
             guiGraphics.pose().popPose();
         }
+    }
+
+    public static ResourceLocation getPlayerSkinRl(String playerName) {
+        Minecraft MC = Minecraft.getInstance();
+        if (MC.level != null) {
+            for (AbstractClientPlayer player : MC.level.players()) {
+                if (player.getName().getString().equals(playerName))
+                    return player.getSkinTextureLocation();
+            }
+        }
+        return DefaultPlayerSkin.getDefaultSkin(MC.player.getUUID());
+    }
+
+    public static void renderPlayerHead(String playerName, GuiGraphics guiGraphics, int x, int y) {
+        ResourceLocation skinRl = getPlayerSkinRl(playerName);
+        guiGraphics.blit(skinRl,
+                x + Button.DEFAULT_ICON_FRAME_SIZE,
+                y + 4,
+                Button.DEFAULT_ICON_SIZE, Button.DEFAULT_ICON_SIZE,
+                8.0f, 8.0f,
+                8, 8,
+                64, 64
+        );
+        // draw hat
+        guiGraphics.blit(skinRl,
+                x + Button.DEFAULT_ICON_FRAME_SIZE,
+                y + 4,
+                Button.DEFAULT_ICON_SIZE, Button.DEFAULT_ICON_SIZE,
+                40.0f, 8.0f,
+                8, 8,
+                64, 64
+        );
     }
 }

@@ -151,18 +151,20 @@ public class Button {
 
         if (bgIconResource != null) {
             guiGraphics.pose().translate(0,0,1);
-            int iconX = frameResource != null ? x+4 + (7 - iconSize/2) : x + (7 - iconSize/2);
-            int iconY = frameResource != null ? y+4 + (7 - iconSize/2) : y + (7 - iconSize/2);
+            int iconX = x+4 + (7 - xyDiff - iconSize/2);
+            int iconY = y+4 + (7 - xyDiff - iconSize/2);
             if (stretchIconToBorders) {
                 iconX -= 1;
                 iconY -= 1;
             }
+            iconX += (DEFAULT_ICON_SIZE - imageSize) / 2;
+            iconY += (DEFAULT_ICON_SIZE - imageSize) / 2;
             MyRenderer.renderIcon(
                     guiGraphics,
                     bgIconResource,
                     iconX,
                     iconY,
-                    stretchIconToBorders ? iconSize + 2 : iconSize
+                    stretchIconToBorders ? imageSize + 2 : imageSize
             );
         }
         // item/unit icon

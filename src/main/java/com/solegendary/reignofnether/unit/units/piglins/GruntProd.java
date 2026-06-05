@@ -50,22 +50,22 @@ public class GruntProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.grunt"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.grunt_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.grunt.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.grunt.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.grunt_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.grunt_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-            FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.grunt"), Style.EMPTY.withBold(true)),
+            FormattedCharSequence.forward(I18n.get("entity.reignofnether.grunt_unit"), Style.EMPTY.withBold(true)),
             ResourceCosts.getFormattedCost(cost),
             ResourceCosts.getFormattedPopAndTime(cost),
             FormattedCharSequence.forward("", Style.EMPTY),
-            FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.grunt.tooltip1"), Style.EMPTY),
-            FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.grunt.tooltip2"), Style.EMPTY)
+            FormattedCharSequence.forward(I18n.get("entity.reignofnether.grunt_unit.tooltip1"), Style.EMPTY),
+            FormattedCharSequence.forward(I18n.get("entity.reignofnether.grunt_unit.tooltip2"), Style.EMPTY)
         ));
 
         return new StartProductionButton(

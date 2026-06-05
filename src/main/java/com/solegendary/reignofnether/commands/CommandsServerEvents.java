@@ -471,6 +471,15 @@ public class CommandsServerEvents {
 					))))
 		);
 
+		dispatcher.register(Commands.literal("rtsapi-teams-mode")
+				.requires(source -> source.hasPermission(2))
+				.then(Commands.argument("mode", StringArgumentType.string())
+						.executes(ctx -> setStartingTeamsMode(
+								ctx,
+								StringArgumentType.getString(ctx, "mode")
+						)))
+		);
+
 		dispatcher.register(Commands.literal("rtsapi-set-starting-teams-mode")
 				.requires(source -> source.hasPermission(2))
 				.then(Commands.argument("mode", StringArgumentType.string())

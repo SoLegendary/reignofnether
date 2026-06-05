@@ -49,9 +49,9 @@ public class WitchProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/witch.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.witch"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.witch_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.witch.tooltip1"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.witch_unit.tooltip1"), Style.EMPTY)
                 )
         );
     }
@@ -64,11 +64,11 @@ public class WitchProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.witch"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.witch_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.witch.tooltip1"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.witch_unit.tooltip1"), Style.EMPTY)
             ),
             this
         );

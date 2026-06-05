@@ -49,11 +49,11 @@ public class VillagerProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.villager_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.villager_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.villager_unit.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.villager_unit.tooltip3"), Style.EMPTY)
                 )
         );
     }
@@ -66,13 +66,13 @@ public class VillagerProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.villager_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.villager.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.villager_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.villager_unit.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.villager_unit.tooltip3"), Style.EMPTY)
             ),
             this
         );

@@ -53,12 +53,12 @@ public class HuskProd extends GraveyardUnitProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.husk_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.husk_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.husk_unit.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.husk_unit.tooltip3"), Style.EMPTY)
                 )
         );
     }
@@ -71,14 +71,14 @@ public class HuskProd extends GraveyardUnitProductionItem {
             () -> false,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS),
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.husk_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.husk_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.husk_unit.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.husk.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.husk_unit.tooltip3"), Style.EMPTY)
             ),
             this
         );

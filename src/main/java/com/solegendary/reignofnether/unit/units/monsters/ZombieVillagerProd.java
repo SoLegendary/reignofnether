@@ -49,12 +49,12 @@ public class ZombieVillagerProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit_villager"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit_villager.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit_villager.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit_villager.tooltip3"), Style.EMPTY)
                 )
         );
     }
@@ -67,14 +67,14 @@ public class ZombieVillagerProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit_villager"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit_villager.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit_villager.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zombie_villager.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit_villager.tooltip3"), Style.EMPTY)
             ),
             this
         );

@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.rtsmap;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -48,6 +47,20 @@ public class RTSMapInfoServerEvents {
             evt.getEntity().sendSystemMessage(authors);
             evt.getEntity().sendSystemMessage(Component.literal(""));
             evt.getEntity().sendSystemMessage(Component.literal(rtsMapInfo.getDescription()));
+
+            StringBuilder modesStr = new StringBuilder();
+            for (String modeName : rtsMapInfo.getModes().keySet()) {
+                if (modeName.equals(rtsMapInfo.getDefaultMode()))
+                    modesStr.append("[").append(modeName).append("]").append(", ");
+                else
+                    modesStr.append(modeName).append(", ");
+            }
+            if (modesStr.length() > 0) {
+                modesStr.setLength(modesStr.length() - 2);
+                evt.getEntity().sendSystemMessage(Component.literal(""));
+                evt.getEntity().sendSystemMessage(Component.translatable("message.reignofnether.rts_map_info_modes", modesStr));
+                evt.getEntity().sendSystemMessage(Component.translatable("message.reignofnether.rts_map_info_modes_command", modesStr));
+            }
         }
     }
 }

@@ -52,20 +52,20 @@ public class HeadhunterProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/headhunter.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.headhunter"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.headhunter_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.head_hunter.tooltip1"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.headhunter_unit.tooltip1"), Style.EMPTY)
                 )
         );
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.headhunter"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.headhunter_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.head_hunter.tooltip1"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.headhunter_unit.tooltip1"), Style.EMPTY)
         ));
 
         return new StartProductionButton(

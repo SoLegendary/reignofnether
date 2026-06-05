@@ -74,7 +74,7 @@ public class BuildingUtils {
             buildings = BuildingServerEvents.getBuildings();
         var flag = false;
         for (BuildingPlacement buildingPlacement : buildings) {
-            if (buildingPlacement.originPos == building.originPos) {
+            if (buildingPlacement.originPos.equals(building.originPos)) {
                 flag = true;
                 break;
             }

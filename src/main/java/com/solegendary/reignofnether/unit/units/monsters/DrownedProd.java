@@ -53,14 +53,14 @@ public class DrownedProd extends GraveyardUnitProductionItem {
                 DrownedProd.itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/drowned.png"),
                 List.of(
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned.tooltip3"), Style.EMPTY),
+                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip3"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned.tooltip4"), Style.EMPTY)
+                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip4"), Style.EMPTY)
                 )
         );
     }
@@ -73,16 +73,16 @@ public class DrownedProd extends GraveyardUnitProductionItem {
             () -> false,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED),
             List.of(
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned.tooltip3"), Style.EMPTY),
+                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip3"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("units.monsters.reignofnether.drowned.tooltip4"), Style.EMPTY)
+                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip4"), Style.EMPTY)
             ),
             this
         );

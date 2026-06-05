@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.ability.abilities.CallToArmsUnit;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
-import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
@@ -41,6 +40,7 @@ import com.solegendary.reignofnether.sandbox.SandboxActionButtons;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxMenuType;
 import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
+import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -77,6 +77,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderNameTagEvent;
@@ -179,32 +180,32 @@ public class HudClientEvents {
         String name = MiscUtil.getSimpleEntityName(entity);
 
         if (entity.isBaby())
-            name = I18n.get("units.neutral.reignofnether.baby") + " " + name;
+            name = I18n.get("entity.reignofnether.reignofnether.baby") + " " + name;
 
         if (!(entity instanceof Unit))
             return name.toLowerCase();
 
         if (entity instanceof MilitiaUnit militiaUnit && militiaUnit.isUsingBow()) {
-            name = I18n.get("units.villagers.reignofnether.militia_archer");
+            name = I18n.get("entity.reignofnether.militia_unit_archer");
         }
         ItemStack itemStack = entity.getItemBySlot(EquipmentSlot.HEAD);
         if (itemStack.getItem() instanceof BannerItem) {
-            name += " " + I18n.get("units.villagers.reignofnether.captain");
+            name += " " + I18n.get("entity.reignofnether.captain");
         }
         if (entity.getPassengers().size() == 1) {
             Entity passenger = entity.getPassengers().get(0);
             if (entity instanceof RavagerUnit && passenger instanceof PillagerUnit) {
-                name = I18n.get("units.villagers.reignofnether.ravager_artillery");
+                name = I18n.get("entity.reignofnether.ravager_unit_artillery");
             } else if (entity instanceof PoisonSpiderUnit && (
                     passenger instanceof SkeletonUnit || passenger instanceof StrayUnit
             )) {
-                name = I18n.get("units.monsters.reignofnether.poison_spider_jockey");
+                name = I18n.get("entity.reignofnether.poison_spider_unit_jockey");
             } else if (entity instanceof SpiderUnit && (
                 passenger instanceof SkeletonUnit || passenger instanceof StrayUnit
             )) {
-                name = I18n.get("units.monsters.reignofnether.spider_jockey");
+                name = I18n.get("entity.reignofnether.spider_unit_jockey");
             }else if (entity instanceof HoglinUnit && passenger instanceof HeadhunterUnit) {
-                name = I18n.get("units.piglins.reignofnether.hoglin_rider");
+                name = I18n.get("entity.reignofnether.hoglin_unit_rider");
             } else {
                 String pName = MiscUtil.getSimpleEntityName(entity.getPassengers().get(0)).replace("_", " ");
                 String nameCap = pName.substring(0, 1).toUpperCase() + pName.substring(1);
@@ -243,11 +244,11 @@ public class HudClientEvents {
                     else
                         name = I18n.get("units.reignofnether.hunter");
                 }
-                default -> name = I18n.get("units.villagers.reignofnether.villager");
+                default -> name = I18n.get("entity.reignofnether.villager_unit");
             }
         }
         if (entity instanceof CreeperUnit cUnit && cUnit.isPowered()) {
-            name = I18n.get("units.monsters.reignofnether.charged_creeper");
+            name = I18n.get("entity.reignofnether.charged_creeper");
         }
         return name;
     }
@@ -690,7 +691,7 @@ public class HudClientEvents {
                     AlliancesClient.canControlAlly(unit)) &&
                 unitButtons.size() < (buttonsPerRow * 2)) {
                 // mob head icon
-                String unitName = MiscUtil.getSimpleEntityName(unit);
+                String unitName = MiscUtil.getSimpleEntityName(unit, true).toLowerCase();
                 String buttonImagePath;
 
                 if (unit.isVehicle()) {
@@ -720,7 +721,7 @@ public class HudClientEvents {
                     .build();
 
                 if (unit.isVehicle() && unit instanceof Unit) {
-                    String passengerName = MiscUtil.getSimpleEntityName(unit.getFirstPassenger());
+                    String passengerName = MiscUtil.getSimpleEntityName(unit.getFirstPassenger(), true);
                     button.bgIconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,
                         "textures/mobheads/" + passengerName + ".png"
                     );
@@ -1482,6 +1483,7 @@ public class HudClientEvents {
                     renderedButtons.add(cycleRoleToPlayButton);
                 }
             } else { // normal gamemodes
+                /*
                 Button startPosButton = StartPosClientEvents.getPositionsButton();
                 if (!startPosButton.isHidden.get()) {
                     startPosButton.render(evt.getGuiGraphics(),
@@ -1492,25 +1494,26 @@ public class HudClientEvents {
                     );
                     renderedButtons.add(startPosButton);
                 }
-                Button startButton = StartPosClientEvents.getStartButton();
-                if (!startButton.isHidden.get()) {
-                    startButton.render(evt.getGuiGraphics(),
+                 */
+                Button readyButton = StartPosClientEvents.getReadyButton();
+                if (!readyButton.isHidden.get()) {
+                    readyButton.render(evt.getGuiGraphics(),
                             screenWidth - (StartButtons.ICON_SIZE * 4),
                             40,
                             mouseX,
                             mouseY
                     );
-                    renderedButtons.add(startButton);
+                    renderedButtons.add(readyButton);
                 }
-                Button cancelStartButton = StartPosClientEvents.getCancelStartButton();
-                if (!cancelStartButton.isHidden.get()) {
-                    cancelStartButton.render(evt.getGuiGraphics(),
+                Button unreadyButton = StartPosClientEvents.getUnreadyButton();
+                if (!unreadyButton.isHidden.get()) {
+                    unreadyButton.render(evt.getGuiGraphics(),
                             screenWidth - (StartButtons.ICON_SIZE * 4),
                             40,
                             mouseX,
                             mouseY
                     );
-                    renderedButtons.add(cancelStartButton);
+                    renderedButtons.add(unreadyButton);
                 }
                 Button diffsButton = ConfigClientEvents.getDiffsButton();
                 if (!diffsButton.isHidden.get()) {
@@ -1748,6 +1751,30 @@ public class HudClientEvents {
             renderedButtons.add(idleWorkerButton);
         }
 
+        // -------------------------
+        // Minimap start pos buttons
+        // -------------------------
+        if (MC.player != null && StartPosClientEvents.isEnabled() &&
+                !StartPosClientEvents.isStarting &&
+                !PlayerClientEvents.rtsLocked) {
+
+            for (StartPos startPos : StartPosClientEvents.startPoses) {
+                int xc = startPos.pos.getX();
+                int zc = startPos.pos.getZ();
+
+                // Render the Button overlaid at the map screen position:
+                if (MinimapClientEvents.isWorldXZinsideMap(xc, zc)) {
+                    Button button = startPos.getButton(MC.player.getName().getString());
+                    Vec2 worldPos = new Vec2(xc, zc);
+                    Vec2 screenPos = MinimapClientEvents.worldPosToMinimapScreen((int) worldPos.x, (int) worldPos.y);
+                    int btnX = (int) screenPos.x - Button.DEFAULT_ICON_FRAME_SIZE / 2;
+                    int btnY = (int) screenPos.y - Button.DEFAULT_ICON_FRAME_SIZE / 2;
+                    button.render(evt.getGuiGraphics(), btnX, btnY, HudClientEvents.mouseX, HudClientEvents.mouseY);
+                    renderedButtons.add(button);
+                }
+            }
+        }
+
         // ------------------------------------------------------
         // Button tooltips (has to be rendered last to be on top)
         // ------------------------------------------------------
@@ -1764,6 +1791,14 @@ public class HudClientEvents {
                 return true;
             }
         return false;
+    }
+
+    public static Button getMousedOverStartPosButton() {
+        for (Button button : renderedButtons)
+            if (button.name.equals(StartPos.BUTTON_NAME) && button.isMouseOver(mouseX, mouseY)) {
+                return button;
+            }
+        return null;
     }
 
     public static boolean isMouseOverAnyButtonOrHud() {

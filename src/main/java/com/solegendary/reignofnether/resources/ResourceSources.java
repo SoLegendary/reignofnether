@@ -285,6 +285,13 @@ public class ResourceSources {
                     10,
                     ResourceName.FOOD
             ),
+            new ResourceSource("Hay block",
+                    List.of(Blocks.HAY_BLOCK),
+                    List.of(Items.HAY_BLOCK),
+                    TICKS_PER_SECOND * 20,
+                    20,
+                    ResourceName.FOOD
+            ),
             new ResourceSource("Bee nest",
                     List.of(Blocks.BEE_NEST),
                     List.of(Items.BEE_NEST),

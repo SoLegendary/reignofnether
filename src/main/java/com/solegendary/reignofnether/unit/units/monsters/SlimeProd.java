@@ -49,12 +49,12 @@ public class SlimeProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/slime.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.slime"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.slime_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.slime.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.slime.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.slime_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.slime_unit.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.slime.tooltip4"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.slime_unit.tooltip4"), Style.EMPTY)
                 )
         );
     }
@@ -67,14 +67,14 @@ public class SlimeProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.slime"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.slime_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.slime.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.slime.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.slime_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.slime_unit.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.slime.tooltip4"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.slime_unit.tooltip4"), Style.EMPTY)
             ),
             this
         );

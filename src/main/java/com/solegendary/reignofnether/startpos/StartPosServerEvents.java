@@ -52,6 +52,40 @@ public class StartPosServerEvents {
         savePositions(serverLevel);
     }
 
+    public static void setPlayerReady(String playerName, boolean ready) {
+        boolean shouldStartGame = true;
+        for (StartPos startPos : startPoses) {
+            if (startPos.playerName.equals(playerName))
+                startPos.ready = ready;
+            if (!startPos.ready || startPos.playerName.isBlank())
+                shouldStartGame = false;
+        }
+        if (shouldStartGame && startPoses.size() > 1) {
+            startGameCountdown();
+        }
+        if (ready)
+            StartPosClientboundPacket.readyPlayer(playerName);
+        else
+            StartPosClientboundPacket.unreadyPlayer(playerName);
+    }
+
+    public static void setPosEnabled(BlockPos pos, boolean enable) {
+        for (StartPos startPos : startPoses) {
+            if (startPos.pos.equals(pos)) {
+                startPos.enabled = enable;
+                if (!startPos.enabled) {
+                    startPos.playerName = "";
+                    startPos.ready = false;
+                    startPos.faction = Faction.NONE;
+                }
+            }
+        }
+        if (enable)
+            StartPosClientboundPacket.enablePos(pos);
+        else
+            StartPosClientboundPacket.disablePos(pos);
+    }
+
     @SubscribeEvent
     public static void onBlockPlaced(BlockEvent.EntityPlaceEvent evt) {
         if (evt.getPlacedBlock().getBlock() instanceof RTSStartBlock rtsStartBlock) {
@@ -61,8 +95,8 @@ public class StartPosServerEvents {
             if (startPoses.size() < MAX_START_POSES) {
                 StartPos newStartPos = new StartPos(evt.getPos(),
                         rtsStartBlock.getMapColor(rtsStartBlock.defaultBlockState(),
-                        evt.getLevel(), evt.getPos(),
-                        rtsStartBlock.defaultMapColor()).col
+                            evt.getLevel(), evt.getPos(),
+                            rtsStartBlock.defaultMapColor()).id
                 );
                 startPoses.add(newStartPos);
                 StartPosClientboundPacket.addPos(newStartPos);
@@ -246,4 +280,6 @@ public class StartPosServerEvents {
             }
         }
     }
+
+
 }

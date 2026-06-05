@@ -44,7 +44,7 @@ public class ZoglinProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zoglin.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.zoglin"), Style.EMPTY.withBold(true))
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.zoglin"), Style.EMPTY.withBold(true))
                 )
         );
     }

@@ -52,26 +52,26 @@ public class GhastProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/ghast.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.ghast_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.ghast_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.ghast_unit.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.ghast_unit.tooltip3"), Style.EMPTY)
                 )
         );
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.ghast_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip3"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.ghast_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.ghast_unit.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.ghast_unit.tooltip3"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.ghast.tooltip4"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.ghast_unit.tooltip4"), Style.EMPTY)
         ));
 
         return new StartProductionButton(

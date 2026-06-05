@@ -795,6 +795,10 @@ public class MiscUtil {
 
     // eg. entity.reignofnether.zombie_unit -> zombie
     public static String getSimpleEntityName(Entity entity) {
+        return getSimpleEntityName(entity, false);
+    }
+
+    public static String getSimpleEntityName(Entity entity, boolean includeUnderscores) {
         if (entity instanceof PhantomSummon)
             return "Phantom";
 
@@ -803,16 +807,16 @@ public class MiscUtil {
                 return entity.getType()
                         .getDescription()
                         .getString()
-                        .replace(" ", "")
                         .replace("entity.reignofnether.", "")
                         .replace("_unit", "")
+                        .replace(" ", includeUnderscores ? "_" : " ")
                         .replace(".none", "");
             } else {
                 return entity.getName()
                         .getString()
-                        .replace(" ", "")
                         .replace("entity.reignofnether.", "")
                         .replace("_unit", "")
+                        .replace(" ", includeUnderscores ? "_" : " ")
                         .replace(".none", "");
             }
         } else if (entity != null) {

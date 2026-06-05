@@ -91,9 +91,9 @@ public class SurvivalClientEvents {
     private static String str(String string) {
         Wave wave = Wave.getWave(waveNumber);
         String localePrefix = switch (wave.faction) {
-            case VILLAGERS -> "units.villagers.reignofnether.";
-            case MONSTERS -> "units.monsters.reignofnether.";
-            case PIGLINS -> "units.piglins.reignofnether.";
+            case VILLAGERS -> "entity.reignofnether.";
+            case MONSTERS -> "entity.reignofnether.";
+            case PIGLINS -> "entity.reignofnether.";
             case NONE, NEUTRAL -> "";
         };
         return I18n.get(localePrefix + string);
@@ -103,8 +103,8 @@ public class SurvivalClientEvents {
         Wave wave = Wave.getWave(waveNumber);
         String research = wave.highestUnitTier >= 6 ? (" [" + I18n.get("research.reignofnether.slime_conversion") + "]") : "";
         return FormattedCharSequence.forward(
-                I18n.get("units.monsters.reignofnether.slime") + " " +
-                        I18n.get("units.monsters.reignofnether.slime.size", wave.highestUnitTier) +
+                I18n.get("entity.reignofnether.slime_unit") + " " +
+                        I18n.get("entity.reignofnether.slime_unit.size", wave.highestUnitTier) +
                         research,
                 Style.EMPTY);
     }
@@ -113,8 +113,8 @@ public class SurvivalClientEvents {
         Wave wave = Wave.getWave(waveNumber);
         String research = wave.highestUnitTier >= 6 ? (" [" + I18n.get("research.reignofnether.cube_magma") + "]") : "";
         return FormattedCharSequence.forward(
-                I18n.get("units.piglins.reignofnether.magma_cube") + " " +
-                        I18n.get("units.monsters.reignofnether.slime.size", wave.highestUnitTier) +
+                I18n.get("entity.reignofnether.magma_cube_unit") + " " +
+                        I18n.get("entity.reignofnether.slime_unit.size", wave.highestUnitTier) +
                         research,
                 Style.EMPTY);
     }

@@ -52,24 +52,24 @@ public class MagmaCubeProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/magma_cube.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.magma_cube"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.magma_cube_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.magma_cube.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.magma_cube.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.magma_cube_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.magma_cube_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.magma_cube"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.magma_cube_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.magma_cube.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.magma_cube.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.magma_cube_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.magma_cube_unit.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.magma_cube.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.magma_cube_unit.tooltip3"), Style.EMPTY)
         ));
 
         return new StartProductionButton(

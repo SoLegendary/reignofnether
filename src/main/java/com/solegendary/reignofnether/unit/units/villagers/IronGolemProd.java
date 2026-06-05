@@ -49,10 +49,10 @@ public class IronGolemProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/iron_golem.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
@@ -65,12 +65,12 @@ public class IronGolemProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.iron_golem.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.iron_golem_unit.tooltip2"), Style.EMPTY)
             ),
             this
         );

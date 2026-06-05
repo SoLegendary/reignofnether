@@ -44,7 +44,7 @@ public class PandaProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/panda.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.panda"), Style.EMPTY.withBold(true))
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.panda_unit"), Style.EMPTY.withBold(true))
                 )
         );
     }

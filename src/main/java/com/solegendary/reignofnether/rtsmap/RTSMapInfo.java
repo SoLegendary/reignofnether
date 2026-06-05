@@ -12,7 +12,7 @@ public class RTSMapInfo {
     private String description;
     private String version;
     private List<MapInfoStartPos> startPositions;
-    private String defaultMode;
+    private String defaultMode; // this is also the actual selected mode, but is the same as the default for the Gson to work
     private Map<String, List<List<Integer>>> modes;
 
     /**
@@ -34,7 +34,7 @@ public class RTSMapInfo {
     public String getDescription() { return description; }
     public String getVersion() { return version; }
     public String getDefaultMode() { return defaultMode; }
-    public void setDefaultMode(String mode) { defaultMode = mode; }
+    public void setDefaultMode(String defaultMode) { this.defaultMode = defaultMode; }
     public Map<String, List<List<Integer>>> getModes() { return modes; }
 
     private MapInfoStartPos getEntryById(int id) {

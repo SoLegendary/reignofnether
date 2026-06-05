@@ -38,7 +38,7 @@ public class ResearchUpgradedWindcallers extends ProductionItem {
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(ResearchUpgradedWindcallers.itemName,
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/wind_charge.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/gale_force.png"),
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> ProductionItems.RESEARCH_UPGRADED_WINDCALLERS.itemIsBeingProduced(prodBuilding.ownerName)
@@ -58,7 +58,7 @@ public class ResearchUpgradedWindcallers extends ProductionItem {
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         return new StopProductionButton(ResearchUpgradedWindcallers.itemName,
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/wind_charge.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/gale_force.png"),
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             prodBuilding,
             this,

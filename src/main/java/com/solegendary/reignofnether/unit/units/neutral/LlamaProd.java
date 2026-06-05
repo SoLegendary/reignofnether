@@ -44,7 +44,7 @@ public class LlamaProd extends ProductionItem {
             itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/llama.png"),
             List.of(
-                    FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.llama"), Style.EMPTY.withBold(true))
+                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.llama_unit"), Style.EMPTY.withBold(true))
             )
         );
     }

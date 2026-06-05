@@ -13,7 +13,7 @@ public class WretchedWraithReviveProd extends ReviveHeroProductionItem {
         super(
             "Revive Wretched Wraith",
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/wretched_wraith.png"),
-            "units.monsters.reignofnether.wretched_wraith.revive"
+            "entity.reignofnether.wretched_wraith_unit.revive"
         );
     }
 

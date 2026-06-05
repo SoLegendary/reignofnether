@@ -13,7 +13,7 @@ public class NecromancerReviveProd extends ReviveHeroProductionItem {
         super(
             "Revive Necromancer",
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/necromancer.png"),
-            "units.monsters.reignofnether.necromancer.revive"
+            "entity.reignofnether.necromancer_unit.revive"
         );
     }
 

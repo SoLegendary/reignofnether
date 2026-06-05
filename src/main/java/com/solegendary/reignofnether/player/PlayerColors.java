@@ -89,7 +89,6 @@ public class PlayerColors {
     public static final PlayerColor COLOR_GRAY = PlayerColor.fromName(MapColor.COLOR_GRAY.id, 0x3E4447, "gray");
     public static final PlayerColor COLOR_BLACK = PlayerColor.fromName(MapColor.COLOR_BLACK.id, 0x141519, "black");
     public static final PlayerColor COLOR_WHITE = PlayerColor.fromName(MapColor.SNOW.id, 0xE9ECEC, "white");
-    public static final int PLAYER_COLOR_SPECIAL_COUNT = PlayerColor.colourCount;
 
     public static final PlayerColor COLOR_OWNED = new PlayerColor(-1, 0x33FF33, "owned", ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/lime_wool.png"), COLOR_LIME.bedIcon);
     public static final PlayerColor COLOR_FRIENDLY = new PlayerColor(-1, 0x3333FF, "friendly", ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/blue_wool.png"), COLOR_BLUE.bedIcon);

@@ -49,10 +49,10 @@ public class EndermanProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/enderman.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.enderman_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.enderman_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.enderman_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
@@ -65,12 +65,12 @@ public class EndermanProd extends ProductionItem {
                 () -> false,
                 () -> true,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.enderman_unit"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPopAndTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.neutral.reignofnether.enderman.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.enderman_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.enderman_unit.tooltip2"), Style.EMPTY)
                 ),
                 this
         );

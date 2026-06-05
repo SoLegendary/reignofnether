@@ -148,6 +148,7 @@ public class PlayerServerboundPacket {
         }
     }
 
+    /*
     public static void startRTSEveryone() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null && MC.level != null) {
@@ -156,6 +157,14 @@ public class PlayerServerboundPacket {
         }
     }
 
+        public static void cancelStartRTSEveryone() {
+        Minecraft MC = Minecraft.getInstance();
+        if (MC.player != null && MC.level != null) {
+            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.CANCEL_START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
+        }
+    }
+     */
+
     public static void startRTSScenario(int roleIndex) {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null && MC.level != null) {
@@ -163,12 +172,6 @@ public class PlayerServerboundPacket {
         }
     }
 
-    public static void cancelStartRTSEveryone() {
-        Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null && MC.level != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.CANCEL_START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
-        }
-    }
 
     public static void resetRTS() {
         PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.RESET_RTS, -1, 0d, 0d, 0d));
@@ -288,8 +291,8 @@ public class PlayerServerboundPacket {
                         PlayerServerEvents.startRTSScenario(this.playerId, (int) this.x);
                 case PUBLISH_SCENARIO_MAP ->
                         PlayerServerEvents.publishScenarioMap();
-                case START_RTS_EVERYONE -> StartPosServerEvents.startGameCountdown();
-                case CANCEL_START_RTS_EVERYONE -> StartPosServerEvents.cancelStartGameCountdown(false);
+                //case START_RTS_EVERYONE -> StartPosServerEvents.startGameCountdown();
+                //case CANCEL_START_RTS_EVERYONE -> StartPosServerEvents.cancelStartGameCountdown(false);
                 case DEFEAT -> PlayerServerEvents.defeat(this.playerId, Component.translatable("server.reignofnether.surrendered").getString());
                 case RESET_RTS -> PlayerServerEvents.resetRTS(false);
                 case RESET_RTS_HARD -> PlayerServerEvents.resetRTS(true);

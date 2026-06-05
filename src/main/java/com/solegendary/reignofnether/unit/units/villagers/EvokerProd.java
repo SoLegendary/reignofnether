@@ -51,9 +51,9 @@ public class EvokerProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/evoker.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.evoker"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.evoker_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.evoker.tooltip1"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.evoker_unit.tooltip1"), Style.EMPTY)
                 )
         );
     }
@@ -66,11 +66,11 @@ public class EvokerProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.evoker"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.evoker_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.evoker.tooltip1"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.evoker_unit.tooltip1"), Style.EMPTY)
             ),
             this
         );

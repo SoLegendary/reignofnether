@@ -2,7 +2,7 @@
 Features
 --------
 
-
+[❌] Camera hotkeys (see starcraft example)
 
 Scenario roles:
     [❌] Use start menu colours for each role

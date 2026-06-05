@@ -7,5 +7,9 @@ public enum StartPosAction {
     UNRESERVE,
     RESET,
     SET_GAME_STARTING,
-    UNSET_GAME_STARTING
+    UNSET_GAME_STARTING,
+    PLAYER_READY,
+    PLAYER_UNREADY,
+    ENABLE,
+    DISABLE
 }

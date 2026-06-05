@@ -56,24 +56,24 @@ public class WindcallerProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/windcaller.png"),
                 List.of(
-                        fcs(I18n.get("units.villagers.reignofnether.windcaller"), true),
+                        fcs(I18n.get("entity.reignofnether.windcaller_unit"), true),
                         fcs(""),
-                        fcs(I18n.get("units.villagers.reignofnether.windcaller.tooltip1")),
-                        fcs(I18n.get("units.villagers.reignofnether.windcaller.tooltip2"))
+                        fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip1")),
+                        fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip2"))
                 )
         );
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                fcs(I18n.get("units.villagers.reignofnether.windcaller"), true),
+                fcs(I18n.get("entity.reignofnether.windcaller_unit"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 fcs(""),
-                fcs(I18n.get("units.villagers.reignofnether.windcaller.tooltip1")),
-                fcs(I18n.get("units.villagers.reignofnether.windcaller.tooltip2")),
+                fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip1")),
+                fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip2")),
                 fcs(""),
-                fcs(I18n.get("units.villagers.reignofnether.windcaller.tooltip3"))
+                fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip3"))
         ));
         return new StartProductionButton(
             WindcallerProd.itemName,

@@ -50,11 +50,11 @@ public class WardenProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/warden.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.warden"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.warden_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.warden.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.warden_unit.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.warden.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.warden_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
@@ -67,11 +67,11 @@ public class WardenProd extends ProductionItem {
                 () -> false,
                 () -> true,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.warden"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.warden_unit"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPopAndTime(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.warden.tooltip1"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.warden_unit.tooltip1"), Style.EMPTY)
                 ),
                 this
         );

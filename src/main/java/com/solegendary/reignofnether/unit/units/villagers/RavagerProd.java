@@ -50,10 +50,10 @@ public class RavagerProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/ravager.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.ravager"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.ravager_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.ravager.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.ravager.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.ravager_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.ravager_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
@@ -66,12 +66,12 @@ public class RavagerProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.ravager"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.ravager_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.ravager.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.villagers.reignofnether.ravager.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.ravager_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.ravager_unit.tooltip2"), Style.EMPTY)
             ),
             this
         );
