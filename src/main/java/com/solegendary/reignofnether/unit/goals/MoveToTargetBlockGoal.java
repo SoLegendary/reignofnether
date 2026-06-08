@@ -59,7 +59,7 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
-`        if (recalcCooldown > 0) {
+        if (recalcCooldown > 0) {
             recalcCooldown -= 1;
             return true;
         }
