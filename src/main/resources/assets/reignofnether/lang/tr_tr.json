@@ -636,9 +636,9 @@
     "hud.enchant.reignofnether.multishot": "Çoklu Atış",
     "hud.enchant.reignofnether.quickshot": "Hızlı Atış",
     "hud.enchant.reignofnether.vigor": "Canlılık",
-    "hud.faction.reignofnether.villager": "Köylü",
-    "hud.faction.reignofnether.monster": "Canavar",
-    "hud.faction.reignofnether.piglin": "Piglin",
+    "hud.faction.reignofnether.villagers": "Köylü",
+    "hud.faction.reignofnether.monsters": "Canavar",
+    "hud.faction.reignofnether.piglins": "Piglin",
     "hud.faction.reignofnether.random": "Rastgele",
     "hud.faction.reignofnether.neutral": "Tarafsız",
 

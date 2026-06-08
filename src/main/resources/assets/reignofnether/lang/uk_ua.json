@@ -607,9 +607,9 @@
     "hud.enchant.reignofnether.multishot": "Багатостріл",
     "hud.enchant.reignofnether.quickshot": "Швидкий постріл",
     "hud.enchant.reignofnether.vigor": "Живучасіть",
-    "hud.faction.reignofnether.villager": "Селянин",
-    "hud.faction.reignofnether.monster": "Монстр",
-    "hud.faction.reignofnether.piglin": "Піглін",
+    "hud.faction.reignofnether.villagers": "Селянин",
+    "hud.faction.reignofnether.monsters": "Монстр",
+    "hud.faction.reignofnether.piglins": "Піглін",
     "hud.faction.reignofnether.random": "Випадковий",
     "hud.faction.reignofnether.neutral": "Нейтральний",
 

@@ -641,9 +641,9 @@
     "hud.enchant.reignofnether.multishot": "다중 발사",
     "hud.enchant.reignofnether.quickshot": "빠른 장전",
     "hud.enchant.reignofnether.vigor": "활력",
-    "hud.faction.reignofnether.villager": "주민",
-    "hud.faction.reignofnether.monster": "몬스터",
-    "hud.faction.reignofnether.piglin": "피글린",
+    "hud.faction.reignofnether.villagers": "주민",
+    "hud.faction.reignofnether.monsters": "몬스터",
+    "hud.faction.reignofnether.piglins": "피글린",
     "hud.faction.reignofnether.random": "무작위",
     "hud.faction.reignofnether.neutral": "중립",
 

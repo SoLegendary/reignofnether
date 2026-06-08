@@ -716,9 +716,9 @@
     "hud.enchant.reignofnether.multishot": "شلیک چندگانه",
     "hud.enchant.reignofnether.quickshot": "شارژ سریع",
     "hud.enchant.reignofnether.vigor": "سرزندگی",
-    "hud.faction.reignofnether.villager": "روستایی",
-    "hud.faction.reignofnether.monster": "هیولا",
-    "hud.faction.reignofnether.piglin": "پیگلین",
+    "hud.faction.reignofnether.villagers": "روستایی",
+    "hud.faction.reignofnether.monsters": "هیولا",
+    "hud.faction.reignofnether.piglins": "پیگلین",
     "hud.faction.reignofnether.random": "تصادفی",
     "hud.faction.reignofnether.neutral": "بی طرف",
 

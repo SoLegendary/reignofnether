@@ -965,6 +965,10 @@ public class MiscUtil {
                 block instanceof SnowLayerBlock;
     }
 
+    public static String getFactionName(Faction faction) {
+        return I18n.get(String.format("hud.faction.reignofnether.%s", faction.toString().toLowerCase()));
+    }
+
     public static String getColorName(int colorIdOrHex, boolean english) {
         if (colorIdOrHex == MapColor.COLOR_MAGENTA.id || colorIdOrHex == 0xBD44B3)
             return english ? "magenta" : I18n.get("color.reignofnether.magenta");

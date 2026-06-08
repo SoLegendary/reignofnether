@@ -102,7 +102,7 @@ public class StartPos {
                     fcsList.add(fcs(I18n.get("startpos.reignofnether.reserved_ready", playerName), true));
                 else
                     fcsList.add(fcs(I18n.get("startpos.reignofnether.reserved", playerName), true));
-                fcsList.add(fcs(I18n.get("startpos.reignofnether.faction", faction.name()), false));
+                fcsList.add(fcs(I18n.get("startpos.reignofnether.faction", MiscUtil.getFactionName(faction)), false));
                 fcsList.add(fcs(I18n.get("startpos.reignofnether.team", MiscUtil.getColorName(colorId, false)), false));
             }
         } else if (isOp) {

@@ -869,11 +869,12 @@
     "hud.enchant.reignofnether.march_of_progress.tooltip": "Doubles the effect of all enchantments",
 
 
-    "hud.faction.reignofnether.villager": "Villager",
-    "hud.faction.reignofnether.monster": "Monster",
-    "hud.faction.reignofnether.piglin": "Piglin",
+    "hud.faction.reignofnether.villagers": "Villager",
+    "hud.faction.reignofnether.monsters": "Monster",
+    "hud.faction.reignofnether.piglins": "Piglin",
     "hud.faction.reignofnether.random": "Random",
     "hud.faction.reignofnether.neutral": "Neutral",
+    "hud.faction.reignofnether.none": "None",
 
     "hud.relationship.reignofnether.owned": "Owned",
     "hud.relationship.reignofnether.allied": "Allied",

@@ -869,11 +869,12 @@
   "hud.enchant.reignofnether.march_of_progress.tooltip": "使所有魔咒的效果翻倍",
 
 
-  "hud.faction.reignofnether.villager": "村民",
-  "hud.faction.reignofnether.monster": "怪物",
-  "hud.faction.reignofnether.piglin": "猪灵",
+  "hud.faction.reignofnether.villagers": "村民",
+  "hud.faction.reignofnether.monsters": "怪物",
+  "hud.faction.reignofnether.piglins": "猪灵",
   "hud.faction.reignofnether.random": "随机",
   "hud.faction.reignofnether.neutral": "中立",
+  "hud.faction.reignofnether.none": "无",
 
   "hud.relationship.reignofnether.owned": "所属",
   "hud.relationship.reignofnether.allied": "盟友",

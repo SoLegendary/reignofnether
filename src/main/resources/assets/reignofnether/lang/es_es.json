@@ -638,9 +638,9 @@
     "hud.enchant.reignofnether.multishot": "Multidisparo",
     "hud.enchant.reignofnether.quickshot": "Carga Rápida",
     "hud.enchant.reignofnether.vigor": "Vigor",
-    "hud.faction.reignofnether.villager": "Aldeanos",
-    "hud.faction.reignofnether.monster": "Monstruos",
-    "hud.faction.reignofnether.piglin": "Piglins",
+    "hud.faction.reignofnether.villagers": "Aldeanos",
+    "hud.faction.reignofnether.monsters": "Monstruos",
+    "hud.faction.reignofnether.piglins": "Piglins",
     "hud.faction.reignofnether.random": "Aleatorio",
     "hud.faction.reignofnether.neutral": "Neutral",
 

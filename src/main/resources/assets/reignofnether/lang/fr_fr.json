@@ -777,9 +777,9 @@
     "hud.enchant.reignofnether.march_of_progress.tooltip": "Double l'effet de tous les enchantements",
 
 
-    "hud.faction.reignofnether.villager": "Villageois",
-    "hud.faction.reignofnether.monster": "Monstre",
-    "hud.faction.reignofnether.piglin": "Piglin",
+    "hud.faction.reignofnether.villagers": "Villageois",
+    "hud.faction.reignofnether.monsters": "Monstre",
+    "hud.faction.reignofnether.piglins": "Piglin",
     "hud.faction.reignofnether.random": "Aléatoire",
     "hud.faction.reignofnether.neutral": "Neutre",
 
