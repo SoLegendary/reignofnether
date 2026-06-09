@@ -30,6 +30,8 @@ import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServerboundPacket;
+import com.solegendary.reignofnether.resources.MarketTradeClientboundPacket;
+import com.solegendary.reignofnether.resources.MarketTradeServerboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerboundPacket;
 import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
@@ -321,6 +323,18 @@ public final class PacketHandler {
                 .encoder(ScenarioClientboundPacket::encode)
                 .decoder(ScenarioClientboundPacket::new)
                 .consumerMainThread(ScenarioClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(MarketTradeServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(MarketTradeServerboundPacket::encode)
+                .decoder(MarketTradeServerboundPacket::new)
+                .consumerMainThread(MarketTradeServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(MarketTradeClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(MarketTradeClientboundPacket::encode)
+                .decoder(MarketTradeClientboundPacket::new)
+                .consumerMainThread(MarketTradeClientboundPacket::handle)
                 .add();
     }
 }

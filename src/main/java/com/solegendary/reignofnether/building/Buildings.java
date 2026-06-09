@@ -57,6 +57,9 @@ public class Buildings {
     public static final AltarOfDarkness ALTAR_OF_DARKNESS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "altar_of_darkness"), new AltarOfDarkness());
     public static final ShrineOfProsperity SHRINE_OF_PROSPERITY = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "shrine_of_prosperity"), new ShrineOfProsperity());
     public static final InfernalPortal INFERNAL_PORTAL = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "infernal_portal"), new InfernalPortal());
+    public static final MarketVillagers MARKET_VILLAGERS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "market_villagers"), new MarketVillagers());
+    public static final MarketMonsters MARKET_MONSTERS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "market_monsters"), new MarketMonsters());
+    public static final MarketPiglins MARKET_PIGLINS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "market_piglins"), new MarketPiglins());
 
     private static <T extends Building> T register(ResourceLocation id, T building) {
         return Registry.register(ReignOfNetherRegistries.BUILDING, id, building);

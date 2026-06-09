@@ -44,6 +44,7 @@ public class FactionRegistries {
         register(Faction.MONSTERS, Buildings.ALTAR_OF_DARKNESS, Keybindings.hotkey3);
         register(Faction.MONSTERS, Buildings.SPRUCE_BRIDGE, Keybindings.hotkey4);
         register(Faction.MONSTERS, Buildings.SCULK_CATALYST, Keybindings.hotkey1);
+        register(Faction.MONSTERS, Buildings.MARKET_MONSTERS, Keybindings.hotkey5);
         register(Faction.MONSTERS, Buildings.BEACON);
 
         //Piglins
@@ -58,6 +59,7 @@ public class FactionRegistries {
         register(Faction.PIGLINS, Buildings.FORTRESS, Keybindings.abilitySlot9);
         register(Faction.PIGLINS, Buildings.INFERNAL_PORTAL, Keybindings.hotkey3);
         register(Faction.PIGLINS, Buildings.BLACKSTONE_BRIDGE, Keybindings.hotkey4);
+        register(Faction.PIGLINS, Buildings.MARKET_PIGLINS, Keybindings.hotkey5);
         register(Faction.PIGLINS, Buildings.BEACON);
 
         //Villagers
@@ -75,6 +77,7 @@ public class FactionRegistries {
         register(Faction.VILLAGERS, Buildings.SHRINE_OF_PROSPERITY, Keybindings.hotkey3);
         register(Faction.VILLAGERS, Buildings.IRON_GOLEM_BUILDING, Keybindings.hotkey9);
         register(Faction.VILLAGERS, Buildings.OAK_BRIDGE, Keybindings.hotkey4);
+        register(Faction.VILLAGERS, Buildings.MARKET_VILLAGERS, Keybindings.hotkey5);
         register(Faction.VILLAGERS, Buildings.BEACON);
 
         //Neutral

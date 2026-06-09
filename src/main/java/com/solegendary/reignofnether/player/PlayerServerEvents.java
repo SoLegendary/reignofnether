@@ -360,6 +360,11 @@ public class PlayerServerEvents {
             PlayerClientboundPacket.addRTSPlayer(rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id, rtsPlayer.startPosColorId);
         }
 
+        RTSPlayer ownRtsPlayer = getRTSPlayer(playerName);
+        if (ownRtsPlayer != null) {
+            com.solegendary.reignofnether.resources.MarketTradeClientboundPacket.sendRates(serverPlayer, ownRtsPlayer.tradeRates);
+        }
+
         if (rtsLocked) {
             PlayerClientboundPacket.lockRTS(playerName);
         } else {

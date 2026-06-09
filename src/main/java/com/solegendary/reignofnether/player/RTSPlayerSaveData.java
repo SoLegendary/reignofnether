@@ -48,8 +48,12 @@ public class RTSPlayerSaveData extends SavedData {
                 Faction faction = Faction.valueOf(ptag.getString("faction"));
                 int[] scores = ptag.contains("sources") ? ptag.getIntArray("scores") : new RTSPlayerScores().getScoreListAsArray();
                 int scenarioRoleIndex = ptag.getInt("scenarioRoleIndex");
+                int[] tradeRates = ptag.contains("tradeRates") ? ptag.getIntArray("tradeRates") : RTSPlayer.defaultTradeRates();
+                if (tradeRates.length != 6) tradeRates = RTSPlayer.defaultTradeRates();
 
-                data.rtsPlayers.add(RTSPlayer.getFromSave(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores, scenarioRoleIndex));
+                RTSPlayer rtsPlayer = RTSPlayer.getFromSave(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores, scenarioRoleIndex);
+                rtsPlayer.tradeRates = tradeRates;
+                data.rtsPlayers.add(rtsPlayer);
 
                 ReignOfNether.LOGGER.info("RTSPlayerSaveData.load: " + name + "|" + id + "|" + faction);
             }
@@ -71,6 +75,7 @@ public class RTSPlayerSaveData extends SavedData {
             cTag.putString("faction", p.faction.name());
             cTag.putIntArray("scores", p.scores.getScoreListAsArray());
             cTag.putInt("scenarioRoleIndex", p.scenarioRoleIndex);
+            cTag.putIntArray("tradeRates", p.tradeRates);
             list.add(cTag);
 
             //ReignOfNether.LOGGER.info("RTSPlayerSaveData.save: " + p.name + "|" + p.id + "|" + p.faction);

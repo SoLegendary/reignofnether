@@ -4,11 +4,14 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
+import com.solegendary.reignofnether.building.buildings.shared.Market;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.resources.ResourceName;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -23,6 +26,51 @@ public class RTSPlayer {
     public int startPosColorId = 0;
     public RTSPlayerScores scores = new RTSPlayerScores();
     public int scenarioRoleIndex = -1;
+
+    // Market trade rates, fixed order: [F->W, F->O, W->F, W->O, O->F, O->W].
+    // Each trade spends Market.TRADE_CHUNK of source for `rate` of target; the rate decreases by
+    // Market.RATE_STEP per same-direction trade (floor Market.MIN_RATE) and the opposite rises by the same.
+    public int[] tradeRates = defaultTradeRates();
+
+    public static int[] defaultTradeRates() {
+        int[] rates = new int[6];
+        Arrays.fill(rates, Market.START_RATE);
+        return rates;
+    }
+
+    // -1 if from==to or any NONE
+    public static int tradeIndex(ResourceName from, ResourceName to) {
+        switch (from) {
+            case FOOD:
+                if (to == ResourceName.WOOD) return 0;
+                if (to == ResourceName.ORE) return 1;
+                break;
+            case WOOD:
+                if (to == ResourceName.FOOD) return 2;
+                if (to == ResourceName.ORE) return 3;
+                break;
+            case ORE:
+                if (to == ResourceName.FOOD) return 4;
+                if (to == ResourceName.WOOD) return 5;
+                break;
+            default:
+                break;
+        }
+        return -1;
+    }
+
+    public int getTradeRate(ResourceName from, ResourceName to) {
+        int i = tradeIndex(from, to);
+        return i < 0 ? 0 : tradeRates[i];
+    }
+
+    public void applyTrade(ResourceName from, ResourceName to) {
+        int i = tradeIndex(from, to);
+        int j = tradeIndex(to, from);
+        if (i < 0 || j < 0) return;
+        tradeRates[i] = Math.max(Market.MIN_RATE, tradeRates[i] - Market.RATE_STEP);
+        tradeRates[j] = tradeRates[j] + Market.RATE_STEP;
+    }
 
     private RTSPlayer(String playerName, Faction faction, int id) {
         this.name = playerName;
