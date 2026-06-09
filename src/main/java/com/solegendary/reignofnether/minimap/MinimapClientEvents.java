@@ -109,10 +109,11 @@ public class MinimapClientEvents {
 	public static boolean minimapRightClickDown = false;
 
     private static DynamicTexture mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
-    private static RenderType mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance().textureManager.register(
+    private static ResourceLocation mapTexLoc = Minecraft.getInstance().textureManager.register(
         ReignOfNether.MOD_ID + "_" + "minimap",
         mapTexture
-    ));
+    );
+    private static RenderType mapRenderType = RenderType.textSeeThrough(mapTexLoc);
     private static int[][] mapColoursTerrain = new int[worldRadius * 2][worldRadius * 2];
     private static int[][] mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2]; // view quad, units, buildings
 
@@ -218,6 +219,75 @@ public class MinimapClientEvents {
         return mapGuiRadius;
     }
 
+    public static int getWorldRadius() {
+        return worldRadius;
+    }
+
+    public static int getMapCentreWorldX() {
+        return xc_world;
+    }
+
+    public static int getMapCentreWorldZ() {
+        return zc_world;
+    }
+
+    public static boolean isMapReady() {
+        return mapTexture != null && mapTexLoc != null;
+    }
+
+    public static void renderMapInto(GuiGraphics g, int x, int y, int w, int h) {
+        if (mapTexture == null || mapTexLoc == null) return;
+        int tex = worldRadius * 2;
+        g.blit(mapTexLoc, x, y, w, h, 0, 0, tex, tex, tex, tex);
+    }
+
+    public static org.joml.Vector2f worldToRect(int worldX, int worldZ,
+                                                int rectX, int rectY, int rectW, int rectH) {
+        int centreX = xc_world;
+        int centreZ = zc_world;
+        int span = worldRadius * 2;
+        float u = (worldX - (centreX - worldRadius)) / (float) span;
+        float v = (worldZ - (centreZ - worldRadius)) / (float) span;
+        return new org.joml.Vector2f(rectX + u * rectW, rectY + v * rectH);
+    }
+
+    public static net.minecraft.core.BlockPos rectToWorld(int sx, int sy,
+                                                          int rectX, int rectY, int rectW, int rectH) {
+        float u = (sx - rectX) / (float) Math.max(1, rectW);
+        float v = (sy - rectY) / (float) Math.max(1, rectH);
+        int span = worldRadius * 2;
+        int wx = (int) (xc_world - worldRadius + u * span);
+        int wz = (int) (zc_world - worldRadius + v * span);
+        int y = 64;
+        net.minecraft.client.Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null) {
+            y = mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, wx, wz);
+        }
+        return new net.minecraft.core.BlockPos(wx, y, wz);
+    }
+
+    public static void setLargeMap(boolean large) {
+        if (largeMap != large) {
+            toggleMapSize();
+        }
+    }
+
+    public static void forceMapCentre(int x, int z) {
+        lockedMap = false;
+        setMapCentre(x, z);
+        forceUpdateAllPartitions = true;
+    }
+
+    public static void setMapLocked(boolean locked) {
+        lockedMap = locked;
+    }
+
+    public static boolean isMapLocked() {
+        return lockedMap;
+    }
+
+    public static boolean suppressViewQuad = false;
+
     private static void toggleMapSize() {
         largeMap = !largeMap;
         if (largeMap) {
@@ -228,10 +298,11 @@ public class MinimapClientEvents {
             mapGuiRadius = 60;
         }
         mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
-        mapRenderType = RenderType.textSeeThrough(Minecraft.getInstance().textureManager.register(
+        mapTexLoc = Minecraft.getInstance().textureManager.register(
             ReignOfNether.MOD_ID + "_" + "minimap",
             mapTexture
-        ));
+        );
+        mapRenderType = RenderType.textSeeThrough(mapTexLoc);
         mapColoursTerrain = new int[worldRadius * 2][worldRadius * 2];
         mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
         forceUpdateAllPartitions = true;
@@ -586,7 +657,7 @@ public class MinimapClientEvents {
     }
 
     private static void updateMapViewQuad() {
-        if (MC.level == null || MC.player == null) {
+        if (MC.level == null || MC.player == null || suppressViewQuad) {
             return;
         }
 
