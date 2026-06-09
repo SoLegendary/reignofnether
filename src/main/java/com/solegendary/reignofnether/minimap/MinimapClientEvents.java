@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
@@ -864,6 +865,17 @@ public class MinimapClientEvents {
         float dx = (worldX - xc_world) / pixelsToBlocks;
         float dz = (worldZ - zc_world) / pixelsToBlocks;
 
+        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
+            // square mode: same -45° rotation as the diamond, but with the rotated quad
+            // circumscribing the visible square (content zoom = SQUARE_CONTENT_SCALE)
+            Vec2 rotated = MyMath.rotateCoords(
+                (float) (dx / Math.sqrt(2) * SQUARE_CONTENT_SCALE),
+                (float) (dz / Math.sqrt(2) * SQUARE_CONTENT_SCALE),
+                -45
+            );
+            return new Vec2(xc + rotated.x, yc + rotated.y);
+        }
+
         // rotate -45° to go from axis-aligned → diamond orientation
         Vec2 rotated = MyMath.rotateCoords((float) (dx / Math.sqrt(2)), (float) (dz / Math.sqrt(2)), -45);
 
@@ -932,6 +944,11 @@ public class MinimapClientEvents {
         yc = MC.getWindow().getGuiScaledHeight() - mapGuiRadius - CORNER_OFFSET;
         yb = MC.getWindow().getGuiScaledHeight() - CORNER_OFFSET;
 
+        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
+            renderSquareMap(guiGraphics, matrix4f);
+            return;
+        }
+
         // background vertex coords need to be slightly larger
         float xl_bg = xl - BG_OFFSET;
         float xc_bg = xc;
@@ -968,10 +985,71 @@ public class MinimapClientEvents {
         buffer.endBatch();
     }
 
+    public static final float SQUARE_SCALE = 1.2f; // 20% bigger than the inscribed square
+    public static float squareHalf = 0; // half-side of the visible square, set per frame
+    // content-zoom factor for square mode: 2 * SQUARE_SCALE / sqrt(2) — chosen so the rotated
+    // (-45°) texture quad circumscribes the visible square (no empty corners after scissor)
+    public static final float SQUARE_CONTENT_SCALE = (float) (SQUARE_SCALE * Math.sqrt(2));
+
+    private static void renderSquareMap(GuiGraphics guiGraphics, Matrix4f matrix4f) {
+        float baseHalf = (float) (mapGuiRadius / Math.sqrt(2));
+        float half = baseHalf * SQUARE_SCALE;
+        squareHalf = half;
+
+        // anchor bottom-right corner at the very bottom-right of the screen
+        int sw = MC.getWindow().getGuiScaledWidth();
+        int sh = MC.getWindow().getGuiScaledHeight();
+        float brX = sw - CORNER_OFFSET;
+        float brY = sh - CORNER_OFFSET;
+        // centre of the bigger square (grows up-left from the fixed bottom-right)
+        xc = brX - half;
+        yc = brY - half;
+
+        float x1 = brX - 2 * half;
+        float x2 = brX;
+        float y1 = brY - 2 * half;
+        float y2 = brY;
+
+        // parchment frame: same texture as the diamond — the artwork is a square frame drawn
+        // axis-aligned in the image, so standard (0,0)→(1,1) UVs render it as-is here.
+        float xl_bg = x1 - BG_OFFSET, xr_bg = x2 + BG_OFFSET;
+        float yt_bg = y1 - BG_OFFSET, yb_bg = y2 + BG_OFFSET;
+        ResourceLocation bg = ResourceLocation.fromNamespaceAndPath(
+                ReignOfNether.MOD_ID, "textures/hud/map_background.png");
+        RenderSystem.setShaderTexture(0, bg);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        BufferBuilder bb = Tesselator.getInstance().getBuilder();
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bb.vertex(matrix4f, xl_bg, yb_bg, 0.0F).uv(0.0F, 1.0F).endVertex();
+        bb.vertex(matrix4f, xr_bg, yb_bg, 0.0F).uv(1.0F, 1.0F).endVertex();
+        bb.vertex(matrix4f, xr_bg, yt_bg, 0.0F).uv(1.0F, 0.0F).endVertex();
+        bb.vertex(matrix4f, xl_bg, yt_bg, 0.0F).uv(0.0F, 0.0F).endVertex();
+        BufferUploader.drawWithShader(bb.end());
+
+        // clip the rotated content to the visible square (after the frame, so frame isn't clipped)
+        guiGraphics.enableScissor((int) x1, (int) y1, (int) x2, (int) y2);
+
+        // render the texture as a rotated quad that fully circumscribes the visible square
+        // (d = 2*half makes the diamond's edges meet the square's corners — no black borders)
+        float d = 2 * half;
+        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        VertexConsumer consumer = buffer.getBuffer(mapRenderType);
+        consumer.vertex(matrix4f, xc, yc + d, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(255).endVertex();
+        consumer.vertex(matrix4f, xc + d, yc, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(255).endVertex();
+        consumer.vertex(matrix4f, xc, yc - d, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(255).endVertex();
+        consumer.vertex(matrix4f, xc - d, yc, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(255).endVertex();
+        buffer.endBatch();
+
+        guiGraphics.disableScissor();
+    }
+
     // https://stackoverflow.com/questions/27022064/detect-click-in-a-diamond
     public static boolean isPointInsideMinimap(double x, double y) {
         double dx = Math.abs(x - xc);
         double dy = Math.abs(y - yc);
+        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
+            return dx <= squareHalf && dy <= squareHalf;
+        }
         double d = dx / (mapGuiRadius * 2) + dy / (mapGuiRadius * 2);
         return d <= 0.5;
     }
@@ -992,10 +1070,19 @@ public class MinimapClientEvents {
             x -= radius * Math.cos(angleRad);
             y -= radius * Math.sin(angleRad);
         }
-        Vec2 clicked = MyMath.rotateCoords(x - xc, y - yc, 45);
 
-        double xWorld = xc_world + clicked.x * pixelsToBlocks * Math.sqrt(2);
-        double zWorld = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2);
+        double xWorld;
+        double zWorld;
+        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
+            // square mode: undo -45° rotation and SQUARE_CONTENT_SCALE
+            Vec2 clicked = MyMath.rotateCoords(x - xc, y - yc, 45);
+            xWorld = xc_world + clicked.x * pixelsToBlocks * Math.sqrt(2) / SQUARE_CONTENT_SCALE;
+            zWorld = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2) / SQUARE_CONTENT_SCALE;
+        } else {
+            Vec2 clicked = MyMath.rotateCoords(x - xc, y - yc, 45);
+            xWorld = xc_world + clicked.x * pixelsToBlocks * Math.sqrt(2);
+            zWorld = zc_world + clicked.y * pixelsToBlocks * Math.sqrt(2);
+        }
         int roundedX = Mth.floor(xWorld + 0.5d);
         int roundedZ = Mth.floor(zWorld + 0.5d);
         int roundedY = MiscUtil.getHighestNonAirBlock(MC.level, new BlockPos(roundedX, 0, roundedZ)).getY();

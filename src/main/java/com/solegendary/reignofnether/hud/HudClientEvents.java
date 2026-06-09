@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.config.ConfigClientEvents;
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
@@ -1334,126 +1335,181 @@ public class HudClientEvents {
             }
         }
 
-        // ---------------------
-        // Attack warning button
-        // ---------------------
+        // -------------------------
+        // Minimap buttons + warning
+        // -------------------------
+        boolean squareMinimap = ReignOfNetherClientConfigs.SQUARE_MINIMAP.get();
+
         Button attackWarningButton = AttackWarningClientEvents.getWarningButton();
-        if (!attackWarningButton.isHidden.get()) {
-            attackWarningButton.render(evt.getGuiGraphics(),
-                screenWidth - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2)
-                    - 14,
-                screenHeight - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
-                mouseX,
-                mouseY
-            );
-            renderedButtons.add(attackWarningButton);
-        }
-
-        // ----------------------
-        // Map size toggle button
-        // ----------------------
         Button toggleMapSizeButton = MinimapClientEvents.getToggleSizeButton();
-        if (!toggleMapSizeButton.isHidden.get()) {
-            toggleMapSizeButton.render(evt.getGuiGraphics(),
-                    screenWidth - (toggleMapSizeButton.iconSize * 2),
-                    screenHeight - (toggleMapSizeButton.iconSize * 2),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(toggleMapSizeButton);
-        }
-
         Button markerModeButton = MinimapClientEvents.getMarkerModeButton();
-        if (!markerModeButton.isHidden.get()) {
-            markerModeButton.render(evt.getGuiGraphics(),
-                screenWidth - (markerModeButton.iconSize * (MinimapClientEvents.isLargeMap() ? 12 : 8)),
-                screenHeight - (markerModeButton.iconSize * 2),
-                mouseX, mouseY
-            );
-            renderedButtons.add(markerModeButton);
-        }
-
         Button camSensitivityButton = MinimapClientEvents.getCamSensitivityButton();
-        if (!camSensitivityButton.isHidden.get()) {
-            camSensitivityButton.render(evt.getGuiGraphics(),
-                    screenWidth - (camSensitivityButton.iconSize * 4),
-                    screenHeight - (camSensitivityButton.iconSize * 2),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(camSensitivityButton);
-        }
         Button mapLockButton = MinimapClientEvents.getMapLockButton();
-        if (!mapLockButton.isHidden.get()) {
-            mapLockButton.render(evt.getGuiGraphics(),
-                    screenWidth - (mapLockButton.iconSize * 2),
-                    screenHeight - (mapLockButton.iconSize * 4),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(mapLockButton);
-        }
         Button highlightAnimalsButton = MinimapClientEvents.getHighlightAnimalsButton();
-        if (!highlightAnimalsButton.isHidden.get()) {
-            highlightAnimalsButton.render(evt.getGuiGraphics(),
-                    screenWidth - (highlightAnimalsButton.iconSize * 2),
-                    screenHeight - (highlightAnimalsButton.iconSize * 6),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(highlightAnimalsButton);
-        }
         Button nightCirclesButton = MinimapClientEvents.getNightCirclesModeButton();
-        if (!nightCirclesButton.isHidden.get()) {
-            nightCirclesButton.render(evt.getGuiGraphics(),
-                    screenWidth - (nightCirclesButton.iconSize * 4),
-                    screenHeight - (nightCirclesButton.iconSize * 4),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(nightCirclesButton);
-        }
         Button leavesHidingButton = OrthoviewClientEvents.getLeavesHidingButton();
-        if (!leavesHidingButton.isHidden.get()) {
-            leavesHidingButton.render(evt.getGuiGraphics(),
-                    screenWidth - (leavesHidingButton.iconSize * 6),
-                    screenHeight - (leavesHidingButton.iconSize * 2),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(leavesHidingButton);
-        }
         Button toggleTeamColorsButton = PlayerColors.getToggleTeamColorsButton();
-        if (!toggleTeamColorsButton.isHidden.get()) {
-            toggleTeamColorsButton.render(evt.getGuiGraphics(),
-                    screenWidth - (toggleTeamColorsButton.iconSize * 6),
-                    screenHeight - (toggleTeamColorsButton.iconSize * 4),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(toggleTeamColorsButton);
-        }
-
         Button rotateCW = MinimapClientEvents.getCameraRotateCWButton();
-        if (!rotateCW.isHidden.get()) {
-            rotateCW.render(evt.getGuiGraphics(),
-                    screenWidth - (rotateCW.iconSize * (MinimapClientEvents.isLargeMap() ? 8 : 4)),
-                    screenHeight - (rotateCW.iconSize * 2),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(rotateCW);
-        }
-
         Button rotateCCW = MinimapClientEvents.getCameraRotateCCWButton();
-        if (!rotateCCW.isHidden.get()) {
-            rotateCCW.render(evt.getGuiGraphics(),
-                    screenWidth - (rotateCCW.iconSize * (MinimapClientEvents.isLargeMap() ? 10 : 6)),
-                    screenHeight - (rotateCCW.iconSize * 2),
+
+        if (squareMinimap) {
+            int radius = MinimapClientEvents.getMapGuiRadius();
+            int co = MinimapClientEvents.CORNER_OFFSET;
+            float baseHalf = (float) (radius / Math.sqrt(2));
+            float half = baseHalf * MinimapClientEvents.SQUARE_SCALE;
+            // bottom-right corner of the minimap is fixed at the screen's bottom-right (with co padding)
+            float brX = screenWidth - co;
+            float brY = screenHeight - co;
+            int mmLeft = (int) (brX - 2 * half);
+            int mmBottom = (int) brY;
+
+            int frameSize = toggleMapSizeButton.iconFrameSize; // 22 — actual rendered frame
+            int stride = toggleMapSizeButton.iconSize * 2;     // 28, matches original spacing
+            int gridRight = mmLeft - 12;                       // shifted further left
+            int gridBottom = mmBottom + 4;                     // shifted a touch lower than the map bottom
+
+            int r0y = gridBottom - frameSize;            // bottom row: frame bottom = map bottom
+            int r1y = r0y - stride;                       // top row
+            int c0x = gridRight - frameSize;             // rightmost column: frame right = map left - 4
+            int c1x = c0x - stride;
+            int c2x = c1x - stride;
+            int c3x = c2x - stride;
+            int c4x = c3x - stride;
+
+            // bottom row: map controls (most-used)
+            if (!toggleMapSizeButton.isHidden.get()) {
+                toggleMapSizeButton.render(evt.getGuiGraphics(), c0x, r0y, mouseX, mouseY);
+                renderedButtons.add(toggleMapSizeButton);
+            }
+            if (!markerModeButton.isHidden.get()) {
+                markerModeButton.render(evt.getGuiGraphics(), c1x, r0y, mouseX, mouseY);
+                renderedButtons.add(markerModeButton);
+            }
+            if (!mapLockButton.isHidden.get()) {
+                mapLockButton.render(evt.getGuiGraphics(), c2x, r0y, mouseX, mouseY);
+                renderedButtons.add(mapLockButton);
+            }
+            if (!rotateCCW.isHidden.get()) {
+                rotateCCW.render(evt.getGuiGraphics(), c3x, r0y, mouseX, mouseY);
+                renderedButtons.add(rotateCCW);
+            }
+            if (!rotateCW.isHidden.get()) {
+                rotateCW.render(evt.getGuiGraphics(), c4x, r0y, mouseX, mouseY);
+                renderedButtons.add(rotateCW);
+            }
+
+            // top row: view toggles
+            if (!camSensitivityButton.isHidden.get()) {
+                camSensitivityButton.render(evt.getGuiGraphics(), c0x, r1y, mouseX, mouseY);
+                renderedButtons.add(camSensitivityButton);
+            }
+            if (!nightCirclesButton.isHidden.get()) {
+                nightCirclesButton.render(evt.getGuiGraphics(), c1x, r1y, mouseX, mouseY);
+                renderedButtons.add(nightCirclesButton);
+            }
+            if (!highlightAnimalsButton.isHidden.get()) {
+                highlightAnimalsButton.render(evt.getGuiGraphics(), c2x, r1y, mouseX, mouseY);
+                renderedButtons.add(highlightAnimalsButton);
+            }
+            if (!leavesHidingButton.isHidden.get()) {
+                leavesHidingButton.render(evt.getGuiGraphics(), c3x, r1y, mouseX, mouseY);
+                renderedButtons.add(leavesHidingButton);
+            }
+            if (!toggleTeamColorsButton.isHidden.get()) {
+                toggleTeamColorsButton.render(evt.getGuiGraphics(), c4x, r1y, mouseX, mouseY);
+                renderedButtons.add(toggleTeamColorsButton);
+            }
+
+            // attack warning: above the grid, aligned right
+            if (!attackWarningButton.isHidden.get()) {
+                attackWarningButton.render(evt.getGuiGraphics(), c0x, r1y - stride - 4, mouseX, mouseY);
+                renderedButtons.add(attackWarningButton);
+            }
+        } else {
+            // ---------------------
+            // Attack warning button (diamond layout)
+            // ---------------------
+            if (!attackWarningButton.isHidden.get()) {
+                attackWarningButton.render(evt.getGuiGraphics(),
+                    screenWidth - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2)
+                        - 14,
+                    screenHeight - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
                     mouseX,
                     mouseY
-            );
-            renderedButtons.add(rotateCCW);
+                );
+                renderedButtons.add(attackWarningButton);
+            }
+
+            if (!toggleMapSizeButton.isHidden.get()) {
+                toggleMapSizeButton.render(evt.getGuiGraphics(),
+                        screenWidth - (toggleMapSizeButton.iconSize * 2),
+                        screenHeight - (toggleMapSizeButton.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(toggleMapSizeButton);
+            }
+            if (!markerModeButton.isHidden.get()) {
+                markerModeButton.render(evt.getGuiGraphics(),
+                    screenWidth - (markerModeButton.iconSize * (MinimapClientEvents.isLargeMap() ? 12 : 8)),
+                    screenHeight - (markerModeButton.iconSize * 2),
+                    mouseX, mouseY);
+                renderedButtons.add(markerModeButton);
+            }
+            if (!camSensitivityButton.isHidden.get()) {
+                camSensitivityButton.render(evt.getGuiGraphics(),
+                        screenWidth - (camSensitivityButton.iconSize * 4),
+                        screenHeight - (camSensitivityButton.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(camSensitivityButton);
+            }
+            if (!mapLockButton.isHidden.get()) {
+                mapLockButton.render(evt.getGuiGraphics(),
+                        screenWidth - (mapLockButton.iconSize * 2),
+                        screenHeight - (mapLockButton.iconSize * 4),
+                        mouseX, mouseY);
+                renderedButtons.add(mapLockButton);
+            }
+            if (!highlightAnimalsButton.isHidden.get()) {
+                highlightAnimalsButton.render(evt.getGuiGraphics(),
+                        screenWidth - (highlightAnimalsButton.iconSize * 2),
+                        screenHeight - (highlightAnimalsButton.iconSize * 6),
+                        mouseX, mouseY);
+                renderedButtons.add(highlightAnimalsButton);
+            }
+            if (!nightCirclesButton.isHidden.get()) {
+                nightCirclesButton.render(evt.getGuiGraphics(),
+                        screenWidth - (nightCirclesButton.iconSize * 4),
+                        screenHeight - (nightCirclesButton.iconSize * 4),
+                        mouseX, mouseY);
+                renderedButtons.add(nightCirclesButton);
+            }
+            if (!leavesHidingButton.isHidden.get()) {
+                leavesHidingButton.render(evt.getGuiGraphics(),
+                        screenWidth - (leavesHidingButton.iconSize * 6),
+                        screenHeight - (leavesHidingButton.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(leavesHidingButton);
+            }
+            if (!toggleTeamColorsButton.isHidden.get()) {
+                toggleTeamColorsButton.render(evt.getGuiGraphics(),
+                        screenWidth - (toggleTeamColorsButton.iconSize * 6),
+                        screenHeight - (toggleTeamColorsButton.iconSize * 4),
+                        mouseX, mouseY);
+                renderedButtons.add(toggleTeamColorsButton);
+            }
+            if (!rotateCW.isHidden.get()) {
+                rotateCW.render(evt.getGuiGraphics(),
+                        screenWidth - (rotateCW.iconSize * (MinimapClientEvents.isLargeMap() ? 8 : 4)),
+                        screenHeight - (rotateCW.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(rotateCW);
+            }
+            if (!rotateCCW.isHidden.get()) {
+                rotateCCW.render(evt.getGuiGraphics(),
+                        screenWidth - (rotateCCW.iconSize * (MinimapClientEvents.isLargeMap() ? 10 : 6)),
+                        screenHeight - (rotateCCW.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(rotateCCW);
+            }
         }
 
         // ------------------------------

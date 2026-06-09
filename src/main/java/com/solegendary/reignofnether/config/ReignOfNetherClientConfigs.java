@@ -16,6 +16,7 @@ public class ReignOfNetherClientConfigs {
 
     public static final ForgeConfigSpec.ConfigValue<Boolean> USE_PLAYER_COLORS;
     public static final ForgeConfigSpec.ConfigValue<Integer> CAMERA_SENSITIVITY;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> SQUARE_MINIMAP;
 
     static {
         BUILDER.push("Configuration File");
@@ -30,6 +31,7 @@ public class ReignOfNetherClientConfigs {
         PLAYER_COLOR_ENEMY = BUILDER.define("player_color_enemy", PlayerColors.COLOR_HOSTILE.id);
         USE_PLAYER_COLORS = BUILDER.define("use_player_colors", false);
         CAMERA_SENSITIVITY = BUILDER.define("camera_sensitivity", 10);
+        SQUARE_MINIMAP = BUILDER.define("square_minimap", false);
         SPEC = BUILDER.build();
     }
 
