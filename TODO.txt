@@ -1,5 +1,5 @@
 
-1.20.1-1.3.4c
+1.20.1-1.3.5
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -7,14 +7,9 @@
 
 Bugfixes
 --------
-[✔] Fixed Hoglin riders not moving all the way to their target position
-[✔] Fixed units stopping periodically when on long move commands
-[✔] Fixed bridges over water not replacing their destroyed blocks with water
 
 Quality of Life
 ---------------
-[✔] Added an option for a square minimap in the RoN mod config menu
-
 [❌] Waypoint looping (by shift clicking back onto a previous waypoint it will automatically cycle the list once it reaches the end)
 [❌] Gamerule to turn off item drops from blocks (for performance)
 
