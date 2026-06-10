@@ -407,6 +407,13 @@
     "abilities.reignofnether.autocast": "Right click to auto-cast",
     "abilities.reignofnether.charges": "Can store up to %d charges",
 
+    "abilities.reignofnether.trade_food_wood": "Trade %d Food for %d Wood",
+    "abilities.reignofnether.trade_food_ore": "Trade %d Food for %d Ore",
+    "abilities.reignofnether.trade_wood_food": "Trade %d Wood for %d Food",
+    "abilities.reignofnether.trade_wood_ore": "Trade %d Wood for %d Ore",
+    "abilities.reignofnether.trade_ore_food": "Trade %d Ore for %d Food",
+    "abilities.reignofnether.trade_ore_wood": "Trade %d Ore for %d Wood",
+
     "ability.reignofnether.enchant.error1": "Can only enchant your own units",
     "ability.reignofnether.enchant.error2": "Unit is out of range",
     "ability.reignofnether.enchant.error3": "Wrong unit or equipment type",
@@ -525,6 +532,9 @@
     "buildings.monsters.reignofnether.altar_of_darkness": "Altar of Darkness",
     "buildings.monsters.reignofnether.altar_of_darkness.tooltip1": "A font of dark energy to manifest horrors of the dark.",
     "buildings.monsters.reignofnether.altar_of_darkness.tooltip2": "Trains new and revives fallen Monster heroes.",
+    "buildings.monsters.reignofnether.monster_market": "Conversion Crucible",
+    "buildings.monsters.reignofnether.monster_market.tooltip1": "A dark device for exchanging resources between each other.",
+    "buildings.monsters.reignofnether.monster_market.tooltip2": "Requires 6 houses.",
 
     "buildings.piglins.reignofnether.bastion": "Bastion",
     "buildings.piglins.reignofnether.bastion.tooltip1": "A fortified barracks to house Marauder piglins, ",
@@ -572,6 +582,10 @@
     "buildings.piglins.reignofnether.infernal_portal": "Infernal Portal",
     "buildings.piglins.reignofnether.infernal_portal.tooltip1": "A decorated portal reserved for champions of the Nether.",
     "buildings.piglins.reignofnether.infernal_portal.tooltip2": "Trains new and revives fallen Piglin heroes.",
+    "buildings.piglins.reignofnether.piglin_market": "Commercial Portal",
+    "buildings.piglins.reignofnether.piglin_market.tooltip1": "A portal linked to the trade routes of the nether",
+    "buildings.piglins.reignofnether.piglin_market.tooltip2": "to freely swap resources between each other.",
+    "buildings.piglins.reignofnether.piglin_market.tooltip3": "Requires 4 civil portals.",
 
     "buildings.villagers.reignofnether.witch_hut": "Witch Hut",
     "buildings.villagers.reignofnether.witch_hut.tooltip1": "A quaint little cottage that houses Witches",
@@ -621,6 +635,9 @@
     "buildings.villagers.reignofnether.shrine_of_prosperity": "Shrine of Prosperity",
     "buildings.villagers.reignofnether.shrine_of_prosperity.tooltip1": "A symbol of the alliance of Villagers and Pillagers.",
     "buildings.villagers.reignofnether.shrine_of_prosperity.tooltip2": "Trains new and revives fallen Villager heroes.",
+    "buildings.villagers.reignofnether.villager_market": "Town Market",
+    "buildings.villagers.reignofnether.villager_market.tooltip1": "A lively town square for exchanging different resources.",
+    "buildings.villagers.reignofnether.villager_market.tooltip2": "Requires 6 houses.",
 
     "buildings.neutral.reignofnether.capturable_beacon": "Capturable Beacon",
     "buildings.neutral.reignofnether.capturable_beacon.tooltip1": "A pyramid that grants a variety of powerful auras.",

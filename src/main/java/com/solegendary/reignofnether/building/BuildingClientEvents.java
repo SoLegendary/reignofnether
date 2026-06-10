@@ -1160,6 +1160,19 @@ public class BuildingClientEvents {
         return false;
     }
 
+    // does the player own one of these buildings?
+    public static int numFinishedBuildings(Building building) {
+        int count = 0;
+        for (BuildingPlacement bpl : buildings) {
+            if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt &&
+                    ((MC.player != null && bpl.ownerName.equals(MC.player.getName().getString())) ||
+                            allyHasFinishedBuilding(building))) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
     // does the selected ally's unit own one of these buildings?
     public static boolean allyHasFinishedBuilding(Building building) {
         if (!AlliancesClient.canControlAlly(hudSelectedEntity))

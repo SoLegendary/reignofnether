@@ -83,6 +83,7 @@ public class ResourceCosts {
     public static final ResourceCost SLIME_PIT = new ResourceCost(ID, "SLIME_PIT");
     public static final ResourceCost STRONGHOLD = new ResourceCost(ID, "STRONGHOLD");
     public static final ResourceCost ALTAR_OF_DARKNESS = new ResourceCost(ID, "ALTAR_OF_DARKNESS");
+    public static final ResourceCost MONSTER_MARKET = new ResourceCost(ID, "MONSTER_MARKET");
     //Villagers
     public static final ResourceCost TOWN_CENTRE = new ResourceCost(ID, "TOWN_CENTRE");
     public static final ResourceCost VILLAGER_HOUSE = new ResourceCost(ID, "VILLAGER_HOUSE");
@@ -96,6 +97,7 @@ public class ResourceCosts {
     public static final ResourceCost CASTLE = new ResourceCost(ID, "CASTLE");
     public static final ResourceCost IRON_GOLEM_BUILDING = new ResourceCost(ID, "IRON_GOLEM_BUILDING");
     public static final ResourceCost SHRINE_OF_PROSPERITY = new ResourceCost(ID, "SHRINE_OF_PROSPERITY");
+    public static final ResourceCost VILLAGER_MARKET = new ResourceCost(ID, "VILLAGER_MARKET");
     //Piglins
     public static final ResourceCost CENTRAL_PORTAL = new ResourceCost(ID, "CENTRAL_PORTAL");
     public static final ResourceCost BASIC_PORTAL = new ResourceCost(ID, "BASIC_PORTAL");
@@ -108,6 +110,7 @@ public class ResourceCosts {
     public static final ResourceCost WITHER_SHRINE = new ResourceCost(ID, "WITHER_SHRINE");
     public static final ResourceCost FORTRESS = new ResourceCost(ID, "FORTRESS");
     public static final ResourceCost INFERNAL_PORTAL = new ResourceCost(ID, "INFERNAL_PORTAL");
+    public static final ResourceCost PIGLIN_MARKET = new ResourceCost(ID, "PIGLIN_MARKET");
 
     // RESEARCH
 
@@ -281,6 +284,7 @@ public class ResourceCosts {
         SLIME_PIT.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.SLIME_PIT);
         STRONGHOLD.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.STRONGHOLD);
         ALTAR_OF_DARKNESS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.ALTAR_OF_DARKNESS);
+        MONSTER_MARKET.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.MONSTER_MARKET);
         // Villagers
         TOWN_CENTRE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.TOWN_CENTRE);
         VILLAGER_HOUSE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.VILLAGER_HOUSE);
@@ -294,6 +298,7 @@ public class ResourceCosts {
         CASTLE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CASTLE);
         IRON_GOLEM_BUILDING.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.IRON_GOLEM_BUILDING);
         SHRINE_OF_PROSPERITY.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.SHRINE_OF_PROSPERITY);
+        VILLAGER_MARKET.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.VILLAGER_MARKET);
         // Piglins
         CENTRAL_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CENTRAL_PORTAL);
         BASIC_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASIC_PORTAL);
@@ -306,6 +311,7 @@ public class ResourceCosts {
         BASALT_SPRINGS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASALT_SPRINGS);
         FORTRESS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.FORTRESS);
         INFERNAL_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.INFERNAL_PORTAL);
+        PIGLIN_MARKET.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.PIGLIN_MARKET);
         // ******************* RESEARCH ******************* //
         RESEARCH_GOLEM_SMITHING.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_GOLEM_SMITHING);
         RESEARCH_SUPERIOR_BLACKSMITH.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_SUPERIOR_BLACKSMITH);
