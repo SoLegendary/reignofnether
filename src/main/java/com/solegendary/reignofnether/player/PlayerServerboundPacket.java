@@ -42,9 +42,7 @@ public class PlayerServerboundPacket {
         if (MC.player != null) {
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.TELEPORT,
                 MC.player.getId(),
-                x,
-                y,
-                z
+                x, y, z
             ));
         }
     }
@@ -54,9 +52,7 @@ public class PlayerServerboundPacket {
         if (MC.player != null) {
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.ENABLE_ORTHOVIEW,
                 MC.player.getId(),
-                0d,
-                0d,
-                0d
+                0d, 0d, 0d
             ));
         }
     }
@@ -66,9 +62,7 @@ public class PlayerServerboundPacket {
         if (MC.player != null) {
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.DISABLE_ORTHOVIEW,
                 MC.player.getId(),
-                0d,
-                0d,
-                0d
+                0d, 0d, 0d
             ));
         }
     }
@@ -187,9 +181,7 @@ public class PlayerServerboundPacket {
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
                 PlayerAction.DEFEAT,
                 MC.player.getId(),
-                0d,
-                0d,
-                0d
+                0d, 0d, 0d
             ));
         }
     }
@@ -197,21 +189,26 @@ public class PlayerServerboundPacket {
     public static void enableRTSSyncing() {
         PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
             PlayerAction.ENABLE_RTS_SYNCING,
-            -1,
-            0d,
-            0d,
-            0d
+            -1, 0d, 0d, 0d
         ));
     }
 
     public static void disableRTSSyncing() {
         PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
             PlayerAction.DISABLE_RTS_SYNCING,
-            -1,
-            0d,
-            0d,
-            0d
+            -1, 0d, 0d, 0d
         ));
+    }
+
+    public static void requestMarketRates() {
+        Minecraft MC = Minecraft.getInstance();
+        if (MC.player != null) {
+            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+                PlayerAction.REQUEST_MARKET_RATES,
+                MC.player.getId(),
+                0d, 0d, 0d
+            ));
+        }
     }
 
     // packet-handler functions
@@ -300,6 +297,7 @@ public class PlayerServerboundPacket {
                 case UNLOCK_RTS -> PlayerServerEvents.setRTSLock(false);
                 case ENABLE_RTS_SYNCING -> PlayerServerEvents.setRTSSyncingEnabled(true);
                 case DISABLE_RTS_SYNCING -> PlayerServerEvents.setRTSSyncingEnabled(false);
+                case REQUEST_MARKET_RATES -> PlayerServerEvents.updateMarketRates(this.playerId);
             }
             success.set(true);
         });

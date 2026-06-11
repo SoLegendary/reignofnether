@@ -1,8 +1,11 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
@@ -136,6 +139,16 @@ public class PlayerClientEvents {
         return MC.player != null ? MC.player.getName().getString() : "";
     }
 
+    public static void setMarketRate(TradeAction tradeAction, String playerName, int rate) {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (playerName.equals(rtsPlayer.name))
+                rtsPlayer.tradeRates.put(tradeAction, rate);
+
+        for (BuildingPlacement bpl : BuildingClientEvents.getBuildings())
+            if (bpl.getBuilding() instanceof AbstractMarket)
+                bpl.updateButtons();
+    }
+
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("rts-camera").executes((command) -> {
@@ -242,6 +255,7 @@ public class PlayerClientEvents {
                     MC.getMusicManager().stopPlaying();
                     ResearchClient.removeAllCheats();
                 }
+                PlayerServerboundPacket.requestMarketRates();
             }
         }
     }

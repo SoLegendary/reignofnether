@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -30,7 +31,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 public class TradeResources extends Ability {
 
     public static final int START_RATE = 75;
-    public static final int MAX_RATE = 200;
+    public static final int MAX_RATE = 135;
     public static final int MIN_RATE = 15;
     public static final int RATE_STEP = 2;
     public static final int TRADE_AMOUNT = 100;
@@ -74,14 +75,6 @@ public class TradeResources extends Ability {
             case FOOD_FOR_WOOD, FOOD_FOR_ORE -> ResourceName.FOOD;
             case WOOD_FOR_FOOD, WOOD_FOR_ORE -> ResourceName.WOOD;
             case ORE_FOR_FOOD, ORE_FOR_WOOD -> ResourceName.ORE;
-        };
-    }
-
-    private ResourceName getBuyResource() {
-        return switch (tradeAction) {
-            case FOOD_FOR_WOOD, ORE_FOR_WOOD -> ResourceName.WOOD;
-            case FOOD_FOR_ORE, WOOD_FOR_ORE -> ResourceName.ORE;
-            case WOOD_FOR_FOOD, ORE_FOR_FOOD -> ResourceName.FOOD;
         };
     }
 
@@ -139,7 +132,9 @@ public class TradeResources extends Ability {
             return;
         if (player.tradeRates.isEmpty())
             return;
+        TradeAction oppTradeAction = getOppositeTradeAction();
         int rate = player.tradeRates.get(tradeAction);
+        int oppRate = player.tradeRates.get(oppTradeAction);
 
         if (ResourcesServerEvents.canAfford(playerName, getSellResource(), TRADE_AMOUNT)) {
             switch (tradeAction) {
@@ -150,10 +145,12 @@ public class TradeResources extends Ability {
                 case ORE_FOR_FOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, rate, 0, -TRADE_AMOUNT));
                 case ORE_FOR_WOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, rate, -TRADE_AMOUNT));
             }
-            player.tradeRates.put(tradeAction, Math.max(MIN_RATE, rate - RATE_STEP));
-            player.tradeRates.put(getOppositeTradeAction(), Math.min(MAX_RATE, rate + RATE_STEP));
-            // TODO: update rates on clientside
-            // TODO: update rates on login
+            int newRate = Math.max(MIN_RATE, rate - RATE_STEP);
+            int newOppRate = Math.min(MAX_RATE, oppRate + RATE_STEP);
+            player.tradeRates.put(tradeAction, newRate);
+            player.tradeRates.put(oppTradeAction, newOppRate);
+            PlayerClientboundPacket.setMarketRate(tradeAction, playerName, newRate);
+            PlayerClientboundPacket.setMarketRate(oppTradeAction, playerName, newOppRate);
         } else {
             // TODO: send floating can't afford warning
         }
