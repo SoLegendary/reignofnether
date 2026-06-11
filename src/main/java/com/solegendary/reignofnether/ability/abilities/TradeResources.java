@@ -85,6 +85,17 @@ public class TradeResources extends Ability {
         };
     }
 
+    private TradeAction getOppositeTradeAction() {
+        return switch (tradeAction) {
+            case FOOD_FOR_WOOD -> WOOD_FOR_FOOD;
+            case FOOD_FOR_ORE -> ORE_FOR_FOOD;
+            case WOOD_FOR_FOOD -> FOOD_FOR_WOOD;
+            case WOOD_FOR_ORE -> ORE_FOR_WOOD;
+            case ORE_FOR_FOOD -> FOOD_FOR_ORE;
+            case ORE_FOR_WOOD -> WOOD_FOR_ORE;
+        };
+    }
+
     private ResourceLocation getIconResource() {
         return switch (tradeAction) {
             case FOOD_FOR_WOOD, FOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
@@ -140,6 +151,7 @@ public class TradeResources extends Ability {
                 case ORE_FOR_WOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, rate, -TRADE_AMOUNT));
             }
             player.tradeRates.put(tradeAction, Math.max(MIN_RATE, rate - RATE_STEP));
+            player.tradeRates.put(getOppositeTradeAction(), Math.min(MAX_RATE, rate + RATE_STEP));
             // TODO: update rates on clientside
             // TODO: update rates on login
         } else {
