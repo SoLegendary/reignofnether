@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
@@ -8,10 +9,9 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.faction.Faction;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import static com.solegendary.reignofnether.ability.TradeAction.*;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.TICKS_TO_REVEAL;
 
 public class RTSPlayer {
@@ -23,11 +23,13 @@ public class RTSPlayer {
     public int startPosColorId = 0;
     public RTSPlayerScores scores = new RTSPlayerScores();
     public int scenarioRoleIndex = -1;
+    public Map<TradeAction, Integer> tradeRates = new HashMap<>();
 
     private RTSPlayer(String playerName, Faction faction, int id) {
         this.name = playerName;
         this.id = id;
         this.faction = faction;
+        initTradeRates();
     }
 
     private RTSPlayer(String playerName, Faction faction, int id, int startPosColorId) {
@@ -35,6 +37,16 @@ public class RTSPlayer {
         this.id = id;
         this.faction = faction;
         this.startPosColorId = startPosColorId;
+        initTradeRates();
+    }
+
+    private void initTradeRates() {
+        tradeRates.put(FOOD_FOR_WOOD, 75);
+        tradeRates.put(FOOD_FOR_ORE, 75);
+        tradeRates.put(WOOD_FOR_FOOD, 75);
+        tradeRates.put(WOOD_FOR_ORE, 75);
+        tradeRates.put(ORE_FOR_FOOD, 75);
+        tradeRates.put(ORE_FOR_WOOD, 75);
     }
 
     // bot
@@ -52,6 +64,7 @@ public class RTSPlayer {
         }
         this.faction = faction;
         this.name = name;
+        initTradeRates();
     }
 
     private RTSPlayer(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks, int[] scores, int scenarioRoleIndex) {
@@ -62,6 +75,7 @@ public class RTSPlayer {
         this.beaconOwnerTicks = beaconOwnerTicks;
         this.scores.setScoreListFromArray(scores);
         this.scenarioRoleIndex = scenarioRoleIndex;
+        initTradeRates();
     }
 
     public static RTSPlayer getFromSave(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks, int[] scores, int scenarioRoleIndex) {

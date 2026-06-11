@@ -407,12 +407,12 @@
     "abilities.reignofnether.autocast": "Right click to auto-cast",
     "abilities.reignofnether.charges": "Can store up to %d charges",
 
-    "abilities.reignofnether.trade_food_wood": "Trade %d Food for %d Wood",
-    "abilities.reignofnether.trade_food_ore": "Trade %d Food for %d Ore",
-    "abilities.reignofnether.trade_wood_food": "Trade %d Wood for %d Food",
-    "abilities.reignofnether.trade_wood_ore": "Trade %d Wood for %d Ore",
-    "abilities.reignofnether.trade_ore_food": "Trade %d Ore for %d Food",
-    "abilities.reignofnether.trade_ore_wood": "Trade %d Ore for %d Wood",
+    "abilities.reignofnether.trade_food_wood": "Trade   %d   \uE000   for  %d   \uE001",
+    "abilities.reignofnether.trade_food_ore": "Trade   %d   \uE000   for   %d   \uE002",
+    "abilities.reignofnether.trade_wood_food": "Trade   %d   \uE001   for   %d   \uE000",
+    "abilities.reignofnether.trade_wood_ore": "Trade   %d   \uE001   for   %d   \uE002",
+    "abilities.reignofnether.trade_ore_food": "Trade   %d   \uE002   for   %d   \uE000",
+    "abilities.reignofnether.trade_ore_wood": "Trade   %d   \uE002   for   %d   \uE001",
 
     "ability.reignofnether.enchant.error1": "Can only enchant your own units",
     "ability.reignofnether.enchant.error2": "Unit is out of range",
@@ -584,7 +584,7 @@
     "buildings.piglins.reignofnether.infernal_portal.tooltip2": "Trains new and revives fallen Piglin heroes.",
     "buildings.piglins.reignofnether.piglin_market": "Commercial Portal",
     "buildings.piglins.reignofnether.piglin_market.tooltip1": "A portal linked to the trade routes of the nether",
-    "buildings.piglins.reignofnether.piglin_market.tooltip2": "to freely swap resources between each other.",
+    "buildings.piglins.reignofnether.piglin_market.tooltip2": "to freely swap resources between dimensions.",
     "buildings.piglins.reignofnether.piglin_market.tooltip3": "Requires 4 civil portals.",
 
     "buildings.villagers.reignofnether.witch_hut": "Witch Hut",
@@ -636,7 +636,7 @@
     "buildings.villagers.reignofnether.shrine_of_prosperity.tooltip1": "A symbol of the alliance of Villagers and Pillagers.",
     "buildings.villagers.reignofnether.shrine_of_prosperity.tooltip2": "Trains new and revives fallen Villager heroes.",
     "buildings.villagers.reignofnether.villager_market": "Town Market",
-    "buildings.villagers.reignofnether.villager_market.tooltip1": "A lively town square for exchanging different resources.",
+    "buildings.villagers.reignofnether.villager_market.tooltip1": "A lively town square for trading different resources.",
     "buildings.villagers.reignofnether.villager_market.tooltip2": "Requires 6 houses.",
 
     "buildings.neutral.reignofnether.capturable_beacon": "Capturable Beacon",

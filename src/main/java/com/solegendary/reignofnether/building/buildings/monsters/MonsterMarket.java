@@ -29,8 +29,8 @@ public class MonsterMarket extends AbstractMarket {
     public MonsterMarket() {
         super(structureName, cost);
         this.name = buildingName;
-        this.portraitBlock = Blocks.END_PORTAL;
-        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/end_portal.png");
+        this.portraitBlock = Blocks.POLISHED_DEEPSLATE;
+        this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_deepslate.png");
 
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
         this.startingBlockTypes.add(Blocks.DEEPSLATE_TILE_SLAB);
@@ -43,7 +43,7 @@ public class MonsterMarket extends AbstractMarket {
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
         return new BuildingPlaceButton(
                 name,
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/sculk.png"),
+                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_deepslate.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),

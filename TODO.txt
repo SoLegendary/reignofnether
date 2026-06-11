@@ -7,6 +7,7 @@
 
 Bugfixes
 --------
+[❌] Remove chain from dark watchtower to allow necromancers through
 
 Quality of Life
 ---------------

@@ -67,6 +67,14 @@ public class PlayerClientEvents {
     }
 
     @Nullable
+    public static RTSPlayer getRTSPlayer() {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (MC.player != null && rtsPlayer.name.equals(MC.player.getName().getString()))
+                return rtsPlayer;
+        return null;
+    }
+
+    @Nullable
     public static RTSPlayer getRTSPlayer(String playerName) {
         for (RTSPlayer rtsPlayer : rtsPlayers)
             if (rtsPlayer.name.equals(playerName))
