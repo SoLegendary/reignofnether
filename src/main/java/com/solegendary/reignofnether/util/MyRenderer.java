@@ -16,6 +16,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -611,24 +612,21 @@ public class MyRenderer {
         return DefaultPlayerSkin.getDefaultSkin(MC.player.getUUID());
     }
 
-    public static void renderPlayerHead(String playerName, GuiGraphics guiGraphics, int x, int y) {
-        ResourceLocation skinRl = getPlayerSkinRl(playerName);
-        guiGraphics.blit(skinRl,
-                x + Button.DEFAULT_ICON_FRAME_SIZE,
-                y + 4,
-                Button.DEFAULT_ICON_SIZE, Button.DEFAULT_ICON_SIZE,
-                8.0f, 8.0f,
-                8, 8,
-                64, 64
-        );
-        // draw hat
-        guiGraphics.blit(skinRl,
-                x + Button.DEFAULT_ICON_FRAME_SIZE,
-                y + 4,
-                Button.DEFAULT_ICON_SIZE, Button.DEFAULT_ICON_SIZE,
-                40.0f, 8.0f,
-                8, 8,
-                64, 64
-        );
+    public static void drawScaledString(GuiGraphics guiGraphics, Font font, String text, int x, int y, int color, float scale) {
+        PoseStack poseStack = guiGraphics.pose();
+        poseStack.pushPose();
+        poseStack.translate(x, y, 0);
+        poseStack.scale(scale, scale, 1.0f);
+        guiGraphics.drawString(font, text, 0, 0, color);
+        poseStack.popPose();
+    }
+
+    public static void drawScaledCenteredString(GuiGraphics guiGraphics, Font font, String text, int x, int y, int color, float scale) {
+        PoseStack poseStack = guiGraphics.pose();
+        poseStack.pushPose();
+        poseStack.translate(x, y, 0);
+        poseStack.scale(scale, scale, 1.0f);
+        guiGraphics.drawCenteredString(font, text, 0, 0, color);
+        poseStack.popPose();
     }
 }

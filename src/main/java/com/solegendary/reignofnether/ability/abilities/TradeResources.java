@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.TradeAbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -50,7 +51,14 @@ public class TradeResources extends Ability {
 
     @Override
     public AbilityButton getButton(Keybinding hotkey, BuildingPlacement placement) {
-        AbilityButton button = new AbilityButton(
+        String playerName = placement.ownerName;
+        RTSPlayer player = PlayerClientEvents.getRTSPlayer(playerName);
+        if (player == null)
+            return null;
+        if (player.tradeRates.isEmpty())
+            return null;
+
+        AbilityButton button = new TradeAbilityButton(
                 "Trade Resources",
                 getIconResource(),
                 hotkey,
@@ -61,7 +69,8 @@ public class TradeResources extends Ability {
                 null,
                 List.of(fcsIcons(getTooltip())),
                 this,
-                placement
+                placement,
+                player.tradeRates.get(tradeAction)
         );
         button.bgIconResource = getBgIconResource();
         return button;
@@ -88,17 +97,17 @@ public class TradeResources extends Ability {
 
     private ResourceLocation getIconResource() {
         return switch (tradeAction) {
-            case FOOD_FOR_WOOD, FOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
-            case WOOD_FOR_FOOD, WOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
-            case ORE_FOR_FOOD, ORE_FOR_WOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
+            case WOOD_FOR_FOOD, ORE_FOR_FOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat_half_right.png");
+            case FOOD_FOR_WOOD, ORE_FOR_WOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood_half_right.png");
+            case FOOD_FOR_ORE, WOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore_half_right.png");
         };
     }
 
     private ResourceLocation getBgIconResource() {
         return switch (tradeAction) {
-            case WOOD_FOR_FOOD, ORE_FOR_FOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
-            case FOOD_FOR_WOOD, ORE_FOR_WOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
-            case FOOD_FOR_ORE, WOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
+            case FOOD_FOR_WOOD, FOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat_half_left.png");
+            case WOOD_FOR_FOOD, WOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood_half_left.png");
+            case ORE_FOR_FOOD, ORE_FOR_WOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore_half_left.png");
         };
     }
 
