@@ -407,6 +407,13 @@
   "abilities.reignofnether.autocast": "鼠标右击此按钮以自动释放",
   "abilities.reignofnether.charges": "最多可储存 %d 次释放次数",
 
+  "abilities.reignofnether.trade_food_wood": "交出   %d   \uE000   以换取   %d   \uE001",
+  "abilities.reignofnether.trade_food_ore": "交出   %d   \uE000   以换取   %d   \uE002",
+  "abilities.reignofnether.trade_wood_food": "交出   %d   \uE001   以换取   %d   \uE000",
+  "abilities.reignofnether.trade_wood_ore": "交出   %d   \uE001   以换取   %d   \uE002",
+  "abilities.reignofnether.trade_ore_food": "交出   %d   \uE002   以换取   %d   \uE000",
+  "abilities.reignofnether.trade_ore_wood": "交出   %d   \uE002   以换取   %d   \uE001",
+
   "ability.reignofnether.enchant.error1": "附魔台仅能为所属你自己的单位附魔",
   "ability.reignofnether.enchant.error2": "所选单位超出有效范围",
   "ability.reignofnether.enchant.error3": "所选单位类型不符，或装备类型不符",
@@ -525,6 +532,9 @@
   "buildings.monsters.reignofnether.altar_of_darkness": "黑暗祭坛（英雄）",
   "buildings.monsters.reignofnether.altar_of_darkness.tooltip1": "一座黑暗能量的源泉，暗黑恐惧由此诞生。",
   "buildings.monsters.reignofnether.altar_of_darkness.tooltip2": "能够训练新的怪物英雄，也能复活阵亡的怪物英雄。",
+  "buildings.monsters.reignofnether.monster_market": "转换坩埚",
+  "buildings.monsters.reignofnether.monster_market.tooltip1": "一台暗黑设备，用于与其他人交换资源。",
+  "buildings.monsters.reignofnether.monster_market.tooltip2": "需要 6 间鬼屋以建造。",
 
   "buildings.piglins.reignofnether.bastion": "猪灵堡垒",
   "buildings.piglins.reignofnether.bastion.tooltip1": "一座供猪灵流掠者居住的坚固兵营，",
@@ -572,6 +582,10 @@
   "buildings.piglins.reignofnether.infernal_portal": "炼狱传送门（英雄）",
   "buildings.piglins.reignofnether.infernal_portal.tooltip1": "一座装饰精美的传送门，专为下界的魁首所用。",
   "buildings.piglins.reignofnether.infernal_portal.tooltip2": "能够训练新的猪灵英雄，也能复活阵亡的猪灵英雄。",
+  "buildings.piglins.reignofnether.piglin_market": "贸易传送门",
+  "buildings.piglins.reignofnether.piglin_market.tooltip1": "一座与下界贸易枢纽相连的传送门，",
+  "buildings.piglins.reignofnether.piglin_market.tooltip2": "供各方跨维度相互自由交易资源。",
+  "buildings.piglins.reignofnether.piglin_market.tooltip3": "需要 4 座民用传送门以建造。",
 
   "buildings.villagers.reignofnether.witch_hut": "女巫小屋",
   "buildings.villagers.reignofnether.witch_hut.tooltip1": "一座古老小屋舍，供女巫居住。",
@@ -621,6 +635,9 @@
   "buildings.villagers.reignofnether.shrine_of_prosperity": "繁荣神殿（英雄）",
   "buildings.villagers.reignofnether.shrine_of_prosperity.tooltip1": "村民与掠夺者同仇敌忾的象征。",
   "buildings.villagers.reignofnether.shrine_of_prosperity.tooltip2": "能够训练新的村民英雄，也能复活阵亡的村民英雄。",
+  "buildings.villagers.reignofnether.villager_market": "城镇市集",
+  "buildings.villagers.reignofnether.villager_market.tooltip1": "一座用于交易资源的繁荣广场。",
+  "buildings.villagers.reignofnether.villager_market.tooltip2": "需要 6 座村民房屋以建造。",
 
   "buildings.neutral.reignofnether.capturable_beacon": "可占领信标",
   "buildings.neutral.reignofnether.capturable_beacon.tooltip1": "一座宏伟的金字塔，可以提供多种强力光环。",
