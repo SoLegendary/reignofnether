@@ -11,10 +11,7 @@ import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
-import com.solegendary.reignofnether.resources.ResourceName;
-import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.resources.ResourcesClientEvents;
-import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -152,7 +149,11 @@ public class TradeResources extends Ability {
             PlayerClientboundPacket.setMarketRate(tradeAction, playerName, newRate);
             PlayerClientboundPacket.setMarketRate(oppTradeAction, playerName, newOppRate);
         } else {
-            // TODO: send floating can't afford warning
+            ResourcesClientboundPacket.warnInsufficientResources(playerName,
+                getSellResource() != ResourceName.FOOD,
+                getSellResource() != ResourceName.WOOD,
+                getSellResource() != ResourceName.ORE
+            );
         }
     }
 }

@@ -68,7 +68,8 @@ public class RTSPlayer {
         initTradeRates();
     }
 
-    private RTSPlayer(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks, int[] scores, int scenarioRoleIndex) {
+    private RTSPlayer(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks,
+                      int[] scores, int scenarioRoleIndex, Map<TradeAction, Integer> tradeRates) {
         this.name = name;
         this.id = id;
         this.ticksWithoutCapitol = ticksWithoutCapitol;
@@ -76,11 +77,12 @@ public class RTSPlayer {
         this.beaconOwnerTicks = beaconOwnerTicks;
         this.scores.setScoreListFromArray(scores);
         this.scenarioRoleIndex = scenarioRoleIndex;
-        initTradeRates();
+        this.tradeRates = tradeRates;
     }
 
-    public static RTSPlayer getFromSave(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks, int[] scores, int scenarioRoleIndex) {
-        return new RTSPlayer(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores, scenarioRoleIndex);
+    public static RTSPlayer getFromSave(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks,
+                                        int[] scores, int scenarioRoleIndex, Map<TradeAction, Integer> tradeRates) {
+        return new RTSPlayer(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores, scenarioRoleIndex, tradeRates);
     }
 
     public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id) {
