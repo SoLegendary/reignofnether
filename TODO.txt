@@ -7,9 +7,9 @@
 
 Bugfixes
 --------
-[❌] Remove chain from dark watchtower to allow necromancers through
-[🟡] Fixed a crash from selecting a lot of buildings and mousing over the + tooltip
-[❌] Fixed selected building buttons not showing any labels
+[✔] Removed a block from watchtower entrances to stop taller units getting stuck on exit
+[✔] Fixed a crash from selecting a lot of buildings and mousing over the + tooltip
+[✔] Fixed selected building buttons not showing any labels
 
 Quality of Life
 ---------------
