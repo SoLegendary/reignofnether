@@ -78,26 +78,26 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) || ResearchClient.hasCheat(
                 "modifythephasevariance"),
             List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.sculk_catalyst"),
+                    I18n.get("buildings.reignofnether.sculk_catalyst"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.sculk_catalyst.tooltip1"),
+                    I18n.get("buildings.reignofnether.sculk_catalyst.tooltip1"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get(
-                    "buildings.monsters.reignofnether.sculk_catalyst.tooltip2",
+                    "buildings.reignofnether.sculk_catalyst.tooltip2",
                     nightRangeMin
                 ), Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get(
-                    "buildings.monsters.reignofnether.sculk_catalyst.tooltip3",
+                    "buildings.reignofnether.sculk_catalyst.tooltip3",
                     nightRangeMax
                 ), Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.sculk_catalyst.tooltip4"),
+                    I18n.get("buildings.reignofnether.sculk_catalyst.tooltip4"),
                     Style.EMPTY
                 )
             ),

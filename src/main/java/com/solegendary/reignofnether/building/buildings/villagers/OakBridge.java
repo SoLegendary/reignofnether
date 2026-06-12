@@ -68,26 +68,26 @@ public class OakBridge extends AbstractBridge {
                     "modifythephasevariance")
             ),
             List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.oak_bridge"),
+                    I18n.get("buildings.reignofnether.oak_bridge"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.oak_bridge.tooltip1"),
+                    I18n.get("buildings.reignofnether.oak_bridge.tooltip1"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.oak_bridge.tooltip2"),
+                    I18n.get("buildings.reignofnether.oak_bridge.tooltip2"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.oak_bridge.tooltip3"),
+                    I18n.get("buildings.reignofnether.oak_bridge.tooltip3"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.oak_bridge.tooltip4"),
+                    I18n.get("buildings.reignofnether.oak_bridge.tooltip4"),
                     Style.EMPTY
                 )
             ),

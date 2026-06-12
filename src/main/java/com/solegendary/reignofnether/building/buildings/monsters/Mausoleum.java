@@ -71,19 +71,19 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
             () -> false,
             () -> true,
             List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.mausoleum"),
+                    I18n.get("buildings.reignofnether.mausoleum"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip1"),
+                    I18n.get("buildings.reignofnether.mausoleum.tooltip1"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip2",  nightRange), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip4",  nightRangeReduced), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.mausoleum.tooltip2",  nightRange), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.mausoleum.tooltip4",  nightRangeReduced), Style.EMPTY)
             ),
             this
         );

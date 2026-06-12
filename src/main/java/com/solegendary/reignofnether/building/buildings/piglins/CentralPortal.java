@@ -60,11 +60,11 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
                 () -> false,
                 () -> true,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.central_portal"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.central_portal"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPop(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.central_portal.tooltip1"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.central_portal.tooltip1"), Style.EMPTY)
                 ),
                 this
         );

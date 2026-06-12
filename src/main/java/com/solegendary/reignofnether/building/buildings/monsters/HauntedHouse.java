@@ -47,11 +47,11 @@ public class HauntedHouse extends Building {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.haunted_house"), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.haunted_house"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
                     ResourceCosts.getFormattedPop(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.haunted_house.tooltip1"), Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.haunted_house.tooltip1"), Style.EMPTY)
             ),
             this
         );

@@ -53,11 +53,11 @@ public class PumpkinFarm extends AbstractFarm {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST), MyRenderer.iconStyle),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.pumpkin_farm"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.pumpkin_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST), MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.pumpkin_farm.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.pumpkin_farm.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.pumpkin_farm.tooltip3"), Style.EMPTY)
                 ),
                 this
         );

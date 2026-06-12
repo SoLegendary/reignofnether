@@ -47,12 +47,14 @@ public class PortraitRendererBuilding {
     public RectZone render(GuiGraphics guiGraphics, int x, int y, BuildingPlacement building) {
         Relationship rs = BuildingClientEvents.getPlayerToBuildingRelationship(building);
 
-        String name;
+        String name = "";
         if (building.getBuilding() instanceof CustomBuilding customBuilding) {
             name = customBuilding.name;
         } else {
             ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding());
-            name = LanguageUtil.getTranslation("buildings." + (building.getFaction() != null && building.getFaction() != Faction.NONE ? building.getFaction().name().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
+            if (key != null) {
+                name = LanguageUtil.getTranslation("buildings." + key.getNamespace() + "." + key.getPath());
+            }
         }
 
         if (building.getUpgradeLevel() > 0)

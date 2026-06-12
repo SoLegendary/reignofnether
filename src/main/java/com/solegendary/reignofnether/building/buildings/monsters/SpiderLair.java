@@ -55,12 +55,12 @@ public class SpiderLair extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spider_lair"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spider_lair"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spider_lair.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spider_lair.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spider_lair.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spider_lair.tooltip2"), Style.EMPTY)
                 ),
                 this
         );

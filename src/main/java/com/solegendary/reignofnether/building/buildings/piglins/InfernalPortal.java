@@ -71,11 +71,11 @@ public class InfernalPortal extends ProductionBuilding implements NetherConverti
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.CENTRAL_PORTAL) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        fcs(I18n.get("buildings.piglins.reignofnether.infernal_portal"), true),
+                        fcs(I18n.get("buildings.reignofnether.infernal_portal"), true),
                         ResourceCosts.getFormattedCost(cost),
                         fcs(""),
-                        fcs(I18n.get("buildings.piglins.reignofnether.infernal_portal.tooltip1")),
-                        fcs(I18n.get("buildings.piglins.reignofnether.infernal_portal.tooltip2"))
+                        fcs(I18n.get("buildings.reignofnether.infernal_portal.tooltip1")),
+                        fcs(I18n.get("buildings.reignofnether.infernal_portal.tooltip2"))
                 ),
                 this
         );

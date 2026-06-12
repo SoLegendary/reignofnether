@@ -66,15 +66,15 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuildingA
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.PORTAL_BASIC) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion.tooltip3", MAX_OCCUPANTS), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion.tooltip3", MAX_OCCUPANTS), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.bastion.tooltip4"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion.tooltip4"), Style.EMPTY)
                 ),
                 this
         );

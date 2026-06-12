@@ -69,11 +69,11 @@ public class AltarOfDarkness extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness"), true),
+                        fcs(I18n.get("buildings.reignofnether.altar_of_darkness"), true),
                         ResourceCosts.getFormattedCost(cost),
                         fcs(""),
-                        fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness.tooltip1")),
-                        fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness.tooltip2"))
+                        fcs(I18n.get("buildings.reignofnether.altar_of_darkness.tooltip1")),
+                        fcs(I18n.get("buildings.reignofnether.altar_of_darkness.tooltip2"))
                 ),
                 this
         );

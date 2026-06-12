@@ -60,7 +60,7 @@ public class Graveyard extends ProductionBuilding {
 
     @Override
     public String getUpgradedName(BuildingPlacement placement) {
-        return I18n.get("buildings.monsters.reignofnether.graveyard.upgraded");
+        return I18n.get("buildings.reignofnether.graveyard.upgraded");
     }
 
     @Override
@@ -82,10 +82,10 @@ public class Graveyard extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.graveyard"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.graveyard"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.graveyard.tooltip1"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.graveyard.tooltip1"), Style.EMPTY)
             ),
             this
         );

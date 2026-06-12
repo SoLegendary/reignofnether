@@ -98,12 +98,12 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.blacksmith"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blacksmith"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.blacksmith.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blacksmith.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.blacksmith.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blacksmith.tooltip2"), Style.EMPTY)
                 ),
                 this
         );
@@ -150,7 +150,7 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
 
     @Override
     public String getUpgradedName(BuildingPlacement placement) {
-        return I18n.get("buildings.villagers.reignofnether.blacksmith.superior");
+        return I18n.get("buildings.reignofnether.blacksmith.superior");
     }
 
     @Override

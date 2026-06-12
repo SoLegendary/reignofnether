@@ -60,19 +60,19 @@ public class IronGolemBuilding extends Building {
                     "modifythephasevariance")
             ),
             List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.iron_golem_building"),
+                    I18n.get("buildings.reignofnether.iron_golem_building"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(IronGolemProd.cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.iron_golem_building.tooltip1"),
+                    I18n.get("buildings.reignofnether.iron_golem_building.tooltip1"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.iron_golem_building.tooltip2"),
+                    I18n.get("buildings.reignofnether.iron_golem_building.tooltip2"),
                     Style.EMPTY
                 )
             ),

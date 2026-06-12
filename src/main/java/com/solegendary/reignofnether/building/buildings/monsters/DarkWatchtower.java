@@ -55,13 +55,13 @@ public class DarkWatchtower extends Building implements GarrisonableBuildingAddo
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower"), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dark_watchtower"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower.tooltip1"), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower.tooltip2"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dark_watchtower.tooltip1"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dark_watchtower.tooltip2"), Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dark_watchtower.tooltip3", MAX_OCCUPANTS), Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dark_watchtower.tooltip3", MAX_OCCUPANTS), Style.EMPTY)
             ),
             this
         );

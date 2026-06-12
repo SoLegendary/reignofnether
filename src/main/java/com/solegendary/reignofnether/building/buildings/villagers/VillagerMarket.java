@@ -20,6 +20,8 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
 public class VillagerMarket extends AbstractMarket {
 
     public static final String buildingName = "Town Market";
@@ -31,6 +33,8 @@ public class VillagerMarket extends AbstractMarket {
         this.name = buildingName;
         this.portraitBlock = Blocks.EMERALD_BLOCK;
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/emerald_block.png");
+
+        this.buildTimeModifier = 0.8f;
 
         this.startingBlockTypes.add(Blocks.COBBLESTONE);
         this.startingBlockTypes.add(Blocks.STONE);
@@ -50,11 +54,12 @@ public class VillagerMarket extends AbstractMarket {
                 () -> BuildingClientEvents.numFinishedBuildings(Buildings.VILLAGER_HOUSE) >= 6 ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.villager_market"), Style.EMPTY.withBold(true)),
+                        fcs(I18n.get("buildings.reignofnether.villager_market"), true),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.villager_market.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.villager_market.tooltip2"), Style.EMPTY)
+                        fcs(""),
+                        fcs(I18n.get("buildings.reignofnether.villager_market.tooltip1")),
+                        fcs(""),
+                        fcs(I18n.get("buildings.reignofnether.villager_market.tooltip2"))
                 ),
                 this
         );

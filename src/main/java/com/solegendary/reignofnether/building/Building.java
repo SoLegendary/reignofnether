@@ -173,6 +173,6 @@ public abstract class Building {
         if (key == null) {
             return "Unknown";
         }
-        return I18n.get("buildings." + (getFaction() != null && getFaction() != Faction.NONE ? getFaction().toString().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
+        return I18n.get("buildings." + key.getNamespace() + "." + key.getPath());
     }
 }

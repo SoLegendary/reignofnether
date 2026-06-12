@@ -120,19 +120,19 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
             TutorialClientEvents::isEnabled,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.library"),
+            List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.library.tooltip1"),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library.tooltip1"),
                     Style.EMPTY
                 ),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.library.tooltip2"),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library.tooltip2"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.library.tooltip3"),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library.tooltip3"),
                     Style.EMPTY
                 )
             ),
@@ -157,7 +157,7 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
 
     @Override
     public String getUpgradedName(BuildingPlacement placement) {
-        return I18n.get("buildings.villagers.reignofnether.library.upgraded");
+        return I18n.get("buildings.reignofnether.library.upgraded");
     }
 
     @Override

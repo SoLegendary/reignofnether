@@ -20,6 +20,8 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
 public class MonsterMarket extends AbstractMarket {
 
     public static final String buildingName = "Conversion Crucible";
@@ -32,8 +34,14 @@ public class MonsterMarket extends AbstractMarket {
         this.portraitBlock = Blocks.POLISHED_DEEPSLATE;
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_deepslate.png");
 
-        this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
+        this.startingBlockTypes.add(Blocks.POLISHED_DEEPSLATE);
+        this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_BRICKS);
+        this.startingBlockTypes.add(Blocks.DEEPSLATE_TILES);
+        this.startingBlockTypes.add(Blocks.SMOOTH_BASALT);
+        this.startingBlockTypes.add(Blocks.POLISHED_BASALT);
         this.startingBlockTypes.add(Blocks.DEEPSLATE_TILE_SLAB);
+        this.startingBlockTypes.add(Blocks.POLISHED_DEEPSLATE_SLAB);
+        this.startingBlockTypes.add(Blocks.DARK_PRISMARINE_SLAB);
     }
 
     public Faction getFaction() { return Faction.MONSTERS; }
@@ -50,11 +58,12 @@ public class MonsterMarket extends AbstractMarket {
                 () -> BuildingClientEvents.numFinishedBuildings(Buildings.HAUNTED_HOUSE) >= 6 ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.monster_market"), Style.EMPTY.withBold(true)),
+                        fcs(I18n.get("buildings.reignofnether.monster_market"), true),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.monster_market.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.monster_market.tooltip2"), Style.EMPTY)
+                        fcs(""),
+                        fcs(I18n.get("buildings.reignofnether.monster_market.tooltip1")),
+                        fcs(""),
+                        fcs(I18n.get("buildings.reignofnether.monster_market.tooltip2"))
                 ),
                 this
         );

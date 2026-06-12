@@ -75,23 +75,23 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.SPIDER_LAIR)
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.DUNGEON)
             ) || ResearchClient.hasCheat("modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.stronghold"),
+            List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.stronghold.tooltip1"),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold.tooltip1"),
                     Style.EMPTY
                 ),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.stronghold.tooltip2",
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold.tooltip2",
                     Stronghold.MAX_OCCUPANTS
                 ), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.stronghold.tooltip3",
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold.tooltip3",
                     nightRange
                 ), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.stronghold.tooltip4"),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold.tooltip4"),
                     Style.EMPTY
                 )
             ),

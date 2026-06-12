@@ -98,22 +98,22 @@ public class Castle extends ProductionBuilding implements GarrisonableBuildingAd
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.ARCANE_TOWER)
             ) || ResearchClient.hasCheat("modifythephasevariance"),
             List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.castle"),
+                    I18n.get("buildings.reignofnether.castle"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.castle.tooltip1"),
+                    I18n.get("buildings.reignofnether.castle.tooltip1"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward(I18n.get(
-                    "buildings.villagers.reignofnether.castle.tooltip2",
+                    "buildings.reignofnether.castle.tooltip2",
                         MAX_OCCUPANTS
                 ), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.villagers.reignofnether.castle.tooltip3"),
+                    I18n.get("buildings.reignofnether.castle.tooltip3"),
                     Style.EMPTY
                 )
             ),

@@ -20,6 +20,8 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
 public class PiglinMarket extends AbstractMarket {
 
     public static final String buildingName = "Commercial Portal";
@@ -50,12 +52,13 @@ public class PiglinMarket extends AbstractMarket {
                 () -> BuildingClientEvents.numFinishedBuildings(Buildings.PORTAL_CIVILIAN) >= 4 ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.piglin_market"), Style.EMPTY.withBold(true)),
+                        fcs(I18n.get("buildings.reignofnether.piglin_market"), true),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.piglin_market.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.piglin_market.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.piglin_market.tooltip3"), Style.EMPTY)
+                        fcs(""),
+                        fcs(I18n.get("buildings.reignofnether.piglin_market.tooltip1")),
+                        fcs(I18n.get("buildings.reignofnether.piglin_market.tooltip2")),
+                        fcs(""),
+                        fcs(I18n.get("buildings.reignofnether.piglin_market.tooltip3"))
                 ),
                 this
         );

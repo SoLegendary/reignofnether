@@ -348,13 +348,15 @@ public class HudClientEvents {
             // ---------------------------
             for (BuildingPlacement building : selBuildings) {
                 if (hudSelBuildingOwned && buildingButtons.size() < (buttonsPerRow * 2)) {
-                    String name;
+                    String name = "";
                     if (building.getBuilding() instanceof CustomBuilding customBuilding) {
                         name = customBuilding.name;
                     } else {
-                        name = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding()).toString();
+                        ResourceLocation rl = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding());
+                        if (rl != null) {
+                            name = I18n.get("buildings.reignofnether." + rl.getPath());
+                        }
                     }
-
                     buildingButtons.add(new ButtonBuilder(name)
                         .iconSize(iconSize)
                         .iconResource(building.getBuilding().icon)
@@ -368,6 +370,7 @@ public class HudClientEvents {
                                 hudSelectedPlacement = building;
                             }
                         })
+                        .tooltipLines(List.of(fcs(name)))
                         .build()
                     );
                 }
@@ -408,26 +411,23 @@ public class HudClientEvents {
 
                         if (plusBuildingsZone.isMouseOver(mouseX, mouseY)) {
                             List<FormattedCharSequence> tooltipLines = new ArrayList<>();
-                            int numBuildings = 0;
+                            Map<String, Integer> extraBuildingsMap = new HashMap<>();
 
                             for (int i = selBuildings.size() - numExtraBuildings; i < selBuildings.size(); i++) {
                                 BuildingPlacement placement = selBuildings.get(i);
-                                BuildingPlacement nextPlacement = null;
                                 Building building = placement.getBuilding();
-
-                                Building nextBuilding = null;
-                                numBuildings += 1;
-
-                                if (i < selBuildings.size() - 1) {
-                                    nextPlacement = selBuildings.get(i + 1);
-                                    nextBuilding = nextPlacement.getBuilding();
+                                ResourceLocation rl = ReignOfNetherRegistries.BUILDING.getKey(building);
+                                if (rl != null) {
+                                    String buildingName = I18n.get("buildings.reignofnether." + rl.getPath());
+                                    if (extraBuildingsMap.containsKey(buildingName))
+                                        extraBuildingsMap.put(buildingName, extraBuildingsMap.get(buildingName) + 1);
+                                    else
+                                        extraBuildingsMap.put(buildingName, 1);
                                 }
-                                if (building != nextBuilding) {
-                                    tooltipLines.add(FormattedCharSequence.forward("x" + numBuildings + " " + I18n.get(ReignOfNetherRegistries.BUILDING.getKey(nextBuilding).getPath()),
-                                        Style.EMPTY
-                                    ));
-                                    numBuildings = 0;
-                                }
+                            }
+                            for (String buildingName : extraBuildingsMap.keySet()) {
+                                int numBuildings = extraBuildingsMap.get(buildingName);
+                                tooltipLines.add(fcs("x" + numBuildings + " " + buildingName));
                             }
                             MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipLines, mouseX, mouseY);
                         }
