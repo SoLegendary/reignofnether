@@ -1,9 +1,8 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -22,7 +21,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class PiglinMarket extends AbstractMarket {
+public class PiglinMarket extends AbstractMarket implements NetherConvertingAddon {
 
     public static final String buildingName = "Commercial Portal";
     public static final String structureName = "market_piglins";
@@ -62,5 +61,21 @@ public class PiglinMarket extends AbstractMarket {
                 ),
                 this
         );
+    }
+
+    @Override
+    public void onBuilt(BuildingPlacement buildingPlacement) {
+        super.onBuilt(buildingPlacement);
+        setNetherZone(buildingPlacement, new NetherZone(buildingPlacement.centrePos.offset(0, -2, 0), getMaxNetherRange(buildingPlacement), getStartingNetherRange(buildingPlacement)), true);
+    }
+
+    @Override
+    public double getMaxNetherRange(BuildingPlacement placement) {
+        return 20;
+    }
+
+    @Override
+    public double getStartingNetherRange(BuildingPlacement placement) {
+        return 3;
     }
 }
