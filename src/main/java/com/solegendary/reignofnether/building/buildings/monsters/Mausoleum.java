@@ -33,7 +33,7 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
     public final static String buildingName = "Mausoleum";
     public final static String structureName = "mausoleum";
     public final static ResourceCost cost = ResourceCosts.MAUSOLEUM;
-    public final static int nightRange = 80;
+    public final static int nightRange = 60;
     public final static int nightRangeReduced = 40;
 
     public Mausoleum() {

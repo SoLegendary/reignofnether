@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.Rotation;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SculkCatalyst extends Building implements NightSourceAddon, RangeIndicatorAddon {
     //TODO public static final DataType<ArrayList<BlockPos>> SCULK_BPS_CACHE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "sculk_bps_cache"), (nbt, server) -> new ArrayList<>(), (netherZone -> new CompoundTag()), () -> new ArrayList<>()); //Cache only, shouldn't be saved
@@ -39,7 +40,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
     // vanilla logic determines the actual range, but this is what we're guessing it to be for the range limiter
     // mixin and the dirt path fix
     public final static int ESTIMATED_RANGE = 10;
-    public final static int nightRangeMin = 25;
+    public final static int nightRangeMin = 30;
     public final static int nightRangeMax = 50;
 
     public SculkCatalyst() {
@@ -77,29 +78,13 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) || ResearchClient.hasCheat(
                 "modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.sculk_catalyst"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("buildings.reignofnether.sculk_catalyst"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.sculk_catalyst.tooltip1"),
-                    Style.EMPTY
-                ),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get(
-                    "buildings.reignofnether.sculk_catalyst.tooltip2",
-                    nightRangeMin
-                ), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get(
-                    "buildings.reignofnether.sculk_catalyst.tooltip3",
-                    nightRangeMax
-                ), Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.sculk_catalyst.tooltip4"),
-                    Style.EMPTY
-                )
+                fcs(""),
+                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip1")),
+                fcs(""),
+                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip2", nightRangeMin)),
+                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip3"))
             ),
             this
         );

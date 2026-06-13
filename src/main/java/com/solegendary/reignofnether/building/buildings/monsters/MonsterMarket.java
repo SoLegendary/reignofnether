@@ -55,7 +55,7 @@ public class MonsterMarket extends AbstractMarket {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
-                () -> BuildingClientEvents.numFinishedBuildings(Buildings.HAUNTED_HOUSE) >= 6 ||
+                () -> BuildingClientEvents.numFinishedBuildings(Buildings.SCULK_CATALYST) >= 5 ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
                         fcs(I18n.get("buildings.reignofnether.monster_market"), true),

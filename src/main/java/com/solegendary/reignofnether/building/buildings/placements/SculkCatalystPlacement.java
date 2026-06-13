@@ -43,6 +43,10 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         return 0;
     }
 
+    public float getMeleeDamageMult() {
+        return 0.1F; // half compared to most buildings
+    }
+
     @Override
     public void onBuilt() {
         super.onBuilt();
