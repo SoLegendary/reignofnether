@@ -47,6 +47,7 @@ public abstract class Building {
 
     public ResourceCost cost;
     public boolean selfBuilding = false;
+    public double healthPerBlock = 2.0f; // technically a building has 1hp per block, but we only are counting half the blocks, since it dies at half blocks remaining
 
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical

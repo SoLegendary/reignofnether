@@ -42,10 +42,6 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         return 0;
     }
 
-    public float getMeleeDamageMult() {
-        return 0.1F; // half compared to most buildings
-    }
-
     @Override
     public void onBuilt() {
         super.onBuilt();
@@ -88,9 +84,8 @@ public class SculkCatalystPlacement extends BuildingPlacement {
 
     @Override
     public int getHealth() {
-        return (int) (getBlocksPlaced() / MIN_BLOCKS_PERCENT) - getHighestBlockCountReached() + (int) (
-                sculkBps.size() * HP_PER_SCULK
-        );
+        return (int) ((((getBlocksPlaced() - partialBlocksDestroyed) / MIN_BLOCKS_PERCENT) - getHighestBlockCountReached() +
+                (sculkBps.size() * HP_PER_SCULK)) * (getBuilding().healthPerBlock / 2));
     }
 
     public void updateSculkBps() {
@@ -138,15 +133,24 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         }
     }
 
-    // returns the number of blocks converted
-    private int restoreRandomSculk(int amount) {
+    // deal 1.5 damage
+    // health = 100
+    // partialdmg = 0.7
+    //
+    // deals 2 damage
+    // partialdmg goes from 0.7 -> 0.2
+
+    // returns the number of blocks restored
+    private double restoreRandomSculk(double amount) {
         if (getLevel().isClientSide()) {
             return 0;
         }
         int restoredSculk = 0;
         updateSculkBps();
 
-        for (int i = 0; i < amount; i++) {
+        int intAmount = getBlocksDestroyedAfterPartialDamage(amount);
+
+        for (int i = 0; i < intAmount; i++) {
             BlockPos bp;
             BlockState bs;
 
@@ -174,14 +178,15 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         return restoredSculk;
     }
 
-    public void destroyRandomBlocks(int amount) {
+    @Override
+    public void destroyRandomBlocks(double amount) {
         if (getLevel().isClientSide() || amount <= 0) {
             return;
         }
-
-        int restoredSculk = restoreRandomSculk((int) (amount / HP_PER_SCULK));
-        if (restoredSculk < amount) {
-            super.destroyRandomBlocks(amount - restoredSculk);
+        double restoredSculk = restoreRandomSculk(amount / HP_PER_SCULK);
+        double newAmount = amount - restoredSculk;
+        if (restoredSculk <= amount && newAmount > 0) {
+            super.destroyRandomBlocks(newAmount);
         }
     }
 }

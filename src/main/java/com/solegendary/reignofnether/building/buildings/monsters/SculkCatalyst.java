@@ -49,6 +49,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/sculk_catalyst_side.png");
 
         this.buildTimeModifier = 2.5f;
+        this.healthPerBlock = 4.0d;
 
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
 

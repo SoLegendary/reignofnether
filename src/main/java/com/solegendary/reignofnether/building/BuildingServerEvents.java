@@ -638,7 +638,8 @@ public class BuildingServerEvents {
         if (buildingSyncTicks <= 0) {
             buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
             for (BuildingPlacement building : buildings)
-                BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(), building.ownerName, building.scenarioRoleIndex);
+                BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(),
+                        building.partialBlocksDestroyed, building.ownerName, building.scenarioRoleIndex);
         }
         // need to remove from the list first as destroy() will read it to check defeats
         List<BuildingPlacement> buildingsToDestroy = new ArrayList<>();
@@ -765,7 +766,7 @@ public class BuildingServerEvents {
                         atkDmg /= 2;
                     }
 
-                    building.destroyRandomBlocks((int) atkDmg);
+                    building.destroyRandomBlocks(atkDmg);
                 }
 
             }

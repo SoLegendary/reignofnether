@@ -3,12 +3,8 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
-import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
-import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
-import com.solegendary.reignofnether.building.buildings.piglins.Bastion;
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
@@ -17,7 +13,6 @@ import com.solegendary.reignofnether.building.buildings.placements.BeaconPlaceme
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
-import com.solegendary.reignofnether.building.buildings.villagers.Watchtower;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.data.DataStorage;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -61,11 +56,9 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -200,12 +193,10 @@ public class BuildingPlacement {
     }
 
     public Mob lastAttacker = null;
-
     public boolean allowProdWhileBuilding = false;
-
     public Ability autocast;
-
     private ArmorStand targetStand = null;
+    public double partialBlocksDestroyed = 0;
 
     public ArmorStand getTargetStand() {
         if (targetStand == null)
@@ -459,11 +450,11 @@ public class BuildingPlacement {
 
     // health and maxHealth are normalised to 0 being point of destruction
     public int getHealth() {
-        return (int) (getBlocksPlaced() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached());
+        return (int) ((((getBlocksPlaced() - partialBlocksDestroyed) / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getBuilding().healthPerBlock / 2));
     }
 
     public int getMaxHealth() {
-        return (int) (getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached());
+        return (int) (((getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getBuilding().healthPerBlock / 2));
     }
 
     // place blocks according to the following rules:
@@ -524,6 +515,7 @@ public class BuildingPlacement {
             }
             addToBlockPlaceQueue(validBlocks.get(0));
         }
+        partialBlocksDestroyed = 0d;
     }
 
     private void extinguishFires(ServerLevel level) {
@@ -559,18 +551,34 @@ public class BuildingPlacement {
         return block.isPlaced(getLevel());
     }
 
-    public void destroyRandomBlocks(int amount) {
+    protected int getBlocksDestroyedAfterPartialDamage(double amount) {
+        amount /= (getBuilding().healthPerBlock / 2d);
+        double floorAmount = Math.floor(amount);
+        partialBlocksDestroyed += (amount - floorAmount);
+
+        int intAmount = (int) floorAmount;
+        if (partialBlocksDestroyed >= 1d) {
+            partialBlocksDestroyed -= 1d;
+            intAmount += 1;
+        }
+        return intAmount;
+    }
+
+    public void destroyRandomBlocks(double amount) {
         if (getLevel().isClientSide())
             return;
         if (!isAttackable())
             return;
+
+        int intAmount = getBlocksDestroyedAfterPartialDamage(amount);
+
         var placedBlocks = new ArrayList<BuildingBlock>();
         for (BuildingBlock block : blocks) {
             if (!isDestroyedAndNotNextToLiquid(block)) continue;
             placedBlocks.add(block);
         }
         Collections.shuffle(placedBlocks);
-        for (int i = 0; i < amount && i < placedBlocks.size(); i++) {
+        for (int i = 0; i < intAmount && i < placedBlocks.size(); i++) {
             BlockPos bp = placedBlocks.get(i).getBlockPos();
             if (!getLevel().getBlockState(bp).getFluidState().isEmpty()) {
                 getLevel().setBlockAndUpdate(bp, Blocks.AIR.defaultBlockState());
@@ -579,7 +587,7 @@ public class BuildingPlacement {
             }
             this.onBlockBreak((ServerLevel) getLevel(), bp, false);
         }
-        if (amount > 0) {
+        if (intAmount > 0) {
             AttackWarningClientboundPacket.sendWarning(ownerName, BuildingUtils.getCentrePos(getBlocks()));
         }
     }

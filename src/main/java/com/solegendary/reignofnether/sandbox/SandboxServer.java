@@ -98,7 +98,7 @@ public class SandboxServer {
         for (BuildingPlacement bpl : BuildingServerEvents.getBuildings()) {
             if (bpl.originPos.equals(pos)) {
                 bpl.ownerName = ownerName;
-                BuildingClientboundPacket.syncBuilding(pos, bpl.getBlocksPlaced(), ownerName, bpl.scenarioRoleIndex);
+                BuildingClientboundPacket.syncBuilding(pos, bpl.getBlocksPlaced(), bpl.partialBlocksDestroyed, ownerName, bpl.scenarioRoleIndex);
             }
         }
     }

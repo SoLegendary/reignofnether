@@ -102,14 +102,8 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
         AttackerUnit unit = (AttackerUnit) mob;
         ticksToNextBlockBreak = (int) unit.getAttackCooldown();
-        double damageFloat = unit.getUnitAttackDamage() * buildingTarget.getMeleeDamageMult();
-        damageFloat *= unit.getBuildingDamageMultiplier();
-
-        double damageFloor = Math.floor(damageFloat);
-        int damageInt = (int) damageFloor;
-        if (new Random().nextDouble(1.0f) < damageFloat - damageFloor)
-            damageInt += 1;
-        buildingTarget.destroyRandomBlocks(damageInt);
+        double dmg = unit.getUnitAttackDamage() * buildingTarget.getMeleeDamageMult() * unit.getBuildingDamageMultiplier();
+        buildingTarget.destroyRandomBlocks(dmg);
         buildingTarget.lastAttacker = this.mob;
 
         if (unit instanceof MarauderUnit marauderUnit) {

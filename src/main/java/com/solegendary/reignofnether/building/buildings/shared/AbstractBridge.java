@@ -28,14 +28,11 @@ public abstract class AbstractBridge extends Building {
         tag.putBoolean("diagonal", diagonal);
         return tag;
     }, () -> false);
-    public final float MELEE_DAMAGE_MULTIPLIER = 0.05f;
 
     public AbstractBridge(ResourceCost cost) {
         super("", cost, false);
+        this.healthPerBlock = 8.0d;
     }
-
-    @Override
-    public float getMeleeDamageMult() { return MELEE_DAMAGE_MULTIPLIER; }
 
     public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {
         return BuildingBlockData.getBuildingBlocksFromNbt(diagonal ? getDiagonalStructureName() : getOrthogonalStructureName(), level);

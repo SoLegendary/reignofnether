@@ -1118,12 +1118,13 @@ public class BuildingClientEvents {
         }
     }
 
-    public static void syncBuilding(BuildingPlacement serverBuilding, int blocksPlaced, String ownerName, int scenarioRoleIndex) {
+    public static void syncBuilding(BuildingPlacement serverBuilding, int blocksPlaced, double partialBlocksDestroyed, String ownerName, int scenarioRoleIndex) {
         for (BuildingPlacement building : buildings) {
             if (building.originPos.equals(serverBuilding.originPos)) {
                 building.setServerBlocksPlaced(blocksPlaced);
                 building.ownerName = ownerName;
                 building.scenarioRoleIndex = scenarioRoleIndex;
+                building.partialBlocksDestroyed = partialBlocksDestroyed;
             }
         }
     }

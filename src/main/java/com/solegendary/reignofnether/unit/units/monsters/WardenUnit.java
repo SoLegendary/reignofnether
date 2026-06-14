@@ -346,7 +346,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
                     doEntitySonicBoom(nearbyEnemies.get(i), Vec3.atCenterOf(targetBuilding.centrePos), ResearchSculkAmplifiers.SPLIT_BOOM_DAMAGE_MULT);
         }
         else {
-            int damage = (int) ((SONIC_BOOM_DAMAGE / 2) * targetBuilding.getMagicDamageMult());
+            float damage = ((SONIC_BOOM_DAMAGE / 2) * targetBuilding.getMagicDamageMult());
             targetBuilding.destroyRandomBlocks(damage);
         }
     }

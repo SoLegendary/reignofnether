@@ -13,11 +13,14 @@ Bugfixes
 
 Quality of Life
 ---------------
-[❌] Add building hp per block stat
-
 [✔] Monster buildings now show their night radius before they are placed
-[🟡] Piglin units are now immune to the Commercial Portal's lava blocks
-[🟡] The Wretched Wraith's ultimate is now only cancellable via stop commands (S)
+[✔] Piglin units are now immune to the Commercial Portal's lava blocks
+[✔] The Wretched Wraith's ultimate is now only cancellable via stop commands (S)
+
+[❌] Buildings now have a hidden 'healthPerBlock' stat which determines how much HP each block is worth
+    - This number is 4 for sculk catalysts, 8 for bridges and 2 for all other buildings
+    - Sculk catalysts and bridges now take standard damage from melee attacks (40%) to make up for their increased health
+    [❌] Sculk catalysts with sculk seem to have inconsistent HP numbers
 
 Balance
 -------

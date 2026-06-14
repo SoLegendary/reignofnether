@@ -1445,6 +1445,7 @@
     "entity.reignofnether.grizzly_bear_unit": "Grizzly Bear",
     "entity.reignofnether.panda_unit": "Panda",
     "entity.reignofnether.llama_unit": "Llama",
+    "entity.reignofnether.silverfish_unit": "Silverfish",
 
     "units.reignofnether.hero_production.allowed_heroes_1": "You may only have one hero per game",
     "units.reignofnether.hero_production.allowed_heroes_2": "You may have two different heroes per game",
