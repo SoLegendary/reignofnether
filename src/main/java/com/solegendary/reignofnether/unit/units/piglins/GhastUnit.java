@@ -208,7 +208,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
+        if (MiscUtil.isMagicDamage(pSource))
             pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }

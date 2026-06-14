@@ -15,6 +15,8 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -174,7 +176,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
         if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO)) {
             pDamage *= 2.67; // 0.4 (60% less damage) after super's * 0.15
         }
-        if (pSource.is(DamageTypes.ON_FIRE)) {
+        else if (MiscUtil.isMagicDamage(pSource)) {
             pDamage *= (1 - getUnitMagicArmorPercentage());
         }
         return pDamage;

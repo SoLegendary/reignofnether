@@ -14,12 +14,6 @@ Scenario roles:
 
 [❌] Let villagers repair iron golems with ore for 1hp per ore, masons repair faster
 
-[❌] Walls
-    - Connect to garrisonable towers
-    - 3 layers that are broken starting from where the unit attacking it is positioned
-    - Able to be walked along as battlements
-    - Variable height across terrain
-
 [❌] Nydus worm-style ability for transport portals
     - Because without Fog of war, transport portals are too weak
     - Includes minimap and sound warning
@@ -27,22 +21,9 @@ Scenario roles:
 
 [❌] Config to allow changing resource block values, including modded blocks
 
-[❌] AoE2-style markets
-    - Start as neutral building
-    - Trade with trader units by passing between markets
-        - Striders for piglins, zombie horses for monsters, mules for villagers
-
 
 Bugfixes
 --------
-[❌] [Code issue] ResearchHoglinCavalry doesn't overwrite the getItemName method of the base ProductionItem class,
-        resulting in a null name when calling the method in the prod queue
-    - Same with FireResistance, SoulFireball, LabLightningRod, WaterPotions, HealingPotions
-
-[❌] Fix bug with not being able to choose superflat
-
-[❌] Avatar state is reset when unloaded
-
 [❌] Players logging in messes up the observer menu (and freezes resources?)
 [❌] bridge scroll bug (up and down vs left/right?)
 
@@ -54,17 +35,11 @@ Quality of Life Features
 [❌] Handicap command
     - Makes all resource costs some % higher than normal
 
-[❌] More serverside logging for major player actions
-    - Building creation
-    - Start/complete research
-    - Created unit
-    - Used ability
-
 [❌] Added /gamerule for bridges over void
 
 [❌] restore ores on /rts-reset
     - Have to track each ore block when it is mined or converted into nether terrain
 
-
+[❌] Waypoint looping (by shift clicking back onto a previous waypoint it will automatically cycle the list once it reaches the end)
 
 

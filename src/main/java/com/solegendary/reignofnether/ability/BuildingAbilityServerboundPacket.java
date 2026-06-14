@@ -61,53 +61,50 @@ public class BuildingAbilityServerboundPacket {
 
             ServerPlayer player = ctx.get().getSender();
             if (player == null) {
-                ReignOfNether.LOGGER.warn("EnchantEquipAbilityServerboundPacket: Sender was null");
+                ReignOfNether.LOGGER.warn("BuildingAbilityServerboundPacket: Sender was null");
                 success.set(false);
                 return;
             }
-
             BuildingPlacement building = BuildingUtils.findBuilding(false, buildingPos);
-            ReignOfNether.LOGGER.info("[BuildingAbility] {} performed {} at {}", player.getName(), abilityAction, buildingPos);
-            if (building != null && building.getBuilding() instanceof Library) {
+            if (building != null) {
                 if (!player.getName().getString().equals(building.ownerName)) {
-                    ReignOfNether.LOGGER.warn("EnchantEquipAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);
+                    ReignOfNether.LOGGER.warn("BuildingAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);
                     success.set(false);
                     return;
                 }
-                Ability ability = null;
-                for (Ability abl : building.getAbilities())
-                    if (abl.action == abilityAction)
-                        ability = abl;
-                if (ability instanceof EnchantAbility enchantAbility) {
-                    if (building.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == enchantAbility)
-                        building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
-                    else
-                        building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, enchantAbility);
+                ReignOfNether.LOGGER.info("[BuildingAbility] {} performed {} at {}", player.getName(), abilityAction, buildingPos);
+
+                if (building.getBuilding() instanceof Library) {
+                    Ability ability = null;
+                    for (Ability abl : building.getAbilities())
+                        if (abl.action == abilityAction)
+                            ability = abl;
+                    if (ability instanceof EnchantAbility enchantAbility) {
+                        if (building.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == enchantAbility)
+                            building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
+                        else
+                            building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, enchantAbility);
+                    }
                 }
-            }
-            else if (building != null && building.getBuilding() instanceof Blacksmith) {
-                if (!player.getName().getString().equals(building.ownerName)) {
-                    ReignOfNether.LOGGER.warn("EnchantEquipAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);
-                    success.set(false);
-                    return;
+                else if (building.getBuilding() instanceof Blacksmith) {
+                    Ability ability = null;
+                    for (Ability abl : building.getAbilities())
+                        if (abl.action == abilityAction)
+                            ability = abl;
+                    if (ability instanceof EquipAbility equipAbility) {
+                        if (building.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP) == equipAbility)
+                            building.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, null);
+                        else
+                            building.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, equipAbility);
+                    }
                 }
-                Ability ability = null;
-                for (Ability abl : building.getAbilities())
-                    if (abl.action == abilityAction)
-                        ability = abl;
-                if (ability instanceof EquipAbility equipAbility) {
-                    if (building.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP) == equipAbility)
-                        building.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, null);
-                    else
-                        building.getDataStorage().setData(Blacksmith.AUTO_CAST_EQUIP, equipAbility);
+                else if (building instanceof GraveyardPlacement gy) {
+                    if (abilityAction == UnitAction.SET_GRAVEYARD_RELEASE_ON)
+                        gy.autoRelease = true;
+                    else if (abilityAction == UnitAction.SET_GRAVEYARD_RELEASE_OFF)
+                        gy.autoRelease = false;
+                    BuildingAbilityClientboundPacket.doAbility(abilityAction, buildingPos);
                 }
-            }
-            else if (building instanceof GraveyardPlacement gy) {
-                if (abilityAction == UnitAction.SET_GRAVEYARD_RELEASE_ON)
-                    gy.autoRelease = true;
-                else if (abilityAction == UnitAction.SET_GRAVEYARD_RELEASE_OFF)
-                    gy.autoRelease = false;
-                BuildingAbilityClientboundPacket.doAbility(abilityAction, buildingPos);
             }
             success.set(true);
         });

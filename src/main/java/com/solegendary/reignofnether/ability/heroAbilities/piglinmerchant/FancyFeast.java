@@ -36,8 +36,8 @@ public class FancyFeast extends HeroAbility {
 
     private static final int CD_MAX_SECONDS = 45 * ResourceCost.TICKS_PER_SECOND;
     public static final int BASE_ITEMS = 6;
-    public static final int BONUS_ITEMS_PER_100_RESOURCES = 2;
-    public static int MANA_REFUND_PER_100_RESOURCES = 10;
+    public static final int BONUS_ITEMS_PER_CHUNK_RESOURCES = 2;
+    public static int MANA_REFUND_PER_CHUNK_RESOURCES = 10;
 
     public static final float HEALTH_PER_BREAD = 12;
     public static final float HEALTH_PER_CHICKEN = 18;
@@ -113,7 +113,8 @@ public class FancyFeast extends HeroAbility {
                 fcsIcons(I18n.get("abilities.reignofnether.fancy_feast.stats", getHealAmount(hero), CD_MAX_SECONDS / 20, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip2", BASE_ITEMS, BONUS_ITEMS_PER_100_RESOURCES, MANA_REFUND_PER_100_RESOURCES))
+                fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip2",
+                    BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk))
         );
     }
 
@@ -123,7 +124,8 @@ public class FancyFeast extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip2", BASE_ITEMS, BONUS_ITEMS_PER_100_RESOURCES, MANA_REFUND_PER_100_RESOURCES)),
+                fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip2",
+                        BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.rank1", HEALTH_PER_BREAD), getRank(hero) == 0),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.rank2", HEALTH_PER_CHICKEN), getRank(hero) == 1),

@@ -7,21 +7,17 @@
 
 Bugfixes
 --------
-[❌] can you keep surrendering and keep giving opponents a victory
-
-[❌] Alliances persisted between logouts and log into a new map
-
-[❌] Spectators can control building abilities (eg. graveyard overflow)
+[✔] Defeated players can no longer repeatedly surrender
+[✔] Alliances are now reset correctly when changing server worlds or instances
+[✔] Fixed spectators being able to toggle graveyard overflows
 
 Quality of Life
 ---------------
-[❌] Waypoint looping (by shift clicking back onto a previous waypoint it will automatically cycle the list once it reaches the end)
-[❌] Gamerule to turn off item drops from blocks (for performance)
-
-[❌] Commercial portal lava damages allies
-
-[❌] The Wretched Wraith's ultimate is now only cancellable via stop commands (S)
 [❌] Add building hp per block stat
+
+[✔] Monster buildings now show their night radius before they are placed
+[🟡] Piglin units are now immune to the Commercial Portal's lava blocks
+[🟡] The Wretched Wraith's ultimate is now only cancellable via stop commands (S)
 
 Balance
 -------
@@ -32,9 +28,12 @@ Balance
 - Conversion crucibles now require 5 sculk catalysts instead of 6 houses
 - Sculk Amplifier upgrade cost raised from (200 wood, 400 ore, 150s) to (300 wood, 500 ore, 180s)
 
-[❌] Sculk catalysts now show their night radius before they are placed
+[✔] Experience from enemy units is reduced by 25% (neutrals still give full exp)
 
-[❌] Halve exp from enemy troops
+[✔] Phantoms now deal magic damage (Heroes have 30% magic resistance)
+[✔] Fixed Wretched Wraiths not having any magic resistance
+[✔] Wretched Wraiths chilling screech cooldown reduced from 30s to 20s
+[✔] Piglin merchant Greed is Good resource cost reduced to 75 per level
 
 Languages
 ---------

@@ -841,4 +841,10 @@ public interface Unit {
     default boolean isFlyingUnit() {
         return getMoveGoal() instanceof FlyingMoveToTargetGoal;
     }
+
+    // if true, will ignore all commands except for stop (S)
+    // used for things like channeling blizzard on the wraith to prevent accidental cancels
+    default boolean ignoreNonStopCommands() {
+        return false;
+    }
 }

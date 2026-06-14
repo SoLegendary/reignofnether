@@ -349,6 +349,11 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     }
 
     @Override
+    public boolean ignoreNonStopCommands() {
+        return isBlizzardInProgress();
+    }
+
+    @Override
     public void kill() {
         if (!level().isClientSide()) {
             SoundClientboundPacket.stopSoundWithId(getId());
@@ -363,7 +368,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
+        if (MiscUtil.isMagicDamage(pSource))
             pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
@@ -400,7 +405,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
                 .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
                 .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)

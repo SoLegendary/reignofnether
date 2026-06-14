@@ -31,8 +31,7 @@ import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.PiglinMerchantAnimations;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.core.BlockPos;
@@ -42,11 +41,9 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -304,7 +301,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
+        if (MiscUtil.isMagicDamage(pSource))
             pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
@@ -524,12 +521,12 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.WOOD, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.WOOD, this);
 
-        float cooldown = Math.max(0, throwTNT.cooldownMax - (resourceBonus * ThrowTNT.LESS_COOLDOWN_PER_100_RESOURCES));
+        float cooldown = Math.max(0, throwTNT.cooldownMax - (resourceBonus * ThrowTNT.LESS_COOLDOWN_PER_CHUNK_RESOURCES));
         throwTNT.setCooldown(cooldown, this);
         AbilityClientboundPacket.sendSetCooldownPacket(getId(), throwTNT.action, throwTNT.getCooldown(this));
-        setMana(getMana() + (resourceBonus * ThrowTNT.MANA_REFUND_PER_100_RESOURCES));
+        setMana(getMana() + (resourceBonus * ThrowTNT.MANA_REFUND_PER_CHUNK_RESOURCES));
     }
 
     public void fancyFeast(BlockPos targetBp) {
@@ -538,9 +535,9 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.FOOD, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.FOOD, this);
 
-        int numItems = FancyFeast.BASE_ITEMS + (FancyFeast.BONUS_ITEMS_PER_100_RESOURCES * resourceBonus);
+        int numItems = FancyFeast.BASE_ITEMS + (FancyFeast.BONUS_ITEMS_PER_CHUNK_RESOURCES * resourceBonus);
 
         for (int i = 0; i < numItems; i++) {
             ItemEntity foodEntity = new ItemEntity(level(), pos.x, pos.y, pos.z, new ItemStack(getFancyFeast().getFoodItem(this)));
@@ -558,7 +555,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
             level().playSound(null, getX(), getY(), getZ(), SoundEvents.EGG_THROW,
                     SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
         }
-        setMana(getMana() + (resourceBonus * FancyFeast.MANA_REFUND_PER_100_RESOURCES));
+        setMana(getMana() + (resourceBonus * FancyFeast.MANA_REFUND_PER_CHUNK_RESOURCES));
     }
 
     // give at least one rare item per unit
@@ -627,9 +624,9 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGet100sSpent(ResourceName.ORE, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.ORE, this);
 
-        int numItems = LootExplosion.BASE_ITEMS + (LootExplosion.BONUS_ITEMS_PER_100_RESOURCES * resourceBonus);
+        int numItems = LootExplosion.BASE_ITEMS + (LootExplosion.BONUS_ITEMS_PER_CHUNK_RESOURCES * resourceBonus);
         List<ItemStack> items = getRandomLoot(numItems);
 
         for (ItemStack itemStack : items) {
@@ -645,7 +642,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         }
         level().explode(null, null, null, getX(), getY(), getZ(),
                 2.0f, false, Level.ExplosionInteraction.NONE);
-        setMana(getMana() + (resourceBonus * LootExplosion.MANA_REFUND_PER_100_RESOURCES));
+        setMana(getMana() + (resourceBonus * LootExplosion.MANA_REFUND_PER_CHUNK_RESOURCES));
     }
 
     @Override

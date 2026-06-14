@@ -159,7 +159,8 @@ public class UnitActionItem {
                 continue;
             } else if (((LivingEntity) unit).getEffect(MobEffectRegistrar.UNCONTROLLABLE.get()) != null) {
                 continue;
-            }
+            } else if (unit.ignoreNonStopCommands() && action != UnitAction.STOP)
+                continue;
             // recalculating pathfinding can be expensive, so check if we actually need to first
             if (action == UnitAction.MOVE && isRedundantMove(unit, preselectedBlockPos)) {
                 continue;

@@ -32,8 +32,8 @@ public class LootExplosion extends HeroAbility {
 
     private static final int CD_MAX_SECONDS = 300 * ResourceCost.TICKS_PER_SECOND;
     public static final int BASE_ITEMS = 12;
-    public static final int BONUS_ITEMS_PER_100_RESOURCES = 3;
-    public static int MANA_REFUND_PER_100_RESOURCES = 15;
+    public static final int BONUS_ITEMS_PER_CHUNK_RESOURCES = 3;
+    public static int MANA_REFUND_PER_CHUNK_RESOURCES = 15;
 
     public LootExplosion() {
         super(1, 125, UnitAction.LOOT_EXPLOSION, CD_MAX_SECONDS, 0, 0, false);
@@ -84,7 +84,8 @@ public class LootExplosion extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip2")),
-                fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3", BASE_ITEMS, BONUS_ITEMS_PER_100_RESOURCES, MANA_REFUND_PER_100_RESOURCES))
+                fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3",
+                    BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk))
         );
     }
 
@@ -95,7 +96,8 @@ public class LootExplosion extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip2")),
-                fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3", BASE_ITEMS, BONUS_ITEMS_PER_100_RESOURCES, MANA_REFUND_PER_100_RESOURCES))
+                fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3",
+                    BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk))
         );
     }
 

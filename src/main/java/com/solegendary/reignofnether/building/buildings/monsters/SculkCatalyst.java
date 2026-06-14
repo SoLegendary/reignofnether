@@ -81,8 +81,8 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
                 ResourceCosts.getFormattedCost(cost),
                 fcs(""),
                 fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip1")),
-                fcs(""),
                 fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip2", MIN_NIGHT_RANGE)),
+                fcs(""),
                 fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip3"))
             ),
             this

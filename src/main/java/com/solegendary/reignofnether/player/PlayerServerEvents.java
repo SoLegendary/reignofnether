@@ -946,9 +946,20 @@ public class PlayerServerEvents {
     }
 
     public static void defeat(String playerName, String reason) {
-        ReignOfNether.LOGGER.info("[Player] defeat: playerName={}, reason={}", playerName, reason);
         if (SandboxServer.isSandboxPlayer(playerName))
             return;
+
+        boolean playerExists = false;
+        for (RTSPlayer rtsPlayer : rtsPlayers) {
+            if (rtsPlayer.name.equals(playerName)) {
+                playerExists = true;
+                break;
+            }
+        }
+        if (!playerExists)
+            return;
+
+        ReignOfNether.LOGGER.info("[Player] defeat: playerName={}, reason={}", playerName, reason);
 
         synchronized (rtsPlayers) {
             // Remove the defeated player from the list
