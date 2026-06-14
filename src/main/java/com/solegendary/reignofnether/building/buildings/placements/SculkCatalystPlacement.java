@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -38,7 +37,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
 
     public int getUncappedNightRange() {
         if (isBuilt || isBuiltServerside) {
-            return (int) (getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).size() * RANGE_PER_SCULK) + SculkCatalyst.nightRangeMin;
+            return (int) (getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).size() * RANGE_PER_SCULK) + SculkCatalyst.MIN_NIGHT_RANGE;
         }
         return 0;
     }
@@ -77,7 +76,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
                     NightSourceAddon nsa;
                     if (ability instanceof Sacrifice sacrifice &&
                         sacrifice.isAutocasting(this) &&
-                        (nsa = getBuilding().getActiveAddon(NightSourceAddon.class)) != null && nsa.getNightRange(this) < SculkCatalyst.nightRangeMax) {
+                        (nsa = getBuilding().getActiveAddon(NightSourceAddon.class)) != null && nsa.getNightRange(this) < SculkCatalyst.MAX_NIGHT_RANGE) {
                         sacrifice.autoSacrifice(this);
                     }
                 }

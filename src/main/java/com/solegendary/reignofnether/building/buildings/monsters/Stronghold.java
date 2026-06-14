@@ -170,4 +170,9 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
     public boolean showOnlyWhenSelected(BuildingPlacement placement) {
         return false;
     }
+
+    @Override
+    public int getDefaultNightRange() {
+        return nightRange;
+    }
 }

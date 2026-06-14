@@ -133,4 +133,9 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
     public boolean showOnlyWhenSelected(BuildingPlacement placement) {
         return false;
     }
+
+    @Override
+    public int getDefaultNightRange() {
+        return nightRangeReduced;
+    }
 }

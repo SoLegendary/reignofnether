@@ -20,7 +20,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -40,8 +39,8 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
     // vanilla logic determines the actual range, but this is what we're guessing it to be for the range limiter
     // mixin and the dirt path fix
     public final static int ESTIMATED_RANGE = 10;
-    public final static int nightRangeMin = 30;
-    public final static int nightRangeMax = 50;
+    public final static int MIN_NIGHT_RANGE = 30;
+    public final static int MAX_NIGHT_RANGE = 50;
 
     public SculkCatalyst() {
         super(structureName, cost, false);
@@ -83,7 +82,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
                 fcs(""),
                 fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip1")),
                 fcs(""),
-                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip2", nightRangeMin)),
+                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip2", MIN_NIGHT_RANGE)),
                 fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip3"))
             ),
             this
@@ -92,7 +91,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
 
     public int getRange(BuildingPlacement placement) {
         if ((placement.isBuilt || placement.isBuiltServerside) && placement instanceof SculkCatalystPlacement scp) {
-            return (int) Math.min(SculkCatalyst.nightRangeMin + (scp.sculkBps.size() * SculkCatalystPlacement.RANGE_PER_SCULK), SculkCatalyst.nightRangeMax);
+            return (int) Math.min(SculkCatalyst.MIN_NIGHT_RANGE + (scp.sculkBps.size() * SculkCatalystPlacement.RANGE_PER_SCULK), SculkCatalyst.MAX_NIGHT_RANGE);
         }
         return 0;
     }
@@ -127,5 +126,10 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
     @Override
     public boolean showOnlyWhenSelected(BuildingPlacement placement) {
         return false;
+    }
+
+    @Override
+    public int getDefaultNightRange() {
+        return MIN_NIGHT_RANGE;
     }
 }

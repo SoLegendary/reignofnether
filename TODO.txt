@@ -7,12 +7,21 @@
 
 Bugfixes
 --------
+[❌] can you keep surrendering and keep giving opponents a victory
 
+[❌] Alliances persisted between logouts and log into a new map
+
+[❌] Spectators can control building abilities (eg. graveyard overflow)
 
 Quality of Life
 ---------------
 [❌] Waypoint looping (by shift clicking back onto a previous waypoint it will automatically cycle the list once it reaches the end)
 [❌] Gamerule to turn off item drops from blocks (for performance)
+
+[❌] Commercial portal lava damages allies
+
+[❌] The Wretched Wraith's ultimate is now only cancellable via stop commands (S)
+[❌] Add building hp per block stat
 
 Balance
 -------
@@ -24,6 +33,8 @@ Balance
 - Sculk Amplifier upgrade cost raised from (200 wood, 400 ore, 150s) to (300 wood, 500 ore, 180s)
 
 [❌] Sculk catalysts now show their night radius before they are placed
+
+[❌] Halve exp from enemy troops
 
 Languages
 ---------

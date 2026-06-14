@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -67,7 +66,7 @@ public class PortraitRendererBuilding {
             name += " (" + building.ownerName + ")";
 
         if (building instanceof SculkCatalystPlacement sc && building.getBuilding().hasActiveAddon(NightSourceAddon.class) && building.isBuilt)
-            name += " (" + building.getBuilding().getActiveAddon(NightSourceAddon.class).getNightRange(building) + "/" + SculkCatalyst.nightRangeMax + " range)";
+            name += " (" + building.getBuilding().getActiveAddon(NightSourceAddon.class).getNightRange(building) + "/" + SculkCatalyst.MAX_NIGHT_RANGE + " range)";
 
         // draw name
         guiGraphics.drawString(

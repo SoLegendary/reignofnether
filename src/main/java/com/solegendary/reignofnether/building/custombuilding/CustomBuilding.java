@@ -427,4 +427,9 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     public boolean showOnlyWhenSelected(BuildingPlacement placement) {
         return false;
     }
+
+    @Override
+    public int getDefaultNightRange() {
+        return nightRadius;
+    }
 }
