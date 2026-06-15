@@ -206,6 +206,17 @@ public class BuildingPlacement {
 
     private EntityType<? extends Animal> lastAnimalType = null;
 
+    public double getHealthPerBlock() {
+        if (getBuilding().isUsingSetHealth()) {
+            int blocksTotal = getBlocksTotal();
+            if (blocksTotal <= 0)
+                blocksTotal = 1;
+            return (getBuilding().maxHealth / blocksTotal) * 2;
+        } else {
+            return Building.DEFAULT_HEALTH_PER_BLOCK;
+        }
+    }
+
     public BuildingPlacement(
         Building building,
         Level level,
@@ -450,11 +461,12 @@ public class BuildingPlacement {
 
     // health and maxHealth are normalised to 0 being point of destruction
     public int getHealth() {
-        return (int) ((((getBlocksPlaced() - partialBlocksDestroyed) / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getBuilding().healthPerBlock / 2));
+        return (int) Math.round((((getBlocksPlaced() - partialBlocksDestroyed) / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 
     public int getMaxHealth() {
-        return (int) (((getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getBuilding().healthPerBlock / 2));
+        return (int) Math.round(getBuilding().isUsingSetHealth() ? getBuilding().maxHealth :
+                    ((getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 
     // place blocks according to the following rules:
@@ -557,7 +569,7 @@ public class BuildingPlacement {
         if (!isAttackable())
             return;
 
-        amount /= (getBuilding().healthPerBlock / 2d);
+        amount /= (getHealthPerBlock() / 2d);
         double floorAmount = Math.floor(amount);
         partialBlocksDestroyed += (amount - floorAmount);
 

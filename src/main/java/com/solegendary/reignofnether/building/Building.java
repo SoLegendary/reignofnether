@@ -47,7 +47,13 @@ public abstract class Building {
 
     public ResourceCost cost;
     public boolean selfBuilding = false;
-    public double healthPerBlock = 2.0f; // health per half the blocks, since it dies at half blocks remaining
+    public double maxHealth = 0;
+
+    public final static double DEFAULT_HEALTH_PER_BLOCK = 2.0d;
+
+    public boolean isUsingSetHealth() {
+        return maxHealth > 0;
+    }
 
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical
@@ -70,7 +76,7 @@ public abstract class Building {
     }
 
     public float getMeleeDamageMult() {
-        return 0.2F;
+        return 0.25F;
     }
 
     public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {

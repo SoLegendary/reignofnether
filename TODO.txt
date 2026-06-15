@@ -28,12 +28,11 @@ Balance
     - Conversion crucibles now require 5 sculk catalysts instead of 6 houses
     - Sculk Amplifier upgrade cost raised from (200 wood, 400 ore, 150s) to (300 wood, 500 ore, 180s)
 
-[✔] Buildings now have a 'healthPerBlock' stat which determines how much HP each block is worth
-    - This number is 3 for portals, 4 for sculk catalysts, 6 for bridges and 2 for all other buildings
-    - Sculk catalysts and bridges now take standard damage from melee attacks (40%) to make up for their increased health
+[✔] Buildings now have
     - Piglin merchant TNT damage to buildings changed from 40 to 26/40/54 based on rank
     - Bridges no longer have 50% explosion or magic resistance
     - Warden sonic booms can no longer damage sculk catalysts at all
+    - Standard melee damage to buildings raised from 40% to 50%, and all building health raised to match
 
 [✔] Experience from enemy units is reduced by 25% (neutrals still give full exp)
 [✔] Phantoms now deal magic damage (Heroes have 30% magic resistance)

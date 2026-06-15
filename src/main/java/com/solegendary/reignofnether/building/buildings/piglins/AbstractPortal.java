@@ -29,7 +29,7 @@ public abstract class AbstractPortal extends ProductionBuilding implements Nethe
         this.buildTimeModifier = 1.2f;
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
         this.canSetRallyPoint = false;
-        this.healthPerBlock = 3.0f;
+        this.maxHealth = 75d;
 
         setActiveAddon(NetherConvertingAddon.class, this, true);
     }

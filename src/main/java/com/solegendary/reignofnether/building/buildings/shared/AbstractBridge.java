@@ -14,10 +14,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.AirBlock;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
@@ -31,7 +29,7 @@ public abstract class AbstractBridge extends Building {
 
     public AbstractBridge(ResourceCost cost) {
         super("", cost, false);
-        this.healthPerBlock = 6.0d;
+        this.maxHealth = 350d;
     }
 
     public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {

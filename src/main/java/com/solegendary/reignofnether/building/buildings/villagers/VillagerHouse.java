@@ -34,6 +34,8 @@ public class VillagerHouse extends Building {
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.OAK_PLANKS);
         this.startingBlockTypes.add(Blocks.OAK_LOG);
+
+        this.maxHealth = 125;
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
