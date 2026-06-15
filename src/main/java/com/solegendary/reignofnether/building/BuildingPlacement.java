@@ -551,7 +551,12 @@ public class BuildingPlacement {
         return block.isPlaced(getLevel());
     }
 
-    protected int getBlocksDestroyedAfterPartialDamage(double amount) {
+    public void destroyRandomBlocks(double amount) {
+        if (getLevel().isClientSide())
+            return;
+        if (!isAttackable())
+            return;
+
         amount /= (getBuilding().healthPerBlock / 2d);
         double floorAmount = Math.floor(amount);
         partialBlocksDestroyed += (amount - floorAmount);
@@ -561,16 +566,6 @@ public class BuildingPlacement {
             partialBlocksDestroyed -= 1d;
             intAmount += 1;
         }
-        return intAmount;
-    }
-
-    public void destroyRandomBlocks(double amount) {
-        if (getLevel().isClientSide())
-            return;
-        if (!isAttackable())
-            return;
-
-        int intAmount = getBlocksDestroyedAfterPartialDamage(amount);
 
         var placedBlocks = new ArrayList<BuildingBlock>();
         for (BuildingBlock block : blocks) {

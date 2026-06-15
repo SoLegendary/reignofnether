@@ -23,6 +23,9 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
+
 public class Sacrifice extends Ability {
 
     private static final int CD_MAX = 0;
@@ -44,16 +47,13 @@ public class Sacrifice extends Ability {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.SACRIFICE),
             () -> toggleAutocast(placement),
-            List.of(FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice"),
-                            Style.EMPTY.withBold(true)
-                    ),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip1", RANGE),
-                            MyRenderer.iconStyle
-                    ),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip2"), Style.EMPTY),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY),
+            List.of(fcs(I18n.get("abilities.reignofnether.sacrifice"), true),
+                    fcsIcons(I18n.get("abilities.reignofnether.sacrifice.tooltip1", RANGE)),
+                    fcs(""),
+                    fcs(I18n.get("abilities.reignofnether.sacrifice.tooltip2")),
+                    fcs(I18n.get("abilities.reignofnether.sacrifice.tooltip3")),
+                    fcs(""),
+                    fcs(I18n.get("abilities.reignofnether.autocast")),
                     getAutoSacrificeTooltip(placement)
             ),
             this,
@@ -67,8 +67,8 @@ public class Sacrifice extends Ability {
             unitType = sculkCat.autoSacrificeUnitType;
 
         return unitType != null && !unitType.isBlank() && isAutocasting(placement) ?
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip4", unitType), Style.EMPTY) :
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sacrifice.tooltip3"), Style.EMPTY);
+                fcs(I18n.get("abilities.reignofnether.sacrifice.tooltip5")) :
+                fcs(I18n.get("abilities.reignofnether.sacrifice.tooltip5", unitType));
     }
 
     public boolean isValidTarget(Level level, BuildingPlacement buildingUsing, LivingEntity targetEntity) {
@@ -113,8 +113,6 @@ public class Sacrifice extends Ability {
                 HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.sacrifice.out_of_range"));
             } else if (level.getBlockState(targetEntity.getOnPos()).isAir()) {
                 HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.sacrifice.in_air"));
-            } else if (BuildingUtils.isWithinRangeOfMaxedCatalyst(targetEntity)) {
-                HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.sacrifice.max_spread"));
             } else if (BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), targetEntity.getOnPos().above()) ||
                         level.getBlockState(targetEntity.getOnPos()).getBlock() == Blocks.SCULK) {
                 HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.sacrifice.not_spreadable"));

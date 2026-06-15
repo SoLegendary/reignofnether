@@ -154,7 +154,7 @@
     "abilities.reignofnether.sacrifice.tooltip1": "  %d",
     "abilities.reignofnether.sacrifice.tooltip2": "Убивает ближайшего союзника, распространяя скалк.",
     "abilities.reignofnether.sacrifice.tooltip3": "Выберите цель для авто-жертвоприношения существ того же типа",
-    "abilities.reignofnether.sacrifice.tooltip4": "Авто-пожертвование: %s",
+    "abilities.reignofnether.sacrifice.tooltip5": "Авто-пожертвование: %s",
     "abilities.reignofnether.sacrifice.only_own": "Можно жертвовать только своих юнитов",
     "abilities.reignofnether.sacrifice.out_of_range": "Юнит вне зоны досягаемости",
     "abilities.reignofnether.sacrifice.in_air": "Нельзя жертвовать юнитов в воздухе",

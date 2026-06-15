@@ -131,7 +131,7 @@
     "abilities.reignofnether.sacrifice.tooltip1": "\uE005  %d",
     "abilities.reignofnether.sacrifice.tooltip2": "یک نیرو دوستانه اطراف را بکش تا اسکالک پخش شود.",
     "abilities.reignofnether.sacrifice.tooltip3": "یک نیرو را هدف بگیر تا به صورت خودکار نیرو های مشابه را قربانی کند",
-    "abilities.reignofnether.sacrifice.tooltip4": "قربانی خودکار: %s",
+    "abilities.reignofnether.sacrifice.tooltip5": "قربانی خودکار: %s",
     "abilities.reignofnether.sacrifice.only_own": "فقط میتوانید نیرو های خود را قربانی کنید",
     "abilities.reignofnether.sacrifice.out_of_range": "نیرو از محدوده خارج است",
     "abilities.reignofnether.sacrifice.in_air": "نمیتواند نیرو ها در آسمان را قربانی کرد",

@@ -131,7 +131,7 @@
     "abilities.reignofnether.sacrifice.tooltip1": "\uE005  %d",
     "abilities.reignofnether.sacrifice.tooltip2": "Sculk yaymak için bir birimini feda et.",
     "abilities.reignofnether.sacrifice.tooltip3": "Bir birim türünü otomatik olarak kurban etmek için bir birimi hedefleyin",
-    "abilities.reignofnether.sacrifice.tooltip4": "Otomatik Kurban: %s",
+    "abilities.reignofnether.sacrifice.tooltip5": "Otomatik Kurban: %s",
     "abilities.reignofnether.sacrifice.only_own": "Sadece kendi birimlerini kurban edebilirsin.",
     "abilities.reignofnether.sacrifice.out_of_range": "Birim menzil dışında",
     "abilities.reignofnether.sacrifice.in_air": "Havadaki birimler kurban edilemez",

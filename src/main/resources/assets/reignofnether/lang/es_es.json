@@ -131,7 +131,7 @@
     "abilities.reignofnether.sacrifice.tooltip1": "\uE005  %d",
     "abilities.reignofnether.sacrifice.tooltip2": "Mata una unidad aliada cercana para esparcir sculk.",
     "abilities.reignofnether.sacrifice.tooltip3": "Dirige una unidad a auto-sacrificar ese tipo de unidad",
-    "abilities.reignofnether.sacrifice.tooltip4": "Auto-sacrificando: %s",
+    "abilities.reignofnether.sacrifice.tooltip5": "Auto-sacrificando: %s",
     "abilities.reignofnether.sacrifice.only_own": "Solo puedes sacrificar tus propias unidades",
     "abilities.reignofnether.sacrifice.out_of_range": "La unidad está fuera de alcance",
     "abilities.reignofnether.sacrifice.in_air": "No se pueden sacrificar unidades en el aire",

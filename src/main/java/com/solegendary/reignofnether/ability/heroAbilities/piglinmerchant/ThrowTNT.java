@@ -7,6 +7,7 @@ package com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -102,7 +103,9 @@ public class ThrowTNT extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.throw_tnt") + " " + rankString(hero), true),
-                fcsIcons(I18n.get("abilities.reignofnether.throw_tnt.stats", Math.round(explosionPower * 6.67f), cooldownMax / 20, RANGE, manaCost)),
+                fcsIcons(I18n.get("abilities.reignofnether.throw_tnt.stats",
+                        Math.round(explosionPower * AdjustablePrimedTnt.DAMAGE_PER_POWER),
+                        cooldownMax / 20, RANGE, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2",

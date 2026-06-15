@@ -131,7 +131,7 @@
     "abilities.reignofnether.sacrifice.tooltip1": "\uE005  %d",
     "abilities.reignofnether.sacrifice.tooltip2": "Hy sinh một đơn vị đồng minh gần đó để lan rộng Sculk.",
     "abilities.reignofnether.sacrifice.tooltip3": "Chỉ định một đơn vị để tự động hi sinh loại đơn vị đó",
-    "abilities.reignofnether.sacrifice.tooltip4": "Tự động hy sinh: %s",
+    "abilities.reignofnether.sacrifice.tooltip5": "Tự động hy sinh: %s",
     "abilities.reignofnether.sacrifice.only_own": "Chỉ có thể hy sinh đơn vị của bạn",
     "abilities.reignofnether.sacrifice.out_of_range": "Đơn vị ngoài phạm vi",
     "abilities.reignofnether.sacrifice.in_air": "Không thể hy sinh đơn vị đang ở trên không",

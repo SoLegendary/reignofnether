@@ -31,7 +31,7 @@ public abstract class AbstractBridge extends Building {
 
     public AbstractBridge(ResourceCost cost) {
         super("", cost, false);
-        this.healthPerBlock = 8.0d;
+        this.healthPerBlock = 6.0d;
     }
 
     public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level, boolean diagonal) {

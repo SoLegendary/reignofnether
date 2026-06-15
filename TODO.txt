@@ -17,25 +17,28 @@ Quality of Life
 [✔] Piglin units are now immune to the Commercial Portal's lava blocks
 [✔] The Wretched Wraith's ultimate is now only cancellable via stop commands (S)
 
-[❌] Buildings now have a hidden 'healthPerBlock' stat which determines how much HP each block is worth
-    - This number is 4 for sculk catalysts, 8 for bridges and 2 for all other buildings
-    - Sculk catalysts and bridges now take standard damage from melee attacks (40%) to make up for their increased health
-    [❌] Sculk catalysts with sculk seem to have inconsistent HP numbers
+
 
 Balance
 -------
-- Monsters no longer build haunted houses for population, instead Sculk Catalysts give 12 population each
-- Sculk Catalysts now take half damage from melee attacks compared to other buildings
-- Sculk Catalyst starting range raised from 25 to 30 blocks
-- Starting mausoleum night radius reduced from 80 to 60
-- Conversion crucibles now require 5 sculk catalysts instead of 6 houses
-- Sculk Amplifier upgrade cost raised from (200 wood, 400 ore, 150s) to (300 wood, 500 ore, 180s)
+[✔] Monsters no longer build haunted houses for population, instead Sculk Catalysts give 12 population each
+    - Sculk Catalysts now take half damage from melee attacks compared to other buildings
+    - Sculk Catalyst starting range raised from 25 to 30 blocks
+    - Starting mausoleum night radius reduced from 80 to 60
+    - Conversion crucibles now require 5 sculk catalysts instead of 6 houses
+    - Sculk Amplifier upgrade cost raised from (200 wood, 400 ore, 150s) to (300 wood, 500 ore, 180s)
+
+[✔] Buildings now have a 'healthPerBlock' stat which determines how much HP each block is worth
+    - This number is 3 for portals, 4 for sculk catalysts, 6 for bridges and 2 for all other buildings
+    - Sculk catalysts and bridges now take standard damage from melee attacks (40%) to make up for their increased health
+    - Piglin merchant TNT damage to buildings changed from 40 to 26/40/54 based on rank
+    - Bridges no longer have 50% explosion or magic resistance
+    - Warden sonic booms can no longer damage sculk catalysts at all
 
 [✔] Experience from enemy units is reduced by 25% (neutrals still give full exp)
-
 [✔] Phantoms now deal magic damage (Heroes have 30% magic resistance)
-[✔] Fixed Wretched Wraiths not having any magic resistance
-[✔] Wretched Wraiths chilling screech cooldown reduced from 30s to 20s
+[✔] Wretched Wraith's chilling screech cooldown reduced from 30s to 20s
+[✔] Wretched Wraiths now gain 4% armour per layer of snow they're on
 [✔] Piglin merchant Greed is Good resource cost reduced to 75 per level
 
 Languages

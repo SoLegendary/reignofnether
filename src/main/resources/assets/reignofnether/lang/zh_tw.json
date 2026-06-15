@@ -131,7 +131,7 @@
     "abilities.reignofnether.sacrifice.tooltip1": "\uE005  %d",
     "abilities.reignofnether.sacrifice.tooltip2": "犧牲附近友方單位以傳播伏聆。",
     "abilities.reignofnether.sacrifice.tooltip3": "選定指定單位爲目標可自動犧牲其該單位類型",
-    "abilities.reignofnether.sacrifice.tooltip4": "正在自動犧牲：%s",
+    "abilities.reignofnether.sacrifice.tooltip5": "正在自動犧牲：%s",
     "abilities.reignofnether.sacrifice.only_own": "只能犧牲你自己的單位",
     "abilities.reignofnether.sacrifice.out_of_range": "選定的單位超出範圍",
     "abilities.reignofnether.sacrifice.in_air": "無法犧牲空中單位",

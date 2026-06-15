@@ -162,7 +162,7 @@
   "abilities.reignofnether.sacrifice.tooltip1": "\uE005  %d",
   "abilities.reignofnether.sacrifice.tooltip2": "献祭临近的己方单位以蔓延幽匿块。",
   "abilities.reignofnether.sacrifice.tooltip3": "选中指定单位以自动献祭所选类型的单位。",
-  "abilities.reignofnether.sacrifice.tooltip4": "正在自动献祭：%s",
+  "abilities.reignofnether.sacrifice.tooltip5": "正在自动献祭：%s",
   "abilities.reignofnether.sacrifice.only_own": "仅能献祭所属于你的单位",
   "abilities.reignofnether.sacrifice.out_of_range": "所选单位超出范围",
   "abilities.reignofnether.sacrifice.in_air": "无法献祭空中单位",

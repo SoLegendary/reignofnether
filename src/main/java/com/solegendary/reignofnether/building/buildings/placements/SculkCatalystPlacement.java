@@ -23,7 +23,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
     //private final Set<BlockPos> nightBorderBps = new HashSet<>();
 
     private final static int SCULK_SEARCH_RANGE = 30;
-    private final static float HP_PER_SCULK = 0.5f;
+    private final static double HP_PER_SCULK = 1.0f;
     public final static float RANGE_PER_SCULK = 0.30f;
 
     public String autoSacrificeUnitType = "";
@@ -133,13 +133,6 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         }
     }
 
-    // deal 1.5 damage
-    // health = 100
-    // partialdmg = 0.7
-    //
-    // deals 2 damage
-    // partialdmg goes from 0.7 -> 0.2
-
     // returns the number of blocks restored
     private double restoreRandomSculk(double amount) {
         if (getLevel().isClientSide()) {
@@ -148,7 +141,15 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         int restoredSculk = 0;
         updateSculkBps();
 
-        int intAmount = getBlocksDestroyedAfterPartialDamage(amount);
+        amount /= (HP_PER_SCULK / 2d);
+        double floorAmount = Math.floor(amount);
+        partialBlocksDestroyed += (amount - floorAmount);
+
+        int intAmount = (int) floorAmount;
+        if (partialBlocksDestroyed >= 1d) {
+            partialBlocksDestroyed -= 1d;
+            intAmount += 1;
+        }
 
         for (int i = 0; i < intAmount; i++) {
             BlockPos bp;
@@ -180,13 +181,17 @@ public class SculkCatalystPlacement extends BuildingPlacement {
 
     @Override
     public void destroyRandomBlocks(double amount) {
-        if (getLevel().isClientSide() || amount <= 0) {
-            return;
-        }
-        double restoredSculk = restoreRandomSculk(amount / HP_PER_SCULK);
-        double newAmount = amount - restoredSculk;
-        if (restoredSculk <= amount && newAmount > 0) {
-            super.destroyRandomBlocks(newAmount);
+        if (!getLevel().isClientSide() && amount > 0) {
+            double absorbedHp = 0;
+            if (!sculkBps.isEmpty()) {
+                double restoredSculk = restoreRandomSculk(amount / HP_PER_SCULK);
+                absorbedHp = restoredSculk * HP_PER_SCULK;
+                updateSculkBps();
+            }
+            double newAmount = amount - absorbedHp;
+            if (newAmount > 0 && sculkBps.isEmpty()) {
+                super.destroyRandomBlocks(newAmount);
+            }
         }
     }
 }
