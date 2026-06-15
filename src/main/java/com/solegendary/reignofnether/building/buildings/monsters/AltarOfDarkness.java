@@ -46,6 +46,8 @@ public class AltarOfDarkness extends ProductionBuilding {
         this.productions.add(ProductionItems.NECROMANCER_REVIVE, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.WRETCHED_WRAITH, Keybindings.abilitySlot2);
         this.productions.add(ProductionItems.WRETCHED_WRAITH_REVIVE, Keybindings.abilitySlot2);
+
+        this.maxHealth = 240d;
     }
 
     @Override

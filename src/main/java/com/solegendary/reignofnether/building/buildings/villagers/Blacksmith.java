@@ -69,6 +69,7 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/smithing_table_front.png");
 
         this.buildTimeModifier = 0.85f;
+        this.maxHealth = 300d;
 
         this.startingBlockTypes.add(Blocks.OAK_PLANKS);
         this.startingBlockTypes.add(Blocks.COBBLESTONE);

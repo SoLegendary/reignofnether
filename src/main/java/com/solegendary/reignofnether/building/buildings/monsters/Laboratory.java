@@ -41,6 +41,7 @@ public class Laboratory extends ProductionBuilding implements RangeIndicatorAddo
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/brewing_stand.png");
 
         this.buildTimeModifier = 0.85f;
+        this.maxHealth = 300d;
 
         this.canSetRallyPoint = false;
 

@@ -45,6 +45,7 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
 
         this.buildTimeModifier = 0.274f; // 60s total build time with 3 villagers
         this.canAcceptResources = true;
+        this.maxHealth = 460d;
 
         this.startingBlockTypes.add(Blocks.STONE);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);

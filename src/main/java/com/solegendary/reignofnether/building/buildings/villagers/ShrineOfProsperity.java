@@ -46,6 +46,8 @@ public class ShrineOfProsperity extends ProductionBuilding {
         this.productions.add(ProductionItems.ROYAL_GUARD_REVIVE, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.ENCHANTER, Keybindings.abilitySlot2);
         this.productions.add(ProductionItems.ENCHANTER_REVIVE, Keybindings.abilitySlot2);
+
+        this.maxHealth = 240d;
     }
 
     @Override

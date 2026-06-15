@@ -45,6 +45,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/reinforced_deepslate_side.png");
 
         this.buildTimeModifier = 0.5f;
+        this.maxHealth = 800d;
 
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
         this.startingBlockTypes.add(Blocks.DEEPSLATE_TILE_SLAB);

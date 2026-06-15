@@ -21,5 +21,7 @@ public abstract class AbstractMarket extends Building {
         this.abilities.add(new TradeResources(UnitAction.TRADE_WOOD_FOR_ORE),  Keybindings.abilitySlot4);
         this.abilities.add(new TradeResources(UnitAction.TRADE_ORE_FOR_FOOD), Keybindings.abilitySlot5);
         this.abilities.add(new TradeResources(UnitAction.TRADE_ORE_FOR_WOOD), Keybindings.abilitySlot6);
+
+        this.maxHealth = 300d;
     }
 }

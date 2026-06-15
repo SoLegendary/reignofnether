@@ -33,6 +33,7 @@ public class OakStockpile extends AbstractStockpile {
         super(structureName);
         this.name = buildingName;
         this.startingBlockTypes.add(Blocks.OAK_LOG);
+        this.maxHealth = 95d;
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}

@@ -36,6 +36,7 @@ public class WheatFarm extends AbstractFarm {
         this.startingBlockTypes.add(Blocks.OAK_LOG);
 
         this.explodeChance = 0;
+        this.maxHealth = 65d;
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}

@@ -29,6 +29,8 @@ public class HauntedHouse extends Building {
 
         this.buildTimeModifier = 0.8f;
 
+        this.maxHealth = 175d;
+
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.DARK_OAK_LOG);
     }

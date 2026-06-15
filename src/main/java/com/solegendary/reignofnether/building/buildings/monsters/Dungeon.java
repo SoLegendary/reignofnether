@@ -48,6 +48,8 @@ public class Dungeon extends ProductionBuilding {
         this.explodeChance = 0.2f;
         this.productions.add(ProductionItems.CREEPER, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.WRAITH, Keybindings.abilitySlot2);
+
+        this.maxHealth = 120d;
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}

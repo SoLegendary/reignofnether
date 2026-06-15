@@ -45,6 +45,7 @@ public class Graveyard extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICKS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 120d;
 
         this.abilities.add(new SetGraveyardReleaseOff(), Keybindings.abilitySlot9);
         this.abilities.add(new SetGraveyardReleaseOn(), Keybindings.abilitySlot9);

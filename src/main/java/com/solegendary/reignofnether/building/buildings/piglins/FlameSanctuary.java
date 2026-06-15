@@ -48,6 +48,7 @@ public class FlameSanctuary extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.RED_NETHER_BRICK_STAIRS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
         this.productions.add(ProductionItems.RESEARCH_BLAZE_FIREWALL, Keybindings.abilitySlot1);
     }

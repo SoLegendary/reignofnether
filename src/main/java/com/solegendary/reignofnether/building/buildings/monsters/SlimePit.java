@@ -40,6 +40,7 @@ public class SlimePit extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.COBBLED_DEEPSLATE);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
         this.productions.add(ProductionItems.SLIME, Keybindings.abilitySlot1);
     }

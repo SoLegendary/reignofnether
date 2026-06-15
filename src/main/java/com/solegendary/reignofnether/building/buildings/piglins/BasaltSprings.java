@@ -38,6 +38,7 @@ public class BasaltSprings extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
         this.productions.add(ProductionItems.RESEARCH_CUBE_MAGMA, Keybindings.abilitySlot1);
     }

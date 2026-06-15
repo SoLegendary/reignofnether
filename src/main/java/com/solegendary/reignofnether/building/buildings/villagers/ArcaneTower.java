@@ -43,6 +43,7 @@ public class ArcaneTower extends ProductionBuilding {
 
         this.buildTimeModifier = 0.7f;
         this.explodeChance = 0.2f;
+        this.maxHealth = 340d;
 
         this.productions.add(ProductionItems.EVOKER, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.WINDCALLER, Keybindings.abilitySlot2);

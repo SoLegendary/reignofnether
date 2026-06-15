@@ -29,6 +29,8 @@ public class PortalMilitary extends AbstractPortal {
         productions.add(ProductionItems.WITHER_SKELETON, Keybindings.abilitySlot6);
         productions.add(ProductionItems.MAGMA_CUBE, Keybindings.abilitySlot7);
         productions.add(ProductionItems.GHAST, Keybindings.abilitySlot8);
+
+        this.maxHealth = 100d;
     }
 
     @Override

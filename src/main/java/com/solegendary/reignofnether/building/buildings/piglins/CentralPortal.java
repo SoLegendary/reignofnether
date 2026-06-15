@@ -39,6 +39,7 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
 
         this.buildTimeModifier = 0.32f; // 60s total build time with 3 villagers
         this.canAcceptResources = true;
+        this.maxHealth = 380d;
 
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
 

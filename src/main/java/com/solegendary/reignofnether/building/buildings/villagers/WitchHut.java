@@ -42,6 +42,7 @@ public class WitchHut extends ProductionBuilding {
 
         this.buildTimeModifier = 0.7f;
         this.explodeChance = 0.2f;
+        this.maxHealth = 250d;
 
         this.productions.add(ProductionItems.WITCH, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.RESEARCH_LINGERING_POTIONS, Keybindings.abilitySlot2);

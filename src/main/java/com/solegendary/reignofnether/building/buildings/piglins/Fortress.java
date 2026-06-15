@@ -37,6 +37,7 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/chiseled_nether_bricks.png");
 
         this.buildTimeModifier = 0.5f;
+        this.maxHealth = 800d;
 
         this.canSetRallyPoint = false;
 

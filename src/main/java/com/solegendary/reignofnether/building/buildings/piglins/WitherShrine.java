@@ -37,6 +37,7 @@ public class WitherShrine extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_STAIRS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
         this.productions.add(ProductionItems.RESEARCH_WITHER_CLOUDS, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.RESEARCH_FIRE_RESISTANCE, Keybindings.abilitySlot2);

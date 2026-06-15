@@ -35,6 +35,7 @@ public class VillagerMarket extends AbstractMarket {
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/emerald_block.png");
 
         this.buildTimeModifier = 0.8f;
+        this.maxHealth = 300d;
 
         this.startingBlockTypes.add(Blocks.COBBLESTONE);
         this.startingBlockTypes.add(Blocks.STONE);

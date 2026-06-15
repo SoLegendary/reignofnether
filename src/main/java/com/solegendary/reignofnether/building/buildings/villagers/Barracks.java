@@ -37,6 +37,7 @@ public class Barracks extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.POLISHED_ANDESITE_STAIRS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
         this.productions.add(ProductionItems.VINDICATOR, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.PILLAGER, Keybindings.abilitySlot2);

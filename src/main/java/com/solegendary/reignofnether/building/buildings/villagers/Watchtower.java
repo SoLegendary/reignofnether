@@ -32,6 +32,7 @@ public class Watchtower extends Building implements GarrisonableBuildingAddon {
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/stone_bricks.png");
 
         this.buildTimeModifier = 1.0f;
+        this.maxHealth = 240d;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICKS);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_SLAB);
