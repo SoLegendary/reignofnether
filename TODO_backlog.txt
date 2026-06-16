@@ -2,6 +2,8 @@
 Features
 --------
 
+[❌] Save control groups to world per player
+
 [❌] Camera hotkeys (see starcraft example)
 
 Scenario roles:
