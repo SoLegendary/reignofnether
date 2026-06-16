@@ -10,6 +10,7 @@ Bugfixes
 [✔] Defeated players can no longer repeatedly surrender
 [✔] Alliances are now reset correctly when changing server worlds or instances
 [✔] Fixed spectators being able to toggle graveyard overflows
+[✔] Fixed '/rtsapi building place' crashing when run on servers
 
 Quality of Life
 ---------------
@@ -28,11 +29,13 @@ Balance
     - Conversion crucibles now require 5 sculk catalysts instead of 6 houses
     - Sculk Amplifier upgrade cost raised from (200 wood, 400 ore, 150s) to (300 wood, 500 ore, 180s)
 
-[✔] Buildings now have
+[✔] Buildings now have set amount of HP with a variable health per block
     - Piglin merchant TNT damage to buildings changed from 40 to 26/40/54 based on rank
     - Bridges no longer have 50% explosion or magic resistance
     - Warden sonic booms can no longer damage sculk catalysts at all
     - Standard melee damage to buildings raised from 40% to 50%, and all building health raised to match
+    - Dungeons now take 100% longer to build (they built way too fast due to their low block count)
+    - Added a health option to custom buildings
 
 [✔] Experience from enemy units is reduced by 25% (neutrals still give full exp)
 [✔] Phantoms now deal magic damage (Heroes have 30% magic resistance)

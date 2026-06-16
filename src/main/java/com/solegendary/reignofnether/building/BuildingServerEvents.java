@@ -134,7 +134,8 @@ public class BuildingServerEvents {
                     portalType,
                     b instanceof PortalPlacement portal && portal.hasDestination() ? portal.destination : new BlockPos(0,0,0),
                     b.scenarioRoleIndex,
-                    b.getDataStorage()
+                    b.getDataStorage(),
+                    b.partialBlocksDestroyed
             ));
             //ReignOfNether.LOGGER.info("saved buildings/nether in serverevents: " + b.originPos);
         });
@@ -177,6 +178,7 @@ public class BuildingServerEvents {
                 );
 
                 if (building != null) {
+                    building.partialBlocksDestroyed = b.partialBlocksDestroyed;
                     building.dataStorage = b.dataStorage;
                     building.scenarioRoleIndex = b.scenarioRoleIndex;
                     building.isBuilt = b.isBuilt;

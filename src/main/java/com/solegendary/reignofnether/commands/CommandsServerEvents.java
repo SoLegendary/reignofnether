@@ -16,7 +16,6 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
-import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.commands.argument.BuildingArgument;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
@@ -72,7 +71,7 @@ public class CommandsServerEvents {
 		SharedSuggestionProvider.suggestResource(
 			Stream.concat(
 				ReignOfNetherRegistries.BUILDING.stream(),
-				CustomBuildingClientEvents.customBuildings.stream()
+				CustomBuildingServerEvents.customBuildings.stream()
 			).collect(Collectors.toList()),
 			builder,
 			building -> {

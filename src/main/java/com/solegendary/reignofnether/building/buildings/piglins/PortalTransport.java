@@ -30,8 +30,6 @@ public class PortalTransport extends AbstractPortal {
         this.abilities.add(new ConnectPortal(), Keybindings.abilitySlot1);
         this.abilities.add(new GotoPortal(), Keybindings.abilitySlot2);
         this.abilities.add(new DisconnectPortal(), Keybindings.abilitySlot3);
-
-        this.maxHealth = 100d;
     }
 
     @Override

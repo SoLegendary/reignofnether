@@ -65,6 +65,7 @@ public class Beacon extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.CHISELED_STONE_BRICKS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 500d;
 
         this.abilities.add(new BeaconWealth(), Keybindings.abilitySlot1);
         this.abilities.add(new BeaconHaste(), Keybindings.abilitySlot2);

@@ -1672,6 +1672,8 @@
     "sandbox.reignofnether.custom_buildings.set_wood_cost.tooltip1": "If neutral, grants 25%% to the player who destroys this",
     "sandbox.reignofnether.custom_buildings.set_ore_cost.label": "Ore Cost",
     "sandbox.reignofnether.custom_buildings.set_ore_cost.tooltip1": "If neutral, grants 25%% to the player who destroys this",
+    "sandbox.reignofnether.custom_buildings.set_max_health.label": "Max Health",
+    "sandbox.reignofnether.custom_buildings.set_max_health.tooltip1": "Ctrl-click to set as default of 1 health per block",
     "sandbox.reignofnether.custom_buildings.set_garrison_capacity.label": "Garrison Capacity",
     "sandbox.reignofnether.custom_buildings.set_garrison_capacity.tooltip1": "Maximum number of units that can garrison",
     "sandbox.reignofnether.custom_buildings.set_garrison_range.label": "Garrison Range",

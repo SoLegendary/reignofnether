@@ -1068,7 +1068,7 @@ public class BuildingClientEvents {
         if (newBuilding != null && MC.player != null) {
             newBuilding.isBuilt = isBuilt;
 
-            if (isBuilt && forPlayerLoggingIn) {
+            if (isBuilt) {
                 newBuilding.highestBlockCountReached = newBuilding.getBlocksTotal();
             }
 

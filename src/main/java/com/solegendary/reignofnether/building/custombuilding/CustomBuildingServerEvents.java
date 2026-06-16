@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class CustomBuildingServerEvents {
 
     // since every custom building has a different structure, we need to maintain a list of them here
-    private static final Set<CustomBuilding> customBuildings = new HashSet<>();
+    public static final Set<CustomBuilding> customBuildings = new HashSet<>();
 
     public static CustomBuilding getCustomBuilding(String name) {
         for (CustomBuilding building : customBuildings)

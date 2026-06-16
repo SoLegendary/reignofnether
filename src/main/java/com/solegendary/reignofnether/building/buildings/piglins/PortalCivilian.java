@@ -23,8 +23,6 @@ public class PortalCivilian extends AbstractPortal {
         this.canSetRallyPoint = false;
         this.canAcceptResources = true;
         productions.add(ProductionItems.RESEARCH_RESOURCE_CAPACITY, Keybindings.abilitySlot1);
-
-        this.maxHealth = 100d;
     }
 
     @Override

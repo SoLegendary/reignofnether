@@ -229,6 +229,35 @@ public class CustomBuildingMenu {
         setOreCostButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
         buttonsCol1.add(setOreCostButton);
 
+        Button setMaxHealthButton = new IntegerButton(
+                I18n.get("sandbox.reignofnether.custom_buildings.set_max_health.label") + ": " + (int) customBuilding.maxHealth,
+                () -> {
+                    if (Keybindings.ctrlMod.isDown()) {
+                        customBuilding.setToDefaultMaxHealth();
+                        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_MAX_HEALTH, customBuilding.name, (int) customBuilding.maxHealth);
+                    } else {
+                        int value = Math.min(10000, (int) customBuilding.maxHealth + (Keybindings.shiftMod.isDown() ? 100 : 5));
+                        value = (int) (Math.round((double) value / 5.0d) * 5);
+                        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_MAX_HEALTH, customBuilding.name, value);
+                        customBuilding.maxHealth = value;
+                    }
+                },
+                () -> {
+                    if (Keybindings.ctrlMod.isDown()) {
+                        customBuilding.setToDefaultMaxHealth();
+                        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_MAX_HEALTH, customBuilding.name, (int) customBuilding.maxHealth);
+                    } else {
+                        int value = Math.max(5, (int) customBuilding.maxHealth - (Keybindings.shiftMod.isDown() ? 100 : 5));
+                        value = (int) (Math.round((double) value / 5.0d) * 5);
+                        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_MAX_HEALTH, customBuilding.name, value);
+                        customBuilding.maxHealth = value;
+                    }
+                },
+                I18n.get("sandbox.reignofnether.custom_buildings.set_max_health.tooltip1")
+        );
+        setMaxHealthButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/heart.png");
+        buttonsCol1.add(setMaxHealthButton);
+
         buttonsCol2.add(new BooleanButton(
                 I18n.get("sandbox.reignofnether.custom_buildings.set_capturable.label"), customBuilding.capturable,
                 () -> {

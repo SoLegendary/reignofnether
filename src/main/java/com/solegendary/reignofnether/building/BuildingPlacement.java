@@ -127,7 +127,7 @@ public class BuildingPlacement {
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float MIN_BLOCKS_PERCENT = 0.5f;
 
-    protected int highestBlockCountReached = 2; // effective max health of the building
+    protected int highestBlockCountReached = 2; // used for calculating max health of the building
 
     protected ArrayList<BuildingBlock> scaffoldBlocks = new ArrayList<>();
     /**
@@ -207,11 +207,11 @@ public class BuildingPlacement {
     private EntityType<? extends Animal> lastAnimalType = null;
 
     public double getHealthPerBlock() {
-        if (getBuilding().isUsingSetHealth()) {
+        if (getBuilding().isUsingSetHealth(this)) {
             int blocksTotal = getBlocksTotal();
             if (blocksTotal <= 0)
                 blocksTotal = 1;
-            return (getBuilding().maxHealth / blocksTotal) * 2;
+            return (getBuilding().getMaxHealth(this) / blocksTotal) * 2;
         } else {
             return Building.DEFAULT_HEALTH_PER_BLOCK;
         }
@@ -465,7 +465,7 @@ public class BuildingPlacement {
     }
 
     public int getMaxHealth() {
-        return (int) Math.round(getBuilding().isUsingSetHealth() ? getBuilding().maxHealth :
+        return (int) Math.round(getBuilding().isUsingSetHealth(this) ? getBuilding().getMaxHealth(this) :
                     ((getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 

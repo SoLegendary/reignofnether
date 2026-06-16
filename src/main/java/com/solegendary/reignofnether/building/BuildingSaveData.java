@@ -74,11 +74,12 @@ public class BuildingSaveData extends SavedData {
                 BlockPos portalDestination = new BlockPos(btag.getInt("xp"), btag.getInt("yp"), btag.getInt("zp"));
                 int scenarioRoleIndex = btag.getInt("scenarioRoleIndex");
                 DataStorage dataStorage;
-                if(btag.contains("dataStorage", Tag.TAG_LIST)) {
+                if (btag.contains("dataStorage", Tag.TAG_LIST)) {
                     dataStorage = DataStorage.read(btag.getList("dataStorage", Tag.TAG_COMPOUND), server);
-                }else {
+                } else {
                     dataStorage = new DataStorage();
                 }
+                double partialBlocksDestroyed = btag.contains("partialBlocksDestroyed") ? btag.getDouble("partialBlocksDestroyed") : 0d;
 
                 if (building != null) {
                     data.buildings.add(new BuildingSave(pos,
@@ -93,7 +94,8 @@ public class BuildingSaveData extends SavedData {
                             portalType,
                             portalDestination,
                             scenarioRoleIndex,
-                            dataStorage
+                            dataStorage,
+                            partialBlocksDestroyed
                     ));
                     ReignOfNether.LOGGER.info("BuildingSaveData.load: " + ownerName + "|" + building.name);
                 }
@@ -132,6 +134,7 @@ public class BuildingSaveData extends SavedData {
             cTag.putInt("zp", b.portalDestination != null ? b.portalDestination.getZ() : 0);
             cTag.putInt("scenarioRoleIndex", b.scenarioRoleIndex);
             cTag.put("dataStorage", b.dataStorage.write());
+            cTag.putDouble("partialBlocksDestroyed", b.partialBlocksDestroyed);
             list.add(cTag);
 
             //ReignOfNether.LOGGER.info("BuildingSaveData.save: " + b.ownerName + "|" + buildingName);

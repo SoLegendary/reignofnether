@@ -111,6 +111,7 @@ public class CustomBuildingServerboundPacket {
                     case SET_COMMAND_TEXT -> customBuilding.setCommandText(this.intValue, this.strValue);
                     case SET_COMMAND_COOLDOWN -> customBuilding.setCommandCooldownTicks(this.intValue, this.strValue);
                     case SET_COMMAND_TRIGGER -> customBuilding.setCommandTrigger(this.intValue, this.strValue);
+                    case SET_MAX_HEALTH -> customBuilding.maxHealth = this.intValue;
                 }
             }
             success.set(true);
