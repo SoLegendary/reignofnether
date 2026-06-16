@@ -8,7 +8,7 @@
 Bugfixes
 --------
 [✔] Defeated players can no longer repeatedly surrender
-[✔] Alliances are now reset correctly when changing server worlds or instances
+[✔] Alliances are now reset clientside when changing server worlds or instances
 [✔] Fixed spectators being able to toggle graveyard overflows
 [✔] Fixed '/rtsapi building place' crashing when run on servers
 
@@ -40,7 +40,7 @@ Balance
 [🟡] Experience from enemy units is reduced by 50% (neutrals still give full exp)
 [✔] Phantoms now deal magic damage (Heroes have 30% magic resistance)
 [✔] Wretched Wraith's chilling screech cooldown reduced from 30s to 20s
-[✔] Wretched Wraiths now gain 4% armour per layer of snow they're on
+[✔] Wretched Wraith's frostblink cooldown reduced from 20/15/10s to 18/13/8s
 [✔] Piglin merchant Greed is Good resource cost reduced to 75 per level
 
 Languages

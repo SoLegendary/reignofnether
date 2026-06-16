@@ -333,12 +333,9 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public double getUnitPhysicalArmorPercentage() {
-        int layers = 0;
-        if (onGround())
-            layers = BlockUtils.getWraithSnowLayers(level().getBlockState(getOnPos().above()));
         double dmgAfterAbsorb = CombatRules.getDamageAfterAbsorb(
                 1,
-                getArmorValue() + (isBlizzardInProgress() ? 13 : 0) + (layers),
+                getArmorValue() + (isBlizzardInProgress() ? 13 : 0),
                 (float)getAttributeValue(Attributes.ARMOR_TOUGHNESS));
         dmgAfterAbsorb += getDamageTakenIncrease();
         return Math.round((1 - dmgAfterAbsorb)/ 0.01d) * 0.01d;
