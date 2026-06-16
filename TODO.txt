@@ -41,6 +41,7 @@ Balance
 [✔] Phantoms now deal magic damage (Heroes have 30% magic resistance)
 [✔] Wretched Wraith's chilling screech cooldown reduced from 30s to 20s
 [✔] Wretched Wraith's frostblink cooldown reduced from 20/15/10s to 18/13/8s
+[✔] Wretched Wraith now gains +0.25 mana regeneration per layer of snow it's standing on
 [✔] Piglin merchant Greed is Good resource cost reduced to 75 per level
 
 Languages

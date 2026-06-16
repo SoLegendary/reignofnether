@@ -59,6 +59,7 @@ public class BitterFrostPassive extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip2")),
+                fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip3")),
                 fcs("")
         ));
         if (getRank(hero) >= 1) {
@@ -80,6 +81,7 @@ public class BitterFrostPassive extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip2")),
+                fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip3")),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.rank1"), getRank(hero) == 0),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.rank2"), getRank(hero) == 1),

@@ -43,6 +43,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -206,6 +207,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
     final static private float manaRegenPerSecond = 1;
+    final static private float bonusManaRegenPerSnowLayer = 0.25f;
     final static private float manaBonusPerLevel = 10;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
@@ -218,6 +220,14 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         this.mana = Math.min(maxMana, amount);
         if (!level().isClientSide())
             HeroClientboundPacket.setMana(getId(), this.mana);
+    }
+    @Override
+    public float getManaRegenPerSecond() {
+        float regen = HeroUnit.super.getManaRegenPerSecond();
+        int layers = 0;
+        if (onGround())
+            layers = BlockUtils.getWraithSnowLayers(level().getBlockState(getOnPos().above()));
+        return regen + (bonusManaRegenPerSnowLayer * layers);
     }
 
     final static public float attackDamage = 5.0f;
