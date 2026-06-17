@@ -5,12 +5,6 @@
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
-Bugfixes
---------
-[✔] Defeated players can no longer repeatedly surrender
-[✔] Alliances are now reset clientside when changing server worlds or instances
-[✔] Fixed spectators being able to toggle graveyard overflows
-[✔] Fixed '/rtsapi building place' crashing when run on servers
 
 Quality of Life
 ---------------
@@ -18,7 +12,7 @@ Quality of Life
 [✔] Piglin units are now immune to the Commercial Portal's lava blocks
 [✔] The Wretched Wraith's ultimate is now only cancellable via stop commands (S)
 
-
+[❌] Custom building commands with the 'on capture' condition now only trigger after the set cooldown after being captured
 
 Balance
 -------
@@ -37,12 +31,21 @@ Balance
     - Dungeons now take 100% longer to build (they built way too fast due to their low block count)
     - Added a health option to custom buildings
 
-[🟡] Experience from enemy units is reduced by 50% (neutrals still give full exp)
+[✔] Experience from player-controlled units is reduced by 50% (neutrals still give full exp)
 [✔] Phantoms now deal magic damage (Heroes have 30% magic resistance)
 [✔] Wretched Wraith's chilling screech cooldown reduced from 30s to 20s
 [✔] Wretched Wraith's frostblink cooldown reduced from 20/15/10s to 18/13/8s
-[✔] Wretched Wraith now gains +0.25 mana regeneration per layer of snow it's standing on
+[✔] Wretched Wraith base mana regen reduced by 0.25/s, but gains +0.25/s per layer of snow it's on
 [✔] Piglin merchant Greed is Good resource cost reduced to 75 per level
+
+
+Bugfixes
+--------
+[✔] Defeated players can no longer repeatedly surrender
+[✔] Alliances are now reset clientside when changing server worlds or instances
+[✔] Fixed spectators being able to toggle graveyard overflows
+[✔] Fixed '/rtsapi building place' crashing when run on servers
+[✔] Fixed various laboratory button issues
 
 Languages
 ---------

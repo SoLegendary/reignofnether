@@ -59,10 +59,10 @@ public class Laboratory extends ProductionBuilding implements RangeIndicatorAddo
         this.productions.add(ProductionItems.RESEARCH_SPIDER_WEBS, Keybindings.abilitySlot7);
         this.productions.add(ProductionItems.RESEARCH_SLIME_CONVERSION, Keybindings.abilitySlot8);
         this.productions.add(ProductionItems.RESEARCH_LAB_LIGHTNING_ROD, Keybindings.abilitySlot9);
-        this.productions.add(ProductionItems.RESEARCH_SILVERFISH, Keybindings.abilitySlot10);
-        this.productions.add(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, Keybindings.hotkey6);
-        this.productions.add(ProductionItems.RESEARCH_MASS_BURIAL, null);
-        this.productions.add(ProductionItems.RESEARCH_POSSESSION, null);
+        this.productions.add(ProductionItems.RESEARCH_POSSESSION, Keybindings.abilitySlot10);
+        this.productions.add(ProductionItems.RESEARCH_SILVERFISH, Keybindings.hotkey6);
+        this.productions.add(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, Keybindings.hotkey8);
+        this.productions.add(ProductionItems.RESEARCH_MASS_BURIAL, Keybindings.hotkey9);
 
         setActiveAddon(RangeIndicatorAddon.class, this, true);
     }

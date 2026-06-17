@@ -22,6 +22,8 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
 public class ResearchSlimeConversion extends ProductionItem {
 
     public final static String itemName = "Slimy Conversion";
@@ -50,14 +52,18 @@ public class ResearchSlimeConversion extends ProductionItem {
             () -> ProductionItems.RESEARCH_SLIME_CONVERSION.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_SLIME_CONVERSION),
             () -> true,
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.slime_conversion"),
+            List.of(fcs(I18n.get("research.reignofnether.slime_conversion"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.slime_conversion.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.slime_conversion.tooltip2"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.slime_conversion.tooltip1")),
+                fcs(I18n.get("research.reignofnether.slime_conversion.tooltip2")),
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.slime_conversion.tooltip3")),
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.slime_conversion.tooltip4"))
             ),
             this
         );

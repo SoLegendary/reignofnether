@@ -206,7 +206,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     final static private float baseMaxMana = 120;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    final static private float manaRegenPerSecond = 1;
+    final static private float manaRegenPerSecond = 0.75f;
     final static private float bonusManaRegenPerSnowLayer = 0.25f;
     final static private float manaBonusPerLevel = 10;
     @Override public float getMaxMana() { return maxMana; }
