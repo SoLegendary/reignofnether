@@ -550,7 +550,7 @@ public class HudClientEvents {
 
                     List<AbilityButton> buildingAbilities = hudSelectedPlacement.getAbilityButtons()
                             .stream()
-                            .filter(b -> !b.isHidden.get())
+                            .filter(b -> b != null && !b.isHidden.get())
                             .toList();
                     if (buildingAbilities.size() > 0) {
                         blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
