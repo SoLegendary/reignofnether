@@ -787,10 +787,16 @@ public class BuildingClientEvents {
                     ids[i] = builderIds.get(i);
                 }
                 if (Keybindings.shiftMod.isDown()) {
+                    String ownerName = MC.player.getName().getString();
+                    if (SandboxClientEvents.relationship == Relationship.NEUTRAL)
+                        ownerName = "";
+                    else if (SandboxClientEvents.relationship == Relationship.HOSTILE)
+                        ownerName = "Enemy";
+
                     BuildingServerboundPacket.placeAndQueueBuilding(building,
                         isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
                         buildingRotation,
-                        hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : MC.player.getName().getString(),
+                        hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : ownerName,
                         ids,
                         isBridgeDiagonal()
                     );

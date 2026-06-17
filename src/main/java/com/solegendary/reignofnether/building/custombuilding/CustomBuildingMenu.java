@@ -412,24 +412,26 @@ public class CustomBuildingMenu {
             int rowY = y + i * (COMMAND_ROW_HEIGHT + 2) + (COMMAND_ROW_HEIGHT - EDIT_BOX_HEIGHT) / 2;
             CustomBuildingCommand cmd = customBuilding.commands.get(idx);
 
-            MyEditBox cdBox = new MyEditBox.Builder(editBoxX, rowY, COOLDOWN_EDIT_BOX_WIDTH, EDIT_BOX_HEIGHT)
-                    .maxLength(5)
-                    .value(String.valueOf(cmd.tickCooldownMax))
-                    .isNumber(true)
-                    .onDefocus(value -> {
-                        try {
-                            cmd.tickCooldownMax = Integer.parseInt(value);
-                            CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_COOLDOWN, customBuilding.name, idx, value);
-                        } catch (NumberFormatException e) {
-                            cmd.tickCooldownMax = 100;
-                            CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_COOLDOWN, customBuilding.name, idx, "100");
-                        }
-                    })
-                    .tooltipLines(List.of(fcs(I18n.get("sandbox.reignofnether.custom_buildings.commands.cooldown"))))
-                    .build();
+            if (cmd.hasCooldownCondition()) {
+                MyEditBox cdBox = new MyEditBox.Builder(editBoxX, rowY, COOLDOWN_EDIT_BOX_WIDTH, EDIT_BOX_HEIGHT)
+                        .maxLength(5)
+                        .value(String.valueOf(cmd.tickCooldownMax))
+                        .isNumber(true)
+                        .onDefocus(value -> {
+                            try {
+                                cmd.tickCooldownMax = Integer.parseInt(value);
+                                CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_COOLDOWN, customBuilding.name, idx, value);
+                            } catch (NumberFormatException e) {
+                                cmd.tickCooldownMax = 100;
+                                CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_COOLDOWN, customBuilding.name, idx, "100");
+                            }
+                        })
+                        .tooltipLines(List.of(fcs(I18n.get("sandbox.reignofnether.custom_buildings.commands.cooldown"))))
+                        .build();
 
-            TextInputClientEvents.registerEditBox(cdBox);
-            commandCooldownEditBoxes.add(cdBox);
+                TextInputClientEvents.registerEditBox(cdBox);
+                commandCooldownEditBoxes.add(cdBox);
+            }
 
             MyEditBox textBox = new MyEditBox.Builder(editBoxX + COOLDOWN_EDIT_BOX_WIDTH + 5, rowY, TEXT_EDIT_BOX_WIDTH, EDIT_BOX_HEIGHT)
                     .maxLength(256)
@@ -482,8 +484,10 @@ public class CustomBuildingMenu {
                 case ON_CAPTURE                 -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png");
                 case OFF_COOLDOWN_IF_COMPLETE   -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/clock.png");
                 case OFF_COOLDOWN_IF_GARRISONED -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/ladder.png");
+                case OFF_COOLDOWN_IF_CAPTURED   -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/clock_half.png");
                 case NONE                       -> null;
             };
+            ResourceLocation bgRl = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png");
 
             String tooltip = switch (cmd.condition) {
                 case ON_BUILD_COMPLETE          -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.on_build_complete");
@@ -492,11 +496,13 @@ public class CustomBuildingMenu {
                 case ON_CAPTURE                 -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.on_capture");
                 case OFF_COOLDOWN_IF_COMPLETE   -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_complete");
                 case OFF_COOLDOWN_IF_GARRISONED -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_garrisoned");
+                case OFF_COOLDOWN_IF_CAPTURED   -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_captured");
                 case NONE                       -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.none");
             };
 
             Button condButton = new ButtonBuilder("Cycle Trigger Condition " + idx)
                     .iconResource(condRl)
+                    .bgIconResource(cmd.condition == CustomBuildingCommand.TriggerCondition.OFF_COOLDOWN_IF_CAPTURED ? bgRl : null)
                     .onLeftClick(() -> {
                         int next = (cmd.condition.ordinal() + 1) % conditions.length;
                         cmd.condition = conditions[next];

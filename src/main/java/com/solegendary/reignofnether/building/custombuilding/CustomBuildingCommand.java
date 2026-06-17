@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CustomBuildingCommand {
@@ -25,7 +26,18 @@ public class CustomBuildingCommand {
         ON_CAPTURE,
         OFF_COOLDOWN_IF_COMPLETE,
         OFF_COOLDOWN_IF_GARRISONED,
+        OFF_COOLDOWN_IF_CAPTURED,
         NONE
+    }
+
+    public boolean hasCooldownCondition() {
+        return List.of(
+            TriggerCondition.ON_CAPTURE,
+            TriggerCondition.ON_DAMAGE_TAKEN,
+            TriggerCondition.OFF_COOLDOWN_IF_COMPLETE,
+            TriggerCondition.OFF_COOLDOWN_IF_GARRISONED,
+            TriggerCondition.OFF_COOLDOWN_IF_CAPTURED
+        ).contains(condition);
     }
 
     public int tickCooldown = 100;
@@ -34,6 +46,7 @@ public class CustomBuildingCommand {
     public TriggerCondition condition = TriggerCondition.NONE;
     public boolean isValid = true; // updated whenever commandStr is updated
     public Map<? extends CommandNode<?>, CommandSyntaxException> exceptions = new HashMap<>();
+    public int triggerCount = 0;
 
     public CustomBuildingCommand() { }
 
@@ -43,6 +56,8 @@ public class CustomBuildingCommand {
         command.tickCooldownMax = tag.getInt("tickCooldownMax");
         command.commandStr = tag.getString("commandStr");
         command.condition = TriggerCondition.valueOf(tag.getString("condition"));
+        if (tag.contains("triggerCount"))
+            command.triggerCount = tag.getInt("triggerCount");
         return command;
     }
 
@@ -79,11 +94,16 @@ public class CustomBuildingCommand {
         return tickCooldown <= 0;
     }
 
+    public void setCooldownToMax() {
+        tickCooldown = tickCooldownMax;
+    }
+
     public void tick(BuildingPlacement bpl) {
+        if (!hasCooldownCondition())
+            return;
         if (tickCooldown > 0)
             tickCooldown -= 1;
         if (tickCooldown <= 0 && checkTickingCondition(bpl)) {
-            tickCooldown = tickCooldownMax;
             run(bpl);
         }
     }
@@ -93,13 +113,14 @@ public class CustomBuildingCommand {
         return switch (condition) {
             case OFF_COOLDOWN_IF_COMPLETE -> bpl.isBuilt;
             case OFF_COOLDOWN_IF_GARRISONED -> (gba = bpl.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null && !gba.getOccupants(bpl).isEmpty();
+            case OFF_COOLDOWN_IF_CAPTURED -> !bpl.ownerName.isBlank();
+            case ON_CAPTURE -> !bpl.ownerName.isBlank() && triggerCount <= 0;
             default -> false;
         };
     }
 
     public void run(BuildingPlacement bpl) {
         if (bpl.level instanceof ServerLevel level) {
-
             ServerPlayer player = level.getServer().getPlayerList().getPlayerByName(bpl.ownerName);
 
             CommandSourceStack source;
@@ -118,6 +139,9 @@ public class CustomBuildingCommand {
                         .withSuppressedOutput();
             }
             level.getServer().getCommands().performPrefixedCommand(source, commandStr);
+
+            setCooldownToMax();
+            triggerCount += 1;
         }
     }
 }

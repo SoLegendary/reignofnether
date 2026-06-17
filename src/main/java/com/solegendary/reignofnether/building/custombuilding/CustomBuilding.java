@@ -192,6 +192,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
             ctag.putInt("tickCooldownMax", command.tickCooldownMax);
             ctag.putString("commandStr", command.commandStr);
             ctag.putString("condition", command.condition.toString());
+            ctag.putInt("triggerCount", command.triggerCount);
             this.commandsNbt.add(ctag);
         }
     }
