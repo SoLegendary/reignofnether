@@ -956,9 +956,7 @@ public class BuildingPlacement {
                     msPerBuild *= PortalPlacement.NON_NETHER_BUILD_TIME_MODIFIER;
                 }
 
-                if (msToNextBuild > msPerBuild) {
-                    msToNextBuild = msPerBuild;
-                }
+                msToNextBuild = Math.min(msToNextBuild, msPerBuild);
 
                 if (hasFastBuildCheat) {
                     msToNextBuild -= 500;
@@ -967,7 +965,7 @@ public class BuildingPlacement {
                 }
 
                 if (msToNextBuild <= 0) {
-                    msToNextBuild = msPerBuild;
+                    msToNextBuild += msPerBuild;
                     Collections.shuffle(workerUnits);
                     if (!workerUnits.isEmpty()) {
                         WorkerUnit wUnit = workerUnits.get(0);

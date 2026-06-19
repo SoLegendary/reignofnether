@@ -43,7 +43,7 @@ public class TownCentre extends ProductionBuilding implements RangeIndicatorAddo
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_granite.png");
 
         this.maxHealth = 380d;
-        this.buildTimeModifier = 0.331f; // 60s total build time with 3 villagers
+        this.buildTimeModifier = 0.328f; // 60s total build time with 3 villagers
         this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);

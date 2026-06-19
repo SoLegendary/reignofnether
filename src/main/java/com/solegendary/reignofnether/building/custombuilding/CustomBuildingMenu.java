@@ -412,8 +412,22 @@ public class CustomBuildingMenu {
             int rowY = y + i * (COMMAND_ROW_HEIGHT + 2) + (COMMAND_ROW_HEIGHT - EDIT_BOX_HEIGHT) / 2;
             CustomBuildingCommand cmd = customBuilding.commands.get(idx);
 
+            MyEditBox textBox = new MyEditBox.Builder(editBoxX, rowY, TEXT_EDIT_BOX_WIDTH, EDIT_BOX_HEIGHT)
+                    .maxLength(256)
+                    .value(cmd.commandStr)
+                    .onDefocus(value -> {
+                        cmd.commandStr = value;
+                        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_TEXT, customBuilding.name, idx, value);
+                    })
+                    .responder(value -> {
+                        cmd.commandStr = value;
+                        cmd.updateValidityAndExceptions();
+                    })
+                    .commandSuggestions(true)
+                    .build();
+
             if (cmd.hasCooldownCondition()) {
-                MyEditBox cdBox = new MyEditBox.Builder(editBoxX, rowY, COOLDOWN_EDIT_BOX_WIDTH, EDIT_BOX_HEIGHT)
+                MyEditBox cdBox = new MyEditBox.Builder(editBoxX + TEXT_EDIT_BOX_WIDTH + 5, rowY, COOLDOWN_EDIT_BOX_WIDTH, EDIT_BOX_HEIGHT)
                         .maxLength(5)
                         .value(String.valueOf(cmd.tickCooldownMax))
                         .isNumber(true)
@@ -428,24 +442,9 @@ public class CustomBuildingMenu {
                         })
                         .tooltipLines(List.of(fcs(I18n.get("sandbox.reignofnether.custom_buildings.commands.cooldown"))))
                         .build();
-
                 TextInputClientEvents.registerEditBox(cdBox);
                 commandCooldownEditBoxes.add(cdBox);
             }
-
-            MyEditBox textBox = new MyEditBox.Builder(editBoxX + COOLDOWN_EDIT_BOX_WIDTH + 5, rowY, TEXT_EDIT_BOX_WIDTH, EDIT_BOX_HEIGHT)
-                    .maxLength(256)
-                    .value(cmd.commandStr)
-                    .onDefocus(value -> {
-                        cmd.commandStr = value;
-                        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_TEXT, customBuilding.name, idx, value);
-                    })
-                    .responder(value -> {
-                        cmd.commandStr = value;
-                        cmd.updateValidityAndExceptions();
-                    })
-                    .commandSuggestions(true)
-                    .build();
 
             TextInputClientEvents.registerEditBox(textBox);
             commandEditBoxes.add(textBox);
@@ -507,11 +506,13 @@ public class CustomBuildingMenu {
                         int next = (cmd.condition.ordinal() + 1) % conditions.length;
                         cmd.condition = conditions[next];
                         CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_TRIGGER, customBuilding.name, idx, cmd.condition.name());
+                        forceRefreshCommandEditBoxes();
                     })
                     .onRightClick(() -> {
                         int prev = (cmd.condition.ordinal() - 1 + conditions.length) % conditions.length;
                         cmd.condition = conditions[prev];
                         CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_COMMAND_TRIGGER, customBuilding.name, idx, cmd.condition.name());
+                        forceRefreshCommandEditBoxes();
                     })
                     .tooltipLines(List.of(
                             fcs(tooltip)

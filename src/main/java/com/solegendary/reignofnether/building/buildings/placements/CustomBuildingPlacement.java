@@ -59,7 +59,8 @@ public class CustomBuildingPlacement extends BuildingPlacement {
         boolean captured = super.checkIfCaptured(serverLevel);
         if (captured) {
             for (CustomBuildingCommand command : commands) {
-                if (command.condition == CustomBuildingCommand.TriggerCondition.ON_CAPTURE) {
+                if (command.condition == CustomBuildingCommand.TriggerCondition.ON_CAPTURE ||
+                    command.condition == CustomBuildingCommand.TriggerCondition.OFF_COOLDOWN_IF_CAPTURED) {
                     command.triggerCount = 0; // allow retrigger after the cooldown is done
                     command.setCooldownToMax();
                 }

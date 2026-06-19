@@ -488,6 +488,20 @@ public class CommandsServerEvents {
 						)))
 		);
 
+		dispatcher.register(Commands.literal("rtsapi-set-alliance")
+				.requires(source -> source.hasPermission(2))
+				.then(Commands.argument("value", BoolArgumentType.bool())
+						.then(Commands.argument("playerName1", StringArgumentType.string())
+								.then(Commands.argument("playerName2", StringArgumentType.string())
+										.executes(ctx -> setAlliance(
+												ctx,
+												BoolArgumentType.getBool(ctx, "value"),
+												StringArgumentType.getString(ctx, "playerName1"),
+												StringArgumentType.getString(ctx, "playerName2")
+										)))))
+		);
+
+
 		dispatcher.register(Commands.literal("rts-reset")
 				.requires(source -> source.hasPermission(2))
 				.executes(ctx -> PlayerServerEvents.resetRTS(false))
@@ -1142,7 +1156,53 @@ public class CommandsServerEvents {
 		StartPosServerEvents.loadPositionsFromMapInfo();
 		return 1;
 	}
-	
+
+	private static int setAlliance(
+			CommandContext<CommandSourceStack> ctx,
+			boolean value,
+			String playerName1,
+			String playerName2
+	) {
+		if (playerName1.equals(playerName2)) {
+			ctx.getSource().sendFailure(Component.literal("Cannot ally a player with themselves"));
+			return 0;
+		}
+		if (!PlayerServerEvents.isRTSPlayer(playerName1)) {
+			ctx.getSource().sendFailure(Component.literal("Unknown RTS player '" + playerName1 + "'"));
+			return 0;
+		}
+		if (!PlayerServerEvents.isRTSPlayer(playerName2)) {
+			ctx.getSource().sendFailure(Component.literal("Unknown RTS player '" + playerName2 + "'"));
+			return 0;
+		}
+
+		boolean alreadyAllied = AlliancesServerEvents.isAllied(playerName1, playerName2);
+
+		if (value) {
+			if (alreadyAllied) {
+				ctx.getSource().sendFailure(Component.literal(playerName1 + " and " + playerName2 + " are already allied"));
+				return 0;
+			}
+			AlliancesServerEvents.addAlliance(playerName1, playerName2);
+			ctx.getSource().sendSuccess(
+					() -> Component.literal("Allied " + playerName1 + " and " + playerName2),
+					true
+			);
+		} else {
+			if (!alreadyAllied) {
+				ctx.getSource().sendFailure(Component.literal(playerName1 + " and " + playerName2 + " are not allied"));
+				return 0;
+			}
+			AlliancesServerEvents.removeAlliance(playerName1, playerName2);
+			ctx.getSource().sendSuccess(
+					() -> Component.literal("Unallied " + playerName1 + " and " + playerName2),
+					true
+			);
+		}
+		return 1;
+	}
+
+
 	private static ResourceName resolveResource(String name) throws CommandSyntaxException {
 		try {
 			return ResourceName.valueOf(name.trim().toUpperCase());

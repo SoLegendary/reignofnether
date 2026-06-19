@@ -12,10 +12,10 @@ Quality of Life
 [✔] Piglin units are now immune to the Commercial Portal's lava blocks
 [✔] The Wretched Wraith's ultimate is now only cancellable via stop commands (S)
 [✔] Tweaked market and hoglin stables structures to reduce the chance units get stuck on them
-[🟡] Added a new custom building command trigger: "Off cooldown if captured"
-[🟡] Custom building commands with the 'on capture' condition now only tick their cooldown if captured
-    - And their cooldown is reset if captured by an enemy
+[✔] Added a new custom building command trigger: "Off cooldown if captured"
+[✔] Custom building commands with capture related triggers set their cooldown to max when captured
 [✔] Custom building command cooldowns can only be edited if there is condition set that actually uses it
+[✔] Added command '/rtsapi-set-alliance <true/false> <playerName> <playerName>'
 
 Balance
 -------
@@ -51,7 +51,9 @@ Bugfixes
 [✔] Fixed various laboratory button issues
 [✔] Holding shift to place buildings no longer ignores the neutral/enemy setting in sandbox
 
-[❌] buildings on reload don't get fixed all the way on repair (not due to partial block damage)
+[❌] Units not responding while attacking (only pillagers?)
+    - Maybe only specifically on Soly's server?
+[❌] After player rejoins, can't place buildings anymore (pressing key nulls buildingToPlace the tick after)
 
 Languages
 ---------
