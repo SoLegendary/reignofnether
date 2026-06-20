@@ -28,6 +28,7 @@ public class GameruleClient {
     public static int maxPopulation = ResourceCosts.DEFAULT_MAX_POPULATION;
     public static boolean doUnitGriefing = false; // only for GUI
     public static boolean doPlayerGriefing = true; // only for GUI
+    public static boolean rtsPathfinding = false; // only for GUI
     public static boolean improvedPathfinding = true; // only for GUI
     public static double groundYLevel = -320;
     public static double flyingMaxYLevel = 320;
@@ -146,6 +147,10 @@ public class GameruleClient {
         buttons.add(new GameruleBooleanButton("doPlayerGriefing", doPlayerGriefing,
             () -> GameruleServerboundPacket.setPlayerGriefing(!doPlayerGriefing),
             I18n.get("commands.reignofnether.gamerule.player_griefing")
+        ));
+        buttons.add(new GameruleBooleanButton("rtsPathfinding", rtsPathfinding,
+            () -> GameruleServerboundPacket.setRtsPathfinding(!rtsPathfinding),
+            "Use RTS-optimised pathfinder (async grid A*)."
         ));
         buttons.add(new GameruleBooleanButton("improvedPathfinding", improvedPathfinding,
             () -> GameruleServerboundPacket.setImprovedPathfinding(!improvedPathfinding),

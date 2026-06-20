@@ -90,6 +90,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(WorldBorderClientEvents.class);
         vanillaEventBus.register(SurvivalClientEvents.class);
         vanillaEventBus.register(StartPosClientEvents.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.commands.RtsDebugClientEvents.class);
         vanillaEventBus.register(NonUnitClientEvents.class);
         vanillaEventBus.register(HeroClientEvents.class);
         vanillaEventBus.register(CustomBuildingClientEvents.class);

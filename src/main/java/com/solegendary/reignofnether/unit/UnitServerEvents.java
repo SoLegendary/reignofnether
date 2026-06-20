@@ -102,6 +102,7 @@ import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUT
 public class UnitServerEvents {
 
     public static boolean improvedPathfinding = true;
+    public static boolean rtsPathfinding = false;
 
     private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;

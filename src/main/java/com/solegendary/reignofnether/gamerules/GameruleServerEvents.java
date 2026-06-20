@@ -57,6 +57,13 @@ public class GameruleServerEvents {
                 }
                 GameruleClientboundPacket.setImprovedPathfinding(value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("rtsPathfinding")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                UnitServerEvents.rtsPathfinding = value;
+                GameruleClientboundPacket.setRtsPathfinding(value);
+            }
         } else if (nodes.get(1).getNode().getName().equals("neutralAggro")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
             if (args.containsKey("value")) {
@@ -134,6 +141,9 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setUnitGriefing(unitGriefing);
             boolean playerGriefing = server.getGameRules().getRule(GameRuleRegistrar.DO_PLAYER_GRIEFING).get();
             GameruleClientboundPacket.setPlayerGriefing(playerGriefing);
+            boolean rtsPathfinding = server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get();
+            UnitServerEvents.rtsPathfinding = rtsPathfinding;
+            GameruleClientboundPacket.setRtsPathfinding(rtsPathfinding);
             boolean improvedPathfinding = server.getGameRules().getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).get();
             GameruleClientboundPacket.setImprovedPathfinding(improvedPathfinding);
             int groundYLevel = server.getGameRules().getRule(GameRuleRegistrar.GROUND_Y_LEVEL).get();
