@@ -848,6 +848,8 @@
   "hud.reignofnether.not_garrisonable": "所选建筑无法进驻",
   "hud.reignofnether.no_destination": "所选传送门没有通往任一目标！",
 
+  "hud.buildings.reignofnether.sculk_catalyst.range": "当前%d/最大%d格",
+
   "hud.units.reignofnether.hero": "英雄",
   "hud.units.reignofnether.armoured": "装甲",
 

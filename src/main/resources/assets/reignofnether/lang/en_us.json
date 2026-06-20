@@ -848,6 +848,8 @@
     "hud.reignofnether.not_garrisonable": "That building is not garrisonable",
     "hud.reignofnether.no_destination": "That portal has no destination!",
 
+    "hud.buildings.reignofnether.sculk_catalyst.range": "%d / %d range",
+
     "hud.units.reignofnether.hero": "Hero",
     "hud.units.reignofnether.armoured": "Armoured",
 

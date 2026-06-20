@@ -640,6 +640,8 @@
     "hud.reignofnether.not_garrisonable": "選定的建築不可駐紮",
     "hud.reignofnether.no_destination": "選定的傳送門無目的地！",
 
+    "hud.buildings.reignofnether.sculk_catalyst.range": "當前%d/最大%d方塊",
+
     "hud.units.reignofnether.hero": "英雄",
     "hud.units.reignofnether.armoured": "裝甲",
     "hud.enchant.reignofnether.maiming": "致殞",
