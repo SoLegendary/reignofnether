@@ -901,12 +901,13 @@
   "hud.relationship.reignofnether.enemy": "敌对",
   "hud.relationship.reignofnether.neutral": "中立",
 
-  "hud.hero.reignofnether.level": "（等级 %d）",
+  "hud.hero.reignofnether.level": "（%d级）",
+  "hud.hero.reignofnether.level.short": "（%d级）",
   "hud.hero.reignofnether.experience": "经验：%d/%d",
-  "hud.hero.reignofnether.experience_warning": "5 级后无法再从中立单位获得经验",
+  "hud.hero.reignofnether.experience_warning": "5级后无法再从中立单位获得经验",
   "hud.hero.reignofnether.max_level": "已达最大等级！",
-  "hud.hero.reignofnether.death": "%s的%s（等级 %d）已阵亡！",
-  "hud.hero.reignofnether.revival": "%s的%s（等级 %d）已复活！",
+  "hud.hero.reignofnether.death": "%s的%s（%d级）已阵亡！",
+  "hud.hero.reignofnether.revival": "%s的%s（%d级）已复活！",
 
   "server.reignofnether.is_defeated": "%s%s，遗憾落败！",
   "server.reignofnether.lost_buildings": "失去了所有建筑",

@@ -902,6 +902,7 @@
     "hud.relationship.reignofnether.neutral": "Neutral",
 
     "hud.hero.reignofnether.level": " (Lvl %d)",
+    "hud.hero.reignofnether.level.short": " (Lv %d)",
     "hud.hero.reignofnether.experience": "Experience: %d/%d",
     "hud.hero.reignofnether.experience_warning": "No exp from neutrals from lvl 5",
     "hud.hero.reignofnether.max_level": "Max Level!",

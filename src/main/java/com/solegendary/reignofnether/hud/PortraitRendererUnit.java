@@ -43,6 +43,7 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
@@ -517,9 +518,11 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         if (unit instanceof HeroUnit heroUnit) {
             int heroLvl = heroUnit.getHeroLevel();
+            String heroLvlString = I18n.get("hud.hero.reignofnether.level", heroLvl);
+            String heroLvString = I18n.get("hud.hero.reignofnether.level.short", heroLvl);
             guiGraphics.drawString(
                     Minecraft.getInstance().font,
-                    fcs((heroLvl >= 10 ? "Lv " : "Lvl ") + heroLvl, true),
+                    fcs((heroLvl >= 10 ? heroLvString : heroLvlString), true),
                     blitXIcon + 1,
                     blitYIcon - 1,
                     0xFFFFFFFF

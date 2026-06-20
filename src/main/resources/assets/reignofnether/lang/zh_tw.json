@@ -662,6 +662,7 @@
     "hud.relationship.reignofnether.neutral": "中立",
 
     "hud.hero.reignofnether.level": "（等級 %d）",
+    "hud.hero.reignofnether.level.short": "（等級 %d）",
     "hud.hero.reignofnether.experience": "經驗值：%d/%d",
     "hud.hero.reignofnether.experience_warning": "等級 5 後無法從中立單位獲得經驗",
     "hud.hero.reignofnether.max_level": "已達最高等級！",
