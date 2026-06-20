@@ -847,6 +847,7 @@
     "hud.reignofnether.building_full": "That building is full!",
     "hud.reignofnether.not_garrisonable": "That building is not garrisonable",
     "hud.reignofnether.no_destination": "That portal has no destination!",
+    "hud.reignofnether.block_pos": "BlockPos: %s",
 
     "hud.buildings.reignofnether.sculk_catalyst.range": "%d / %d range",
 

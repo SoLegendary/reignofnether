@@ -485,7 +485,7 @@ public class HudClientEvents {
                     }
                     evt.getGuiGraphics().drawString(
                         MC.font,
-                        Math.round(100 - (percentageDoneInv * 100f)) + "% " + productionButtons.get(0).name,
+                        Math.round(100 - (percentageDoneInv * 100f)) + "% " + productionButtons.get(0).name,  // TODO: translatable
                         blitX + iconFrameSize + 5,
                         blitY + 2,
                         colour
@@ -2151,7 +2151,7 @@ public class HudClientEvents {
                 }
             }
             BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
-            evt.getGuiGraphics().drawString(MC.font, "BlockPos: " + bp.toShortString(), 100, y, 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, I18n.get("hud.reignofnether.block_pos", bp.toShortString()), 100, y, 0xFFFFFF);
             evt.getGuiGraphics().drawString(MC.font, MC.level.getBlockState(bp).getBlock().toString().replaceFirst("Block", ""), 100, y + 10, 0xFFFFFF);
         }
     }

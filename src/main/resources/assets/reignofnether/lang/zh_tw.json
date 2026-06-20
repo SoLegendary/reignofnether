@@ -639,6 +639,7 @@
     "hud.reignofnether.building_full": "選定的建築已滿！",
     "hud.reignofnether.not_garrisonable": "選定的建築不可駐紮",
     "hud.reignofnether.no_destination": "選定的傳送門無目的地！",
+    "hud.reignofnether.block_pos": "方塊坐標：%s",
 
     "hud.buildings.reignofnether.sculk_catalyst.range": "當前%d/最大%d方塊",
 
