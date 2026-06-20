@@ -1757,7 +1757,13 @@
   "alliances.reignofnether.tooltip.cancel_request_alliance": "取消请求",
   "alliances.reignofnether.tooltip.accept_alliance": "接受结盟",
   "alliances.reignofnether.tooltip.disband_alliance": "解除同盟",
-  "alliances.reignofnether.tooltip.goto_player": "前往该玩家处",
+  "alliances.reignofnether.tooltip.goto_player": "前往玩家位置",
+
+  "alliances.reignofnether.tooltip.status.enemy": "敌对",
+  "alliances.reignofnether.tooltip.status.requested": "已发送请求",
+  "alliances.reignofnether.tooltip.status.accept": "接受请求？",
+  "alliances.reignofnether.tooltip.status.allied": "已结盟",
+  "alliances.reignofnether.tooltip.status.allied.plural": "",
 
   "alliances.reignofnether.tooltip.toggle_observer_player_displays": "观察者菜单（Z）",
   "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "外交菜单（Z）",

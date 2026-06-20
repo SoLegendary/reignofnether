@@ -1759,6 +1759,12 @@
     "alliances.reignofnether.tooltip.disband_alliance": "Disband Alliance",
     "alliances.reignofnether.tooltip.goto_player": "Go to player",
 
+    "alliances.reignofnether.tooltip.status.enemy": "Enemy",
+    "alliances.reignofnether.tooltip.status.requested": "Requested",
+    "alliances.reignofnether.tooltip.status.accept": "Accept?",
+    "alliances.reignofnether.tooltip.status.allied": "Allied",
+    "alliances.reignofnether.tooltip.status.allied.plural": " (s)",
+
     "alliances.reignofnether.tooltip.toggle_observer_player_displays": "Observer Menu (Z)",
     "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "Diplomacy Menu (Z)",
     "alliances.reignofnether.tooltip.toggle_shared_unit_control": "Toggle whether allies can control your units",
