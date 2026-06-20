@@ -43,6 +43,7 @@ public class FactionRegistries {
         register(Faction.MONSTERS, Buildings.STRONGHOLD, Keybindings.hotkey2);
         register(Faction.MONSTERS, Buildings.ALTAR_OF_DARKNESS, Keybindings.hotkey3);
         register(Faction.MONSTERS, Buildings.SPRUCE_BRIDGE, Keybindings.hotkey4);
+        register(Faction.MONSTERS, Buildings.HAUNTED_HOUSE, null);
 
         register(Faction.MONSTERS, Buildings.MONSTER_MARKET);
         register(Faction.MONSTERS, Buildings.BEACON);

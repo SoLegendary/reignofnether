@@ -57,6 +57,8 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -350,7 +352,7 @@ public class BuildingClientEvents {
     }
 
     public static boolean isBuildingPlacementValid(BlockPos originPos) {
-        return !isBuildingPlacementInAirOrOnBarriers(originPos) &&
+        return !isBuildingPlacementInAirOrOnIllegalBlocks(originPos) &&
                 !isBuildingPlacementClipping(originPos) &&
                 (!isOverlappingAnyOtherBuilding() || SandboxClientEvents.isSandboxPlayer()) &&
                 isNonPiglinOrOnNetherBlocks(originPos) &&
@@ -363,7 +365,7 @@ public class BuildingClientEvents {
     public static void checkBuildingPlacementValidityWithMessages(BlockPos originPos) {
         if (!isBuildingPlacementWithinWorldBorder(originPos)) {
             showTemporaryMessage(I18n.get("building.reignofnether.outside_map"));
-        } else if (isBuildingPlacementInAirOrOnBarriers(originPos)) {
+        } else if (isBuildingPlacementInAirOrOnIllegalBlocks(originPos)) {
             showTemporaryMessage(I18n.get("building.reignofnether.ground_not_flat"));
         } else if (isBuildingPlacementClipping(originPos)) {
             showTemporaryMessage(I18n.get("building.reignofnether.ground_not_flat"));
@@ -402,7 +404,7 @@ public class BuildingClientEvents {
 
     // 90% all solid blocks at the base of the building must be on top of solid non-barrier blocks to be placeable
     // excluding those under blocks which aren't solid anyway
-    private static boolean isBuildingPlacementInAirOrOnBarriers(BlockPos originPos) {
+    private static boolean isBuildingPlacementInAirOrOnIllegalBlocks(BlockPos originPos) {
         if (isBuildingToPlaceABridge() || GameruleClient.slantedBuilding) {
             return false;
         }
@@ -418,7 +420,8 @@ public class BuildingClientEvents {
                     blocksBelow += 1;
                     if (bsBelow.isSolid() &&
                             !(bsBelow.getBlock() instanceof LeavesBlock) &&
-                            !(bsBelow.getBlock() instanceof BarrierBlock)) {
+                            !(bsBelow.getBlock() instanceof BarrierBlock) &&
+                            !(bsBelow.getBlock() instanceof SlabBlock && bsBelow.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.BOTTOM)) {
                         solidBlocksBelow += 1;
                     }
                 }

@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -45,7 +46,7 @@ public class HauntedHouse extends Building {
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/dark_oak_log.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.HAUNTED_HOUSE,
-            () -> false,
+            () -> !SandboxClientEvents.isSandboxPlayer(),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(

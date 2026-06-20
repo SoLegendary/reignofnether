@@ -995,8 +995,11 @@ public class BuildingPlacement {
             BuildingBlock nextBlock = blockPlaceQueue.get(0);
             BlockPos bp = nextBlock.getBlockPos();
             BlockState bs = nextBlock.getBlockState();
+            Block blockBelow = level.getBlockState(bp.below()).getBlock();
             CompoundTag bNbt = nextBlock.getBlockNbt();
             if (level.isLoaded(bp)) {
+                if (blockBelow == Blocks.FARMLAND || blockBelow == Blocks.DIRT_PATH)
+                    level.setBlockAndUpdate(bp.below(), Blocks.DIRT.defaultBlockState());
                 level.setBlockAndUpdate(bp, bs);
                 if (bNbt != null) {
                     if (bs.getBlock() == Blocks.SCULK_CATALYST) {
