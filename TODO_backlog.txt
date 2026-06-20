@@ -2,6 +2,9 @@
 Features
 --------
 
+[❌] Make custom arrow entity to control logic better
+    - Half pierce and multishot damage
+
 [❌] Save control groups to world per player
 
 [❌] Camera hotkeys (see starcraft example)

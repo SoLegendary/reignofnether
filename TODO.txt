@@ -8,8 +8,8 @@
 
 Quality of Life
 ---------------
-[🟡] Added the Haunted House back into the sandbox building menu
-[🟡] Bottom slabs are now illegal blocks for placing buildings on
+[✔] Added the Haunted House back into the sandbox building menu
+[✔] Bottom slabs are now illegal blocks for placing buildings on
 
 Balance
 -------
@@ -24,8 +24,10 @@ Bugfixes
 
 [✔] Fixed newly registered custom buildings not saving their placements correctly
 
-[🟡] Building blocks now convert farmland and dirt paths underneath into regular dirt when placed
+[✔] Building blocks now convert farmland and dirt paths underneath into regular dirt when placed
     - This was preventing some blocks like rails from allowing the building to complete
+
+[✔] Fixed Ravager roars not causing any knockback
 
 Languages
 ---------

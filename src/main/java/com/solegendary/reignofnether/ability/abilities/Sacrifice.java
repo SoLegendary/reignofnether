@@ -67,8 +67,8 @@ public class Sacrifice extends Ability {
             unitType = sculkCat.autoSacrificeUnitType;
 
         return unitType != null && !unitType.isBlank() && isAutocasting(placement) ?
-                fcs(I18n.get("abilities.reignofnether.sacrifice.tooltip5")) :
-                fcs(I18n.get("abilities.reignofnether.sacrifice.tooltip5", unitType));
+                fcs(I18n.get("abilities.reignofnether.sacrifice.tooltip5", unitType)) :
+                fcs("");
     }
 
     public boolean isValidTarget(Level level, BuildingPlacement buildingUsing, LivingEntity targetEntity) {

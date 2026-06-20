@@ -267,7 +267,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         AttributeInstance ai = mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
         float knockbackMult = 1.0f;
         if (ai != null)
-            knockbackMult = (float) Math.min(0, 1 - ai.getValue());
+            knockbackMult = (float) Math.min(1, 1 - ai.getValue());
         mob.push((d0 / d2 * ROAR_KNOCKBACK) * knockbackMult, 0.2 * knockbackMult, (d1 / d2 * ROAR_KNOCKBACK) * knockbackMult);
     }
 
