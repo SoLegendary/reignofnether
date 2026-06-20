@@ -1307,5 +1307,8 @@
 
     "alliances.reignofnether.tooltip.toggle_observer_player_displays": "觀察者選單（Z）",
     "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "外交選單（Z）",
-    "alliances.reignofnether.tooltip.toggle_shared_unit_control": "切換是否允許盟友控制你的單位"
+    "alliances.reignofnether.tooltip.toggle_shared_unit_control": "切換是否允許盟友控制你的單位",
+    "alliances.reignofnether.tooltip.shared_unit_control": "盟友共享單位控制：",
+    "alliances.reignofnether.tooltip.shared_unit_control.enable": "已啓用",
+    "alliances.reignofnether.tooltip.shared_unit_control.disable": "已禁用"
 }

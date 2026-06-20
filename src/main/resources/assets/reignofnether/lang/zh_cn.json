@@ -1761,7 +1761,10 @@
 
   "alliances.reignofnether.tooltip.toggle_observer_player_displays": "观察者菜单（Z）",
   "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "外交菜单（Z）",
-  "alliances.reignofnether.tooltip.toggle_shared_unit_control": "切换是否允许盟友控制你的单位",
+  "alliances.reignofnether.tooltip.toggle_shared_unit_control": "是否允许盟友控制你的单位",
+  "alliances.reignofnether.tooltip.shared_unit_control": "盟友共享单位控制：",
+  "alliances.reignofnether.tooltip.shared_unit_control.enable": "已启用",
+  "alliances.reignofnether.tooltip.shared_unit_control.disable": "已禁用",
 
   "effect.reignofnether.stun": "眩晕",
   "effect.reignofnether.freeze": "冻结",
