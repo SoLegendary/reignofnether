@@ -112,7 +112,7 @@ public class BuildingSaveData extends SavedData {
         this.buildings.forEach(b -> {
             CompoundTag cTag = new CompoundTag();
             if (b.building instanceof CustomBuilding) {
-                cTag.putString("customStructureName", b.building.structureName);
+                cTag.putString("customStructureName", b.building.name);
             }
             if (!(b.building instanceof CustomBuilding)) {
                 cTag.putString("buildingKey", ReignOfNetherRegistries.BUILDING.getKey(b.building).toString());

@@ -1,5 +1,5 @@
 
-1.20.1-1.3.6
+1.20.1-1.3.6a
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -8,52 +8,20 @@
 
 Quality of Life
 ---------------
-[✔] Monster buildings now show their night radius before they are placed
-[✔] Piglin units are now immune to the Commercial Portal's lava blocks
-[✔] The Wretched Wraith's ultimate is now only cancellable via stop commands (S)
-[✔] Tweaked market and hoglin stables structures to reduce the chance units get stuck on them
-[✔] Added a new custom building command trigger: "Off cooldown if captured"
-[✔] Custom building commands with capture related triggers set their cooldown to max when captured
-[✔] Custom building command cooldowns can only be edited if there is condition set that actually uses it
-[✔] Added command '/rtsapi-set-alliance <true/false> <playerName> <playerName>'
+
 
 Balance
 -------
-[✔] Monsters no longer build haunted houses for population, instead Sculk Catalysts give 12 population each
-    - Sculk Catalysts now take half damage from melee attacks compared to other buildings
-    - Sculk Catalyst starting range raised from 25 to 30 blocks
-    - Starting mausoleum night radius reduced from 80 to 60
-    - Conversion crucibles now require 5 sculk catalysts instead of 6 houses
-    - Sculk Amplifier upgrade cost raised from (200 wood, 400 ore, 150s) to (300 wood, 500 ore, 180s)
 
-[✔] Buildings now have set amount of HP with a variable health per block
-    - Piglin merchant TNT damage to buildings changed from 40 to 26/40/54 based on rank
-    - Bridges no longer have 50% explosion or magic resistance
-    - Warden sonic booms can no longer damage sculk catalysts at all
-    - Standard melee damage to buildings raised from 40% to 50%, and all building health raised to match
-    - Dungeons now take 100% longer to build (they built way too fast due to their low block count)
-    - Added a health option to custom buildings
-
-[✔] Experience from player-controlled units is reduced by 50% (neutrals still give full exp)
-[✔] Phantoms now deal magic damage (Heroes have 30% magic resistance)
-[✔] Wretched Wraith's chilling screech cooldown reduced from 30s to 20s
-[✔] Wretched Wraith's frostblink cooldown reduced from 20/15/10s to 18/13/8s
-[✔] Wretched Wraith base mana regen reduced by 0.25/s, but gains +0.25/s per layer of snow it's on
-[✔] Piglin merchant Greed is Good resource cost reduced to 75 per level
 
 
 Bugfixes
 --------
-[✔] Defeated players can no longer repeatedly surrender
-[✔] Alliances are now reset clientside when changing server worlds or instances
-[✔] Fixed spectators being able to toggle graveyard overflows
-[✔] Fixed '/rtsapi building place' crashing when run on servers
-[✔] Fixed various laboratory button issues
-[✔] Holding shift to place buildings no longer ignores the neutral/enemy setting in sandbox
-
 [❌] Units not responding while attacking (only pillagers?)
     - Maybe only specifically on Soly's server?
 [❌] After player rejoins, can't place buildings anymore (pressing key nulls buildingToPlace the tick after)
+
+[✔] Fixed newly registered custom buildings not saving their placements correctly
 
 Languages
 ---------
