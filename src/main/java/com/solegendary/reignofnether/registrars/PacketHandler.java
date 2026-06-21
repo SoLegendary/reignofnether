@@ -100,6 +100,20 @@ public final class PacketHandler {
                 .encoder(UnitAnimationClientboundPacket::encode).decoder(UnitAnimationClientboundPacket::new)
                 .consumerMainThread(UnitAnimationClientboundPacket::handle).add();
 
+        INSTANCE.messageBuilder(UnitPathClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitPathClientboundPacket::encode).decoder(UnitPathClientboundPacket::new)
+                .consumerMainThread(UnitPathClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(com.solegendary.reignofnether.commands.RtsDebugClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.solegendary.reignofnether.commands.RtsDebugClientboundPacket::encode)
+                .decoder(com.solegendary.reignofnether.commands.RtsDebugClientboundPacket::new)
+                .consumerMainThread(com.solegendary.reignofnether.commands.RtsDebugClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(com.solegendary.reignofnether.commands.RtsDebugStatsClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(com.solegendary.reignofnether.commands.RtsDebugStatsClientboundPacket::encode)
+                .decoder(com.solegendary.reignofnether.commands.RtsDebugStatsClientboundPacket::new)
+                .consumerMainThread(com.solegendary.reignofnether.commands.RtsDebugStatsClientboundPacket::handle).add();
+
         INSTANCE.messageBuilder(UnitIdleWorkerClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitIdleWorkerClientBoundPacket::encode).decoder(UnitIdleWorkerClientBoundPacket::new)
                 .consumerMainThread(UnitIdleWorkerClientBoundPacket::handle).add();

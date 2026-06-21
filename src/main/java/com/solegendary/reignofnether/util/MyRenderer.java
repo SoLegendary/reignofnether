@@ -61,6 +61,15 @@ public class MyRenderer {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    // Path-line render constants used by the move-command path preview.
+    public static final float PATH_LINE_R = 0.2f;
+    public static final float PATH_LINE_G = 1.0f;
+    public static final float PATH_LINE_B = 0.4f;
+    public static final float PATH_LINE_BASE_ALPHA = 0.9f;
+    public static final float PATH_LINE_Y_OFFSET = 0.1f;
+    public static final int PATH_DISPLAY_TICKS = 40; // ~2s at 20 tps
+    public static final int PATH_FADE_TICKS = 10; // last N ticks fade out linearly
+
     public static final RenderType LINES_NO_DEPTH_TEST = RenderType.create(
             "lines", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
             RenderType.CompositeState.builder().setShaderState(RENDERTYPE_LINES_SHADER)

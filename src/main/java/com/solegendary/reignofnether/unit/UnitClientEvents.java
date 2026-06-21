@@ -154,6 +154,27 @@ public class UnitClientEvents {
         return allUnits;
     }
 
+    // Path-preview state. Keyed by entityId. Decremented in onClientTick. Entries auto-purge at zero.
+    public static class PathDisplay {
+        public final java.util.List<BlockPos> nodes;
+        public int ticksRemaining;
+        public PathDisplay(java.util.List<BlockPos> nodes, int ticksRemaining) {
+            this.nodes = nodes;
+            this.ticksRemaining = ticksRemaining;
+        }
+    }
+    private static final java.util.HashMap<Integer, PathDisplay> displayedPaths = new java.util.HashMap<>();
+
+    public static void receiveUnitPath(int entityId, java.util.List<BlockPos> nodes) {
+        if (nodes == null || nodes.isEmpty()) {
+            displayedPaths.remove(entityId);
+            return;
+        }
+        displayedPaths.put(entityId, new PathDisplay(nodes, MyRenderer.PATH_DISPLAY_TICKS));
+    }
+
+    public static int displayedPathCount() { return displayedPaths.size(); }
+
     private static boolean rightClickMoveDeferred = false;
     private static boolean rightClickActionTaken = false;
 
@@ -510,6 +531,29 @@ public class UnitClientEvents {
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END)
             return;
+
+        // Tick path-preview entries down. Remove expired in a single pass.
+        // When rts-debug is enabled, entries don't expire on a timer — they persist until either
+        // a new path arrives or the unit reaches the last node of its current path.
+        if (!displayedPaths.isEmpty()) {
+            boolean debugOn = com.solegendary.reignofnether.commands.RtsDebug.enabled;
+            displayedPaths.entrySet().removeIf(e -> {
+                PathDisplay pd = e.getValue();
+                if (!debugOn) {
+                    pd.ticksRemaining -= 1;
+                    if (pd.ticksRemaining <= 0) return true;
+                }
+                // Drop the entry once the unit is within 2 blocks of the path's last node.
+                if (MC.level != null) {
+                    var entity = MC.level.getEntity(e.getKey());
+                    if (entity == null) return true;
+                    BlockPos last = pd.nodes.get(pd.nodes.size() - 1);
+                    if (entity.distanceToSqr(last.getX() + 0.5, last.getY() + 0.5, last.getZ() + 0.5) < 4)
+                        return true;
+                }
+                return false;
+            });
+        }
 
         //if (MC.level != null)
         //    variance = WaveSpawner.getYVariance(MC.level, getPreselectedBlockPos(), 8);
@@ -1116,15 +1160,25 @@ public class UnitClientEvents {
                         }
                     }
 
-                    // draw path nodes
-                    /*
-                    if (unit instanceof Mob mob && mob.getNavigation().getPath() != null) {
-                        for (Node node : mob.getNavigation().getPath().nodes) {
-                            BlockPos bp = new BlockPos(node.x, node.y, node.z).below();
-                            MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0, 1, 0, a);
+                    // draw path preview — gated by /rts-debug. When debug is off, never render.
+                    // When debug is on, always render at full alpha (no fade).
+                    PathDisplay pd = displayedPaths.get(entity.getId());
+                    if (com.solegendary.reignofnether.commands.RtsDebug.enabled
+                            && pd != null && pd.nodes.size() >= 2 && MC.player != null
+                            && (unit.getOwnerName().equals(MC.player.getName().getString())
+                                || AlliancesClient.canControlAlly(unit.getOwnerName()))) {
+                        float pathAlpha = MyRenderer.PATH_LINE_BASE_ALPHA;
+                        BlockPos prev = null;
+                        for (BlockPos node : pd.nodes) {
+                            if (prev != null) {
+                                Vec3 a0 = new Vec3(prev.getX() + 0.5, prev.getY() + MyRenderer.PATH_LINE_Y_OFFSET, prev.getZ() + 0.5);
+                                Vec3 b0 = new Vec3(node.getX() + 0.5, node.getY() + MyRenderer.PATH_LINE_Y_OFFSET, node.getZ() + 0.5);
+                                MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, a0, b0,
+                                        MyRenderer.PATH_LINE_R, MyRenderer.PATH_LINE_G, MyRenderer.PATH_LINE_B, pathAlpha);
+                            }
+                            prev = node;
                         }
                     }
-                     */
                 }
             }
 

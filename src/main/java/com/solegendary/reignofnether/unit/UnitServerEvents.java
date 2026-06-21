@@ -162,6 +162,20 @@ public class UnitServerEvents {
         }
     }
 
+    // Debug counter: incremented each time a goal calls mob.getNavigation().createPath().
+    // Sampled and reset once per second by the rts-debug stats tick handler.
+    public static int debugPathCalcsThisSecond = 0;
+
+    // 5-second rolling buffers for the debug overlay. Indexed mod STATS_WINDOW.
+    private static final int STATS_WINDOW = 5;
+    private static final int[] pathsHistory = new int[STATS_WINDOW];
+    private static final int[] queueHistory = new int[STATS_WINDOW];
+    private static final int[] stuckHistory = new int[STATS_WINDOW];
+    private static int statsIndex = 0;
+    // Queue is sampled every tick (cheap, captures bursts) and averaged at second boundaries.
+    private static long queueSumThisSecond = 0;
+    private static int queueSamplesThisSecond = 0;
+
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
     }
@@ -691,6 +705,8 @@ public class UnitServerEvents {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
             return;
         synchronized (formationDispatchQueue) {
+            queueSumThisSecond += formationDispatchQueue.size();
+            queueSamplesThisSecond += 1;
             if (formationDispatchQueue.isEmpty())
                 return;
             int processed = 0;
@@ -705,6 +721,46 @@ public class UnitServerEvents {
                 processed += 1;
             }
         }
+    }
+
+    // Per-second sample of debug stats. Only broadcast while /rts-debug is enabled.
+    private static int rtsDebugStatsTicks = 0;
+    @SubscribeEvent
+    public static void onRtsDebugStatsTick(TickEvent.LevelTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
+            return;
+        rtsDebugStatsTicks += 1;
+        if (rtsDebugStatsTicks < 20) return;
+        rtsDebugStatsTicks = 0;
+        int paths = debugPathCalcsThisSecond;
+        debugPathCalcsThisSecond = 0;
+        if (!com.solegendary.reignofnether.commands.RtsDebug.enabled)
+            return;
+        int stuck = 0;
+        for (LivingEntity e : allUnits) {
+            if (e instanceof Unit u) {
+                var mg = u.getMoveGoal();
+                if (mg != null && mg.isInBackoff()) stuck += 1;
+            }
+        }
+        int avgQueueThisSec;
+        synchronized (formationDispatchQueue) {
+            avgQueueThisSec = queueSamplesThisSecond > 0 ? (int) (queueSumThisSecond / queueSamplesThisSecond) : 0;
+            queueSumThisSecond = 0;
+            queueSamplesThisSecond = 0;
+        }
+        pathsHistory[statsIndex] = paths;
+        queueHistory[statsIndex] = avgQueueThisSec;
+        stuckHistory[statsIndex] = stuck;
+        statsIndex = (statsIndex + 1) % STATS_WINDOW;
+        com.solegendary.reignofnether.commands.RtsDebugStatsClientboundPacket.broadcast(
+                avg(pathsHistory), avg(queueHistory), avg(stuckHistory));
+    }
+
+    private static int avg(int[] buf) {
+        int sum = 0;
+        for (int v : buf) sum += v;
+        return sum / buf.length;
     }
 
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns
