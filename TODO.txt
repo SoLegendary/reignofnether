@@ -16,9 +16,10 @@ Quality of Life
 
 Balance
 -------
-[🟡] Curse of Insomnia phantoms now deal regular damage again, but specifically deal 30% less damage to heroes
+[✔] Curse of Insomnia phantoms now deal regular damage again, but specifically deal 30% less damage to heroes
     - This is so that they do full damage to ghasts
-
+[✔] Wraith fear range (when manually casted) raised from 4 to 5
+[✔] Wraith fear duration raised from 5 to 6 seconds
 
 Bugfixes
 --------
@@ -34,3 +35,5 @@ Bugfixes
 
 Languages
 ---------
+[✔] Made various more strings translatable
+    - Thanks @NumberSir!
