@@ -34,6 +34,11 @@ public class RtsDebugServerEvents {
         if (evt.phase != TickEvent.Phase.END)
             return;
 
+        // Sample the formation dispatch queue depth every tick (cheap, captures bursts);
+        // averaged at the once-per-second boundary below.
+        queueSumThisSecond += UnitServerEvents.formationDispatchQueueSize();
+        queueSamplesThisSecond += 1;
+
         MinecraftServer server = evt.getServer();
         long[] times = server.getTickTime(Level.OVERWORLD);
         if (times == null)

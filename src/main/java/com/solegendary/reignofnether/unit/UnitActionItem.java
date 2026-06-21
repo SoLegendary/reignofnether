@@ -412,9 +412,11 @@ public class UnitActionItem {
                 if (!isRedundantMove((Unit) pair.getFirst(), pair.getSecond()))
                     filtered.add(pair);
             }
+            // Small groups dispatch immediately; large groups queue for time-sliced dispatch on the
+            // server so we don't run N concurrent A* searches in the same tick.
             if (level.isClientSide() || filtered.size() <= 20) {
                 for (Pair<LivingEntity, BlockPos> pair : filtered) {
-                    ((Unit) pair.getFirst()).setMoveTarget(pair.getSecond());
+                    ((Unit) pair.getFirst()).getMoveGoal().setMoveTarget(pair.getSecond());
                 }
             } else {
                 UnitServerEvents.queueFormationMove(filtered);

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.pathfinding.RtsPathfinder;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -70,21 +71,23 @@ public class RtsDebugClientEvents {
     // Path-preview state. Keyed by entityId. Decremented in onClientTick. Entries auto-purge at zero.
     public static class PathDisplay {
         public final java.util.List<BlockPos> nodes;
+        public final byte pathType;
         public int ticksRemaining;
-        public PathDisplay(java.util.List<BlockPos> nodes, int ticksRemaining) {
+        public PathDisplay(java.util.List<BlockPos> nodes, byte pathType, int ticksRemaining) {
             this.nodes = nodes;
+            this.pathType = pathType;
             this.ticksRemaining = ticksRemaining;
         }
     }
 
     private static final HashMap<Integer, PathDisplay> displayedPaths = new HashMap<>();
 
-    public static void receiveUnitPath(int entityId, List<BlockPos> nodes) {
+    public static void receiveUnitPath(int entityId, byte pathType, List<BlockPos> nodes) {
         if (nodes == null || nodes.isEmpty()) {
             displayedPaths.remove(entityId);
             return;
         }
-        displayedPaths.put(entityId, new PathDisplay(nodes, PATH_DISPLAY_TICKS));
+        displayedPaths.put(entityId, new PathDisplay(nodes, pathType, PATH_DISPLAY_TICKS));
     }
 
     public static int displayedPathCount() { return displayedPaths.size(); }
@@ -162,13 +165,20 @@ public class RtsDebugClientEvents {
                         if (pd != null && pd.nodes.size() >= 2 && MC.player != null
                                 && (unit.getOwnerName().equals(MC.player.getName().getString())
                                 || AlliancesClient.canControlAlly(unit.getOwnerName()))) {
+                            // green for vanilla/A*/flow, red for failed-to-reach
+                            float lineR, lineG, lineB;
+                            if (pd.pathType == RtsPathfinder.TYPE_FAILED) {
+                                lineR = 1.0f; lineG = 0.2f; lineB = 0.2f;
+                            } else {
+                                lineR = PATH_LINE_R; lineG = PATH_LINE_G; lineB = PATH_LINE_B;
+                            }
                             BlockPos prev = null;
                             for (BlockPos node : pd.nodes) {
                                 if (prev != null) {
                                     Vec3 a0 = new Vec3(prev.getX() + 0.5, prev.getY() + PATH_LINE_Y_OFFSET, prev.getZ() + 0.5);
                                     Vec3 b0 = new Vec3(node.getX() + 0.5, node.getY() + PATH_LINE_Y_OFFSET, node.getZ() + 0.5);
                                     MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, a0, b0,
-                                            PATH_LINE_R, PATH_LINE_G, PATH_LINE_B, PATH_LINE_BASE_ALPHA);
+                                            lineR, lineG, lineB, PATH_LINE_BASE_ALPHA);
                                 }
                                 prev = node;
                             }
