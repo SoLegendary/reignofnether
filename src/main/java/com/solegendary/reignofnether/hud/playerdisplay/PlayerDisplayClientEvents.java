@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
 public class PlayerDisplayClientEvents {
 
     private enum DisplayType {
@@ -67,7 +69,7 @@ public class PlayerDisplayClientEvents {
             },
             null,
             List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.toggle_observer_player_displays"), Style.EMPTY)
-    ));
+            ));
 
     public static final Button diplomacyButton = new Button(
             "Toggle Diplomacy Displays",
@@ -85,7 +87,7 @@ public class PlayerDisplayClientEvents {
             },
             null,
             List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.toggle_diplomacy_player_displays"), Style.EMPTY)
-    ));
+            ));
 
     private static int getNumFpvPlayers() {
         if (MC.level == null)
@@ -108,18 +110,18 @@ public class PlayerDisplayClientEvents {
             () -> !PlayerClientEvents.isRTSPlayer() || PlayerClientEvents.rtsPlayers.size() <= 1,
             () -> true,
             () -> AllianceServerboundPacket.doAllianceAction(
-                AllianceAction.SET_ALLY_CONTROL,
-                !AlliancesClient.sharingAllyControl()
+                    AllianceAction.SET_ALLY_CONTROL,
+                    !AlliancesClient.sharingAllyControl()
             ),
             null,
             List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.toggle_shared_unit_control"), Style.EMPTY)
-    ));
+            ));
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() ||
-            !(evt.getScreen() instanceof TopdownGui) ||
-            MC.level == null) {
+                !(evt.getScreen() instanceof TopdownGui) ||
+                MC.level == null) {
             return;
         }
         renderedButtons.clear();
@@ -251,24 +253,31 @@ public class PlayerDisplayClientEvents {
         int y1 = blitY - BG_BORDER_WIDTH;
         int x2 = blitX + DiplomacyPlayerDisplay.DISPLAY_WIDTH + BG_BORDER_WIDTH;
         int y2 = blitY + ((Button.DEFAULT_ICON_FRAME_SIZE + BG_BORDER_WIDTH) *
-                        (rtsDiplomacyPlayerDisplays.size() + fpvDiplomacyPlayerDisplays.size() )) +
-                        (canShareUnitControl ? (int) (Button.DEFAULT_ICON_FRAME_SIZE * 1.5f) : 0);
+                (rtsDiplomacyPlayerDisplays.size() + fpvDiplomacyPlayerDisplays.size() )) +
+                (canShareUnitControl ? (int) (Button.DEFAULT_ICON_FRAME_SIZE * 1.5f) : 0);
         guiGraphics.fill(x1, y1, x2, y2, 0x99000000);
         hudZones.add(new RectZone(x1, y1, x2, y2));
 
         if (!rtsDiplomacyPlayerDisplays.isEmpty() && !shareUnitControlButton.isHidden.get()) {
+            String tooltipSharedUnitEnable = I18n.get("alliances.reignofnether.tooltip.shared_unit_control.enable");
+            String tooltipSharedUnitDisable = I18n.get("alliances.reignofnether.tooltip.shared_unit_control.disable");
+
             shareUnitControlButton.render(guiGraphics, blitX, blitY, evt.getMouseX(), evt.getMouseY());
             MyRenderer.renderFrameWithBg(
                     guiGraphics,
                     blitX + Button.DEFAULT_ICON_FRAME_SIZE,
                     blitY,
-                    102 + (AlliancesClient.sharingAllyControl() ? 10 : 15),
+                    102 + (
+                            AlliancesClient.sharingAllyControl()
+                                    ? MC.font.width(tooltipSharedUnitEnable)
+                                    : MC.font.width(tooltipSharedUnitDisable)
+                    ),
                     Button.DEFAULT_ICON_FRAME_SIZE,
                     0xA0000000
             );
             guiGraphics.drawString(
                     MC.font,
-                    "Shared Control: " + (AlliancesClient.sharingAllyControl() ? "ON" : "OFF"),
+                    I18n.get("alliances.reignofnether.tooltip.shared_unit_control") + (AlliancesClient.sharingAllyControl() ? tooltipSharedUnitEnable : tooltipSharedUnitDisable),
                     blitX + (Button.DEFAULT_ICON_SIZE / 2) + 1 + Button.DEFAULT_ICON_FRAME_SIZE,
                     blitY + (Button.DEFAULT_ICON_SIZE / 2) + 1,
                     0xFFFFFF

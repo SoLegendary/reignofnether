@@ -639,6 +639,9 @@
     "hud.reignofnether.building_full": "選定的建築已滿！",
     "hud.reignofnether.not_garrisonable": "選定的建築不可駐紮",
     "hud.reignofnether.no_destination": "選定的傳送門無目的地！",
+    "hud.reignofnether.block_pos": "方塊坐標：%s",
+
+    "hud.buildings.reignofnether.sculk_catalyst.range": "當前%d/最大%d方塊",
 
     "hud.units.reignofnether.hero": "英雄",
     "hud.units.reignofnether.armoured": "裝甲",
@@ -660,6 +663,7 @@
     "hud.relationship.reignofnether.neutral": "中立",
 
     "hud.hero.reignofnether.level": "（等級 %d）",
+    "hud.hero.reignofnether.level.short": "（等級 %d）",
     "hud.hero.reignofnether.experience": "經驗值：%d/%d",
     "hud.hero.reignofnether.experience_warning": "等級 5 後無法從中立單位獲得經驗",
     "hud.hero.reignofnether.max_level": "已達最高等級！",
@@ -1305,7 +1309,16 @@
     "alliances.reignofnether.tooltip.disband_alliance": "解除聯盟",
     "alliances.reignofnether.tooltip.goto_player": "前往玩家位置",
 
+    "alliances.reignofnether.tooltip.status.enemy": "敵人",
+    "alliances.reignofnether.tooltip.status.requested": "已發送請求",
+    "alliances.reignofnether.tooltip.status.accept": "接受請求？",
+    "alliances.reignofnether.tooltip.status.allied": "已結盟",
+    "alliances.reignofnether.tooltip.status.allied.plural": "",
+
     "alliances.reignofnether.tooltip.toggle_observer_player_displays": "觀察者選單（Z）",
     "alliances.reignofnether.tooltip.toggle_diplomacy_player_displays": "外交選單（Z）",
-    "alliances.reignofnether.tooltip.toggle_shared_unit_control": "切換是否允許盟友控制你的單位"
+    "alliances.reignofnether.tooltip.toggle_shared_unit_control": "切換是否允許盟友控制你的單位",
+    "alliances.reignofnether.tooltip.shared_unit_control": "盟友共享單位控制：",
+    "alliances.reignofnether.tooltip.shared_unit_control.enable": "已啓用",
+    "alliances.reignofnether.tooltip.shared_unit_control.disable": "已禁用"
 }
