@@ -1010,6 +1010,6 @@ public class MiscUtil {
     }
 
     public static boolean isMagicDamage(DamageSource source) {
-        return source.is(DamageTypeTags.WITCH_RESISTANT_TO) || source.is(DamageTypes.ON_FIRE) || source.getEntity() instanceof PhantomSummon;
+        return source.is(DamageTypeTags.WITCH_RESISTANT_TO) || source.is(DamageTypes.ON_FIRE);
     }
 }

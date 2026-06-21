@@ -94,7 +94,7 @@ public class RtsDebugClientEvents {
         if (displayMode == DebugDisplayMode.NONE)
             return;
 
-        int x = evt.getWindow().getGuiScaledWidth() - 100;
+        int x = evt.getWindow().getGuiScaledWidth() - (displayMode == DebugDisplayMode.PATHFINDING ? 95 : 85);
         int y = 25;
         int lineH = 10;
 
@@ -108,14 +108,15 @@ public class RtsDebugClientEvents {
         }
         String fps = MC.fpsString.length() >= 6 ? MC.fpsString.substring(0, 6).replace("fps", "") : "?";
 
-        evt.getGuiGraphics().drawString(MC.font, "TPS:     " + String.format("%.2f", worldTPS), x, y + lineH, tpsCol);
-        evt.getGuiGraphics().drawString(MC.font, "FPS:     " + fps,                             x, y + lineH * 2,  0xFFFFFF);
+        evt.getGuiGraphics().drawString(MC.font, "Tick: " + String.format("%.2f", tickTime), x, y, tpsCol);
+        evt.getGuiGraphics().drawString(MC.font, "TPS: " + String.format("%.2f", worldTPS),  x, y + lineH * 2, tpsCol);
+        evt.getGuiGraphics().drawString(MC.font, "FPS: " + fps,                              x, y + lineH * 3,  0xFFFFFF);
         if (displayMode == DebugDisplayMode.PATHFINDING) {
-            evt.getGuiGraphics().drawString(MC.font, "Units:   " + UnitClientEvents.getAllUnits().size(), x, y + lineH * 3, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Paths:   " + displayedPathCount(),                  x, y + lineH * 4, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Paths/s: " + pathsAvg,                              x, y + lineH * 5, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Queue:   " + queueAvg,                              x, y + lineH * 6, 0xFFFFFF);
-            evt.getGuiGraphics().drawString(MC.font, "Stuck:   " + stuckAvg,                              x, y + lineH * 7, stuckAvg > 0 ? 0xFF6060 : 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, "Units: " + UnitClientEvents.getAllUnits().size(), x, y + lineH * 4, 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, "Paths: " + displayedPathCount(),                  x, y + lineH * 5, 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, "Paths/s: " + pathsAvg,                            x, y + lineH * 6, 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, "Queue: " + queueAvg,                              x, y + lineH * 7, 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, "Stuck: " + stuckAvg,                              x, y + lineH * 8, stuckAvg > 0 ? 0xFF6060 : 0xFFFFFF);
         }
     }
 

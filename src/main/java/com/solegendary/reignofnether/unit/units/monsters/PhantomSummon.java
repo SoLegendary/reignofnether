@@ -33,6 +33,7 @@ public class PhantomSummon extends Phantom {
     public int tickCountUntilDeath = 1200; // hard cap on lifespan
     public int attackCooldown = 0;
     public final int ATTACK_COOLDOWN_MAX = 120;
+    public static final float HERO_DAMAGE_MULT = 0.7f;
 
     public LivingEntity entityTarget = null;
 

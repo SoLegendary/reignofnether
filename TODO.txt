@@ -16,7 +16,8 @@ Quality of Life
 
 Balance
 -------
-
+[🟡] Curse of Insomnia phantoms now deal regular damage again, but specifically deal 30% less damage to heroes
+    - This is so that they do full damage to ghasts
 
 
 Bugfixes
@@ -29,6 +30,7 @@ Bugfixes
 [✔] Building blocks now convert farmland and dirt paths underneath into regular dirt when placed
     - This was preventing some blocks like rails from allowing the building to complete
 [✔] Fixed Ravager roars not causing any knockback
+
 
 Languages
 ---------
