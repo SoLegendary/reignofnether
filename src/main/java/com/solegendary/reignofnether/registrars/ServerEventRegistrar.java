@@ -23,7 +23,6 @@ import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.tps.TPSServerEvents;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.world.WorldServerEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 
@@ -66,6 +65,5 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(CommandsServerEvents.class);
         vanillaEventBus.register(RtsDebug.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
-        vanillaEventBus.register(WorldServerEvents.class);
     }
 }
