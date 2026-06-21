@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -144,7 +145,7 @@ public class TimeClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused()
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
             || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK)) {
             return;
         }
@@ -176,7 +177,7 @@ public class TimeClientEvents {
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
         if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) ||
-            !(MC.screen instanceof TopdownGui)) {
+            !(MC.screen instanceof TopdownGui) || !HudClientEvents.enabled) {
             return;
         }
 

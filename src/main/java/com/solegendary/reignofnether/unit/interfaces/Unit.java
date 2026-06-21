@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
@@ -22,7 +23,6 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.time.NightUtils;
-import com.solegendary.reignofnether.tps.TPSClientEvents;
 import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
@@ -232,7 +232,7 @@ public interface Unit {
             float cooldown = cooldownEntry.getValue();
             if (cooldown > 0 || unit.getCharges(ability) < ability.maxCharges) {
                 if (((Entity) unit).level().isClientSide())
-                    unit.getCooldowns().put(ability, (float) (cooldown - (TPSClientEvents.getCappedTPS() / 20D)));
+                    unit.getCooldowns().put(ability, (float) (cooldown - (RtsDebugClientEvents.getCappedTPS() / 20D)));
                 else
                     unit.getCooldowns().put(ability, cooldown - 1);
 

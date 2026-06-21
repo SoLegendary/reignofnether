@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitPathClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -95,7 +95,7 @@ public class MoveToTargetBlockGoal extends Goal {
             // in place if present, so vanilla A* searches at the configured range. If the resulting path
             // ends up suboptimal, the backoff in canContinueToUse handles retries / give-up.
             Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
-            if (!this.mob.level().isClientSide()) UnitServerEvents.debugPathCalcsThisSecond += 1;
+            if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
             if (path == null) {
                 AttributeInstance ai = mob.getAttribute(Attributes.FOLLOW_RANGE);
                 if (ai != null && ai.getBaseValue() == FOLLOW_RANGE_IMPROVED) {
@@ -103,7 +103,7 @@ public class MoveToTargetBlockGoal extends Goal {
                     // range — vanilla A* may give up sooner and return a useful partial path.
                     ai.setBaseValue(FOLLOW_RANGE);
                     path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
-                    if (!this.mob.level().isClientSide()) UnitServerEvents.debugPathCalcsThisSecond += 1;
+                    if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
                     ai.setBaseValue(FOLLOW_RANGE_IMPROVED);
                 }
             }

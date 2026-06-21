@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.commands.CommandsServerEvents;
-import com.solegendary.reignofnether.commands.RtsDebug;
 import com.solegendary.reignofnether.config.ConfigVanillaServerEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.gamemode.GameModeServerEvents;
@@ -20,7 +19,7 @@ import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.time.TimeServerEvents;
-import com.solegendary.reignofnether.tps.TPSServerEvents;
+import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraftforge.common.MinecraftForge;
@@ -50,7 +49,7 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(BuildingServerEvents.class);
         vanillaEventBus.register(AttackWarningServerEvents.class);
         vanillaEventBus.register(ResourcesServerEvents.class);
-        vanillaEventBus.register(TPSServerEvents.class);
+        vanillaEventBus.register(RtsDebugServerEvents.class);
         vanillaEventBus.register(FogOfWarServerEvents.class);
         vanillaEventBus.register(ResearchServerEvents.class);
         vanillaEventBus.register(SurvivalServerEvents.class);
@@ -63,7 +62,6 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(TimeServerEvents.class);
         vanillaEventBus.register(CustomBuildingServerEvents.class);
         vanillaEventBus.register(CommandsServerEvents.class);
-        vanillaEventBus.register(RtsDebug.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
     }
 }

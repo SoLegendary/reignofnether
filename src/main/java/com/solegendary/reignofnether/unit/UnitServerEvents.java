@@ -16,7 +16,6 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
-import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
@@ -27,7 +26,6 @@ import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
-import com.solegendary.reignofnether.research.researchItems.ResearchSlimeConversion;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -42,7 +40,6 @@ import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.EnchantmentUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
@@ -53,18 +50,14 @@ import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSources;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.*;
@@ -82,7 +75,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.world.ForgeChunkManager;
-import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
@@ -155,26 +147,6 @@ public class UnitServerEvents {
             }
         }
     }
-
-    public static int formationDispatchQueueSize() {
-        synchronized (formationDispatchQueue) {
-            return formationDispatchQueue.size();
-        }
-    }
-
-    // Debug counter: incremented each time a goal calls mob.getNavigation().createPath().
-    // Sampled and reset once per second by the rts-debug stats tick handler.
-    public static int debugPathCalcsThisSecond = 0;
-
-    // 5-second rolling buffers for the debug overlay. Indexed mod STATS_WINDOW.
-    private static final int STATS_WINDOW = 5;
-    private static final int[] pathsHistory = new int[STATS_WINDOW];
-    private static final int[] queueHistory = new int[STATS_WINDOW];
-    private static final int[] stuckHistory = new int[STATS_WINDOW];
-    private static int statsIndex = 0;
-    // Queue is sampled every tick (cheap, captures bursts) and averaged at second boundaries.
-    private static long queueSumThisSecond = 0;
-    private static int queueSamplesThisSecond = 0;
 
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
@@ -697,70 +669,6 @@ public class UnitServerEvents {
                 lastHuntedAnimalId = evt.getEntity().getId();
             }
         }
-    }
-
-
-    @SubscribeEvent
-    public static void onFormationDispatchTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
-            return;
-        synchronized (formationDispatchQueue) {
-            queueSumThisSecond += formationDispatchQueue.size();
-            queueSamplesThisSecond += 1;
-            if (formationDispatchQueue.isEmpty())
-                return;
-            int processed = 0;
-            Iterator<Pair<LivingEntity, BlockPos>> it = formationDispatchQueue.values().iterator();
-            while (processed < FORMATION_DISPATCH_PER_TICK && it.hasNext()) {
-                Pair<LivingEntity, BlockPos> pair = it.next();
-                it.remove();
-                LivingEntity le = pair.getFirst();
-                if (le != null && le.isAlive() && le instanceof Unit unit) {
-                    unit.setMoveTarget(pair.getSecond());
-                }
-                processed += 1;
-            }
-        }
-    }
-
-    // Per-second sample of debug stats. Only broadcast while /rts-debug is enabled.
-    private static int rtsDebugStatsTicks = 0;
-    @SubscribeEvent
-    public static void onRtsDebugStatsTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
-            return;
-        rtsDebugStatsTicks += 1;
-        if (rtsDebugStatsTicks < 20) return;
-        rtsDebugStatsTicks = 0;
-        int paths = debugPathCalcsThisSecond;
-        debugPathCalcsThisSecond = 0;
-        if (!com.solegendary.reignofnether.commands.RtsDebug.enabled)
-            return;
-        int stuck = 0;
-        for (LivingEntity e : allUnits) {
-            if (e instanceof Unit u) {
-                var mg = u.getMoveGoal();
-                if (mg != null && mg.isInBackoff()) stuck += 1;
-            }
-        }
-        int avgQueueThisSec;
-        synchronized (formationDispatchQueue) {
-            avgQueueThisSec = queueSamplesThisSecond > 0 ? (int) (queueSumThisSecond / queueSamplesThisSecond) : 0;
-            queueSumThisSecond = 0;
-            queueSamplesThisSecond = 0;
-        }
-        pathsHistory[statsIndex] = paths;
-        queueHistory[statsIndex] = avgQueueThisSec;
-        stuckHistory[statsIndex] = stuck;
-        statsIndex = (statsIndex + 1) % STATS_WINDOW;
-        com.solegendary.reignofnether.commands.RtsDebugStatsClientboundPacket.broadcast(
-                avg(pathsHistory), avg(queueHistory), avg(stuckHistory));
-    }
-
-    private static int avg(int[] buf) {
-        int sum = 0;
-        for (int v : buf) sum += v;
-        return sum / buf.length;
     }
 
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns

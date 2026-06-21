@@ -79,7 +79,6 @@ public class MinimapClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
     private static int worldRadius = 100; // how many world blocks should be mapped
     private static int mapGuiRadius = 50; // actual size on the screen
-    private static int refreshTicks = 0;
     public static final int CORNER_OFFSET = 10;
     public static final int BG_OFFSET = 6;
 
@@ -87,10 +86,6 @@ public class MinimapClientEvents {
     public static boolean isLargeMap() { return largeMap; }
     private static boolean shouldToggleSize = false;
     private static boolean markerMode = false;
-
-    public static boolean isMarkerInteractionActive() {
-        return markerMode || Keybindings.altMod.isDown();
-    }
 
     private static final int UNIT_RADIUS = 3;
     private static final int UNIT_THICKNESS = 1;
@@ -1232,7 +1227,7 @@ public class MinimapClientEvents {
 
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiOverlayEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused()
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
             || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK)) {
             return;
         }

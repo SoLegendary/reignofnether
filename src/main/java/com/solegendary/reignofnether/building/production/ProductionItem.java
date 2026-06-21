@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.production;
 
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -12,10 +13,8 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
-import com.solegendary.reignofnether.tps.TPSClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -171,13 +170,13 @@ public abstract class ProductionItem {
             if ((placement.getLevel().isClientSide() && ResearchClient.hasCheat("warpten")) ||
                 (!placement.getLevel().isClientSide() && ResearchServerEvents.playerHasCheat(placement.ownerName, "warpten"))) {
                 if (placement.getLevel().isClientSide())
-                    active.ticksLeft -= (TPSClientEvents.getCappedTPS() / 20D) * 10;
+                    active.ticksLeft -= (RtsDebugClientEvents.getCappedTPS() / 20D) * 10;
                 else
                     active.ticksLeft -= 10;
             }
             else {
                 if (placement.getLevel().isClientSide())
-                    active.ticksLeft -= (TPSClientEvents.getCappedTPS() / 20D);
+                    active.ticksLeft -= (RtsDebugClientEvents.getCappedTPS() / 20D);
                 else
                     active.ticksLeft -= 1;
             }
