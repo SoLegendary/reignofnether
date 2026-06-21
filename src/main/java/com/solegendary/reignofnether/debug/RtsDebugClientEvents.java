@@ -108,7 +108,7 @@ public class RtsDebugClientEvents {
         }
         String fps = MC.fpsString.length() >= 6 ? MC.fpsString.substring(0, 6).replace("fps", "") : "?";
 
-        evt.getGuiGraphics().drawString(MC.font, "Tick: " + String.format("%.2f", tickTime), x, y, tpsCol);
+        evt.getGuiGraphics().drawString(MC.font, "Tick: " + String.format("%.2f", tickTime), x, y + lineH, tpsCol);
         evt.getGuiGraphics().drawString(MC.font, "TPS: " + String.format("%.2f", worldTPS),  x, y + lineH * 2, tpsCol);
         evt.getGuiGraphics().drawString(MC.font, "FPS: " + fps,                              x, y + lineH * 3,  0xFFFFFF);
         if (displayMode == DebugDisplayMode.PATHFINDING) {

@@ -849,7 +849,7 @@
     "hud.reignofnether.no_destination": "That portal has no destination!",
     "hud.reignofnether.block_pos": "BlockPos: %s",
 
-    "hud.buildings.reignofnether.sculk_catalyst.range": "%d / %d range",
+    "hud.buildings.reignofnether.sculk_catalyst.range": "%d/%d range",
 
     "hud.units.reignofnether.hero": "Hero",
     "hud.units.reignofnether.armoured": "Armoured",
@@ -902,8 +902,8 @@
     "hud.relationship.reignofnether.enemy": "Enemy",
     "hud.relationship.reignofnether.neutral": "Neutral",
 
-    "hud.hero.reignofnether.level": " (Lvl %d)",
-    "hud.hero.reignofnether.level.short": " (Lv %d)",
+    "hud.hero.reignofnether.level": "Lvl %d",
+    "hud.hero.reignofnether.level.short": "Lv %d",
     "hud.hero.reignofnether.experience": "Experience: %d/%d",
     "hud.hero.reignofnether.experience_warning": "No exp from neutrals from lvl 5",
     "hud.hero.reignofnether.max_level": "Max Level!",
