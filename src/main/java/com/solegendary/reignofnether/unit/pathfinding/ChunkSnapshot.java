@@ -9,13 +9,19 @@ import net.minecraft.world.level.Level;
 public final class ChunkSnapshot implements WalkabilityView {
     private final Long2ObjectMap<WalkabilityGridChunk> chunks;
     private final MobilityClass mobility;
+    private final int clearanceCells;
+    private final int footprintRadius;
+    private final float fireCost;
 
-    private ChunkSnapshot(Long2ObjectMap<WalkabilityGridChunk> chunks, MobilityClass mobility) {
+    private ChunkSnapshot(Long2ObjectMap<WalkabilityGridChunk> chunks, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost) {
         this.chunks = chunks;
         this.mobility = mobility;
+        this.clearanceCells = clearanceCells;
+        this.footprintRadius = footprintRadius;
+        this.fireCost = fireCost;
     }
 
-    public static ChunkSnapshot capture(Level level, BlockPos start, BlockPos target, int dilation, MobilityClass mobility) {
+    public static ChunkSnapshot capture(Level level, BlockPos start, BlockPos target, int dilation, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost) {
         WalkabilityGrid grid = WalkabilityGrid.get(level);
         int minX = Math.min(start.getX(), target.getX()) - dilation;
         int maxX = Math.max(start.getX(), target.getX()) + dilation;
@@ -34,7 +40,7 @@ public final class ChunkSnapshot implements WalkabilityView {
                 map.put(ChunkPos.asLong(cx, cz), grid.getOrBuild(level, cx, cz, wantMinY, wantMaxY));
             }
         }
-        return new ChunkSnapshot(map, mobility);
+        return new ChunkSnapshot(map, mobility, clearanceCells, footprintRadius, fireCost);
     }
 
     @Override
@@ -53,4 +59,13 @@ public final class ChunkSnapshot implements WalkabilityView {
 
     @Override
     public MobilityClass mobility() { return mobility; }
+
+    @Override
+    public int clearanceCells() { return clearanceCells; }
+
+    @Override
+    public int footprintRadius() { return footprintRadius; }
+
+    @Override
+    public float fireCost() { return fireCost; }
 }

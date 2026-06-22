@@ -17,13 +17,6 @@ public enum MobilityClass {
         return HUMANOID;
     }
 
-    // Chebyshev radius (in cells) of wall-free space the unit's body needs around any cell it occupies.
-    // 0 = fits any single walkable cell (<=1 block wide). 1 = needs a 3x3 of wall-free cells, which
-    // covers every wide unit in the roster (up to ~3 blocks). See GridNeighbors.footprintBlocked.
-    public int footprintRadius() {
-        return this == LARGE ? 1 : 0;
-    }
-
     public float costFor(byte kind) {
         switch (kind) {
             case WalkabilityBuilder.KIND_LAND:  return 1.0f;
@@ -31,8 +24,15 @@ public enum MobilityClass {
                 if (this == AQUATIC) return 0.8f;
                 if (this == LARGE)   return 5.0f;
                 return 3.0f;
-            case WalkabilityBuilder.KIND_FIRE:  return 50.0f;
+            case WalkabilityBuilder.KIND_FIRE:  return PathfinderConfig.FIRE_AVOID_COST;
             default: return Float.POSITIVE_INFINITY;
         }
+    }
+
+    // Mobility (land/water) is the same for every unit of a class, but the fire cost is per-unit (it depends
+    // on fire immunity + the unit's DAMAGE_FIRE malus), so the A* search injects it per request.
+    public float costFor(byte kind, float fireCost) {
+        if (kind == WalkabilityBuilder.KIND_FIRE) return fireCost;
+        return costFor(kind);
     }
 }

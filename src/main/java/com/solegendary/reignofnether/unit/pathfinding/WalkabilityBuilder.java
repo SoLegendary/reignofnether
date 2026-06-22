@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.pathfinding;
 
+import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
@@ -28,10 +29,14 @@ public final class WalkabilityBuilder {
         BlockPos.MutableBlockPos feet  = FEET.get().set(wx, y, wz);
         BlockPos.MutableBlockPos head  = HEAD.get().set(wx, y + 1, wz);
         BlockPos.MutableBlockPos floor = FLOOR.get().set(wx, y - 1, wz);
-        if (MiscUtil.isSolidBlocking(level, feet)) return KIND_BLOCKED;
-        if (MiscUtil.isSolidBlocking(level, head)) return KIND_BLOCKED;
 
-        BlockState feetBs  = level.getBlockState(feet);
+        BlockState feetBs = level.getBlockState(feet);
+        BlockState headBs = level.getBlockState(head);
+        // Feet/head can't sit inside a body-blocking block; leaves report non-solid but block the body, so
+        // include them explicitly (they're still never floor support, so units don't walk on them).
+        if (MiscUtil.isSolidBlocking(level, feet) || BlockUtils.isLeafBlock(feetBs)) return KIND_BLOCKED;
+        if (MiscUtil.isSolidBlocking(level, head) || BlockUtils.isLeafBlock(headBs)) return KIND_BLOCKED;
+
         BlockState floorBs = level.getBlockState(floor);
 
         FluidState feetFluid = feetBs.getFluidState();

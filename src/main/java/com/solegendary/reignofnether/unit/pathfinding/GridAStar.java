@@ -59,6 +59,9 @@ public final class GridAStar {
         float bestH = startRec.h;
 
         MobilityClass mob = view.mobility();
+        int clearance = view.clearanceCells();
+        int footprintRadius = view.footprintRadius();
+        float fireCost = view.fireCost();
 
         while (!open.isEmpty() && expanded < maxNodes) {
             NodeRec cur = open.poll();
@@ -72,7 +75,7 @@ public final class GridAStar {
             }
             if (cur.h < bestH) { bestH = cur.h; best = cur; }
 
-            for (int d = 0; d < 16; d++) {
+            for (int d = 0; d < GridNeighbors.COUNT; d++) {
                 int nx = cur.x + DX[d];
                 int ny = cur.y + DY[d];
                 int nz = cur.z + DZ[d];
@@ -81,13 +84,21 @@ public final class GridAStar {
                 if (ddx * ddx + ddz * ddz > radiusSq) continue;
 
                 byte kind = view.kindAt(nx, ny, nz);
-                float costMult = mob.costFor(kind);
+                float costMult = mob.costFor(kind, fireCost);
                 if (Float.isInfinite(costMult)) continue;
-                if (GridNeighbors.footprintBlocked(view, nx, ny, nz, mob.footprintRadius())) continue;
 
-                // Stepping up needs air above the unit's head at the origin (a 2-tall unit climbing onto a
-                // 1-block ledge would smash its head into a ceiling otherwise — it can step, not jump).
-                if (DY[d] == 1 && view.solidAt(cur.x, cur.y + 2, cur.z)) continue;
+                if (footprintRadius > 0) {
+                    // Wide unit: its full footprint box must be standable (no wall, corner or drop the body
+                    // would overhang), the vanilla "keep clearance from block borders" rule. See wideFits.
+                    if (!GridNeighbors.wideFits(view, nx, ny, nz)) continue;
+                } else if (headBlocked(view, nx, ny, nz, clearance)) {
+                    // 1-wide unit: only its own column needs headroom for its (possibly tall) height.
+                    continue;
+                }
+
+                // Stepping up also needs the full height clear above the ORIGIN so the body can rise into it
+                // (a tall mob can't climb a ledge under an overhang otherwise). For a 2-tall unit, one cell.
+                if (DY[d] == 1 && riseBlocked(view, cur.x, cur.y, cur.z, clearance)) continue;
 
                 if (GridNeighbors.diagonalBlocked(view, mob, cur.x, ny, cur.z, DX[d], DZ[d])) continue;
 
@@ -109,6 +120,20 @@ public final class GridAStar {
         }
 
         return new Result(reconstruct(best), false, expanded);
+    }
+
+    // Cells [y+2 .. y+clearance-1] above the destination feet must be clear for a mob taller than 2 cells.
+    private static boolean headBlocked(WalkabilityView view, int x, int y, int z, int clearance) {
+        for (int k = 2; k < clearance; k++)
+            if (view.solidAt(x, y + k, z)) return true;
+        return false;
+    }
+
+    // Cells [y+2 .. y+clearance] above the origin feet must be clear for the body to rise on a step-up.
+    private static boolean riseBlocked(WalkabilityView view, int x, int y, int z, int clearance) {
+        for (int k = 2; k <= clearance; k++)
+            if (view.solidAt(x, y + k, z)) return true;
+        return false;
     }
 
     private static List<BlockPos> reconstruct(NodeRec end) {

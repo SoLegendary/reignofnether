@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.pathfinding;
 
+import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
@@ -7,8 +8,8 @@ import net.minecraft.world.level.Level;
 
 // 3D walkability cache for one chunk, classified only over a Y band [minY, minY+height).
 // cellKind indexed by (yIdx * SIZE + localZ) * SIZE + localX. Cells outside the band read as BLOCKED.
-// Wide-unit footprint clearance is checked on the fly via solidAt (GridNeighbors.footprintBlocked) so it
-// reads correctly across chunk seams, rather than a per-chunk precomputed field that has to edge-clamp.
+// Footprint clearance is checked on the fly via solidAt (GridNeighbors.wideFits), which reads correctly
+// across chunk seams unlike a per-chunk precomputed field.
 public final class WalkabilityGridChunk {
     public static final int SIZE = 16;
 
@@ -43,7 +44,11 @@ public final class WalkabilityGridChunk {
                 for (int y = minY; y < maxY; y++) {
                     int i = idx(dx, y - minY, dz);
                     cellKind[i] = WalkabilityBuilder.classify(level, wx, y, wz);
-                    solid[i] = MiscUtil.isSolidBlocking(level, mp.set(wx, y, wz)) ? (byte) 1 : 0;
+                    // Leaves report non-solid but have full collision, so count them as body-blocking here
+                    // (classify still treats them as no floor support, so units don't walk on them).
+                    mp.set(wx, y, wz);
+                    solid[i] = (MiscUtil.isSolidBlocking(level, mp) || BlockUtils.isLeafBlock(level.getBlockState(mp)))
+                            ? (byte) 1 : 0;
                 }
             }
         }

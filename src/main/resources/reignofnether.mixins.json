@@ -18,6 +18,7 @@
         "MixinNetworkManager",
         "MobMixin",
         "PanicGoalMixin",
+        "PathNavigationMixin",
         "PlayerMixin",
         "PowderSnowBlockMixin",
         "SculkCatalystBlockEntityMixin",

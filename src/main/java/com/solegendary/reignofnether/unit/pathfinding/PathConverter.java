@@ -11,6 +11,10 @@ import java.util.List;
 public final class PathConverter {
     private PathConverter() {}
 
+    // Plain vanilla Path: wide units follow loosely (vanilla's corner offset + corner-cutting). That's fine now
+    // that wideFits clears a full 3x3 around every node - the body has room to drift without clipping - and it
+    // avoids the freezes that strict centre-following caused. Only the vertical advance gate is still relaxed
+    // (PathNavigationMixin) so a wide unit can drop down a stair step.
     public static Path toMcPath(List<BlockPos> waypoints, BlockPos target, boolean reached, WalkabilityView view) {
         ArrayList<Node> nodes = new ArrayList<>(waypoints.size());
         for (BlockPos bp : waypoints) {

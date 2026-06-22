@@ -7,9 +7,12 @@ public final class PathfinderConfig {
     private PathfinderConfig() {}
 
     public static final int MAX_RADIUS = 96;
-    public static final int MAX_NODES = 36000;
+    // Worst-case node budget per A* segment; only fully spent on hard detours / unreachable targets. High
+    // enough to flood the reachable area within MAX_RADIUS so units round obstacles instead of giving up at
+    // the near wall. Past ~200k the radius cap, not this, is the limit (raise MAX_RADIUS + MIN_DILATION).
+    public static final int MAX_NODES = 250000;
     public static final int MAX_CHAIN_SEGMENTS = 10;
-    public static final int MIN_DILATION = 32;
+    public static final int MIN_DILATION = 48;
     public static final int QUEUE_BACKPRESSURE_CAP = 500;
     // A* searches stay near the surface; only classify a Y band around the path rather than the full
     // world column. SLACK covers the Y+-1 step nodes and goal snapping that reach just outside the band.
@@ -18,6 +21,11 @@ public final class PathfinderConfig {
 
     // Bound the per-level walkability chunk cache so long games don't grow it without limit.
     public static final int MAX_CACHED_CHUNKS = 1024;
+
+    // Cost multiplier a unit pays to path across a fire/magma/campfire cell when it is NOT fire-immune and
+    // its DAMAGE_FIRE pathfinding malus marks fire as dangerous. Fire-immune units pay 1x instead (see
+    // RtsPathfinder.fireCostFor), so they cross fire freely while everyone else routes around it.
+    public static final float FIRE_AVOID_COST = 50.0f;
 
     // A* over an immutable snapshot is embarrassingly parallel; scale workers with cores.
     public static final int WORKER_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);

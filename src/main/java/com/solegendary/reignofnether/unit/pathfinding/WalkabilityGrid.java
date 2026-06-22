@@ -50,16 +50,4 @@ public final class WalkabilityGrid {
     public void invalidateColumn(BlockPos bp) {
         synchronized (chunks) { chunks.remove(ChunkPos.asLong(bp.getX() >> 4, bp.getZ() >> 4)); }
     }
-
-    public int chunkCount() {
-        synchronized (chunks) { return chunks.size(); }
-    }
-
-    public static int totalChunksCached() {
-        synchronized (PER_LEVEL) {
-            int total = 0;
-            for (WalkabilityGrid g : PER_LEVEL.values()) total += g.chunkCount();
-            return total;
-        }
-    }
 }

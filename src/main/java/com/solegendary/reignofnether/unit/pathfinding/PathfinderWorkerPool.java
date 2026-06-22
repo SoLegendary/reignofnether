@@ -72,7 +72,7 @@ public final class PathfinderWorkerPool {
         }
     }
 
-    public static void submit(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility, Consumer<Path> onReady) {
+    public static void submit(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, Consumer<Path> onReady) {
         ExecutorService pool = POOL;
         if (pool == null) {
             onReady.accept(null);
@@ -86,7 +86,7 @@ public final class PathfinderWorkerPool {
         ChunkSnapshot snapshot;
         try {
             int dilation = PathfinderConfig.dilationFor(start, target);
-            snapshot = ChunkSnapshot.capture(level, start, target, dilation, mobility);
+            snapshot = ChunkSnapshot.capture(level, start, target, dilation, mobility, clearanceCells, footprintRadius, fireCost);
         } catch (Throwable t) {
             ReignOfNether.LOGGER.error("ChunkSnapshot capture failed", t);
             onReady.accept(null);

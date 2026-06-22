@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
 
 import java.util.function.Consumer;
@@ -30,13 +31,17 @@ public final class RtsPathfinder {
             onReady.accept(null);
             return;
         }
-        target = snapToWalkable(level, target, mobility, SNAP_RADIUS);
+        int clearanceCells = Math.max(2, net.minecraft.util.Mth.ceil(mob.getBbHeight()));
+        // Tile footprint radius, vanilla style: floor(width + 1) - 1. 0 for a <=1-wide unit, 1 for a bear.
+        int footprintRadius = Math.max(0, net.minecraft.util.Mth.floor(mob.getBbWidth() + 1.0f) - 1);
+        float fireCost = fireCostFor(mob);
+        target = snapToWalkable(level, target, mobility, footprintRadius, clearanceCells, fireCost, SNAP_RADIUS);
         if (PathfinderWorkerPool.isInitialised()) {
-            PathfinderWorkerPool.submit(level, start, target, reach, mobility, onReady);
+            PathfinderWorkerPool.submit(level, start, target, reach, mobility, clearanceCells, footprintRadius, fireCost, onReady);
         } else {
             try {
                 int dilation = PathfinderConfig.dilationFor(start, target);
-                ChunkSnapshot snap = ChunkSnapshot.capture(level, start, target, dilation, mobility);
+                ChunkSnapshot snap = ChunkSnapshot.capture(level, start, target, dilation, mobility, clearanceCells, footprintRadius, fireCost);
                 GridAStar.Result r = GridAStar.search(snap, start, target, reach, PathfinderConfig.MAX_RADIUS, PathfinderConfig.MAX_NODES);
                 onReady.accept(PathConverter.toMcPath(r.waypoints, target, r.reached, snap));
             } catch (Throwable t) {
@@ -46,17 +51,23 @@ public final class RtsPathfinder {
         }
     }
 
-    public static BlockPos snapToWalkable(Level level, BlockPos bp, MobilityClass mobility, int radius) {
-        WalkabilityGrid grid = WalkabilityGrid.get(level);
-        int band = radius + PathfinderConfig.VERTICAL_WINDOW_SLACK;
-        int wantMinY = bp.getY() - band;
-        int wantMaxY = bp.getY() + band;
-        int fr = mobility.footprintRadius();
-        WalkabilityGridChunk c = grid.getOrBuild(level, bp.getX() >> 4, bp.getZ() >> 4, wantMinY, wantMaxY);
-        if (mobility.costFor(c.kindAt(bp.getX(), bp.getY(), bp.getZ())) != Float.POSITIVE_INFINITY
-                && fitsFootprint(grid, level, bp.getX(), bp.getY(), bp.getZ(), fr, wantMinY, wantMaxY)) {
-            return bp;
-        }
+    // Fire/magma cost for this unit: the DAMAGE_FIRE malus plus per-unit fire immunity, so fire-immune units
+    // cross fire freely and everyone else routes around it. Called once per request (never per A* cell), since
+    // fireImmune() can do an expensive building lookup.
+    private static float fireCostFor(Mob mob) {
+        if (mob.fireImmune()) return 1.0f;
+        float malus = mob.getPathfindingMalus(BlockPathTypes.DAMAGE_FIRE);
+        return malus <= 0f ? 1.0f : PathfinderConfig.FIRE_AVOID_COST;
+    }
+
+    public static BlockPos snapToWalkable(Level level, BlockPos bp, MobilityClass mobility, int footprintRadius,
+                                          int clearanceCells, float fireCost, int radius) {
+        // Snap over a small snapshot so the goal reuses the EXACT walkability + footprint logic A* uses (the
+        // snapped goal can never be a cell A* would reject); the +footprintRadius+1 dilation keeps wideFits
+        // from reading an uncaptured (BLOCKED) edge cell.
+        ChunkSnapshot view = ChunkSnapshot.capture(level, bp, bp, radius + footprintRadius + 1,
+                mobility, clearanceCells, footprintRadius, fireCost);
+        if (standable(view, bp.getX(), bp.getY(), bp.getZ())) return bp;
         int bestDistSq = Integer.MAX_VALUE;
         BlockPos best = bp;
         for (int dz = -radius; dz <= radius; dz++) {
@@ -65,10 +76,7 @@ public final class RtsPathfinder {
                     int nx = bp.getX() + dx;
                     int ny = bp.getY() + dy;
                     int nz = bp.getZ() + dz;
-                    WalkabilityGridChunk nc = grid.getOrBuild(level, nx >> 4, nz >> 4, wantMinY, wantMaxY);
-                    if (mobility.costFor(nc.kindAt(nx, ny, nz)) == Float.POSITIVE_INFINITY) continue;
-                    // A wide unit must be able to actually stand here, or A* can never finish on it.
-                    if (!fitsFootprint(grid, level, nx, ny, nz, fr, wantMinY, wantMaxY)) continue;
+                    if (!standable(view, nx, ny, nz)) continue;
                     int distSq = dx * dx + dy * dy + dz * dz;
                     if (distSq < bestDistSq) { bestDistSq = distSq; best = new BlockPos(nx, ny, nz); }
                 }
@@ -77,20 +85,10 @@ public final class RtsPathfinder {
         return best;
     }
 
-    // Mirror of GridNeighbors.footprintBlocked for the goal snap (no WalkabilityView available here):
-    // a unit with body radius r can't stand at (x,y,z) if any cell within Chebyshev r is a >=2-tall wall.
-    private static boolean fitsFootprint(WalkabilityGrid grid, Level level, int x, int y, int z, int r,
-                                         int wantMinY, int wantMaxY) {
-        if (r <= 0) return true;
-        for (int dz = -r; dz <= r; dz++) {
-            for (int dx = -r; dx <= r; dx++) {
-                if (dx == 0 && dz == 0) continue;
-                int cx = x + dx, cz = z + dz;
-                WalkabilityGridChunk c = grid.getOrBuild(level, cx >> 4, cz >> 4, wantMinY, wantMaxY);
-                if (c.solidAt(cx, y, cz) && c.solidAt(cx, y + 1, cz)) return false;
-            }
-        }
-        return true;
+    // The unit can stand (and its whole footprint fits) at this cell - the same gate A* applies to a node.
+    private static boolean standable(WalkabilityView view, int x, int y, int z) {
+        if (Float.isInfinite(view.mobility().costFor(view.kindAt(x, y, z), view.fireCost()))) return false;
+        return GridNeighbors.wideFits(view, x, y, z);
     }
 
     private static boolean isUnloaded(Level level, BlockPos bp) {
