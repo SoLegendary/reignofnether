@@ -16,7 +16,7 @@ Balance
 
 Bugfixes
 --------
-[❌] Fixed units not responding to move commands when in large groups
+[✔] Fixed units not responding to move commands when in large groups
 
 
 Languages

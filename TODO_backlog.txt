@@ -2,6 +2,11 @@
 Features
 --------
 
+[❌] Custom building buttons
+    - Customisable icon, name, tooltip, range, cooldown, activation type (on-click, entity-target, ground target)
+    - Can be used for an ability, production, etc.
+    - On new 3rd screen
+
 [❌] Make custom arrow entity to control logic better
     - Half pierce and multishot damage
 
@@ -22,7 +27,6 @@ Scenario roles:
 [❌] Nydus worm-style ability for transport portals
     - Because without Fog of war, transport portals are too weak
     - Includes minimap and sound warning
-
 
 [❌] Config to allow changing resource block values, including modded blocks
 
