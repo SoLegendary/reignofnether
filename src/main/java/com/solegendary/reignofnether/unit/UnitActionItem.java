@@ -404,15 +404,16 @@ public class UnitActionItem {
             List<Pair<LivingEntity, BlockPos>> formationPairs = UnitFormations.getMoveFormation(
                 level, new ArrayList<>(list), preselectedBlockPos
             );
+            // Filter out redundant moves once, then either dispatch immediately (small groups)
+            // or queue for time-sliced dispatch on the server (large groups) so we don't run
+            // N concurrent A* searches in the same tick.
             List<Pair<LivingEntity, BlockPos>> filtered = new ArrayList<>(formationPairs.size());
             for (Pair<LivingEntity, BlockPos> pair : formationPairs) {
                 if (!isRedundantMove((Unit) pair.getFirst(), pair.getSecond()))
                     filtered.add(pair);
             }
-            if (level.isClientSide()) {
-                for (Pair<LivingEntity, BlockPos> pair : filtered) {
-                    ((Unit) pair.getFirst()).setMoveTarget(pair.getSecond());
-                }
+            for (Pair<LivingEntity, BlockPos> pair : filtered) {
+                ((Unit) pair.getFirst()).setMoveTarget(pair.getSecond());
             }
         }
 

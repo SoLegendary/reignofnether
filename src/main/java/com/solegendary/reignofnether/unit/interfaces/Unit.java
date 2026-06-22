@@ -586,8 +586,10 @@ public interface Unit {
     }
 
     static void fullResetBehaviours(Unit unit) {
-        if (((Entity) unit).level().isClientSide() && !Keybindings.shiftMod.isDown())
+        if (((Entity) unit).level().isClientSide() && !Keybindings.shiftMod.isDown()) {
             unit.getCheckpoints().clear();
+            RtsDebugClientEvents.displayedPaths.remove(((Entity) unit).getId());
+        }
         unit.resetBehaviours();
         Unit.resetBehaviours(unit);
         if (unit instanceof WorkerUnit workerUnit) {

@@ -77,7 +77,7 @@ public class RtsDebugClientEvents {
         }
     }
 
-    private static final HashMap<Integer, PathDisplay> displayedPaths = new HashMap<>();
+    public static final HashMap<Integer, PathDisplay> displayedPaths = new HashMap<>();
 
     public static void receiveUnitPath(int entityId, List<BlockPos> nodes) {
         if (nodes == null || nodes.isEmpty()) {
