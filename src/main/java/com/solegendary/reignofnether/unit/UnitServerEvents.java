@@ -131,20 +131,6 @@ public class UnitServerEvents {
     // Per-entity last-synced mob effect amplifiers. Null amp means "absent last sync".
     private static final HashMap<Integer, HashMap<MobEffect, Byte>> lastSyncedEffects = new HashMap<>();
 
-    // Time-sliced formation dispatch: large group MOVE commands are spread across multiple ticks
-    // to avoid the spike from N units all running A* in the same tick. LinkedHashMap preserves
-    // insertion order while letting a re-queued unit overwrite its old target (supersession).
-    private static final int FORMATION_DISPATCH_PER_TICK = 5;
-    private static final LinkedHashMap<Integer, Pair<LivingEntity, BlockPos>> formationDispatchQueue = new LinkedHashMap<>();
-
-    public static void queueFormationMove(List<Pair<LivingEntity, BlockPos>> pairs) {
-        synchronized (formationDispatchQueue) {
-            for (Pair<LivingEntity, BlockPos> p : pairs) {
-                formationDispatchQueue.put(p.getFirst().getId(), p);
-            }
-        }
-    }
-
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
     }

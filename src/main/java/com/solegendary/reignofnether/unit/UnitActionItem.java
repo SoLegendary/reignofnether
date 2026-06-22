@@ -412,12 +412,10 @@ public class UnitActionItem {
                 if (!isRedundantMove((Unit) pair.getFirst(), pair.getSecond()))
                     filtered.add(pair);
             }
-            if (level.isClientSide() || filtered.size() <= 20) {
+            if (level.isClientSide()) {
                 for (Pair<LivingEntity, BlockPos> pair : filtered) {
                     ((Unit) pair.getFirst()).setMoveTarget(pair.getSecond());
                 }
-            } else {
-                UnitServerEvents.queueFormationMove(filtered);
             }
         }
 
