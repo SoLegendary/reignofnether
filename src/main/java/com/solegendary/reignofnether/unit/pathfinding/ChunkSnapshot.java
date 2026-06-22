@@ -12,35 +12,53 @@ public final class ChunkSnapshot implements WalkabilityView {
     private final int clearanceCells;
     private final int footprintRadius;
     private final float fireCost;
+    private final boolean canClimb;
 
-    private ChunkSnapshot(Long2ObjectMap<WalkabilityGridChunk> chunks, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost) {
+    private ChunkSnapshot(Long2ObjectMap<WalkabilityGridChunk> chunks, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, boolean canClimb) {
         this.chunks = chunks;
         this.mobility = mobility;
         this.clearanceCells = clearanceCells;
         this.footprintRadius = footprintRadius;
         this.fireCost = fireCost;
+        this.canClimb = canClimb;
     }
 
-    public static ChunkSnapshot capture(Level level, BlockPos start, BlockPos target, int dilation, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost) {
+    public static ChunkSnapshot capture(Level level, BlockPos start, BlockPos target, int dilation, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, boolean canClimb) {
         WalkabilityGrid grid = WalkabilityGrid.get(level);
+        CaptureRegion region = regionFor(start, target, dilation);
+        Long2ObjectOpenHashMap<WalkabilityGridChunk> map =
+                new Long2ObjectOpenHashMap<>((region.cx1 - region.cx0 + 1) * (region.cz1 - region.cz0 + 1));
+        for (int cx = region.cx0; cx <= region.cx1; cx++) {
+            for (int cz = region.cz0; cz <= region.cz1; cz++) {
+                map.put(ChunkPos.asLong(cx, cz), grid.getOrBuild(level, cx, cz, region.wantMinY, region.wantMaxY));
+            }
+        }
+        return new ChunkSnapshot(map, mobility, clearanceCells, footprintRadius, fireCost, canClimb);
+    }
+
+    // The chunk rectangle + Y band a capture(start, target, dilation) needs. Shared with the deferred build
+    // queue (PathfinderWorkerPool) so "which chunks/band to warm" can never drift from what capture reads.
+    public static final class CaptureRegion {
+        public final int cx0, cx1, cz0, cz1;
+        public final int wantMinY, wantMaxY;
+
+        private CaptureRegion(int cx0, int cx1, int cz0, int cz1, int wantMinY, int wantMaxY) {
+            this.cx0 = cx0; this.cx1 = cx1; this.cz0 = cz0; this.cz1 = cz1;
+            this.wantMinY = wantMinY; this.wantMaxY = wantMaxY;
+        }
+
+        public int chunkCount() { return (cx1 - cx0 + 1) * (cz1 - cz0 + 1); }
+    }
+
+    public static CaptureRegion regionFor(BlockPos start, BlockPos target, int dilation) {
         int minX = Math.min(start.getX(), target.getX()) - dilation;
         int maxX = Math.max(start.getX(), target.getX()) + dilation;
         int minZ = Math.min(start.getZ(), target.getZ()) - dilation;
         int maxZ = Math.max(start.getZ(), target.getZ()) + dilation;
-        int cx0 = minX >> 4, cx1 = maxX >> 4;
-        int cz0 = minZ >> 4, cz1 = maxZ >> 4;
         // A* hugs the surface between start and target, so only classify a Y band around the path.
         int band = PathfinderConfig.VERTICAL_RADIUS + PathfinderConfig.VERTICAL_WINDOW_SLACK;
         int refY = (start.getY() + target.getY()) / 2;
-        int wantMinY = refY - band;
-        int wantMaxY = refY + band;
-        Long2ObjectOpenHashMap<WalkabilityGridChunk> map = new Long2ObjectOpenHashMap<>((cx1 - cx0 + 1) * (cz1 - cz0 + 1));
-        for (int cx = cx0; cx <= cx1; cx++) {
-            for (int cz = cz0; cz <= cz1; cz++) {
-                map.put(ChunkPos.asLong(cx, cz), grid.getOrBuild(level, cx, cz, wantMinY, wantMaxY));
-            }
-        }
-        return new ChunkSnapshot(map, mobility, clearanceCells, footprintRadius, fireCost);
+        return new CaptureRegion(minX >> 4, maxX >> 4, minZ >> 4, maxZ >> 4, refY - band, refY + band);
     }
 
     @Override
@@ -68,4 +86,7 @@ public final class ChunkSnapshot implements WalkabilityView {
 
     @Override
     public float fireCost() { return fireCost; }
+
+    @Override
+    public boolean canClimb() { return canClimb; }
 }

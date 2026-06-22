@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.debug;
 
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.pathfinding.WalkabilityGrid;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -67,6 +68,9 @@ public class RtsDebugServerEvents {
         statsIndex = (statsIndex + 1) % STATS_WINDOW;
         RtsDebugStatsClientboundPacket.broadcast(
                 avg(pathsHistory), avg(queueHistory), avg(stuckHistory), worldTickTime);
+        // Built navmesh chunks (overworld) so the debug overlay can show what's cached.
+        if (server.overworld() != null)
+            RtsDebugChunksClientboundPacket.broadcast(WalkabilityGrid.get(server.overworld()).builtChunkKeys());
     }
 
     private static long mean(long[] values) {

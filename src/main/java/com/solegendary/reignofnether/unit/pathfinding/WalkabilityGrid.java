@@ -47,7 +47,21 @@ public final class WalkabilityGrid {
         return built;
     }
 
+    // Peek whether a cached chunk already covers [wantMinY, wantMaxY) WITHOUT building one. Lets the deferred
+    // build queue tell a free cache hit from a cold build so it only spends its per-tick budget on the latter.
+    public boolean isBuilt(int chunkX, int chunkZ, int wantMinY, int wantMaxY) {
+        synchronized (chunks) {
+            WalkabilityGridChunk c = chunks.get(ChunkPos.asLong(chunkX, chunkZ));
+            return c != null && c.covers(wantMinY, wantMaxY);
+        }
+    }
+
     public void invalidateColumn(BlockPos bp) {
         synchronized (chunks) { chunks.remove(ChunkPos.asLong(bp.getX() >> 4, bp.getZ() >> 4)); }
+    }
+
+    // Snapshot of the currently-built (cached) chunk keys, for the debug overlay.
+    public long[] builtChunkKeys() {
+        synchronized (chunks) { return chunks.keySet().toLongArray(); }
     }
 }

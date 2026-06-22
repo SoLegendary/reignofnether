@@ -14,6 +14,11 @@ public final class PathfinderConfig {
     public static final int MAX_CHAIN_SEGMENTS = 10;
     public static final int MIN_DILATION = 48;
     public static final int QUEUE_BACKPRESSURE_CAP = 500;
+    // Walkability-grid building (getBlockState/getCollisionShape) must run on the main thread, so a single
+    // cross-map move classifying its whole corridor in one tick spikes the TPS. Cap how many cold (uncached)
+    // chunks the build queue classifies per server tick and defer the rest; cache hits are free and don't
+    // count. Lower = smoother TPS but slower first path, higher = snappier first path but bigger per-tick cost.
+    public static final int MAX_CHUNK_BUILDS_PER_TICK = 24;
     // A* searches stay near the surface; only classify a Y band around the path rather than the full
     // world column. SLACK covers the Y+-1 step nodes and goal snapping that reach just outside the band.
     public static final int VERTICAL_RADIUS = 24;

@@ -17,4 +17,8 @@ public interface WalkabilityView {
 
     // True if the block in this cell is solid-blocking. Used to require headroom before a unit steps up a ledge.
     boolean solidAt(int wx, int y, int wz);
+
+    // True if this unit may use vertical climb moves (cling to a climbable wall, no floor needed). False for
+    // non-climbers, so they path exactly as before. Only spiders with wall-climbing toggled on set this.
+    boolean canClimb();
 }

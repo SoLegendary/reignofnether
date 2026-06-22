@@ -16,6 +16,15 @@ public final class GridAStar {
     private static final int[] DZ = GridNeighbors.DZ;
     private static final int[] DY = GridNeighbors.DY;
 
+    // Climb moves for climber units (wall-cling cells only). STRICTLY straight: vertical up/down the SAME column
+    // (the actual climb), plus the 4 cardinal horizontals to step onto/off a wall and traverse a face. NO
+    // diagonals - those let the climb zig-zag. Stepping onto the cliff lip is a flat horizontal move because the
+    // lip cell counts as a climb cell (a wall sits one block below it - see GridNeighbors.adjacentToClimbWall).
+    // All bypass the footprint/floor gates (a cling cell has no floor).
+    private static final int[] CLIMB_DX = { 0,  0,   1, -1,  0,  0 };
+    private static final int[] CLIMB_DY = { 1, -1,   0,  0,  0,  0 };
+    private static final int[] CLIMB_DZ = { 0,  0,   0,  0,  1, -1 };
+
     public static final class Result {
         public final List<BlockPos> waypoints;
         public final boolean reached;
@@ -103,6 +112,7 @@ public final class GridAStar {
                 if (GridNeighbors.diagonalBlocked(view, mob, cur.x, ny, cur.z, DX[d], DZ[d])) continue;
 
                 float ng = cur.g + GridNeighbors.stepCost(d) * costMult;
+                ng += GridNeighbors.crowdingMalus(view, nx, ny, nz); // avoid walls/edges/corners for ALL units
 
                 long nkey = key(nx, ny, nz);
                 NodeRec nb = all.get(nkey);
@@ -115,6 +125,40 @@ public final class GridAStar {
                     nb.f = ng + nb.h;
                     nb.parent = cur;
                     open.add(nb);
+                }
+            }
+
+            // Climber units (spiders with wall-climbing on) may also cling to a wall face. A climb cell hangs off
+            // an adjacent wall with no floor and occupies only the unit's own column, so it BYPASSES the costMult
+            // / wideFits / headBlocked / riseBlocked / diagonal gates above (those all assume floor support and a
+            // footprint box). The moves (see CLIMB_*) let the path hug the wall both ways: enter a column from the
+            // ground, climb up/down the face, and step on/off a cliff lip. The main neighbour loop still runs on
+            // every node, so a unit re-enters normal ground movement at the top or bottom automatically.
+            if (view.canClimb()) {
+                for (int c = 0; c < CLIMB_DX.length; c++) {
+                    int nx = cur.x + CLIMB_DX[c];
+                    int ny = cur.y + CLIMB_DY[c];
+                    int nz = cur.z + CLIMB_DZ[c];
+
+                    int cddx = nx - sx, cddz = nz - sz;
+                    if (cddx * cddx + cddz * cddz > radiusSq) continue;
+
+                    if (!GridNeighbors.climbColumnClear(view, nx, ny, nz)) continue;
+                    if (!GridNeighbors.adjacentToClimbWall(view, nx, ny, nz)) continue;
+
+                    float ng = cur.g + GridNeighbors.CLIMB_COST;
+                    long nkey = key(nx, ny, nz);
+                    NodeRec nb = all.get(nkey);
+                    if (nb == null) {
+                        nb = new NodeRec(nx, ny, nz, ng, heuristic(gx - nx, gy - ny, gz - nz), cur);
+                        all.put(nkey, nb);
+                        open.add(nb);
+                    } else if (!nb.closed && ng < nb.g) {
+                        nb.g = ng;
+                        nb.f = ng + nb.h;
+                        nb.parent = cur;
+                        open.add(nb);
+                    }
                 }
             }
         }

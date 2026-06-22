@@ -43,6 +43,7 @@ import com.solegendary.reignofnether.survival.SurvivalServerboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.*;
+import com.solegendary.reignofnether.debug.RtsDebugChunksClientboundPacket;
 import com.solegendary.reignofnether.debug.RtsDebugStatsClientboundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
@@ -108,6 +109,11 @@ public final class PacketHandler {
                 .encoder(RtsDebugStatsClientboundPacket::encode)
                 .decoder(RtsDebugStatsClientboundPacket::new)
                 .consumerMainThread(RtsDebugStatsClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(RtsDebugChunksClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RtsDebugChunksClientboundPacket::encode)
+                .decoder(RtsDebugChunksClientboundPacket::new)
+                .consumerMainThread(RtsDebugChunksClientboundPacket::handle).add();
 
         INSTANCE.messageBuilder(UnitIdleWorkerClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitIdleWorkerClientBoundPacket::encode).decoder(UnitIdleWorkerClientBoundPacket::new)

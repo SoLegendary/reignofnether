@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.pathfinding;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
@@ -32,16 +33,21 @@ public final class RtsPathfinder {
             return;
         }
         int clearanceCells = Math.max(2, net.minecraft.util.Mth.ceil(mob.getBbHeight()));
-        // Tile footprint radius, vanilla style: floor(width + 1) - 1. 0 for a <=1-wide unit, 1 for a bear.
-        int footprintRadius = Math.max(0, net.minecraft.util.Mth.floor(mob.getBbWidth() + 1.0f) - 1);
         float fireCost = fireCostFor(mob);
+        // Only spiders with wall-climbing toggled on may scale vertical walls; PoisonSpiderUnit inherits this.
+        boolean canClimb = mob instanceof SpiderUnit su && su.isWallClimbing();
+        // Tile footprint radius, vanilla style: floor(width + 1) - 1. 0 for a <=1-wide unit, 1 for a bear.
+        // A climbing spider is pathed 1-wide (radius 0): a 3x3 footprint can't perch on a cliff edge (it
+        // overhangs the drop), so the climb up the wall could never connect to the plateau. 1-wide fixes that
+        // and is cheaper (skips the per-node wideFits 3x3 check) - the nimble-spider trade-off.
+        int footprintRadius = canClimb ? 0 : Math.max(0, net.minecraft.util.Mth.floor(mob.getBbWidth() + 1.0f) - 1);
         target = snapToWalkable(level, target, mobility, footprintRadius, clearanceCells, fireCost, SNAP_RADIUS);
         if (PathfinderWorkerPool.isInitialised()) {
-            PathfinderWorkerPool.submit(level, start, target, reach, mobility, clearanceCells, footprintRadius, fireCost, onReady);
+            PathfinderWorkerPool.submit(level, start, target, reach, mobility, clearanceCells, footprintRadius, fireCost, canClimb, mob::isAlive, onReady);
         } else {
             try {
                 int dilation = PathfinderConfig.dilationFor(start, target);
-                ChunkSnapshot snap = ChunkSnapshot.capture(level, start, target, dilation, mobility, clearanceCells, footprintRadius, fireCost);
+                ChunkSnapshot snap = ChunkSnapshot.capture(level, start, target, dilation, mobility, clearanceCells, footprintRadius, fireCost, canClimb);
                 GridAStar.Result r = GridAStar.search(snap, start, target, reach, PathfinderConfig.MAX_RADIUS, PathfinderConfig.MAX_NODES);
                 onReady.accept(PathConverter.toMcPath(r.waypoints, target, r.reached, snap));
             } catch (Throwable t) {
@@ -49,6 +55,13 @@ public final class RtsPathfinder {
                 onReady.accept(null);
             }
         }
+    }
+
+    // The footprint radius the pathfinder uses for this mob (kept here so the debug overlay scores cells exactly
+    // like A* does). Mirrors requestPath: climbing spiders are 1-wide (radius 0), everyone else floor(width+1)-1.
+    public static int footprintRadiusFor(Mob mob) {
+        if (mob instanceof SpiderUnit su && su.isWallClimbing()) return 0;
+        return Math.max(0, net.minecraft.util.Mth.floor(mob.getBbWidth() + 1.0f) - 1);
     }
 
     // Fire/magma cost for this unit: the DAMAGE_FIRE malus plus per-unit fire immunity, so fire-immune units
@@ -64,9 +77,10 @@ public final class RtsPathfinder {
                                           int clearanceCells, float fireCost, int radius) {
         // Snap over a small snapshot so the goal reuses the EXACT walkability + footprint logic A* uses (the
         // snapped goal can never be a cell A* would reject); the +footprintRadius+1 dilation keeps wideFits
-        // from reading an uncaptured (BLOCKED) edge cell.
+        // from reading an uncaptured (BLOCKED) edge cell. canClimb=false: a goal must snap to standable ground,
+        // never to a mid-air wall-cling cell, so snapping always uses the ground footprint gate.
         ChunkSnapshot view = ChunkSnapshot.capture(level, bp, bp, radius + footprintRadius + 1,
-                mobility, clearanceCells, footprintRadius, fireCost);
+                mobility, clearanceCells, footprintRadius, fireCost, false);
         if (standable(view, bp.getX(), bp.getY(), bp.getZ())) return bp;
         int bestDistSq = Integer.MAX_VALUE;
         BlockPos best = bp;
