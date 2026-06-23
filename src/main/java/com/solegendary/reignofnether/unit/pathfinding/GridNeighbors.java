@@ -68,39 +68,56 @@ public final class GridNeighbors {
     // height) and low ceilings - NOT drops/edges (a cliff beside the path isn't something the body bumps, so it
     // shouldn't read as "crowded"). Walls right beside the body (distance 1) count full; walls one cell further
     // (distance 2) count half - a gentler pull toward the middle of a wide-open area.
-    public static final float SIDE_MALUS = 0.25f;
-    public static final float CORNER_MALUS = 0.125f; // extra "slight" cost for an inside 90-deg corner (L of walls)
+    public static final float SIDE_MALUS = 0.75f; // touching a wall (distance-1); distance-2 is half this
+    public static final float CORNER_MALUS = 0.375f; // extra "slight" cost for an inside 90-deg corner (L of walls)
 
     public static float crowdingMalus(WalkabilityView view, int x, int y, int z) {
         int clearance = view.clearanceCells();
-        float malus = 0f;
-        // Walls in ANY of the 8 directions around the body, cardinal AND diagonal. Distance-1 ring (cells touching
-        // the body) counts full; distance-2 ring counts half. Applies to every unit so even 1-wide units bow off
-        // walls when there's room.
+        // HORIZONTAL cost is driven by the NEAREST wall, not a SUM over every wall. A cell touching a wall
+        // (distance-1) pays full; a cell whose closest wall is one cell further (distance-2) pays half; a cell with
+        // open space all around pays nothing. Summing every wall made the middle of a corridor - flanked by BOTH
+        // walls at distance-2 - score higher than a cell hugging a single wall, the exact opposite of what we want.
+        // Nearest-wall makes the search PREFER the most open lane: in a 3-wide corridor the middle (walls only at
+        // distance-2 -> 0.125) beats the edges (a wall touching -> 0.25). The ceiling is handled SEPARATELY below:
+        // folding it in here let a roofed tunnel saturate every cell to full malus, flattening the steering so the
+        // middle could never win.
+        float wall = 0f;
+        // distance-1 ring (cells touching the body), cardinal AND diagonal - worst case, no need to look further
+        distance1:
         for (int dx = -1; dx <= 1; dx++)
             for (int dz = -1; dz <= 1; dz++) {
                 if (dx == 0 && dz == 0) continue;
-                if (wallBeside(view, x + dx, z + dz, y, clearance)) malus += SIDE_MALUS;
+                if (wallBeside(view, x + dx, z + dz, y, clearance)) { wall = SIDE_MALUS; break distance1; }
             }
-        for (int dx = -2; dx <= 2; dx++)
-            for (int dz = -2; dz <= 2; dz++) {
-                if (Math.max(Math.abs(dx), Math.abs(dz)) != 2) continue; // only the distance-2 ring
-                if (wallBeside(view, x + dx, z + dz, y, clearance)) malus += SIDE_MALUS * 0.5f;
-            }
+        // distance-2 ring - half, only counts if nothing was touching at distance-1
+        if (wall == 0f) {
+            distance2:
+            for (int dx = -2; dx <= 2; dx++)
+                for (int dz = -2; dz <= 2; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != 2) continue; // only the distance-2 ring
+                    if (wallBeside(view, x + dx, z + dz, y, clearance)) { wall = SIDE_MALUS * 0.5f; break distance2; }
+                }
+        }
+        // Low ceiling right above the head - a separate, additive term. In a roofed tunnel this is uniform across
+        // all cells so it cancels out in the A* comparison and the horizontal nearest-wall term still picks the
+        // middle; where only some cells have a low ceiling it nudges the unit toward the headroom.
+        float ceiling = view.solidAt(x, y + clearance, z) ? SIDE_MALUS : 0f;
         // Inner-edge penalty: a +1 block (raised terrain / step-up, or the base of a wall) on two ADJACENT sides
         // makes this cell an inside corner the unit would 45-degree step into. Make it less valuable so paths
         // don't zig-zag diagonally up step corners.
+        float corner = 0f;
         boolean rW = raisedBeside(view, x - 1, z, y);
         boolean rE = raisedBeside(view, x + 1, z, y);
         boolean rN = raisedBeside(view, x, z - 1, y);
         boolean rS = raisedBeside(view, x, z + 1, y);
-        if (rN && rW) malus += CORNER_MALUS;
-        if (rN && rE) malus += CORNER_MALUS;
-        if (rS && rW) malus += CORNER_MALUS;
-        if (rS && rE) malus += CORNER_MALUS;
-        // low ceiling right above the head
-        if (view.solidAt(x, y + clearance, z)) malus += SIDE_MALUS;
-        return malus;
+        if (rN && rW) corner += CORNER_MALUS;
+        if (rN && rE) corner += CORNER_MALUS;
+        if (rS && rW) corner += CORNER_MALUS;
+        if (rS && rE) corner += CORNER_MALUS;
+        // No global cap: nearest-wall already prevents side walls from stacking, so the horizontal term is at most
+        // one wall. Ceiling and corner are additive on top - a cell that's BOTH against a wall AND under a roof is
+        // genuinely more cramped than one that's only against a wall, and should cost more.
+        return wall + ceiling + corner;
     }
 
     // A wall here = a solid block anywhere ABOVE the feet, [y+1 .. y+clearance] (head level up to one block over

@@ -11,8 +11,8 @@ public interface WalkabilityView {
     // not the 2 the classifier assumes, so tall mobs don't wedge into a ceiling or fail to rise under an overhang.
     int clearanceCells();
 
-    // Tile footprint radius, vanilla style (Mth.floor(bbWidth + 1) - 1): 0 for a <=1-wide unit, 1 for a bear's
-    // 2x2 box, scaling up. See GridNeighbors.wideFits.
+    // Tile footprint radius, vanilla style (Mth.floor(bbWidth + 1) - 1): 0 for a <=1-wide unit, scaling up for
+    // wider mobs. See GridNeighbors.wideFits.
     int footprintRadius();
 
     // True if the block in this cell is solid-blocking. Used to require headroom before a unit steps up a ledge.

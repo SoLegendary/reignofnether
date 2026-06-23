@@ -22,7 +22,7 @@ public final class WalkabilityBuilder {
     public static final byte KIND_FIRE    = 3;
     public static final byte KIND_LAVA    = 4;
 
-    // Per-chunk build calls this ~98k times; reusable mutable positions avoid ~300k BlockPos allocations.
+    // Hot path (called per cell during a chunk build); reuse mutable positions to avoid BlockPos allocations.
     private static final ThreadLocal<BlockPos.MutableBlockPos> FEET  = ThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
     private static final ThreadLocal<BlockPos.MutableBlockPos> HEAD  = ThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
     private static final ThreadLocal<BlockPos.MutableBlockPos> FLOOR = ThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
@@ -34,10 +34,8 @@ public final class WalkabilityBuilder {
 
         BlockState feetBs = level.getBlockState(feet);
         BlockState headBs = level.getBlockState(head);
-        // Feet/head can't sit inside a body-blocking block; leaves report non-solid but block the body, so
-        // include them explicitly (they're still never floor support, so units don't walk on them). Fences,
-        // walls and closed fence gates are 1.5-tall barriers a unit can neither walk through nor stand on top
-        // of (vanilla treats them as impassable FENCE), so block them too - otherwise units path onto railings.
+        // Feet/head can't sit inside a body-blocking block. Leaves report non-solid but block the body, and
+        // fence-likes are impassable barriers (see isFenceLike), so reject both explicitly.
         if (MiscUtil.isSolidBlocking(level, feet) || BlockUtils.isLeafBlock(feetBs) || isFenceLike(feetBs)) return KIND_BLOCKED;
         if (MiscUtil.isSolidBlocking(level, head) || BlockUtils.isLeafBlock(headBs) || isFenceLike(headBs)) return KIND_BLOCKED;
 
@@ -62,7 +60,7 @@ public final class WalkabilityBuilder {
 
     // Fences, walls and CLOSED fence gates are 1.5-block barriers units can't pass or stand on (open gates are
     // walkable, so they're excluded). Mirrors vanilla WalkNodeEvaluator's BlockPathTypes.FENCE handling.
-    private static boolean isFenceLike(BlockState bs) {
+    public static boolean isFenceLike(BlockState bs) {
         if (bs.is(BlockTags.FENCES) || bs.is(BlockTags.WALLS)) return true;
         return bs.getBlock() instanceof FenceGateBlock && !bs.getValue(FenceGateBlock.OPEN);
     }

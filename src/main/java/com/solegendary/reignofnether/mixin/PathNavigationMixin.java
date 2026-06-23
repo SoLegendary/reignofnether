@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.pathfinding.PathfinderConfig;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
@@ -37,8 +38,11 @@ public class PathNavigationMixin {
         // Climbing spiders barely gate on Y at all: a climb is a straight column (same X/Z), so the horizontal
         // reach already keeps them on the wall. With a big vertical window they advance to the far end of the
         // column right away and just go for it up/down, instead of fussing over each block of the climb. Wide
-        // units get a small relax so a body perched on a stair step still drops instead of spinning on the ledge.
+        // units get the gate relaxed to cover a full MAX_FALL_DROP: the pathfinder now emits multi-block drop
+        // nodes (see GridAStar fall pass), so a body perched at the lip of a 2-3 block drop must be able to
+        // validate the landing node below it and commit to the fall, instead of spinning on the ledge unable to
+        // reach a node it's standing right above. +0.5 so a drop of exactly MAX_FALL_DROP still validates.
         if (reignofnether$isClimbingSpider()) return 16.0;
-        return reignofnether$isWideUnit() ? 1.5 : original;
+        return reignofnether$isWideUnit() ? PathfinderConfig.MAX_FALL_DROP + 0.5 : original;
     }
 }

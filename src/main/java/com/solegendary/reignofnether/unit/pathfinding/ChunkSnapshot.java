@@ -61,18 +61,20 @@ public final class ChunkSnapshot implements WalkabilityView {
         return new CaptureRegion(minX >> 4, maxX >> 4, minZ >> 4, maxZ >> 4, refY - band, refY + band);
     }
 
+    private WalkabilityGridChunk chunkAt(int wx, int wz) {
+        return chunks.get(ChunkPos.asLong(wx >> 4, wz >> 4));
+    }
+
     @Override
     public byte kindAt(int wx, int y, int wz) {
-        WalkabilityGridChunk c = chunks.get(ChunkPos.asLong(wx >> 4, wz >> 4));
-        if (c == null) return WalkabilityBuilder.KIND_BLOCKED;
-        return c.kindAt(wx, y, wz);
+        WalkabilityGridChunk c = chunkAt(wx, wz);
+        return c == null ? WalkabilityBuilder.KIND_BLOCKED : c.kindAt(wx, y, wz);
     }
 
     @Override
     public boolean solidAt(int wx, int y, int wz) {
-        WalkabilityGridChunk c = chunks.get(ChunkPos.asLong(wx >> 4, wz >> 4));
-        if (c == null) return false;
-        return c.solidAt(wx, y, wz);
+        WalkabilityGridChunk c = chunkAt(wx, wz);
+        return c != null && c.solidAt(wx, y, wz);
     }
 
     @Override

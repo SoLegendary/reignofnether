@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -32,15 +33,11 @@ public final class RtsPathfinder {
             onReady.accept(null);
             return;
         }
-        int clearanceCells = Math.max(2, net.minecraft.util.Mth.ceil(mob.getBbHeight()));
+        int clearanceCells = Math.max(2, Mth.ceil(mob.getBbHeight()));
         float fireCost = fireCostFor(mob);
         // Only spiders with wall-climbing toggled on may scale vertical walls; PoisonSpiderUnit inherits this.
         boolean canClimb = mob instanceof SpiderUnit su && su.isWallClimbing();
-        // Tile footprint radius, vanilla style: floor(width + 1) - 1. 0 for a <=1-wide unit, 1 for a bear.
-        // A climbing spider is pathed 1-wide (radius 0): a 3x3 footprint can't perch on a cliff edge (it
-        // overhangs the drop), so the climb up the wall could never connect to the plateau. 1-wide fixes that
-        // and is cheaper (skips the per-node wideFits 3x3 check) - the nimble-spider trade-off.
-        int footprintRadius = canClimb ? 0 : Math.max(0, net.minecraft.util.Mth.floor(mob.getBbWidth() + 1.0f) - 1);
+        int footprintRadius = footprintRadiusFor(mob);
         target = snapToWalkable(level, target, mobility, footprintRadius, clearanceCells, fireCost, SNAP_RADIUS);
         if (PathfinderWorkerPool.isInitialised()) {
             PathfinderWorkerPool.submit(level, start, target, reach, mobility, clearanceCells, footprintRadius, fireCost, canClimb, mob::isAlive, onReady);
@@ -57,11 +54,14 @@ public final class RtsPathfinder {
         }
     }
 
-    // The footprint radius the pathfinder uses for this mob (kept here so the debug overlay scores cells exactly
-    // like A* does). Mirrors requestPath: climbing spiders are 1-wide (radius 0), everyone else floor(width+1)-1.
+    // Tile footprint radius for this mob, vanilla style: floor(width + 1) - 1. 0 for a <=1-wide unit, 1 for a
+    // bear. Used by both requestPath and the debug overlay, so the overlay scores cells exactly like A* does.
+    // A climbing spider is pathed 1-wide (radius 0): a 3x3 footprint can't perch on a cliff edge (it overhangs
+    // the drop), so the climb up the wall could never connect to the plateau. 1-wide fixes that and is cheaper
+    // (skips the per-node wideFits 3x3 check) - the nimble-spider trade-off.
     public static int footprintRadiusFor(Mob mob) {
         if (mob instanceof SpiderUnit su && su.isWallClimbing()) return 0;
-        return Math.max(0, net.minecraft.util.Mth.floor(mob.getBbWidth() + 1.0f) - 1);
+        return Math.max(0, Mth.floor(mob.getBbWidth() + 1.0f) - 1);
     }
 
     // Fire/magma cost for this unit: the DAMAGE_FIRE malus plus per-unit fire immunity, so fire-immune units

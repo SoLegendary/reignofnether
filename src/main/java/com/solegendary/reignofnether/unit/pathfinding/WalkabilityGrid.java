@@ -60,6 +60,16 @@ public final class WalkabilityGrid {
         synchronized (chunks) { chunks.remove(ChunkPos.asLong(bp.getX() >> 4, bp.getZ() >> 4)); }
     }
 
+    // Invalidate WITHOUT creating a grid for a level that has none yet. Cheap enough to call from the
+    // LevelChunk.setBlockState mixin on every in-game block change (buildings, explosions, commands, player
+    // edits) - and on BOTH sides, so the client-side grid the debug overlay reads stays fresh too.
+    public static void invalidateColumnIfPresent(LevelAccessor level, BlockPos bp) {
+        if (level == null || bp == null) return;
+        WalkabilityGrid grid;
+        synchronized (WalkabilityGrid.class) { grid = PER_LEVEL.get(level); }
+        if (grid != null) grid.invalidateColumn(bp);
+    }
+
     // Snapshot of the currently-built (cached) chunk keys, for the debug overlay.
     public long[] builtChunkKeys() {
         synchronized (chunks) { return chunks.keySet().toLongArray(); }

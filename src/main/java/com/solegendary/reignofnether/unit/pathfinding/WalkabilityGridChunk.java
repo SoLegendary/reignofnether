@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 
 // 3D walkability cache for one chunk, classified only over a Y band [minY, minY+height).
 // cellKind indexed by (yIdx * SIZE + localZ) * SIZE + localX. Cells outside the band read as BLOCKED.
@@ -35,6 +36,7 @@ public final class WalkabilityGridChunk {
         byte[] cellKind = new byte[SIZE * SIZE * height];
         byte[] solid = new byte[SIZE * SIZE * height];
         BlockPos.MutableBlockPos mp = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos mpBelow = new BlockPos.MutableBlockPos();
         int baseX = cp.getMinBlockX();
         int baseZ = cp.getMinBlockZ();
         for (int dz = 0; dz < SIZE; dz++) {
@@ -45,10 +47,22 @@ public final class WalkabilityGridChunk {
                     int i = idx(dx, y - minY, dz);
                     cellKind[i] = WalkabilityBuilder.classify(level, wx, y, wz);
                     // Leaves report non-solid but have full collision, so count them as body-blocking here
-                    // (classify still treats them as no floor support, so units don't walk on them).
+                    // (classify still treats them as no floor support, so units don't walk on them). Fences,
+                    // walls and closed fence gates are 1.5-tall barriers too - count them as body-blocking so
+                    // they register as walls for the crowding malus and block footprints, like solid blocks.
                     mp.set(wx, y, wz);
-                    solid[i] = (MiscUtil.isSolidBlocking(level, mp) || BlockUtils.isLeafBlock(level.getBlockState(mp)))
-                            ? (byte) 1 : 0;
+                    BlockState bs = level.getBlockState(mp);
+                    boolean cellSolid = MiscUtil.isSolidBlocking(level, mp) || BlockUtils.isLeafBlock(bs)
+                            || WalkabilityBuilder.isFenceLike(bs);
+                    // A fence/wall directly BELOW is 1.5 tall and reaches up into this cell. Mark this cell solid
+                    // too so wallBeside (which probes ABOVE the feet, skipping the feet cell as a climbable step)
+                    // actually detects a ground-level fence/wall as a wall - otherwise a 1-tall fence sitting at a
+                    // neighbour's feet is invisible to the crowding malus.
+                    if (!cellSolid) {
+                        mpBelow.set(wx, y - 1, wz);
+                        if (WalkabilityBuilder.isFenceLike(level.getBlockState(mpBelow))) cellSolid = true;
+                    }
+                    solid[i] = cellSolid ? (byte) 1 : 0;
                 }
             }
         }

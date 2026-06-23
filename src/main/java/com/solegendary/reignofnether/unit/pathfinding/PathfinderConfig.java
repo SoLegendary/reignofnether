@@ -24,6 +24,14 @@ public final class PathfinderConfig {
     public static final int VERTICAL_RADIUS = 24;
     public static final int VERTICAL_WINDOW_SLACK = 8;
 
+    // The grid's neighbour model only steps +-1 in Y, so it can't express a sheer drop bigger than one block -
+    // a unit would stall at the lip of a 2+ block descent (a tall staircase) with no node to advance to, and a
+    // wide body spins on the ledge. Vanilla allows multi-block falls; so do we, up to MAX_FALL_DROP blocks, with
+    // a small per-block malus so a unit still prefers a gentle route when one is comparably short but commits to
+    // the drop rather than fearing it. 3 matches vanilla's roughly-safe fall threshold.
+    public static final int MAX_FALL_DROP = 3;
+    public static final float FALL_COST_PER_BLOCK = 0.3f;
+
     // Bound the per-level walkability chunk cache so long games don't grow it without limit.
     public static final int MAX_CACHED_CHUNKS = 1024;
 

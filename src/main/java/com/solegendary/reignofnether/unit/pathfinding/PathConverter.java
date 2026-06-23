@@ -25,6 +25,12 @@ public final class PathConverter {
     // with the wall, so it simply free-falls straight down the column (no fall damage) and lands at the bottom.
     private static final double WALL_PUSH_OFF = 0.5;
 
+    // Extra push along the travel direction at a DESCENT node. A 2-wide body walking off a ledge stays "on ground"
+    // while any part of its base still overhangs the lip block, so quadrant-centring alone leaves it perched and it
+    // refuses to drop. Pushing the follow target past the lip carries the body's centre clear so it commits to the
+    // fall. Added on top of the quadrant offset (which handles squeezing past obstacles) - the two are separate.
+    private static final double DROP_NUDGE = 0.6;
+
     public static Path toMcPath(List<BlockPos> waypoints, BlockPos target, boolean reached, WalkabilityView view) {
         ArrayList<Node> nodes = new ArrayList<>(waypoints.size());
         for (BlockPos bp : waypoints) {
@@ -59,7 +65,29 @@ public final class PathConverter {
             n.type = BlockPathTypes.WALKABLE;
         }
 
-        return new CenteredPath(nodes, target, reached, climbAim, descending, wallDir);
+        // Per-node body position for WIDE units. Our A* node is a single cell, but a 2-wide body actually occupies
+        // the node cell PLUS one clear quadrant (see GridNeighbors.wideFits). Aiming the follower at the cell
+        // centre puts the body half-on every neighbour, so a lone obstacle beside the path (a tree, a 1-block wall)
+        // clips it and it jams. Instead we tell vanilla's follower exactly where the body sits: offset toward the
+        // clear quadrant the pathfinder found, so the body squeezes past on the open side - the repositioning
+        // vanilla does, but driven by OUR footprint check. Fully-open cells stay centred (no jitter mid-corridor).
+        Vec3[] footOffset = new Vec3[nodes.size()];
+        for (int i = 0; view != null && view.footprintRadius() > 0 && i < nodes.size(); i++) {
+            if (climbAim[i]) continue; // climb nodes do their own wall press/push-off
+            Node n = nodes.get(i);
+            // Travel direction through this node, used to break ties between equally-clear quadrants and to push
+            // off a ledge on a descent.
+            Node prev = nodes.get(Math.max(0, i - 1)), next = nodes.get(Math.min(nodes.size() - 1, i + 1));
+            Vec3 off = footprintOffset(view, n, next.x - prev.x, next.z - prev.z);
+            // Descent node: also shove the target past the lip so a perched wide body commits to the drop.
+            if (i > 0 && n.y < prev.y) {
+                double dx = n.x - prev.x, dz = n.z - prev.z, len = Math.sqrt(dx * dx + dz * dz);
+                if (len > 0) off = off.add(dx / len * DROP_NUDGE, 0, dz / len * DROP_NUDGE);
+            }
+            footOffset[i] = off;
+        }
+
+        return new CenteredPath(nodes, target, reached, climbAim, descending, wallDir, footOffset);
     }
 
     // Vertical direction of the wall move at node i: +1 going up, -1 going down, 0 if not a vertical climb step.
@@ -75,6 +103,33 @@ public final class PathConverter {
         if (index <= 0 || index >= nodes.size()) return false;
         Node a = nodes.get(index - 1), b = nodes.get(index);
         return a.x == b.x && a.z == b.z && Math.abs(b.y - a.y) == 1;
+    }
+
+    // Where a wide body's centre should sit at this node: offset toward a clear quadrant (node cell + the 3 cells
+    // of that quadrant all standable, matching wideFits). The 2x2 body then straddles the node cell and that
+    // quadrant, with its centre on their shared corner (+-0.5 per axis). If the cell is fully open (all 4
+    // quadrants clear) we keep the centre so units walk down the middle; among partial-clear quadrants we pick the
+    // one best aligned with travel so the choice is stable node-to-node and the body leads where it's going.
+    private static Vec3 footprintOffset(WalkabilityView view, Node n, double travelX, double travelZ) {
+        MobilityClass mob = view.mobility();
+        int clearance = view.clearanceCells();
+        float fireCost = view.fireCost();
+        Vec3 best = null;
+        double bestScore = Double.NEGATIVE_INFINITY;
+        int clearCount = 0;
+        for (int sx = -1; sx <= 1; sx += 2) {
+            for (int sz = -1; sz <= 1; sz += 2) {
+                if (!(GridNeighbors.cellStandable(view, mob, n.x + sx, n.z, n.y, clearance, fireCost)
+                   && GridNeighbors.cellStandable(view, mob, n.x, n.z + sz, n.y, clearance, fireCost)
+                   && GridNeighbors.cellStandable(view, mob, n.x + sx, n.z + sz, n.y, clearance, fireCost)))
+                    continue;
+                clearCount++;
+                double score = sx * travelX + sz * travelZ; // prefer the clear quadrant we're heading toward
+                if (score > bestScore) { bestScore = score; best = new Vec3(sx * 0.5, 0, sz * 0.5); }
+            }
+        }
+        if (best == null || clearCount == 4) return Vec3.ZERO; // boxed-in fallback, or fully open -> stay centred
+        return best;
     }
 
     // First horizontal direction whose column is solid over the unit's body height - the wall to cling to.
@@ -95,21 +150,26 @@ public final class PathConverter {
         return false;
     }
 
-    // Vanilla's getEntityPosAtNode aims a wide unit at the +X/+Z CORNER of each cell (offset (int)(width+1)*0.5),
-    // which physically drags its body into the wall/corner - even under a low overhang - no matter how clear the
-    // path is. We aim every unit at the cell CENTRE so it walks down the middle of the 3x3-cleared path. Following
-    // is otherwise left loose (vanilla corner-cutting + reach tolerance) so units flow instead of freezing. Climb
-    // nodes are the exception: they're nudged into the adjacent wall so the climbing physics engage (WALL_PRESS).
+    // Vanilla's getEntityPosAtNode aims a wide unit at a FIXED +X/+Z corner (offset (int)(width+1)*0.5) - which
+    // works for vanilla because its node evaluator places the node so that corner is the clear one, but applied to
+    // our centre-cell nodes it shoves the body into whatever happens to be on the +X/+Z side. So we override it:
+    // narrow units (and fully-open wide cells) aim at the cell CENTRE; wide units beside an obstacle aim at the
+    // clear quadrant the pathfinder actually found (footOffset), which is what lets a big body shift aside to clear
+    // a tree or wall. Everything else about following is plain vanilla - advance, corner-cutting, reach tolerance,
+    // stuck detection - so units flow and reposition exactly like vanilla mobs. Climb nodes are the exception:
+    // they're nudged into the adjacent wall so the climbing physics engage (WALL_PRESS).
     private static final class CenteredPath extends Path {
         private final boolean[] climbAim;
         private final boolean[] descending;
         private final Vec3[] wallDir;
+        private final Vec3[] footOffset;
 
-        CenteredPath(List<Node> nodes, BlockPos target, boolean reached, boolean[] climbAim, boolean[] descending, Vec3[] wallDir) {
+        CenteredPath(List<Node> nodes, BlockPos target, boolean reached, boolean[] climbAim, boolean[] descending, Vec3[] wallDir, Vec3[] footOffset) {
             super(nodes, target, reached);
             this.climbAim = climbAim;
             this.descending = descending;
             this.wallDir = wallDir;
+            this.footOffset = footOffset;
         }
 
         @Override
@@ -122,6 +182,9 @@ public final class PathConverter {
                 double press = descending[index] ? -WALL_PUSH_OFF : WALL_PRESS;
                 return base.add(w.x * press, 0, w.z * press);
             }
+            // Wide unit: sit the body in the clear quadrant so it squeezes past obstacles instead of clipping them.
+            if (index < footOffset.length && footOffset[index] != null && entity.getBbWidth() > 1.0f)
+                return base.add(footOffset[index]);
             return base;
         }
     }

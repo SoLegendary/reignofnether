@@ -36,7 +36,7 @@ public class RtsDebugChunksClientboundPacket {
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() ->
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> RtsDebugClientEvents.setBuiltChunks(this.keys)));
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> RtsDebugNavmesh.setBuiltChunks(this.keys)));
         ctx.get().setPacketHandled(true);
         return true;
     }

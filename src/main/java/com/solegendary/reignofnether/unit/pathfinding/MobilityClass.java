@@ -11,8 +11,8 @@ public enum MobilityClass {
     public static MobilityClass of(Unit unit) {
         if (!(unit instanceof Mob mob)) return HUMANOID;
         if (mob instanceof Drowned || mob instanceof WaterAnimal) return AQUATIC;
-        // Anything wider than a full block (spider/panda/bear 1.3-1.4, hoglin, ravager 1.95, ...) spans
-        // more than one cell and needs a multi-cell footprint; 0.6-wide humanoids fit a single cell.
+        // Anything wider than a full block spans more than one cell and needs a multi-cell footprint;
+        // sub-block-wide humanoids fit a single cell.
         if (mob.getBbWidth() > 1.0f) return LARGE;
         return HUMANOID;
     }
@@ -22,8 +22,8 @@ public enum MobilityClass {
             case WalkabilityBuilder.KIND_LAND:  return 1.0f;
             case WalkabilityBuilder.KIND_WATER:
                 if (this == AQUATIC) return 0.8f;
-                if (this == LARGE)   return 5.0f;
-                return 3.0f;
+                if (this == LARGE)   return 8.0f;
+                return 5.0f;
             case WalkabilityBuilder.KIND_FIRE:  return PathfinderConfig.FIRE_AVOID_COST;
             default: return Float.POSITIVE_INFINITY;
         }

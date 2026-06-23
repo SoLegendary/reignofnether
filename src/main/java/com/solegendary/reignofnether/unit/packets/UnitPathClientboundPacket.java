@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.packets;
 
-import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
+import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -59,7 +59,7 @@ public class UnitPathClientboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
-                () -> () -> RtsDebugClientEvents.receiveUnitPath(this.entityId, this.pathType, this.nodes));
+                () -> () -> RtsDebugPathPreview.receiveUnitPath(this.entityId, this.pathType, this.nodes));
         });
         ctx.get().setPacketHandled(true);
         return true;

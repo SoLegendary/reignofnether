@@ -13,6 +13,7 @@
         "EvokerFangsMixin",
         "ItemEntityMixin",
         "LeavesBlockMixin",
+        "LevelChunkMixin",
         "LivingEntityMixin",
         "MixinNetworkFilters",
         "MixinNetworkManager",

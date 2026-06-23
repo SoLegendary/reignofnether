@@ -114,17 +114,44 @@ public final class GridAStar {
                 float ng = cur.g + GridNeighbors.stepCost(d) * costMult;
                 ng += GridNeighbors.crowdingMalus(view, nx, ny, nz); // avoid walls/edges/corners for ALL units
 
-                long nkey = key(nx, ny, nz);
-                NodeRec nb = all.get(nkey);
-                if (nb == null) {
-                    nb = new NodeRec(nx, ny, nz, ng, heuristic(gx - nx, gy - ny, gz - nz), cur);
-                    all.put(nkey, nb);
-                    open.add(nb);
-                } else if (!nb.closed && ng < nb.g) {
-                    nb.g = ng;
-                    nb.f = ng + nb.h;
-                    nb.parent = cur;
-                    open.add(nb);
+                relax(all, open, nx, ny, nz, ng, gx, gy, gz, cur);
+            }
+
+            // Falling: drop straight down MORE than one block where there's no standable cell one step down - a
+            // sheer 2+ block descent like a tall staircase. The +-1 DY neighbour model can't express this, so a
+            // unit stalls at the lip of a drop it can't path (a wide body then spins on the ledge). Vanilla allows
+            // multi-block falls; mirror that. For each horizontal direction, step off the edge into an open column
+            // and land on the first standable cell within MAX_FALL_DROP. The 1-block drop is already handled by the
+            // DY=-1 neighbours above, so this only fires when the one-down cell is NOT a standable step.
+            for (int d = 0; d < 8; d++) { // the 8 horizontal (DY==0) directions
+                int nx = cur.x + DX[d];
+                int nz = cur.z + DZ[d];
+                int fddx = nx - sx, fddz = nz - sz;
+                if (fddx * fddx + fddz * fddz > radiusSq) continue;
+
+                // The body must be able to step horizontally off the edge: the column it enters is clear over its
+                // full height, and a diagonal step doesn't cut through a blocked corner.
+                if (!GridNeighbors.climbColumnClear(view, nx, cur.y, nz)) continue;
+                if (DX[d] != 0 && DZ[d] != 0
+                        && GridNeighbors.diagonalBlocked(view, mob, cur.x, cur.y, cur.z, DX[d], DZ[d])) continue;
+
+                // A genuine drop needs open air directly under the edge. If the one-down cell is solid (a wall) or
+                // itself standable (a normal step-down the DY=-1 neighbour already covers), there's no fall here.
+                if (view.solidAt(nx, cur.y - 1, nz)) continue;
+                if (standable(view, mob, nx, cur.y - 1, nz, clearance, footprintRadius, fireCost)) continue;
+
+                for (int fy = cur.y - 2; fy >= cur.y - PathfinderConfig.MAX_FALL_DROP; fy--) {
+                    if (view.solidAt(nx, fy, nz)) break; // hit ground/obstacle before an open landing
+                    float lmult = mob.costFor(view.kindAt(nx, fy, nz), fireCost);
+                    if (Float.isInfinite(lmult)) continue; // still mid-air (no floor here) - keep falling
+                    if (footprintRadius > 0 ? !GridNeighbors.wideFits(view, nx, fy, nz)
+                                            : headBlocked(view, nx, fy, nz, clearance)) continue;
+                    int drop = cur.y - fy;
+                    float ng = cur.g + GridNeighbors.stepCost(d) * lmult
+                             + PathfinderConfig.FALL_COST_PER_BLOCK * drop
+                             + GridNeighbors.crowdingMalus(view, nx, fy, nz);
+                    relax(all, open, nx, fy, nz, ng, gx, gy, gz, cur);
+                    break;
                 }
             }
 
@@ -146,24 +173,38 @@ public final class GridAStar {
                     if (!GridNeighbors.climbColumnClear(view, nx, ny, nz)) continue;
                     if (!GridNeighbors.adjacentToClimbWall(view, nx, ny, nz)) continue;
 
-                    float ng = cur.g + GridNeighbors.CLIMB_COST;
-                    long nkey = key(nx, ny, nz);
-                    NodeRec nb = all.get(nkey);
-                    if (nb == null) {
-                        nb = new NodeRec(nx, ny, nz, ng, heuristic(gx - nx, gy - ny, gz - nz), cur);
-                        all.put(nkey, nb);
-                        open.add(nb);
-                    } else if (!nb.closed && ng < nb.g) {
-                        nb.g = ng;
-                        nb.f = ng + nb.h;
-                        nb.parent = cur;
-                        open.add(nb);
-                    }
+                    relax(all, open, nx, ny, nz, cur.g + GridNeighbors.CLIMB_COST, gx, gy, gz, cur);
                 }
             }
         }
 
         return new Result(reconstruct(best), false, expanded);
+    }
+
+    // Insert a freshly-reached node, or relax an existing open one if this path to it is cheaper.
+    private static void relax(Long2ObjectOpenHashMap<NodeRec> all, PriorityQueue<NodeRec> open,
+                              int nx, int ny, int nz, float ng, int gx, int gy, int gz, NodeRec cur) {
+        long nkey = key(nx, ny, nz);
+        NodeRec nb = all.get(nkey);
+        if (nb == null) {
+            nb = new NodeRec(nx, ny, nz, ng, heuristic(gx - nx, gy - ny, gz - nz), cur);
+            all.put(nkey, nb);
+            open.add(nb);
+        } else if (!nb.closed && ng < nb.g) {
+            nb.g = ng;
+            nb.f = ng + nb.h;
+            nb.parent = cur;
+            open.add(nb);
+        }
+    }
+
+    // Can a unit rest with its feet in this cell? Walkable terrain plus the footprint/headroom gate the main
+    // neighbour loop uses, so the fall pass agrees with it on what counts as a landing.
+    private static boolean standable(WalkabilityView view, MobilityClass mob, int x, int y, int z,
+                                     int clearance, int footprintRadius, float fireCost) {
+        if (Float.isInfinite(mob.costFor(view.kindAt(x, y, z), fireCost))) return false;
+        return footprintRadius > 0 ? GridNeighbors.wideFits(view, x, y, z)
+                                   : !headBlocked(view, x, y, z, clearance);
     }
 
     // Cells [y+2 .. y+clearance-1] above the destination feet must be clear for a mob taller than 2 cells.
