@@ -747,6 +747,15 @@
     "titles.reignofnether.defeated": "You have been defeated",
     "titles.reignofnether.victorious": "You are victorious!",
 
+    "matchend.reignofnether.title": "Match Results",
+    "matchend.reignofnether.winner": "WINNER",
+    "matchend.reignofnether.loser": "LOSER",
+    "matchend.reignofnether.party_total": "Party total",
+    "matchend.reignofnether.resources": "Resources harvested: %s",
+    "matchend.reignofnether.col_units": "Units",
+    "matchend.reignofnether.col_military": "Military",
+    "matchend.reignofnether.col_buildings": "Buildings",
+
     "fogofwar.reignofnether.warning": "[WARNING]",
     "fogofwar.reignofnether.experimental": "You are about to enable fog of war for all players. This is an experimental feature with several issues:",
     "fogofwar.reignofnether.optifine_crash": "- ALL PLAYERS WITH OPTIFINE WILL CRASH",

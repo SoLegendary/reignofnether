@@ -113,12 +113,12 @@ public class MatchStartScreen extends Screen {
         chatInput.setFocused(false);
         addRenderableWidget(chatInput);
 
-        int closeW = 50;
+        int closeW = 20;
         int closeH = 20;
         int closeX = this.width - MARGIN - closeW - 6;
         int closeY = MARGIN + (HEADER_H - closeH) / 2;
         closeButton = net.minecraft.client.gui.components.Button.builder(
-                        Component.literal("Back"),
+                        Component.literal("✕"),
                         b -> MatchStartClientEvents.dismiss())
                 .pos(closeX, closeY).size(closeW, closeH).build();
         addRenderableWidget(closeButton);

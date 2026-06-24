@@ -1027,6 +1027,7 @@ public class PlayerServerEvents {
                             sendMessageToAllPlayers("server.reignofnether.victory_alliance", true, winner);
                             PlayerClientboundPacket.victory(winner);
                         }
+                        broadcastMatchStats(remainingPlayers);
                     }
                 } else if (rtsPlayers.size() == 1) {
                     // Single remaining player - declare victory
@@ -1034,6 +1035,7 @@ public class PlayerServerEvents {
                     postGameRtsPlayers.add(winner);
                     sendMessageToAllPlayers("server.reignofnether.victorious", true, winner.name);
                     PlayerClientboundPacket.victory(winner.name);
+                    broadcastMatchStats(Set.of(winner.name));
                 }
             }
         }
@@ -1051,6 +1053,9 @@ public class PlayerServerEvents {
                 for (String allyName : AlliancesServerEvents.getAllAllies(playerName))
                     PlayerClientboundPacket.victory(allyName);
                 SurvivalServerEvents.endCurrentWave();
+                Set<String> winners = new HashSet<>(AlliancesServerEvents.getAllAllies(playerName));
+                winners.add(playerName);
+                broadcastMatchStats(winners);
             } catch (ConcurrentModificationException e) {
                 System.err.println("ConcurrentModificationException during beaconVictory: " + e.getMessage());
             }
@@ -1061,6 +1066,27 @@ public class PlayerServerEvents {
                 defeat(n, Component.translatable("server.reignofnether.beacon_defeat").getString());
             }
         }
+    }
+
+    // Sends the final per-player scoreboard to all clients so they can show the
+    // end-of-match stats popup (MatchEndScreen). Winners are those in winnerNames;
+    // everyone else (already moved to postGameRtsPlayers on defeat) is a loser.
+    public static void broadcastMatchStats(Set<String> winnerNames) {
+        LinkedHashMap<String, RTSPlayer> byName = new LinkedHashMap<>();
+        synchronized (rtsPlayers) {
+            for (RTSPlayer p : rtsPlayers)
+                if (p != null) byName.putIfAbsent(p.name, p);
+        }
+        synchronized (postGameRtsPlayers) {
+            for (RTSPlayer p : postGameRtsPlayers)
+                if (p != null) byName.putIfAbsent(p.name, p);
+        }
+        List<MatchStatsClientboundPacket.MatchStatRow> rows = new ArrayList<>();
+        for (RTSPlayer p : byName.values())
+            rows.add(new MatchStatsClientboundPacket.MatchStatRow(
+                    p.name, p.faction, winnerNames.contains(p.name), p.startPosColorId,
+                    p.scores.getScoreListAsArray()));
+        MatchStatsClientboundPacket.broadcast(rtsGameTicks, rows);
     }
 
     public static String getBeaconWinTime(String playerName) {
