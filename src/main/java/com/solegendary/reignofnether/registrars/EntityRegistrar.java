@@ -195,7 +195,7 @@ public class EntityRegistrar {
 
     public static final RegistryObject<EntityType<MarauderUnit>> MARAUDER_UNIT = ENTITIES.register("marauder_unit",
             () -> EntityType.Builder.of(MarauderUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
+                    .sized(EntityType.IRON_GOLEM.getWidth(), EntityType.IRON_GOLEM.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "marauder_unit").toString()));
 
@@ -272,7 +272,7 @@ public class EntityRegistrar {
 
     public static final RegistryObject<EntityType<PiglinMerchantUnit>> PIGLIN_MERCHANT_UNIT = ENTITIES.register("piglin_merchant_unit",
             () -> EntityType.Builder.of(PiglinMerchantUnit::new, MobCategory.CREATURE)
-                    .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
+                    .sized(EntityType.IRON_GOLEM.getWidth(), EntityType.IRON_GOLEM.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "piglin_merchant_unit").toString()));
 

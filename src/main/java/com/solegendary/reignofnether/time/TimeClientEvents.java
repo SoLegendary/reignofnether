@@ -109,7 +109,7 @@ public class TimeClientEvents {
     // render directly above the minimap
     @SubscribeEvent
     public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused()
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
             || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK)) {
             return;
         }

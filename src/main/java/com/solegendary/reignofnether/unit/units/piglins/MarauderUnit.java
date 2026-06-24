@@ -414,8 +414,8 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.5f, 0, 0.5f);
-        aabb.setMaxY(aabb.maxY + 0.8f);
+        AABB aabb = this.getBoundingBox().inflate(0.2f, 0, 0.2f);
+        aabb.setMaxY(aabb.maxY + 0.7f);
         return aabb;
     }
 
