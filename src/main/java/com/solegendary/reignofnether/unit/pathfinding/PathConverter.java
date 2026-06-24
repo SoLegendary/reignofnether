@@ -25,11 +25,14 @@ public final class PathConverter {
     // with the wall, so it simply free-falls straight down the column (no fall damage) and lands at the bottom.
     private static final double WALL_PUSH_OFF = 0.5;
 
-    // Extra push along the travel direction at a DESCENT node. A 2-wide body walking off a ledge stays "on ground"
+    // Extra push PAST the lip at a DESCENT node, ON TOP of the body's half-width. A wide body stays "on ground"
     // while any part of its base still overhangs the lip block, so quadrant-centring alone leaves it perched and it
-    // refuses to drop. Pushing the follow target past the lip carries the body's centre clear so it commits to the
-    // fall. Added on top of the quadrant offset (which handles squeezing past obstacles) - the two are separate.
-    private static final double DROP_NUDGE = 0.6;
+    // refuses to drop (it won't move forward until it falls, won't fall until it moves forward - a deadlock). The
+    // follow target is pushed forward by bbWidth/2 (to carry the body's trailing edge past the lip) PLUS this margin
+    // so it fully clears its support and commits to the fall. A fixed nudge was too small for a 1.4-2.0 wide body;
+    // the width-scaled push is applied per-entity in getEntityPosAtNode where bbWidth is known. Added on top of the
+    // quadrant offset (which handles squeezing past obstacles) - the two are separate.
+    private static final double DROP_CLEAR_MARGIN = 0.5;
 
     public static Path toMcPath(List<BlockPos> waypoints, BlockPos target, boolean reached, WalkabilityView view) {
         ArrayList<Node> nodes = new ArrayList<>(waypoints.size());
@@ -72,22 +75,23 @@ public final class PathConverter {
         // clear quadrant the pathfinder found, so the body squeezes past on the open side - the repositioning
         // vanilla does, but driven by OUR footprint check. Fully-open cells stay centred (no jitter mid-corridor).
         Vec3[] footOffset = new Vec3[nodes.size()];
+        Vec3[] dropDir = new Vec3[nodes.size()];
         for (int i = 0; view != null && view.footprintRadius() > 0 && i < nodes.size(); i++) {
             if (climbAim[i]) continue; // climb nodes do their own wall press/push-off
             Node n = nodes.get(i);
             // Travel direction through this node, used to break ties between equally-clear quadrants and to push
             // off a ledge on a descent.
             Node prev = nodes.get(Math.max(0, i - 1)), next = nodes.get(Math.min(nodes.size() - 1, i + 1));
-            Vec3 off = footprintOffset(view, n, next.x - prev.x, next.z - prev.z);
-            // Descent node: also shove the target past the lip so a perched wide body commits to the drop.
+            footOffset[i] = footprintOffset(view, n, next.x - prev.x, next.z - prev.z);
+            // Descent node: remember the (normalised) travel direction so the follower can shove the target past
+            // the lip by a width-scaled amount (see getEntityPosAtNode), so a perched wide body commits to the drop.
             if (i > 0 && n.y < prev.y) {
                 double dx = n.x - prev.x, dz = n.z - prev.z, len = Math.sqrt(dx * dx + dz * dz);
-                if (len > 0) off = off.add(dx / len * DROP_NUDGE, 0, dz / len * DROP_NUDGE);
+                if (len > 0) dropDir[i] = new Vec3(dx / len, 0, dz / len);
             }
-            footOffset[i] = off;
         }
 
-        return new CenteredPath(nodes, target, reached, climbAim, descending, wallDir, footOffset);
+        return new CenteredPath(nodes, target, reached, climbAim, descending, wallDir, footOffset, dropDir);
     }
 
     // Vertical direction of the wall move at node i: +1 going up, -1 going down, 0 if not a vertical climb step.
@@ -163,13 +167,15 @@ public final class PathConverter {
         private final boolean[] descending;
         private final Vec3[] wallDir;
         private final Vec3[] footOffset;
+        private final Vec3[] dropDir;
 
-        CenteredPath(List<Node> nodes, BlockPos target, boolean reached, boolean[] climbAim, boolean[] descending, Vec3[] wallDir, Vec3[] footOffset) {
+        CenteredPath(List<Node> nodes, BlockPos target, boolean reached, boolean[] climbAim, boolean[] descending, Vec3[] wallDir, Vec3[] footOffset, Vec3[] dropDir) {
             super(nodes, target, reached);
             this.climbAim = climbAim;
             this.descending = descending;
             this.wallDir = wallDir;
             this.footOffset = footOffset;
+            this.dropDir = dropDir;
         }
 
         @Override
@@ -183,8 +189,16 @@ public final class PathConverter {
                 return base.add(w.x * press, 0, w.z * press);
             }
             // Wide unit: sit the body in the clear quadrant so it squeezes past obstacles instead of clipping them.
-            if (index < footOffset.length && footOffset[index] != null && entity.getBbWidth() > 1.0f)
-                return base.add(footOffset[index]);
+            if (entity.getBbWidth() > 1.0f) {
+                if (index < footOffset.length && footOffset[index] != null)
+                    base = base.add(footOffset[index]);
+                // Descent: push the target forward past the lip by the body's half-width (+ margin) so the perched
+                // body's trailing edge clears its support and it commits to the drop instead of stalling on the edge.
+                if (index < dropDir.length && dropDir[index] != null) {
+                    double nudge = entity.getBbWidth() / 2.0 + DROP_CLEAR_MARGIN;
+                    base = base.add(dropDir[index].x * nudge, 0, dropDir[index].z * nudge);
+                }
+            }
             return base;
         }
     }

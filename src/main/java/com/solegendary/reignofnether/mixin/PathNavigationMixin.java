@@ -5,12 +5,17 @@ import com.solegendary.reignofnether.unit.pathfinding.PathfinderConfig;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.Path;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 // No unit follows its path strictly: they aim at cell centres (PathConverter.CenteredPath, so they don't hug
 // walls) but follow LOOSELY - vanilla corner-cutting and reach tolerance, no per-node lock, no stuck-recovery
@@ -21,6 +26,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class PathNavigationMixin {
 
     @Shadow @Final protected Mob mob;
+    @Shadow protected Path path;
 
     @Unique
     private boolean reignofnether$isWideUnit() {
@@ -44,5 +50,28 @@ public class PathNavigationMixin {
         // reach a node it's standing right above. +0.5 so a drop of exactly MAX_FALL_DROP still validates.
         if (reignofnether$isClimbingSpider()) return 16.0;
         return reignofnether$isWideUnit() ? PathfinderConfig.MAX_FALL_DROP + 0.5 : original;
+    }
+
+    // The other half of the descent deadlock: vanilla only advances to the next node once the body is within
+    // maxDistanceToWaypoint (~bbWidth/2) HORIZONTALLY of it. A wide body perched on a block can never get its
+    // centre that close to a lower-forward node while it's still grounded (its base overhangs the lip, so it
+    // never falls into reach) - so the path never advances and it spins on the edge. When the next node is a drop
+    // below the mob and the mob is roughly over the lip, advance anyway: the follow target jumps to the node
+    // BEYOND the drop, giving a forward pull that walks the body off the ledge. One advance per tick (a staircase
+    // steps down one node at a time); never past the final target node. Narrow units / climbing spiders excluded.
+    @Inject(method = "followThePath", at = @At("HEAD"))
+    private void reignofnether$commitDescent(CallbackInfo ci) {
+        if (!reignofnether$isWideUnit()) return;
+        Path p = this.path;
+        if (p == null || p.isDone()) return;
+        int idx = p.getNextNodeIndex();
+        if (idx >= p.getNodeCount() - 1) return; // keep the final target node; only commit intermediate drops
+        Node next = p.getNode(idx);
+        if (next.y >= mob.getY() - 0.5) return; // not a drop below the mob's feet
+        double dx = (next.x + 0.5) - mob.getX();
+        double dz = (next.z + 0.5) - mob.getZ();
+        double reach = mob.getBbWidth() / 2.0 + 1.0;
+        if (dx * dx + dz * dz <= reach * reach)
+            p.advance();
     }
 }
