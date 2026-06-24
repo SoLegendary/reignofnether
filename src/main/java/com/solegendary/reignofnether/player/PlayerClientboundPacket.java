@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.faction.Faction;
@@ -19,6 +20,7 @@ public class PlayerClientboundPacket {
     Long value1;
     int value2;
     Faction faction;
+    TradeAction tradeAction; // for updating market rates
 
     public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
@@ -95,12 +97,27 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(PlayerAction.SET_RTS_CAMERA, playerName, (long) (value ? 1 : 0), 0, Faction.NONE));
     }
 
+    public static void setMarketRate(TradeAction tradeAction, String playerName, int value) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(tradeAction, playerName, (long) value));
+    }
+
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1, int value2, Faction faction) {
         this.playerAction = playerAction;
         this.playerName = playerName;
         this.value1 = value1;
         this.value2 = value2;
         this.faction = faction;
+        this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
+    }
+
+    public PlayerClientboundPacket(TradeAction tradeAction, String playerName, Long value1) {
+        this.playerAction = PlayerAction.SET_MARKET_RATE;
+        this.playerName = playerName;
+        this.value1 = value1;
+        this.value2 = 0;
+        this.faction = Faction.NONE;
+        this.tradeAction = tradeAction;
     }
 
     public PlayerClientboundPacket(FriendlyByteBuf buffer) {
@@ -109,6 +126,7 @@ public class PlayerClientboundPacket {
         this.value1 = buffer.readLong();
         this.value2 = buffer.readInt();
         this.faction = buffer.readEnum(Faction.class);
+        this.tradeAction = buffer.readEnum(TradeAction.class);
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -117,6 +135,7 @@ public class PlayerClientboundPacket {
         buffer.writeLong(this.value1);
         buffer.writeInt(this.value2);
         buffer.writeEnum(this.faction);
+        buffer.writeEnum(this.tradeAction);
     }
 
     // server-side packet-consuming functions
@@ -142,6 +161,7 @@ public class PlayerClientboundPacket {
                             case DISABLE_START_RTS -> PlayerClientEvents.setCanStartRTS(false);
                             case SYNC_BEACON_OWNER_TICKS -> PlayerClientEvents.syncBeaconOwnerTicks(playerName, value1);
                             case SET_RTS_CAMERA -> OrthoviewClientEvents.tryToSetCamera(playerName, value1 == 1L);
+                            case SET_MARKET_RATE -> PlayerClientEvents.setMarketRate(tradeAction, playerName, Math.toIntExact(value1));
                         }
                         success.set(true);
                     });

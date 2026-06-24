@@ -326,9 +326,9 @@ public class ScenarioMenu {
             List.of()
         );
         String factionStr = switch (role.faction) {
-            case VILLAGERS -> I18n.get("hud.faction.reignofnether.villager");
-            case MONSTERS -> I18n.get("hud.faction.reignofnether.monster");
-            case PIGLINS -> I18n.get("hud.faction.reignofnether.piglin");
+            case VILLAGERS -> I18n.get("hud.faction.reignofnether.villagers");
+            case MONSTERS -> I18n.get("hud.faction.reignofnether.monsters");
+            case PIGLINS -> I18n.get("hud.faction.reignofnether.piglins");
             case NONE, NEUTRAL -> I18n.get("hud.faction.reignofnether.neutral");
         };
         String label = I18n.get("sandbox.reignofnether.faction_button1", factionStr);

@@ -124,11 +124,23 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
             }
         }
 
+        if (maxHealth <= 0)
+            setToDefaultMaxHealth();
+
         //TODO made this toggelable
         setActiveAddon(GarrisonableBuildingAddon.class, this, true);
         setActiveAddon(NetherConvertingAddon.class, this, true);
         setActiveAddon(NightSourceAddon.class, this, true);
         setActiveAddon(RangeIndicatorAddon.class, this, true);
+    }
+
+    public void setToDefaultMaxHealth() {
+        int nonAirBlocks = 0;
+        for (BuildingBlock bb : BuildingBlockData.getBuildingBlocksFromNbt(structureNbt)) {
+            if (!bb.getBlockState().isAir())
+                nonAirBlocks += 1;
+        }
+        this.maxHealth = nonAirBlocks;
     }
 
     public void packAttributesNbt() {
@@ -148,6 +160,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         attributesNbt.putInt("oreCost", this.cost.ore);
         attributesNbt.putInt("garrisonCapacity", this.garrisonCapacity);
         attributesNbt.putInt("garrisonRange", this.garrisonRange);
+        attributesNbt.putInt("maxHealth", (int) this.maxHealth);
     }
 
     private void unpackAttributesNbt() {
@@ -167,6 +180,8 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         this.cost.ore = attributesNbt.getInt("oreCost");
         this.garrisonCapacity = attributesNbt.getInt("garrisonCapacity");
         this.garrisonRange = attributesNbt.getInt("garrisonRange");
+        if (attributesNbt.contains("maxHealth"))
+            this.maxHealth = attributesNbt.getInt("maxHealth");
     }
 
     public void packCommandsNbt() {
@@ -177,6 +192,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
             ctag.putInt("tickCooldownMax", command.tickCooldownMax);
             ctag.putString("commandStr", command.commandStr);
             ctag.putString("condition", command.condition.toString());
+            ctag.putInt("triggerCount", command.triggerCount);
             this.commandsNbt.add(ctag);
         }
     }
@@ -426,5 +442,10 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     @Override
     public boolean showOnlyWhenSelected(BuildingPlacement placement) {
         return false;
+    }
+
+    @Override
+    public int getDefaultNightRange() {
+        return nightRadius;
     }
 }

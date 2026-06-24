@@ -159,7 +159,8 @@ public class UnitActionItem {
                 continue;
             } else if (((LivingEntity) unit).getEffect(MobEffectRegistrar.UNCONTROLLABLE.get()) != null) {
                 continue;
-            }
+            } else if (unit.ignoreNonStopCommands() && action != UnitAction.STOP)
+                continue;
             // recalculating pathfinding can be expensive, so check if we actually need to first
             if (action == UnitAction.MOVE && isRedundantMove(unit, preselectedBlockPos)) {
                 continue;
@@ -411,12 +412,8 @@ public class UnitActionItem {
                 if (!isRedundantMove((Unit) pair.getFirst(), pair.getSecond()))
                     filtered.add(pair);
             }
-            if (level.isClientSide() || filtered.size() <= 20) {
-                for (Pair<LivingEntity, BlockPos> pair : filtered) {
-                    ((Unit) pair.getFirst()).setMoveTarget(pair.getSecond());
-                }
-            } else {
-                UnitServerEvents.queueFormationMove(filtered);
+            for (Pair<LivingEntity, BlockPos> pair : filtered) {
+                ((Unit) pair.getFirst()).setMoveTarget(pair.getSecond());
             }
         }
 

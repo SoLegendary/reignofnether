@@ -37,6 +37,7 @@ public class WitherShrine extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_STAIRS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
         this.productions.add(ProductionItems.RESEARCH_WITHER_CLOUDS, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.RESEARCH_FIRE_RESISTANCE, Keybindings.abilitySlot2);
@@ -56,13 +57,13 @@ public class WitherShrine extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BASTION) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wither_shrine"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wither_shrine.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wither_shrine.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.wither_shrine.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wither_shrine.tooltip3"), Style.EMPTY)
             ),
             this
         );

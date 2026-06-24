@@ -20,7 +20,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -28,6 +27,7 @@ import net.minecraft.world.level.block.Rotation;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SculkCatalyst extends Building implements NightSourceAddon, RangeIndicatorAddon {
     //TODO public static final DataType<ArrayList<BlockPos>> SCULK_BPS_CACHE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "sculk_bps_cache"), (nbt, server) -> new ArrayList<>(), (netherZone -> new CompoundTag()), () -> new ArrayList<>()); //Cache only, shouldn't be saved
@@ -39,8 +39,8 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
     // vanilla logic determines the actual range, but this is what we're guessing it to be for the range limiter
     // mixin and the dirt path fix
     public final static int ESTIMATED_RANGE = 10;
-    public final static int nightRangeMin = 25;
-    public final static int nightRangeMax = 50;
+    public final static int MIN_NIGHT_RANGE = 30;
+    public final static int MAX_NIGHT_RANGE = 50;
 
     public SculkCatalyst() {
         super(structureName, cost, false);
@@ -49,6 +49,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/sculk_catalyst_side.png");
 
         this.buildTimeModifier = 2.5f;
+        this.maxHealth = 75d;
 
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
 
@@ -77,29 +78,13 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) || ResearchClient.hasCheat(
                 "modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.sculk_catalyst"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("buildings.reignofnether.sculk_catalyst"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.sculk_catalyst.tooltip1"),
-                    Style.EMPTY
-                ),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get(
-                    "buildings.monsters.reignofnether.sculk_catalyst.tooltip2",
-                    nightRangeMin
-                ), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get(
-                    "buildings.monsters.reignofnether.sculk_catalyst.tooltip3",
-                    nightRangeMax
-                ), Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.sculk_catalyst.tooltip4"),
-                    Style.EMPTY
-                )
+                fcs(""),
+                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip1")),
+                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip2", MIN_NIGHT_RANGE)),
+                fcs(""),
+                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip3"))
             ),
             this
         );
@@ -107,7 +92,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
 
     public int getRange(BuildingPlacement placement) {
         if ((placement.isBuilt || placement.isBuiltServerside) && placement instanceof SculkCatalystPlacement scp) {
-            return (int) Math.min(SculkCatalyst.nightRangeMin + (scp.sculkBps.size() * SculkCatalystPlacement.RANGE_PER_SCULK), SculkCatalyst.nightRangeMax);
+            return (int) Math.min(SculkCatalyst.MIN_NIGHT_RANGE + (scp.sculkBps.size() * SculkCatalystPlacement.RANGE_PER_SCULK), SculkCatalyst.MAX_NIGHT_RANGE);
         }
         return 0;
     }
@@ -142,5 +127,10 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
     @Override
     public boolean showOnlyWhenSelected(BuildingPlacement placement) {
         return false;
+    }
+
+    @Override
+    public int getDefaultNightRange() {
+        return MIN_NIGHT_RANGE;
     }
 }

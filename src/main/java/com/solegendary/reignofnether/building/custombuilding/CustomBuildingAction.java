@@ -21,6 +21,7 @@ public enum CustomBuildingAction {
     SET_ORE_BOUNTY,
     SET_GARRISON_CAPACITY,
     SET_GARRISON_RANGE,
+    SET_MAX_HEALTH,
 
     ADD_COMMAND,
     DELETE_COMMAND,

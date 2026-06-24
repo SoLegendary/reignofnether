@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -210,6 +211,11 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
                 } while(!(block instanceof LeavesBlock));
             }
         }
+
+        // for some reason, hoglins don't run this goal when mounted and so don't move beyond follow range
+        if (this.isVehicle())
+            if (this.getMoveGoal().canUse())
+                this.getMoveGoal().canContinueToUse();
     }
 
     @Override
@@ -303,7 +309,10 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
     @Override
     public boolean fireImmune() {
         BuildingPlacement bpl = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
-        return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
+        return super.fireImmune() ||
+                (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary ||
+                        bpl.getBuilding() instanceof BasaltSprings ||
+                        bpl.getBuilding() instanceof PiglinMarket));
     }
 
     @Override

@@ -28,7 +28,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class ChillingScreech extends HeroAbility {
 
-    private static final int CD_MAX = 30 * ResourceCost.TICKS_PER_SECOND;
+    private static final int CD_MAX = 20 * ResourceCost.TICKS_PER_SECOND;
 
     public static final int DURATION_RANK_1 = 7 * 20;
     public static final int DURATION_RANK_2 = 9 * 20;
@@ -68,12 +68,15 @@ public class ChillingScreech extends HeroAbility {
         if (getRank(hero) == 1) {
             duration = DURATION_RANK_1;
             radius = RADIUS_RANK_1;
+            range = RADIUS_RANK_1;
         } else if (getRank(hero) == 2) {
             duration = DURATION_RANK_2;
             radius = RADIUS_RANK_2;
+            range = RADIUS_RANK_2;
         } else if (getRank(hero) == 3) {
             duration = DURATION_RANK_3;
             radius = RADIUS_RANK_3;
+            range = RADIUS_RANK_3;
         }
     }
 

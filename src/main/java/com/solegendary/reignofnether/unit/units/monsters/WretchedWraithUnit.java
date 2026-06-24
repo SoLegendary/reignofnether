@@ -43,6 +43,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -205,7 +206,8 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     final static private float baseMaxMana = 120;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    final static private float manaRegenPerSecond = 1;
+    final static private float manaRegenPerSecond = 0.75f;
+    final static private float bonusManaRegenPerSnowLayer = 0.25f;
     final static private float manaBonusPerLevel = 10;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
@@ -218,6 +220,14 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         this.mana = Math.min(maxMana, amount);
         if (!level().isClientSide())
             HeroClientboundPacket.setMana(getId(), this.mana);
+    }
+    @Override
+    public float getManaRegenPerSecond() {
+        float regen = HeroUnit.super.getManaRegenPerSecond();
+        int layers = 0;
+        if (onGround())
+            layers = BlockUtils.getWraithSnowLayers(level().getBlockState(getOnPos().above()));
+        return regen + (bonusManaRegenPerSnowLayer * layers);
     }
 
     final static public float attackDamage = 5.0f;
@@ -349,6 +359,11 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     }
 
     @Override
+    public boolean ignoreNonStopCommands() {
+        return isBlizzardInProgress();
+    }
+
+    @Override
     public void kill() {
         if (!level().isClientSide()) {
             SoundClientboundPacket.stopSoundWithId(getId());
@@ -363,7 +378,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
+        if (MiscUtil.isMagicDamage(pSource))
             pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
@@ -400,7 +415,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
                 .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
                 .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)

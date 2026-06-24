@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
+import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.alliance.AllyCommand;
 import com.solegendary.reignofnether.building.*;
@@ -371,6 +372,8 @@ public class PlayerServerEvents {
         } else {
             PlayerClientboundPacket.disableStartRTS(playerName);
         }
+
+        updateMarketRates(playerName);
     }
 
     @SubscribeEvent
@@ -628,7 +631,8 @@ public class PlayerServerEvents {
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building.scenarioRoleIndex == roleIndex) {
                     building.ownerName = playerName;
-                    BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(), playerName, building.scenarioRoleIndex);
+                    BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(),
+                            building.partialBlocksDestroyed, playerName, building.scenarioRoleIndex);
                 }
             }
             for (LivingEntity le : UnitServerEvents.getAllUnits()) {
@@ -943,9 +947,20 @@ public class PlayerServerEvents {
     }
 
     public static void defeat(String playerName, String reason) {
-        ReignOfNether.LOGGER.info("[Player] defeat: playerName={}, reason={}", playerName, reason);
         if (SandboxServer.isSandboxPlayer(playerName))
             return;
+
+        boolean playerExists = false;
+        for (RTSPlayer rtsPlayer : rtsPlayers) {
+            if (rtsPlayer.name.equals(playerName)) {
+                playerExists = true;
+                break;
+            }
+        }
+        if (!playerExists)
+            return;
+
+        ReignOfNether.LOGGER.info("[Player] defeat: playerName={}, reason={}", playerName, reason);
 
         synchronized (rtsPlayers) {
             // Remove the defeated player from the list
@@ -1165,7 +1180,7 @@ public class PlayerServerEvents {
         for (BuildingPlacement bpl : BuildingServerEvents.getBuildings()) {
             ScenarioRole role = ScenarioUtils.getScenarioRole(false, bpl.scenarioRoleIndex);
             bpl.ownerName = role != null ? role.name : "";
-            BuildingClientEvents.syncBuilding(bpl, bpl.getBlocksPlaced(), bpl.ownerName, bpl.scenarioRoleIndex);
+            BuildingClientEvents.syncBuilding(bpl, bpl.getBlocksPlaced(), bpl.partialBlocksDestroyed, bpl.ownerName, bpl.scenarioRoleIndex);
         }
         serverLevel.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).set(true, serverLevel.getServer());
 
@@ -1244,6 +1259,28 @@ public class PlayerServerEvents {
             sendMessageToAllPlayers("server.reignofnether.sync_enabled");
         } else {
             sendMessageToAllPlayers("server.reignofnether.sync_disabled");
+        }
+    }
+
+    public static void updateMarketRates(String playerName) {
+        for (RTSPlayer rtsPlayer : rtsPlayers) {
+            if (rtsPlayer.name.equals(playerName)) {
+                for (TradeAction tradeAction : rtsPlayer.tradeRates.keySet()) {
+                    PlayerClientboundPacket.setMarketRate(tradeAction, rtsPlayer.name, rtsPlayer.tradeRates.get(tradeAction));
+                }
+                return;
+            }
+        }
+    }
+
+    public static void updateMarketRates(int playerId) {
+        for (RTSPlayer rtsPlayer : rtsPlayers) {
+            if (rtsPlayer.id == playerId) {
+                for (TradeAction tradeAction : rtsPlayer.tradeRates.keySet()) {
+                    PlayerClientboundPacket.setMarketRate(tradeAction, rtsPlayer.name, rtsPlayer.tradeRates.get(tradeAction));
+                }
+                return;
+            }
         }
     }
 }

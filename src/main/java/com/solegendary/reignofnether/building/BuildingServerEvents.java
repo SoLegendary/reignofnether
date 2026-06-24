@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -133,7 +134,8 @@ public class BuildingServerEvents {
                     portalType,
                     b instanceof PortalPlacement portal && portal.hasDestination() ? portal.destination : new BlockPos(0,0,0),
                     b.scenarioRoleIndex,
-                    b.getDataStorage()
+                    b.getDataStorage(),
+                    b.partialBlocksDestroyed
             ));
             //ReignOfNether.LOGGER.info("saved buildings/nether in serverevents: " + b.originPos);
         });
@@ -176,6 +178,7 @@ public class BuildingServerEvents {
                 );
 
                 if (building != null) {
+                    building.partialBlocksDestroyed = b.partialBlocksDestroyed;
                     building.dataStorage = b.dataStorage;
                     building.scenarioRoleIndex = b.scenarioRoleIndex;
                     building.isBuilt = b.isBuilt;
@@ -638,7 +641,8 @@ public class BuildingServerEvents {
         if (buildingSyncTicks <= 0) {
             buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
             for (BuildingPlacement building : buildings)
-                BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(), building.ownerName, building.scenarioRoleIndex);
+                BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(),
+                        building.partialBlocksDestroyed, building.ownerName, building.scenarioRoleIndex);
         }
         // need to remove from the list first as destroy() will read it to check defeats
         List<BuildingPlacement> buildingsToDestroy = new ArrayList<>();
@@ -749,6 +753,8 @@ public class BuildingServerEvents {
                 } else if (pillagerUnit != null) {
                     atkDmg = pillagerUnit.getUnitAttackDamage() / 2;
                     building.lastAttacker = pillagerUnit;
+                } else if (exp.getExploder() instanceof AdjustablePrimedTnt aTNT) {
+                    atkDmg = aTNT.getExplosionPower() *  AdjustablePrimedTnt.DAMAGE_PER_POWER;
                 } else if (exp.getExploder() instanceof PrimedTnt) {
                     atkDmg = TNT_BUILDING_BASE_DAMAGE;
                 }
@@ -761,11 +767,7 @@ public class BuildingServerEvents {
                             le.hurt(exp.getDamageSource(), (random.nextFloat(atkDmg + 1)) / 2f);
                     }
 
-                    if (building.getBuilding() instanceof AbstractBridge) {
-                        atkDmg /= 2;
-                    }
-
-                    building.destroyRandomBlocks((int) atkDmg);
+                    building.destroyRandomBlocks(atkDmg);
                 }
 
             }

@@ -49,9 +49,9 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     private static final int ALLIANCE_FRAME_WIDTH = (Button.DEFAULT_ICON_FRAME_SIZE * 5); // frame containing a resource value + icon
     public static final int DISPLAY_WIDTH = // total width of a player display
             PLAYER_FRAME_WIDTH +
-            RESOURCE_FRAME_WIDTH * 4 +
-            (int) (Button.DEFAULT_ICON_FRAME_SIZE * 2.5f) +
-            ALLIANCE_FRAME_WIDTH;
+                    RESOURCE_FRAME_WIDTH * 4 +
+                    (int) (Button.DEFAULT_ICON_FRAME_SIZE * 2.5f) +
+                    ALLIANCE_FRAME_WIDTH;
 
 
     private boolean isAllied() {
@@ -71,7 +71,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     }
 
     private Button renderTradeResources(GuiGraphics guiGraphics, ResourceName resourceName,
-                                      int x, int y, int mouseX, int mouseY) {
+                                        int x, int y, int mouseX, int mouseY) {
         String iconPath;
         String value;
         int color;
@@ -245,33 +245,29 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         String allianceStatusStr;
         int frameBgColour = 0xA0000000 | PlayerColors.getPlayerAllianceColorHex(playerName);
 
-        int frameWidth = 50;
-
         if (!isAllied() && !allianceRequested() && !allianceReceived()) {
-            allianceStatusStr = "Enemy";
+            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.enemy");
             allyRequestButton.render(guiGraphics, x, y, mouseX, mouseY);
             renderedButton = allyRequestButton;
-            frameWidth = 46;
         } else if (!isAllied() && allianceRequested()) {
-            allianceStatusStr = "Requested";
+            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.requested");
             allyCancelRequestButton.render(guiGraphics, x, y, mouseX, mouseY);
             renderedButton = allyCancelRequestButton;
-            frameWidth = 67;
         } else if (!isAllied() && allianceReceived()) {
-            allianceStatusStr = "Accept?";
+            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.accept");
             allyConfirmButton.render(guiGraphics, x, y, mouseX, mouseY);
             renderedButton = allyConfirmButton;
-            frameWidth = 55;
         } else {
-            allianceStatusStr = "Allied";
+            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.allied");
             disbandButton.render(guiGraphics, x, y, mouseX, mouseY);
             renderedButton = disbandButton;
-            frameWidth = 41;
             if (AlliancesClient.canControlAlly(playerName)) {
-                allianceStatusStr += " (s)";
-                frameWidth = 58;
+                allianceStatusStr += I18n.get("alliances.reignofnether.tooltip.status.allied.plural");
             }
         }
+
+        int drawStringStartOffset = Button.DEFAULT_ICON_FRAME_SIZE + (Button.DEFAULT_ICON_SIZE / 2) + 1;
+        int frameWidth = drawStringStartOffset + MC.font.width(allianceStatusStr);
         MyRenderer.renderFrameWithBg(
                 guiGraphics,
                 x + Button.DEFAULT_ICON_FRAME_SIZE,
@@ -283,7 +279,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         guiGraphics.drawString(
                 MC.font,
                 allianceStatusStr,
-                x + Button.DEFAULT_ICON_FRAME_SIZE + (Button.DEFAULT_ICON_SIZE / 2) + 1,
+                x + drawStringStartOffset,
                 y + (Button.DEFAULT_ICON_SIZE / 2) + 1,
                 0xFFFFFF
         );
@@ -292,7 +288,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
             guiGraphics.fill(
                     x + Button.DEFAULT_ICON_FRAME_SIZE,
                     y,
-                    x + (Button.DEFAULT_ICON_FRAME_SIZE * 2) + 4 + (allianceStatusStr.length() * 4),
+                    x + (Button.DEFAULT_ICON_FRAME_SIZE * 2) + 4 + MC.font.width(allianceStatusStr),
                     y + Button.DEFAULT_ICON_FRAME_SIZE,
                     0x99000000
             );

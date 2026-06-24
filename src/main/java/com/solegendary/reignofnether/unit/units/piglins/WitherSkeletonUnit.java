@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -337,7 +338,10 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     @Override
     public boolean fireImmune() {
         BuildingPlacement bpl = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
-        return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
+        return super.fireImmune() ||
+                (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary ||
+                        bpl.getBuilding() instanceof BasaltSprings ||
+                        bpl.getBuilding() instanceof PiglinMarket));
     }
 
     @Override

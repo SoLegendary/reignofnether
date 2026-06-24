@@ -43,6 +43,7 @@ public class ArcaneTower extends ProductionBuilding {
 
         this.buildTimeModifier = 0.7f;
         this.explodeChance = 0.2f;
+        this.maxHealth = 340d;
 
         this.productions.add(ProductionItems.EVOKER, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.WINDCALLER, Keybindings.abilitySlot2);
@@ -62,12 +63,12 @@ public class ArcaneTower extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.arcane_tower"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.arcane_tower.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.arcane_tower.tooltip2"), Style.EMPTY)
             ),
             this
         );

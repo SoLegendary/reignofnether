@@ -22,10 +22,12 @@ public class BuildingSave {
     public BlockPos portalDestination;
     public int scenarioRoleIndex;
     public DataStorage dataStorage;
+    public double partialBlocksDestroyed;
 
     public BuildingSave(BlockPos originPos, Level level, Building building, String ownerName, Rotation rotation,
                         BlockPos rallyPoint, boolean isDiagonalBridge, boolean isBuilt, int upgradeLevel,
-                        PortalPlacement.PortalType portalType, BlockPos portalDestination, int scenarioRoleIndex, DataStorage dataStorage) {
+                        PortalPlacement.PortalType portalType, BlockPos portalDestination, int scenarioRoleIndex,
+                        DataStorage dataStorage, double partialBlocksDestroyed) {
         this.originPos = originPos;
         this.level = level;
         this.building = building;
@@ -39,5 +41,6 @@ public class BuildingSave {
         this.portalDestination = portalDestination;
         this.scenarioRoleIndex = scenarioRoleIndex;
         this.dataStorage = dataStorage;
+        this.partialBlocksDestroyed = partialBlocksDestroyed;
     }
 }

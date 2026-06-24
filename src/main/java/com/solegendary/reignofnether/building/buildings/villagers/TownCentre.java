@@ -42,7 +42,8 @@ public class TownCentre extends ProductionBuilding implements RangeIndicatorAddo
         this.portraitBlock = Blocks.POLISHED_GRANITE;
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_granite.png");
 
-        this.buildTimeModifier = 0.331f; // 60s total build time with 3 villagers
+        this.maxHealth = 380d;
+        this.buildTimeModifier = 0.328f; // 60s total build time with 3 villagers
         this.canAcceptResources = true;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
@@ -72,11 +73,11 @@ public class TownCentre extends ProductionBuilding implements RangeIndicatorAddo
                 () -> false,
                 () -> true,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.town_centre"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.town_centre"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPop(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.town_centre.tooltip1"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.town_centre.tooltip1"), Style.EMPTY)
                 ),
                 this
         );

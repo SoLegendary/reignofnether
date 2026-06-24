@@ -40,6 +40,7 @@ public class SlimePit extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.COBBLED_DEEPSLATE);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
         this.productions.add(ProductionItems.SLIME, Keybindings.abilitySlot1);
     }
@@ -58,12 +59,12 @@ public class SlimePit extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.slime_pit"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.slime_pit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.slime_pit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.slime_pit.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.slime_pit.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.slime_pit.tooltip3"), Style.EMPTY)
             ),
             this
         );

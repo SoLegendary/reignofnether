@@ -322,7 +322,7 @@ public class BuildingUtils {
         for (BuildingPlacement building : buildings) {
             if (building instanceof SculkCatalystPlacement sc) {
                 if (entity.distanceToSqr(Vec3.atCenterOf(sc.centrePos)) < maxCatalystRangeSquared &&
-                        sc.getUncappedNightRange() >= SculkCatalyst.nightRangeMax * 1.5f) {
+                        sc.getUncappedNightRange() >= SculkCatalyst.MAX_NIGHT_RANGE * 1.5f) {
                     return true;
                 }
             }

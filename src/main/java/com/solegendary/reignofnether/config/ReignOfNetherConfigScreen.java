@@ -35,6 +35,7 @@ public class ReignOfNetherConfigScreen extends Screen {
     protected void init() {
         super.init();
         this.buildColorSettings(50);
+        this.buildMinimapSettings(150);
         this.addRenderableWidget(button(this.width / 2 - 75, this.height - 29, 150, 20, CommonComponents.GUI_BACK, button -> this.minecraft.setScreen(this.parent)));
     }
 
@@ -77,5 +78,16 @@ public class ReignOfNetherConfigScreen extends Screen {
         addRenderableWidget(new ConfigCheckbox(ReignOfNetherClientConfigs.USE_PLAYER_COLORS, "Using player colors", "Using alliance colors")
                 .pos(colorRect.left(), colorRect.bottom())
                 .size(colorRect.width(), labelHeight));
+    }
+
+    private void buildMinimapSettings(int y) {
+        int width = 200;
+        int labelHeight = 20;
+        int left = this.width / 2 - width / 2;
+
+        addRenderableOnly(new Label("Minimap").pos(left, y).size(width, labelHeight));
+        addRenderableWidget(new ConfigCheckbox(ReignOfNetherClientConfigs.SQUARE_MINIMAP, "Square minimap", "Diamond minimap")
+                .pos(left, y + labelHeight)
+                .size(width, labelHeight));
     }
 }

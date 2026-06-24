@@ -45,10 +45,10 @@ public class SpruceStockpile extends AbstractStockpile {
                         BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spruce_stockpile"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spruce_stockpile"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spruce_stockpile.tooltip1"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spruce_stockpile.tooltip1"), Style.EMPTY)
                 ),
                 this
         );

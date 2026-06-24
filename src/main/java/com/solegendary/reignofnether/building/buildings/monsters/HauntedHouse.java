@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +30,8 @@ public class HauntedHouse extends Building {
 
         this.buildTimeModifier = 0.8f;
 
+        this.maxHealth = 175d;
+
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.DARK_OAK_LOG);
     }
@@ -43,15 +46,15 @@ public class HauntedHouse extends Building {
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/dark_oak_log.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.HAUNTED_HOUSE,
-            () -> false,
+            () -> !SandboxClientEvents.isSandboxPlayer(),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.haunted_house"), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.haunted_house"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
                     ResourceCosts.getFormattedPop(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.haunted_house.tooltip1"), Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.haunted_house.tooltip1"), Style.EMPTY)
             ),
             this
         );

@@ -4,4 +4,5 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 
 public interface NightSourceAddon extends BuildingAddon {
     int getNightRange(BuildingPlacement placement);
+    int getDefaultNightRange(); // for indicator while placing
 }

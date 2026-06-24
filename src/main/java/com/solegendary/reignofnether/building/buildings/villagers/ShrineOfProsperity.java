@@ -46,6 +46,8 @@ public class ShrineOfProsperity extends ProductionBuilding {
         this.productions.add(ProductionItems.ROYAL_GUARD_REVIVE, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.ENCHANTER, Keybindings.abilitySlot2);
         this.productions.add(ProductionItems.ENCHANTER_REVIVE, Keybindings.abilitySlot2);
+
+        this.maxHealth = 240d;
     }
 
     @Override
@@ -69,11 +71,11 @@ public class ShrineOfProsperity extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        fcs(I18n.get("buildings.villagers.reignofnether.shrine_of_prosperity"), true),
+                        fcs(I18n.get("buildings.reignofnether.shrine_of_prosperity"), true),
                         ResourceCosts.getFormattedCost(cost),
                         fcs(""),
-                        fcs(I18n.get("buildings.villagers.reignofnether.shrine_of_prosperity.tooltip1")),
-                        fcs(I18n.get("buildings.villagers.reignofnether.shrine_of_prosperity.tooltip2"))
+                        fcs(I18n.get("buildings.reignofnether.shrine_of_prosperity.tooltip1")),
+                        fcs(I18n.get("buildings.reignofnether.shrine_of_prosperity.tooltip2"))
                 ),
                 this
         );

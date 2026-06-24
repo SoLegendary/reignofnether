@@ -39,6 +39,7 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
 
         this.buildTimeModifier = 0.32f; // 60s total build time with 3 villagers
         this.canAcceptResources = true;
+        this.maxHealth = 380d;
 
         this.startingBlockTypes.add(Blocks.NETHER_BRICKS);
 
@@ -60,11 +61,11 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
                 () -> false,
                 () -> true,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.central_portal"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.central_portal"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPop(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.central_portal.tooltip1"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.central_portal.tooltip1"), Style.EMPTY)
                 ),
                 this
         );

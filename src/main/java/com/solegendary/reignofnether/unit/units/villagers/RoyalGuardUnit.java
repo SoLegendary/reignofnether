@@ -29,6 +29,7 @@ import com.solegendary.reignofnether.unit.modelling.animations.RoyalGuardAnimati
 import com.solegendary.reignofnether.unit.modelling.renderers.RoyalGuardRenderer;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -337,7 +338,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
+        if (MiscUtil.isMagicDamage(pSource))
             pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
@@ -624,7 +625,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 }
             }
             for (BuildingPlacement building : buildings) {
-                building.destroyRandomBlocks((int) (maceSlam.damage / 2));
+                building.destroyRandomBlocks(maceSlam.damage / 2);
             }
 
             for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(blockPos.above()), MaceSlam.RADIUS, LivingEntity.class, level())) {

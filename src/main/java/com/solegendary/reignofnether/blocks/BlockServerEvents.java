@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.resources.ResourceSources;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
@@ -27,6 +26,9 @@ public class BlockServerEvents {
     private static final Random RANDOM = new Random();
 
     public static ArrayList<TemporaryBlock> tempBlocks = new ArrayList<>();
+
+    // if you want to place a block to replace a broken block, we can't do it in the same tick
+    public static Map<BlockPos, BlockState> blocksToPlace = new HashMap<>();
 
     public static void addTempBlock(ServerLevel level, BlockPos bp, BlockState bs, BlockState oldBs, int lifespan) {
         addTempBlock(level, bp, bs, oldBs, lifespan, false, null);
@@ -55,6 +57,12 @@ public class BlockServerEvents {
             return;
         }
         tempBlocks.removeIf(tb -> tb.tick((ServerLevel) evt.level));
+
+        for (BlockPos bp : blocksToPlace.keySet()) {
+            BlockState bs = blocksToPlace.get(bp);
+            evt.level.setBlockAndUpdate(bp, bs);
+        }
+        blocksToPlace.clear();
     }
 
     @SubscribeEvent

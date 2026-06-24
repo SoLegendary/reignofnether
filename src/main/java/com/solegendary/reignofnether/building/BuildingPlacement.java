@@ -3,12 +3,8 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
-import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
-import com.solegendary.reignofnether.building.buildings.monsters.DarkWatchtower;
-import com.solegendary.reignofnether.building.buildings.piglins.Bastion;
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
@@ -17,10 +13,10 @@ import com.solegendary.reignofnether.building.buildings.placements.BeaconPlaceme
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractStockpile;
-import com.solegendary.reignofnether.building.buildings.villagers.Watchtower;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.data.DataStorage;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
@@ -44,7 +40,6 @@ import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
-import com.solegendary.reignofnether.tps.TPSClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -61,11 +56,9 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -134,7 +127,7 @@ public class BuildingPlacement {
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float MIN_BLOCKS_PERCENT = 0.5f;
 
-    protected int highestBlockCountReached = 2; // effective max health of the building
+    protected int highestBlockCountReached = 2; // used for calculating max health of the building
 
     protected ArrayList<BuildingBlock> scaffoldBlocks = new ArrayList<>();
     /**
@@ -200,12 +193,10 @@ public class BuildingPlacement {
     }
 
     public Mob lastAttacker = null;
-
     public boolean allowProdWhileBuilding = false;
-
     public Ability autocast;
-
     private ArmorStand targetStand = null;
+    public double partialBlocksDestroyed = 0;
 
     public ArmorStand getTargetStand() {
         if (targetStand == null)
@@ -214,6 +205,17 @@ public class BuildingPlacement {
     }
 
     private EntityType<? extends Animal> lastAnimalType = null;
+
+    public double getHealthPerBlock() {
+        if (getBuilding().isUsingSetHealth(this)) {
+            int blocksTotal = getBlocksTotal();
+            if (blocksTotal <= 0)
+                blocksTotal = 1;
+            return (getBuilding().getMaxHealth(this) / blocksTotal) * 2;
+        } else {
+            return Building.DEFAULT_HEALTH_PER_BLOCK;
+        }
+    }
 
     public BuildingPlacement(
         Building building,
@@ -459,11 +461,12 @@ public class BuildingPlacement {
 
     // health and maxHealth are normalised to 0 being point of destruction
     public int getHealth() {
-        return (int) (getBlocksPlaced() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached());
+        return (int) Math.round((((getBlocksPlaced() - partialBlocksDestroyed) / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 
     public int getMaxHealth() {
-        return (int) (getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached());
+        return (int) Math.round(getBuilding().isUsingSetHealth(this) ? getBuilding().getMaxHealth(this) :
+                    ((getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 
     // place blocks according to the following rules:
@@ -524,6 +527,7 @@ public class BuildingPlacement {
             }
             addToBlockPlaceQueue(validBlocks.get(0));
         }
+        partialBlocksDestroyed = 0d;
     }
 
     private void extinguishFires(ServerLevel level) {
@@ -559,18 +563,29 @@ public class BuildingPlacement {
         return block.isPlaced(getLevel());
     }
 
-    public void destroyRandomBlocks(int amount) {
+    public void destroyRandomBlocks(double amount) {
         if (getLevel().isClientSide())
             return;
         if (!isAttackable())
             return;
+
+        amount /= (getHealthPerBlock() / 2d);
+        double floorAmount = Math.floor(amount);
+        partialBlocksDestroyed += (amount - floorAmount);
+
+        int intAmount = (int) floorAmount;
+        if (partialBlocksDestroyed >= 1d) {
+            partialBlocksDestroyed -= 1d;
+            intAmount += 1;
+        }
+
         var placedBlocks = new ArrayList<BuildingBlock>();
         for (BuildingBlock block : blocks) {
             if (!isDestroyedAndNotNextToLiquid(block)) continue;
             placedBlocks.add(block);
         }
         Collections.shuffle(placedBlocks);
-        for (int i = 0; i < amount && i < placedBlocks.size(); i++) {
+        for (int i = 0; i < intAmount && i < placedBlocks.size(); i++) {
             BlockPos bp = placedBlocks.get(i).getBlockPos();
             if (!getLevel().getBlockState(bp).getFluidState().isEmpty()) {
                 getLevel().setBlockAndUpdate(bp, Blocks.AIR.defaultBlockState());
@@ -579,7 +594,7 @@ public class BuildingPlacement {
             }
             this.onBlockBreak((ServerLevel) getLevel(), bp, false);
         }
-        if (amount > 0) {
+        if (intAmount > 0) {
             AttackWarningClientboundPacket.sendWarning(ownerName, BuildingUtils.getCentrePos(getBlocks()));
         }
     }
@@ -837,7 +852,7 @@ public class BuildingPlacement {
             float cooldown = cooldownEntry.getValue();
             if (cooldown > 0 || getCharges(ability) < ability.maxCharges) {
                 if (level.isClientSide())
-                    cooldowns.put(ability, (float) (cooldown - (TPSClientEvents.getCappedTPS() / 20D)));
+                    cooldowns.put(ability, (float) (cooldown - (RtsDebugClientEvents.getCappedTPS() / 20D)));
                 else
                     cooldowns.put(ability, cooldown - 1);
 
@@ -941,9 +956,7 @@ public class BuildingPlacement {
                     msPerBuild *= PortalPlacement.NON_NETHER_BUILD_TIME_MODIFIER;
                 }
 
-                if (msToNextBuild > msPerBuild) {
-                    msToNextBuild = msPerBuild;
-                }
+                msToNextBuild = Math.min(msToNextBuild, msPerBuild);
 
                 if (hasFastBuildCheat) {
                     msToNextBuild -= 500;
@@ -952,7 +965,7 @@ public class BuildingPlacement {
                 }
 
                 if (msToNextBuild <= 0) {
-                    msToNextBuild = msPerBuild;
+                    msToNextBuild += msPerBuild;
                     Collections.shuffle(workerUnits);
                     if (!workerUnits.isEmpty()) {
                         WorkerUnit wUnit = workerUnits.get(0);
@@ -982,8 +995,11 @@ public class BuildingPlacement {
             BuildingBlock nextBlock = blockPlaceQueue.get(0);
             BlockPos bp = nextBlock.getBlockPos();
             BlockState bs = nextBlock.getBlockState();
+            Block blockBelow = level.getBlockState(bp.below()).getBlock();
             CompoundTag bNbt = nextBlock.getBlockNbt();
             if (level.isLoaded(bp)) {
+                if (blockBelow == Blocks.FARMLAND || blockBelow == Blocks.DIRT_PATH)
+                    level.setBlockAndUpdate(bp.below(), Blocks.DIRT.defaultBlockState());
                 level.setBlockAndUpdate(bp, bs);
                 if (bNbt != null) {
                     if (bs.getBlock() == Blocks.SCULK_CATALYST) {

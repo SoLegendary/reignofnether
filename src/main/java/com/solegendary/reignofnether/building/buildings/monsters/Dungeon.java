@@ -45,9 +45,13 @@ public class Dungeon extends ProductionBuilding {
 
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICK_STAIRS);
 
+        this.buildTimeModifier = 2.0f;
+
         this.explodeChance = 0.2f;
         this.productions.add(ProductionItems.CREEPER, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.WRAITH, Keybindings.abilitySlot2);
+
+        this.maxHealth = 120d;
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
@@ -64,12 +68,12 @@ public class Dungeon extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dungeon"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dungeon.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dungeon.tooltip2"), Style.EMPTY)
             ),
             this
         );

@@ -66,10 +66,10 @@ public class HealingFountain extends Building implements RangeIndicatorAddon {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.healing_fountain"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.healing_fountain"), Style.EMPTY.withBold(true)),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.healing_fountain.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.healing_fountain.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.healing_fountain.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.healing_fountain.tooltip2"), Style.EMPTY)
             ),
             this
         );

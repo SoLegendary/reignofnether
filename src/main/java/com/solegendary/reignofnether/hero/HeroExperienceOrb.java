@@ -39,7 +39,7 @@ public class HeroExperienceOrb extends ExperienceOrb {
             RANDOM.nextDouble() * 0.2,
             (RANDOM.nextDouble() * 0.2 - 0.1)
         );
-        expOrb.value = pValue;
+        expOrb.value = isNeutral ? pValue : (int) (pValue * 0.5f);
         expOrb.setNoGravity(true);
         return expOrb;
     }

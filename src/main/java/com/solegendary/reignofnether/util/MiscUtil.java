@@ -51,8 +51,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -965,37 +968,48 @@ public class MiscUtil {
                 block instanceof SnowLayerBlock;
     }
 
+    public static String getFactionName(Faction faction) {
+        return I18n.get(String.format("hud.faction.reignofnether.%s", faction.toString().toLowerCase()));
+    }
+
+    private record ColorEntry(int mapColorId, int hex, String englishName) {}
+
+    private static final ColorEntry[] COLOR_ENTRIES = {
+        // default
+        new ColorEntry(MapColor.SNOW.id,                0xE9ECEC, "white"),
+
+        new ColorEntry(MapColor.COLOR_BLACK.id,         0x141519, "black"),
+        new ColorEntry(MapColor.COLOR_BLUE.id,          0x35399D, "blue"),
+        new ColorEntry(MapColor.COLOR_BROWN.id,         0x724728, "brown"),
+        new ColorEntry(MapColor.COLOR_CYAN.id,          0x158991, "cyan"),
+        new ColorEntry(MapColor.COLOR_GRAY.id,          0x3E4447, "gray"),
+        new ColorEntry(MapColor.COLOR_GREEN.id,         0x546D1B, "green"),
+        new ColorEntry(MapColor.COLOR_LIGHT_BLUE.id,    0x3AAFD9, "light_blue"),
+        new ColorEntry(MapColor.COLOR_LIGHT_GRAY.id,    0x8E8E86, "light_gray"),
+        new ColorEntry(MapColor.COLOR_LIGHT_GREEN.id,   0x70B919, "lime"),
+        new ColorEntry(MapColor.COLOR_MAGENTA.id,       0xBD44B3, "magenta"),
+        new ColorEntry(MapColor.COLOR_ORANGE.id,        0xF07613, "orange"),
+        new ColorEntry(MapColor.COLOR_PINK.id,          0xED8DAC, "pink"),
+        new ColorEntry(MapColor.COLOR_PURPLE.id,        0x792AAC, "purple"),
+        new ColorEntry(MapColor.COLOR_RED.id,           0xA12722, "red"),
+        new ColorEntry(MapColor.COLOR_YELLOW.id,        0xF8C627, "yellow"),
+    };
+
+    private static final Map<Integer, ColorEntry> COLOR_MAP = new HashMap<>() {};
+
+    static {
+        for (ColorEntry e : COLOR_ENTRIES) {
+            COLOR_MAP.put(e.mapColorId, e);
+            COLOR_MAP.put(e.hex, e);
+        }
+    }
+
     public static String getColorName(int colorIdOrHex, boolean english) {
-        if (colorIdOrHex == MapColor.COLOR_MAGENTA.id || colorIdOrHex == 0xBD44B3)
-            return english ? "magenta" : I18n.get("color.reignofnether.magenta");
-        else if (colorIdOrHex == MapColor.COLOR_LIGHT_BLUE.id || colorIdOrHex == 0x3AAFD9)
-            return english ? "light_blue" : I18n.get("color.reignofnether.light_blue");
-        else if (colorIdOrHex == MapColor.COLOR_ORANGE.id || colorIdOrHex == 0xF07613)
-            return english ? "orange" : I18n.get("color.reignofnether.orange");
-        else if (colorIdOrHex == MapColor.COLOR_YELLOW.id || colorIdOrHex == 0xF8C627)
-            return english ? "yellow" : I18n.get("color.reignofnether.yellow");
-        else if (colorIdOrHex == MapColor.COLOR_LIGHT_GREEN.id || colorIdOrHex == 0x70B919)
-            return english ? "lime" : I18n.get("color.reignofnether.lime");
-        else if (colorIdOrHex == MapColor.COLOR_PINK.id || colorIdOrHex == 0xED8DAC)
-            return english ? "pink" : I18n.get("color.reignofnether.pink");
-        else if (colorIdOrHex == MapColor.COLOR_GRAY.id || colorIdOrHex == 0x3E4447)
-            return english ? "gray" : I18n.get("color.reignofnether.gray");
-        else if (colorIdOrHex == MapColor.COLOR_LIGHT_GRAY.id || colorIdOrHex == 0x8E8E86)
-            return english ? "light_gray" : I18n.get("color.reignofnether.light_gray");
-        else if (colorIdOrHex == MapColor.COLOR_CYAN.id || colorIdOrHex == 0x158991)
-            return english ? "cyan" : I18n.get("color.reignofnether.cyan");
-        else if (colorIdOrHex == MapColor.COLOR_PURPLE.id || colorIdOrHex == 0x792AAC)
-            return english ? "purple" : I18n.get("color.reignofnether.purple");
-        else if (colorIdOrHex == MapColor.COLOR_BLUE.id || colorIdOrHex == 0x35399D)
-            return english ? "blue" : I18n.get("color.reignofnether.blue");
-        else if (colorIdOrHex == MapColor.COLOR_BROWN.id || colorIdOrHex == 0x724728)
-            return english ? "brown" : I18n.get("color.reignofnether.brown");
-        else if (colorIdOrHex == MapColor.COLOR_GREEN.id || colorIdOrHex == 0x546D1B)
-            return english ? "green" : I18n.get("color.reignofnether.green");
-        else if (colorIdOrHex == MapColor.COLOR_RED.id || colorIdOrHex == 0xA12722)
-            return english ? "red" : I18n.get("color.reignofnether.red");
-        else if (colorIdOrHex == MapColor.COLOR_BLACK.id || colorIdOrHex == 0x141519)
-            return english ? "black" : I18n.get("color.reignofnether.black");
-        else return english ? "white" : I18n.get("color.reignofnether.white");
+        ColorEntry entry = COLOR_MAP.getOrDefault(colorIdOrHex, COLOR_ENTRIES[0]);
+        return english ? entry.englishName : I18n.get(String.format("color.reignofnether.%s", entry.englishName));
+    }
+
+    public static boolean isMagicDamage(DamageSource source) {
+        return source.is(DamageTypeTags.WITCH_RESISTANT_TO) || source.is(DamageTypes.ON_FIRE);
     }
 }

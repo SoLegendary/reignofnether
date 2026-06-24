@@ -1,24 +1,23 @@
 
-1.20.1-1.3.4b
+1.20.1-1.3.6b
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
-Bugfixes
---------
-[✔] Fixed translations in wave survival mode
-[✔] Fixed an possible crash when attacking buildings
-[✔] Fixed spectators sometimes being able to see start pos buttons when a game has already started
-[✔] Fixed heroes not being recognised for revivals and training
 
 Quality of Life
 ---------------
-[❌] Waypoint looping (by shift clicking back onto a previous waypoint it will automatically cycle the list once it reaches the end)
-[❌] Gamerule to turn off item drops from blocks (for performance)
+
 
 Balance
 -------
+
+
+Bugfixes
+--------
+[✔] Fixed units not responding to move commands when in large groups
+
 
 Languages
 ---------

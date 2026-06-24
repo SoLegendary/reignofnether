@@ -41,6 +41,7 @@ public class BuildingClientboundPacket {
     public PortalPlacement.PortalType portalType;
     public BlockPos portalDestination;
     public boolean forPlayerLoggingIn; // is this placement for someone logging in currently joined?
+    public double partialBlocksDestroyed = 0;
 
     public static void placeBuilding(
         BlockPos buildingPos,
@@ -75,9 +76,8 @@ public class BuildingClientboundPacket {
         ));
     }
 
-    public static void syncBuilding(BlockPos buildingPos, int blocksPlaced, String ownerName, int scenarioRoleIndex) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new BuildingClientboundPacket(BuildingAction.SYNC_BLOCKS_AND_OWNER,
+    public static void syncBuilding(BlockPos buildingPos, int blocksPlaced, double partialBlocksDestroyed, String ownerName, int scenarioRoleIndex) {
+        BuildingClientboundPacket packet = new BuildingClientboundPacket(BuildingAction.SYNC_BLOCKS_AND_OWNER,
                 EMPTY,
                 "",
                 buildingPos,
@@ -92,8 +92,9 @@ public class BuildingClientboundPacket {
                 PortalPlacement.PortalType.BASIC,
                 new BlockPos(0,0,0),
                 false
-            )
         );
+        packet.partialBlocksDestroyed = partialBlocksDestroyed;
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), packet);
     }
 
     public static void startProduction(BlockPos buildingPos, ProductionItem item) {
@@ -230,6 +231,7 @@ public class BuildingClientboundPacket {
         this.portalType = buffer.readEnum(PortalPlacement.PortalType.class);
         this.portalDestination = buffer.readBlockPos();
         this.forPlayerLoggingIn = buffer.readBoolean();
+        this.partialBlocksDestroyed = buffer.readDouble();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -248,6 +250,7 @@ public class BuildingClientboundPacket {
         buffer.writeEnum(this.portalType);
         buffer.writeBlockPos(this.portalDestination);
         buffer.writeBoolean(this.forPlayerLoggingIn);
+        buffer.writeDouble(this.partialBlocksDestroyed);
     }
 
     // server-side packet-consuming functions
@@ -297,7 +300,9 @@ public class BuildingClientboundPacket {
                             this.portalDestination,
                             this.forPlayerLoggingIn
                     );
-                    case SYNC_BLOCKS_AND_OWNER -> BuildingClientEvents.syncBuilding(building, this.blocksPlaced, this.ownerName, this.scenarioRoleIndex);
+                    case SYNC_BLOCKS_AND_OWNER -> {
+                        BuildingClientEvents.syncBuilding(building, this.blocksPlaced, this.partialBlocksDestroyed, this.ownerName, this.scenarioRoleIndex);
+                    }
                     case START_PRODUCTION -> {
                         ((ProductionPlacement) building).startProductionItem(
                             ReignOfNetherRegistries.PRODUCTION_ITEM.get(itemKey)

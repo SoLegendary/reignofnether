@@ -71,7 +71,6 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
         return nbt;
     });
 
-
     public final static String buildingName = "Library";
     public final static String structureName = "library";
     public final static String upgradedStructureName = "library_grand";
@@ -91,6 +90,8 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
         this.startingBlockTypes.add(Blocks.SPRUCE_STAIRS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 125d;
+        this.maxHealthBonusPerUpgradeLevel = 25d;
 
         this.abilities.add(ENCHANT_MAIMING, Keybindings.abilitySlot1);
         this.abilities.add(ENCHANT_QUICK_CHARGE, Keybindings.abilitySlot2);
@@ -120,19 +121,19 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
             TutorialClientEvents::isEnabled,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.library"),
+            List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.library.tooltip1"),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library.tooltip1"),
                     Style.EMPTY
                 ),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.library.tooltip2"),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library.tooltip2"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.library.tooltip3"),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library.tooltip3"),
                     Style.EMPTY
                 )
             ),
@@ -157,7 +158,7 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
 
     @Override
     public String getUpgradedName(BuildingPlacement placement) {
-        return I18n.get("buildings.villagers.reignofnether.library.upgraded");
+        return I18n.get("buildings.reignofnether.library.upgraded");
     }
 
     @Override

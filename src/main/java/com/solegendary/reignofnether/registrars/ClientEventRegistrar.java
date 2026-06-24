@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.commands.CommandsServerEvents;
+import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.config.ConfigClientEvents;
 import com.solegendary.reignofnether.config.ConfigVanillaServerEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -44,8 +45,7 @@ import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.time.TimeServerEvents;
-import com.solegendary.reignofnether.tps.TPSClientEvents;
-import com.solegendary.reignofnether.tps.TPSServerEvents;
+import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.NonUnitClientEvents;
@@ -82,7 +82,6 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(BlockClientEvents.class);
         vanillaEventBus.register(FogOfWarClientEvents.class);
         vanillaEventBus.register(ResourcesClientEvents.class);
-        vanillaEventBus.register(TPSClientEvents.class);
         vanillaEventBus.register(PlayerClientEvents.class);
         vanillaEventBus.register(TutorialClientEvents.class);
         vanillaEventBus.register(TitleClientEvents.class);
@@ -97,6 +96,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(PlayerDisplayClientEvents.class);
         vanillaEventBus.register(ScenarioClientEvents.class);
         vanillaEventBus.register(TextInputClientEvents.class);
+        vanillaEventBus.register(RtsDebugClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(GameruleServerEvents.class);
@@ -108,7 +108,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(BuildingServerEvents.class);
         vanillaEventBus.register(AttackWarningServerEvents.class);
         vanillaEventBus.register(ResourcesServerEvents.class);
-        vanillaEventBus.register(TPSServerEvents.class);
+        vanillaEventBus.register(RtsDebugServerEvents.class);
         vanillaEventBus.register(FogOfWarServerEvents.class);
         vanillaEventBus.register(ResearchServerEvents.class);
         vanillaEventBus.register(SurvivalServerEvents.class);

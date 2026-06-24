@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.config.ConfigClientEvents;
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
@@ -78,10 +79,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderNameTagEvent;
-import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
@@ -100,6 +98,8 @@ import static com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClien
 public class HudClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
+
+    public static boolean enabled = true;
 
     private static String tempMsg = "";
     private static int tempMsgTicksLeft = 0;
@@ -268,8 +268,17 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
+    // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
+    public static void onInput(InputEvent.Key evt) {
+        if (OrthoviewClientEvents.isEnabled() && evt.getAction() == GLFW.GLFW_PRESS) {
+            if (evt.getKey() == Keybindings.getFnum(1).getKey())
+                enabled = !enabled;
+        }
+    }
+
+    @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || !(evt.getScreen() instanceof TopdownGui)) {
+        if (!OrthoviewClientEvents.isEnabled() || !(evt.getScreen() instanceof TopdownGui) || !enabled) {
             return;
         }
         if (MC.level == null) {
@@ -347,13 +356,15 @@ public class HudClientEvents {
             // ---------------------------
             for (BuildingPlacement building : selBuildings) {
                 if (hudSelBuildingOwned && buildingButtons.size() < (buttonsPerRow * 2)) {
-                    String name;
+                    String name = "";
                     if (building.getBuilding() instanceof CustomBuilding customBuilding) {
                         name = customBuilding.name;
                     } else {
-                        name = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding()).toString();
+                        ResourceLocation rl = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding());
+                        if (rl != null) {
+                            name = I18n.get("buildings.reignofnether." + rl.getPath());
+                        }
                     }
-
                     buildingButtons.add(new ButtonBuilder(name)
                         .iconSize(iconSize)
                         .iconResource(building.getBuilding().icon)
@@ -367,6 +378,7 @@ public class HudClientEvents {
                                 hudSelectedPlacement = building;
                             }
                         })
+                        .tooltipLines(List.of(fcs(name)))
                         .build()
                     );
                 }
@@ -407,26 +419,23 @@ public class HudClientEvents {
 
                         if (plusBuildingsZone.isMouseOver(mouseX, mouseY)) {
                             List<FormattedCharSequence> tooltipLines = new ArrayList<>();
-                            int numBuildings = 0;
+                            Map<String, Integer> extraBuildingsMap = new HashMap<>();
 
                             for (int i = selBuildings.size() - numExtraBuildings; i < selBuildings.size(); i++) {
                                 BuildingPlacement placement = selBuildings.get(i);
-                                BuildingPlacement nextPlacement = null;
                                 Building building = placement.getBuilding();
-
-                                Building nextBuilding = null;
-                                numBuildings += 1;
-
-                                if (i < selBuildings.size() - 1) {
-                                    nextPlacement = selBuildings.get(i + 1);
-                                    nextBuilding = nextPlacement.getBuilding();
+                                ResourceLocation rl = ReignOfNetherRegistries.BUILDING.getKey(building);
+                                if (rl != null) {
+                                    String buildingName = I18n.get("buildings.reignofnether." + rl.getPath());
+                                    if (extraBuildingsMap.containsKey(buildingName))
+                                        extraBuildingsMap.put(buildingName, extraBuildingsMap.get(buildingName) + 1);
+                                    else
+                                        extraBuildingsMap.put(buildingName, 1);
                                 }
-                                if (building != nextBuilding) {
-                                    tooltipLines.add(FormattedCharSequence.forward("x" + numBuildings + " " + I18n.get(ReignOfNetherRegistries.BUILDING.getKey(nextBuilding).getPath()),
-                                        Style.EMPTY
-                                    ));
-                                    numBuildings = 0;
-                                }
+                            }
+                            for (String buildingName : extraBuildingsMap.keySet()) {
+                                int numBuildings = extraBuildingsMap.get(buildingName);
+                                tooltipLines.add(fcs("x" + numBuildings + " " + buildingName));
                             }
                             MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipLines, mouseX, mouseY);
                         }
@@ -484,7 +493,7 @@ public class HudClientEvents {
                     }
                     evt.getGuiGraphics().drawString(
                         MC.font,
-                        Math.round(100 - (percentageDoneInv * 100f)) + "% " + productionButtons.get(0).name,
+                        Math.round(100 - (percentageDoneInv * 100f)) + "% " + productionButtons.get(0).name,  // TODO: translatable
                         blitX + iconFrameSize + 5,
                         blitY + 2,
                         colour
@@ -549,45 +558,45 @@ public class HudClientEvents {
 
                     List<AbilityButton> buildingAbilities = hudSelectedPlacement.getAbilityButtons()
                             .stream()
-                            .filter(b -> !b.isHidden.get())
+                            .filter(b -> b != null && !b.isHidden.get())
                             .toList();
                     if (buildingAbilities.size() > 0) {
                         blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
                     }
 
-                    // production buttons on bottom row
                     if (hudSelectedPlacement instanceof ProductionPlacement selProdPlacement) {
                         List<Button> visibleProdButtons = selProdPlacement.productionButtons.stream()
                                 .filter(b -> !b.isHidden.get())
                                 .toList();
-                        if (visibleProdButtons.size() > MAX_BUTTONS_PER_ROW) {
-                            blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
-                        }
-                        buildingProdRows += 1;
+                        blitY -= Button.DEFAULT_ICON_FRAME_SIZE * Math.ceil(((float) visibleProdButtons.size() / (float) MAX_BUTTONS_PER_ROW) - 1);
 
                         int rowButtons = 0;
                         for (Button prodButton : visibleProdButtons) {
                             rowButtons += 1;
-                            if (rowButtons > MAX_BUTTONS_PER_ROW) {
+                            prodButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                            productionButtons.add(prodButton);
+                            renderedButtons.add(prodButton);
+                            blitX += iconFrameSize;
+                            if (rowButtons >= MAX_BUTTONS_PER_ROW) {
                                 rowButtons = 0;
                                 blitX = 0;
                                 blitY += Button.DEFAULT_ICON_FRAME_SIZE;
                                 buildingProdRows += 1;
                             }
-                            prodButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
-                            productionButtons.add(prodButton);
-                            renderedButtons.add(prodButton);
-                            blitX += iconFrameSize;
                         }
+                        if (rowButtons > 0) {
+                            blitY += Button.DEFAULT_ICON_FRAME_SIZE;
+                            buildingProdRows += 1;
+                        }
+                    } else {
+                        blitY += Button.DEFAULT_ICON_FRAME_SIZE;
                     }
-                    blitY += Button.DEFAULT_ICON_FRAME_SIZE;
                     blitX = 0;
+
                     for (AbilityButton abilityButton : buildingAbilities) {
-                        if (!abilityButton.isHidden.get()) {
-                            abilityButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
-                            renderedButtons.add(abilityButton);
-                            blitX += iconFrameSize;
-                        }
+                        abilityButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                        renderedButtons.add(abilityButton);
+                        blitX += iconFrameSize;
                     }
                 }
             }
@@ -1334,126 +1343,181 @@ public class HudClientEvents {
             }
         }
 
-        // ---------------------
-        // Attack warning button
-        // ---------------------
+        // -------------------------
+        // Minimap buttons + warning
+        // -------------------------
+        boolean squareMinimap = ReignOfNetherClientConfigs.SQUARE_MINIMAP.get();
+
         Button attackWarningButton = AttackWarningClientEvents.getWarningButton();
-        if (!attackWarningButton.isHidden.get()) {
-            attackWarningButton.render(evt.getGuiGraphics(),
-                screenWidth - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2)
-                    - 14,
-                screenHeight - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
-                mouseX,
-                mouseY
-            );
-            renderedButtons.add(attackWarningButton);
-        }
-
-        // ----------------------
-        // Map size toggle button
-        // ----------------------
         Button toggleMapSizeButton = MinimapClientEvents.getToggleSizeButton();
-        if (!toggleMapSizeButton.isHidden.get()) {
-            toggleMapSizeButton.render(evt.getGuiGraphics(),
-                    screenWidth - (toggleMapSizeButton.iconSize * 2),
-                    screenHeight - (toggleMapSizeButton.iconSize * 2),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(toggleMapSizeButton);
-        }
-
         Button markerModeButton = MinimapClientEvents.getMarkerModeButton();
-        if (!markerModeButton.isHidden.get()) {
-            markerModeButton.render(evt.getGuiGraphics(),
-                screenWidth - (markerModeButton.iconSize * (MinimapClientEvents.isLargeMap() ? 12 : 8)),
-                screenHeight - (markerModeButton.iconSize * 2),
-                mouseX, mouseY
-            );
-            renderedButtons.add(markerModeButton);
-        }
-
         Button camSensitivityButton = MinimapClientEvents.getCamSensitivityButton();
-        if (!camSensitivityButton.isHidden.get()) {
-            camSensitivityButton.render(evt.getGuiGraphics(),
-                    screenWidth - (camSensitivityButton.iconSize * 4),
-                    screenHeight - (camSensitivityButton.iconSize * 2),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(camSensitivityButton);
-        }
         Button mapLockButton = MinimapClientEvents.getMapLockButton();
-        if (!mapLockButton.isHidden.get()) {
-            mapLockButton.render(evt.getGuiGraphics(),
-                    screenWidth - (mapLockButton.iconSize * 2),
-                    screenHeight - (mapLockButton.iconSize * 4),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(mapLockButton);
-        }
         Button highlightAnimalsButton = MinimapClientEvents.getHighlightAnimalsButton();
-        if (!highlightAnimalsButton.isHidden.get()) {
-            highlightAnimalsButton.render(evt.getGuiGraphics(),
-                    screenWidth - (highlightAnimalsButton.iconSize * 2),
-                    screenHeight - (highlightAnimalsButton.iconSize * 6),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(highlightAnimalsButton);
-        }
         Button nightCirclesButton = MinimapClientEvents.getNightCirclesModeButton();
-        if (!nightCirclesButton.isHidden.get()) {
-            nightCirclesButton.render(evt.getGuiGraphics(),
-                    screenWidth - (nightCirclesButton.iconSize * 4),
-                    screenHeight - (nightCirclesButton.iconSize * 4),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(nightCirclesButton);
-        }
         Button leavesHidingButton = OrthoviewClientEvents.getLeavesHidingButton();
-        if (!leavesHidingButton.isHidden.get()) {
-            leavesHidingButton.render(evt.getGuiGraphics(),
-                    screenWidth - (leavesHidingButton.iconSize * 6),
-                    screenHeight - (leavesHidingButton.iconSize * 2),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(leavesHidingButton);
-        }
         Button toggleTeamColorsButton = PlayerColors.getToggleTeamColorsButton();
-        if (!toggleTeamColorsButton.isHidden.get()) {
-            toggleTeamColorsButton.render(evt.getGuiGraphics(),
-                    screenWidth - (toggleTeamColorsButton.iconSize * 6),
-                    screenHeight - (toggleTeamColorsButton.iconSize * 4),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(toggleTeamColorsButton);
-        }
-
         Button rotateCW = MinimapClientEvents.getCameraRotateCWButton();
-        if (!rotateCW.isHidden.get()) {
-            rotateCW.render(evt.getGuiGraphics(),
-                    screenWidth - (rotateCW.iconSize * (MinimapClientEvents.isLargeMap() ? 8 : 4)),
-                    screenHeight - (rotateCW.iconSize * 2),
-                    mouseX,
-                    mouseY
-            );
-            renderedButtons.add(rotateCW);
-        }
-
         Button rotateCCW = MinimapClientEvents.getCameraRotateCCWButton();
-        if (!rotateCCW.isHidden.get()) {
-            rotateCCW.render(evt.getGuiGraphics(),
-                    screenWidth - (rotateCCW.iconSize * (MinimapClientEvents.isLargeMap() ? 10 : 6)),
-                    screenHeight - (rotateCCW.iconSize * 2),
+
+        if (squareMinimap) {
+            int radius = MinimapClientEvents.getMapGuiRadius();
+            int co = MinimapClientEvents.CORNER_OFFSET;
+            float baseHalf = (float) (radius / Math.sqrt(2));
+            float half = baseHalf * MinimapClientEvents.SQUARE_SCALE;
+            // bottom-right corner of the minimap is fixed at the screen's bottom-right (with co padding)
+            float brX = screenWidth - co;
+            float brY = screenHeight - co;
+            int mmLeft = (int) (brX - 2 * half);
+            int mmBottom = (int) brY;
+
+            int frameSize = toggleMapSizeButton.iconFrameSize; // 22 — actual rendered frame
+            int stride = toggleMapSizeButton.iconSize * 2;     // 28, matches original spacing
+            int gridRight = mmLeft - 12;                       // shifted further left
+            int gridBottom = mmBottom + 4;                     // shifted a touch lower than the map bottom
+
+            int r0y = gridBottom - frameSize;            // bottom row: frame bottom = map bottom
+            int r1y = r0y - stride;                       // top row
+            int c0x = gridRight - frameSize;             // rightmost column: frame right = map left - 4
+            int c1x = c0x - stride;
+            int c2x = c1x - stride;
+            int c3x = c2x - stride;
+            int c4x = c3x - stride;
+
+            // bottom row: map controls (most-used)
+            if (!toggleMapSizeButton.isHidden.get()) {
+                toggleMapSizeButton.render(evt.getGuiGraphics(), c0x, r0y, mouseX, mouseY);
+                renderedButtons.add(toggleMapSizeButton);
+            }
+            if (!markerModeButton.isHidden.get()) {
+                markerModeButton.render(evt.getGuiGraphics(), c1x, r0y, mouseX, mouseY);
+                renderedButtons.add(markerModeButton);
+            }
+            if (!mapLockButton.isHidden.get()) {
+                mapLockButton.render(evt.getGuiGraphics(), c2x, r0y, mouseX, mouseY);
+                renderedButtons.add(mapLockButton);
+            }
+            if (!rotateCCW.isHidden.get()) {
+                rotateCCW.render(evt.getGuiGraphics(), c3x, r0y, mouseX, mouseY);
+                renderedButtons.add(rotateCCW);
+            }
+            if (!rotateCW.isHidden.get()) {
+                rotateCW.render(evt.getGuiGraphics(), c4x, r0y, mouseX, mouseY);
+                renderedButtons.add(rotateCW);
+            }
+
+            // top row: view toggles
+            if (!camSensitivityButton.isHidden.get()) {
+                camSensitivityButton.render(evt.getGuiGraphics(), c0x, r1y, mouseX, mouseY);
+                renderedButtons.add(camSensitivityButton);
+            }
+            if (!nightCirclesButton.isHidden.get()) {
+                nightCirclesButton.render(evt.getGuiGraphics(), c1x, r1y, mouseX, mouseY);
+                renderedButtons.add(nightCirclesButton);
+            }
+            if (!highlightAnimalsButton.isHidden.get()) {
+                highlightAnimalsButton.render(evt.getGuiGraphics(), c2x, r1y, mouseX, mouseY);
+                renderedButtons.add(highlightAnimalsButton);
+            }
+            if (!leavesHidingButton.isHidden.get()) {
+                leavesHidingButton.render(evt.getGuiGraphics(), c3x, r1y, mouseX, mouseY);
+                renderedButtons.add(leavesHidingButton);
+            }
+            if (!toggleTeamColorsButton.isHidden.get()) {
+                toggleTeamColorsButton.render(evt.getGuiGraphics(), c4x, r1y, mouseX, mouseY);
+                renderedButtons.add(toggleTeamColorsButton);
+            }
+
+            // attack warning: above the grid, aligned right
+            if (!attackWarningButton.isHidden.get()) {
+                attackWarningButton.render(evt.getGuiGraphics(), c0x, r1y - stride - 4, mouseX, mouseY);
+                renderedButtons.add(attackWarningButton);
+            }
+        } else {
+            // ---------------------
+            // Attack warning button (diamond layout)
+            // ---------------------
+            if (!attackWarningButton.isHidden.get()) {
+                attackWarningButton.render(evt.getGuiGraphics(),
+                    screenWidth - (MinimapClientEvents.getMapGuiRadius() * 2) - (MinimapClientEvents.CORNER_OFFSET * 2)
+                        - 14,
+                    screenHeight - MinimapClientEvents.getMapGuiRadius() - (MinimapClientEvents.CORNER_OFFSET * 2) - 2,
                     mouseX,
                     mouseY
-            );
-            renderedButtons.add(rotateCCW);
+                );
+                renderedButtons.add(attackWarningButton);
+            }
+
+            if (!toggleMapSizeButton.isHidden.get()) {
+                toggleMapSizeButton.render(evt.getGuiGraphics(),
+                        screenWidth - (toggleMapSizeButton.iconSize * 2),
+                        screenHeight - (toggleMapSizeButton.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(toggleMapSizeButton);
+            }
+            if (!markerModeButton.isHidden.get()) {
+                markerModeButton.render(evt.getGuiGraphics(),
+                    screenWidth - (markerModeButton.iconSize * (MinimapClientEvents.isLargeMap() ? 12 : 8)),
+                    screenHeight - (markerModeButton.iconSize * 2),
+                    mouseX, mouseY);
+                renderedButtons.add(markerModeButton);
+            }
+            if (!camSensitivityButton.isHidden.get()) {
+                camSensitivityButton.render(evt.getGuiGraphics(),
+                        screenWidth - (camSensitivityButton.iconSize * 4),
+                        screenHeight - (camSensitivityButton.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(camSensitivityButton);
+            }
+            if (!mapLockButton.isHidden.get()) {
+                mapLockButton.render(evt.getGuiGraphics(),
+                        screenWidth - (mapLockButton.iconSize * 2),
+                        screenHeight - (mapLockButton.iconSize * 4),
+                        mouseX, mouseY);
+                renderedButtons.add(mapLockButton);
+            }
+            if (!highlightAnimalsButton.isHidden.get()) {
+                highlightAnimalsButton.render(evt.getGuiGraphics(),
+                        screenWidth - (highlightAnimalsButton.iconSize * 2),
+                        screenHeight - (highlightAnimalsButton.iconSize * 6),
+                        mouseX, mouseY);
+                renderedButtons.add(highlightAnimalsButton);
+            }
+            if (!nightCirclesButton.isHidden.get()) {
+                nightCirclesButton.render(evt.getGuiGraphics(),
+                        screenWidth - (nightCirclesButton.iconSize * 4),
+                        screenHeight - (nightCirclesButton.iconSize * 4),
+                        mouseX, mouseY);
+                renderedButtons.add(nightCirclesButton);
+            }
+            if (!leavesHidingButton.isHidden.get()) {
+                leavesHidingButton.render(evt.getGuiGraphics(),
+                        screenWidth - (leavesHidingButton.iconSize * 6),
+                        screenHeight - (leavesHidingButton.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(leavesHidingButton);
+            }
+            if (!toggleTeamColorsButton.isHidden.get()) {
+                toggleTeamColorsButton.render(evt.getGuiGraphics(),
+                        screenWidth - (toggleTeamColorsButton.iconSize * 6),
+                        screenHeight - (toggleTeamColorsButton.iconSize * 4),
+                        mouseX, mouseY);
+                renderedButtons.add(toggleTeamColorsButton);
+            }
+            if (!rotateCW.isHidden.get()) {
+                rotateCW.render(evt.getGuiGraphics(),
+                        screenWidth - (rotateCW.iconSize * (MinimapClientEvents.isLargeMap() ? 8 : 4)),
+                        screenHeight - (rotateCW.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(rotateCW);
+            }
+            if (!rotateCCW.isHidden.get()) {
+                rotateCCW.render(evt.getGuiGraphics(),
+                        screenWidth - (rotateCCW.iconSize * (MinimapClientEvents.isLargeMap() ? 10 : 6)),
+                        screenHeight - (rotateCCW.iconSize * 2),
+                        mouseX, mouseY);
+                renderedButtons.add(rotateCCW);
+            }
         }
 
         // ------------------------------
@@ -2095,7 +2159,7 @@ public class HudClientEvents {
                 }
             }
             BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
-            evt.getGuiGraphics().drawString(MC.font, "BlockPos: " + bp.toShortString(), 100, y, 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, I18n.get("hud.reignofnether.block_pos", bp.toShortString()), 100, y, 0xFFFFFF);
             evt.getGuiGraphics().drawString(MC.font, MC.level.getBlockState(bp).getBlock().toString().replaceFirst("Block", ""), 100, y + 10, 0xFFFFFF);
         }
     }

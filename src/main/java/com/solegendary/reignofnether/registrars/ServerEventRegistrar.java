@@ -19,7 +19,7 @@ import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.time.TimeServerEvents;
-import com.solegendary.reignofnether.tps.TPSServerEvents;
+import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraftforge.common.MinecraftForge;
@@ -49,7 +49,7 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(BuildingServerEvents.class);
         vanillaEventBus.register(AttackWarningServerEvents.class);
         vanillaEventBus.register(ResourcesServerEvents.class);
-        vanillaEventBus.register(TPSServerEvents.class);
+        vanillaEventBus.register(RtsDebugServerEvents.class);
         vanillaEventBus.register(FogOfWarServerEvents.class);
         vanillaEventBus.register(ResearchServerEvents.class);
         vanillaEventBus.register(SurvivalServerEvents.class);

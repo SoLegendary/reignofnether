@@ -185,7 +185,7 @@ public class ScenarioServerboundPacket {
                     BuildingPlacement bpl = BuildingUtils.findBuilding(false, new BlockPos(x,y,z));
                     if (bpl != null) {
                         bpl.scenarioRoleIndex = roleIndex;
-                        BuildingClientboundPacket.syncBuilding(bpl.originPos, bpl.getBlocksPlaced(), bpl.ownerName, bpl.scenarioRoleIndex);
+                        BuildingClientboundPacket.syncBuilding(bpl.originPos, bpl.getBlocksPlaced(), bpl.partialBlocksDestroyed, bpl.ownerName, bpl.scenarioRoleIndex);
                     }
                 }
                 case SET_SCENARIO_NAME -> {

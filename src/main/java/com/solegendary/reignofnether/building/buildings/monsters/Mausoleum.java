@@ -33,7 +33,7 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
     public final static String buildingName = "Mausoleum";
     public final static String structureName = "mausoleum";
     public final static ResourceCost cost = ResourceCosts.MAUSOLEUM;
-    public final static int nightRange = 80;
+    public final static int nightRange = 60;
     public final static int nightRangeReduced = 40;
 
     public Mausoleum() {
@@ -45,6 +45,7 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
 
         this.buildTimeModifier = 0.274f; // 60s total build time with 3 villagers
         this.canAcceptResources = true;
+        this.maxHealth = 460d;
 
         this.startingBlockTypes.add(Blocks.STONE);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
@@ -71,19 +72,19 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
             () -> false,
             () -> true,
             List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.mausoleum"),
+                    I18n.get("buildings.reignofnether.mausoleum"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip1"),
+                    I18n.get("buildings.reignofnether.mausoleum.tooltip1"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip2",  nightRange), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip4",  nightRangeReduced), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.mausoleum.tooltip2",  nightRange), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.mausoleum.tooltip4",  nightRangeReduced), Style.EMPTY)
             ),
             this
         );
@@ -132,5 +133,10 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
     @Override
     public boolean showOnlyWhenSelected(BuildingPlacement placement) {
         return false;
+    }
+
+    @Override
+    public int getDefaultNightRange() {
+        return nightRangeReduced;
     }
 }

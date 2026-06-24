@@ -51,12 +51,12 @@ public class NeutralTransportPortal extends PortalTransport {
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> false,
                 () -> true,
-                List.of(FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.neutral_transport_portal"),
+                List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.neutral_transport_portal"),
                                 Style.EMPTY.withBold(true)
                         ),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.neutral_transport_portal.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.neutral_transport_portal.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.neutral_transport_portal.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.neutral_transport_portal.tooltip2"), Style.EMPTY)
                 ),
                 this
         );

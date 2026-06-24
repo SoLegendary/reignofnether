@@ -40,10 +40,10 @@ import com.solegendary.reignofnether.startpos.StartPosClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalClientboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalServerboundPacket;
-import com.solegendary.reignofnether.tps.TPSClientBoundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.*;
+import com.solegendary.reignofnether.debug.RtsDebugStatsClientboundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
@@ -99,6 +99,15 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(UnitAnimationClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitAnimationClientboundPacket::encode).decoder(UnitAnimationClientboundPacket::new)
                 .consumerMainThread(UnitAnimationClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(UnitPathClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitPathClientboundPacket::encode).decoder(UnitPathClientboundPacket::new)
+                .consumerMainThread(UnitPathClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(RtsDebugStatsClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RtsDebugStatsClientboundPacket::encode)
+                .decoder(RtsDebugStatsClientboundPacket::new)
+                .consumerMainThread(RtsDebugStatsClientboundPacket::handle).add();
 
         INSTANCE.messageBuilder(UnitIdleWorkerClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitIdleWorkerClientBoundPacket::encode).decoder(UnitIdleWorkerClientBoundPacket::new)
@@ -169,10 +178,6 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(BuildingAbilityClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(BuildingAbilityClientboundPacket::encode).decoder(BuildingAbilityClientboundPacket::new)
                 .consumerMainThread(BuildingAbilityClientboundPacket::handle).add();
-
-        INSTANCE.messageBuilder(TPSClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(TPSClientBoundPacket::encode).decoder(TPSClientBoundPacket::new)
-                .consumerMainThread(TPSClientBoundPacket::handle).add();
 
         INSTANCE.messageBuilder(AttackWarningClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(AttackWarningClientboundPacket::encode).decoder(AttackWarningClientboundPacket::new)

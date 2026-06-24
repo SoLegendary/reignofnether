@@ -47,6 +47,18 @@ public abstract class Building {
 
     public ResourceCost cost;
     public boolean selfBuilding = false;
+    public double maxHealth = 0;
+    protected double maxHealthBonusPerUpgradeLevel = 0;
+
+    public final static double DEFAULT_HEALTH_PER_BLOCK = 2.0d;
+
+    public double getMaxHealth(BuildingPlacement placement) {
+        return maxHealth + (getUpgradeLevel(placement) * maxHealthBonusPerUpgradeLevel);
+    }
+
+    public boolean isUsingSetHealth(BuildingPlacement placement) {
+        return getMaxHealth(placement) > 0;
+    }
 
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical
@@ -69,7 +81,7 @@ public abstract class Building {
     }
 
     public float getMeleeDamageMult() {
-        return 0.2F;
+        return 0.25F; // this is 50% visually, as 1 block is 2hp by default
     }
 
     public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
@@ -160,10 +172,6 @@ public abstract class Building {
 
     }
 
-    public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks, BuildingPlacement placement) {
-
-    }
-
     public void destroy(ServerLevel serverLevel, BuildingPlacement placement) {
 
     }
@@ -177,6 +185,6 @@ public abstract class Building {
         if (key == null) {
             return "Unknown";
         }
-        return I18n.get("buildings." + (getFaction() != null && getFaction() != Faction.NONE ? getFaction().toString().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
+        return I18n.get("buildings." + key.getNamespace() + "." + key.getPath());
     }
 }

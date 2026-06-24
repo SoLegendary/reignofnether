@@ -16,7 +16,6 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
-import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
@@ -27,22 +26,17 @@ import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
-import com.solegendary.reignofnether.research.researchItems.ResearchSlimeConversion;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
-import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.EnchantmentUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
@@ -53,18 +47,14 @@ import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSources;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.*;
@@ -82,7 +72,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.world.ForgeChunkManager;
-import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
@@ -141,26 +130,6 @@ public class UnitServerEvents {
 
     // Per-entity last-synced mob effect amplifiers. Null amp means "absent last sync".
     private static final HashMap<Integer, HashMap<MobEffect, Byte>> lastSyncedEffects = new HashMap<>();
-
-    // Time-sliced formation dispatch: large group MOVE commands are spread across multiple ticks
-    // to avoid the spike from N units all running A* in the same tick. LinkedHashMap preserves
-    // insertion order while letting a re-queued unit overwrite its old target (supersession).
-    private static final int FORMATION_DISPATCH_PER_TICK = 5;
-    private static final LinkedHashMap<Integer, Pair<LivingEntity, BlockPos>> formationDispatchQueue = new LinkedHashMap<>();
-
-    public static void queueFormationMove(List<Pair<LivingEntity, BlockPos>> pairs) {
-        synchronized (formationDispatchQueue) {
-            for (Pair<LivingEntity, BlockPos> p : pairs) {
-                formationDispatchQueue.put(p.getFirst().getId(), p);
-            }
-        }
-    }
-
-    public static int formationDispatchQueueSize() {
-        synchronized (formationDispatchQueue) {
-            return formationDispatchQueue.size();
-        }
-    }
 
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
@@ -685,28 +654,6 @@ public class UnitServerEvents {
         }
     }
 
-
-    @SubscribeEvent
-    public static void onFormationDispatchTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
-            return;
-        synchronized (formationDispatchQueue) {
-            if (formationDispatchQueue.isEmpty())
-                return;
-            int processed = 0;
-            Iterator<Pair<LivingEntity, BlockPos>> it = formationDispatchQueue.values().iterator();
-            while (processed < FORMATION_DISPATCH_PER_TICK && it.hasNext()) {
-                Pair<LivingEntity, BlockPos> pair = it.next();
-                it.remove();
-                LivingEntity le = pair.getFirst();
-                if (le != null && le.isAlive() && le instanceof Unit unit) {
-                    unit.setMoveTarget(pair.getSecond());
-                }
-                processed += 1;
-            }
-        }
-    }
-
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns
     // null
     // remember to always reset targets so that users' actions always overwrite any existing action
@@ -1019,6 +966,10 @@ public class UnitServerEvents {
 
         if (evt.getEntity().hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) && evt.getSource().is(DamageTypes.ON_FIRE)) {
             evt.setAmount(evt.getAmount() * 2);
+        }
+
+        if (evt.getEntity() instanceof HeroUnit && evt.getSource().getEntity() instanceof PhantomSummon) {
+            evt.setAmount(evt.getAmount() * PhantomSummon.HERO_DAMAGE_MULT);
         }
     }
 

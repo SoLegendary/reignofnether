@@ -494,25 +494,12 @@ public class UnitClientEvents {
         }
     }
 
-    /*
-    private static double variance = 0;
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "var: " + variance,
-        });
-    }
-     */
-
     private static final int VIS_CHECK_TICKS_MAX = 10;
     private static int ticksToNextVisCheck = VIS_CHECK_TICKS_MAX;
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END)
             return;
-
-        //if (MC.level != null)
-        //    variance = WaveSpawner.getYVariance(MC.level, getPreselectedBlockPos(), 8);
 
         ticksToNextVisCheck -= 1;
 
@@ -1115,16 +1102,6 @@ public class UnitClientEvents {
                             }
                         }
                     }
-
-                    // draw path nodes
-                    /*
-                    if (unit instanceof Mob mob && mob.getNavigation().getPath() != null) {
-                        for (Node node : mob.getNavigation().getPath().nodes) {
-                            BlockPos bp = new BlockPos(node.x, node.y, node.z).below();
-                            MyRenderer.drawBlockFace(evt.getPoseStack(), Direction.UP, bp, 0, 1, 0, a);
-                        }
-                    }
-                     */
                 }
             }
 

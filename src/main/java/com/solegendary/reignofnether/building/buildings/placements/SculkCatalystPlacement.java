@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -24,7 +23,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
     //private final Set<BlockPos> nightBorderBps = new HashSet<>();
 
     private final static int SCULK_SEARCH_RANGE = 30;
-    private final static float HP_PER_SCULK = 0.5f;
+    private final static double HP_PER_SCULK = 1.0f;
     public final static float RANGE_PER_SCULK = 0.30f;
 
     public String autoSacrificeUnitType = "";
@@ -38,7 +37,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
 
     public int getUncappedNightRange() {
         if (isBuilt || isBuiltServerside) {
-            return (int) (getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).size() * RANGE_PER_SCULK) + SculkCatalyst.nightRangeMin;
+            return (int) (getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).size() * RANGE_PER_SCULK) + SculkCatalyst.MIN_NIGHT_RANGE;
         }
         return 0;
     }
@@ -73,7 +72,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
                     NightSourceAddon nsa;
                     if (ability instanceof Sacrifice sacrifice &&
                         sacrifice.isAutocasting(this) &&
-                        (nsa = getBuilding().getActiveAddon(NightSourceAddon.class)) != null && nsa.getNightRange(this) < SculkCatalyst.nightRangeMax) {
+                        (nsa = getBuilding().getActiveAddon(NightSourceAddon.class)) != null && nsa.getNightRange(this) < SculkCatalyst.MAX_NIGHT_RANGE) {
                         sacrifice.autoSacrifice(this);
                     }
                 }
@@ -85,9 +84,8 @@ public class SculkCatalystPlacement extends BuildingPlacement {
 
     @Override
     public int getHealth() {
-        return (int) (getBlocksPlaced() / MIN_BLOCKS_PERCENT) - getHighestBlockCountReached() + (int) (
-                sculkBps.size() * HP_PER_SCULK
-        );
+        return (int) ((((getBlocksPlaced() - partialBlocksDestroyed) / MIN_BLOCKS_PERCENT) - getHighestBlockCountReached() +
+                (sculkBps.size() * HP_PER_SCULK)) * (getHealthPerBlock() / 2));
     }
 
     public void updateSculkBps() {
@@ -135,15 +133,25 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         }
     }
 
-    // returns the number of blocks converted
-    private int restoreRandomSculk(int amount) {
+    // returns the number of blocks restored
+    private double restoreRandomSculk(double amount) {
         if (getLevel().isClientSide()) {
             return 0;
         }
         int restoredSculk = 0;
         updateSculkBps();
 
-        for (int i = 0; i < amount; i++) {
+        amount /= (HP_PER_SCULK / 2d);
+        double floorAmount = Math.floor(amount);
+        partialBlocksDestroyed += (amount - floorAmount);
+
+        int intAmount = (int) floorAmount;
+        if (partialBlocksDestroyed >= 1d) {
+            partialBlocksDestroyed -= 1d;
+            intAmount += 1;
+        }
+
+        for (int i = 0; i < intAmount; i++) {
             BlockPos bp;
             BlockState bs;
 
@@ -171,14 +179,19 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         return restoredSculk;
     }
 
-    public void destroyRandomBlocks(int amount) {
-        if (getLevel().isClientSide() || amount <= 0) {
-            return;
-        }
-
-        int restoredSculk = restoreRandomSculk((int) (amount / HP_PER_SCULK));
-        if (restoredSculk < amount) {
-            super.destroyRandomBlocks(amount - restoredSculk);
+    @Override
+    public void destroyRandomBlocks(double amount) {
+        if (!getLevel().isClientSide() && amount > 0) {
+            double absorbedHp = 0;
+            if (!sculkBps.isEmpty()) {
+                double restoredSculk = restoreRandomSculk(amount / HP_PER_SCULK);
+                absorbedHp = restoredSculk * HP_PER_SCULK;
+                updateSculkBps();
+            }
+            double newAmount = amount - absorbedHp;
+            if (newAmount > 0 && sculkBps.isEmpty()) {
+                super.destroyRandomBlocks(newAmount);
+            }
         }
     }
 }

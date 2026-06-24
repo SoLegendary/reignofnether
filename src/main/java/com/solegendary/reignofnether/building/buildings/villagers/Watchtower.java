@@ -32,6 +32,7 @@ public class Watchtower extends Building implements GarrisonableBuildingAddon {
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/stone_bricks.png");
 
         this.buildTimeModifier = 1.0f;
+        this.maxHealth = 240d;
 
         this.startingBlockTypes.add(Blocks.STONE_BRICKS);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_SLAB);
@@ -53,13 +54,13 @@ public class Watchtower extends Building implements GarrisonableBuildingAddon {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                    FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.watchtower"), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.watchtower"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.watchtower.tooltip1"), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.watchtower.tooltip2"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.watchtower.tooltip1"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.watchtower.tooltip2"), Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.watchtower.tooltip3", MAX_OCCUPANTS), Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.watchtower.tooltip3", MAX_OCCUPANTS), Style.EMPTY)
             ),
             this
         );

@@ -26,8 +26,8 @@ import java.util.List;
 public class Fear extends Ability {
 
     public static final int CD_MAX_SECONDS = 20;
-    public static final int RANGE = 4;
-    public static final int DURATION_SECONDS = 5;
+    public static final int RANGE = 5;
+    public static final int DURATION_SECONDS = 6;
 
     public Fear() {
         super(

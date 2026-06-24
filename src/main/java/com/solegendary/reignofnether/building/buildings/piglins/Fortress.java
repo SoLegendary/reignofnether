@@ -37,6 +37,7 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/chiseled_nether_bricks.png");
 
         this.buildTimeModifier = 0.5f;
+        this.maxHealth = 800d;
 
         this.canSetRallyPoint = false;
 
@@ -67,13 +68,13 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
                     BuildingClientEvents.hasFinishedBuilding(Buildings.WITHER_SHRINE)) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                    FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.fortress"), Style.EMPTY.withBold(true)),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.fortress"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.fortress.tooltip1"), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.fortress.tooltip2", MAX_OCCUPANTS), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.fortress.tooltip1"), Style.EMPTY),
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.fortress.tooltip2", MAX_OCCUPANTS), Style.EMPTY),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.fortress.tooltip3"), Style.EMPTY)
+                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.fortress.tooltip3"), Style.EMPTY)
             ),
             this
         );

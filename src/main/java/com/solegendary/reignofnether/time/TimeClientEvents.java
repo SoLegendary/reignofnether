@@ -2,8 +2,10 @@ package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -113,31 +115,42 @@ public class TimeClientEvents {
         }
 
         if (!isBloodMoonActive()) {
-            xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (
-                    MinimapClientEvents.CORNER_OFFSET * 2
-            ) + 2;
-            yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (
-                    MinimapClientEvents.CORNER_OFFSET * 2
-            ) - 6;
-
+            updateClockPos();
             evt.getGuiGraphics().renderItem(new ItemStack(Items.CLOCK), xPos, yPos);
             evt.getGuiGraphics().renderItemDecorations(MC.font, new ItemStack(Items.CLOCK), xPos, yPos);
         }
     }
 
+    private static void updateClockPos() {
+        int screenWidth = MC.getWindow().getGuiScaledWidth();
+        int screenHeight = MC.getWindow().getGuiScaledHeight();
+        int radius = MinimapClientEvents.getMapGuiRadius();
+        int co = MinimapClientEvents.CORNER_OFFSET;
+        if (ReignOfNetherClientConfigs.SQUARE_MINIMAP.get()) {
+            // clock centred ON the top-left corner of the visible square (half in / half out)
+            float baseHalf = (float) (radius / Math.sqrt(2));
+            float half = baseHalf * MinimapClientEvents.SQUARE_SCALE;
+            float brX = screenWidth - co;
+            float brY = screenHeight - co;
+            float tlX = brX - 2 * half;  // top-left corner X
+            float tlY = brY - 2 * half;  // top-left corner Y
+            // 16x16 clock nudged a few px up-left from the corner
+            xPos = (int) (tlX - 12);
+            yPos = (int) (tlY - 12);
+        } else {
+            xPos = screenWidth - radius - (co * 2) + 2;
+            yPos = screenHeight - (radius * 2) - (co * 2) - 6;
+        }
+    }
+
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused()
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
             || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK)) {
             return;
         }
 
-        xPos = MC.getWindow().getGuiScaledWidth() - MinimapClientEvents.getMapGuiRadius() - (
-            MinimapClientEvents.CORNER_OFFSET * 2
-        ) + 2;
-        yPos = MC.getWindow().getGuiScaledHeight() - (MinimapClientEvents.getMapGuiRadius() * 2) - (
-            MinimapClientEvents.CORNER_OFFSET * 2
-        ) - 6;
+        updateClockPos();
 
         bloodMoonButton = getBloodMoonButton();
         if (!bloodMoonButton.isHidden.get() && evt.getScreen() instanceof TopdownGui) {
@@ -164,7 +177,7 @@ public class TimeClientEvents {
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
         if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) ||
-            !(MC.screen instanceof TopdownGui)) {
+            !(MC.screen instanceof TopdownGui) || !HudClientEvents.enabled) {
             return;
         }
 

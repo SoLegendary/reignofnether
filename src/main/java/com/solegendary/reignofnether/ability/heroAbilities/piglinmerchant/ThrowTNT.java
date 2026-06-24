@@ -7,6 +7,7 @@ package com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -34,8 +35,8 @@ public class ThrowTNT extends HeroAbility {
     public float explosionPower = 2;
 
     // for some reason 0 and negative cooldown values cause this to stop working
-    public static int LESS_COOLDOWN_PER_100_RESOURCES = 6 * (ResourceCost.TICKS_PER_SECOND + 2);
-    public static int MANA_REFUND_PER_100_RESOURCES = 5;
+    public static int LESS_COOLDOWN_PER_CHUNK_RESOURCES = 6 * (ResourceCost.TICKS_PER_SECOND + 2);
+    public static int MANA_REFUND_PER_CHUNK_RESOURCES = 5;
 
     public ThrowTNT() {
         super(3, 40, UnitAction.THROW_TNT, 20 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);
@@ -102,10 +103,13 @@ public class ThrowTNT extends HeroAbility {
     public List<FormattedCharSequence> getTooltipLines(HeroUnit hero) {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.throw_tnt") + " " + rankString(hero), true),
-                fcsIcons(I18n.get("abilities.reignofnether.throw_tnt.stats", Math.round(explosionPower * 6.67f), cooldownMax / 20, RANGE, manaCost)),
+                fcsIcons(I18n.get("abilities.reignofnether.throw_tnt.stats",
+                        Math.round(explosionPower * AdjustablePrimedTnt.DAMAGE_PER_POWER),
+                        cooldownMax / 20, RANGE, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2", LESS_COOLDOWN_PER_100_RESOURCES / 20, MANA_REFUND_PER_100_RESOURCES))
+                fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2",
+                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk))
         );
     }
 
@@ -115,7 +119,8 @@ public class ThrowTNT extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.level_req", getLevelRequirement(hero)), getLevelReqStyle(hero)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2", LESS_COOLDOWN_PER_100_RESOURCES / 20, MANA_REFUND_PER_100_RESOURCES)),
+                fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2",
+                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.rank1"), getRank(hero) == 0),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.rank2"), getRank(hero) == 1),

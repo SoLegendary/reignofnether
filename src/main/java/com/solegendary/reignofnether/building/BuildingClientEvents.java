@@ -57,6 +57,8 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -350,7 +352,7 @@ public class BuildingClientEvents {
     }
 
     public static boolean isBuildingPlacementValid(BlockPos originPos) {
-        return !isBuildingPlacementInAirOrOnBarriers(originPos) &&
+        return !isBuildingPlacementInAirOrOnIllegalBlocks(originPos) &&
                 !isBuildingPlacementClipping(originPos) &&
                 (!isOverlappingAnyOtherBuilding() || SandboxClientEvents.isSandboxPlayer()) &&
                 isNonPiglinOrOnNetherBlocks(originPos) &&
@@ -363,7 +365,7 @@ public class BuildingClientEvents {
     public static void checkBuildingPlacementValidityWithMessages(BlockPos originPos) {
         if (!isBuildingPlacementWithinWorldBorder(originPos)) {
             showTemporaryMessage(I18n.get("building.reignofnether.outside_map"));
-        } else if (isBuildingPlacementInAirOrOnBarriers(originPos)) {
+        } else if (isBuildingPlacementInAirOrOnIllegalBlocks(originPos)) {
             showTemporaryMessage(I18n.get("building.reignofnether.ground_not_flat"));
         } else if (isBuildingPlacementClipping(originPos)) {
             showTemporaryMessage(I18n.get("building.reignofnether.ground_not_flat"));
@@ -402,7 +404,7 @@ public class BuildingClientEvents {
 
     // 90% all solid blocks at the base of the building must be on top of solid non-barrier blocks to be placeable
     // excluding those under blocks which aren't solid anyway
-    private static boolean isBuildingPlacementInAirOrOnBarriers(BlockPos originPos) {
+    private static boolean isBuildingPlacementInAirOrOnIllegalBlocks(BlockPos originPos) {
         if (isBuildingToPlaceABridge() || GameruleClient.slantedBuilding) {
             return false;
         }
@@ -418,7 +420,8 @@ public class BuildingClientEvents {
                     blocksBelow += 1;
                     if (bsBelow.isSolid() &&
                             !(bsBelow.getBlock() instanceof LeavesBlock) &&
-                            !(bsBelow.getBlock() instanceof BarrierBlock)) {
+                            !(bsBelow.getBlock() instanceof BarrierBlock) &&
+                            !(bsBelow.getBlock() instanceof SlabBlock && bsBelow.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.BOTTOM)) {
                         solidBlocksBelow += 1;
                     }
                 }
@@ -787,10 +790,16 @@ public class BuildingClientEvents {
                     ids[i] = builderIds.get(i);
                 }
                 if (Keybindings.shiftMod.isDown()) {
+                    String ownerName = MC.player.getName().getString();
+                    if (SandboxClientEvents.relationship == Relationship.NEUTRAL)
+                        ownerName = "";
+                    else if (SandboxClientEvents.relationship == Relationship.HOSTILE)
+                        ownerName = "Enemy";
+
                     BuildingServerboundPacket.placeAndQueueBuilding(building,
                         isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
                         buildingRotation,
-                        hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : MC.player.getName().getString(),
+                        hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : ownerName,
                         ids,
                         isBridgeDiagonal()
                     );
@@ -1068,7 +1077,7 @@ public class BuildingClientEvents {
         if (newBuilding != null && MC.player != null) {
             newBuilding.isBuilt = isBuilt;
 
-            if (isBuilt && forPlayerLoggingIn) {
+            if (isBuilt) {
                 newBuilding.highestBlockCountReached = newBuilding.getBlocksTotal();
             }
 
@@ -1118,12 +1127,13 @@ public class BuildingClientEvents {
         }
     }
 
-    public static void syncBuilding(BuildingPlacement serverBuilding, int blocksPlaced, String ownerName, int scenarioRoleIndex) {
+    public static void syncBuilding(BuildingPlacement serverBuilding, int blocksPlaced, double partialBlocksDestroyed, String ownerName, int scenarioRoleIndex) {
         for (BuildingPlacement building : buildings) {
             if (building.originPos.equals(serverBuilding.originPos)) {
                 building.setServerBlocksPlaced(blocksPlaced);
                 building.ownerName = ownerName;
                 building.scenarioRoleIndex = scenarioRoleIndex;
+                building.partialBlocksDestroyed = partialBlocksDestroyed;
             }
         }
     }
@@ -1158,6 +1168,19 @@ public class BuildingClientEvents {
             }
         }
         return false;
+    }
+
+    // does the player own one of these buildings?
+    public static int numFinishedBuildings(Building building) {
+        int count = 0;
+        for (BuildingPlacement bpl : buildings) {
+            if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt &&
+                    ((MC.player != null && bpl.ownerName.equals(MC.player.getName().getString())) ||
+                            allyHasFinishedBuilding(building))) {
+                count += 1;
+            }
+        }
+        return count;
     }
 
     // does the selected ally's unit own one of these buildings?

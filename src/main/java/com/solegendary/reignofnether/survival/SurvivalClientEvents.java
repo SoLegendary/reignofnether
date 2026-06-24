@@ -136,9 +136,9 @@ public class SurvivalClientEvents {
 
     private static String faction(Faction faction) {
         return switch (faction) {
-            case VILLAGERS -> I18n.get("hud.faction.reignofnether.villager");
-            case MONSTERS -> I18n.get("hud.faction.reignofnether.monster");
-            case PIGLINS -> I18n.get("hud.faction.reignofnether.piglin");
+            case VILLAGERS -> I18n.get("hud.faction.reignofnether.villagers");
+            case MONSTERS -> I18n.get("hud.faction.reignofnether.monsters");
+            case PIGLINS -> I18n.get("hud.faction.reignofnether.piglins");
             case NONE, NEUTRAL -> I18n.get("hud.faction.reignofnether.random");
         };
     }
