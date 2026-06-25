@@ -25,6 +25,11 @@ public class StartPosClientboundPacket {
                 new StartPosClientboundPacket(StartPosAction.ADD, startPos.pos, startPos.faction, startPos.playerName, startPos.colorId));
     }
 
+    public static void addDisabledPos(StartPos startPos) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new StartPosClientboundPacket(StartPosAction.ADD_DISABLED, startPos.pos, startPos.faction, startPos.playerName, startPos.colorId));
+    }
+
     public static void removePos(BlockPos pos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new StartPosClientboundPacket(StartPosAction.REMOVE, pos, Faction.NONE, "", 0));
@@ -110,6 +115,12 @@ public class StartPosClientboundPacket {
                             case ADD -> {
                                 StartPosClientEvents.startPoses.removeIf(sp -> sp.pos.equals(blockPos));
                                 StartPosClientEvents.startPoses.add(new StartPos(blockPos, faction, playerName, colorId));
+                            }
+                            case ADD_DISABLED -> {
+                                StartPosClientEvents.startPoses.removeIf(sp -> sp.pos.equals(blockPos));
+                                StartPos pos = new StartPos(blockPos, faction, playerName, colorId);
+                                pos.enabled = false;
+                                StartPosClientEvents.startPoses.add(pos);
                             }
                             case REMOVE -> {
                                 StartPosClientEvents.startPoses.removeIf(sp -> sp.pos.equals(blockPos));

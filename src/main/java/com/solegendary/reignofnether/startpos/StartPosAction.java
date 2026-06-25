@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.startpos;
 
 public enum StartPosAction {
     ADD,
+    ADD_DISABLED,
     REMOVE,
     RESERVE,
     UNRESERVE,

@@ -42,11 +42,9 @@ Quality of Life
 [❌] Moved the iron golem default spawn to beside the furnaces to reduce chance of getting stuck on neighbouring blocks
 
 
-
 Balance
 -------
 [✔] The Piglin Merchant and Marauder hitbox sized increased (visually unchanged)
-[❌] Large slimes and magma cubes (size 4+) no longer take fall damage
 [❌] Spider hitbox reduced to 1x1 to improve pathfinding and evasion against projectiles
 
 Bugfixes
