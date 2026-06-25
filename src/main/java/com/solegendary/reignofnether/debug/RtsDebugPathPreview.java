@@ -56,6 +56,10 @@ public class RtsDebugPathPreview {
         displayedPaths.put(entityId, new PathDisplay(nodes, pathType, PATH_DISPLAY_TICKS));
     }
 
+    public static void removeUnitPath(int entityId) {
+        displayedPaths.remove(entityId);
+    }
+
     public static int displayedPathCount() { return displayedPaths.size(); }
 
     @SubscribeEvent

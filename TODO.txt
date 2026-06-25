@@ -1,5 +1,5 @@
 
-1.20.1-1.3.6a
+1.20.1-1.3.6b
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -8,32 +8,16 @@
 
 Quality of Life
 ---------------
-[✔] Added the Haunted House back into the sandbox building menu
-[✔] Bottom slabs are now illegal blocks for placing buildings on
-[✔] F1 in RTS cam now hides the UI just like in vanilla FPV
-[✔] The F7 debug menu has been expanded to show pathfinding stats and reveal unit paths
 
 
 Balance
 -------
-[✔] Curse of Insomnia phantoms now deal regular damage again, but specifically deal 30% less damage to heroes
-    - This is so that they do full damage to ghasts
-[✔] Wraith fear range (when manually casted) raised from 4 to 5
-[✔] Wraith fear duration raised from 5 to 6 seconds
+
 
 Bugfixes
 --------
-[❌] Units not responding while attacking (only pillagers?)
-    - Maybe only specifically on Soly's server?
-[❌] After player rejoins, can't place buildings anymore (pressing key nulls buildingToPlace the tick after)
-
-[✔] Fixed newly registered custom buildings not saving their placements correctly
-[✔] Building blocks now convert farmland and dirt paths underneath into regular dirt when placed
-    - This was preventing some blocks like rails from allowing the building to complete
-[✔] Fixed Ravager roars not causing any knockback
+[✔] Fixed units not responding to move commands when in large groups
 
 
 Languages
 ---------
-[✔] Made various more strings translatable
-    - Thanks @NumberSir!

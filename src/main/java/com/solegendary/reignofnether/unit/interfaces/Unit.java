@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
+import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
@@ -586,8 +587,10 @@ public interface Unit {
     }
 
     static void fullResetBehaviours(Unit unit) {
-        if (((Entity) unit).level().isClientSide() && !Keybindings.shiftMod.isDown())
+        if (((Entity) unit).level().isClientSide() && !Keybindings.shiftMod.isDown()) {
             unit.getCheckpoints().clear();
+            RtsDebugPathPreview.removeUnitPath(((Entity) unit).getId());
+        }
         unit.resetBehaviours();
         Unit.resetBehaviours(unit);
         if (unit instanceof WorkerUnit workerUnit) {
