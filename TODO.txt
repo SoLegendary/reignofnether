@@ -37,7 +37,7 @@ Official Map Pack
 
 Quality of Life
 ---------------
-[❌] `/rtsapi-teams-mode NONE` can be used on any map to disable all start blocks, even if the map does not have an rtsmap.json
+[❌] `/rtsapi-teams-mode none` can be used on any map to disable all start blocks, even if the map does not have an rtsmap.json
 [❌] Added an option to make a custom building not draw aggro from player units
 [❌] Moved the iron golem default spawn to beside the furnaces to reduce chance of getting stuck on neighbouring blocks
 
@@ -47,6 +47,7 @@ Balance
 -------
 [✔] The Piglin Merchant and Marauder hitbox sized increased (visually unchanged)
 [❌] Large slimes and magma cubes (size 4+) no longer take fall damage
+[❌] Spider hitbox reduced to 1x1 to improve pathfinding and evasion against projectiles
 
 Bugfixes
 --------

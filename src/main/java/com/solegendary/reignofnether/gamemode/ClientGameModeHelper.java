@@ -4,11 +4,14 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.matchstart.MatchStartScreen;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.survival.WaveDifficulty;
 import com.solegendary.reignofnether.faction.Faction;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -63,11 +66,11 @@ public class ClientGameModeHelper {
                 "Classic",
                 Button.itemIconSize,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/grass_block_side.png"),
-                (Keybinding) null,
+                Keybindings.getFnum(9),
                 () -> false,
                 () -> false,
                 () -> !gameModeLocked && !pvpModesOnly,
-                null,
+                () -> Minecraft.getInstance().setScreen(new MatchStartScreen()),
                 ClientGameModeHelper::cycleGameMode,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.classic1") +
@@ -76,6 +79,7 @@ public class ClientGameModeHelper {
                         FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.classic2"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.classic3"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.start_menu"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.changemode"), Style.EMPTY)
                 )
         );
@@ -86,11 +90,11 @@ public class ClientGameModeHelper {
                 "King of the Beacon",
                 Button.itemIconSize,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png"),
-                (Keybinding) null,
+                Keybindings.getFnum(9),
                 () -> false,
                 () -> false,
                 () -> !gameModeLocked && !pvpModesOnly,
-                null,
+                () -> Minecraft.getInstance().setScreen(new MatchStartScreen()),
                 ClientGameModeHelper::cycleGameMode,
                 List.of(
                         FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.kotb1") +
@@ -99,6 +103,7 @@ public class ClientGameModeHelper {
                         FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.kotb2"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.kotb3"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.start_menu"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.changemode"), Style.EMPTY)
                 )
         );

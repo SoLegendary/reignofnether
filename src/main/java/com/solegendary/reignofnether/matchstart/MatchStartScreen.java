@@ -2,14 +2,11 @@ package com.solegendary.reignofnether.matchstart;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
-import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.ButtonBuilder;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
@@ -24,12 +21,9 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.setCustomBuildingToEdit;
 
 public class MatchStartScreen extends Screen {
 
@@ -40,8 +34,9 @@ public class MatchStartScreen extends Screen {
     private static final ResourceLocation PIGLIN_ICON     = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
     private static final ResourceLocation TICK_ICON       = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png");
     private static final ResourceLocation CROSS_ICON      = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png");
+    private static final ResourceLocation CLOSE_ICON      = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross_square.png");
 
-    private static final int BG_PANEL     = 0xA0000000;
+    private static final int BG_PANEL     = 0xDC000000;
     private static final int BG_ICON      = 0x64000000;
     private static final int ACCENT       = 0xFFE6C76A;
     private static final int TEXT_DIM     = 0xFFB0B8C0;
@@ -51,8 +46,6 @@ public class MatchStartScreen extends Screen {
     private static final int MARGIN = 12;
     private static final int HEADER_H = 32;
     private static final int BOTTOM_H = 28;
-    private static final int CHAT_H = 140;
-    private static final int SETTINGS_H = 36;
     private static final int FRAME_SIZE = 22;
     private static final int ICON_SIZE = 14;
     private static final int ROW_H = 26;
@@ -61,15 +54,14 @@ public class MatchStartScreen extends Screen {
     private final List<ReadyHit> readyHits = new ArrayList<>();
     private final List<RowHit> rowHits = new ArrayList<>();
     private final List<Button> hudButtons = new ArrayList<>();
-    private int mapL, mapT, mapR, mapB;
-    private int rosL, rosT, rosR, rosB;
-    private int setL, setT, setR, setB;
-    private int closeBtnX, closeBtnY;
+    private int mapX1, mapY1, mapX2, mapY2;
+    private int rosX1, rosY1, rosX2, rosY2;
+    private int grBtnX, grBtnY;  // gamerules button position for popover anchor
     private int spectateBtnX1, spectateBtnY1, spectateBtnX2, spectateBtnY2;
     private boolean spectateBtnVisible;
 
     private EditBox chatInput;
-    private int chatL, chatT, chatR, chatB;
+    private int chatX1, chatY1, chatX2, chatY2;
     private int chatScroll = 0;
     private int chatTotalLines = 0;
     private int chatViewLines = 0;
@@ -86,6 +78,11 @@ public class MatchStartScreen extends Screen {
     private record ReadyHit(StartPos pos, int x, int y) {}
     private record RowHit(StartPos pos, int x1, int y1, int x2, int y2) {}
 
+    // Tooltip state set during render, drawn after scissor regions
+    private String pendingTooltip = null;
+    private int pendingTooltipX = 0;
+    private int pendingTooltipY = 0;
+
     public MatchStartScreen() {
         super(Component.translatable("matchstart.reignofnether.title"));
     }
@@ -100,28 +97,19 @@ public class MatchStartScreen extends Screen {
         MinimapClientEvents.suppressViewQuad = true;
         recentreMapOnStartPoses();
 
-        int chatBLocal = this.height - BOTTOM_H - MARGIN - 6;
+        // Chat input sits above the bottom of the right panel
+        int chatBLocal = this.height - MARGIN - 6;
         int chatLLocal = this.width / 2 + 3;
         int chatRLocal = this.width - MARGIN;
 
-        chatInput = new EditBox(this.font, chatLLocal + 8, chatBLocal - 22,
-                chatRLocal - chatLLocal - 16, 18,
+        chatInput = new EditBox(this.font, chatLLocal + 6, chatBLocal - 12,
+                chatRLocal - chatLLocal - 12, 16,
                 Component.translatable("matchstart.reignofnether.chat.placeholder"));
         chatInput.setBordered(true);
         chatInput.setMaxLength(256);
         chatInput.setCanLoseFocus(true);
         chatInput.setFocused(false);
         addRenderableWidget(chatInput);
-
-        int closeW = 20;
-        int closeH = 20;
-        int closeX = this.width - MARGIN - closeW - 6;
-        int closeY = MARGIN + (HEADER_H - closeH) / 2;
-        closeButton = net.minecraft.client.gui.components.Button.builder(
-                        Component.literal("✕"),
-                        b -> MatchStartClientEvents.dismiss())
-                .pos(closeX, closeY).size(closeW, closeH).build();
-        addRenderableWidget(closeButton);
     }
 
     private void recentreMapOnStartPoses() {
@@ -148,46 +136,35 @@ public class MatchStartScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderDirtBackground(g);
+        //renderDirtBackground(g);
 
         factionHits.clear();
         readyHits.clear();
         rowHits.clear();
         hudButtons.clear();
+        pendingTooltip = null;
 
-        Minecraft mcLocal = Minecraft.getInstance();
-        boolean showSettings = mcLocal.player != null && mcLocal.player.hasPermissions(2);
+        int leftBottom = this.height - MARGIN;
+        mapX1 = MARGIN;
+        mapY1 = MARGIN + HEADER_H + 6;
+        mapX2 = this.width / 2 - 3;
+        mapY2 = leftBottom - BOTTOM_H;
 
-        int leftBottom = this.height - BOTTOM_H - MARGIN - 6;
-        mapL = MARGIN;
-        mapT = MARGIN + HEADER_H + 6;
-        mapR = this.width / 2 - 3;
-        mapB = showSettings ? leftBottom - SETTINGS_H - 6 : leftBottom;
-
-        setL = mapL;
-        setT = mapB + 6;
-        setR = mapR;
-        setB = leftBottom;
-
-        int rightTotalH = leftBottom - mapT - 6;
-        int rosterH = rightTotalH * 60 / 100;
-        chatL = this.width / 2 + 3;
-        chatR = this.width - MARGIN;
-        rosL = chatL;
-        rosT = mapT;
-        rosR = chatR;
-        rosB = rosT + rosterH;
-        chatT = rosB + 6;
-        chatB = leftBottom;
+        int rosterH = leftBottom * 50 / 100;
+        chatX1 = this.width / 2 + 3;
+        chatX2 = this.width - MARGIN;
+        rosX1 = chatX1;
+        rosY1 = mapY1;
+        rosX2 = chatX2;
+        rosY2 = rosY1 + rosterH;
+        chatY1 = rosY2 + 6;
+        chatY2 = leftBottom + 3;
 
         renderHeader(g, mouseX, mouseY);
-        renderMap(g, mapL, mapT, mapR, mapB, mouseX, mouseY);
-        renderRoster(g, rosL, rosT, rosR, rosB, mouseX, mouseY);
-        renderChatCard(g, chatL, chatT, chatR, chatB, mouseX, mouseY);
-        if (showSettings) {
-            renderSettings(g, setL, setT, setR, setB, mouseX, mouseY);
-        }
-        renderBottomStrip(g);
+        renderMap(g, mapX1, mapY1, mapX2, mapY2, mouseX, mouseY);
+        renderRoster(g, rosX1, rosY1, rosX2, rosY2, mouseX, mouseY);
+        renderChatCard(g, chatX1, chatY1, chatX2, chatY2);
+        renderInstructions(g, mapX1, mapY2 + 6, mapX2, this.height - 9);
 
         if (GameruleClient.gamerulesMenuOpen) {
             renderGamerulesPopover(g, mouseX, mouseY);
@@ -200,6 +177,18 @@ public class MatchStartScreen extends Screen {
                 b.renderTooltip(g, mouseX, mouseY);
             }
         }
+
+        // Draw simple tooltips for faction/ready tiles
+        if (pendingTooltip != null) {
+            int tw = this.font.width(pendingTooltip) + 8;
+            int th = this.font.lineHeight + 6;
+            int tx = pendingTooltipX + FRAME_SIZE + 2;
+            int ty = pendingTooltipY;
+            if (tx + tw > this.width - MARGIN) tx = pendingTooltipX - tw - 2;
+            g.fill(tx, ty, tx + tw, ty + th, 0xE0000000);
+            g.fill(tx, ty, tx + 1, ty + th, 0xFF_C8A840);
+            g.drawString(this.font, pendingTooltip, tx + 4, ty + 4, TEXT_NORMAL, false);
+        }
     }
 
     private void renderHeader(GuiGraphics g, int lastMouseX, int lastMouseY) {
@@ -209,16 +198,43 @@ public class MatchStartScreen extends Screen {
                 Component.translatable("matchstart.reignofnether.title").getString(),
                 MARGIN + 10, MARGIN + 12, ACCENT, false);
 
-        String mode = Component.translatable("matchstart.reignofnether.mode",
-                ClientGameModeHelper.gameMode == null ? "—" : ClientGameModeHelper.gameMode.name()).getString();
-        int modeW = this.font.width(mode);
-        g.drawString(this.font, mode, this.width / 2 - modeW / 2, MARGIN + 12, TEXT_NORMAL, false);
-
         String cd = countdownLabel();
         int cdW = this.font.width(cd);
         int cdCol = StartPosClientEvents.isStarting ? READY_COL : TEXT_DIM;
-        int cdRight = closeButton != null ? closeButton.getX() - 10 : this.width - MARGIN - 10;
+
+        int closeW = 20;
+        int closeH = 20;
+        int closeX = this.width - MARGIN - closeW - 7;
+        int closeY = MARGIN + ((HEADER_H - closeH) / 2) - 1;
+
+        Button closeButton = new ButtonBuilder("Close Start Match Menu")
+                .iconResource(CLOSE_ICON)
+                .onLeftClick(MatchStartClientEvents::dismiss)
+                .build();
+        closeButton.frameResource = null;
+
+        if (!closeButton.isHidden.get()) {
+            closeButton.render(g, closeX, closeY, lastMouseX, lastMouseY);
+            hudButtons.add(closeButton);
+        }
+
+        // Gamerules button is placed to the left of close in the header
+        grBtnX = closeX - FRAME_SIZE - 8;
+        grBtnY = MARGIN + (HEADER_H - FRAME_SIZE) / 2;
+
+        // Leave room for the gamerules button and close button
+        int cdRight = grBtnX - 10;
         g.drawString(this.font, cd, cdRight - cdW, MARGIN + 12, cdCol, false);
+
+        // Gamerules button (only for ops)
+        Minecraft mcRef = Minecraft.getInstance();
+        if (mcRef.player != null && mcRef.player.hasPermissions(2)) {
+            Button grBtn = GameruleClient.getGamerulesButton();
+            if (!grBtn.isHidden.get()) {
+                grBtn.render(g, grBtnX, grBtnY, lastMouseX, lastMouseY);
+                hudButtons.add(grBtn);
+            }
+        }
     }
 
     private void renderMap(GuiGraphics g, int x1, int y1, int x2, int y2, int mx, int my) {
@@ -228,12 +244,21 @@ public class MatchStartScreen extends Screen {
                 Component.translatable("matchstart.reignofnether.map_preview").getString(),
                 x1 + 10, y1 + 8, ACCENT, false);
 
-        int drawL = x1 + 8;
-        int drawT = y1 + 22;
-        int drawR = x2 - 8;
-        int drawB = y2 - 8;
-        int drawW = drawR - drawL;
-        int drawH = drawB - drawT;
+        int padL = x1 + 8;
+        int padT = y1 + 22;
+        int padR = x2 - 8;
+        int padB = y2 - 8;
+        int availW = padR - padL;
+        int availH = padB - padT;
+
+        // Render at square aspect ratio, centred in the available space
+        int side = Math.min(availW, availH);
+        int drawL = padL + (availW - side) / 2;
+        int drawT = padT + (availH - side) / 2;
+        int drawR = drawL + side;
+        int drawB = drawT + side;
+        int drawW = side;
+        int drawH = side;
 
         if (MinimapClientEvents.isMapReady()) {
             MinimapClientEvents.renderMapInto(g, drawL, drawT, drawW, drawH);
@@ -257,7 +282,7 @@ public class MatchStartScreen extends Screen {
             int pz = (int) screen.y;
 
             if (px < drawL - btnFrame || px > drawR + btnFrame ||
-                pz < drawT - btnFrame || pz > drawB + btnFrame) {
+                    pz < drawT - btnFrame || pz > drawB + btnFrame) {
                 continue;
             }
 
@@ -392,7 +417,14 @@ public class MatchStartScreen extends Screen {
             g.fill(x, y, x + 2, rowBottom, ACCENT);
         }
 
-        int tileY = y + (ROW_H - FRAME_SIZE) / 2;
+        // Highlight clickable rows (empty slots or my slot's left area) like the spectate button
+        if (sp.enabled && (empty || mine)) {
+            int rowHitRight = x + width - FRAME_SIZE * 3 - 2 * 2 - FRAME_SIZE - 6 - 8 - 4;
+            boolean hovered = mx >= x && mx <= rowHitRight && my >= y && my <= rowBottom;
+            if (hovered) g.fill(x, y, rowHitRight, rowBottom, 0x32FFFFFF);
+        }
+
+        int tileY = y + ((ROW_H - FRAME_SIZE) / 2) - 1;
         int readyX = x + width - FRAME_SIZE - 6;
         int factionTotalW = FRAME_SIZE * 3 + 2 * 2;
         int factionStartX = readyX - 8 - factionTotalW;
@@ -495,11 +527,16 @@ public class MatchStartScreen extends Screen {
         if (canPick && hovered) {
             g.fill(x + 1, y + 1, x + FRAME_SIZE - 1, y + FRAME_SIZE - 1, 0x32FFFFFF);
         }
+        if (hovered && pendingTooltip == null) {
+            pendingTooltip = f.name().charAt(0) + f.name().substring(1).toLowerCase();
+            pendingTooltipX = x;
+            pendingTooltipY = y;
+        }
         if (canPick) factionHits.add(new FactionHit(sp, f, x, y));
     }
 
     private void renderReadyTile(GuiGraphics g, StartPos sp, int x, int y,
-                                  String localName, int mx, int my) {
+                                 String localName, int mx, int my) {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(localName);
         boolean otherClaimed = !sp.playerName.isBlank() && !mine;
         boolean canToggle = mine;
@@ -519,39 +556,26 @@ public class MatchStartScreen extends Screen {
         if (canToggle && hovered) {
             g.fill(x + 1, y + 1, x + FRAME_SIZE - 1, y + FRAME_SIZE - 1, 0x32FFFFFF);
         }
+        if (hovered && pendingTooltip == null) {
+            pendingTooltip = sp.ready
+                    ? Component.translatable("startpos.reignofnether.ready_button.unready").getString()
+                    : Component.translatable("startpos.reignofnether.ready_button.ready").getString();
+            pendingTooltipX = x;
+            pendingTooltipY = y;
+        }
         if (canToggle) readyHits.add(new ReadyHit(sp, x, y));
     }
 
-    private void renderSettings(GuiGraphics g, int x1, int y1, int x2, int y2, int mx, int my) {
-        MyRenderer.renderFrameWithBg(g, x1, y1, x2 - x1, y2 - y1, BG_PANEL);
-
-        int btnY = y1 + (y2 - y1 - FRAME_SIZE) / 2;
-        int bx = x1 + 10;
-
-        Button modeBtn = ClientGameModeHelper.getButton();
-        if (modeBtn != null) {
-            modeBtn.render(g, bx, btnY, mx, my);
-            hudButtons.add(modeBtn);
-        }
-        bx += FRAME_SIZE + 8;
-
-        Button grBtn = GameruleClient.getGamerulesButton();
-        if (grBtn != null && !grBtn.isHidden.get()) {
-            grBtn.render(g, bx, btnY, mx, my);
-            hudButtons.add(grBtn);
-        }
-    }
-
     private void renderGamerulesPopover(GuiGraphics g, int mx, int my) {
+        // Anchor the popover below the gamerules button in the header
         int panelWidth = 145;
-        int panelHeight = 262;
-        int xTR = setL + panelWidth + 8;
-        int yTR = setT - 6 - panelHeight + 36;
+        int xTR = grBtnX + panelWidth + 8;
+        int yTR = grBtnY + FRAME_SIZE + 6;
         List<Button> buttons = GameruleClient.renderGamerulesGUI(g, xTR, yTR, mx, my);
         hudButtons.addAll(buttons);
     }
 
-    private void renderChatCard(GuiGraphics g, int x1, int y1, int x2, int y2, int mouseX, int mouseY) {
+    private void renderChatCard(GuiGraphics g, int x1, int y1, int x2, int y2) {
         MyRenderer.renderFrameWithBg(g, x1, y1, x2 - x1, y2 - y1, BG_PANEL);
         g.drawString(this.font,
                 Component.translatable("matchstart.reignofnether.chat").getString(),
@@ -602,7 +626,7 @@ public class MatchStartScreen extends Screen {
         if (chatInput == null) return;
         String text = chatInput.getValue().trim();
         chatInput.setValue("");
-        chatInput.setFocused(false);
+        // Do NOT defocus — keep the input active so the player can send more messages
         if (text.isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.player.connection == null) return;
@@ -614,9 +638,8 @@ public class MatchStartScreen extends Screen {
         }
     }
 
-    private void renderBottomStrip(GuiGraphics g) {
-        int y = this.height - BOTTOM_H - MARGIN;
-        MyRenderer.renderFrameWithBg(g, MARGIN, y, this.width - MARGIN * 2, BOTTOM_H, BG_PANEL);
+    private void renderInstructions(GuiGraphics g, int x1, int y1, int x2, int y2) {
+        MyRenderer.renderFrameWithBg(g, x1, y1, x2 - x1, y2 - y1, BG_PANEL);
 
         StartPos current = StartPosClientEvents.getPos();
         String hint;
@@ -629,11 +652,7 @@ public class MatchStartScreen extends Screen {
         } else {
             hint = Component.translatable("matchstart.reignofnether.hint.waiting").getString();
         }
-        g.drawString(this.font, hint, MARGIN + 10, y + 10, ACCENT, false);
-
-        String close = Component.translatable("matchstart.reignofnether.hint.close").getString();
-        int w = this.font.width(close);
-        g.drawString(this.font, close, this.width - MARGIN - 10 - w, y + 10, TEXT_DIM, false);
+        g.drawString(this.font, hint, x1 + MARGIN, y1 + 9, ACCENT, false);
     }
 
     private String countdownLabel() {
@@ -662,14 +681,14 @@ public class MatchStartScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         int mx = (int) mouseX, my = (int) mouseY;
-        if (mx >= rosL && mx <= rosR && my >= rosT && my <= rosB) {
+        if (mx >= rosX1 && mx <= rosX2 && my >= rosY1 && my <= rosY2) {
             rosterScroll -= (int) (delta * 18);
             int maxScroll = Math.max(0, rosterContentH - rosterViewH);
             if (rosterScroll > maxScroll) rosterScroll = maxScroll;
             if (rosterScroll < 0) rosterScroll = 0;
             return true;
         }
-        if (mx >= chatL && mx <= chatR && my >= chatT && my <= chatB) {
+        if (mx >= chatX1 && mx <= chatX2 && my >= chatY1 && my <= chatY2) {
             chatScroll += (int) (delta * 3);
             int maxScroll = Math.max(0, chatTotalLines - chatViewLines);
             if (chatScroll > maxScroll) chatScroll = maxScroll;
@@ -685,8 +704,8 @@ public class MatchStartScreen extends Screen {
         boolean left = button == 0;
 
         if (left && spectateBtnVisible
-            && mx >= spectateBtnX1 && mx <= spectateBtnX2
-            && my >= spectateBtnY1 && my <= spectateBtnY2) {
+                && mx >= spectateBtnX1 && mx <= spectateBtnX2
+                && my >= spectateBtnY1 && my <= spectateBtnY2) {
             leaveOwnSlot();
             return true;
         }
@@ -765,6 +784,12 @@ public class MatchStartScreen extends Screen {
     }
 
     @Override
+    public boolean shouldCloseOnEsc() {
+        // ESC always closes this screen; if chat is focused, first defocus it
+        return true;
+    }
+
+    @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (chatInput != null && chatInput.isFocused()) {
             if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
@@ -772,10 +797,15 @@ public class MatchStartScreen extends Screen {
                 return true;
             }
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                // ESC from focused chat: defocus but keep screen open
                 chatInput.setFocused(false);
                 return true;
             }
             return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_F9) {
+            MatchStartClientEvents.dismiss();
+            return true;
         }
         if (chatInput != null && keyCode == GLFW.GLFW_KEY_T) {
             chatInput.setFocused(true);
@@ -796,30 +826,11 @@ public class MatchStartScreen extends Screen {
     }
 
     @Override
-    public boolean shouldCloseOnEsc() {
-        if (chatInput != null && chatInput.isFocused()) return false;
-        return !OrthoviewClientEvents.isEnabled();
-    }
-
-    @Override
     public void removed() {
         MinimapClientEvents.suppressViewQuad = false;
         MinimapClientEvents.setMapLocked(priorMapLocked);
         MinimapClientEvents.setLargeMap(priorLargeMap);
         GameruleClient.gamerulesMenuOpen = false;
         super.removed();
-    }
-
-    public static boolean shouldAutoOpen() {
-        if (!OrthoviewClientEvents.isEnabled()) return false;
-        if (ClientGameModeHelper.gameMode != GameMode.CLASSIC) return false;
-        if (PlayerClientEvents.rtsLocked) return false;
-        if (StartPosClientEvents.startPoses.isEmpty()) return false;
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return false;
-        for (RTSPlayer p : PlayerClientEvents.rtsPlayers) {
-            if (p.name.equals(mc.player.getName().getString())) return false;
-        }
-        return true;
     }
 }

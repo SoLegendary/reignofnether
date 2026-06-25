@@ -1,15 +1,17 @@
 package com.solegendary.reignofnether.matchstart;
 
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.client.event.InputEvent;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -20,7 +22,6 @@ public class MatchStartClientEvents {
     private static int countdownTicks = -1;
     private static boolean wasStartingLastTick = false;
     private static boolean wasOrthoLastTick = false;
-    private static boolean userDismissed = false;
 
     private static final int CHAT_BUFFER_MAX = 80;
     private static final Deque<Component> chatBuffer = new ArrayDeque<>();
@@ -42,7 +43,6 @@ public class MatchStartClientEvents {
     }
 
     public static void dismiss() {
-        userDismissed = true;
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof MatchStartScreen) {
             mc.setScreen(null);
@@ -58,26 +58,14 @@ public class MatchStartClientEvents {
         tickCountdown();
 
         boolean orthoOn = OrthoviewClientEvents.isEnabled();
-        if (orthoOn && !wasOrthoLastTick) {
-            userDismissed = false;
-        }
         wasOrthoLastTick = orthoOn;
 
-        boolean isOurScreen = mc.screen instanceof MatchStartScreen;
-        boolean isChat = mc.screen instanceof ChatScreen;
-
-        if (!orthoOn || PlayerClientEvents.rtsLocked) {
-            if (isOurScreen) {
+        // Close the screen if ortho is disabled or player is rts-locked
+        if (mc.screen instanceof MatchStartScreen) {
+            if (!orthoOn || PlayerClientEvents.rtsLocked) {
                 mc.setScreen(null);
             }
-            return;
         }
-
-        if (isOurScreen || isChat) return;
-        if (userDismissed) return;
-        if (!MatchStartScreen.shouldAutoOpen()) return;
-
-        mc.setScreen(new MatchStartScreen());
     }
 
     private static void tickCountdown() {
@@ -97,7 +85,6 @@ public class MatchStartClientEvents {
         countdownTicks = -1;
         wasStartingLastTick = false;
         wasOrthoLastTick = false;
-        userDismissed = false;
         chatBuffer.clear();
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof MatchStartScreen) {
