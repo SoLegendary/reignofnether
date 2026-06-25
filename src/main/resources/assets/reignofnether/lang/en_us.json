@@ -1874,7 +1874,6 @@
     "key.reignofnether.fn_11": "Function Key 11",
     "key.reignofnether.fn_12": "Function Key 12 (Toggle RTS Camera)",
 
-    "matchstart.reignofnether.title": "MATCH SETUP",
     "matchstart.reignofnether.mode": "Mode: %s",
     "matchstart.reignofnether.map_preview": "MAP",
     "matchstart.reignofnether.roster": "ROSTER",
@@ -1895,7 +1894,7 @@
     "matchstart.reignofnether.chat": "CHAT",
     "matchstart.reignofnether.chat.placeholder": "Type a message…",
     "matchstart.reignofnether.chat.click_to_type": "Press T or click here to type — Enter to send",
-    "matchstart.reignofnether.hint.pick_pos": "Click the map to pick your starting position.",
+    "matchstart.reignofnether.hint.pick_pos": "Click the map to pick a start position.",
     "matchstart.reignofnether.hint.pick_faction": "Pick your faction.",
     "matchstart.reignofnether.hint.ready_up": "Click the cross in your row to ready up.",
     "matchstart.reignofnether.hint.waiting": "Waiting for other players to ready up.",

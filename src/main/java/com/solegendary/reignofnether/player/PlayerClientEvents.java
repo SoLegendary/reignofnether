@@ -20,6 +20,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
@@ -320,6 +321,7 @@ public class PlayerClientEvents {
         CustomBuildingClientEvents.customBuildings.clear();
         CustomBuildingClientEvents.setCustomBuildingToEdit(null);
         AlliancesClient.resetAllAlliances();
+        RTSMapInfoClientEvents.reset();
     }
 
     @SubscribeEvent

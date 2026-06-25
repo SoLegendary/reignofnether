@@ -5,8 +5,9 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.ButtonBuilder;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
@@ -22,8 +23,6 @@ import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
-
-import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.setCustomBuildingToEdit;
 
 public class MatchStartScreen extends Screen {
 
@@ -54,7 +53,6 @@ public class MatchStartScreen extends Screen {
     private final List<ReadyHit> readyHits = new ArrayList<>();
     private final List<RowHit> rowHits = new ArrayList<>();
     private final List<Button> hudButtons = new ArrayList<>();
-    private int mapX1, mapY1, mapX2, mapY2;
     private int rosX1, rosY1, rosX2, rosY2;
     private int grBtnX, grBtnY;  // gamerules button position for popover anchor
     private int spectateBtnX1, spectateBtnY1, spectateBtnX2, spectateBtnY2;
@@ -65,7 +63,6 @@ public class MatchStartScreen extends Screen {
     private int chatScroll = 0;
     private int chatTotalLines = 0;
     private int chatViewLines = 0;
-    private net.minecraft.client.gui.components.Button closeButton;
 
     private boolean priorLargeMap;
     private boolean priorMapLocked;
@@ -84,7 +81,7 @@ public class MatchStartScreen extends Screen {
     private int pendingTooltipY = 0;
 
     public MatchStartScreen() {
-        super(Component.translatable("matchstart.reignofnether.title"));
+        super(Component.literal("Match Setup"));
     }
 
     @Override
@@ -145,10 +142,10 @@ public class MatchStartScreen extends Screen {
         pendingTooltip = null;
 
         int leftBottom = this.height - MARGIN;
-        mapX1 = MARGIN;
-        mapY1 = MARGIN + HEADER_H + 6;
-        mapX2 = this.width / 2 - 3;
-        mapY2 = leftBottom - BOTTOM_H;
+        int mapX1 = MARGIN;
+        int mapY1 = MARGIN + HEADER_H + 6;
+        int mapX2 = this.width / 2 - 3;
+        int mapY2 = leftBottom - BOTTOM_H;
 
         int rosterH = leftBottom * 50 / 100;
         chatX1 = this.width / 2 + 3;
@@ -193,14 +190,19 @@ public class MatchStartScreen extends Screen {
 
     private void renderHeader(GuiGraphics g, int lastMouseX, int lastMouseY) {
         MyRenderer.renderFrameWithBg(g, MARGIN, MARGIN, this.width - MARGIN * 2, HEADER_H, BG_PANEL);
-
-        g.drawString(this.font,
-                Component.translatable("matchstart.reignofnether.title").getString(),
-                MARGIN + 10, MARGIN + 12, ACCENT, false);
-
         String cd = countdownLabel();
         int cdW = this.font.width(cd);
         int cdCol = StartPosClientEvents.isStarting ? READY_COL : TEXT_DIM;
+
+        int modeX = MARGIN + 5;
+        int modeY = MARGIN + 5;
+        Button modeButton = RTSMapInfoClientEvents.getCycleModeButton();
+        if (!modeButton.isHidden.get()) {
+            modeButton.render(g, modeX, modeY, lastMouseX, lastMouseY);
+            hudButtons.add(modeButton);
+            g.drawString(this.font, RTSMapInfoClientEvents.selectedMode, modeX + 26, modeY + 7, cdCol, false);
+        }
+        g.drawCenteredString(this.font, RTSMapInfoClientEvents.mapName + " " + RTSMapInfoClientEvents.version, this.width / 2, MARGIN + 12, ACCENT);
 
         int closeW = 20;
         int closeH = 20;
@@ -291,11 +293,6 @@ public class MatchStartScreen extends Screen {
             int by = pz - btnFrame / 2;
             spButton.render(g, bx, by, mx, my);
             hudButtons.add(spButton);
-
-            if (!sp.playerName.isBlank()) {
-                int w = this.font.width(sp.playerName);
-                g.drawString(this.font, sp.playerName, px - w / 2, pz + btnFrame / 2 + 2, 0xFFE0E0E0, false);
-            }
         }
     }
 
@@ -568,8 +565,7 @@ public class MatchStartScreen extends Screen {
 
     private void renderGamerulesPopover(GuiGraphics g, int mx, int my) {
         // Anchor the popover below the gamerules button in the header
-        int panelWidth = 145;
-        int xTR = grBtnX + panelWidth + 8;
+        int xTR = grBtnX - 8;
         int yTR = grBtnY + FRAME_SIZE + 6;
         List<Button> buttons = GameruleClient.renderGamerulesGUI(g, xTR, yTR, mx, my);
         hudButtons.addAll(buttons);

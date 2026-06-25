@@ -33,6 +33,8 @@ import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServerboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerboundPacket;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientboundPacket;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerboundPacket;
 import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
 import com.solegendary.reignofnether.scenario.ScenarioClientboundPacket;
 import com.solegendary.reignofnether.scenario.ScenarioServerboundPacket;
@@ -333,6 +335,18 @@ public final class PacketHandler {
                 .encoder(MatchStatsClientboundPacket::encode)
                 .decoder(MatchStatsClientboundPacket::new)
                 .consumerMainThread(MatchStatsClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RTSMapInfoClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RTSMapInfoClientboundPacket::encode)
+                .decoder(RTSMapInfoClientboundPacket::new)
+                .consumerMainThread(RTSMapInfoClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RTSMapInfoServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(RTSMapInfoServerboundPacket::encode)
+                .decoder(RTSMapInfoServerboundPacket::new)
+                .consumerMainThread(RTSMapInfoServerboundPacket::handle)
                 .add();
     }
 }

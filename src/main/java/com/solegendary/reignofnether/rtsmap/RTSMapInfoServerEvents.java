@@ -61,6 +61,14 @@ public class RTSMapInfoServerEvents {
                 evt.getEntity().sendSystemMessage(Component.translatable("message.reignofnether.rts_map_info_modes", modesStr));
                 evt.getEntity().sendSystemMessage(Component.translatable("message.reignofnether.rts_map_info_modes_command", modesStr));
             }
+            RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MAP_NAME, rtsMapInfo.getName());
+            for (String author : rtsMapInfo.getAuthor())
+                RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.ADD_AUTHOR, author);
+            RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_DESCRIPTION, rtsMapInfo.getDescription());
+            RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MODE, rtsMapInfo.getDefaultMode());
+            RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_VERSION, rtsMapInfo.getVersion());
+            for (String mode : rtsMapInfo.getModes().keySet())
+                RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.ADD_MODE, mode);
         }
     }
 }
