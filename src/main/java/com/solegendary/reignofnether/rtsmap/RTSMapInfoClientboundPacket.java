@@ -9,7 +9,6 @@ import net.minecraftforge.network.PacketDistributor;
 
 import java.util.function.Supplier;
 
-// Server → client snapshot of perf counters. Sent once per second while /rts-debug is enabled.
 public class RTSMapInfoClientboundPacket {
 
     private final RTSMapInfoAction action;

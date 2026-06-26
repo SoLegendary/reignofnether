@@ -63,6 +63,10 @@ public class MatchStartScreen extends Screen {
     private int chatScroll = 0;
     private int chatTotalLines = 0;
     private int chatViewLines = 0;
+    private boolean chatMinimised = false;
+
+    // Size of the small minimise/maximise toggle button
+    private static final int MINI_BTN = 10;
 
     private boolean priorLargeMap;
     private boolean priorMapLocked;
@@ -147,20 +151,34 @@ public class MatchStartScreen extends Screen {
         int mapX2 = this.width / 2 - 3;
         int mapY2 = leftBottom - BOTTOM_H;
 
-        int rosterH = leftBottom * 50 / 100;
         chatX1 = this.width / 2 + 3;
         chatX2 = this.width - MARGIN;
         rosX1 = chatX1;
         rosY1 = mapY1;
         rosX2 = chatX2;
-        rosY2 = rosY1 + rosterH;
-        chatY1 = rosY2 + 6;
+
+        int instrTop = mapY2 + 6;
         chatY2 = leftBottom + 3;
+        if (chatMinimised) {
+            chatY1 = instrTop;
+            rosY2 = chatY1 - 6;
+        } else {
+            int rosterH = leftBottom * 50 / 100;
+            rosY2 = rosY1 + rosterH;
+            chatY1 = rosY2 + 6;
+        }
 
         renderHeader(g, mouseX, mouseY);
         renderMap(g, mapX1, mapY1, mapX2, mapY2, mouseX, mouseY);
-        renderRoster(g, rosX1, rosY1, rosX2, rosY2, mouseX, mouseY);
-        renderChatCard(g, chatX1, chatY1, chatX2, chatY2);
+        renderRoster(g, rosX1, rosY1, rosX2, rosY2, mouseX, mouseY, isMouseOverOverlay(mouseX, mouseY));
+        renderChatCard(g, chatX1, chatY1, chatX2, chatY2, mouseX, mouseY);
+
+        if (chatInput != null && !chatMinimised) {
+            int chatBLocal = chatY2 - 6;
+            chatInput.setX(chatX1 + 6);
+            chatInput.setY(chatBLocal - 12);
+            chatInput.setWidth(chatX2 - chatX1 - 12);
+        }
         renderInstructions(g, mapX1, mapY2 + 6, mapX2, this.height - 9);
 
         if (GameruleClient.gamerulesMenuOpen) {
@@ -170,13 +188,16 @@ public class MatchStartScreen extends Screen {
         super.render(g, mouseX, mouseY, partialTick);
 
         for (Button b : hudButtons) {
-            if (b.isMouseOver(mouseX, mouseY)) {
+            if (b.isMouseOver(mouseX, mouseY) &&
+                    ((!isMouseOverOverlay(mouseX, mouseY)) ||
+                    b.name.equals(GameruleClient.BOOLEAN_BUTTON_NAME) ||
+                    b.name.equals(GameruleClient.INTEGER_BUTTON_NAME))) {
                 b.renderTooltip(g, mouseX, mouseY);
             }
         }
 
         // Draw simple tooltips for faction/ready tiles
-        if (pendingTooltip != null) {
+        if (pendingTooltip != null && !isMouseOverOverlay(mouseX, mouseY)) {
             int tw = this.font.width(pendingTooltip) + 8;
             int th = this.font.lineHeight + 6;
             int tx = pendingTooltipX + FRAME_SIZE + 2;
@@ -186,6 +207,11 @@ public class MatchStartScreen extends Screen {
             g.fill(tx, ty, tx + 1, ty + th, 0xFF_C8A840);
             g.drawString(this.font, pendingTooltip, tx + 4, ty + 4, TEXT_NORMAL, false);
         }
+    }
+
+    private boolean isMouseOverOverlay(int mx, int my) {
+        if (mx >= chatX1 && mx <= chatX2 && my >= chatY1 && my <= chatY2) return true;
+        return GameruleClient.gamerulesMenuOpen;
     }
 
     private void renderHeader(GuiGraphics g, int lastMouseX, int lastMouseY) {
@@ -296,7 +322,7 @@ public class MatchStartScreen extends Screen {
         }
     }
 
-    private void renderRoster(GuiGraphics g, int x1, int y1, int x2, int y2, int mx, int my) {
+    private void renderRoster(GuiGraphics g, int x1, int y1, int x2, int y2, int mx, int my, boolean overlayActive) {
         MyRenderer.renderFrameWithBg(g, x1, y1, x2 - x1, y2 - y1, BG_PANEL);
 
         g.drawString(this.font,
@@ -352,7 +378,7 @@ public class MatchStartScreen extends Screen {
                     x1 + 16, y + 1, 0xFFE0E0E0, false);
             y += 12;
             for (StartPos sp : entry.getValue()) {
-                renderSlotRow(g, sp, localName, x1 + 8, y, x2 - x1 - 16, mx, my);
+                renderSlotRow(g, sp, localName, x1 + 8, y, x2 - x1 - 16, mx, my, overlayActive);
                 y += ROW_H;
             }
             y += 4;
@@ -376,7 +402,7 @@ public class MatchStartScreen extends Screen {
             int rowX2 = x2 - 8;
             int rowY2 = y + ROW_H - 4;
             g.fill(rowX1, y, rowX2, rowY2, 0x40404040);
-            boolean hovered = mx >= rowX1 && mx <= rowX2 && my >= y && my <= rowY2;
+            boolean hovered = !overlayActive && mx >= rowX1 && mx <= rowX2 && my >= y && my <= rowY2;
             if (hovered) g.fill(rowX1, y, rowX2, rowY2, 0x32FFFFFF);
             String join = Component.translatable("matchstart.reignofnether.join_spectators").getString();
             g.drawString(this.font, join, rowX1 + 8, y + 7, ACCENT, false);
@@ -404,7 +430,7 @@ public class MatchStartScreen extends Screen {
     }
 
     private void renderSlotRow(GuiGraphics g, StartPos sp, String localName,
-                               int x, int y, int width, int mx, int my) {
+                               int x, int y, int width, int mx, int my, boolean overlayActive) {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(localName);
         boolean empty = sp.playerName.isBlank();
         int tint = (0x60000000) | (sp.getHexColor() & 0xFFFFFF);
@@ -417,7 +443,7 @@ public class MatchStartScreen extends Screen {
         // Highlight clickable rows (empty slots or my slot's left area) like the spectate button
         if (sp.enabled && (empty || mine)) {
             int rowHitRight = x + width - FRAME_SIZE * 3 - 2 * 2 - FRAME_SIZE - 6 - 8 - 4;
-            boolean hovered = mx >= x && mx <= rowHitRight && my >= y && my <= rowBottom;
+            boolean hovered = !overlayActive && mx >= x && mx <= rowHitRight && my >= y && my <= rowBottom;
             if (hovered) g.fill(x, y, rowHitRight, rowBottom, 0x32FFFFFF);
         }
 
@@ -456,11 +482,11 @@ public class MatchStartScreen extends Screen {
         Faction[] order = { Faction.VILLAGERS, Faction.MONSTERS, Faction.PIGLINS };
         int currentX = factionStartX;
         for (Faction f : order) {
-            renderFactionTile(g, sp, f, currentX, tileY, localName, mx, my);
+            renderFactionTile(g, sp, f, currentX, tileY, localName, mx, my, overlayActive);
             currentX += FRAME_SIZE + 2;
         }
 
-        renderReadyTile(g, sp, readyX, tileY, localName, mx, my);
+        renderReadyTile(g, sp, readyX, tileY, localName, mx, my, overlayActive);
 
         if (sp.enabled && (empty || mine)) {
             int rowHitRight = factionStartX - 4;
@@ -505,7 +531,7 @@ public class MatchStartScreen extends Screen {
     }
 
     private void renderFactionTile(GuiGraphics g, StartPos sp, Faction f,
-                                   int x, int y, String localName, int mx, int my) {
+                                   int x, int y, String localName, int mx, int my, boolean overlayActive) {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(localName);
         boolean selected = sp.faction == f && !sp.playerName.isBlank();
         boolean canPick = sp.enabled && mine;
@@ -520,7 +546,7 @@ public class MatchStartScreen extends Screen {
         if (selected) {
             MyRenderer.renderIcon(g, ICON_FRAME_SEL, x - 1, y - 1, FRAME_SIZE + 2);
         }
-        boolean hovered = mx >= x && mx <= x + FRAME_SIZE && my >= y && my <= y + FRAME_SIZE;
+        boolean hovered = !overlayActive && mx >= x && mx <= x + FRAME_SIZE && my >= y && my <= y + FRAME_SIZE;
         if (canPick && hovered) {
             g.fill(x + 1, y + 1, x + FRAME_SIZE - 1, y + FRAME_SIZE - 1, 0x32FFFFFF);
         }
@@ -533,7 +559,7 @@ public class MatchStartScreen extends Screen {
     }
 
     private void renderReadyTile(GuiGraphics g, StartPos sp, int x, int y,
-                                 String localName, int mx, int my) {
+                                 String localName, int mx, int my, boolean overlayActive) {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(localName);
         boolean otherClaimed = !sp.playerName.isBlank() && !mine;
         boolean canToggle = mine;
@@ -549,7 +575,7 @@ public class MatchStartScreen extends Screen {
         if (otherClaimed || sp.playerName.isBlank()) {
             g.fill(x + 1, y + 1, x + FRAME_SIZE - 1, y + FRAME_SIZE - 1, 0xA0000000);
         }
-        boolean hovered = mx >= x && mx <= x + FRAME_SIZE && my >= y && my <= y + FRAME_SIZE;
+        boolean hovered = !overlayActive && mx >= x && mx <= x + FRAME_SIZE && my >= y && my <= y + FRAME_SIZE;
         if (canToggle && hovered) {
             g.fill(x + 1, y + 1, x + FRAME_SIZE - 1, y + FRAME_SIZE - 1, 0x32FFFFFF);
         }
@@ -571,12 +597,32 @@ public class MatchStartScreen extends Screen {
         hudButtons.addAll(buttons);
     }
 
-    private void renderChatCard(GuiGraphics g, int x1, int y1, int x2, int y2) {
+    private void renderChatCard(GuiGraphics g, int x1, int y1, int x2, int y2, int mx, int my) {
         MyRenderer.renderFrameWithBg(g, x1, y1, x2 - x1, y2 - y1, BG_PANEL);
         g.drawString(this.font,
                 Component.translatable("matchstart.reignofnether.chat").getString(),
-                x1 + 10, y1 + 6, ACCENT, false);
+                x1 + 10, y1 + (chatMinimised ? 9 : 7), ACCENT, false);
 
+        // ── Minimise / Maximise toggle button ────────────────────────────────
+        // A small frameless square in the top-right corner of the chat card.
+        int btnSize = MINI_BTN;
+        int btnX = x2 - btnSize - 9;
+        int btnY = y1 + 8;
+        boolean btnHovered = mx >= btnX && mx <= btnX + btnSize
+                && my >= btnY && my <= btnY + btnSize;
+        g.fill(btnX, btnY, btnX + btnSize + 1, btnY + btnSize, btnHovered ? 0x50FFFFFF : 0x30FFFFFF);
+        int symCol = btnHovered ? TEXT_NORMAL : TEXT_DIM;
+        String sym = chatMinimised ? "+" : "-";
+        int symW = this.font.width(sym);
+        g.drawString(this.font, sym,
+                btnX + ((btnSize - symW) / 2) + 1,
+                btnY + 1,
+                symCol, false);
+
+        if (chatMinimised)
+            return;
+
+        // ── Full chat body ────────────────────────────────────────────────────
         int textTop = y1 + 18;
         int textBottom = y2 - 26;
         int maxWidth = (x2 - x1) - 16;
@@ -699,7 +745,23 @@ public class MatchStartScreen extends Screen {
         int mx = (int) mouseX, my = (int) mouseY;
         boolean left = button == 0;
 
+        // Minimise / maximise toggle for chat card
+        if (left) {
+            int btnSize = MINI_BTN;
+            int btnX = chatX2 - btnSize - 9;
+            int btnY = chatY1 + 8;
+            if (mx >= btnX && mx <= btnX + btnSize && my >= btnY && my <= btnY + btnSize) {
+                chatMinimised = !chatMinimised;
+                if (chatInput != null) {
+                    chatInput.setVisible(!chatMinimised);
+                    if (chatMinimised) chatInput.setFocused(false);
+                }
+                return true;
+            }
+        }
+
         if (left && spectateBtnVisible
+                && !isMouseOverOverlay(mx, my)
                 && mx >= spectateBtnX1 && mx <= spectateBtnX2
                 && my >= spectateBtnY1 && my <= spectateBtnY2) {
             leaveOwnSlot();
@@ -710,7 +772,7 @@ public class MatchStartScreen extends Screen {
             b.checkClicked(mx, my, left);
         }
 
-        if (left) {
+        if (left && !isMouseOverOverlay(mx, my)) {
             for (FactionHit fh : factionHits) {
                 if (mx >= fh.x && mx <= fh.x + FRAME_SIZE && my >= fh.y && my <= fh.y + FRAME_SIZE) {
                     pickFaction(fh.pos, fh.faction);

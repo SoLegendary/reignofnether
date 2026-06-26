@@ -27,6 +27,9 @@ Hero Items
     - Should have tooltips shown even on the ground
     - Requires right-click to pick up, will not auto-pickup
 
+Start/End Menu
+----------
+[❌] Test end menu
 
 Official Map Pack
 -----------------
@@ -45,7 +48,7 @@ Quality of Life
 Balance
 -------
 [✔] The Piglin Merchant and Marauder hitbox sized increased (visually unchanged)
-[❌] Spider hitbox reduced to 1x1 to improve pathfinding and evasion against projectiles
+[✔] Spider hitbox width reduced from 1.4 to 1.0 to improve pathfinding and evasion against projectiles
 
 Bugfixes
 --------

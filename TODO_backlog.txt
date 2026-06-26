@@ -35,8 +35,7 @@ Bugfixes
 --------
 [❌] Players logging in messes up the observer menu (and freezes resources?)
 [❌] bridge scroll bug (up and down vs left/right?)
-
-
+[❌] Fix day/night time when /gamerule doDaylightCycle false
 
 Quality of Life Features
 ------------------------

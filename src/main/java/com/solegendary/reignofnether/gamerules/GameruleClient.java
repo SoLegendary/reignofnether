@@ -43,6 +43,9 @@ public class GameruleClient {
 
     public static boolean gamerulesMenuOpen = false;
 
+    public static final String BOOLEAN_BUTTON_NAME = "Boolean Game Rule";
+    public static final String INTEGER_BUTTON_NAME = "Integer Game Rule";
+
     public static Button getGamerulesButton() {
         return new Button(
                 "Game Rules Menu",
@@ -67,7 +70,7 @@ public class GameruleClient {
         private final String label;
         public GameruleBooleanButton(String label, boolean enabled, Runnable onLeftClick, String tooltip) {
             super(
-                    "Boolean Game Rule",
+                    BOOLEAN_BUTTON_NAME,
                     8,
                     enabled ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png") :
                             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
@@ -98,7 +101,7 @@ public class GameruleClient {
         private final String label;
         public GameruleIntegerButton(String label, Runnable onLeftClick, Runnable onRightClick, List<FormattedCharSequence> tooltipLines) {
             super(
-                "Integer Game Rule",
+                INTEGER_BUTTON_NAME,
                 8,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png"),
                 (Keybinding) null,
