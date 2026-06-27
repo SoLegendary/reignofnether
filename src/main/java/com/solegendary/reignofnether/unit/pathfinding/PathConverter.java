@@ -210,6 +210,7 @@ public final class PathConverter {
             case WalkabilityBuilder.KIND_WATER -> BlockPathTypes.WATER;
             case WalkabilityBuilder.KIND_LAVA  -> BlockPathTypes.LAVA;
             case WalkabilityBuilder.KIND_FIRE  -> BlockPathTypes.DAMAGE_FIRE;
+            case WalkabilityBuilder.KIND_SLIME  -> BlockPathTypes.STICKY_HONEY;
             default -> BlockPathTypes.WALKABLE;
         };
     }

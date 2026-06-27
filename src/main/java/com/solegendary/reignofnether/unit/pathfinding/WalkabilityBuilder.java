@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.SculkCatalystBlock;
+import net.minecraft.world.level.block.SculkShriekerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
@@ -22,6 +23,7 @@ public final class WalkabilityBuilder {
     public static final byte KIND_WATER   = 2;
     public static final byte KIND_FIRE    = 3;
     public static final byte KIND_LAVA    = 4;
+    public static final byte KIND_SLIME    = 5;
 
     // Hot path (called per cell during a chunk build); reuse mutable positions to avoid BlockPos allocations.
     private static final ThreadLocal<BlockPos.MutableBlockPos> FEET  = ThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
@@ -46,6 +48,7 @@ public final class WalkabilityBuilder {
         if (feetFluid.is(FluidTags.LAVA)) return KIND_LAVA;
         if (!feetFluid.isEmpty())          return KIND_WATER;
 
+        if (floorBs.getBlock() == Blocks.SLIME_BLOCK) return KIND_SLIME;
         if (feetBs.getBlock() == Blocks.FIRE || feetBs.getBlock() == Blocks.SOUL_FIRE) return KIND_FIRE;
         if (floorBs.getBlock() == Blocks.MAGMA_BLOCK
                 || floorBs.getBlock() == Blocks.CAMPFIRE
@@ -62,7 +65,7 @@ public final class WalkabilityBuilder {
     // Fences, walls and CLOSED fence gates are 1.5-block barriers units can't pass or stand on (open gates are
     // walkable, so they're excluded). Mirrors vanilla WalkNodeEvaluator's BlockPathTypes.FENCE handling.
     public static boolean isFenceLike(BlockState bs) {
-        if (bs.is(BlockTags.FENCES) || bs.is(BlockTags.WALLS) || bs.getBlock() instanceof SculkCatalystBlock) return true;
+        if (bs.is(BlockTags.FENCES) || bs.is(BlockTags.WALLS) || bs.getBlock() instanceof SculkCatalystBlock || bs.getBlock() instanceof SculkShriekerBlock) return true;
         return bs.getBlock() instanceof FenceGateBlock && !bs.getValue(FenceGateBlock.OPEN);
     }
 }

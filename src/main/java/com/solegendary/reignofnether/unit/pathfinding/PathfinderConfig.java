@@ -39,6 +39,7 @@ public final class PathfinderConfig {
     // its DAMAGE_FIRE pathfinding malus marks fire as dangerous. Fire-immune units pay 1x instead (see
     // RtsPathfinder.fireCostFor), so they cross fire freely while everyone else routes around it.
     public static final float FIRE_AVOID_COST = 50.0f;
+    public static final float SLIME_AVOID_COST = 10.0f;
 
     // A* over an immutable snapshot is embarrassingly parallel; scale workers with cores.
     public static final int WORKER_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);

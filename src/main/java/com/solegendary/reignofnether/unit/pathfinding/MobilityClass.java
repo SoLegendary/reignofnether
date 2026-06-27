@@ -25,6 +25,7 @@ public enum MobilityClass {
                 if (this == LARGE)   return 8.0f;
                 return 5.0f;
             case WalkabilityBuilder.KIND_FIRE:  return PathfinderConfig.FIRE_AVOID_COST;
+            case WalkabilityBuilder.KIND_SLIME:  return PathfinderConfig.SLIME_AVOID_COST;
             default: return Float.POSITIVE_INFINITY;
         }
     }
