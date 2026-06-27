@@ -22,7 +22,6 @@ import net.minecraftforge.common.IPlantable;
 
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class ResourceSources {
 
@@ -64,9 +63,11 @@ public class ResourceSources {
             for (ResourceSource resourceSource : resourceSources)
                 if (resourceSource.validBlocks.contains(block))
                     return resourceSource;
-        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LOGS))
+        // bs.is(tag) is an O(1) membership test; the old getTags().collect(toSet()).contains(...) allocated a
+        // Set on every call - brutal when ResourceIndex's chunk scan runs this per cell of a resource section.
+        if (bs.is(BlockTags.LOGS))
             return GENERIC_LOG_BLOCK;
-        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LEAVES))
+        if (bs.is(BlockTags.LEAVES))
             return GENERIC_LEAVES_BLOCK;
         return null;
     }
@@ -76,9 +77,9 @@ public class ResourceSources {
             for (ResourceSource resourceSource : resourceSources)
                 if (resourceSource.validBlocks.contains(bs.getBlock()))
                     return resourceSource;
-        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LOGS))
+        if (bs.is(BlockTags.LOGS))
             return GENERIC_LOG_BLOCK;
-        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LEAVES))
+        if (bs.is(BlockTags.LEAVES))
             return GENERIC_LEAVES_BLOCK;
         return null;
     }

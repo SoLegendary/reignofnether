@@ -112,7 +112,7 @@ public final class GridAStar {
                 if (GridNeighbors.diagonalBlocked(view, mob, cur.x, ny, cur.z, DX[d], DZ[d])) continue;
 
                 float ng = cur.g + GridNeighbors.stepCost(d) * costMult;
-                ng += GridNeighbors.crowdingMalus(view, nx, ny, nz); // avoid walls/edges/corners for ALL units
+                ng += view.crowdAt(nx, ny, nz); // avoid walls/edges/corners for ALL units (precomputed in the chunk)
 
                 relax(all, open, nx, ny, nz, ng, gx, gy, gz, cur);
             }
@@ -149,7 +149,7 @@ public final class GridAStar {
                     int drop = cur.y - fy;
                     float ng = cur.g + GridNeighbors.stepCost(d) * lmult
                              + PathfinderConfig.FALL_COST_PER_BLOCK * drop
-                             + GridNeighbors.crowdingMalus(view, nx, fy, nz);
+                             + view.crowdAt(nx, fy, nz);
                     relax(all, open, nx, fy, nz, ng, gx, gy, gz, cur);
                     break;
                 }

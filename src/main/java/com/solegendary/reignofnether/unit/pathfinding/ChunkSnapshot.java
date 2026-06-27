@@ -78,6 +78,12 @@ public final class ChunkSnapshot implements WalkabilityView {
     }
 
     @Override
+    public float crowdAt(int wx, int y, int wz) {
+        WalkabilityGridChunk c = chunkAt(wx, wz);
+        return c == null ? 0f : c.crowdAt(wx, y, wz);
+    }
+
+    @Override
     public MobilityClass mobility() { return mobility; }
 
     @Override

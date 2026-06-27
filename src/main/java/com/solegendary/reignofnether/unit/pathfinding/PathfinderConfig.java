@@ -11,6 +11,12 @@ public final class PathfinderConfig {
     // enough to flood the reachable area within MAX_RADIUS so units round obstacles instead of giving up at
     // the near wall. Past ~200k the radius cap, not this, is the limit (raise MAX_RADIUS + MIN_DILATION).
     public static final int MAX_NODES = 250000;
+    // Node budget for a search whose goal cell has NO standable spot nearby (eg. an airborne canopy leaf a
+    // worker can never stand to mine). The goal is unreachable as an exact cell, so a normal search would
+    // flood the full MAX_NODES proving it (~250ms). Cap it low: the worker still best-effort approaches, the
+    // search returns in a few ms, and the gather goal drops the unreachable target. Chaining is also skipped
+    // for this case (see dispatchToPool) since there's nothing to chain toward.
+    public static final int MAX_NODES_UNREACHABLE_GOAL = 8000;
     public static final int MAX_CHAIN_SEGMENTS = 10;
     public static final int MIN_DILATION = 48;
     public static final int QUEUE_BACKPRESSURE_CAP = 500;
@@ -28,6 +34,12 @@ public final class PathfinderConfig {
     // world column. SLACK covers the Y+-1 step nodes and goal snapping that reach just outside the band.
     public static final int VERTICAL_RADIUS = 24;
     public static final int VERTICAL_WINDOW_SLACK = 8;
+
+    // Clearance (unit height in cells) the crowding malus is PRECOMPUTED with, since the cached per-cell crowd[]
+    // is shared by all units. 2 = the common/minimum unit clearance; taller units get a negligibly softer
+    // steering malus, never a correctness change (wideFits/headBlocked stay exact and per-unit). See
+    // WalkabilityGridChunk.crowd and GridNeighbors.crowdingMalus.
+    public static final int MALUS_CLEARANCE = 2;
 
     // The grid's neighbour model only steps +-1 in Y, so it can't express a sheer drop bigger than one block -
     // a unit would stall at the lip of a 2+ block descent (a tall staircase) with no node to advance to, and a

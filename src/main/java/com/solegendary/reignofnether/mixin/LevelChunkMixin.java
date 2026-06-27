@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.resources.ResourceIndex;
 import com.solegendary.reignofnether.unit.pathfinding.WalkabilityGrid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -24,5 +25,6 @@ public abstract class LevelChunkMixin {
     private void reignofnether$invalidateWalkability(BlockPos pos, BlockState state, boolean isMoving,
                                                      CallbackInfoReturnable<BlockState> cir) {
         WalkabilityGrid.markColumnDirtyIfPresent(getLevel(), pos);
+        ResourceIndex.onBlockChange(getLevel(), pos, state);
     }
 }
