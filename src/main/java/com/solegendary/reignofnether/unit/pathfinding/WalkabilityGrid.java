@@ -1,0 +1,77 @@
+package com.solegendary.reignofnether.unit.pathfinding;
+
+import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+
+import java.util.WeakHashMap;
+
+public final class WalkabilityGrid {
+    private static final WeakHashMap<LevelAccessor, WalkabilityGrid> PER_LEVEL = new WeakHashMap<>();
+    // Access-ordered (most-recent at head) so we can evict the least-recently-used tail.
+    private final Long2ObjectLinkedOpenHashMap<WalkabilityGridChunk> chunks = new Long2ObjectLinkedOpenHashMap<>();
+
+    private WalkabilityGrid() {}
+
+    public static synchronized WalkabilityGrid get(LevelAccessor level) {
+        return PER_LEVEL.computeIfAbsent(level, k -> new WalkabilityGrid());
+    }
+
+    // Returns a chunk whose classified Y band covers [wantMinY, wantMaxY). If a cached chunk exists but
+    // its band is too small, it is rebuilt over the union of the old and requested bands so repeated
+    // requests at different Y converge to one taller band rather than thrashing.
+    public WalkabilityGridChunk getOrBuild(Level level, int chunkX, int chunkZ, int wantMinY, int wantMaxY) {
+        long key = ChunkPos.asLong(chunkX, chunkZ);
+        WalkabilityGridChunk existing;
+        synchronized (chunks) { existing = chunks.getAndMoveToFirst(key); }
+        if (existing != null && existing.covers(wantMinY, wantMaxY)) return existing;
+
+        int buildMinY = wantMinY;
+        int buildMaxY = wantMaxY;
+        if (existing != null) {
+            buildMinY = Math.min(buildMinY, existing.minY());
+            buildMaxY = Math.max(buildMaxY, existing.maxY());
+        }
+        WalkabilityGridChunk built = WalkabilityGridChunk.build(level, new ChunkPos(chunkX, chunkZ), buildMinY, buildMaxY);
+        synchronized (chunks) {
+            WalkabilityGridChunk concurrent = chunks.get(key);
+            if (concurrent != null && concurrent.covers(wantMinY, wantMaxY)) {
+                chunks.getAndMoveToFirst(key);
+                return concurrent;
+            }
+            chunks.putAndMoveToFirst(key, built);
+            while (chunks.size() > PathfinderConfig.MAX_CACHED_CHUNKS) chunks.removeLast();
+        }
+        return built;
+    }
+
+    // Peek whether a cached chunk already covers [wantMinY, wantMaxY) WITHOUT building one. Lets the deferred
+    // build queue tell a free cache hit from a cold build so it only spends its per-tick budget on the latter.
+    public boolean isBuilt(int chunkX, int chunkZ, int wantMinY, int wantMaxY) {
+        synchronized (chunks) {
+            WalkabilityGridChunk c = chunks.get(ChunkPos.asLong(chunkX, chunkZ));
+            return c != null && c.covers(wantMinY, wantMaxY);
+        }
+    }
+
+    public void invalidateColumn(BlockPos bp) {
+        synchronized (chunks) { chunks.remove(ChunkPos.asLong(bp.getX() >> 4, bp.getZ() >> 4)); }
+    }
+
+    // Invalidate WITHOUT creating a grid for a level that has none yet. Cheap enough to call from the
+    // LevelChunk.setBlockState mixin on every in-game block change (buildings, explosions, commands, player
+    // edits) - and on BOTH sides, so the client-side grid the debug overlay reads stays fresh too.
+    public static void invalidateColumnIfPresent(LevelAccessor level, BlockPos bp) {
+        if (level == null || bp == null) return;
+        WalkabilityGrid grid;
+        synchronized (WalkabilityGrid.class) { grid = PER_LEVEL.get(level); }
+        if (grid != null) grid.invalidateColumn(bp);
+    }
+
+    // Snapshot of the currently-built (cached) chunk keys, for the debug overlay.
+    public long[] builtChunkKeys() {
+        synchronized (chunks) { return chunks.keySet().toLongArray(); }
+    }
+}

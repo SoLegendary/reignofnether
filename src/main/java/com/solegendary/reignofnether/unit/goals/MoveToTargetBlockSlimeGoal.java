@@ -15,6 +15,13 @@ public class MoveToTargetBlockSlimeGoal extends MoveToTargetBlockGoal {
         return 4D;
     }
 
+    // Slimes move in discrete jumps, not smooth walking, so the grid A* path (block-step waypoints)
+    // makes them stutter and turn poorly. Keep them on vanilla pathfinding (see SlimeUnitMoveControl).
+    @Override
+    protected boolean useRtsPathfinding() {
+        return false;
+    }
+
     @Override
     protected void resetRecalcCooldown() { recalcCooldown = RECALC_COOLDOWN_MAX; }
 }
