@@ -389,6 +389,7 @@ public class UnitServerEvents {
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0f);
+            mob.setPathfindingMalus(BlockPathTypes.STICKY_HONEY, 1.0f);
         }
 
         if (evt.getEntity() instanceof Unit unit && evt.getEntity() instanceof LivingEntity entity

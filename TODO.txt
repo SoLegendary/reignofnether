@@ -53,5 +53,7 @@ Bugfixes
 [✔] Fixed castle roofs breaking and causing garrisoned units to fall out
 [✔] Rotated bridges not saving correctly
 
+[❌] Units no longer try to walk through slime blocks
+
 Languages
 ---------

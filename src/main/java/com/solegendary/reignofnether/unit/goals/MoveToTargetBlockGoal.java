@@ -131,6 +131,7 @@ public class MoveToTargetBlockGoal extends Goal {
         // resulting path ends up suboptimal, the backoff in canContinueToUse handles retries / give-up.
         Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
         if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
+        /*
         if (path == null) {
             AttributeInstance ai = mob.getAttribute(Attributes.FOLLOW_RANGE);
             if (ai != null && ai.getBaseValue() == FOLLOW_RANGE_IMPROVED) {
@@ -142,6 +143,7 @@ public class MoveToTargetBlockGoal extends Goal {
                 ai.setBaseValue(FOLLOW_RANGE_IMPROVED);
             }
         }
+         */
         this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier(u));
         // Broadcast the path so clients can render it briefly. Server-only — clients
         // that received the packet decide whether to render based on ownership/FOW.
