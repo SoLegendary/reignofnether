@@ -54,8 +54,6 @@ public final class PathfinderConfig {
     public static final int SEPARATION_MAX_PER_TICK = 400;
     public static final int SEPARATION_CELL_SIZE = 2;
 
-    public static boolean isRtsEnabled() { return UnitServerEvents.rtsPathfinding; }
-
     public static int dilationFor(BlockPos start, BlockPos target) {
         int manhattan = Math.abs(start.getX() - target.getX()) + Math.abs(start.getZ() - target.getZ());
         return Math.min(MAX_RADIUS, Math.max(MIN_DILATION, manhattan / 2));

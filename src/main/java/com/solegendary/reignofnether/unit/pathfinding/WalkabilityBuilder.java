@@ -8,6 +8,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.SculkCatalystBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
@@ -61,7 +62,7 @@ public final class WalkabilityBuilder {
     // Fences, walls and CLOSED fence gates are 1.5-block barriers units can't pass or stand on (open gates are
     // walkable, so they're excluded). Mirrors vanilla WalkNodeEvaluator's BlockPathTypes.FENCE handling.
     public static boolean isFenceLike(BlockState bs) {
-        if (bs.is(BlockTags.FENCES) || bs.is(BlockTags.WALLS)) return true;
+        if (bs.is(BlockTags.FENCES) || bs.is(BlockTags.WALLS) || bs.getBlock() instanceof SculkCatalystBlock) return true;
         return bs.getBlock() instanceof FenceGateBlock && !bs.getValue(FenceGateBlock.OPEN);
     }
 }

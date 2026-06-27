@@ -1671,6 +1671,8 @@
     "sandbox.reignofnether.custom_buildings.set_repairable.tooltip1": "Workers can repair this building",
     "sandbox.reignofnether.custom_buildings.set_destroy_on_reset.label": "Destroy on Reset",
     "sandbox.reignofnether.custom_buildings.set_destroy_on_reset.tooltip1": "Destroyed on /rts-reset",
+    "sandbox.reignofnether.custom_buildings.set_draw_aggro.label": "Draw aggro",
+    "sandbox.reignofnether.custom_buildings.set_draw_aggro.tooltip1": "Units attack this when idle or attack-moving",
     "sandbox.reignofnether.custom_buildings.set_night_radius.label": "Night Radius",
     "sandbox.reignofnether.custom_buildings.set_night_radius.tooltip1": "Area that is eternal night",
     "sandbox.reignofnether.custom_buildings.set_nether_radius.label": "Nether Radius",

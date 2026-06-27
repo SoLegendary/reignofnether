@@ -105,7 +105,7 @@ public interface Unit {
     BlockPos getAnchor();
 
     static int getFollowRange() {
-        return UnitServerEvents.improvedPathfinding ? FOLLOW_RANGE_IMPROVED : FOLLOW_RANGE;
+        return FOLLOW_RANGE_IMPROVED;
     }
 
     // list of positions to draw lines between to indicate unit intents - will fade over time unless shift is held

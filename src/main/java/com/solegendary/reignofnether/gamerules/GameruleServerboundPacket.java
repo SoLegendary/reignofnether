@@ -43,14 +43,6 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_PLAYER_GRIEFING, "", playerGriefing ? 1L : 0L));
     }
-    public static void setRtsPathfinding(boolean rtsPathfinding) {
-        PacketHandler.INSTANCE.sendToServer(
-            new GameruleServerboundPacket(GameruleAction.SET_RTS_PATHFINDING, "", rtsPathfinding ? 1L : 0L));
-    }
-    public static void setImprovedPathfinding(boolean improvedPathfinding) {
-        PacketHandler.INSTANCE.sendToServer(
-                new GameruleServerboundPacket(GameruleAction.SET_IMPROVED_PATHFINDING, "", improvedPathfinding ? 1L : 0L));
-    }
     public static void setGroundYLevel(long groundYLevel) {
         PacketHandler.INSTANCE.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_GROUND_Y_LEVEL, "", groundYLevel));
@@ -149,21 +141,6 @@ public class GameruleServerboundPacket {
                 case SET_PLAYER_GRIEFING -> {
                     gameRules.getRule(GameRuleRegistrar.DO_PLAYER_GRIEFING).set(booleanValue, server);
                     GameruleClientboundPacket.setPlayerGriefing(booleanValue);
-                }
-                case SET_RTS_PATHFINDING -> {
-                    gameRules.getRule(GameRuleRegistrar.RTS_PATHFINDING).set(booleanValue, server);
-                    UnitServerEvents.rtsPathfinding = booleanValue;
-                    GameruleClientboundPacket.setRtsPathfinding(booleanValue);
-                }
-                case SET_IMPROVED_PATHFINDING -> {
-                    gameRules.getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).set(booleanValue, server);
-                    for (LivingEntity le : UnitServerEvents.getAllUnits()) {
-                        UnitServerEvents.improvedPathfinding = booleanValue;
-                        AttributeInstance ai = le.getAttribute(Attributes.FOLLOW_RANGE);
-                        if (ai != null)
-                            ai.setBaseValue(Unit.getFollowRange());
-                    }
-                    GameruleClientboundPacket.setImprovedPathfinding(booleanValue);
                 }
                 case SET_GROUND_Y_LEVEL -> {
                     gameRules.getRule(GameRuleRegistrar.GROUND_Y_LEVEL).set(Math.toIntExact(value), server);

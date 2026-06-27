@@ -44,6 +44,7 @@ public abstract class Building {
     public boolean invulnerable = false;
     public boolean repairable = true;
     public boolean shouldDestroyOnReset = true;
+    public boolean drawAggro = true;
 
     public ResourceCost cost;
     public boolean selfBuilding = false;

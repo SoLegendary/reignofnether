@@ -10,8 +10,6 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> MAX_POPULATION;
     public static GameRules.Key<GameRules.BooleanValue> DO_UNIT_GRIEFING;
     public static GameRules.Key<GameRules.BooleanValue> DO_PLAYER_GRIEFING;
-    public static GameRules.Key<GameRules.BooleanValue> RTS_PATHFINDING;
-    public static GameRules.Key<GameRules.BooleanValue> IMPROVED_PATHFINDING;
     public static GameRules.Key<GameRules.IntegerValue> GROUND_Y_LEVEL;
     public static GameRules.Key<GameRules.IntegerValue> FLYING_MAX_Y_LEVEL;
     public static GameRules.Key<GameRules.BooleanValue> ALLOW_BEACONS;
@@ -44,14 +42,6 @@ public class GameRuleRegistrar {
         );
         // allow players to break blocks other than buildings and resource blocks
         DO_PLAYER_GRIEFING = GameRules.register("doPlayerGriefing", GameRules.Category.PLAYER,
-                GameRules.BooleanValue.create(true)
-        );
-        // use RTS-optimised pathfinder (grid A*, flowfields, async worker) instead of vanilla
-        RTS_PATHFINDING = GameRules.register("rtsPathfinding", GameRules.Category.MOBS,
-                GameRules.BooleanValue.create(false)
-        );
-        // increase pathfinding accuracy in exchange for increased CPU usage
-        IMPROVED_PATHFINDING = GameRules.register("improvedPathfinding", GameRules.Category.MOBS,
                 GameRules.BooleanValue.create(true)
         );
         // sets the minimum Y level for the camera so it doesn't fall into the void

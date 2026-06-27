@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -20,6 +21,7 @@ import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -184,5 +186,10 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
         }
         if (tickLevel.isClientSide && placement.getTickAgeAfterBuilt() > 0 && placement.getTickAgeAfterBuilt() % 100 == 0)
             updateHighlightBps(placement);
+    }
+
+    @Override
+    public BlockPos getDefaultOutdoorSpawnPoint(BlockPos minCorner, ProductionPlacement pp) {
+        return pp.originPos.offset(BuildingUtils.altRotatePos(new BlockPos(3, 0, 8), pp.rotation));
     }
 }

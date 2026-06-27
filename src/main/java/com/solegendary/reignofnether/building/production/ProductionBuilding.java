@@ -23,7 +23,7 @@ public abstract class ProductionBuilding extends Building {
         return new ProductionPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation), this.isCapitol);
     }
 
-    public BlockPos getDefaultOutdoorSpawnPoint(BlockPos minCorner) {
+    public BlockPos getDefaultOutdoorSpawnPoint(BlockPos minCorner, ProductionPlacement pp) {
         return minCorner.offset((int) -spawnRadiusOffset, 0, (int) -spawnRadiusOffset);
     }
 

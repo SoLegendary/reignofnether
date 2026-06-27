@@ -1146,9 +1146,6 @@ public class CommandsServerEvents {
 			ctx.getSource().sendFailure(Component.literal("No rtsMapInfo loaded"));
 			return 0;
 		}
-		if (mode.equals("none")) {
-
-		}
 		if (!RTSMapInfoServerEvents.rtsMapInfo.supportsMode(mode)) {
 			ctx.getSource().sendFailure(Component.literal("Unknown mode '" + mode + "' - not present in this map's modes"));
 			return 0;

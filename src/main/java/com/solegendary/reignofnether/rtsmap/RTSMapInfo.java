@@ -51,6 +51,9 @@ public class RTSMapInfo {
     }
 
     public List<List<BlockPos>> getTeams() {
+        if (getDefaultMode().equalsIgnoreCase("none"))
+            return List.of();
+
         List<List<Integer>> teamSpawnIds = modes.get(defaultMode);
         if (teamSpawnIds == null) return null;
 
@@ -65,6 +68,6 @@ public class RTSMapInfo {
     }
 
     public boolean supportsMode(String mode) {
-        return modes != null && modes.containsKey(mode);
+        return mode.equalsIgnoreCase("none") ||  modes != null && modes.containsKey(mode);
     }
 }

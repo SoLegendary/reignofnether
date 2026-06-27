@@ -24,7 +24,7 @@ public class UnitPathClientboundPacket {
     private final List<BlockPos> nodes;
 
     public static void sendPath(LivingEntity entity, Path path, byte pathType) {
-        if (path == null || path.nodes == null || path.nodes.isEmpty())
+        if (path == null || path.nodes.isEmpty())
             return;
         List<BlockPos> bps = new ArrayList<>(path.nodes.size());
         for (var node : path.nodes)

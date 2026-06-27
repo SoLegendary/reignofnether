@@ -32,7 +32,6 @@ public class MoveToTargetBlockGoal extends Goal {
     protected final int RECALC_COOLDOWN_MAX = 20;
     protected static final int RECALC_COOLDOWN_CAP = 200; // ~10s cap for exponential backoff on stuck units
     protected int currentRecalcCooldown = RECALC_COOLDOWN_MAX;
-    protected void resetRecalcCooldown() { recalcCooldown = currentRecalcCooldown; }
     protected void backoffRecalcCooldown() {
         currentRecalcCooldown = Math.min(currentRecalcCooldown * 2, RECALC_COOLDOWN_CAP);
     }
@@ -65,7 +64,7 @@ public class MoveToTargetBlockGoal extends Goal {
     // Whether this unit routes through the async RTS grid pathfinder. Overridden to false for units whose
     // locomotion the grid path doesn't suit (eg. jump-based slimes), keeping them on vanilla pathfinding.
     protected boolean useRtsPathfinding() {
-        return PathfinderConfig.isRtsEnabled();
+        return true;
     }
 
     public boolean canUse() {
@@ -122,7 +121,6 @@ public class MoveToTargetBlockGoal extends Goal {
             if (this.mob.getNavigation() instanceof GroundPathNavigation gpn) gpn.setCanFloat(true);
             this.mob.getNavigation().stop();
             MobilityClass mobility = MobilityClass.of(u);
-
             pathPending = true;
             RtsPathfinder.requestPath(this.mob, moveTarget, moveReachRange, mobility, this::onPathReady);
             return;

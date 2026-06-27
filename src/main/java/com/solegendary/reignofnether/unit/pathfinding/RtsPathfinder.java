@@ -27,7 +27,6 @@ public final class RtsPathfinder {
 
     public static void requestPath(Mob mob, BlockPos target, int reach, MobilityClass mobility, Consumer<Path> onReady) {
         Level level = mob.level();
-        if (level == null) { onReady.accept(null); return; }
         BlockPos start = mob.blockPosition();
         if (isUnloaded(level, start) || isUnloaded(level, target)) {
             onReady.accept(null);

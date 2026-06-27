@@ -27,9 +27,7 @@ Hero Items
     - Should have tooltips shown even on the ground
     - Requires right-click to pick up, will not auto-pickup
 
-Start/End Menu
-----------
-[❌] Test end menu
+
 
 Official Map Pack
 -----------------
@@ -40,10 +38,10 @@ Official Map Pack
 
 Quality of Life
 ---------------
-[❌] `/rtsapi-teams-mode none` can be used on any map to disable all start blocks, even if the map does not have an rtsmap.json
-[❌] Added an option to make a custom building not draw aggro from player units
-[❌] Moved the iron golem default spawn to beside the furnaces to reduce chance of getting stuck on neighbouring blocks
-
+[✔] You can now use `/rtsapi-teams-mode none` on any map to disable all start blocks, even without an rtsmap.json file
+[✔] Added an option to make a custom building not draw aggro from player units
+[✔] Moved the iron golem default spawn to beside the furnaces to reduce chance of getting stuck on nearby buildings
+[❌] Random faction button
 
 Balance
 -------
@@ -52,7 +50,8 @@ Balance
 
 Bugfixes
 --------
-
+[✔] Fixed castle roofs breaking and causing garrisoned units to fall out
+[✔] Rotated bridges not saving correctly
 
 Languages
 ---------

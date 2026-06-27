@@ -84,13 +84,13 @@ public class GraveyardPlacement extends ProductionPlacement {
     public void destroy(ServerLevel serverLevel) {
         super.destroy(serverLevel);
         for (BlockPos relativePos : skullPoses) {
-            BlockPos relativeRotPos = this.rotatePos(relativePos, this.rotation);
+            BlockPos relativeRotPos = BuildingUtils.altRotatePos(relativePos, this.rotation);
             BlockPos worldPos = relativeRotPos.offset(originPos).above();
             if (level.getBlockState(worldPos).getBlock() instanceof AbstractSkullBlock)
                 level.destroyBlock(worldPos, false);
         }
         for (BlockPos relativePos : wallSkullPoses) {
-            BlockPos relativeRotPos = this.rotatePos(relativePos, this.rotation);
+            BlockPos relativeRotPos = BuildingUtils.altRotatePos(relativePos, this.rotation);
             BlockPos worldPos = relativeRotPos.offset(originPos).above();
             if (level.getBlockState(worldPos).getBlock() instanceof AbstractSkullBlock)
                 level.destroyBlock(worldPos, false);
@@ -124,13 +124,13 @@ public class GraveyardPlacement extends ProductionPlacement {
     public int getTotalSkulls() {
         int totalSkulls = 0;
         for (BlockPos relativePos : skullPoses) {
-            BlockPos relativeRotPos = this.rotatePos(relativePos, this.rotation);
+            BlockPos relativeRotPos = BuildingUtils.altRotatePos(relativePos, this.rotation);
             BlockPos worldPos = relativeRotPos.offset(originPos).above();
             if (level.getBlockState(worldPos).getBlock() instanceof AbstractSkullBlock)
                 totalSkulls++;
         }
         for (BlockPos relativePos : wallSkullPoses) {
-            BlockPos relativeRotPos = this.rotatePos(relativePos, this.rotation);
+            BlockPos relativeRotPos = BuildingUtils.altRotatePos(relativePos, this.rotation);
             BlockPos worldPos = relativeRotPos.offset(originPos).above();
             if (level.getBlockState(worldPos).getBlock() instanceof AbstractSkullBlock)
                 totalSkulls++;
@@ -166,7 +166,7 @@ public class GraveyardPlacement extends ProductionPlacement {
 
         BlockPos skullPos = null;
         for (int i = 0; i < skullPoses.size(); i++) {
-            BlockPos relativeRotPos = this.rotatePos(skullPoses.get(i), this.rotation);
+            BlockPos relativeRotPos = BuildingUtils.altRotatePos(skullPoses.get(i), this.rotation);
             BlockPos worldPos = relativeRotPos.offset(originPos).above();
             if (!(level.getBlockState(worldPos).getBlock() instanceof AbstractSkullBlock)) {
                 skullPos = worldPos;
@@ -175,7 +175,7 @@ public class GraveyardPlacement extends ProductionPlacement {
         }
         if (skullPos == null && getMaxSkulls() > Graveyard.OVERFLOW_AMOUNT) {
             for (int i = 0; i < wallSkullPoses.size(); i++) {
-                BlockPos relativeRotPos = this.rotatePos(wallSkullPoses.get(i), this.rotation);
+                BlockPos relativeRotPos = BuildingUtils.altRotatePos(wallSkullPoses.get(i), this.rotation);
                 BlockPos worldPos = relativeRotPos.offset(originPos).above();
                 if (!(level.getBlockState(worldPos).getBlock() instanceof WallSkullBlock)) {
                     if (i > 4) is2ndWall = true;
@@ -221,7 +221,7 @@ public class GraveyardPlacement extends ProductionPlacement {
         boolean isWallBlock = true;
 
         for (int i = wallSkullPoses.size() - 1; i >= 0; i--) {
-            BlockPos relativeRotPos = this.rotatePos(wallSkullPoses.get(i), this.rotation);
+            BlockPos relativeRotPos = BuildingUtils.altRotatePos(wallSkullPoses.get(i), this.rotation);
             BlockPos worldPos = relativeRotPos.offset(originPos).above();
             if (level.getBlockState(worldPos).getBlock() instanceof WallSkullBlock skullBlock) {
                 skull = skullBlock;
@@ -230,7 +230,7 @@ public class GraveyardPlacement extends ProductionPlacement {
         }
         if (skull == null) {
             for (int i = skullPoses.size() - 1; i >= 0; i--) {
-                BlockPos relativeRotPos = this.rotatePos(skullPoses.get(i), this.rotation);
+                BlockPos relativeRotPos = BuildingUtils.altRotatePos(skullPoses.get(i), this.rotation);
                 BlockPos worldPos = relativeRotPos.offset(originPos).above();
                 if (level.getBlockState(worldPos).getBlock() instanceof AbstractSkullBlock skullBlock) {
                     skull = skullBlock;
@@ -245,19 +245,6 @@ public class GraveyardPlacement extends ProductionPlacement {
             EntityType<? extends Unit> entityType = getEntityType(skull, isWallBlock);
             if (entityType != null)
                 this.produceUnit((ServerLevel) level, entityType, this.ownerName, true);
-        }
-    }
-
-    // not sure why, but this needs to be slightly different to BuildingUtils.rotatePos
-    private BlockPos rotatePos(BlockPos pos, Rotation rot) {
-        if (rot == Rotation.NONE) {
-            return new BlockPos(pos.getX(), pos.getY(), pos.getZ());
-        } else if (rot == Rotation.CLOCKWISE_90) {
-            return new BlockPos(-pos.getZ(), pos.getY(), pos.getX()); // z and x switched
-        } else if (rot == Rotation.CLOCKWISE_180) {
-            return new BlockPos(-pos.getX(), pos.getY(), -pos.getZ());
-        } else {
-            return new BlockPos(pos.getZ(), pos.getY(), -pos.getX()); // z and x switched
         }
     }
 }
