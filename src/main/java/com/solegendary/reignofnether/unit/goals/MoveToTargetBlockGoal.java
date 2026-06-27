@@ -86,12 +86,17 @@ public class MoveToTargetBlockGoal extends Goal {
             this.mob.getOnPos().distSqr(moveTarget) > getMinDistToRecalculateSqr()) {
             BlockPos oldFinalNode = getFinalNodePos();
             this.start();
-            BlockPos newFinalNode = getFinalNodePos();
-            // start() is very expensive, and it repeats every tick if the mob is stuck, eg. targeting over water
-            if (oldFinalNode != null && oldFinalNode.equals(newFinalNode))
-                backoffRecalcCooldown();
-            else
-                resetRecalcBackoff();
+            // start() is very expensive, and it repeats every tick if the mob is stuck, eg. targeting over water.
+            // For the async RTS path the result isn't ready yet (start() just stopped navigation and fired the
+            // request), so the final node here is meaningless - onPathReady owns the backoff once it knows
+            // whether the target was reachable. Only the synchronous vanilla path has a final node to compare.
+            if (!pathPending) {
+                BlockPos newFinalNode = getFinalNodePos();
+                if (oldFinalNode != null && oldFinalNode.equals(newFinalNode))
+                    backoffRecalcCooldown();
+                else
+                    resetRecalcBackoff();
+            }
             return true;
         }
         else if (moveTarget == null)
@@ -161,10 +166,22 @@ public class MoveToTargetBlockGoal extends Goal {
             this.mob.getNavigation().stop();
             return;
         }
+        // Reachability sets the retry cadence. A reachable path resets the backoff (prompt re-path so a long
+        // journey keeps chaining). An unreachable result (null, or a partial that can't reach) escalates the
+        // exponential backoff and sets a real cooldown, so a stuck unit stops re-requesting a full cold-corridor
+        // path every async round-trip - the spiral that pinned the main thread. setMoveTarget resets the backoff
+        // when the target changes, so escalation only persists while hammering the SAME unreachable target.
+        if (path != null && path.canReach()) {
+            resetRecalcBackoff();
+        } else {
+            backoffRecalcCooldown();
+            recalcCooldown = currentRecalcCooldown;
+        }
         if (path == null) {
             this.mob.getNavigation().stop();
             return;
         }
+        // Follow even a partial (unreachable) path so the unit still makes progress toward the target.
         this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier(u));
         if (!this.mob.level().isClientSide()) {
             byte type = path.canReach() ? RtsPathfinder.TYPE_ASTAR : RtsPathfinder.TYPE_FAILED;
@@ -176,8 +193,11 @@ public class MoveToTargetBlockGoal extends Goal {
         if (bp != null) {
             MiscUtil.addUnitCheckpoint((Unit) mob, bp, true);
         }
+        // Only reset the unreachable-target backoff when the target actually changes, so a goal re-asserting the
+        // SAME (possibly unreachable) target can't clobber the escalating backoff that onPathReady builds up.
+        if (!java.util.Objects.equals(bp, this.moveTarget))
+            resetRecalcBackoff();
         this.moveTarget = bp;
-        resetRecalcBackoff();
 
         if (!this.mob.level().isClientSide())
             this.start();

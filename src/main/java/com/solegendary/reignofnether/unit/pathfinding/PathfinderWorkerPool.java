@@ -68,13 +68,16 @@ public final class PathfinderWorkerPool {
         }
         RESULTS.clear();
         BUILD_QUEUE.clear();
+        WalkabilityGrid.clearDirty();
         INFLIGHT.set(0);
     }
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
-        // START: classify a budget of cold corridor chunks and dispatch any request that's now warm.
+        // START: patch dirty columns from block changes, then classify a budget of cold corridor chunks and
+        // dispatch any request that's now warm. Drain first so paths captured this tick see freshest data.
         if (evt.phase == TickEvent.Phase.START) {
+            WalkabilityGrid.drainDirtyColumns(PathfinderConfig.MAX_COLUMN_RECLASSIFY_PER_TICK);
             processBuildQueue();
             return;
         }

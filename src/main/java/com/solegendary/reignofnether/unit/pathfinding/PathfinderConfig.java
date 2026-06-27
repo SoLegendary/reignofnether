@@ -19,6 +19,11 @@ public final class PathfinderConfig {
     // chunks the build queue classifies per server tick and defer the rest; cache hits are free and don't
     // count. Lower = smoother TPS but slower first path, higher = snappier first path but bigger per-tick cost.
     public static final int MAX_CHUNK_BUILDS_PER_TICK = 24;
+    // A block change patches only its (x,z) column (~VERTICAL band cells) instead of evicting the whole 16x16
+    // chunk. Cap how many dirty columns the START-phase drain reclassifies per server tick; the rest stay
+    // stale-but-walkable until a later tick (never removed, so units are never stranded on a transient hole).
+    // ~one chunk's worth of columns, far under the old whole-chunk rebuild cost that this replaces. Tunable.
+    public static final int MAX_COLUMN_RECLASSIFY_PER_TICK = 256;
     // A* searches stay near the surface; only classify a Y band around the path rather than the full
     // world column. SLACK covers the Y+-1 step nodes and goal snapping that reach just outside the band.
     public static final int VERTICAL_RADIUS = 24;

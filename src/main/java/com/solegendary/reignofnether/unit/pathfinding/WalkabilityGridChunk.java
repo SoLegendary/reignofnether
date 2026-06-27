@@ -2,6 +2,8 @@ package com.solegendary.reignofnether.unit.pathfinding;
 
 import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.util.MiscUtil;
+import it.unimi.dsi.fastutil.ints.IntCollection;
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -45,28 +47,63 @@ public final class WalkabilityGridChunk {
                 int wz = baseZ + dz;
                 for (int y = minY; y < maxY; y++) {
                     int i = idx(dx, y - minY, dz);
-                    cellKind[i] = WalkabilityBuilder.classify(level, wx, y, wz);
-                    // Leaves report non-solid but have full collision, so count them as body-blocking here
-                    // (classify still treats them as no floor support, so units don't walk on them). Fences,
-                    // walls and closed fence gates are 1.5-tall barriers too - count them as body-blocking so
-                    // they register as walls for the crowding malus and block footprints, like solid blocks.
-                    mp.set(wx, y, wz);
-                    BlockState bs = level.getBlockState(mp);
-                    boolean cellSolid = MiscUtil.isSolidBlocking(level, mp) || BlockUtils.isLeafBlock(bs)
-                            || WalkabilityBuilder.isFenceLike(bs);
-                    // A fence/wall directly BELOW is 1.5 tall and reaches up into this cell. Mark this cell solid
-                    // too so wallBeside (which probes ABOVE the feet, skipping the feet cell as a climbable step)
-                    // actually detects a ground-level fence/wall as a wall - otherwise a 1-tall fence sitting at a
-                    // neighbour's feet is invisible to the crowding malus.
-                    if (!cellSolid) {
-                        mpBelow.set(wx, y - 1, wz);
-                        if (WalkabilityBuilder.isFenceLike(level.getBlockState(mpBelow))) cellSolid = true;
-                    }
-                    solid[i] = cellSolid ? (byte) 1 : 0;
+                    classifyCell(level, wx, y, wz, cellKind, solid, i, mp, mpBelow);
                 }
             }
         }
         return new WalkabilityGridChunk(minY, height, cellKind, solid);
+    }
+
+    // Re-derive ONE local column (packed (lz<<4)|lx) into clones of this chunk's arrays, returning a NEW
+    // immutable chunk - never mutating the receiver. Worker-pool threads holding the old chunk through a
+    // captured snapshot keep reading consistent (if briefly stale) data; the swap into the cache is atomic
+    // (see WalkabilityGrid.drainDirtyColumns). Same minY/height as the original, so covers() and every
+    // snapshot's band assumption stay valid. ~height cell classifications per column vs SIZE*SIZE for build().
+    public WalkabilityGridChunk reclassifyColumns(Level level, ChunkPos cp, IntCollection localColumns) {
+        byte[] newKind = cellKind.clone();
+        byte[] newSolid = solid.clone();
+        int baseX = cp.getMinBlockX();
+        int baseZ = cp.getMinBlockZ();
+        int maxY = minY + height;
+        BlockPos.MutableBlockPos mp = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos mpBelow = new BlockPos.MutableBlockPos();
+        IntIterator it = localColumns.iterator();
+        while (it.hasNext()) {
+            int packed = it.nextInt();
+            int lx = packed & 15;
+            int lz = (packed >> 4) & 15;
+            int wx = baseX + lx;
+            int wz = baseZ + lz;
+            for (int y = minY; y < maxY; y++) {
+                int i = idx(lx, y - minY, lz);
+                classifyCell(level, wx, y, wz, newKind, newSolid, i, mp, mpBelow);
+            }
+        }
+        return new WalkabilityGridChunk(minY, height, newKind, newSolid);
+    }
+
+    // Classify one cell (x,y,z) into cellKind[i]/solid[i]. The single definition of how a cell becomes
+    // walkable + body-blocking, shared by build() and reclassifyColumns() so the two can never drift.
+    private static void classifyCell(Level level, int wx, int y, int wz, byte[] cellKind, byte[] solid, int i,
+                                     BlockPos.MutableBlockPos mp, BlockPos.MutableBlockPos mpBelow) {
+        cellKind[i] = WalkabilityBuilder.classify(level, wx, y, wz);
+        // Leaves report non-solid but have full collision, so count them as body-blocking here
+        // (classify still treats them as no floor support, so units don't walk on them). Fences,
+        // walls and closed fence gates are 1.5-tall barriers too - count them as body-blocking so
+        // they register as walls for the crowding malus and block footprints, like solid blocks.
+        mp.set(wx, y, wz);
+        BlockState bs = level.getBlockState(mp);
+        boolean cellSolid = MiscUtil.isSolidBlocking(level, mp) || BlockUtils.isLeafBlock(bs)
+                || WalkabilityBuilder.isFenceLike(bs);
+        // A fence/wall directly BELOW is 1.5 tall and reaches up into this cell. Mark this cell solid
+        // too so wallBeside (which probes ABOVE the feet, skipping the feet cell as a climbable step)
+        // actually detects a ground-level fence/wall as a wall - otherwise a 1-tall fence sitting at a
+        // neighbour's feet is invisible to the crowding malus.
+        if (!cellSolid) {
+            mpBelow.set(wx, y - 1, wz);
+            if (WalkabilityBuilder.isFenceLike(level.getBlockState(mpBelow))) cellSolid = true;
+        }
+        solid[i] = cellSolid ? (byte) 1 : 0;
     }
 
     private static int idx(int localX, int yIdx, int localZ) {
