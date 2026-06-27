@@ -1,0 +1,63 @@
+package com.solegendary.reignofnether.unit.pathfinding;
+
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import net.minecraft.core.BlockPos;
+
+public final class PathfinderConfig {
+    private PathfinderConfig() {}
+
+    public static final int MAX_RADIUS = 96;
+    // Worst-case node budget per A* segment; only fully spent on hard detours / unreachable targets. High
+    // enough to flood the reachable area within MAX_RADIUS so units round obstacles instead of giving up at
+    // the near wall. Past ~200k the radius cap, not this, is the limit (raise MAX_RADIUS + MIN_DILATION).
+    public static final int MAX_NODES = 250000;
+    public static final int MAX_CHAIN_SEGMENTS = 10;
+    public static final int MIN_DILATION = 48;
+    public static final int QUEUE_BACKPRESSURE_CAP = 500;
+    // Walkability-grid building (getBlockState/getCollisionShape) must run on the main thread, so a single
+    // cross-map move classifying its whole corridor in one tick spikes the TPS. Cap how many cold (uncached)
+    // chunks the build queue classifies per server tick and defer the rest; cache hits are free and don't
+    // count. Lower = smoother TPS but slower first path, higher = snappier first path but bigger per-tick cost.
+    public static final int MAX_CHUNK_BUILDS_PER_TICK = 24;
+    // A* searches stay near the surface; only classify a Y band around the path rather than the full
+    // world column. SLACK covers the Y+-1 step nodes and goal snapping that reach just outside the band.
+    public static final int VERTICAL_RADIUS = 24;
+    public static final int VERTICAL_WINDOW_SLACK = 8;
+
+    // The grid's neighbour model only steps +-1 in Y, so it can't express a sheer drop bigger than one block -
+    // a unit would stall at the lip of a 2+ block descent (a tall staircase) with no node to advance to, and a
+    // wide body spins on the ledge. Vanilla allows multi-block falls; so do we, up to MAX_FALL_DROP blocks, with
+    // a small per-block malus so a unit still prefers a gentle route when one is comparably short but commits to
+    // the drop rather than fearing it. 3 matches vanilla's roughly-safe fall threshold.
+    public static final int MAX_FALL_DROP = 3;
+    public static final float FALL_COST_PER_BLOCK = 0.3f;
+
+    // Bound the per-level walkability chunk cache so long games don't grow it without limit.
+    public static final int MAX_CACHED_CHUNKS = 1024;
+
+    // Cost multiplier a unit pays to path across a fire/magma/campfire cell when it is NOT fire-immune and
+    // its DAMAGE_FIRE pathfinding malus marks fire as dangerous. Fire-immune units pay 1x instead (see
+    // RtsPathfinder.fireCostFor), so they cross fire freely while everyone else routes around it.
+    public static final float FIRE_AVOID_COST = 50.0f;
+
+    // A* over an immutable snapshot is embarrassingly parallel; scale workers with cores.
+    public static final int WORKER_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
+
+    // A unit within this squared distance of its move target is "arrived": separation stops pushing it and
+    // the move goal stops recalculating, so a settled/formed-up group doesn't jitter on the spot. Shared by
+    // UnitSeparation and MoveToTargetBlockGoal.getMinDistToRecalculateSqr so the two thresholds can't drift.
+    public static final double ARRIVAL_SETTLE_SQ = 2.25; // 1.5 blocks
+
+    // Per-tick separation steering between crowding, same-owner, moving units.
+    public static final double SEPARATION_RADIUS = 1.6;
+    public static final double SEPARATION_STRENGTH = 0.04;
+    public static final int SEPARATION_MAX_PER_TICK = 400;
+    public static final int SEPARATION_CELL_SIZE = 2;
+
+    public static boolean isRtsEnabled() { return UnitServerEvents.rtsPathfinding; }
+
+    public static int dilationFor(BlockPos start, BlockPos target) {
+        int manhattan = Math.abs(start.getX() - target.getX()) + Math.abs(start.getZ() - target.getZ());
+        return Math.min(MAX_RADIUS, Math.max(MIN_DILATION, manhattan / 2));
+    }
+}

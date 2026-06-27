@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.debug;
 
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.pathfinding.WalkabilityGrid;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -34,6 +35,11 @@ public class RtsDebugServerEvents {
         if (evt.phase != TickEvent.Phase.END)
             return;
 
+        // Sample the formation dispatch queue depth every tick (cheap, captures bursts);
+        // averaged at the once-per-second boundary below.
+        queueSumThisSecond += UnitServerEvents.formationDispatchQueueSize();
+        queueSamplesThisSecond += 1;
+
         MinecraftServer server = evt.getServer();
         long[] times = server.getTickTime(Level.OVERWORLD);
         if (times == null)
@@ -62,6 +68,9 @@ public class RtsDebugServerEvents {
         statsIndex = (statsIndex + 1) % STATS_WINDOW;
         RtsDebugStatsClientboundPacket.broadcast(
                 avg(pathsHistory), avg(queueHistory), avg(stuckHistory), worldTickTime);
+        // Built navmesh chunks (overworld) so the debug overlay can show what's cached.
+        if (server.overworld() != null)
+            RtsDebugChunksClientboundPacket.broadcast(WalkabilityGrid.get(server.overworld()).builtChunkKeys());
     }
 
     private static long mean(long[] values) {

@@ -43,6 +43,10 @@ public class GameruleClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new GameruleClientboundPacket(GameruleAction.SET_PLAYER_GRIEFING, "", playerGriefing ? 1L : 0L));
     }
+    public static void setRtsPathfinding(boolean rtsPathfinding) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new GameruleClientboundPacket(GameruleAction.SET_RTS_PATHFINDING, "", rtsPathfinding ? 1L : 0L));
+    }
     public static void setImprovedPathfinding(boolean improvedPathfinding) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new GameruleClientboundPacket(GameruleAction.SET_IMPROVED_PATHFINDING, "", improvedPathfinding ? 1L : 0L));
@@ -123,6 +127,7 @@ public class GameruleClientboundPacket {
                             case SET_MAX_POPULATION -> GameruleClient.maxPopulation = Math.toIntExact(value);
                             case SET_UNIT_GRIEFING -> GameruleClient.doUnitGriefing = value == 1L;
                             case SET_PLAYER_GRIEFING -> GameruleClient.doPlayerGriefing = value == 1L;
+                            case SET_RTS_PATHFINDING -> GameruleClient.rtsPathfinding = value == 1L;
                             case SET_IMPROVED_PATHFINDING -> GameruleClient.improvedPathfinding = value == 1L;
                             case SET_GROUND_Y_LEVEL -> {
                                 GameruleClient.groundYLevel = value;

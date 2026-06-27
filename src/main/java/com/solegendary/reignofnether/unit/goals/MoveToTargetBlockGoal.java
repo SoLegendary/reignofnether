@@ -3,12 +3,16 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitPathClientboundPacket;
+import com.solegendary.reignofnether.unit.pathfinding.MobilityClass;
+import com.solegendary.reignofnether.unit.pathfinding.PathfinderConfig;
+import com.solegendary.reignofnether.unit.pathfinding.RtsPathfinder;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.pathfinder.Path;
 
 import javax.annotation.Nullable;
@@ -35,6 +39,7 @@ public class MoveToTargetBlockGoal extends Goal {
     protected void resetRecalcBackoff() { currentRecalcCooldown = RECALC_COOLDOWN_MAX; }
     public boolean isInBackoff() { return currentRecalcCooldown > RECALC_COOLDOWN_MAX && moveTarget != null; }
     protected int recalcCooldown = 0; // limit start() used by canContinueToUse
+    protected boolean pathPending = false; // true while an async RTS path request is in flight
 
     public MoveToTargetBlockGoal(Mob mob, boolean persistent, int reachRange) {
         this.mob = mob;
@@ -50,8 +55,17 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public double getMinDistToRecalculateSqr() {
-        double dist = Math.max(1, moveReachRange);
+        // Floor the recalc radius at the separation settle distance so there's no band where a unit is
+        // close enough that separation lets it settle but still far enough to trigger a path recalc every
+        // tick — that mismatch is what makes arrived units jitter ("dance") on the spot.
+        double dist = Math.max(Math.sqrt(PathfinderConfig.ARRIVAL_SETTLE_SQ), moveReachRange);
         return dist * dist;
+    }
+
+    // Whether this unit routes through the async RTS grid pathfinder. Overridden to false for units whose
+    // locomotion the grid path doesn't suit (eg. jump-based slimes), keeping them on vanilla pathfinding.
+    protected boolean useRtsPathfinding() {
+        return PathfinderConfig.isRtsEnabled();
     }
 
     public boolean canUse() {
@@ -61,6 +75,9 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public boolean canContinueToUse() {
+        // Keep the goal active (without recalculating) while an async RTS path is being computed.
+        if (pathPending)
+            return moveTarget != null;
         if (recalcCooldown > 0) {
             recalcCooldown -= 1;
             return true;
@@ -90,31 +107,69 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public void start() {
-        if (moveTarget != null) {
-            // Single createPath call. The improvedPathfinding (FOLLOW_RANGE_IMPROVED) attribute is left
-            // in place if present, so vanilla A* searches at the configured range. If the resulting path
-            // ends up suboptimal, the backoff in canContinueToUse handles retries / give-up.
-            Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
-            if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
-            if (path == null) {
-                AttributeInstance ai = mob.getAttribute(Attributes.FOLLOW_RANGE);
-                if (ai != null && ai.getBaseValue() == FOLLOW_RANGE_IMPROVED) {
-                    // Fallback: long-range search bailed (eg. hit maxVisitedNodes). Retry with the short
-                    // range — vanilla A* may give up sooner and return a useful partial path.
-                    ai.setBaseValue(FOLLOW_RANGE);
-                    path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
-                    if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
-                    ai.setBaseValue(FOLLOW_RANGE_IMPROVED);
-                }
-            }
-            this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier((Unit) this.mob));
-            // Broadcast the path so clients can render it briefly. Server-only — clients
-            // that received the packet decide whether to render based on ownership/FOW.
-            if (!this.mob.level().isClientSide())
-                UnitPathClientboundPacket.sendPath(this.mob, path);
-        }
-        else
+        if (moveTarget == null) {
             this.mob.getNavigation().stop();
+            return;
+        }
+        if (!(this.mob instanceof Unit u)) {
+            this.mob.getNavigation().stop();
+            return;
+        }
+
+        // When the rtsPathfinding gamerule is on, route through the async grid A* pathfinder.
+        if (useRtsPathfinding()) {
+            this.mob.setMaxUpStep(1.0f);
+            if (this.mob.getNavigation() instanceof GroundPathNavigation gpn) gpn.setCanFloat(true);
+            this.mob.getNavigation().stop();
+            MobilityClass mobility = MobilityClass.of(u);
+
+            pathPending = true;
+            RtsPathfinder.requestPath(this.mob, moveTarget, moveReachRange, mobility, this::onPathReady);
+            return;
+        }
+
+        // Vanilla pathfinding. Single createPath call. The improvedPathfinding (FOLLOW_RANGE_IMPROVED)
+        // attribute is left in place if present, so vanilla A* searches at the configured range. If the
+        // resulting path ends up suboptimal, the backoff in canContinueToUse handles retries / give-up.
+        Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
+        if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
+        if (path == null) {
+            AttributeInstance ai = mob.getAttribute(Attributes.FOLLOW_RANGE);
+            if (ai != null && ai.getBaseValue() == FOLLOW_RANGE_IMPROVED) {
+                // Fallback: long-range search bailed (eg. hit maxVisitedNodes). Retry with the short
+                // range — vanilla A* may give up sooner and return a useful partial path.
+                ai.setBaseValue(FOLLOW_RANGE);
+                path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
+                if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
+                ai.setBaseValue(FOLLOW_RANGE_IMPROVED);
+            }
+        }
+        this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier(u));
+        // Broadcast the path so clients can render it briefly. Server-only — clients
+        // that received the packet decide whether to render based on ownership/FOW.
+        if (!this.mob.level().isClientSide()) {
+            byte type = (path != null && !path.canReach()) ? RtsPathfinder.TYPE_FAILED : RtsPathfinder.TYPE_VANILLA;
+            UnitPathClientboundPacket.sendPath(this.mob, path, type);
+        }
+    }
+
+    // Callback for the async RTS pathfinder. Runs on the server thread once a path is ready.
+    protected void onPathReady(@Nullable Path path) {
+        pathPending = false;
+        if (moveTarget == null) return;
+        if (!(this.mob instanceof Unit u)) {
+            this.mob.getNavigation().stop();
+            return;
+        }
+        if (path == null) {
+            this.mob.getNavigation().stop();
+            return;
+        }
+        this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier(u));
+        if (!this.mob.level().isClientSide()) {
+            byte type = path.canReach() ? RtsPathfinder.TYPE_ASTAR : RtsPathfinder.TYPE_FAILED;
+            UnitPathClientboundPacket.sendPath(this.mob, path, type);
+        }
     }
 
     public void setMoveTarget(@Nullable BlockPos bp) {
