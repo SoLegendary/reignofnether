@@ -106,7 +106,6 @@ public class MatchStartScreen extends Screen {
                 Component.translatable("matchstart.reignofnether.chat.placeholder"));
         chatInput.setBordered(true);
         chatInput.setMaxLength(256);
-        chatInput.setCanLoseFocus(true);
         chatInput.setFocused(false);
         addRenderableWidget(chatInput);
     }
@@ -536,6 +535,8 @@ public class MatchStartScreen extends Screen {
 
         MyRenderer.renderIconFrameWithBg(g, ICON_FRAME, x, y, FRAME_SIZE, BG_ICON);
         ResourceLocation icon = MiscUtil.getFactionIcon(f);
+        if (f == Faction.RANDOM)
+            icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark.png");
         int innerOffset = (FRAME_SIZE - ICON_SIZE) / 2;
         MyRenderer.renderIcon(g, icon, x + innerOffset, y + innerOffset, ICON_SIZE);
         if (!canPick) {
@@ -655,7 +656,7 @@ public class MatchStartScreen extends Screen {
             g.fill(trackX, thumbY, trackX + 2, thumbY + thumbH, ACCENT);
         }
 
-        if (chatInput != null && !chatInput.isFocused() && chatInput.getValue().isEmpty()) {
+        if (chatInput != null && !chatMinimised && chatInput.getValue().isEmpty()) {
             g.drawString(this.font,
                     Component.translatable("matchstart.reignofnether.chat.click_to_type").getString(),
                     chatInput.getX() + 4, chatInput.getY() + 5, TEXT_DIM, false);
@@ -741,10 +742,8 @@ public class MatchStartScreen extends Screen {
             int btnY = chatY1 + 8;
             if (mx >= btnX && mx <= btnX + btnSize && my >= btnY && my <= btnY + btnSize) {
                 chatMinimised = !chatMinimised;
-                if (chatInput != null) {
-                    chatInput.setVisible(!chatMinimised);
-                    if (chatMinimised) chatInput.setFocused(false);
-                }
+                chatInput.setVisible(!chatMinimised);
+                chatInput.setFocused(!chatMinimised);
                 return true;
             }
         }
@@ -838,14 +837,12 @@ public class MatchStartScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (chatInput != null && chatInput.isFocused()) {
+        if (chatInput != null && !chatMinimised) {
             if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
                 sendChatFromInput();
                 return true;
             }
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-                // ESC from focused chat: defocus but keep screen open
-                chatInput.setFocused(false);
                 return true;
             }
             return super.keyPressed(keyCode, scanCode, modifiers);
