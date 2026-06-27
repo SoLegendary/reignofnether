@@ -53,8 +53,8 @@ Bugfixes
 [✔] Fixed castle roofs breaking and causing garrisoned units to fall out
 [✔] Fixed diagonal bridges not saving correctly
 [✔] Units no longer try to walk through slime blocks
+[✔] Fixed minimap sometimes showing non-existent units
 [🟡] Units now avoid trying to walk on sculk shrieker and catalyst blocks
-[🟡] Fixed minimap sometimes showing non-existent units
 
 Languages
 ---------
