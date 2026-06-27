@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,9 +29,6 @@ public class MatchStartScreen extends Screen {
 
     private static final ResourceLocation ICON_FRAME      = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
     private static final ResourceLocation ICON_FRAME_SEL  = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
-    private static final ResourceLocation VILLAGER_ICON   = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
-    private static final ResourceLocation MONSTER_ICON    = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
-    private static final ResourceLocation PIGLIN_ICON     = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
     private static final ResourceLocation TICK_ICON       = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png");
     private static final ResourceLocation CROSS_ICON      = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png");
     private static final ResourceLocation CLOSE_ICON      = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross_square.png");
@@ -442,15 +440,15 @@ public class MatchStartScreen extends Screen {
 
         // Highlight clickable rows (empty slots or my slot's left area) like the spectate button
         if (sp.enabled && (empty || mine)) {
-            int rowHitRight = x + width - FRAME_SIZE * 3 - 2 * 2 - FRAME_SIZE - 6 - 8 - 4;
+            int rowHitRight = x + width - FRAME_SIZE * 3 - 2 * 2 - FRAME_SIZE - 6 - 8 - 16;
             boolean hovered = !overlayActive && mx >= x && mx <= rowHitRight && my >= y && my <= rowBottom;
             if (hovered) g.fill(x, y, rowHitRight, rowBottom, 0x32FFFFFF);
         }
 
         int tileY = y + ((ROW_H - FRAME_SIZE) / 2) - 1;
-        int readyX = x + width - FRAME_SIZE - 6;
+        int readyX = x + width - FRAME_SIZE - 2;
         int factionTotalW = FRAME_SIZE * 3 + 2 * 2;
-        int factionStartX = readyX - 8 - factionTotalW;
+        int factionStartX = readyX - 20 - factionTotalW;
 
         int headX = x + 6;
         int innerOffset = (FRAME_SIZE - ICON_SIZE) / 2;
@@ -463,7 +461,7 @@ public class MatchStartScreen extends Screen {
             g.pose().pushPose();
             g.pose().translate(headX + FRAME_SIZE / 2.0f, tileY + FRAME_SIZE / 2.0f + 1, 0);
             g.pose().scale(scale, scale, 1f);
-            g.drawString(this.font, plus, -plusW / 2, -plusH / 2, ACCENT, false);
+            g.drawString(this.font, plus, (-plusW / 2) + 1, -plusH / 2, ACCENT, false);
             g.pose().popPose();
         } else {
             MyRenderer.renderIconFrameWithBg(g, ICON_FRAME, headX, tileY, FRAME_SIZE, BG_ICON);
@@ -479,17 +477,17 @@ public class MatchStartScreen extends Screen {
         String drawnName = this.font.plainSubstrByWidth(name, nameMaxW);
         g.drawString(this.font, drawnName, nameX, tileY + (FRAME_SIZE - this.font.lineHeight) / 2 + 1, nameCol, false);
 
-        Faction[] order = { Faction.VILLAGERS, Faction.MONSTERS, Faction.PIGLINS };
-        int currentX = factionStartX;
+        Faction[] order = { Faction.VILLAGERS, Faction.MONSTERS, Faction.PIGLINS, Faction.RANDOM };
+        int currentX = factionStartX - 6;
         for (Faction f : order) {
             renderFactionTile(g, sp, f, currentX, tileY, localName, mx, my, overlayActive);
-            currentX += FRAME_SIZE + 2;
+            currentX += FRAME_SIZE;
         }
 
         renderReadyTile(g, sp, readyX, tileY, localName, mx, my, overlayActive);
 
         if (sp.enabled && (empty || mine)) {
-            int rowHitRight = factionStartX - 4;
+            int rowHitRight = factionStartX - 5;
             rowHits.add(new RowHit(sp, x, y, rowHitRight, rowBottom));
         }
     }
@@ -537,7 +535,7 @@ public class MatchStartScreen extends Screen {
         boolean canPick = sp.enabled && mine;
 
         MyRenderer.renderIconFrameWithBg(g, ICON_FRAME, x, y, FRAME_SIZE, BG_ICON);
-        ResourceLocation icon = factionIcon(f);
+        ResourceLocation icon = MiscUtil.getFactionIcon(f);
         int innerOffset = (FRAME_SIZE - ICON_SIZE) / 2;
         MyRenderer.renderIcon(g, icon, x + innerOffset, y + innerOffset, ICON_SIZE);
         if (!canPick) {
@@ -709,15 +707,6 @@ public class MatchStartScreen extends Screen {
             if (sp.ready && !sp.playerName.isBlank()) ready++;
         }
         return Component.translatable("matchstart.reignofnether.ready_count", ready, total).getString();
-    }
-
-    private static ResourceLocation factionIcon(Faction faction) {
-        return switch (faction) {
-            case VILLAGERS -> VILLAGER_ICON;
-            case MONSTERS -> MONSTER_ICON;
-            case PIGLINS -> PIGLIN_ICON;
-            default -> ICON_FRAME;
-        };
     }
 
     @Override

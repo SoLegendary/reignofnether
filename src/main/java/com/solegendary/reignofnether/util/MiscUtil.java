@@ -959,7 +959,8 @@ public class MiscUtil {
             case VILLAGERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
             case MONSTERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
             case PIGLINS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
-            case NONE, NEUTRAL -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep.png");
+            case RANDOM -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark.png");
+            default -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep.png");
         };
     }
 
@@ -1015,5 +1016,12 @@ public class MiscUtil {
 
     public static boolean isMagicDamage(DamageSource source) {
         return source.is(DamageTypeTags.WITCH_RESISTANT_TO) || source.is(DamageTypes.ON_FIRE);
+    }
+
+    public static <T> T getRandomItem(List<T> list) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("List must not be null or empty");
+        }
+        return list.get(RANDOM.nextInt(list.size()));
     }
 }

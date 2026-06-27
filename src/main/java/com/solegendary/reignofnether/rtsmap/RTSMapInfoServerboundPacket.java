@@ -53,7 +53,8 @@ public class RTSMapInfoServerboundPacket {
                 return;
             }
             if (RTSMapInfoServerEvents.rtsMapInfo != null &&
-                RTSMapInfoServerEvents.rtsMapInfo.supportsMode(mode)) {
+                RTSMapInfoServerEvents.rtsMapInfo.supportsMode(mode) &&
+                !StartPosServerEvents.isStartingGame()) {
                 RTSMapInfoServerEvents.rtsMapInfo.setDefaultMode(mode);
                 RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MODE, mode);
                 StartPosServerEvents.loadPositionsFromMapInfo();

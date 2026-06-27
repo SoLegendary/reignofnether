@@ -5,5 +5,6 @@ public enum Faction {
     MONSTERS,
     PIGLINS,
     NEUTRAL,
-    NONE // used for sandbox, neutral or placeholder value
+    RANDOM,
+    NONE // used for sandbox or placeholder value
 }

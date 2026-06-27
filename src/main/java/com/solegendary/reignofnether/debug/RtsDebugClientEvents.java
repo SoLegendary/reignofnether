@@ -54,7 +54,7 @@ public class RtsDebugClientEvents {
         if (displayMode == DebugDisplayMode.NONE)
             return;
 
-        int x = evt.getWindow().getGuiScaledWidth() - (displayMode == DebugDisplayMode.PATHFINDING ? 95 : 85);
+        int x = evt.getWindow().getGuiScaledWidth() - (displayMode == DebugDisplayMode.NONE ? 85 : 95);
         int y = 25;
         int lineH = 10;
 

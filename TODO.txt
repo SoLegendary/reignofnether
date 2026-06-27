@@ -41,7 +41,10 @@ Quality of Life
 [✔] You can now use `/rtsapi-teams-mode none` on any map to disable all start blocks, even without an rtsmap.json file
 [✔] Added an option to make a custom building not draw aggro from player units
 [✔] Moved the iron golem default spawn to beside the furnaces to reduce chance of getting stuck on nearby buildings
+[✔] On a countdown game start, your camera is now automatically moved to your starting position
+[✔] The F7 debug menu has been expanded to include navmesh visualisations
 [❌] Random faction button
+    - Can sometimes do nothing?
 
 Balance
 -------
