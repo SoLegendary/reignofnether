@@ -51,9 +51,10 @@ Balance
 Bugfixes
 --------
 [✔] Fixed castle roofs breaking and causing garrisoned units to fall out
-[❌] Rotated bridges not saving correctly
+[✔] Fixed diagonal bridges not saving correctly
 [✔] Units no longer try to walk through slime blocks
 [🟡] Units now avoid trying to walk on sculk shrieker and catalyst blocks
+[🟡] Fixed minimap sometimes showing non-existent units
 
 Languages
 ---------

@@ -138,7 +138,11 @@ public class MinimapClientEvents {
         return highlightAnimals;
     }
 
-    // objects for tracking serverside Units that don't yet exist on clientside
+    public static void clearMinimapUnits() {
+        minimapUnits.clear();
+    }
+
+    // for tracking serverside Units that don't yet exist on clientside
     private static class MinimapUnit {
         public BlockPos pos;
         public final int id;

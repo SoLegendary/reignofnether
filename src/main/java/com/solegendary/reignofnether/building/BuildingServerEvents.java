@@ -825,7 +825,7 @@ public class BuildingServerEvents {
                         building.ownerName,
                         building.scenarioRoleIndex,
                         building.blockPlaceQueue.size(),
-                        building.getBuilding() instanceof AbstractBridge && building.getDataStorage().getData(AbstractBridge.DIAGONAL),
+                        building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                         building.getUpgradeLevel(),
                         building.isBuilt,
                         building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
