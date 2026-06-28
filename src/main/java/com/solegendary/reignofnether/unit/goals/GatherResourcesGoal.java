@@ -47,9 +47,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public TargetResourcesSave permSaveData = new TargetResourcesSave();
 
     private static final int REACH_RANGE = 5;
-    // How far ABOVE the worker's head it can still reach a block: lets it gather ground/low resources but not
-    // reach up a tall tree. Combined with the 3D mining reach (REACH_RANGE).
-    private static final int MAX_REACH_ABOVE_HEAD = 2;
     private static final int DEFAULT_MAX_GATHER_TICKS = 600; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private float gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
@@ -419,10 +416,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
 
     private boolean isBlockInRange(BlockPos target) {
-        // Don't reach a block more than MAX_REACH_ABOVE_HEAD blocks above the worker's head - it gathers
-        // ground/low resources but can't reach up a tall tree (it fells those from the base).
-        if (target.getY() - (mob.getY() + mob.getBbHeight()) > MAX_REACH_ABOVE_HEAD)
-            return false;
         // Within mining reach (3D). No stuck-worker bonus: a block that's out of range is dropped by the gather
         // goal's NO_TARGET_TIMEOUT so the worker just searches another one, instead of stretching its reach.
         return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= REACH_RANGE * REACH_RANGE;
