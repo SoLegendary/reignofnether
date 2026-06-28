@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitPathClientboundPacket;
 import com.solegendary.reignofnether.unit.pathfinding.MobilityClass;
@@ -73,7 +74,7 @@ public class MoveToTargetBlockGoal extends Goal {
     // Whether this unit routes through the async RTS grid pathfinder. Overridden to false for units whose
     // locomotion the grid path doesn't suit (eg. jump-based slimes), keeping them on vanilla pathfinding.
     protected boolean useRtsPathfinding() {
-        return true;
+        return UnitServerEvents.improvedPathfinding;
     }
 
     public boolean canUse() {

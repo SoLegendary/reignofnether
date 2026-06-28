@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.pathfinding;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.resources.ResourceIndex;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
@@ -79,13 +80,21 @@ public final class PathfinderWorkerPool {
         // START: rebuild settled dirty chunks from block changes, then classify a budget of cold corridor
         // chunks and dispatch any request that's now warm. Drain first so paths captured this tick see freshest data.
         if (evt.phase == TickEvent.Phase.START) {
-            WalkabilityGrid.drainDirtyChunks(PathfinderConfig.MAX_CHUNK_RECLASSIFY_PER_TICK);
+            // Walkability caching + path dispatch only run when the improvedPathfinding gamerule is on;
+            // with it off, units use vanilla pathfinding and none of this work happens. The resource index
+            // is independent of pathfinding (used by gather goals either way), so it always drains.
+            if (UnitServerEvents.improvedPathfinding) {
+                WalkabilityGrid.drainDirtyChunks(PathfinderConfig.MAX_CHUNK_RECLASSIFY_PER_TICK);
+            }
             ResourceIndex.drainBuildQueue(ResourceIndex.MAX_RESOURCE_CHUNK_SCANS_PER_TICK);
-            processBuildQueue();
+            if (UnitServerEvents.improvedPathfinding) {
+                processBuildQueue();
+            }
             return;
         }
         // END: deliver finished paths back on the main thread.
         if (evt.phase != TickEvent.Phase.END) return;
+        if (!UnitServerEvents.improvedPathfinding) return;
         Runnable r;
         int drained = 0;
         while (drained < 256 && (r = RESULTS.poll()) != null) {

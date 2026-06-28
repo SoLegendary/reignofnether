@@ -62,8 +62,12 @@ public final class PathfinderConfig {
     public static final int MAX_FALL_DROP = 3;
     public static final float FALL_COST_PER_BLOCK = 0.3f;
 
-    // Bound the per-level walkability chunk cache so long games don't grow it without limit.
-    public static final int MAX_CACHED_CHUNKS = 1024;
+    // Bound the per-level walkability chunk cache. Sized to hold the whole play area of an RTS-optimised
+    // map (world border <= 1024 blocks = 64x64 chunks, detected by WorldBorderServerEvents) plus a margin
+    // for the capture-region dilation that reaches just past the border edge - 72*72 = (64 + 8 each side).
+    // Because the whole prewarmed map fits, chunks never leave the cache via LRU eviction; they only
+    // change when a block change marks them dirty and drainDirtyChunks rebuilds the changed region.
+    public static final int MAX_CACHED_CHUNKS = 5184;
 
     // Cost multiplier a unit pays to path across a fire/magma/campfire cell when it is NOT fire-immune and
     // its DAMAGE_FIRE pathfinding malus marks fire as dangerous. Fire-immune units pay 1x instead (see

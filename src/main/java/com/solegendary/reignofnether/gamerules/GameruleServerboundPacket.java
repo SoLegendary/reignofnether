@@ -79,6 +79,10 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_COOP_MODE, "", coopMode ? 1L : 0L));
     }
+    public static void setImprovedPathfinding(boolean improvedPathfinding) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_IMPROVED_PATHFINDING, "", improvedPathfinding ? 1L : 0L));
+    }
 
     public GameruleServerboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -177,6 +181,11 @@ public class GameruleServerboundPacket {
                 case SET_COOP_MODE -> {
                     gameRules.getRule(GameRuleRegistrar.COOP_MODE).set(booleanValue, server);
                     GameruleClientboundPacket.setCoopMode(booleanValue);
+                }
+                case SET_IMPROVED_PATHFINDING -> {
+                    gameRules.getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).set(booleanValue, server);
+                    UnitServerEvents.improvedPathfinding = booleanValue;
+                    GameruleClientboundPacket.setImprovedPathfinding(booleanValue);
                 }
             }
             success.set(true);

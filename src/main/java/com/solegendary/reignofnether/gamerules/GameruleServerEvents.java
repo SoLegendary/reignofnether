@@ -105,6 +105,13 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setBuildingsOutsideBorder(value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("improvedPathfinding")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                UnitServerEvents.improvedPathfinding = value;
+                GameruleClientboundPacket.setImprovedPathfinding(value);
+            }
         }
     }
 
@@ -144,6 +151,9 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setCoopMode(coopMode);
             boolean buildingsOutsideBorder = server.getGameRules().getRule(GameRuleRegistrar.BUILDINGS_OUTSIDE_BORDER).get();
             GameruleClientboundPacket.setBuildingsOutsideBorder(buildingsOutsideBorder);
+            boolean improvedPathfinding = server.getGameRules().getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).get();
+            UnitServerEvents.improvedPathfinding = improvedPathfinding;
+            GameruleClientboundPacket.setImprovedPathfinding(improvedPathfinding);
         }
     }
 }
