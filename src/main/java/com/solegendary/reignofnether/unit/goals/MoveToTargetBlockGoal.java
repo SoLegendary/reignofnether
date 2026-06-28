@@ -73,7 +73,7 @@ public class MoveToTargetBlockGoal extends Goal {
     // Whether this unit routes through the async RTS grid pathfinder. Overridden to false for units whose
     // locomotion the grid path doesn't suit (eg. jump-based slimes), keeping them on vanilla pathfinding.
     protected boolean useRtsPathfinding() {
-        return true;
+        return false;
     }
 
     public boolean canUse() {
@@ -146,20 +146,8 @@ public class MoveToTargetBlockGoal extends Goal {
         // resulting path ends up suboptimal, the backoff in canContinueToUse handles retries / give-up.
         Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
         if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
-        /*
-        if (path == null) {
-            AttributeInstance ai = mob.getAttribute(Attributes.FOLLOW_RANGE);
-            if (ai != null && ai.getBaseValue() == FOLLOW_RANGE_IMPROVED) {
-                // Fallback: long-range search bailed (eg. hit maxVisitedNodes). Retry with the short
-                // range — vanilla A* may give up sooner and return a useful partial path.
-                ai.setBaseValue(FOLLOW_RANGE);
-                path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
-                if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
-                ai.setBaseValue(FOLLOW_RANGE_IMPROVED);
-            }
-        }
-         */
         this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier(u));
+
         // Broadcast the path so clients can render it briefly. Server-only — clients
         // that received the packet decide whether to render based on ownership/FOW.
         if (!this.mob.level().isClientSide()) {
