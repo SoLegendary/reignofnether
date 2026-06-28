@@ -21,21 +21,35 @@ public final class WalkabilityGrid {
     // Access-ordered (most-recent at head) so we can evict the least-recently-used tail.
     private final Long2ObjectLinkedOpenHashMap<WalkabilityGridChunk> chunks = new Long2ObjectLinkedOpenHashMap<>();
 
-    // Chunks awaiting a deferred rebuild: chunkKey -> dirty entry (the tick bounds used to coalesce ACROSS
-    // ticks). A block change marks its chunk dirty instead of evicting it, so reads keep getting the (briefly
-    // stale) cached chunk rather than a BLOCKED hole that would strand units. Drained, budgeted, on the server
-    // tick by drainDirtyChunks. We rebuild the WHOLE chunk (build()) rather than tracking individual columns:
-    // once the drain is throttled (settle delay + a per-tick chunk cap) per-column bookkeeping saves little -
-    // each rebuild allocates the same arrays either way - and a full rebuild recomputes crowd[] exactly
-    // instead of via the column-seam approximation.
+    // Chunks awaiting a deferred reclassify: chunkKey -> dirty entry (tick bounds to coalesce ACROSS ticks +
+    // the bbox of the cells that changed). A block change marks its chunk dirty instead of evicting it, so reads
+    // keep getting the (briefly stale) cached chunk rather than a BLOCKED hole that would strand units. Drained,
+    // budgeted, on the server tick by drainDirtyChunks, which patches ONLY the changed region (reclassifyRegion)
+    // - not all 256 columns over the full band. The crowd[] precompute is a ~5x5-neighbour scan per cell, so a
+    // whole-chunk rebuild on a small footprint (eg. a worker placing a building's blocks a tick at a time) spiked
+    // the main thread; region scope + the settle/ceiling coalescing keeps that cheap and rare.
     private final Long2ObjectOpenHashMap<DirtyChunk> dirtyChunks = new Long2ObjectOpenHashMap<>();
 
-    // Per dirty chunk: the tick it first went dirty (anchors the hard-defer ceiling) and the tick of its most
-    // recent change (anchors the settle check). No per-column data - the whole chunk is rebuilt.
+    // Per dirty chunk: the tick it first went dirty (anchors the hard-defer ceiling), the tick of its most
+    // recent change (anchors the settle check), and the bbox of the cells that actually changed - local
+    // columns [minLX..maxLX]/[minLZ..maxLZ] (0..15) and the WORLD-Y span [minY..maxY] (inclusive). The drain
+    // reclassifies only that region (reclassifyRegion) instead of the whole chunk, so a building's footprint
+    // churn doesn't rebuild all 256 columns over the full band.
     private static final class DirtyChunk {
         final long firstTick;
         long lastTick;
+        int minLX = Integer.MAX_VALUE, maxLX = Integer.MIN_VALUE;
+        int minLZ = Integer.MAX_VALUE, maxLZ = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE, maxY = Integer.MIN_VALUE;
         DirtyChunk(long now) { firstTick = now; lastTick = now; }
+        void include(int lx, int lz, int yLo, int yHi) {
+            if (lx < minLX) minLX = lx;
+            if (lx > maxLX) maxLX = lx;
+            if (lz < minLZ) minLZ = lz;
+            if (lz > maxLZ) maxLZ = lz;
+            if (yLo < minY) minY = yLo;
+            if (yHi > maxY) maxY = yHi;
+        }
     }
 
     // Monotonic server-tick clock, bumped once per drainDirtyChunks call (the drain runs once per server tick
@@ -118,6 +132,9 @@ public final class WalkabilityGrid {
             DirtyChunk entry = dirtyChunks.get(key);
             if (entry == null) { entry = new DirtyChunk(now); dirtyChunks.put(key, entry); }
             entry.lastTick = now; // bump the settle window on every change; firstTick stays the ceiling anchor
+            // Grow the changed-cell bbox by the same [y-1, y+1] span the early-out above reasons about (a block
+            // at y can only change cells whose feet/head/floor touch it).
+            entry.include(bp.getX() & 15, bp.getZ() & 15, bp.getY() - 1, bp.getY() + 1);
             DIRTY_GRIDS.put(this, level);
         }
     }
@@ -153,6 +170,7 @@ public final class WalkabilityGrid {
         // Pick the eligible chunk keys under the lock, then rebuild OUTSIDE it: build() reads the world and
         // must not hold DIRTY_LOCK while A* threads concurrently mark fresh chunks dirty.
         LongArrayList ready = new LongArrayList();
+        List<DirtyChunk> readyEntries = new ArrayList<>(); // the bbox per ready key (it.remove() drops the entry)
         synchronized (DIRTY_LOCK) {
             LongIterator it = dirtyChunks.keySet().iterator();
             while (it.hasNext() && ready.size() < budget) {
@@ -160,20 +178,27 @@ public final class WalkabilityGrid {
                 DirtyChunk d = dirtyChunks.get(key);
                 boolean settled = (now - d.lastTick) >= PathfinderConfig.WALKABILITY_SETTLE_TICKS;
                 boolean ceiling = (now - d.firstTick) >= PathfinderConfig.WALKABILITY_MAX_DEFER_TICKS;
-                if (settled || ceiling) { ready.add(key); it.remove(); }
+                if (settled || ceiling) { ready.add(key); readyEntries.add(d); it.remove(); }
             }
             if (dirtyChunks.isEmpty()) DIRTY_GRIDS.remove(this);
         }
         // A block change arriving after we removed a key (but before/while we rebuild) re-marks the chunk with
-        // a fresh entry, so it's rebuilt again next settle - nothing is lost, and build() reads current state.
+        // a fresh entry, so it's rebuilt again next settle - nothing is lost, and reclassify reads current state.
         for (int i = 0; i < ready.size(); i++) {
             long key = ready.getLong(i);
+            DirtyChunk d = readyEntries.get(i);
             WalkabilityGridChunk original;
             synchronized (chunks) { original = chunks.get(key); }
             // null -> chunk was LRU-evicted while dirty; drop it, a later getOrBuild rebuilds fresh.
             if (original == null) continue;
-            WalkabilityGridChunk replacement = WalkabilityGridChunk.build(
-                    level, new ChunkPos(ChunkPos.getX(key), ChunkPos.getZ(key)), original.minY(), original.maxY());
+            ChunkPos cp = new ChunkPos(ChunkPos.getX(key), ChunkPos.getZ(key));
+            // Patch only the changed region. A bbox spanning all 16x16 columns saves nothing over build(), so
+            // degrade to a full rebuild there (also the exact-crowd path); otherwise reclassify just the footprint.
+            boolean wholeChunk = d.minLX <= 0 && d.maxLX >= 15 && d.minLZ <= 0 && d.maxLZ >= 15;
+            WalkabilityGridChunk replacement = wholeChunk
+                    ? WalkabilityGridChunk.build(level, cp, original.minY(), original.maxY())
+                    : original.reclassifyRegion(level, cp, d.minLX, d.maxLX, d.minLZ, d.maxLZ, d.minY, d.maxY);
+            if (replacement == original) continue; // region fully outside the band -> nothing changed
             synchronized (chunks) {
                 // CAS: only swap if no concurrent getOrBuild replaced it with a fresher/taller chunk in the
                 // meantime (that rebuild already read at-least-as-new world state, so drop ours). Plain put,

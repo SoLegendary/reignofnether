@@ -25,9 +25,9 @@ public final class PathfinderConfig {
     // chunks the build queue classifies per server tick and defer the rest; cache hits are free and don't
     // count. Lower = smoother TPS but slower first path, higher = snappier first path but bigger per-tick cost.
     public static final int MAX_CHUNK_BUILDS_PER_TICK = 24;
-    // A block change marks its whole chunk dirty (instead of evicting it) and the START-phase drain rebuilds
-    // settled dirty chunks via WalkabilityGridChunk.build. Each rebuild allocates the chunk's cellKind/solid/
-    // crowd arrays, so the chunk is the real cost unit: cap how many distinct chunks are rebuilt per server
+    // A block change marks its chunk dirty (instead of evicting it) and records the changed-cell bbox; the
+    // START-phase drain patches only that region via WalkabilityGridChunk.reclassifyRegion (a clone + a small
+    // footprint reclassify, NOT a whole-chunk build). Cap how many distinct dirty chunks are patched per server
     // tick; the rest stay stale-but-walkable (never removed, so units are never stranded) and wait for a later
     // tick. Same order as MAX_CHUNK_BUILDS_PER_TICK, which the cold-build path already tolerates. Tunable.
     public static final int MAX_CHUNK_RECLASSIFY_PER_TICK = 8;

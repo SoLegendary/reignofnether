@@ -64,8 +64,56 @@ public final class WalkabilityGridChunk {
         GridNeighbors.SolidProbe probe = solidProbe(solid, minY, height, baseX, baseZ);
         for (int lz = 0; lz < SIZE; lz++)
             for (int lx = 0; lx < SIZE; lx++)
-                computeCrowdColumn(probe, crowd, minY, height, baseX, baseZ, lx, lz);
+                computeCrowdColumn(probe, crowd, minY, height, baseX, baseZ, lx, lz, 0, height - 1);
         return new WalkabilityGridChunk(minY, height, cellKind, solid, crowd);
+    }
+
+    // Copy-on-write patch of just the cells a block change touched, instead of rebuilding all 256 columns over
+    // the full band (build()). A worker building a building places a block per tick, each marking its chunk
+    // dirty; the dirty drain calls this so it reclassifies only the building's footprint columns over the few
+    // changed Y levels, plus a 2-cell halo for crowd[] (crowdingMalus reads a distance-2 ring + y..y+2). The
+    // band-wide crowd pass over a whole chunk is what made construction stutter - this bounds it to the change.
+    // [minLX..maxLX]/[minLZ..maxLZ] are local 0..15; [regionMinY..regionMaxY] are WORLD-Y (inclusive) of the
+    // changed cells. Clones the arrays and returns a new chunk, never mutating the live one (A* threads read it).
+    public WalkabilityGridChunk reclassifyRegion(Level level, ChunkPos cp,
+                                                 int minLX, int maxLX, int minLZ, int maxLZ,
+                                                 int regionMinY, int regionMaxY) {
+        int maxY = minY + height;
+        int kMinY = Math.max(minY, regionMinY);       // clamp the changed-cell Y span to this chunk's band
+        int kMaxY = Math.min(maxY - 1, regionMaxY);
+        if (kMinY > kMaxY) return this;               // whole change outside the band -> identical cells, no-op
+
+        byte[] newKind = cellKind.clone();            // COW: only ever write the clones
+        byte[] newSolid = solid.clone();
+        byte[] newCrowd = crowd.clone();
+        int baseX = cp.getMinBlockX();
+        int baseZ = cp.getMinBlockZ();
+        BlockPos.MutableBlockPos mp = new BlockPos.MutableBlockPos();
+        BlockPos.MutableBlockPos mpBelow = new BlockPos.MutableBlockPos();
+
+        // Pass 1: re-classify cellKind/solid for the dirty columns over the changed Y span. A block at (x,z)
+        // only changes cells in its own column, so no halo is needed here - and all solid[] edits land before
+        // the crowd pass below reads them.
+        for (int lz = minLZ; lz <= maxLZ; lz++)
+            for (int lx = minLX; lx <= maxLX; lx++) {
+                int wx = baseX + lx, wz = baseZ + lz;
+                for (int y = kMinY; y <= kMaxY; y++)
+                    classifyCell(level, wx, y, wz, newKind, newSolid, idx(lx, y - minY, lz), mp, mpBelow);
+            }
+
+        // Pass 2: recompute crowd[] over the dirty region grown by a 2-cell horizontal halo and down 2 in Y,
+        // since a changed solid cell at world-Y cy affects crowd of cells y in [cy-2, cy] within +-2 in X/Z.
+        // Halo cells keep their unchanged (still-correct) old solid in newSolid, so this matches build() exactly.
+        GridNeighbors.SolidProbe probe = solidProbe(newSolid, minY, height, baseX, baseZ);
+        int hMinLX = Math.max(0, minLX - 2), hMaxLX = Math.min(SIZE - 1, maxLX + 2);
+        int hMinLZ = Math.max(0, minLZ - 2), hMaxLZ = Math.min(SIZE - 1, maxLZ + 2);
+        int cMinYIdx = Math.max(0, (kMinY - 2) - minY);
+        int cMaxYIdx = Math.min(height - 1, kMaxY - minY);
+        for (int lz = hMinLZ; lz <= hMaxLZ; lz++)
+            for (int lx = hMinLX; lx <= hMaxLX; lx++)
+                computeCrowdColumn(probe, newCrowd, minY, height, baseX, baseZ, lx, lz, cMinYIdx, cMaxYIdx);
+
+        return new WalkabilityGridChunk(minY, height, newKind, newSolid, newCrowd);
     }
 
     // Classify one cell (x,y,z) into cellKind[i]/solid[i]. The single definition of how a cell becomes
@@ -106,12 +154,13 @@ public final class WalkabilityGridChunk {
         };
     }
 
-    // Fill crowd[] for one local column across the whole band, from the shared GridNeighbors.crowdingMalus math
-    // (fixed MALUS_CLEARANCE, since one cached value serves all units), quantised to a byte.
+    // Fill crowd[] for one local column over yIdx [yIdxLo, yIdxHi] (inclusive), from the shared
+    // GridNeighbors.crowdingMalus math (fixed MALUS_CLEARANCE, since one cached value serves all units),
+    // quantised to a byte. build() passes the full band; reclassifyRegion passes only the changed Y slice.
     private static void computeCrowdColumn(GridNeighbors.SolidProbe probe, byte[] crowd, int minY, int height,
-                                           int baseX, int baseZ, int lx, int lz) {
+                                           int baseX, int baseZ, int lx, int lz, int yIdxLo, int yIdxHi) {
         int wx = baseX + lx, wz = baseZ + lz;
-        for (int yIdx = 0; yIdx < height; yIdx++) {
+        for (int yIdx = yIdxLo; yIdx <= yIdxHi; yIdx++) {
             float malus = GridNeighbors.crowdingMalus(probe, PathfinderConfig.MALUS_CLEARANCE, wx, minY + yIdx, wz);
             crowd[idx(lx, yIdx, lz)] = (byte) Math.min(255, Math.round(malus * CROWD_SCALE));
         }
