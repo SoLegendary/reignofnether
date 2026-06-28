@@ -11,6 +11,12 @@ public final class PathfinderConfig {
     // enough to flood the reachable area within MAX_RADIUS so units round obstacles instead of giving up at
     // the near wall. Past ~200k the radius cap, not this, is the limit (raise MAX_RADIUS + MIN_DILATION).
     public static final int MAX_NODES = 250000;
+    // Node budget for a search whose goal cell has NO standable spot nearby (eg. an airborne canopy leaf a
+    // worker can never stand to mine). The goal is unreachable as an exact cell, so a normal search would
+    // flood the full MAX_NODES proving it (~250ms). Cap it low: the worker still best-effort approaches, the
+    // search returns in a few ms, and the gather goal drops the unreachable target. Chaining is also skipped
+    // for this case (see dispatchToPool) since there's nothing to chain toward.
+    public static final int MAX_NODES_UNREACHABLE_GOAL = 8000;
     public static final int MAX_CHAIN_SEGMENTS = 10;
     public static final int MIN_DILATION = 48;
     public static final int QUEUE_BACKPRESSURE_CAP = 500;
@@ -19,10 +25,21 @@ public final class PathfinderConfig {
     // chunks the build queue classifies per server tick and defer the rest; cache hits are free and don't
     // count. Lower = smoother TPS but slower first path, higher = snappier first path but bigger per-tick cost.
     public static final int MAX_CHUNK_BUILDS_PER_TICK = 24;
+    // A block change patches only its (x,z) column (~VERTICAL band cells) instead of evicting the whole 16x16
+    // chunk. Cap how many dirty columns the START-phase drain reclassifies per server tick; the rest stay
+    // stale-but-walkable until a later tick (never removed, so units are never stranded on a transient hole).
+    // ~one chunk's worth of columns, far under the old whole-chunk rebuild cost that this replaces. Tunable.
+    public static final int MAX_COLUMN_RECLASSIFY_PER_TICK = 256;
     // A* searches stay near the surface; only classify a Y band around the path rather than the full
     // world column. SLACK covers the Y+-1 step nodes and goal snapping that reach just outside the band.
     public static final int VERTICAL_RADIUS = 24;
     public static final int VERTICAL_WINDOW_SLACK = 8;
+
+    // Clearance (unit height in cells) the crowding malus is PRECOMPUTED with, since the cached per-cell crowd[]
+    // is shared by all units. 2 = the common/minimum unit clearance; taller units get a negligibly softer
+    // steering malus, never a correctness change (wideFits/headBlocked stay exact and per-unit). See
+    // WalkabilityGridChunk.crowd and GridNeighbors.crowdingMalus.
+    public static final int MALUS_CLEARANCE = 2;
 
     // The grid's neighbour model only steps +-1 in Y, so it can't express a sheer drop bigger than one block -
     // a unit would stall at the lip of a 2+ block descent (a tall staircase) with no node to advance to, and a

@@ -54,9 +54,13 @@ public final class WalkabilityBuilder {
                 || floorBs.getBlock() == Blocks.CAMPFIRE
                 || floorBs.getBlock() == Blocks.SOUL_CAMPFIRE) return KIND_FIRE;
 
-        // A fence/wall/closed-gate floor is NOT standable - a unit can't perch on a railing (vanilla agrees),
-        // so don't count it as support; the cell falls through to "no floor" and the unit routes around.
-        if (MiscUtil.isSolidBlocking(level, floor) && !isFenceLike(floorBs)) return KIND_LAND;
+        // A fence/wall/closed-gate floor is NOT standable - a unit can't perch on a railing (vanilla agrees) -
+        // and a LEAF floor must not count either, or units path up onto and over the tree canopy (and goal
+        // snapping lands a worker on top of the very leaf it's told to mine). Don't count these as support; the
+        // cell falls through to "no floor" so the unit routes around, and stands on the real ground below.
+        // BlockTags.LEAVES (allocation-free, covers every tree canopy) instead of BlockUtils.isLeafBlock, whose
+        // List.of fallback would allocate on this per-cell hot path for every ordinary solid floor.
+        if (MiscUtil.isSolidBlocking(level, floor) && !isFenceLike(floorBs) && !floorBs.is(BlockTags.LEAVES)) return KIND_LAND;
         if (floorBs.getFluidState().is(FluidTags.LAVA)) return KIND_LAVA;
         if (!floorBs.getFluidState().isEmpty()) return KIND_WATER;
         return KIND_BLOCKED; // no floor support

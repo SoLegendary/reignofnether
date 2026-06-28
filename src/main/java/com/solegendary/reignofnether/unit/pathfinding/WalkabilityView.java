@@ -18,6 +18,11 @@ public interface WalkabilityView {
     // True if the block in this cell is solid-blocking. Used to require headroom before a unit steps up a ledge.
     boolean solidAt(int wx, int y, int wz);
 
+    // Precomputed crowding malus for this cell (the steering cost that keeps units off walls/edges/corners),
+    // baked into the chunk at build time instead of rescanned per A* node. 0 for open cells / outside the view.
+    // See GridNeighbors.crowdingMalus and WalkabilityGridChunk.crowdAt.
+    float crowdAt(int wx, int y, int wz);
+
     // True if this unit may use vertical climb moves (cling to a climbable wall, no floor needed). False for
     // non-climbers, so they path exactly as before. Only spiders with wall-climbing toggled on set this.
     boolean canClimb();

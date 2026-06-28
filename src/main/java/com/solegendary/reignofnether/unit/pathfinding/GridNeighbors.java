@@ -71,8 +71,19 @@ public final class GridNeighbors {
     public static final float SIDE_MALUS = 0.75f; // touching a wall (distance-1); distance-2 is half this
     public static final float CORNER_MALUS = 0.375f; // extra "slight" cost for an inside 90-deg corner (L of walls)
 
+    // Reads one cell's body-blocking (solid) state. Lets crowdingMalus run either over a live WalkabilityView
+    // (A* / debug) or directly over a chunk's local solid[] array at build time, from ONE definition.
+    @FunctionalInterface
+    public interface SolidProbe { boolean solid(int x, int y, int z); }
+
+    // Adapter: the malus as A* and the debug overlay call it - over a live view, with the unit's clearance.
     public static float crowdingMalus(WalkabilityView view, int x, int y, int z) {
-        int clearance = view.clearanceCells();
+        return crowdingMalus(view::solidAt, view.clearanceCells(), x, y, z);
+    }
+
+    // The malus itself, over a solid-probe. crowdingMalus depends ONLY on surrounding solid cells + clearance,
+    // so the same code feeds both the live A* path and the precomputed per-cell crowd[] cache (build time).
+    public static float crowdingMalus(SolidProbe probe, int clearance, int x, int y, int z) {
         // HORIZONTAL cost is driven by the NEAREST wall, not a SUM over every wall. A cell touching a wall
         // (distance-1) pays full; a cell whose closest wall is one cell further (distance-2) pays half; a cell with
         // open space all around pays nothing. Summing every wall made the middle of a corridor - flanked by BOTH
@@ -87,7 +98,7 @@ public final class GridNeighbors {
         for (int dx = -1; dx <= 1; dx++)
             for (int dz = -1; dz <= 1; dz++) {
                 if (dx == 0 && dz == 0) continue;
-                if (wallBeside(view, x + dx, z + dz, y, clearance)) { wall = SIDE_MALUS; break distance1; }
+                if (wallBeside(probe, x + dx, z + dz, y, clearance)) { wall = SIDE_MALUS; break distance1; }
             }
         // distance-2 ring - half, only counts if nothing was touching at distance-1
         if (wall == 0f) {
@@ -95,21 +106,21 @@ public final class GridNeighbors {
             for (int dx = -2; dx <= 2; dx++)
                 for (int dz = -2; dz <= 2; dz++) {
                     if (Math.max(Math.abs(dx), Math.abs(dz)) != 2) continue; // only the distance-2 ring
-                    if (wallBeside(view, x + dx, z + dz, y, clearance)) { wall = SIDE_MALUS * 0.5f; break distance2; }
+                    if (wallBeside(probe, x + dx, z + dz, y, clearance)) { wall = SIDE_MALUS * 0.5f; break distance2; }
                 }
         }
         // Low ceiling right above the head - a separate, additive term. In a roofed tunnel this is uniform across
         // all cells so it cancels out in the A* comparison and the horizontal nearest-wall term still picks the
         // middle; where only some cells have a low ceiling it nudges the unit toward the headroom.
-        float ceiling = view.solidAt(x, y + clearance, z) ? SIDE_MALUS : 0f;
+        float ceiling = probe.solid(x, y + clearance, z) ? SIDE_MALUS : 0f;
         // Inner-edge penalty: a +1 block (raised terrain / step-up, or the base of a wall) on two ADJACENT sides
         // makes this cell an inside corner the unit would 45-degree step into. Make it less valuable so paths
         // don't zig-zag diagonally up step corners.
         float corner = 0f;
-        boolean rW = raisedBeside(view, x - 1, z, y);
-        boolean rE = raisedBeside(view, x + 1, z, y);
-        boolean rN = raisedBeside(view, x, z - 1, y);
-        boolean rS = raisedBeside(view, x, z + 1, y);
+        boolean rW = raisedBeside(probe, x - 1, z, y);
+        boolean rE = raisedBeside(probe, x + 1, z, y);
+        boolean rN = raisedBeside(probe, x, z - 1, y);
+        boolean rS = raisedBeside(probe, x, z + 1, y);
         if (rN && rW) corner += CORNER_MALUS;
         if (rN && rE) corner += CORNER_MALUS;
         if (rS && rW) corner += CORNER_MALUS;
@@ -125,15 +136,15 @@ public final class GridNeighbors {
     // climbable step ("block-air"), not a wall. But anything with a solid above feet counts as a wall even with a
     // 1-block air gap - a full 2-tall wall (y,y+1), an overhang ("air-block": air y, solid y+1), a wall lifted
     // off the ground (air y, solid y+1+), or a wall with a hole ("block-air-block": solid y, air y+1, solid y+2).
-    private static boolean wallBeside(WalkabilityView view, int cx, int cz, int y, int clearance) {
+    private static boolean wallBeside(SolidProbe probe, int cx, int cz, int y, int clearance) {
         for (int k = 1; k <= clearance; k++)
-            if (view.solidAt(cx, y + k, cz)) return true;
+            if (probe.solid(cx, y + k, cz)) return true;
         return false;
     }
 
     // A +1 block beside: a solid block at the unit's feet level (terrain raised one step up, or a wall's base).
-    private static boolean raisedBeside(WalkabilityView view, int cx, int cz, int y) {
-        return view.solidAt(cx, y, cz);
+    private static boolean raisedBeside(SolidProbe probe, int cx, int cz, int y) {
+        return probe.solid(cx, y, cz);
     }
 
     // Cost of a single vertical climb step (up or down a wall). Higher than a normal step (1.0) and a step-up

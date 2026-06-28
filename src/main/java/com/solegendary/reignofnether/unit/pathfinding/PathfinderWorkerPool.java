@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.pathfinding;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.resources.ResourceIndex;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
@@ -68,13 +69,18 @@ public final class PathfinderWorkerPool {
         }
         RESULTS.clear();
         BUILD_QUEUE.clear();
+        WalkabilityGrid.clearDirty();
+        ResourceIndex.clearAll();
         INFLIGHT.set(0);
     }
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
-        // START: classify a budget of cold corridor chunks and dispatch any request that's now warm.
+        // START: patch dirty columns from block changes, then classify a budget of cold corridor chunks and
+        // dispatch any request that's now warm. Drain first so paths captured this tick see freshest data.
         if (evt.phase == TickEvent.Phase.START) {
+            WalkabilityGrid.drainDirtyColumns(PathfinderConfig.MAX_COLUMN_RECLASSIFY_PER_TICK);
+            ResourceIndex.drainBuildQueue(ResourceIndex.MAX_RESOURCE_CHUNK_SCANS_PER_TICK);
             processBuildQueue();
             return;
         }
@@ -88,7 +94,7 @@ public final class PathfinderWorkerPool {
         }
     }
 
-    public static void submit(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, BooleanSupplier alive, Consumer<Path> onReady) {
+    public static void submit(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, int maxNodes, BooleanSupplier alive, Consumer<Path> onReady) {
         if (POOL == null) {
             onReady.accept(null);
             return;
@@ -100,7 +106,7 @@ public final class PathfinderWorkerPool {
         int dilation = PathfinderConfig.dilationFor(start, target);
         ChunkSnapshot.CaptureRegion region = ChunkSnapshot.regionFor(start, target, dilation);
         BUILD_QUEUE.add(new PendingBuild(level, start, target, reach, mobility, clearanceCells,
-                footprintRadius, fireCost, canClimb, region, alive, onReady));
+                footprintRadius, fireCost, canClimb, maxNodes, region, alive, onReady));
     }
 
     // Classify up to MAX_CHUNK_BUILDS_PER_TICK cold chunks across the parked requests this tick. Cache hits are
@@ -170,6 +176,7 @@ public final class PathfinderWorkerPool {
         final BlockPos start = pb.start;
         final BlockPos target = pb.target;
         final int reach = pb.reach;
+        final int maxNodes = pb.maxNodes;
         final Consumer<Path> onReady = pb.onReady;
         INFLIGHT.incrementAndGet();
         pool.execute(() -> {
@@ -178,12 +185,15 @@ public final class PathfinderWorkerPool {
                 // Chained A*: instead of returning a partial path when goal is outside the
                 // 96-block search radius, run a follow-up search from where the previous one
                 // ended. Up to MAX_CHAIN_SEGMENTS hops. Caps at "actually blocked" after that.
+                // A capped (unreachable-goal) request runs a single best-effort segment - there's
+                // nothing to chain toward, and chaining would multiply its cheap budget.
+                int segLimit = (maxNodes >= PathfinderConfig.MAX_NODES) ? PathfinderConfig.MAX_CHAIN_SEGMENTS : 1;
                 ArrayList<BlockPos> combined = new ArrayList<>();
                 BlockPos cur = start;
                 boolean reached = false;
-                for (int seg = 0; seg < PathfinderConfig.MAX_CHAIN_SEGMENTS; seg++) {
+                for (int seg = 0; seg < segLimit; seg++) {
                     GridAStar.Result r = GridAStar.search(snapshot, cur, target, reach,
-                            PathfinderConfig.MAX_RADIUS, PathfinderConfig.MAX_NODES);
+                            PathfinderConfig.MAX_RADIUS, maxNodes);
                     if (seg == 0) {
                         combined.addAll(r.waypoints);
                     } else {
@@ -219,13 +229,14 @@ public final class PathfinderWorkerPool {
         final int footprintRadius;
         final float fireCost;
         final boolean canClimb;
+        final int maxNodes;
         final ChunkSnapshot.CaptureRegion region;
         final BooleanSupplier alive;
         final Consumer<Path> onReady;
         int cursor = 0;
 
         PendingBuild(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility,
-                     int clearanceCells, int footprintRadius, float fireCost, boolean canClimb,
+                     int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, int maxNodes,
                      ChunkSnapshot.CaptureRegion region, BooleanSupplier alive, Consumer<Path> onReady) {
             this.level = level;
             this.start = start;
@@ -236,6 +247,7 @@ public final class PathfinderWorkerPool {
             this.footprintRadius = footprintRadius;
             this.fireCost = fireCost;
             this.canClimb = canClimb;
+            this.maxNodes = maxNodes;
             this.region = region;
             this.alive = alive;
             this.onReady = onReady;

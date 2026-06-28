@@ -12,6 +12,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
 
+import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 // Facade: turn a (mob, target) into a vanilla Path delivered to a callback.
@@ -37,14 +38,20 @@ public final class RtsPathfinder {
         // Only spiders with wall-climbing toggled on may scale vertical walls; PoisonSpiderUnit inherits this.
         boolean canClimb = mob instanceof SpiderUnit su && su.isWallClimbing();
         int footprintRadius = footprintRadiusFor(mob);
-        target = snapToWalkable(level, target, mobility, footprintRadius, clearanceCells, fireCost, SNAP_RADIUS);
+        // Snap the goal onto a cell a worker can actually stand in. If none exists nearby (eg. an airborne
+        // canopy leaf), the goal is unreachable as an exact cell: path to it best-effort with a capped node
+        // budget so A* can't flood the full MAX_RADIUS proving the obvious (the 250ms freeze on leaf orders).
+        BlockPos snapped = findStandable(level, target, mobility, footprintRadius, clearanceCells, fireCost, SNAP_RADIUS);
+        boolean reachableGoal = snapped != null;
+        if (reachableGoal) target = snapped;
+        int maxNodes = reachableGoal ? PathfinderConfig.MAX_NODES : PathfinderConfig.MAX_NODES_UNREACHABLE_GOAL;
         if (PathfinderWorkerPool.isInitialised()) {
-            PathfinderWorkerPool.submit(level, start, target, reach, mobility, clearanceCells, footprintRadius, fireCost, canClimb, mob::isAlive, onReady);
+            PathfinderWorkerPool.submit(level, start, target, reach, mobility, clearanceCells, footprintRadius, fireCost, canClimb, maxNodes, mob::isAlive, onReady);
         } else {
             try {
                 int dilation = PathfinderConfig.dilationFor(start, target);
                 ChunkSnapshot snap = ChunkSnapshot.capture(level, start, target, dilation, mobility, clearanceCells, footprintRadius, fireCost, canClimb);
-                GridAStar.Result r = GridAStar.search(snap, start, target, reach, PathfinderConfig.MAX_RADIUS, PathfinderConfig.MAX_NODES);
+                GridAStar.Result r = GridAStar.search(snap, start, target, reach, PathfinderConfig.MAX_RADIUS, maxNodes);
                 onReady.accept(PathConverter.toMcPath(r.waypoints, target, r.reached, snap));
             } catch (Throwable t) {
                 ReignOfNether.LOGGER.error("Sync pathfinder failed", t);
@@ -72,8 +79,12 @@ public final class RtsPathfinder {
         return malus <= 0f ? 1.0f : PathfinderConfig.FIRE_AVOID_COST;
     }
 
-    public static BlockPos snapToWalkable(Level level, BlockPos bp, MobilityClass mobility, int footprintRadius,
-                                          int clearanceCells, float fireCost, int radius) {
+    // Nearest cell a unit can stand in within `radius` of bp (bp itself if already standable), or null if
+    // none exists - meaning the goal is unreachable as an exact cell (eg. an airborne leaf with only air and
+    // leaves around it and no ground within reach). Callers treat null as "approach best-effort, don't flood".
+    @Nullable
+    public static BlockPos findStandable(Level level, BlockPos bp, MobilityClass mobility, int footprintRadius,
+                                         int clearanceCells, float fireCost, int radius) {
         // Snap over a small snapshot so the goal reuses the EXACT walkability + footprint logic A* uses (the
         // snapped goal can never be a cell A* would reject); the +footprintRadius+1 dilation keeps wideFits
         // from reading an uncaptured (BLOCKED) edge cell. canClimb=false: a goal must snap to standable ground,
@@ -82,7 +93,7 @@ public final class RtsPathfinder {
                 mobility, clearanceCells, footprintRadius, fireCost, false);
         if (standable(view, bp.getX(), bp.getY(), bp.getZ())) return bp;
         int bestDistSq = Integer.MAX_VALUE;
-        BlockPos best = bp;
+        BlockPos best = null;
         for (int dz = -radius; dz <= radius; dz++) {
             for (int dx = -radius; dx <= radius; dx++) {
                 for (int dy = -radius; dy <= radius; dy++) {
@@ -96,6 +107,13 @@ public final class RtsPathfinder {
             }
         }
         return best;
+    }
+
+    // Nearest standable cell to bp, or bp itself if none found. Kept for callers that always want a position.
+    public static BlockPos snapToWalkable(Level level, BlockPos bp, MobilityClass mobility, int footprintRadius,
+                                          int clearanceCells, float fireCost, int radius) {
+        BlockPos s = findStandable(level, bp, mobility, footprintRadius, clearanceCells, fireCost, radius);
+        return s != null ? s : bp;
     }
 
     // The unit can stand (and its whole footprint fits) at this cell - the same gate A* applies to a node.
