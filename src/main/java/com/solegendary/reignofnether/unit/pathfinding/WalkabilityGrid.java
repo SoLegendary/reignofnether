@@ -1,10 +1,9 @@
 package com.solegendary.reignofnether.unit.pathfinding;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntIterator;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
+import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -22,11 +21,26 @@ public final class WalkabilityGrid {
     // Access-ordered (most-recent at head) so we can evict the least-recently-used tail.
     private final Long2ObjectLinkedOpenHashMap<WalkabilityGridChunk> chunks = new Long2ObjectLinkedOpenHashMap<>();
 
-    // Columns awaiting deferred reclassify: chunkKey -> set of packed local columns ((lz<<4)|lx, 0..255).
-    // A block change marks its column dirty instead of evicting the chunk, so reads keep getting the (briefly
+    // Chunks awaiting a deferred rebuild: chunkKey -> dirty entry (the tick bounds used to coalesce ACROSS
+    // ticks). A block change marks its chunk dirty instead of evicting it, so reads keep getting the (briefly
     // stale) cached chunk rather than a BLOCKED hole that would strand units. Drained, budgeted, on the server
-    // tick by drainDirtyColumns. The IntOpenHashSet dedups, so a placement/leaf-decay storm coalesces for free.
-    private final Long2ObjectOpenHashMap<IntOpenHashSet> dirtyColumns = new Long2ObjectOpenHashMap<>();
+    // tick by drainDirtyChunks. We rebuild the WHOLE chunk (build()) rather than tracking individual columns:
+    // once the drain is throttled (settle delay + a per-tick chunk cap) per-column bookkeeping saves little -
+    // each rebuild allocates the same arrays either way - and a full rebuild recomputes crowd[] exactly
+    // instead of via the column-seam approximation.
+    private final Long2ObjectOpenHashMap<DirtyChunk> dirtyChunks = new Long2ObjectOpenHashMap<>();
+
+    // Per dirty chunk: the tick it first went dirty (anchors the hard-defer ceiling) and the tick of its most
+    // recent change (anchors the settle check). No per-column data - the whole chunk is rebuilt.
+    private static final class DirtyChunk {
+        final long firstTick;
+        long lastTick;
+        DirtyChunk(long now) { firstTick = now; lastTick = now; }
+    }
+
+    // Monotonic server-tick clock, bumped once per drainDirtyChunks call (the drain runs once per server tick
+    // START). Read by markChunkDirty to stamp dirty entries; the absolute value is irrelevant, only deltas.
+    private static volatile long tickClock;
 
     // Grids that currently have pending dirty work -> the Level needed to reclassify (the grid is keyed by
     // LevelAccessor and keeps no back-reference). The Level is held ONLY while work is pending (the entry is
@@ -78,41 +92,44 @@ public final class WalkabilityGrid {
         }
     }
 
-    // Mark the column at bp dirty for deferred reclassify, WITHOUT creating a grid for a level that has none.
-    // Called from the LevelChunk.setBlockState mixin on every in-game block change (mining, building,
+    // Mark the chunk containing bp dirty for a deferred rebuild, WITHOUT creating a grid for a level that has
+    // none. Called from the LevelChunk.setBlockState mixin on every in-game block change (mining, building,
     // explosions, leaf decay, commands). No-op when no grid exists for the level (eg. client side, where the
     // pathfinder never runs) or the chunk isn't cached. We deliberately do NOT evict: keeping the old chunk
-    // live lets reads return stale-but-walkable data until the deferred drain swaps in the patched chunk,
+    // live lets reads return stale-but-walkable data until the deferred drain swaps in the rebuilt chunk,
     // instead of a removed chunk reading as KIND_BLOCKED and stranding units mid-update.
-    public static void markColumnDirtyIfPresent(Level level, BlockPos bp) {
+    public static void markChunkDirtyIfPresent(Level level, BlockPos bp) {
         if (level == null || bp == null) return;
         WalkabilityGrid grid;
         synchronized (WalkabilityGrid.class) { grid = PER_LEVEL.get(level); }
-        if (grid != null) grid.markColumnDirty(level, bp);
+        if (grid != null) grid.markChunkDirty(level, bp);
     }
 
-    private void markColumnDirty(Level level, BlockPos bp) {
+    private void markChunkDirty(Level level, BlockPos bp) {
         long key = ChunkPos.asLong(bp.getX() >> 4, bp.getZ() >> 4);
         WalkabilityGridChunk c;
         synchronized (chunks) { c = chunks.get(key); }
         if (c == null) return; // not cached -> nothing to patch; a later getOrBuild reads fresh world state.
         // A block at world y can only change cells whose feet/head/floor touch it: yIdx y-1, y, y+1. If that
-        // whole [y-1, y+1] span is outside this chunk's band, reclassifying reproduces identical cells - skip.
+        // whole [y-1, y+1] span is outside this chunk's band, a rebuild reproduces identical cells - skip.
         if (bp.getY() + 1 < c.minY() || bp.getY() - 1 >= c.maxY()) return;
-        int packed = ((bp.getZ() & 15) << 4) | (bp.getX() & 15);
+        long now = tickClock;
         synchronized (DIRTY_LOCK) {
-            IntOpenHashSet set = dirtyColumns.get(key);
-            if (set == null) { set = new IntOpenHashSet(); dirtyColumns.put(key, set); }
-            set.add(packed);
+            DirtyChunk entry = dirtyChunks.get(key);
+            if (entry == null) { entry = new DirtyChunk(now); dirtyChunks.put(key, entry); }
+            entry.lastTick = now; // bump the settle window on every change; firstTick stays the ceiling anchor
             DIRTY_GRIDS.put(this, level);
         }
     }
 
-    // Reclassify up to `budget` dirty columns across all levels on the server tick (called from
-    // PathfinderWorkerPool.onServerTick START phase, before processBuildQueue). Copy-on-write: patch a clone
-    // of the live chunk and atomically swap it in, so A* worker threads never see a half-updated chunk and
-    // reads never hit a missing (BLOCKED) chunk. Cheap (~height cells per column) and coalesced.
-    public static void drainDirtyColumns(int budget) {
+    // Rebuild up to `budget` SETTLED dirty chunks across all levels on the server tick (called from
+    // PathfinderWorkerPool.onServerTick START phase, before processBuildQueue). Copy-on-write: build a fresh
+    // chunk over the live world and atomically swap it in, so A* worker threads never see a half-updated chunk
+    // and reads never hit a missing (BLOCKED) chunk. A chunk is rebuilt only once it has SETTLED (no change
+    // for WALKABILITY_SETTLE_TICKS) or hit the WALKABILITY_MAX_DEFER_TICKS ceiling, so a building dripping
+    // 1 block/tick coalesces into a single rebuild instead of one per tick.
+    public static void drainDirtyChunks(int budget) {
+        long now = ++tickClock; // one tick elapsed; stamps the settle/ceiling comparisons below
         if (budget <= 0) return;
         List<Map.Entry<WalkabilityGrid, Level>> pending;
         synchronized (DIRTY_LOCK) {
@@ -125,45 +142,46 @@ public final class WalkabilityGrid {
         }
         for (Map.Entry<WalkabilityGrid, Level> e : pending) {
             if (budget <= 0) break;
-            budget -= e.getKey().processDirty(e.getValue(), budget);
+            budget -= e.getKey().processDirty(e.getValue(), budget, now);
         }
     }
 
-    // Drain this grid's dirty columns up to `budget`; returns the number reclassified.
-    private int processDirty(Level level, int budget) {
-        int consumed = 0;
-        while (consumed < budget) {
-            long key;
-            IntArrayList pulled = new IntArrayList();
-            synchronized (DIRTY_LOCK) {
-                if (dirtyColumns.isEmpty()) { DIRTY_GRIDS.remove(this); break; }
-                key = dirtyColumns.keySet().iterator().nextLong();
-                IntOpenHashSet set = dirtyColumns.get(key);
-                IntIterator it = set.iterator();
-                while (it.hasNext() && consumed + pulled.size() < budget) {
-                    pulled.add(it.nextInt());
-                    it.remove();
-                }
-                if (set.isEmpty()) dirtyColumns.remove(key);
-                if (dirtyColumns.isEmpty()) DIRTY_GRIDS.remove(this);
+    // Rebuild this grid's eligible (settled / ceiling-hit) dirty chunks, up to `budget` chunks; returns how
+    // many were rebuilt. Chunks not yet settled stay in place (their stale-but-walkable cached chunk keeps
+    // serving reads) and are revisited next tick.
+    private int processDirty(Level level, int budget, long now) {
+        // Pick the eligible chunk keys under the lock, then rebuild OUTSIDE it: build() reads the world and
+        // must not hold DIRTY_LOCK while A* threads concurrently mark fresh chunks dirty.
+        LongArrayList ready = new LongArrayList();
+        synchronized (DIRTY_LOCK) {
+            LongIterator it = dirtyChunks.keySet().iterator();
+            while (it.hasNext() && ready.size() < budget) {
+                long key = it.nextLong();
+                DirtyChunk d = dirtyChunks.get(key);
+                boolean settled = (now - d.lastTick) >= PathfinderConfig.WALKABILITY_SETTLE_TICKS;
+                boolean ceiling = (now - d.firstTick) >= PathfinderConfig.WALKABILITY_MAX_DEFER_TICKS;
+                if (settled || ceiling) { ready.add(key); it.remove(); }
             }
-            if (pulled.isEmpty()) break;
+            if (dirtyChunks.isEmpty()) DIRTY_GRIDS.remove(this);
+        }
+        // A block change arriving after we removed a key (but before/while we rebuild) re-marks the chunk with
+        // a fresh entry, so it's rebuilt again next settle - nothing is lost, and build() reads current state.
+        for (int i = 0; i < ready.size(); i++) {
+            long key = ready.getLong(i);
             WalkabilityGridChunk original;
             synchronized (chunks) { original = chunks.get(key); }
-            // null -> chunk was LRU-evicted while dirty; drop the columns, a later getOrBuild rebuilds fresh.
-            if (original != null) {
-                WalkabilityGridChunk replacement = original.reclassifyColumns(
-                        level, new ChunkPos(ChunkPos.getX(key), ChunkPos.getZ(key)), pulled);
-                synchronized (chunks) {
-                    // CAS: only swap if no concurrent getOrBuild replaced it with a fresher/taller chunk in the
-                    // meantime (that rebuild already read at-least-as-new world state, so drop our patch). Plain
-                    // put, not putAndMoveToFirst, so a passive recompute doesn't perturb LRU order.
-                    if (chunks.get(key) == original) chunks.put(key, replacement);
-                }
+            // null -> chunk was LRU-evicted while dirty; drop it, a later getOrBuild rebuilds fresh.
+            if (original == null) continue;
+            WalkabilityGridChunk replacement = WalkabilityGridChunk.build(
+                    level, new ChunkPos(ChunkPos.getX(key), ChunkPos.getZ(key)), original.minY(), original.maxY());
+            synchronized (chunks) {
+                // CAS: only swap if no concurrent getOrBuild replaced it with a fresher/taller chunk in the
+                // meantime (that rebuild already read at-least-as-new world state, so drop ours). Plain put,
+                // not putAndMoveToFirst, so a passive rebuild doesn't perturb LRU order.
+                if (chunks.get(key) == original) chunks.put(key, replacement);
             }
-            consumed += pulled.size();
         }
-        return consumed;
+        return ready.size();
     }
 
     // Drop all pending dirty work (server stop), so the static DIRTY_GRIDS can't pin Levels across a restart.

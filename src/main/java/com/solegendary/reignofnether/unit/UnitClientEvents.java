@@ -448,11 +448,12 @@ public class UnitClientEvents {
         MinimapClientEvents.syncMinimapUnits(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), entityId, ownerName);
     }
 
-    public static void syncWorkerUnit(int entityId, boolean isBuilding, ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
+    public static void syncWorkerUnit(int entityId, boolean isBuilding, boolean isGathering, ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 if (entity instanceof WorkerUnit workerUnit) {
                     workerUnit.getBuildRepairGoal().setIsBuildingServerside(isBuilding);
+                    workerUnit.getGatherResourceGoal().setIsGatheringServerside(isGathering);
                     workerUnit.getGatherResourceGoal().syncFromServer(gatherName, gatherPos, gatherTicks);
                 }
             }

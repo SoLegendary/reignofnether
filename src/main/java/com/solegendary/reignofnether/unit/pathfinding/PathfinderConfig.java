@@ -25,11 +25,21 @@ public final class PathfinderConfig {
     // chunks the build queue classifies per server tick and defer the rest; cache hits are free and don't
     // count. Lower = smoother TPS but slower first path, higher = snappier first path but bigger per-tick cost.
     public static final int MAX_CHUNK_BUILDS_PER_TICK = 24;
-    // A block change patches only its (x,z) column (~VERTICAL band cells) instead of evicting the whole 16x16
-    // chunk. Cap how many dirty columns the START-phase drain reclassifies per server tick; the rest stay
-    // stale-but-walkable until a later tick (never removed, so units are never stranded on a transient hole).
-    // ~one chunk's worth of columns, far under the old whole-chunk rebuild cost that this replaces. Tunable.
-    public static final int MAX_COLUMN_RECLASSIFY_PER_TICK = 256;
+    // A block change marks its whole chunk dirty (instead of evicting it) and the START-phase drain rebuilds
+    // settled dirty chunks via WalkabilityGridChunk.build. Each rebuild allocates the chunk's cellKind/solid/
+    // crowd arrays, so the chunk is the real cost unit: cap how many distinct chunks are rebuilt per server
+    // tick; the rest stay stale-but-walkable (never removed, so units are never stranded) and wait for a later
+    // tick. Same order as MAX_CHUNK_BUILDS_PER_TICK, which the cold-build path already tolerates. Tunable.
+    public static final int MAX_CHUNK_RECLASSIFY_PER_TICK = 8;
+    // Cross-tick coalescing for the dirty-chunk drain. A chunk is only rebuilt once it has SETTLED (no new
+    // block change for this many ticks), so a building placing 1 block/tick rebuilds ~once when it finishes
+    // instead of every tick of its construction. The cached chunk stays stale-but-walkable in the meantime,
+    // exactly as it already does between mark and drain.
+    public static final int WALKABILITY_SETTLE_TICKS = 4;
+    // Hard ceiling on the settle wait: a chunk that never goes quiet (active farm, a long mining job) is
+    // force-reclassified once it has been continuously dirty this long, so staleness is bounded (~2s) even
+    // under perpetual churn. Overrides WALKABILITY_SETTLE_TICKS.
+    public static final int WALKABILITY_MAX_DEFER_TICKS = 40;
     // A* searches stay near the surface; only classify a Y band around the path rather than the full
     // world column. SLACK covers the Y+-1 step nodes and goal snapping that reach just outside the band.
     public static final int VERTICAL_RADIUS = 24;

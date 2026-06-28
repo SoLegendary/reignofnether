@@ -2,9 +2,6 @@ package com.solegendary.reignofnether.unit.pathfinding;
 
 import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.util.MiscUtil;
-import it.unimi.dsi.fastutil.ints.IntCollection;
-import it.unimi.dsi.fastutil.ints.IntIterator;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -71,57 +68,8 @@ public final class WalkabilityGridChunk {
         return new WalkabilityGridChunk(minY, height, cellKind, solid, crowd);
     }
 
-    // Re-derive ONE local column (packed (lz<<4)|lx) into clones of this chunk's arrays, returning a NEW
-    // immutable chunk - never mutating the receiver. Worker-pool threads holding the old chunk through a
-    // captured snapshot keep reading consistent (if briefly stale) data; the swap into the cache is atomic
-    // (see WalkabilityGrid.drainDirtyColumns). Same minY/height as the original, so covers() and every
-    // snapshot's band assumption stay valid. ~height cell classifications per column vs SIZE*SIZE for build().
-    public WalkabilityGridChunk reclassifyColumns(Level level, ChunkPos cp, IntCollection localColumns) {
-        byte[] newKind = cellKind.clone();
-        byte[] newSolid = solid.clone();
-        byte[] newCrowd = crowd.clone();
-        int baseX = cp.getMinBlockX();
-        int baseZ = cp.getMinBlockZ();
-        int maxY = minY + height;
-        BlockPos.MutableBlockPos mp = new BlockPos.MutableBlockPos();
-        BlockPos.MutableBlockPos mpBelow = new BlockPos.MutableBlockPos();
-        IntIterator it = localColumns.iterator();
-        while (it.hasNext()) {
-            int packed = it.nextInt();
-            int lx = packed & 15;
-            int lz = (packed >> 4) & 15;
-            int wx = baseX + lx;
-            int wz = baseZ + lz;
-            for (int y = minY; y < maxY; y++) {
-                int i = idx(lx, y - minY, lz);
-                classifyCell(level, wx, y, wz, newKind, newSolid, i, mp, mpBelow);
-            }
-        }
-        // A changed column shifts the crowd malus of every cell within 2 of it (crowdingMalus reads a 5x5
-        // neighbourhood), so recompute crowd over the dirty columns DILATED by 2, off the patched solid[].
-        IntOpenHashSet dilated = new IntOpenHashSet();
-        IntIterator dit = localColumns.iterator();
-        while (dit.hasNext()) {
-            int packed = dit.nextInt();
-            int clx = packed & 15, clz = (packed >> 4) & 15;
-            for (int ddz = -2; ddz <= 2; ddz++)
-                for (int ddx = -2; ddx <= 2; ddx++) {
-                    int nlx = clx + ddx, nlz = clz + ddz;
-                    if (nlx < 0 || nlx >= SIZE || nlz < 0 || nlz >= SIZE) continue;
-                    dilated.add((nlz << 4) | nlx);
-                }
-        }
-        GridNeighbors.SolidProbe probe = solidProbe(newSolid, minY, height, baseX, baseZ);
-        IntIterator cit = dilated.iterator();
-        while (cit.hasNext()) {
-            int p = cit.nextInt();
-            computeCrowdColumn(probe, newCrowd, minY, height, baseX, baseZ, p & 15, (p >> 4) & 15);
-        }
-        return new WalkabilityGridChunk(minY, height, newKind, newSolid, newCrowd);
-    }
-
     // Classify one cell (x,y,z) into cellKind[i]/solid[i]. The single definition of how a cell becomes
-    // walkable + body-blocking, shared by build() and reclassifyColumns() so the two can never drift.
+    // walkable + body-blocking, used by build().
     private static void classifyCell(Level level, int wx, int y, int wz, byte[] cellKind, byte[] solid, int i,
                                      BlockPos.MutableBlockPos mp, BlockPos.MutableBlockPos mpBelow) {
         cellKind[i] = WalkabilityBuilder.classify(level, wx, y, wz);
