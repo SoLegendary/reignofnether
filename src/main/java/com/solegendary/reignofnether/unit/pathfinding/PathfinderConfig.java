@@ -20,11 +20,14 @@ public final class PathfinderConfig {
     public static final int MAX_CHAIN_SEGMENTS = 10;
     public static final int MIN_DILATION = 48;
     public static final int QUEUE_BACKPRESSURE_CAP = 500;
-    // Walkability-grid building (getBlockState/getCollisionShape) must run on the main thread, so a single
-    // cross-map move classifying its whole corridor in one tick spikes the TPS. Cap how many cold (uncached)
-    // chunks the build queue classifies per server tick and defer the rest; cache hits are free and don't
-    // count. Lower = smoother TPS but slower first path, higher = snappier first path but bigger per-tick cost.
-    public static final int MAX_CHUNK_BUILDS_PER_TICK = 24;
+    // Walkability-grid building (getBlockState/getCollisionShape + the crowd[] precompute) must run on the main
+    // thread, so a single cross-map move classifying its whole corridor in one tick spikes the TPS. Cap how many
+    // cold (uncached) chunks the build queue classifies per server tick and defer the rest; cache hits are free
+    // and don't count. Lower = smoother TPS but slower first path, higher = snappier first path but bigger
+    // per-tick cost. Kept modest because each cold build now also bakes crowd[] (a ~5x5-neighbour scan per cell),
+    // so a chunk costs noticeably more than it did before that was cached - a batch of fresh path orders (eg.
+    // units just produced from a building) shouldn't classify a big batch of chunks in one tick.
+    public static final int MAX_CHUNK_BUILDS_PER_TICK = 8;
     // A block change marks its chunk dirty (instead of evicting it) and records the changed-cell bbox; the
     // START-phase drain patches only that region via WalkabilityGridChunk.reclassifyRegion (a clone + a small
     // footprint reclassify, NOT a whole-chunk build). Cap how many distinct dirty chunks are patched per server
