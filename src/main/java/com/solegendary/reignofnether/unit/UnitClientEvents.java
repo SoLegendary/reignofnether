@@ -438,14 +438,15 @@ public class UnitClientEvents {
                 if (!isLoadedClientside) {
                     entity.setHealth(health);
                     entity.setPos(pos);
+                    // if the unit doesn't exist at all clientside, create a MinimapUnit to at least track its minimap position
+                    MinimapClientEvents.syncMinimapUnits(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), entityId, ownerName);
+                } else {
+                    MinimapClientEvents.removeMinimapUnit(entityId);
                 }
                 entity.setAbsorptionAmount(absorb);
-                MinimapClientEvents.removeMinimapUnit(entityId);
                 return;
             }
         }
-        // if the unit doesn't exist at all clientside, create a MinimapUnit to at least track its minimap position
-        MinimapClientEvents.syncMinimapUnits(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), entityId, ownerName);
     }
 
     public static void syncWorkerUnit(int entityId, boolean isBuilding, ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {

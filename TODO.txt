@@ -1,5 +1,5 @@
 
-1.20.1-1.3.7-beta-1
+1.20.1-1.3.7-beta-2
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -40,7 +40,7 @@ Official Map Pack
 
 Quality of Life
 ---------------
-[✔] You can now use `/rtsapi-teams-mode none` on any map to disable all start blocks, even without an rtsmap.json file
+[✔] You can now use `/rtsapi-teams-mode none` on any map to disable all start blocks
 [✔] Added an option to make a custom building not draw aggro from player units
     - This means idle and attack-moving units won't automatically target it
 [✔] Moved the iron golem default spawn to beside the furnaces to reduce chance of getting stuck on nearby buildings
@@ -60,14 +60,8 @@ Bugfixes
 [✔] Fixed diagonal bridges not saving correctly
 [✔] Units no longer try to walk through slime blocks
 [✔] Fixed minimap sometimes showing non-existent units
-[🟡] Units now avoid trying to walk on sculk shrieker and catalyst blocks
 [❌] Some HP/portrait block rendering issues on old custom buildings
 
 Languages
 ---------
 
-
-
-Beta notes
-- Flipped the tick and cross in the original ready/unready buttons to match the new start menu
-- When the gamerule pvpModesOnly is enabled, you can now still open the start menu (but you can't right-click to change the game mode)
