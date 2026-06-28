@@ -36,15 +36,18 @@ Official Map Pack
 [❌] Add Killerbee's maps
 
 
+
+
 Quality of Life
 ---------------
 [✔] You can now use `/rtsapi-teams-mode none` on any map to disable all start blocks, even without an rtsmap.json file
 [✔] Added an option to make a custom building not draw aggro from player units
+    - This means idle and attack-moving units won't automatically target it
 [✔] Moved the iron golem default spawn to beside the furnaces to reduce chance of getting stuck on nearby buildings
 [✔] On a countdown game start, your camera is now automatically moved to your starting position
 [✔] The F7 debug menu has been expanded to include navmesh visualisations
-[❌] Random faction button
-    - Can sometimes do nothing?
+[✔] Added a random faction button to the new start menu
+    - The normal menu does not have it yet (as I'm considering removing this later for full release)
 
 Balance
 -------
@@ -58,6 +61,13 @@ Bugfixes
 [✔] Units no longer try to walk through slime blocks
 [✔] Fixed minimap sometimes showing non-existent units
 [🟡] Units now avoid trying to walk on sculk shrieker and catalyst blocks
+[❌] Some HP/portrait block rendering issues on old custom buildings
 
 Languages
 ---------
+
+
+
+Beta notes
+- Flipped the tick and cross in the original ready/unready buttons to match the new start menu
+- When the gamerule pvpModesOnly is enabled, you can now still open the start menu (but you can't right-click to change the game mode)

@@ -75,7 +75,8 @@ public class ClientGameModeHelper {
         tooltips.add(fcs(""));
         if (hasStartPoses)
             tooltips.add(fcs(I18n.get("hud.gamemode.reignofnether.start_menu")));
-        tooltips.add(fcs(I18n.get("hud.gamemode.reignofnether.changemode")));
+        if (!gameModeLocked && !pvpModesOnly)
+            tooltips.add(fcs(I18n.get("hud.gamemode.reignofnether.changemode")));
 
         return new Button(
                 "Classic",
@@ -84,7 +85,7 @@ public class ClientGameModeHelper {
                 hasStartPoses ? Keybindings.getFnum(9) : null,
                 () -> false,
                 () -> false,
-                () -> !gameModeLocked && !pvpModesOnly,
+                () -> true,
                 () -> {
                     if (hasStartPoses) Minecraft.getInstance().setScreen(new MatchStartScreen());
                 },
@@ -104,7 +105,8 @@ public class ClientGameModeHelper {
         tooltips.add(fcs(""));
         if (hasStartPoses)
             tooltips.add(fcs(I18n.get("hud.gamemode.reignofnether.start_menu")));
-        tooltips.add(fcs(I18n.get("hud.gamemode.reignofnether.changemode")));
+        if (!gameModeLocked && !pvpModesOnly)
+            tooltips.add(fcs(I18n.get("hud.gamemode.reignofnether.changemode")));
 
         return new Button(
                 "King of the Beacon",
@@ -113,7 +115,7 @@ public class ClientGameModeHelper {
                 hasStartPoses ? Keybindings.getFnum(9) : null,
                 () -> false,
                 () -> false,
-                () -> !gameModeLocked && !pvpModesOnly,
+                () -> true,
                 () -> {
                     if (hasStartPoses) Minecraft.getInstance().setScreen(new MatchStartScreen());
                 },
