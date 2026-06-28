@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -154,6 +155,10 @@ public class GameruleServerEvents {
             boolean improvedPathfinding = server.getGameRules().getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).get();
             UnitServerEvents.improvedPathfinding = improvedPathfinding;
             GameruleClientboundPacket.setImprovedPathfinding(improvedPathfinding);
+            // Let the joining player know this is an RTS-optimised map (small world border) where improved
+            // pathfinding is on. Sent only to them, not broadcast.
+            if (improvedPathfinding)
+                evt.getEntity().sendSystemMessage(Component.literal("[RoN] RTS-optimised map, improved pathfinding enabled"));
         }
     }
 }
