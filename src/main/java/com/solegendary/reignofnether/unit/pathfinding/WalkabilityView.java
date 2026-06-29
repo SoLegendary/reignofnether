@@ -4,26 +4,25 @@ public interface WalkabilityView {
     byte kindAt(int wx, int y, int wz);
     MobilityClass mobility();
 
-    // Per-request fire/magma cost for THIS unit (fire-immunity + DAMAGE_FIRE malus); see RtsPathfinder.fireCostFor.
+    // per-request fire/magma cost for this unit (fire-immunity + DAMAGE_FIRE malus); see RtsPathfinder.fireCostFor.
     float fireCost();
 
-    // The unit's height in whole cells (>=2); step-ups and destination cells need this much vertical clearance,
-    // not the 2 the classifier assumes, so tall mobs don't wedge into a ceiling or fail to rise under an overhang.
+    // the unit's height in whole cells (>=2). step-ups and destination cells need this much clearance, not the 2
+    // the classifier assumes, so tall mobs don't wedge into a ceiling or fail to rise under an overhang.
     int clearanceCells();
 
-    // Tile footprint radius, vanilla style (Mth.floor(bbWidth + 1) - 1): 0 for a <=1-wide unit, scaling up for
-    // wider mobs. See GridNeighbors.wideFits.
+    // tile footprint radius, vanilla style (Mth.floor(bbWidth + 1) - 1): 0 for a <=1-wide unit, scaling up for
+    // wider mobs. see GridNeighbors.wideFits.
     int footprintRadius();
 
-    // True if the block in this cell is solid-blocking. Used to require headroom before a unit steps up a ledge.
+    // true if the block in this cell is solid-blocking. used to require headroom before a unit steps up a ledge.
     boolean solidAt(int wx, int y, int wz);
 
-    // Precomputed crowding malus for this cell (the steering cost that keeps units off walls/edges/corners),
-    // baked into the chunk at build time instead of rescanned per A* node. 0 for open cells / outside the view.
-    // See GridNeighbors.crowdingMalus and WalkabilityGridChunk.crowdAt.
+    // precomputed crowding malus for this cell (steering cost that keeps units off walls/edges/corners), baked
+    // into the chunk at build time instead of rescanned per A* node. 0 for open cells / outside the view.
     float crowdAt(int wx, int y, int wz);
 
-    // True if this unit may use vertical climb moves (cling to a climbable wall, no floor needed). False for
-    // non-climbers, so they path exactly as before. Only spiders with wall-climbing toggled on set this.
+    // true if this unit may use vertical climb moves (cling to a climbable wall, no floor needed). false for
+    // non-climbers, so they path as before. only spiders with wall-climbing toggled on set this.
     boolean canClimb();
 }

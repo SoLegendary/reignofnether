@@ -19,6 +19,7 @@ public class UnitSyncWorkerClientBoundPacket {
 
     private final int entityId;
     private final boolean isBuilding; // for workers to show arms swinging
+    private final boolean isGathering; // server-authoritative in-range gathering state (client can't compute it)
     private final ResourceName gatherName; // for workers to show arms swinging and have the right tool
     private final BlockPos gatherPos;
     private final int gatherTicks;
@@ -30,6 +31,7 @@ public class UnitSyncWorkerClientBoundPacket {
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncWorkerClientBoundPacket(entity.getId(),
                     workerUnit.getBuildRepairGoal().isBuilding(),
+                    workerUnit.getGatherResourceGoal().isGathering(),
                     workerUnit.getGatherResourceGoal().getTargetResourceName(),
                     bp == null ? new BlockPos(0,0,0) : bp,
                     workerUnit.getGatherResourceGoal().getGatherTicksLeft())
@@ -41,6 +43,7 @@ public class UnitSyncWorkerClientBoundPacket {
     public UnitSyncWorkerClientBoundPacket(
         int unitId,
         boolean isBuilding,
+        boolean isGathering,
         ResourceName gatherName,
         BlockPos gatherPos,
         int gatherTicks
@@ -48,6 +51,7 @@ public class UnitSyncWorkerClientBoundPacket {
         // filter out non-owned entities so we can't control them
         this.entityId = unitId;
         this.isBuilding = isBuilding;
+        this.isGathering = isGathering;
         this.gatherName = gatherName;
         this.gatherPos = gatherPos;
         this.gatherTicks = gatherTicks;
@@ -56,6 +60,7 @@ public class UnitSyncWorkerClientBoundPacket {
     public UnitSyncWorkerClientBoundPacket(FriendlyByteBuf buffer) {
         this.entityId = buffer.readInt();
         this.isBuilding = buffer.readBoolean();
+        this.isGathering = buffer.readBoolean();
         this.gatherName = buffer.readEnum(ResourceName.class);
         this.gatherPos = buffer.readBlockPos();
         this.gatherTicks = buffer.readInt();
@@ -64,6 +69,7 @@ public class UnitSyncWorkerClientBoundPacket {
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeInt(this.entityId);
         buffer.writeBoolean(this.isBuilding);
+        buffer.writeBoolean(this.isGathering);
         buffer.writeEnum(this.gatherName);
         buffer.writeBlockPos(this.gatherPos);
         buffer.writeInt(this.gatherTicks);
@@ -79,6 +85,7 @@ public class UnitSyncWorkerClientBoundPacket {
                     UnitClientEvents.syncWorkerUnit(
                         this.entityId,
                         this.isBuilding,
+                        this.isGathering,
                         this.gatherName,
                         this.gatherPos.equals(new BlockPos(0,0,0)) ? null : this.gatherPos,
                         this.gatherTicks);

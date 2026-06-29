@@ -36,8 +36,8 @@ public final class ChunkSnapshot implements WalkabilityView {
         return new ChunkSnapshot(map, mobility, clearanceCells, footprintRadius, fireCost, canClimb);
     }
 
-    // The chunk rectangle + Y band a capture(start, target, dilation) needs. Shared with the deferred build
-    // queue (PathfinderWorkerPool) so "which chunks/band to warm" can never drift from what capture reads.
+    // The chunk rectangle + Y band a capture(start, target, dilation) needs. Shared with the deferred build queue
+    // (PathfinderWorkerPool) so which chunks/band to warm can't drift from what capture reads.
     public static final class CaptureRegion {
         public final int cx0, cx1, cz0, cz1;
         public final int wantMinY, wantMaxY;
@@ -55,7 +55,7 @@ public final class ChunkSnapshot implements WalkabilityView {
         int maxX = Math.max(start.getX(), target.getX()) + dilation;
         int minZ = Math.min(start.getZ(), target.getZ()) - dilation;
         int maxZ = Math.max(start.getZ(), target.getZ()) + dilation;
-        // A* hugs the surface between start and target, so only classify a Y band around the path.
+        // A* hugs the surface between start and target, so only classify a Y band around it.
         int band = PathfinderConfig.VERTICAL_RADIUS + PathfinderConfig.VERTICAL_WINDOW_SLACK;
         int refY = (start.getY() + target.getY()) / 2;
         return new CaptureRegion(minX >> 4, maxX >> 4, minZ >> 4, maxZ >> 4, refY - band, refY + band);

@@ -66,6 +66,15 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public static final int TICKS_STATIONARY_TIMEOUT = 100; // ticks that the worker hasn't moved and gatherTarget != null
     private BlockPos lastOnPos = null;
     private BlockPos altSearchPos = null; // block search origin that may be used instead of the mob position
+    // Whether the worker is in range and gathering, computed authoritatively on the SERVER and synced to the
+    // client (mirrors BuildRepairGoal.isBuildingServerside). The client must not recompute isBlockInRange
+    // itself - its entity position is interpolated, so it would disagree with the server. Set in
+    // UnitSyncWorkerClientBoundPacket via setIsGatheringServerside.
+    private boolean isGatheringServerside = false;
+
+    public void setIsGatheringServerside(boolean isGathering) {
+        this.isGatheringServerside = isGathering;
+    }
 
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
@@ -435,14 +444,17 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     private boolean isBlockInRange(BlockPos target) {
-        int reachRangeBonus = (int) Math.min(5, ticksWithoutTarget / TICK_CD);
-        return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= Math.pow(REACH_RANGE + reachRangeBonus, 2);
+        // Within mining reach (3D). No stuck-worker bonus: a block that's out of range is dropped by the gather
+        // goal's NO_TARGET_TIMEOUT so the worker just searches another one, instead of stretching its reach.
+        return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= REACH_RANGE * REACH_RANGE;
     }
 
-    // only count as gathering if in range of the target
+    // only count as gathering if in range of the target. The CLIENT trusts the server-synced value (its
+    // entity position is interpolated, so it can't compute isBlockInRange consistently); the SERVER computes
+    // it authoritatively and syncs it via UnitSyncWorkerClientBoundPacket.
     public boolean isGathering() {
-        if (!Unit.atMaxResources((Unit) mob) && data.gatherTarget != null && this.mob.level().isClientSide())
-            return isBlockInRange(data.gatherTarget);
+        if (this.mob.level().isClientSide())
+            return isGatheringServerside;
 
         if (!Unit.atMaxResources((Unit) mob) && this.data.gatherTarget != null && this.data.targetResourceSource != null &&
             ResourceSources.getBlockResourceName(this.data.gatherTarget, mob.level()) != ResourceName.NONE)

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -105,6 +106,13 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setBuildingsOutsideBorder(value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("improvedPathfinding")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                UnitServerEvents.improvedPathfinding = value;
+                GameruleClientboundPacket.setImprovedPathfinding(value);
+            }
         }
     }
 
@@ -144,6 +152,13 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setCoopMode(coopMode);
             boolean buildingsOutsideBorder = server.getGameRules().getRule(GameRuleRegistrar.BUILDINGS_OUTSIDE_BORDER).get();
             GameruleClientboundPacket.setBuildingsOutsideBorder(buildingsOutsideBorder);
+            boolean improvedPathfinding = server.getGameRules().getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).get();
+            UnitServerEvents.improvedPathfinding = improvedPathfinding;
+            GameruleClientboundPacket.setImprovedPathfinding(improvedPathfinding);
+            // Let the joining player know this is an RTS-optimised map (small world border) where improved
+            // pathfinding is on. Sent only to them, not broadcast.
+            if (improvedPathfinding)
+                evt.getEntity().sendSystemMessage(Component.literal("[RoN] RTS-optimised map, improved pathfinding enabled"));
         }
     }
 }
