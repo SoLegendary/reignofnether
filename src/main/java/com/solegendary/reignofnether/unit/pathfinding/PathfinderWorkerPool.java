@@ -79,20 +79,20 @@ public final class PathfinderWorkerPool {
         // START: rebuild settled dirty chunks, then classify a budget of cold corridor chunks and dispatch any
         // request now warm. Drain first so paths captured this tick see freshest data.
         if (evt.phase == TickEvent.Phase.START) {
-            // walkability caching + dispatch only run with the improvedPathfinding gamerule on (off = vanilla
+            // walkability caching + dispatch only run with the rtsPathfinding gamerule on (off = vanilla
             // pathfinding). the resource index is independent (used by gather goals either way), so always drains.
-            if (UnitServerEvents.improvedPathfinding) {
+            if (UnitServerEvents.rtsPathfinding) {
                 WalkabilityGrid.drainDirtyChunks(PathfinderConfig.MAX_CHUNK_RECLASSIFY_PER_TICK);
             }
             ResourceIndex.drainBuildQueue(ResourceIndex.MAX_RESOURCE_CHUNK_SCANS_PER_TICK);
-            if (UnitServerEvents.improvedPathfinding) {
+            if (UnitServerEvents.rtsPathfinding) {
                 processBuildQueue();
             }
             return;
         }
         // END: deliver finished paths back on the main thread.
         if (evt.phase != TickEvent.Phase.END) return;
-        if (!UnitServerEvents.improvedPathfinding) return;
+        if (!UnitServerEvents.rtsPathfinding) return;
         Runnable r;
         int drained = 0;
         while (drained < 256 && (r = RESULTS.poll()) != null) {

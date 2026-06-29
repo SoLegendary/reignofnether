@@ -96,10 +96,10 @@ public class UnitServerEvents {
     // max possible pop you can have regardless of buildings, adjustable via /gamerule maxPopulation
     public static int maxPopulation = ResourceCosts.DEFAULT_MAX_POPULATION;
 
-    // server-side mirror of the improvedPathfinding gamerule: when true, units route through the RTS
+    // server-side mirror of the rtsPathfinding gamerule: when true, units route through the RTS
     // grid A* pathfinder (with walkability caching + worker pool); when false they use vanilla
     // pathfinding and the caching/worker work is skipped. Kept in sync by GameruleServerEvents.
-    public static boolean improvedPathfinding = false;
+    public static boolean rtsPathfinding = false;
 
     // actioned only when the associated unit is idle, one at a time
     private static final List<UnitActionItem> unitActionSlowQueue = Collections.synchronizedList(new ArrayList<>());

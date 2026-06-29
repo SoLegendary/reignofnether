@@ -10,17 +10,12 @@ import com.solegendary.reignofnether.unit.pathfinding.RtsPathfinder;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.pathfinder.Path;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
-
-import static com.solegendary.reignofnether.unit.interfaces.Unit.FOLLOW_RANGE;
-import static com.solegendary.reignofnether.unit.interfaces.Unit.FOLLOW_RANGE_IMPROVED;
 
 public class MoveToTargetBlockGoal extends Goal {
 
@@ -67,7 +62,7 @@ public class MoveToTargetBlockGoal extends Goal {
     // Whether this unit routes through the async RTS grid pathfinder. Overridden to false for units the grid
     // path doesn't suit (eg. jump-based slimes), keeping them on vanilla pathfinding.
     protected boolean useRtsPathfinding() {
-        return UnitServerEvents.improvedPathfinding;
+        return UnitServerEvents.rtsPathfinding;
     }
 
     public boolean canUse() {
@@ -123,7 +118,7 @@ public class MoveToTargetBlockGoal extends Goal {
             return;
         }
 
-        // When the improvedPathfinding gamerule is on, route through the async grid A* pathfinder.
+        // When the rtsPathfinding gamerule is on, route through the async grid A* pathfinder.
         if (useRtsPathfinding()) {
             this.mob.setMaxUpStep(1.0f);
             if (this.mob.getNavigation() instanceof GroundPathNavigation gpn) gpn.setCanFloat(true);

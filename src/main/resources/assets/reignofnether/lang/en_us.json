@@ -686,7 +686,7 @@
     "commands.reignofnether.gamerule.player_griefing": "Players can break terrain blocks",
     "commands.reignofnether.gamerule.ground_y_level": "Minimum height for cameras",
     "commands.reignofnether.gamerule.flying_max_y_level": "Max height for flying units",
-    "commands.reignofnether.gamerule.improved_pathfinding": "Ups pathfinding accuracy and CPU usage",
+    "commands.reignofnether.gamerule.rts_pathfinding": "Use pathfinding specialised for RTS maps",
     "commands.reignofnether.gamerule.allow_beacons": "Allows workers to build Beacons",
     "commands.reignofnether.gamerule.pvp_modes_only": "Disable Wave Survival and Sandbox",
     "commands.reignofnether.gamerule.beacon_win_minutes": "Time needed to win with beacon control",

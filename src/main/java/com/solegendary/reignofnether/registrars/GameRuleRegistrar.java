@@ -22,7 +22,7 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.BooleanValue> COOP_MODE;
     public static GameRules.Key<GameRules.BooleanValue> DO_NETHER_CONVERSION;
     public static GameRules.Key<GameRules.BooleanValue> BUILDINGS_OUTSIDE_BORDER;
-    public static GameRules.Key<GameRules.BooleanValue> IMPROVED_PATHFINDING;
+    public static GameRules.Key<GameRules.BooleanValue> RTS_PATHFINDING;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -96,7 +96,8 @@ public class GameRuleRegistrar {
         // use the RTS-optimised pathfinder (async grid A*, walkability cache) instead of vanilla.
         // Auto-enabled at world load for RTS-optimised maps (small world border) - see
         // WorldBorderServerEvents - which also prewarms the navmesh. Off otherwise.
-        IMPROVED_PATHFINDING = GameRules.register("improvedPathfinding", GameRules.Category.MOBS,
+        // May cause additional TPS lag on worlds without world borders as they will not have a pregenerated navmesh
+        RTS_PATHFINDING = GameRules.register("rtsPathfinding", GameRules.Category.MOBS,
                 GameRules.BooleanValue.create(false)
         );
     }

@@ -41,12 +41,12 @@ public class WorldBorderServerEvents {
                 "RTS-optimised map detected (world border = {} blocks) - enabling improved pathfinding + navmesh precompute",
                 (int) border.getSize());
 
-        // Turn the improvedPathfinding gamerule on for this map (the gamerule's own default stays off, so
+        // Turn the rtsPathfinding gamerule on for this map (the gamerule's own default stays off, so
         // vanilla maps are unaffected) and mirror it to the server flag + any clients, reusing the existing
         // gamerule plumbing. At server-start there are no clients yet; player-join sync handles late joiners.
-        server.getGameRules().getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).set(true, server);
-        UnitServerEvents.improvedPathfinding = true;
-        GameruleClientboundPacket.setImprovedPathfinding(true);
+        server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).set(true, server);
+        UnitServerEvents.rtsPathfinding = true;
+        GameruleClientboundPacket.setRtsPathfinding(true);
 
         prewarmNavmesh(level, border);
     }

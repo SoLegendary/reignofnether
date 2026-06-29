@@ -616,7 +616,7 @@
     "commands.reignofnether.gamerule.player_griefing": "Les joueurs peuvent briser le terrain",
     "commands.reignofnether.gamerule.ground_y_level": "Hauteur minimum pour les caméras",
     "commands.reignofnether.gamerule.flying_max_y_level": "Hauteur max pour les unités volantes",
-    "commands.reignofnether.gamerule.improved_pathfinding": "Améliore la précision du pathfinding et usage CPU",
+    "commands.reignofnether.gamerule.rts_pathfinding": "Améliore la précision du pathfinding et usage CPU",
     "commands.reignofnether.gamerule.allow_beacons": "Permet aux ouvriers de construire des Balises",
     "commands.reignofnether.gamerule.pvp_modes_only": "Désactiver Survie par Vagues et Sandbox",
     "commands.reignofnether.gamerule.beacon_win_minutes": "Temps requis pour gagner avec le contrôle de balise",
