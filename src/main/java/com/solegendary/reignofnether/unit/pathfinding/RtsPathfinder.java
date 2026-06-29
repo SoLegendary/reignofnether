@@ -38,9 +38,9 @@ public final class RtsPathfinder {
         // Only spiders with wall-climbing toggled on may scale vertical walls; PoisonSpiderUnit inherits this.
         boolean canClimb = mob instanceof SpiderUnit su && su.isWallClimbing();
         int footprintRadius = footprintRadiusFor(mob);
-        // Snap the goal onto a cell a worker can actually stand in. If none exists nearby (eg. an airborne
-        // canopy leaf), the goal is unreachable as an exact cell: path to it best-effort with a capped node
-        // budget so A* can't flood the full MAX_RADIUS proving the obvious (the 250ms freeze on leaf orders).
+        // Snap the goal onto a standable cell. If none exists nearby (eg. an airborne canopy leaf) the goal is
+        // unreachable as an exact cell: path best-effort with a capped budget so A* can't flood MAX_RADIUS
+        // proving the obvious (the 250ms freeze on leaf orders).
         BlockPos snapped = findStandable(level, target, mobility, footprintRadius, clearanceCells, fireCost, SNAP_RADIUS);
         boolean reachableGoal = snapped != null;
         if (reachableGoal) target = snapped;
@@ -60,35 +60,32 @@ public final class RtsPathfinder {
         }
     }
 
-    // Tile footprint radius for this mob, vanilla style: floor(width + 1) - 1. 0 for a <=1-wide unit, 1 for a
-    // bear. Used by both requestPath and the debug overlay, so the overlay scores cells exactly like A* does.
-    // A climbing spider is pathed 1-wide (radius 0): a 3x3 footprint can't perch on a cliff edge (it overhangs
-    // the drop), so the climb up the wall could never connect to the plateau. 1-wide fixes that and is cheaper
-    // (skips the per-node wideFits 3x3 check) - the nimble-spider trade-off.
+    // Tile footprint radius, vanilla style: floor(width + 1) - 1. 0 for a <=1-wide unit, 1 for a bear. Shared
+    // by requestPath and the debug overlay so the overlay scores cells exactly like A*. A climbing spider is
+    // pathed 1-wide (radius 0): a 3x3 footprint overhangs a cliff edge, so the climb could never connect to the
+    // plateau; 1-wide fixes that and is cheaper (skips the per-node wideFits check).
     public static int footprintRadiusFor(Mob mob) {
         if (mob instanceof SpiderUnit su && su.isWallClimbing()) return 0;
         return Math.max(0, Mth.floor(mob.getBbWidth() + 1.0f) - 1);
     }
 
-    // Fire/magma cost for this unit: the DAMAGE_FIRE malus plus per-unit fire immunity, so fire-immune units
-    // cross fire freely and everyone else routes around it. Called once per request (never per A* cell), since
-    // fireImmune() can do an expensive building lookup.
+    // Fire/magma cost: DAMAGE_FIRE malus + per-unit fire immunity, so fire-immune units cross freely and others
+    // route around. Called once per request (not per A* cell) since fireImmune() can do an expensive lookup.
     private static float fireCostFor(Mob mob) {
         if (mob.fireImmune()) return 1.0f;
         float malus = mob.getPathfindingMalus(BlockPathTypes.DAMAGE_FIRE);
         return malus <= 0f ? 1.0f : PathfinderConfig.FIRE_AVOID_COST;
     }
 
-    // Nearest cell a unit can stand in within `radius` of bp (bp itself if already standable), or null if
-    // none exists - meaning the goal is unreachable as an exact cell (eg. an airborne leaf with only air and
-    // leaves around it and no ground within reach). Callers treat null as "approach best-effort, don't flood".
+    // Nearest standable cell within `radius` of bp (bp itself if already standable), or null if none - the goal
+    // is then unreachable as an exact cell (eg. an airborne leaf with no ground within reach). Callers treat
+    // null as "approach best-effort, don't flood".
     @Nullable
     public static BlockPos findStandable(Level level, BlockPos bp, MobilityClass mobility, int footprintRadius,
                                          int clearanceCells, float fireCost, int radius) {
-        // Snap over a small snapshot so the goal reuses the EXACT walkability + footprint logic A* uses (the
-        // snapped goal can never be a cell A* would reject); the +footprintRadius+1 dilation keeps wideFits
-        // from reading an uncaptured (BLOCKED) edge cell. canClimb=false: a goal must snap to standable ground,
-        // never to a mid-air wall-cling cell, so snapping always uses the ground footprint gate.
+        // snap over a small snapshot so the goal reuses the exact walkability + footprint logic A* uses (so the
+        // snapped goal is never a cell A* would reject). +footprintRadius+1 dilation keeps wideFits off an
+        // uncaptured (BLOCKED) edge cell. canClimb=false: a goal must snap to ground, never a wall-cling cell.
         ChunkSnapshot view = ChunkSnapshot.capture(level, bp, bp, radius + footprintRadius + 1,
                 mobility, clearanceCells, footprintRadius, fireCost, false);
         if (standable(view, bp.getX(), bp.getY(), bp.getZ())) return bp;

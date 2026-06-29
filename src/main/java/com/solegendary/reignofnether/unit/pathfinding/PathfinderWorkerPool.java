@@ -31,9 +31,8 @@ public final class PathfinderWorkerPool {
     private static final AtomicInteger INFLIGHT = new AtomicInteger(0);
 
     // Building a request's walkability grid (getBlockState/getCollisionShape) MUST happen on the main thread,
-    // so a cross-map move that classifies its whole corridor at once spikes the tick. Instead each request is
-    // parked here and its cold chunks are classified a budget at a time across ticks; once warm it's dispatched
-    // to the worker pool. Main-thread-only (submit runs in the goal tick, draining runs in onServerTick).
+    // so classifying a whole corridor at once spikes the tick. Each request parks here and its cold chunks are
+    // classified a budget at a time across ticks; once warm it dispatches to the pool. Main-thread-only.
     private static final ArrayDeque<PendingBuild> BUILD_QUEUE = new ArrayDeque<>();
 
     public static boolean isInitialised() {
@@ -77,12 +76,11 @@ public final class PathfinderWorkerPool {
 
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
-        // START: rebuild settled dirty chunks from block changes, then classify a budget of cold corridor
-        // chunks and dispatch any request that's now warm. Drain first so paths captured this tick see freshest data.
+        // START: rebuild settled dirty chunks, then classify a budget of cold corridor chunks and dispatch any
+        // request now warm. Drain first so paths captured this tick see freshest data.
         if (evt.phase == TickEvent.Phase.START) {
-            // Walkability caching + path dispatch only run when the improvedPathfinding gamerule is on;
-            // with it off, units use vanilla pathfinding and none of this work happens. The resource index
-            // is independent of pathfinding (used by gather goals either way), so it always drains.
+            // walkability caching + dispatch only run with the improvedPathfinding gamerule on (off = vanilla
+            // pathfinding). the resource index is independent (used by gather goals either way), so always drains.
             if (UnitServerEvents.improvedPathfinding) {
                 WalkabilityGrid.drainDirtyChunks(PathfinderConfig.MAX_CHUNK_RECLASSIFY_PER_TICK);
             }
@@ -118,9 +116,9 @@ public final class PathfinderWorkerPool {
                 footprintRadius, fireCost, canClimb, maxNodes, region, alive, onReady));
     }
 
-    // Classify up to MAX_CHUNK_BUILDS_PER_TICK cold chunks across the parked requests this tick. Cache hits are
-    // free and don't spend budget, so warm/retry corridors (and the trailing units of a formation move) finish
-    // their build in the same tick they're queued and dispatch immediately.
+    // Classify up to MAX_CHUNK_BUILDS_PER_TICK cold chunks across parked requests this tick. Cache hits are free
+    // and don't spend budget, so already-warm corridors (eg. trailing units of a formation move) finish and
+    // dispatch in the same tick they're queued.
     private static void processBuildQueue() {
         int budget = PathfinderConfig.MAX_CHUNK_BUILDS_PER_TICK;
         while (budget > 0 && !BUILD_QUEUE.isEmpty()) {
@@ -191,11 +189,10 @@ public final class PathfinderWorkerPool {
         pool.execute(() -> {
             Path result = null;
             try {
-                // Chained A*: instead of returning a partial path when goal is outside the
-                // 96-block search radius, run a follow-up search from where the previous one
-                // ended. Up to MAX_CHAIN_SEGMENTS hops. Caps at "actually blocked" after that.
-                // A capped (unreachable-goal) request runs a single best-effort segment - there's
-                // nothing to chain toward, and chaining would multiply its cheap budget.
+                // Chained A*: when the goal is outside the 96-block search radius, run a follow-up search from
+                // where the last one ended rather than returning a partial path. Up to MAX_CHAIN_SEGMENTS hops,
+                // then give up. An unreachable-goal (capped) request runs a single best-effort segment: nothing
+                // to chain toward, and chaining would multiply its cheap budget.
                 int segLimit = (maxNodes >= PathfinderConfig.MAX_NODES) ? PathfinderConfig.MAX_CHAIN_SEGMENTS : 1;
                 ArrayList<BlockPos> combined = new ArrayList<>();
                 BlockPos cur = start;

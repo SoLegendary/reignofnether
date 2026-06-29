@@ -39,15 +39,9 @@ public class MoveToTargetBlockGoal extends Goal {
     protected void resetRecalcBackoff() { currentRecalcCooldown = RECALC_COOLDOWN_MAX; }
     public boolean isInBackoff() { return currentRecalcCooldown > RECALC_COOLDOWN_MAX && moveTarget != null; }
     protected int recalcCooldown = 0; // limit start() used by canContinueToUse
-    // Endpoint (nearest-reachable cell) of the last computed path. A re-path that returns the SAME endpoint
-    // means the unit has arrived at the best reachable spot and recomputing won't improve it - the only case
-    // worth throttling. An endpoint that MOVED means it's still travelling (a long journey delivered in
-    // chained segments), so recompute promptly. Reset on a target change / stop so a fresh target starts clean.
-    @Nullable protected BlockPos lastFinalNode = null;
     protected boolean pathPending = false; // true while an async RTS path request is in flight
-    // Bumped on every new request, order, or stop. The async callback captures this at request time and drops
-    // its result if it no longer matches - so a slow stale path (eg. a long FAR route that finishes computing
-    // after we've already been re-ordered to go NEAR) can't overwrite the newer order.
+    // Bumped on every new request/order/stop. The async callback captures it at request time and drops its
+    // result if it no longer matches, so a slow stale path can't overwrite a newer order.
     protected int pathRequestSeq = 0;
 
     public MoveToTargetBlockGoal(Mob mob, boolean persistent, int reachRange) {
@@ -64,15 +58,14 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public double getMinDistToRecalculateSqr() {
-        // Floor the recalc radius at the separation settle distance so there's no band where a unit is
-        // close enough that separation lets it settle but still far enough to trigger a path recalc every
-        // tick — that mismatch is what makes arrived units jitter ("dance") on the spot.
+        // Floor the recalc radius at the separation settle distance, else there's a band where a unit settles
+        // via separation but still triggers a recalc every tick - that mismatch is what makes arrived units dance.
         double dist = Math.max(Math.sqrt(PathfinderConfig.ARRIVAL_SETTLE_SQ), moveReachRange);
         return dist * dist;
     }
 
-    // Whether this unit routes through the async RTS grid pathfinder. Overridden to false for units whose
-    // locomotion the grid path doesn't suit (eg. jump-based slimes), keeping them on vanilla pathfinding.
+    // Whether this unit routes through the async RTS grid pathfinder. Overridden to false for units the grid
+    // path doesn't suit (eg. jump-based slimes), keeping them on vanilla pathfinding.
     protected boolean useRtsPathfinding() {
         return UnitServerEvents.improvedPathfinding;
     }
@@ -91,15 +84,15 @@ public class MoveToTargetBlockGoal extends Goal {
             recalcCooldown -= 1;
             return true;
         }
-        // PathNavigation seems to have a max length so restart it if we haven't actually reached the target yet
+        // PathNavigation has a max length, so once the unit finishes its current path but still isn't at the
+        // target, restart to continue the journey (RTS delivers long routes in segments) or retry.
         if (this.mob.getNavigation().isDone() && moveTarget != null &&
             this.mob.getOnPos().distSqr(moveTarget) > getMinDistToRecalculateSqr()) {
             BlockPos oldFinalNode = getFinalNodePos();
             this.start();
-            // start() is very expensive, and it repeats every tick if the mob is stuck, eg. targeting over water.
-            // For the async RTS path the result isn't ready yet (start() just stopped navigation and fired the
-            // request), so the final node here is meaningless - onPathReady owns the backoff once it knows
-            // whether the target was reachable. Only the synchronous vanilla path has a final node to compare.
+            // start() is expensive and repeats every tick on a stuck mob (eg. targeting over water). Only the
+            // synchronous vanilla path has a final node ready to compare for the backoff; the async RTS path
+            // isn't ready yet (start() just fired the request), so it simply repaths next time it's done.
             if (!pathPending) {
                 BlockPos newFinalNode = getFinalNodePos();
                 if (oldFinalNode != null && oldFinalNode.equals(newFinalNode))
@@ -130,7 +123,7 @@ public class MoveToTargetBlockGoal extends Goal {
             return;
         }
 
-        // When the rtsPathfinding gamerule is on, route through the async grid A* pathfinder.
+        // When the improvedPathfinding gamerule is on, route through the async grid A* pathfinder.
         if (useRtsPathfinding()) {
             this.mob.setMaxUpStep(1.0f);
             if (this.mob.getNavigation() instanceof GroundPathNavigation gpn) gpn.setCanFloat(true);
@@ -142,9 +135,8 @@ public class MoveToTargetBlockGoal extends Goal {
             return;
         }
 
-        // Vanilla pathfinding. Single createPath call. The improvedPathfinding (FOLLOW_RANGE_IMPROVED)
-        // attribute is left in place if present, so vanilla A* searches at the configured range. If the
-        // resulting path ends up suboptimal, the backoff in canContinueToUse handles retries / give-up.
+        // Vanilla pathfinding: one createPath call. If the path ends up suboptimal, the backoff in
+        // canContinueToUse handles retries / give-up.
         Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
         if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
         /*
@@ -171,8 +163,8 @@ public class MoveToTargetBlockGoal extends Goal {
 
     // Callback for the async RTS pathfinder. Runs on the server thread once a path is ready.
     protected void onPathReady(@Nullable Path path, int seq) {
-        // A newer order/stop has superseded the request this result is for - drop it so the old order can't
-        // overwrite the new one. Leave pathPending alone: the newer request is still in flight and owns it.
+        // A newer order/stop superseded this request - drop the result. Leave pathPending alone; the newer
+        // request is still in flight and owns it.
         if (seq != pathRequestSeq) return;
         pathPending = false;
         if (moveTarget == null) return;
@@ -180,25 +172,6 @@ public class MoveToTargetBlockGoal extends Goal {
             this.mob.getNavigation().stop();
             return;
         }
-        // Progress - not canReach() - sets the retry cadence. canReach() only asks "did A* land on the exact
-        // target tile within 1 vertical block", which is false for a mineable block (a log tile, or an upper
-        // log) even when snapToWalkable got the unit standing right next to it and mining. So we throttle on
-        // whether the nearest-reachable ENDPOINT is still improving: a re-path that returns the SAME endpoint
-        // means the unit arrived at the best reachable spot and recomputing won't help (the only case worth
-        // throttling - genuinely walled off, so stop hammering A*). An endpoint that MOVED (or the first path
-        // for this target) means it's still travelling - eg. a long journey delivered in chained segments - so
-        // recompute promptly and never freeze between segments. setMoveTarget clears lastFinalNode on a target
-        // change, so throttling only persists while genuinely stuck on the SAME target.
-        BlockPos newFinalNode = (path == null) ? null : getFinalNodePos(path);
-        if (path != null && path.canReach()) {
-            resetRecalcBackoff();
-        } else if (path != null && lastFinalNode != null && lastFinalNode.equals(newFinalNode)) {
-            backoffRecalcCooldown();
-            recalcCooldown = currentRecalcCooldown;
-        } else {
-            resetRecalcBackoff();
-        }
-        lastFinalNode = newFinalNode;
         if (path == null) {
             this.mob.getNavigation().stop();
             return;
@@ -215,17 +188,14 @@ public class MoveToTargetBlockGoal extends Goal {
         if (bp != null) {
             MiscUtil.addUnitCheckpoint((Unit) mob, bp, true);
         }
-        // Re-issuing the SAME target must NOT re-fire a path request. GatherResourcesGoal re-asserts its block
-        // target every tick (TICK_CD) for persistence; firing start() each time spammed snap-and-fail paths at
-        // solid resource blocks (the block search "asking units to stand on the block they mine"). So only an
-        // actual target CHANGE resets the backoff and starts a fresh path - and that change also bumps the
-        // request seq in start(), superseding any stale path still computing for the old target. A stall on an
-        // unchanged target is re-pathed by canContinueToUse under the backoff throttle, not by this per-tick call.
+        // Only fire a fresh path on an actual target CHANGE. GatherResourcesGoal re-asserts the same block
+        // target every tick for persistence; pathing on each would spam snap-and-fail requests at solid resource
+        // blocks. A real change also bumps the request seq in start(), superseding any stale path still
+        // computing for the old target. A stall on an unchanged target is re-pathed by canContinueToUse instead.
         boolean changed = !java.util.Objects.equals(bp, this.moveTarget);
         if (changed) {
             resetRecalcBackoff();
             recalcCooldown = 0;
-            lastFinalNode = null;
         }
         this.moveTarget = bp;
 
@@ -244,16 +214,9 @@ public class MoveToTargetBlockGoal extends Goal {
         return null;
     }
 
-    @Nullable public BlockPos getFinalNodePos(Path path) {
-        if (path != null && !path.nodes.isEmpty())
-            return path.nodes.get(path.nodes.size() - 1).asBlockPos();
-        return null;
-    }
-
     public void stopMoving() {
         recalcCooldown = 0;
         pathPending = false;
-        lastFinalNode = null;
         pathRequestSeq++; // cancel any in-flight path so a late result can't restart movement after a stop.
         this.moveTarget = null;
         this.mob.getNavigation().stop();

@@ -13,8 +13,8 @@ import net.minecraft.world.level.block.SculkShriekerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
-// Classifies one cell (x, y, z) as LAND / WATER / FIRE / LAVA / BLOCKED.
-// A cell is occupiable when feet (y) and head (y+1) are non-solid AND the floor (y-1) supports.
+// classifies one cell (x, y, z) as LAND / WATER / FIRE / LAVA / BLOCKED.
+// a cell is occupiable when feet (y) and head (y+1) are non-solid AND the floor (y-1) supports.
 public final class WalkabilityBuilder {
     private WalkabilityBuilder() {}
 
@@ -25,7 +25,7 @@ public final class WalkabilityBuilder {
     public static final byte KIND_LAVA    = 4;
     public static final byte KIND_SLIME    = 5;
 
-    // Hot path (called per cell during a chunk build); reuse mutable positions to avoid BlockPos allocations.
+    // hot path (per cell during a chunk build); reuse mutable positions to avoid BlockPos allocations.
     private static final ThreadLocal<BlockPos.MutableBlockPos> FEET  = ThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
     private static final ThreadLocal<BlockPos.MutableBlockPos> HEAD  = ThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
     private static final ThreadLocal<BlockPos.MutableBlockPos> FLOOR = ThreadLocal.withInitial(BlockPos.MutableBlockPos::new);
@@ -37,7 +37,7 @@ public final class WalkabilityBuilder {
 
         BlockState feetBs = level.getBlockState(feet);
         BlockState headBs = level.getBlockState(head);
-        // Feet/head can't sit inside a body-blocking block. Leaves report non-solid but block the body, and
+        // feet/head can't sit inside a body-blocking block. leaves report non-solid but block the body, and
         // fence-likes are impassable barriers (see isFenceLike), so reject both explicitly.
         if (MiscUtil.isSolidBlocking(level, feet) || BlockUtils.isLeafBlock(feetBs) || isFenceLike(feetBs)) return KIND_BLOCKED;
         if (MiscUtil.isSolidBlocking(level, head) || BlockUtils.isLeafBlock(headBs) || isFenceLike(headBs)) return KIND_BLOCKED;
@@ -54,20 +54,19 @@ public final class WalkabilityBuilder {
                 || floorBs.getBlock() == Blocks.CAMPFIRE
                 || floorBs.getBlock() == Blocks.SOUL_CAMPFIRE) return KIND_FIRE;
 
-        // A fence/wall/closed-gate floor is NOT standable - a unit can't perch on a railing (vanilla agrees) -
-        // and a LEAF floor must not count either, or units path up onto and over the tree canopy (and goal
-        // snapping lands a worker on top of the very leaf it's told to mine). Don't count these as support; the
-        // cell falls through to "no floor" so the unit routes around, and stands on the real ground below.
-        // BlockTags.LEAVES (allocation-free, covers every tree canopy) instead of BlockUtils.isLeafBlock, whose
-        // List.of fallback would allocate on this per-cell hot path for every ordinary solid floor.
+        // a fence/wall/closed-gate floor isn't standable (can't perch on a railing; vanilla agrees), and a leaf
+        // floor must not count either or units path up over the tree canopy (and goal snapping lands a worker on
+        // the very leaf it's told to mine). don't count these as support: the cell falls through to "no floor" so
+        // the unit routes around and stands on the real ground below. BlockTags.LEAVES is allocation-free, unlike
+        // BlockUtils.isLeafBlock whose List.of fallback would allocate on this hot path for every solid floor.
         if (MiscUtil.isSolidBlocking(level, floor) && !isFenceLike(floorBs) && !floorBs.is(BlockTags.LEAVES)) return KIND_LAND;
         if (floorBs.getFluidState().is(FluidTags.LAVA)) return KIND_LAVA;
         if (!floorBs.getFluidState().isEmpty()) return KIND_WATER;
         return KIND_BLOCKED; // no floor support
     }
 
-    // Fences, walls and CLOSED fence gates are 1.5-block barriers units can't pass or stand on (open gates are
-    // walkable, so they're excluded). Mirrors vanilla WalkNodeEvaluator's BlockPathTypes.FENCE handling.
+    // fences, walls and closed fence gates are 1.5-block barriers units can't pass or stand on (open gates are
+    // walkable, so excluded). mirrors vanilla WalkNodeEvaluator's BlockPathTypes.FENCE handling.
     public static boolean isFenceLike(BlockState bs) {
         if (bs.is(BlockTags.FENCES) || bs.is(BlockTags.WALLS) || bs.getBlock() instanceof SculkCatalystBlock || bs.getBlock() instanceof SculkShriekerBlock) return true;
         return bs.getBlock() instanceof FenceGateBlock && !bs.getValue(FenceGateBlock.OPEN);
