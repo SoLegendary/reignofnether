@@ -249,7 +249,7 @@ public class GameruleClient {
         ));
 
         int height = (buttons.size() * 18) - 8;
-        MyRenderer.renderFrameWithBg(guiGraphics, x, y, width, height, 0xA0000000);
+        MyRenderer.renderFrameWithBg(guiGraphics, x, y, width, height, 0xC8000000);
 
         for (Button button : buttons) {
             button.render(guiGraphics, x + 5, y + 5, mouseX, mouseY);

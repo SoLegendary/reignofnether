@@ -1547,38 +1547,6 @@ public class HudClientEvents {
                     renderedButtons.add(cycleRoleToPlayButton);
                 }
             } else { // normal gamemodes
-                /*
-                Button startPosButton = StartPosClientEvents.getPositionsButton();
-                if (!startPosButton.isHidden.get()) {
-                    startPosButton.render(evt.getGuiGraphics(),
-                            screenWidth - (StartButtons.ICON_SIZE * 6),
-                            40,
-                            mouseX,
-                            mouseY
-                    );
-                    renderedButtons.add(startPosButton);
-                }
-                 */
-                Button readyButton = StartPosClientEvents.getReadyButton();
-                if (!readyButton.isHidden.get()) {
-                    readyButton.render(evt.getGuiGraphics(),
-                            screenWidth - (StartButtons.ICON_SIZE * 4),
-                            40,
-                            mouseX,
-                            mouseY
-                    );
-                    renderedButtons.add(readyButton);
-                }
-                Button unreadyButton = StartPosClientEvents.getUnreadyButton();
-                if (!unreadyButton.isHidden.get()) {
-                    unreadyButton.render(evt.getGuiGraphics(),
-                            screenWidth - (StartButtons.ICON_SIZE * 4),
-                            40,
-                            mouseX,
-                            mouseY
-                    );
-                    renderedButtons.add(unreadyButton);
-                }
                 Button diffsButton = ConfigClientEvents.getDiffsButton();
                 if (!diffsButton.isHidden.get()) {
                     diffsButton.render(evt.getGuiGraphics(),
@@ -1593,7 +1561,7 @@ public class HudClientEvents {
                 Button gamemodeButton = ClientGameModeHelper.getButton();
                 if (gamemodeButton != null && !gamemodeButton.isHidden.get() && !TutorialClientEvents.isEnabled()) {
                     gamemodeButton.render(evt.getGuiGraphics(),
-                            screenWidth - (StartButtons.ICON_SIZE * 8),
+                            screenWidth - (StartButtons.ICON_SIZE * 2),
                             StartButtons.ICON_SIZE / 2,
                             mouseX,
                             mouseY
@@ -1606,7 +1574,7 @@ public class HudClientEvents {
                     if (!StartPosClientEvents.isEnabled()) {
                         if (!StartButtons.villagerStartButton.isHidden.get()) {
                             StartButtons.villagerStartButton.render(evt.getGuiGraphics(),
-                                    screenWidth - (StartButtons.ICON_SIZE * 6),
+                                    screenWidth - (StartButtons.ICON_SIZE * 8),
                                     StartButtons.ICON_SIZE / 2,
                                     mouseX,
                                     mouseY
@@ -1615,7 +1583,7 @@ public class HudClientEvents {
                         }
                         if (!StartButtons.monsterStartButton.isHidden.get()) {
                             StartButtons.monsterStartButton.render(evt.getGuiGraphics(),
-                                    (int) (screenWidth - (StartButtons.ICON_SIZE * 4f)),
+                                    (int) (screenWidth - (StartButtons.ICON_SIZE * 6)),
                                     StartButtons.ICON_SIZE / 2,
                                     mouseX,
                                     mouseY
@@ -1624,40 +1592,12 @@ public class HudClientEvents {
                         }
                         if (!StartButtons.piglinStartButton.isHidden.get()) {
                             StartButtons.piglinStartButton.render(evt.getGuiGraphics(),
-                                    screenWidth - (StartButtons.ICON_SIZE * 2),
+                                    screenWidth - (StartButtons.ICON_SIZE * 4),
                                     StartButtons.ICON_SIZE / 2,
                                     mouseX,
                                     mouseY
                             );
                             renderedButtons.add(StartButtons.piglinStartButton);
-                        }
-                    } else {
-                        if (!StartPosClientEvents.villagerReadyButton.isHidden.get()) {
-                            StartPosClientEvents.villagerReadyButton.render(evt.getGuiGraphics(),
-                                    screenWidth - (StartButtons.ICON_SIZE * 6),
-                                    StartButtons.ICON_SIZE / 2,
-                                    mouseX,
-                                    mouseY
-                            );
-                            renderedButtons.add(StartPosClientEvents.villagerReadyButton);
-                        }
-                        if (!StartPosClientEvents.monsterReadyButton.isHidden.get()) {
-                            StartPosClientEvents.monsterReadyButton.render(evt.getGuiGraphics(),
-                                    (int) (screenWidth - (StartButtons.ICON_SIZE * 4f)),
-                                    StartButtons.ICON_SIZE / 2,
-                                    mouseX,
-                                    mouseY
-                            );
-                            renderedButtons.add(StartPosClientEvents.monsterReadyButton);
-                        }
-                        if (!StartPosClientEvents.piglinReadyButton.isHidden.get()) {
-                            StartPosClientEvents.piglinReadyButton.render(evt.getGuiGraphics(),
-                                    screenWidth - (StartButtons.ICON_SIZE * 2),
-                                    StartButtons.ICON_SIZE / 2,
-                                    mouseX,
-                                    mouseY
-                            );
-                            renderedButtons.add(StartPosClientEvents.piglinReadyButton);
                         }
                     }
                 } else if (!StartButtons.sandboxStartButton.isHidden.get()) {
@@ -1742,8 +1682,10 @@ public class HudClientEvents {
         if (SandboxClientEvents.isSandboxPlayer() || !PlayerClientEvents.isRTSPlayer()) {
             Button gamerulesButton = GameruleClient.getGamerulesButton();
             if (MC.player != null && !gamerulesButton.isHidden.get() && !TutorialClientEvents.isEnabled()) {
-                int xr = screenWidth - (StartButtons.ICON_SIZE * 8);
-                int yr = PlayerClientEvents.isRTSPlayer() ? StartButtons.ICON_SIZE / 2 : 40;
+                int xr = screenWidth - (StartButtons.ICON_SIZE * 2);
+                if (!diplomacyButton.isHidden.get())
+                    xr = screenWidth - (StartButtons.ICON_SIZE * 4);
+                int yr = 40;
                 gamerulesButton.render(evt.getGuiGraphics(), xr, yr, mouseX, mouseY);
                 renderedButtons.add(gamerulesButton);
                 if (GameruleClient.gamerulesMenuOpen) {
