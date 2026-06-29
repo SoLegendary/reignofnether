@@ -843,6 +843,7 @@ public class MatchStartScreen extends Screen {
                 return true;
             }
             if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                MatchStartClientEvents.dismiss();
                 return true;
             }
             return super.keyPressed(keyCode, scanCode, modifiers);
