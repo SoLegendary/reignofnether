@@ -151,10 +151,6 @@ public class GameruleServerEvents {
             boolean rtsPathfinding = server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get();
             UnitServerEvents.rtsPathfinding = rtsPathfinding;
             GameruleClientboundPacket.setRtsPathfinding(rtsPathfinding);
-            // Let the joining player know this is an RTS-optimised map (small world border) where improved
-            // pathfinding is on. Sent only to them, not broadcast.
-            if (rtsPathfinding)
-                evt.getEntity().sendSystemMessage(Component.literal("[RoN] RTS-optimised map, improved pathfinding enabled"));
         }
     }
 }

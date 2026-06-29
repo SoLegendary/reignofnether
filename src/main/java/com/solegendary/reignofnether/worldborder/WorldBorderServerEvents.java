@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.pathfinding.PathfinderConfig;
 import com.solegendary.reignofnether.unit.pathfinding.WalkabilityGrid;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -13,6 +14,7 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -24,6 +26,8 @@ public class WorldBorderServerEvents {
     // it stays on vanilla pathfinding untouched. The whole bounded play area fits in the walkability cache
     // (see PathfinderConfig.MAX_CACHED_CHUNKS), which is what makes the full-map precompute worthwhile.
     public static final int RTS_OPTIMIZED_BORDER = 1024;
+
+    public static boolean prewarmedNavmesh = false;
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent evt) {
@@ -92,6 +96,8 @@ public class WorldBorderServerEvents {
 
         ReignOfNether.LOGGER.info("Prewarmed RTS navmesh: {} chunks in {} ms",
                 total, System.currentTimeMillis() - startMs);
+
+        prewarmedNavmesh = true;
     }
 
     // Y band to classify for a chunk: span the chunk's surface heights (sampled at its corners + centre) and
