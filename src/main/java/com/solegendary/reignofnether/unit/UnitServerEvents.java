@@ -96,10 +96,10 @@ public class UnitServerEvents {
     // max possible pop you can have regardless of buildings, adjustable via /gamerule maxPopulation
     public static int maxPopulation = ResourceCosts.DEFAULT_MAX_POPULATION;
 
-    // server-side mirror of the improvedPathfinding gamerule: when true, units route through the RTS
+    // server-side mirror of the rtsPathfinding gamerule: when true, units route through the RTS
     // grid A* pathfinder (with walkability caching + worker pool); when false they use vanilla
     // pathfinding and the caching/worker work is skipped. Kept in sync by GameruleServerEvents.
-    public static boolean improvedPathfinding = false;
+    public static boolean rtsPathfinding = false;
 
     // actioned only when the associated unit is idle, one at a time
     private static final List<UnitActionItem> unitActionSlowQueue = Collections.synchronizedList(new ArrayList<>());
@@ -134,7 +134,7 @@ public class UnitServerEvents {
     // Per-entity last-synced mob effect amplifiers. Null amp means "absent last sync".
     private static final HashMap<Integer, HashMap<MobEffect, Byte>> lastSyncedEffects = new HashMap<>();
 
-    // Time-sliced formation dispatch: VANILLA-ONLY (improvedPathfinding off). Large group MOVE commands
+    // Time-sliced formation dispatch: VANILLA-ONLY (rtsPathfinding off). Large group MOVE commands
     // are spread across ticks to avoid the spike from N units all running vanilla's synchronous main-thread
     // A* in the same tick. With RTS pathfinding on, moves dispatch immediately (UnitActionItem) since the
     // worker pool queues + backpressures off-thread, so this queue stays empty. LinkedHashMap preserves

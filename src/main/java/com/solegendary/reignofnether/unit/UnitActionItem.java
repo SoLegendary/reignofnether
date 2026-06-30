@@ -419,7 +419,7 @@ public class UnitActionItem {
             // doesn't need the stagger - and staggering leaves units idle for a few ticks after their
             // combat state was reset, in which the aggressive-when-idle scan re-acquires the enemy they
             // were just ordered away from (the "team move-away snaps back to attacking" bug).
-            if (level.isClientSide() || UnitServerEvents.improvedPathfinding || filtered.size() <= 20) {
+            if (level.isClientSide() || UnitServerEvents.rtsPathfinding || filtered.size() <= 20) {
                 for (Pair<LivingEntity, BlockPos> pair : filtered) {
                     ((Unit) pair.getFirst()).getMoveGoal().setMoveTarget(pair.getSecond());
                     ((Unit) pair.getFirst()).getMoveGoal().setManualMove(true); // disengage order

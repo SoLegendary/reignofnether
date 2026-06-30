@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.rtsmap;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
+import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -59,7 +62,6 @@ public class RTSMapInfoServerEvents {
                 modesStr.setLength(modesStr.length() - 2);
                 evt.getEntity().sendSystemMessage(Component.literal(""));
                 evt.getEntity().sendSystemMessage(Component.translatable("message.reignofnether.rts_map_info_modes", modesStr));
-                evt.getEntity().sendSystemMessage(Component.translatable("message.reignofnether.rts_map_info_modes_command", modesStr));
             }
             RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MAP_NAME, rtsMapInfo.getName());
             for (String author : rtsMapInfo.getAuthor())
@@ -69,6 +71,12 @@ public class RTSMapInfoServerEvents {
             RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_VERSION, rtsMapInfo.getVersion());
             for (String mode : rtsMapInfo.getModes().keySet())
                 RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.ADD_MODE, mode);
+
+            MinecraftServer server = evt.getEntity().level().getServer();
+            if (server != null && server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get() && WorldBorderServerEvents.prewarmedNavmesh) {
+                evt.getEntity().sendSystemMessage(Component.literal(""));
+                evt.getEntity().sendSystemMessage(Component.translatable("server.reignofnether.prewarmed_navmesh"));
+            }
         }
     }
 }

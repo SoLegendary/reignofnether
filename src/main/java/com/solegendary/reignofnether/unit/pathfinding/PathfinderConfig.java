@@ -36,7 +36,7 @@ public final class PathfinderConfig {
     // a block change marks its chunk dirty (not evicted) with the changed-cell bbox; the START-phase drain
     // patches only that region via reclassifyRegion (clone + small reclassify, not a whole-chunk build). cap
     // distinct dirty chunks patched per tick; the rest stay stale-but-walkable (never removed, so units are
-    // never stranded) until a later tick. same order as MAX_CHUNK_BUILDS_PER_TICK. tunable.
+    // never stranded) until a later tick. same order as the chunk-build budget. tunable.
     public static final int MAX_CHUNK_RECLASSIFY_PER_TICK = 8;
     // cross-tick coalescing for the dirty drain: a chunk is only rebuilt once it's settled (no block change for
     // this many ticks), so a building placing 1 block/tick rebuilds ~once when done instead of every tick. stays
@@ -75,8 +75,9 @@ public final class PathfinderConfig {
     // A* over an immutable snapshot is embarrassingly parallel; scale workers with cores.
     public static final int WORKER_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
 
-    // within this squared distance of its target a unit is "arrived": the move goal stops recalculating, so a
-    // settled group doesn't jitter. Used by MoveToTargetBlockGoal.getMinDistToRecalculateSqr.
+    // within this squared distance of its target a unit is "arrived": separation stops pushing and the move
+    // goal stops recalculating, so a settled group doesn't jitter. shared by UnitSeparation and
+    // MoveToTargetBlockGoal.getMinDistToRecalculateSqr so the thresholds can't drift.
     public static final double ARRIVAL_SETTLE_SQ = 2.25; // 1.5 blocks
 
     public static int dilationFor(BlockPos start, BlockPos target) {

@@ -80,7 +80,7 @@ public class MoveToTargetBlockGoal extends Goal {
     // Whether this unit routes through the async RTS grid pathfinder. Overridden to false for units the grid
     // path doesn't suit (eg. jump-based slimes), keeping them on vanilla pathfinding.
     protected boolean useRtsPathfinding() {
-        return UnitServerEvents.improvedPathfinding;
+        return UnitServerEvents.rtsPathfinding;
     }
 
     public boolean canUse() {
@@ -107,6 +107,9 @@ public class MoveToTargetBlockGoal extends Goal {
             // request), so flag it and let onPathReady do the same once the new path is in.
             BlockPos oldFinalNode = getFinalNodePos();
             this.start();
+            // start() is expensive and repeats every tick on a stuck mob (eg. targeting over water). Only the
+            // synchronous vanilla path has a final node ready to compare for the backoff; the async RTS path
+            // isn't ready yet (start() just fired the request), so it simply repaths next time it's done.
             if (!pathPending) {
                 BlockPos newFinalNode = getFinalNodePos();
                 if (oldFinalNode != null && oldFinalNode.equals(newFinalNode))
@@ -147,7 +150,7 @@ public class MoveToTargetBlockGoal extends Goal {
             return;
         }
 
-        // When the improvedPathfinding gamerule is on, route through the async grid A* pathfinder.
+        // When the rtsPathfinding gamerule is on, route through the async grid A* pathfinder.
         if (useRtsPathfinding()) {
             this.mob.setMaxUpStep(1.0f);
             if (this.mob.getNavigation() instanceof GroundPathNavigation gpn) gpn.setCanFloat(true);
@@ -161,7 +164,7 @@ public class MoveToTargetBlockGoal extends Goal {
             final BooleanSupplier valid = () -> this.mob.isAlive() && this.pathRequestSeq == seq;
             // Count the async request too, so the F7 "Paths/s" meter reflects RTS pathfinding load (the
             // vanilla branch below already counts createPath calls); else the meter reads ~0 under
-            // improvedPathfinding while async repaths flood.
+            // rtsPathfinding while async repaths flood.
             if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
             RtsPathfinder.requestPath(this.mob, moveTarget, moveReachRange, mobility, valid,
                     (path, busy) -> onPathReady(path, busy, seq));
@@ -172,6 +175,19 @@ public class MoveToTargetBlockGoal extends Goal {
         // canContinueToUse handles retries / give-up.
         Path path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
         if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
+        /*
+        if (path == null) {
+            AttributeInstance ai = mob.getAttribute(Attributes.FOLLOW_RANGE);
+            if (ai != null && ai.getBaseValue() == FOLLOW_RANGE_IMPROVED) {
+                // Fallback: long-range search bailed (eg. hit maxVisitedNodes). Retry with the short
+                // range — vanilla A* may give up sooner and return a useful partial path.
+                ai.setBaseValue(FOLLOW_RANGE);
+                path = mob.getNavigation().createPath(moveTarget.getX(), moveTarget.getY(), moveTarget.getZ(), moveReachRange);
+                if (!this.mob.level().isClientSide()) RtsDebugServerEvents.debugPathCalcsThisSecond += 1;
+                ai.setBaseValue(FOLLOW_RANGE_IMPROVED);
+            }
+        }
+         */
         this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier(u));
         // Broadcast the path so clients can render it briefly. Server-only — clients
         // that received the packet decide whether to render based on ownership/FOW.

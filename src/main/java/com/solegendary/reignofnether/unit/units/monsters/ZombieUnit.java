@@ -134,7 +134,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     @Nullable
     public ResourceCost getCost() {
-        return isSummonedByNecromancer() ?
+        return isSummoned() ?
                 ResourceCost.Unit(0,0, 0, 0,0) :
                 ResourceCosts.ZOMBIE;
     }
@@ -212,19 +212,15 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
                 if (getOwnerName().equals(BloodMoon.ENEMY_NAME) && !TimeServerEvents.isBloodMoonActive()) {
                     hurt(this.damageSources().starve(), 1.33f);
                 }
-                else if (tickCount > RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY && isSummonedByNecromancer()) {
+                else if (tickCount > RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY && isSummoned()) {
                     hurt(this.damageSources().starve(), 1.33f);
                 }
             }
         }
     }
 
-    public boolean isSummonedByNecromancer() {
-        return hasItemInSlot(EquipmentSlot.HEAD) &&
-                hasItemInSlot(EquipmentSlot.CHEST) &&
-                hasItemInSlot(EquipmentSlot.LEGS) &&
-                hasItemInSlot(EquipmentSlot.FEET) &&
-                hasItemInSlot(EquipmentSlot.MAINHAND);
+    public boolean isSummoned() {
+        return getPersistentData().contains("isSummoned") && getPersistentData().getBoolean("isSummoned");
     }
 
     @Override

@@ -493,7 +493,7 @@
     "commands.reignofnether.gamerule.player_griefing": "Гравці можуть руйнувати блоки ландшафту",
     "commands.reignofnether.gamerule.ground_y_level": "Мінімальна висота для камер",
     "commands.reignofnether.gamerule.flying_max_y_level": "Максимальна висота для літаючих юнітів",
-    "commands.reignofnether.gamerule.improved_pathfinding": "Покращує точність пошуку шляху, збільшує навантаження на CPU",
+    "commands.reignofnether.gamerule.rts_pathfinding": "Покращує точність пошуку шляху, збільшує навантаження на CPU",
     "commands.reignofnether.send_resources": "%s - Надіслати ресурси союзному RTS-гравцю",
     "commands.reignofnether.camera": "%s - Перемкнути RTS-камеру",
     "commands.reignofnether.gamerule.allow_beacons": "Дозволити робітникам будувати Маяки",

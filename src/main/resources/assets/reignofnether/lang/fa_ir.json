@@ -597,7 +597,7 @@
     "commands.reignofnether.gamerule.player_griefing": "بازیکنان میتوانند بلاک ها را خراب کنند",
     "commands.reignofnether.gamerule.ground_y_level": "حداقل ارتفاع برای دوربین",
     "commands.reignofnether.gamerule.flying_max_y_level": "حداکثر ارتفاع برای نیرو های پرنده",
-    "commands.reignofnether.gamerule.improved_pathfinding": "پیدا کردن مسیر را برای نیروها راحت تر میکند اما استفاده از سی پی یو افزایش می یابد",
+    "commands.reignofnether.gamerule.rts_pathfinding": "پیدا کردن مسیر را برای نیروها راحت تر میکند اما استفاده از سی پی یو افزایش می یابد",
     "commands.reignofnether.gamerule.allow_beacons": "به کارگران اجازه میدهد بیکن بسازند",
     "commands.reignofnether.gamerule.pvp_modes_only": "غیرفعال کردن حالت بقا و سندباکس",
     "commands.reignofnether.gamerule.beacon_win_minutes": "زمان نیاز برای پیروزی با کنترل بیکن",

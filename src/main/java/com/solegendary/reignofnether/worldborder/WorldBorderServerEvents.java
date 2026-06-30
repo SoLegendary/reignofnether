@@ -25,6 +25,8 @@ public class WorldBorderServerEvents {
     // (see PathfinderConfig.MAX_CACHED_CHUNKS), which is what makes the full-map precompute worthwhile.
     public static final int RTS_OPTIMIZED_BORDER = 1024;
 
+    public static boolean prewarmedNavmesh = false;
+
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent evt) {
         MinecraftServer server = evt.getServer();
@@ -41,12 +43,12 @@ public class WorldBorderServerEvents {
                 "RTS-optimised map detected (world border = {} blocks) - enabling improved pathfinding + navmesh precompute",
                 (int) border.getSize());
 
-        // Turn the improvedPathfinding gamerule on for this map (the gamerule's own default stays off, so
+        // Turn the rtsPathfinding gamerule on for this map (the gamerule's own default stays off, so
         // vanilla maps are unaffected) and mirror it to the server flag + any clients, reusing the existing
         // gamerule plumbing. At server-start there are no clients yet; player-join sync handles late joiners.
-        server.getGameRules().getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).set(true, server);
-        UnitServerEvents.improvedPathfinding = true;
-        GameruleClientboundPacket.setImprovedPathfinding(true);
+        server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).set(true, server);
+        UnitServerEvents.rtsPathfinding = true;
+        GameruleClientboundPacket.setRtsPathfinding(true);
 
         // Elevate the per-tick warm budget across the prewarm load window, restoring the configured value
         // after. (The synchronous prewarm loop below bypasses this budget; this only affects any runtime
@@ -101,6 +103,8 @@ public class WorldBorderServerEvents {
 
         ReignOfNether.LOGGER.info("Prewarmed RTS navmesh: {} chunks in {} ms",
                 total, System.currentTimeMillis() - startMs);
+
+        prewarmedNavmesh = true;
     }
 
     // Y band to classify for a chunk: span the chunk's surface heights (sampled at its corners + centre) and
