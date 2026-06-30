@@ -118,6 +118,8 @@ public class MoveToTargetBlockGoal extends Goal {
             return;
         }
 
+        System.out.println("MoveToTargetBlockGoal start: " + mob.getName().getString() + "|" + mob.getId() + "|" + pathRequestSeq);
+
         // When the rtsPathfinding gamerule is on, route through the async grid A* pathfinder.
         if (useRtsPathfinding()) {
             this.mob.setMaxUpStep(1.0f);
