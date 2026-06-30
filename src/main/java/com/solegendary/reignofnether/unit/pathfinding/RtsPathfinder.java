@@ -13,7 +13,7 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Path;
 
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
+import java.util.function.BooleanSupplier;
 
 // Facade: turn a (mob, target) into a vanilla Path delivered to a callback.
 // Snaps the goal, captures a snapshot, hands it to the worker pool.
@@ -26,11 +26,14 @@ public final class RtsPathfinder {
 
     public static final int SNAP_RADIUS = 4;
 
-    public static void requestPath(Mob mob, BlockPos target, int reach, MobilityClass mobility, Consumer<Path> onReady) {
+    // `valid` is checked on the main thread before a parked request warms its chunks: it bundles the
+    // mob's liveness with the requesting goal's current request-seq, so a superseded order is dropped
+    // before it burns chunk-build budget (see PathfinderWorkerPool.processBuildQueue).
+    public static void requestPath(Mob mob, BlockPos target, int reach, MobilityClass mobility, BooleanSupplier valid, PathCallback onReady) {
         Level level = mob.level();
         BlockPos start = mob.blockPosition();
         if (isUnloaded(level, start) || isUnloaded(level, target)) {
-            onReady.accept(null);
+            onReady.onPath(null, false);
             return;
         }
         int clearanceCells = Math.max(2, Mth.ceil(mob.getBbHeight()));
@@ -46,16 +49,16 @@ public final class RtsPathfinder {
         if (reachableGoal) target = snapped;
         int maxNodes = reachableGoal ? PathfinderConfig.MAX_NODES : PathfinderConfig.MAX_NODES_UNREACHABLE_GOAL;
         if (PathfinderWorkerPool.isInitialised()) {
-            PathfinderWorkerPool.submit(level, start, target, reach, mobility, clearanceCells, footprintRadius, fireCost, canClimb, maxNodes, mob::isAlive, onReady);
+            PathfinderWorkerPool.submit(level, start, target, reach, mobility, clearanceCells, footprintRadius, fireCost, canClimb, maxNodes, valid, onReady);
         } else {
             try {
                 int dilation = PathfinderConfig.dilationFor(start, target);
                 ChunkSnapshot snap = ChunkSnapshot.capture(level, start, target, dilation, mobility, clearanceCells, footprintRadius, fireCost, canClimb);
                 GridAStar.Result r = GridAStar.search(snap, start, target, reach, PathfinderConfig.MAX_RADIUS, maxNodes);
-                onReady.accept(PathConverter.toMcPath(r.waypoints, target, r.reached, snap));
+                onReady.onPath(PathConverter.toMcPath(r.waypoints, target, r.reached, snap), false);
             } catch (Throwable t) {
                 ReignOfNether.LOGGER.error("Sync pathfinder failed", t);
-                onReady.accept(null);
+                onReady.onPath(null, false);
             }
         }
     }

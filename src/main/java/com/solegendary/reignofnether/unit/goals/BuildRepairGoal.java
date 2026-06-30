@@ -38,6 +38,15 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         super(mob, true, 0);
     }
 
+    // isBuilding() accepts the worker as arrived at range 2, but moveReachRange is 0 so the base recalc
+    // threshold is the 1.5-block settle distance. That leaves a 1.5-2 block band where a worker is building
+    // yet still "too far -> repath" - which loops it on the spot. Match the threshold to the build range so a
+    // worker in build range never triggers a recalc.
+    @Override
+    public double getMinDistToRecalculateSqr() {
+        return Math.max(super.getMinDistToRecalculateSqr(), 2.0 * 2.0);
+    }
+
     public void setIsBuildingServerside(boolean isBuilding) {
         this.isBuildingServerside = isBuilding;
     }

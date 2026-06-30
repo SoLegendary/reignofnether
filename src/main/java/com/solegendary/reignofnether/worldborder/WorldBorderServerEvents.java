@@ -48,7 +48,16 @@ public class WorldBorderServerEvents {
         UnitServerEvents.improvedPathfinding = true;
         GameruleClientboundPacket.setImprovedPathfinding(true);
 
-        prewarmNavmesh(level, border);
+        // Elevate the per-tick warm budget across the prewarm load window, restoring the configured value
+        // after. (The synchronous prewarm loop below bypasses this budget; this only affects any runtime
+        // warming that occurs during loading.)
+        int configuredBudget = PathfinderConfig.maxChunkBuildsPerTick;
+        PathfinderConfig.maxChunkBuildsPerTick = PathfinderConfig.CHUNK_BUILDS_PER_TICK_PREWARM;
+        try {
+            prewarmNavmesh(level, border);
+        } finally {
+            PathfinderConfig.maxChunkBuildsPerTick = configuredBudget;
+        }
     }
 
     // Force-load and classify every chunk inside the world border so the navmesh is fully warm before play.

@@ -4,6 +4,7 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.pathfinding.PathfinderWorkerPool;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -112,6 +113,18 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 UnitServerEvents.improvedPathfinding = value;
                 GameruleClientboundPacket.setImprovedPathfinding(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("pathfindingThreads")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                int value = (int) args.get("value").getResult();
+                PathfinderWorkerPool.requestResize(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("pathfindingChunkBuildsPerTick")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                int value = (int) args.get("value").getResult();
+                PathfinderWorkerPool.setChunkBuildsPerTick(value);
             }
         }
     }

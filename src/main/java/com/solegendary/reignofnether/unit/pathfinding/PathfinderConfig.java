@@ -23,7 +23,16 @@ public final class PathfinderConfig {
     // per tick; cache hits are free and don't count. lower = smoother TPS but slower first path, higher = the
     // reverse. kept modest since each cold build also bakes crowd[] (a ~5x5 scan per cell), so a chunk is
     // pricier than it used to be - a batch of fresh path orders shouldn't classify many chunks in one tick.
-    public static final int MAX_CHUNK_BUILDS_PER_TICK = 8;
+    // this is main-thread work, so a high cap spikes TPS; superseded requests are now dropped before warming
+    // (PathfinderWorkerPool seq guard) so the budget is spent only on live requests. Live via the
+    // pathfindingChunkBuildsPerTick gamerule (clamped to [1, 64]) - watch the F7 Queue/e2e stats when tuning;
+    // prefer raising worker threads (off-thread compute) over this (on-thread warming) to lower e2e under load.
+    public static final int CHUNK_BUILDS_PER_TICK_DEFAULT = 4;
+    // raised cap used while the world-border navmesh prewarms at server start (no players, so the TPS cost is
+    // free). note the prewarm itself warms chunks synchronously and bypasses this budget; this elevates any
+    // runtime warming that happens within the load window.
+    public static final int CHUNK_BUILDS_PER_TICK_PREWARM = 16;
+    public static volatile int maxChunkBuildsPerTick = CHUNK_BUILDS_PER_TICK_DEFAULT;
     // a block change marks its chunk dirty (not evicted) with the changed-cell bbox; the START-phase drain
     // patches only that region via reclassifyRegion (clone + small reclassify, not a whole-chunk build). cap
     // distinct dirty chunks patched per tick; the rest stay stale-but-walkable (never removed, so units are
@@ -66,16 +75,9 @@ public final class PathfinderConfig {
     // A* over an immutable snapshot is embarrassingly parallel; scale workers with cores.
     public static final int WORKER_THREADS = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
 
-    // within this squared distance of its target a unit is "arrived": separation stops pushing and the move
-    // goal stops recalculating, so a settled group doesn't jitter. shared by UnitSeparation and
-    // MoveToTargetBlockGoal.getMinDistToRecalculateSqr so the thresholds can't drift.
+    // within this squared distance of its target a unit is "arrived": the move goal stops recalculating, so a
+    // settled group doesn't jitter. Used by MoveToTargetBlockGoal.getMinDistToRecalculateSqr.
     public static final double ARRIVAL_SETTLE_SQ = 2.25; // 1.5 blocks
-
-    // Per-tick separation steering between crowding, same-owner, moving units.
-    public static final double SEPARATION_RADIUS = 1.6;
-    public static final double SEPARATION_STRENGTH = 0.04;
-    public static final int SEPARATION_MAX_PER_TICK = 400;
-    public static final int SEPARATION_CELL_SIZE = 2;
 
     public static int dilationFor(BlockPos start, BlockPos target) {
         int manhattan = Math.abs(start.getX() - target.getX()) + Math.abs(start.getZ() - target.getZ());

@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.unit.pathfinding;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceIndex;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraftforge.event.TickEvent;
@@ -20,7 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID)
 public final class PathfinderWorkerPool {
@@ -29,6 +31,14 @@ public final class PathfinderWorkerPool {
     private static volatile ExecutorService POOL;
     private static final ConcurrentLinkedQueue<Runnable> RESULTS = new ConcurrentLinkedQueue<>();
     private static final AtomicInteger INFLIGHT = new AtomicInteger(0);
+
+    // Worker-thread count is the live `pathfindingThreads` gamerule. currentThreads is the size the
+    // running POOL was built with (main-thread only); desiredThreads is the latest requested size
+    // (written from the gamerule command, applied at the next tick START). Hard-capped so a stray
+    // value can't spawn a runaway pool.
+    private static final int MAX_THREAD_CAP = 32;
+    private static int currentThreads = 0;
+    private static volatile int desiredThreads = 0;
 
     // Building a request's walkability grid (getBlockState/getCollisionShape) MUST happen on the main thread,
     // so classifying a whole corridor at once spikes the tick. Each request parks here and its cold chunks are
@@ -42,17 +52,68 @@ public final class PathfinderWorkerPool {
     @SubscribeEvent
     public static void onServerStart(ServerStartingEvent evt) {
         if (POOL != null) return;
-        int n = Math.max(1, PathfinderConfig.WORKER_THREADS);
-        POOL = Executors.newFixedThreadPool(n, r -> {
+        int n = clampThreads(configuredThreads(evt.getServer()));
+        POOL = newPool(n);
+        currentThreads = n;
+        desiredThreads = n;
+        if (evt.getServer() != null && GameRuleRegistrar.PATHFINDING_CHUNK_BUILDS != null)
+            setChunkBuildsPerTick(evt.getServer().getGameRules().getInt(GameRuleRegistrar.PATHFINDING_CHUNK_BUILDS));
+        INFLIGHT.set(0);
+        RESULTS.clear();
+        BUILD_QUEUE.clear();
+        ReignOfNether.LOGGER.info("RTS pathfinder pool started ({} thread{})", n, n == 1 ? "" : "s");
+    }
+
+    private static ExecutorService newPool(int n) {
+        return Executors.newFixedThreadPool(n, r -> {
             Thread t = new Thread(r, "RtsPathfinderPool");
             t.setDaemon(true);
             t.setPriority(Thread.NORM_PRIORITY - 1);
             return t;
         });
-        INFLIGHT.set(0);
-        RESULTS.clear();
-        BUILD_QUEUE.clear();
-        ReignOfNether.LOGGER.info("RTS pathfinder pool started ({} thread{})", n, n == 1 ? "" : "s");
+    }
+
+    private static int clampThreads(int n) {
+        return Math.max(1, Math.min(n, MAX_THREAD_CAP));
+    }
+
+    // The pathfindingThreads gamerule value, falling back to the hardware-derived default if the rule
+    // isn't available yet.
+    private static int configuredThreads(MinecraftServer server) {
+        if (server != null && GameRuleRegistrar.PATHFINDING_THREADS != null)
+            return server.getGameRules().getInt(GameRuleRegistrar.PATHFINDING_THREADS);
+        return PathfinderConfig.WORKER_THREADS;
+    }
+
+    // Requested by the gamerule command; the new size is applied at the next tick START (main thread).
+    public static void requestResize(int n) {
+        desiredThreads = clampThreads(n);
+    }
+
+    // Live cap on cold chunks warmed per tick (pathfindingChunkBuildsPerTick gamerule). Takes effect the next
+    // tick; clamped so it can never stall warming (0) or spike TPS unbounded.
+    public static void setChunkBuildsPerTick(int n) {
+        PathfinderConfig.maxChunkBuildsPerTick = Math.max(1, Math.min(n, 64));
+    }
+
+    // Outstanding pathfinding work for the F7 "Queue" stat: requests parked for chunk warming plus those
+    // running A* on the pool. This is the backlog that drives the "Path e2e" latency under load.
+    // BUILD_QUEUE is main-thread-only, so call this from the main thread (the debug tick does).
+    public static int queueDepth() {
+        return BUILD_QUEUE.size() + INFLIGHT.get();
+    }
+
+    // Swap in a fresh pool of the requested size and let the old one drain gracefully. In-flight tasks
+    // on the old pool still finish, post seq-guarded results to RESULTS, and decrement INFLIGHT, so we
+    // leave INFLIGHT/RESULTS/BUILD_QUEUE untouched. Main-thread only (called from tick START).
+    private static void applyPendingResize() {
+        int target = desiredThreads;
+        if (target <= 0 || target == currentThreads) return;
+        ExecutorService old = POOL;
+        POOL = newPool(target);
+        currentThreads = target;
+        if (old != null) old.shutdown();
+        ReignOfNether.LOGGER.info("RTS pathfinder pool resized to {} thread{}", target, target == 1 ? "" : "s");
     }
 
     @SubscribeEvent
@@ -79,6 +140,8 @@ public final class PathfinderWorkerPool {
         // START: rebuild settled dirty chunks, then classify a budget of cold corridor chunks and dispatch any
         // request now warm. Drain first so paths captured this tick see freshest data.
         if (evt.phase == TickEvent.Phase.START) {
+            // apply a pending pathfindingThreads change before any dispatch this tick.
+            applyPendingResize();
             // walkability caching + dispatch only run with the improvedPathfinding gamerule on (off = vanilla
             // pathfinding). the resource index is independent (used by gather goals either way), so always drains.
             if (UnitServerEvents.improvedPathfinding) {
@@ -101,32 +164,36 @@ public final class PathfinderWorkerPool {
         }
     }
 
-    public static void submit(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, int maxNodes, BooleanSupplier alive, Consumer<Path> onReady) {
+    public static void submit(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, int maxNodes, BooleanSupplier valid, PathCallback onReady) {
         if (POOL == null) {
-            onReady.accept(null);
+            onReady.onPath(null, false);
             return;
         }
+        // Queue saturated: deliver a busy signal (not a no-path), so the unit keeps its current path and
+        // retries shortly instead of stopping and re-submitting every tick (the back-and-forth loop).
         if (BUILD_QUEUE.size() >= PathfinderConfig.QUEUE_BACKPRESSURE_CAP) {
-            RESULTS.add(() -> onReady.accept(null));
+            RESULTS.add(() -> onReady.onPath(null, true));
             return;
         }
         int dilation = PathfinderConfig.dilationFor(start, target);
         ChunkSnapshot.CaptureRegion region = ChunkSnapshot.regionFor(start, target, dilation);
         BUILD_QUEUE.add(new PendingBuild(level, start, target, reach, mobility, clearanceCells,
-                footprintRadius, fireCost, canClimb, maxNodes, region, alive, onReady));
+                footprintRadius, fireCost, canClimb, maxNodes, region, valid, onReady, System.nanoTime()));
     }
 
     // Classify up to MAX_CHUNK_BUILDS_PER_TICK cold chunks across parked requests this tick. Cache hits are free
     // and don't spend budget, so already-warm corridors (eg. trailing units of a formation move) finish and
     // dispatch in the same tick they're queued.
     private static void processBuildQueue() {
-        int budget = PathfinderConfig.MAX_CHUNK_BUILDS_PER_TICK;
+        int budget = PathfinderConfig.maxChunkBuildsPerTick;
         while (budget > 0 && !BUILD_QUEUE.isEmpty()) {
             PendingBuild pb = BUILD_QUEUE.peekFirst();
-            // Drop work for units that died/were removed while waiting, so they don't starve live requests.
-            if (pb.alive != null && !pb.alive.getAsBoolean()) {
+            // Drop work for units that died, were removed, or whose request was superseded by a newer order
+            // (valid bundles isAlive + the goal's current seq), so stale entries don't burn chunk-build budget
+            // and starve live requests. onPathReady discards the result via its own seq guard.
+            if (pb.valid != null && !pb.valid.getAsBoolean()) {
                 BUILD_QUEUE.pollFirst();
-                pb.onReady.accept(null);
+                pb.onReady.onPath(null, false);
                 continue;
             }
             WalkabilityGrid grid = WalkabilityGrid.get(pb.level);
@@ -161,11 +228,12 @@ public final class PathfinderWorkerPool {
     private static void dispatchToPool(PendingBuild pb) {
         ExecutorService pool = POOL;
         if (pool == null) {
-            pb.onReady.accept(null);
+            pb.onReady.onPath(null, false);
             return;
         }
+        // Pool saturated: busy signal (see submit) so the unit doesn't stop/resubmit-loop under load.
         if (INFLIGHT.get() >= PathfinderConfig.QUEUE_BACKPRESSURE_CAP) {
-            RESULTS.add(() -> pb.onReady.accept(null));
+            RESULTS.add(() -> pb.onReady.onPath(null, true));
             return;
         }
 
@@ -176,7 +244,7 @@ public final class PathfinderWorkerPool {
                     pb.clearanceCells, pb.footprintRadius, pb.fireCost, pb.canClimb);
         } catch (Throwable t) {
             ReignOfNether.LOGGER.error("ChunkSnapshot capture failed", t);
-            pb.onReady.accept(null);
+            pb.onReady.onPath(null, false);
             return;
         }
 
@@ -184,10 +252,12 @@ public final class PathfinderWorkerPool {
         final BlockPos target = pb.target;
         final int reach = pb.reach;
         final int maxNodes = pb.maxNodes;
-        final Consumer<Path> onReady = pb.onReady;
+        final PathCallback onReady = pb.onReady;
+        final long submitNanos = pb.submitNanos;
         INFLIGHT.incrementAndGet();
         pool.execute(() -> {
             Path result = null;
+            long computeStart = System.nanoTime();
             try {
                 // Chained A*: when the goal is outside the 96-block search radius, run a follow-up search from
                 // where the last one ended rather than returning a partial path. Up to MAX_CHAIN_SEGMENTS hops,
@@ -217,9 +287,16 @@ public final class PathfinderWorkerPool {
                 ReignOfNether.LOGGER.error("Worker A* failed", t);
             } finally {
                 INFLIGHT.decrementAndGet();
+                // worker-thread compute time (pure A*); accumulated thread-safely for the F7 "Path ms" stat.
+                RtsDebugServerEvents.recordPathCompute(System.nanoTime() - computeStart);
             }
             final Path delivered = result;
-            RESULTS.add(() -> onReady.accept(delivered));
+            RESULTS.add(() -> {
+                // end-to-end latency (submit -> delivered, incl. queue wait); recorded on the main thread
+                // for the F7 "Path e2e" stat.
+                RtsDebugServerEvents.recordPathE2e(System.nanoTime() - submitNanos);
+                onReady.onPath(delivered, false);
+            });
         });
     }
 
@@ -237,13 +314,14 @@ public final class PathfinderWorkerPool {
         final boolean canClimb;
         final int maxNodes;
         final ChunkSnapshot.CaptureRegion region;
-        final BooleanSupplier alive;
-        final Consumer<Path> onReady;
+        final BooleanSupplier valid;
+        final PathCallback onReady;
+        final long submitNanos;
         int cursor = 0;
 
         PendingBuild(Level level, BlockPos start, BlockPos target, int reach, MobilityClass mobility,
                      int clearanceCells, int footprintRadius, float fireCost, boolean canClimb, int maxNodes,
-                     ChunkSnapshot.CaptureRegion region, BooleanSupplier alive, Consumer<Path> onReady) {
+                     ChunkSnapshot.CaptureRegion region, BooleanSupplier valid, PathCallback onReady, long submitNanos) {
             this.level = level;
             this.start = start;
             this.target = target;
@@ -255,8 +333,9 @@ public final class PathfinderWorkerPool {
             this.canClimb = canClimb;
             this.maxNodes = maxNodes;
             this.region = region;
-            this.alive = alive;
+            this.valid = valid;
             this.onReady = onReady;
+            this.submitNanos = submitNanos;
         }
     }
 }

@@ -395,14 +395,7 @@ public class UnitClientEvents {
         }
         // move to ground pos (disabled during camera manip)
         else if (!Keybindings.altMod.isDown() && !selectedUnits.isEmpty() && MC.level != null) {
-            ResourceName resName = ResourceSources.getBlockResourceName(getPreselectedBlockPos(), MC.level);
-            boolean isGathering = hudSelectedEntity instanceof WorkerUnit && resName != ResourceName.NONE;
-
             sendUnitCommand(UnitAction.MOVE);
-
-            for (LivingEntity le : selectedUnits)
-                if (!isGathering && le instanceof Unit unit && unit.getMoveGoal() != null)
-                    unit.getMoveGoal().lastSelectedMoveTarget = getPreselectedBlockPos();
         }
     }
 
