@@ -38,6 +38,7 @@ Official Map Pack
 [❌] You can ready without picking a faction
 [❌] if showing observer menu, don't show gamerules menu
 [❌] clear the observer menu stats on client logout
+[❌]
 
 Quality of Life
 ---------------
