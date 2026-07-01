@@ -35,7 +35,8 @@ Official Map Pack
 [❌] Remove older author's maps
 [❌] Add Killerbee's maps
 
-
+[❌] You can ready without picking a faction
+[❌] if showing observer menu, don't show gamerules menu
 
 
 Quality of Life
