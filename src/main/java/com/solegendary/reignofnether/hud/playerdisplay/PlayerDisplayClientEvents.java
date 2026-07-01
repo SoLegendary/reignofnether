@@ -53,6 +53,13 @@ public class PlayerDisplayClientEvents {
         displayType = DisplayType.NONE;
     }
 
+    public static void clearAll() {
+        observerPlayerDisplays.clear();
+        rtsDiplomacyPlayerDisplays.clear();
+        fpvDiplomacyPlayerDisplays.clear();
+        resetDisplay();
+    }
+
     public static final Button observerButton = new Button(
             "Toggle Observer Displays",
             Button.DEFAULT_ICON_SIZE,

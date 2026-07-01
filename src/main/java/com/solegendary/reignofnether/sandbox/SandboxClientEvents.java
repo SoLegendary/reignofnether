@@ -170,15 +170,6 @@ public class SandboxClientEvents {
         };
     }
 
-    private static String getFactionName() {
-        return switch (faction) {
-            case VILLAGERS -> I18n.get("hud.faction.reignofnether.villagers");
-            case MONSTERS -> I18n.get("hud.faction.reignofnether.monsters");
-            case PIGLINS -> I18n.get("hud.faction.reignofnether.piglins");
-            default -> I18n.get("hud.faction.reignofnether.neutral");
-        };
-    }
-
     public static String getRelationshipName(Relationship relationship) {
         return switch (relationship) {
             case OWNED -> I18n.get("hud.relationship.reignofnether.owned");

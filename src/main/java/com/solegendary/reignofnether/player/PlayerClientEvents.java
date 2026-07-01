@@ -324,6 +324,7 @@ public class PlayerClientEvents {
         AlliancesClient.resetAllAlliances();
         RTSMapInfoClientEvents.reset();
         MinimapClientEvents.clearMinimapUnits();
+        PlayerDisplayClientEvents.clearAll();
     }
 
     @SubscribeEvent

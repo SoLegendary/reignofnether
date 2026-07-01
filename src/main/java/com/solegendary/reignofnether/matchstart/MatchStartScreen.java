@@ -18,12 +18,15 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class MatchStartScreen extends Screen {
 
@@ -47,8 +50,6 @@ public class MatchStartScreen extends Screen {
     private static final int ICON_SIZE = 14;
     private static final int ROW_H = 26;
 
-    private final List<FactionHit> factionHits = new ArrayList<>();
-    private final List<ReadyHit> readyHits = new ArrayList<>();
     private final List<RowHit> rowHits = new ArrayList<>();
     private final List<Button> hudButtons = new ArrayList<>();
     private int rosX1, rosY1, rosX2, rosY2;
@@ -73,14 +74,7 @@ public class MatchStartScreen extends Screen {
     private int rosterContentH = 0;
     private int rosterViewH = 0;
 
-    private record FactionHit(StartPos pos, Faction faction, int x, int y) {}
-    private record ReadyHit(StartPos pos, int x, int y) {}
     private record RowHit(StartPos pos, int x1, int y1, int x2, int y2) {}
-
-    // Tooltip state set during render, drawn after scissor regions
-    private String pendingTooltip = null;
-    private int pendingTooltipX = 0;
-    private int pendingTooltipY = 0;
 
     public MatchStartScreen() {
         super(Component.literal("Match Setup"));
@@ -134,13 +128,8 @@ public class MatchStartScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        //renderDirtBackground(g);
-
-        factionHits.clear();
-        readyHits.clear();
         rowHits.clear();
         hudButtons.clear();
-        pendingTooltip = null;
 
         int leftBottom = this.height - MARGIN;
         int mapX1 = MARGIN;
@@ -191,18 +180,6 @@ public class MatchStartScreen extends Screen {
                     b.name.equals(GameruleClient.INTEGER_BUTTON_NAME))) {
                 b.renderTooltip(g, mouseX, mouseY);
             }
-        }
-
-        // Draw simple tooltips for faction/ready tiles
-        if (pendingTooltip != null && !isMouseOverOverlay(mouseX, mouseY)) {
-            int tw = this.font.width(pendingTooltip) + 8;
-            int th = this.font.lineHeight + 6;
-            int tx = pendingTooltipX + FRAME_SIZE + 2;
-            int ty = pendingTooltipY;
-            if (tx + tw > this.width - MARGIN) tx = pendingTooltipX - tw - 2;
-            g.fill(tx, ty, tx + tw, ty + th, 0xE0000000);
-            g.fill(tx, ty, tx + 1, ty + th, 0xFF_C8A840);
-            g.drawString(this.font, pendingTooltip, tx + 4, ty + 4, TEXT_NORMAL, false);
         }
     }
 
@@ -479,11 +456,10 @@ public class MatchStartScreen extends Screen {
         Faction[] order = { Faction.VILLAGERS, Faction.MONSTERS, Faction.PIGLINS, Faction.RANDOM };
         int currentX = factionStartX - 6;
         for (Faction f : order) {
-            renderFactionTile(g, sp, f, currentX, tileY, localName, mx, my, overlayActive);
+            renderFactionTile(g, sp, f, currentX, tileY, localName, mx, my);
             currentX += FRAME_SIZE;
         }
-
-        renderReadyTile(g, sp, readyX, tileY, localName, mx, my, overlayActive);
+        renderReadyTile(g, sp, readyX, tileY, localName, mx, my);
 
         if (sp.enabled && (empty || mine)) {
             int rowHitRight = factionStartX - 5;
@@ -528,64 +504,41 @@ public class MatchStartScreen extends Screen {
     }
 
     private void renderFactionTile(GuiGraphics g, StartPos sp, Faction f,
-                                   int x, int y, String localName, int mx, int my, boolean overlayActive) {
+                                   int x, int y, String localName, int mx, int my) {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(localName);
-        boolean selected = sp.faction == f && !sp.playerName.isBlank();
-        boolean canPick = sp.enabled && mine;
-
-        MyRenderer.renderIconFrameWithBg(g, ICON_FRAME, x, y, FRAME_SIZE, BG_ICON);
         ResourceLocation icon = MiscUtil.getFactionIcon(f);
         if (f == Faction.RANDOM)
             icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark.png");
-        int innerOffset = (FRAME_SIZE - ICON_SIZE) / 2;
-        MyRenderer.renderIcon(g, icon, x + innerOffset, y + innerOffset, ICON_SIZE);
-        if (!canPick) {
-            g.fill(x + 1, y + 1, x + FRAME_SIZE - 1, y + FRAME_SIZE - 1, 0xA0000000);
-        }
-        if (selected) {
-            MyRenderer.renderIcon(g, ICON_FRAME_SEL, x - 1, y - 1, FRAME_SIZE + 2);
-        }
-        boolean hovered = !overlayActive && mx >= x && mx <= x + FRAME_SIZE && my >= y && my <= y + FRAME_SIZE;
-        if (canPick && hovered) {
-            g.fill(x + 1, y + 1, x + FRAME_SIZE - 1, y + FRAME_SIZE - 1, 0x32FFFFFF);
-        }
-        if (hovered && pendingTooltip == null) {
-            pendingTooltip = f.name().charAt(0) + f.name().substring(1).toLowerCase();
-            pendingTooltipX = x;
-            pendingTooltipY = y;
-        }
-        if (canPick) factionHits.add(new FactionHit(sp, f, x, y));
+
+        Button button = new ButtonBuilder("Faction " + f.name())
+                .iconResource(icon)
+                .isSelected(() -> sp.faction == f && !sp.playerName.isBlank())
+                .isEnabled(() -> mine)
+                .onLeftClick(() -> pickFaction(sp, f))
+                .tooltipLines(List.of(fcs(MiscUtil.getFactionName(f))))
+                .build();
+
+        button.render(g, x, y, mx, my);
+        hudButtons.add(button);
     }
 
     private void renderReadyTile(GuiGraphics g, StartPos sp, int x, int y,
-                                 String localName, int mx, int my, boolean overlayActive) {
+                                 String localName, int mx, int my) {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(localName);
-        boolean otherClaimed = !sp.playerName.isBlank() && !mine;
-        boolean canToggle = mine;
-
         MyRenderer.renderIconFrameWithBg(g, ICON_FRAME, x, y, FRAME_SIZE, BG_ICON);
         ResourceLocation icon = sp.ready ? TICK_ICON : CROSS_ICON;
-        int innerOffset = (FRAME_SIZE - ICON_SIZE) / 2;
-        MyRenderer.renderIcon(g, icon, x + innerOffset, y + innerOffset, ICON_SIZE);
 
-        if (sp.ready) {
-            MyRenderer.renderIcon(g, ICON_FRAME_SEL, x - 1, y - 1, FRAME_SIZE + 2);
-        }
-        if (otherClaimed || sp.playerName.isBlank()) {
-            g.fill(x + 1, y + 1, x + FRAME_SIZE - 1, y + FRAME_SIZE - 1, 0xA0000000);
-        }
-        boolean hovered = !overlayActive && mx >= x && mx <= x + FRAME_SIZE && my >= y && my <= y + FRAME_SIZE;
-        if (canToggle && hovered) {
-            g.fill(x + 1, y + 1, x + FRAME_SIZE - 1, y + FRAME_SIZE - 1, 0x32FFFFFF);
-        }
-        if (hovered && pendingTooltip == null) {
-            pendingTooltip = sp.ready
-                    ? Component.translatable("startpos.reignofnether.ready_button.unready").getString()
-                    : Component.translatable("startpos.reignofnether.ready_button.ready").getString();
-            pendingTooltipX = x;
-            pendingTooltipY = y;
-        }
-        if (canToggle) readyHits.add(new ReadyHit(sp, x, y));
+        Button button = new ButtonBuilder("Ready toggle")
+                .iconResource(icon)
+                .isEnabled(() -> mine && sp.faction != Faction.NONE && sp.faction != Faction.NEUTRAL)
+                .onLeftClick(() -> toggleReady(sp))
+                .tooltipLines(List.of(fcs(sp.ready
+                        ? I18n.get("startpos.reignofnether.ready_button.unready")
+                        : I18n.get("startpos.reignofnether.ready_button.ready"))))
+                .build();
+
+        button.render(g, x, y, mx, my);
+        hudButtons.add(button);
     }
 
     private void renderGamerulesPopover(GuiGraphics g, int mx, int my) {
@@ -761,18 +714,6 @@ public class MatchStartScreen extends Screen {
         }
 
         if (left && !isMouseOverOverlay(mx, my)) {
-            for (FactionHit fh : factionHits) {
-                if (mx >= fh.x && mx <= fh.x + FRAME_SIZE && my >= fh.y && my <= fh.y + FRAME_SIZE) {
-                    pickFaction(fh.pos, fh.faction);
-                    return true;
-                }
-            }
-            for (ReadyHit rh : readyHits) {
-                if (mx >= rh.x && mx <= rh.x + FRAME_SIZE && my >= rh.y && my <= rh.y + FRAME_SIZE) {
-                    toggleReady(rh.pos);
-                    return true;
-                }
-            }
             for (RowHit rh : rowHits) {
                 if (mx >= rh.x1 && mx <= rh.x2 && my >= rh.y1 && my <= rh.y2) {
                     claimDot(rh.pos);
@@ -807,6 +748,9 @@ public class MatchStartScreen extends Screen {
                 StartPosServerboundPacket.reservePos(pos.pos, faction, name);
             }
         }
+        if (pos.ready) {
+            toggleReady(pos);
+        }
     }
 
     private void claimDot(StartPos pos) {
@@ -831,7 +775,6 @@ public class MatchStartScreen extends Screen {
 
     @Override
     public boolean shouldCloseOnEsc() {
-        // ESC always closes this screen; if chat is focused, first defocus it
         return true;
     }
 

@@ -35,11 +35,6 @@ Official Map Pack
 [❌] Remove older author's maps
 [❌] Add Killerbee's maps
 
-[❌] You can ready without picking a faction
-[❌] if showing observer menu, don't show gamerules menu
-[❌] clear the observer menu stats on client logout
-[❌] refactor MatchStartScreen buttons to use ButtonBuilder
-
 Quality of Life
 ---------------
 [✔] You can now use `/rtsapi-teams-mode none` on any map to disable all start blocks
@@ -62,7 +57,7 @@ Bugfixes
 [✔] Fixed diagonal bridges not saving correctly
 [✔] Units no longer try to walk through slime blocks
 [✔] Fixed minimap sometimes showing non-existent units
-[❌] Some HP/portrait block rendering issues on old custom buildings
+[✔] Fixed the observer menu showing stats previous games you spectated
 
 Languages
 ---------
