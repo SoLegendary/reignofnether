@@ -320,7 +320,7 @@
     "abilities.reignofnether.molten_bomb": "Molten Bomb",
     "abilities.reignofnether.molten_bomb.stats": "\uE004  %ds   \uE005  %d   \uE008  %d",
     "abilities.reignofnether.molten_bomb.tooltip1": "Shoot a large fireball that explodes when it reaches its ",
-    "abilities.reignofnether.molten_bomb.tooltip2": "target, igniting the area and creating temporary magma.",
+    "abilities.reignofnether.molten_bomb.tooltip2": "target or hits an enemy, igniting the area with magma.",
     "abilities.reignofnether.molten_bomb.rank1": "Rank 1: %d block radius",
     "abilities.reignofnether.molten_bomb.rank2": "Rank 2: %d block radius",
     "abilities.reignofnether.molten_bomb.rank3": "Rank 3: %d block radius",
