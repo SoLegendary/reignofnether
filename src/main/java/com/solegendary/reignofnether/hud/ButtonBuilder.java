@@ -58,6 +58,7 @@ public class ButtonBuilder {
     private boolean showSelectedFrameWhenDisabled = false;
     private boolean stretchIconToBorders = false;
     private int tooltipOffsetY = 0;
+    private String playerNameForHeadIcon = "";
 
     /**
      * Creates a new builder with the two required fields.
@@ -111,6 +112,11 @@ public class ButtonBuilder {
 
     public ButtonBuilder greyWhenDisabled(boolean value) {
         this.greyWhenDisabled = value;
+        return this;
+    }
+
+    public ButtonBuilder playerNameForHeadIcon(String name) {
+        this.playerNameForHeadIcon = name;
         return this;
     }
 
@@ -230,6 +236,7 @@ public class ButtonBuilder {
         button.tooltipOffsetY = tooltipOffsetY;
         button.lightUpOnHover = lightUpOnHover;
         button.imageSize = imageSize;
+        button.playerNameForHeadIcon = playerNameForHeadIcon;
 
         return button;
     }

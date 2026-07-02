@@ -629,7 +629,7 @@ public class MyRenderer {
     }
 
     public static void renderPlayerHead(GuiGraphics g, String playerName, int x, int y, int iconSize, ResourceLocation fallbackRl) {
-        if (playerName == null || playerName.isBlank()) {
+        if (playerName == null || playerName.isBlank() && fallbackRl != null) {
             MyRenderer.renderIcon(g, fallbackRl, x, y, iconSize);
             return;
         }
@@ -647,7 +647,7 @@ public class MyRenderer {
             ResourceLocation skin = p.getSkinTextureLocation();
             g.blit(skin, x, y, iconSize, iconSize, 8.0f, 8.0f, 8, 8, 64, 64);
             g.blit(skin, x, y, iconSize, iconSize, 40.0f, 8.0f, 8, 8, 64, 64);
-        } else {
+        } else if (fallbackRl != null) {
             MyRenderer.renderIcon(g, fallbackRl, x, y, iconSize);
         }
     }

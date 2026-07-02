@@ -131,6 +131,7 @@ public class StartPos {
                 .iconSize(MinimapClientEvents.isLargeMap() ? 6 : 4)
                 .imageSize(MinimapClientEvents.isLargeMap() ? 12 : 10)
                 .greyWhenDisabled(false)
+                .playerNameForHeadIcon(playerName)
                 .build();
     }
 }

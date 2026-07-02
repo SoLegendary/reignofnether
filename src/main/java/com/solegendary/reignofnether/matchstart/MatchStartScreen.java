@@ -479,8 +479,6 @@ public class MatchStartScreen extends Screen {
         g.drawString(this.font, tag, x + width - w - 8, y + 9, TEXT_DIM, false);
     }
 
-
-
     private void renderFactionTile(GuiGraphics g, StartPos sp, Faction f,
                                    int x, int y, String localName, int mx, int my) {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(localName);
