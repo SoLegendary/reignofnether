@@ -167,6 +167,21 @@ public class UnitClientEvents {
         preselectedUnits.add(unit);
         markSelectedUnitsChanged();
     }
+    public static void sortedSelectedUnits() {
+        selectedUnits.sort(Comparator.comparing(MiscUtil::getSimpleEntityName));
+        selectedUnits.sort(Comparator.comparing(Entity::getId));
+    }
+    public static void addSelectedUnitNoSort(LivingEntity unit) {
+        CursorClientEvents.setLeftClickAction(null);
+        if (!FogOfWarClientEvents.isInBrightChunk(unit))
+            return;
+        if (unit.isPassenger())
+            return;
+        selectedUnits.add(unit);
+        BuildingClientEvents.clearSelectedBuildings();
+        NonUnitClientEvents.isMoveCheckpointGreen = true;
+        markSelectedUnitsChanged();
+    }
     public static void addSelectedUnit(LivingEntity unit) {
         CursorClientEvents.setLeftClickAction(null);
         if (!FogOfWarClientEvents.isInBrightChunk(unit))

@@ -441,7 +441,7 @@ public class MatchStartScreen extends Screen {
             g.pose().popPose();
         } else {
             MyRenderer.renderIconFrameWithBg(g, ICON_FRAME, headX, tileY, FRAME_SIZE, BG_ICON);
-            renderPlayerHead(g, sp.playerName, headX + innerOffset, tileY + innerOffset);
+            MyRenderer.renderPlayerHead(g, sp.playerName, headX + innerOffset, tileY + innerOffset, ICON_SIZE, ICON_FRAME);
         }
 
         String name = empty
@@ -472,36 +472,14 @@ public class MatchStartScreen extends Screen {
         int rowBottom = y + ROW_H - 2;
         g.fill(x, y, x + width, rowBottom, 0x40808080);
         if (isLocal) g.fill(x, y, x + 2, rowBottom, ACCENT);
-        renderPlayerHead(g, name, x + 6, y + (ROW_H - ICON_SIZE) / 2);
+        MyRenderer.renderPlayerHead(g, name, x + 6, y + (ROW_H - ICON_SIZE) / 2, ICON_SIZE, ICON_FRAME);
         g.drawString(this.font, name, x + 6 + ICON_SIZE + 4, y + 9, TEXT_DIM, false);
         String tag = Component.translatable("matchstart.reignofnether.spectator_tag").getString();
         int w = this.font.width(tag);
         g.drawString(this.font, tag, x + width - w - 8, y + 9, TEXT_DIM, false);
     }
 
-    private void renderPlayerHead(GuiGraphics g, String playerName, int x, int y) {
-        if (playerName == null || playerName.isBlank()) {
-            MyRenderer.renderIcon(g, ICON_FRAME, x, y, ICON_SIZE);
-            return;
-        }
-        Minecraft mc = Minecraft.getInstance();
-        AbstractClientPlayer p = null;
-        if (mc.level != null) {
-            for (AbstractClientPlayer candidate : mc.level.players()) {
-                if (candidate.getName().getString().equals(playerName)) {
-                    p = candidate;
-                    break;
-                }
-            }
-        }
-        if (p != null && p.isSkinLoaded()) {
-            ResourceLocation skin = p.getSkinTextureLocation();
-            g.blit(skin, x, y, ICON_SIZE, ICON_SIZE, 8.0f, 8.0f, 8, 8, 64, 64);
-            g.blit(skin, x, y, ICON_SIZE, ICON_SIZE, 40.0f, 8.0f, 8, 8, 64, 64);
-        } else {
-            MyRenderer.renderIcon(g, ICON_FRAME, x, y, ICON_SIZE);
-        }
-    }
+
 
     private void renderFactionTile(GuiGraphics g, StartPos sp, Faction f,
                                    int x, int y, String localName, int mx, int my) {
@@ -516,6 +494,7 @@ public class MatchStartScreen extends Screen {
                 .isEnabled(() -> mine)
                 .onLeftClick(() -> pickFaction(sp, f))
                 .tooltipLines(List.of(fcs(MiscUtil.getFactionName(f))))
+                .showSelectedFrameWhenDisabled()
                 .build();
 
         button.render(g, x, y, mx, my);

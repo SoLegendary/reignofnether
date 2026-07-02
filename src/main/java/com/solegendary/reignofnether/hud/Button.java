@@ -72,6 +72,9 @@ public class Button {
     // @ 1.0, whole button is greyed out
     public float greyPercent = 0.0f;
 
+    public boolean greyWhenDisabled = true;
+    public boolean showSelectedFrameWhenDisabled = false;
+
     Minecraft MC = Minecraft.getInstance();
 
     // constructor for ability/action/production buttons
@@ -193,7 +196,7 @@ public class Button {
         renderHotkey(guiGraphics, x, y);
 
         // user is holding click or hotkey down over the button and render frame if so
-        if (isEnabled.get() &&
+        if ((isEnabled.get() || showSelectedFrameWhenDisabled) &&
             (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) &&
                     ((MiscUtil.isLeftClickDown(MC) && onLeftClick != null) ||
                     (MiscUtil.isRightClickDown(MC) && onRightClick != null))
@@ -220,7 +223,7 @@ public class Button {
                     0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
 
-        if (greyPercent > 0 || !isEnabled.get()) {
+        if (greyPercent > 0 || (!isEnabled.get() && greyWhenDisabled)) {
             int greyHeightPx = Math.round(greyPercent * iconFrameSize);
             if (!isEnabled.get())
                 greyHeightPx = 0;

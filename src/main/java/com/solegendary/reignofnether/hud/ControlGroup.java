@@ -130,21 +130,20 @@ public class ControlGroup {
         if (!entityIds.isEmpty()) {
             BuildingClientEvents.clearSelectedBuildings();
             UnitClientEvents.clearSelectedUnits();
-            for (int id : entityIds) {
-                List<LivingEntity> entities = new ArrayList<>();
-                for (LivingEntity e : getAllUnits()) {
-                    if (entityIds.contains(e.getId()) && e instanceof Unit) {
-                        entities.add(e);
-                    }
+            List<LivingEntity> entities = new ArrayList<>();
+            for (LivingEntity e : getAllUnits()) {
+                if (entityIds.contains(e.getId()) && e instanceof Unit) {
+                    entities.add(e);
                 }
-                if (!entities.isEmpty()) {
-                    UnitClientEvents.clearSelectedUnits();
-                    for (LivingEntity entity : entities)
-                        UnitClientEvents.addSelectedUnit(entity);
-                    HudClientEvents.setLowestCdHudEntity();
-                    if (doubleClicked)
-                        OrthoviewClientEvents.centreCameraOnPos(entities.get(0).position());
-                }
+            }
+            if (!entities.isEmpty()) {
+                UnitClientEvents.clearSelectedUnits();
+                for (LivingEntity entity : entities)
+                    UnitClientEvents.addSelectedUnitNoSort(entity);
+                UnitClientEvents.sortedSelectedUnits();
+                HudClientEvents.setLowestCdHudEntity();
+                if (doubleClicked)
+                    OrthoviewClientEvents.centreCameraOnPos(entities.get(0).position());
             }
         }
         else if (!buildingBps.isEmpty()) {

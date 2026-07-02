@@ -1,5 +1,5 @@
 
-1.20.1-1.3.7-beta-4
+1.20.1-1.3.7-beta-5
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -46,6 +46,8 @@ Quality of Life
 [✔] Added a random faction button to the new start menu
     - The normal menu does not have it yet (as I'm considering removing this later for full release)
 
+
+
 Balance
 -------
 [✔] The Piglin Merchant and Marauder hitbox sized increased (visually unchanged)
@@ -58,7 +60,9 @@ Bugfixes
 [✔] Units no longer try to walk through slime blocks
 [✔] Fixed minimap sometimes showing non-existent units
 [✔] Fixed the observer menu showing stats previous games you spectated
+[✔] Fixed frame drops when selecting really big control groups
 
 Languages
 ---------
 
+- show what opponent faction are picking

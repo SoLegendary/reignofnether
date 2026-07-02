@@ -54,6 +54,8 @@ public class ButtonBuilder {
     private List<FormattedCharSequence> tooltipLines = null;
     private Supplier<Boolean> isFlashing = () -> false;
     private float greyPercent = 0.0f;
+    private boolean greyWhenDisabled = true;
+    private boolean showSelectedFrameWhenDisabled = false;
     private boolean stretchIconToBorders = false;
     private int tooltipOffsetY = 0;
 
@@ -99,6 +101,16 @@ public class ButtonBuilder {
 
     public ButtonBuilder stretchIconToBorders() {
         this.stretchIconToBorders = true;
+        return this;
+    }
+
+    public ButtonBuilder showSelectedFrameWhenDisabled() {
+        this.showSelectedFrameWhenDisabled = true;
+        return this;
+    }
+
+    public ButtonBuilder greyWhenDisabled(boolean value) {
+        this.greyWhenDisabled = value;
         return this;
     }
 
@@ -212,6 +224,8 @@ public class ButtonBuilder {
         button.bgIconResource = bgIconResource;
         button.isFlashing = isFlashing;
         button.greyPercent = greyPercent;
+        button.greyWhenDisabled = greyWhenDisabled;
+        button.showSelectedFrameWhenDisabled = showSelectedFrameWhenDisabled;
         button.stretchIconToBorders = stretchIconToBorders;
         button.tooltipOffsetY = tooltipOffsetY;
         button.lightUpOnHover = lightUpOnHover;

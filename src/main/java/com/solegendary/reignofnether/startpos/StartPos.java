@@ -130,6 +130,7 @@ public class StartPos {
                 .tooltipLines(fcsList)
                 .iconSize(MinimapClientEvents.isLargeMap() ? 6 : 4)
                 .imageSize(MinimapClientEvents.isLargeMap() ? 12 : 10)
+                .greyWhenDisabled(false)
                 .build();
     }
 }

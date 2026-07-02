@@ -627,4 +627,28 @@ public class MyRenderer {
         guiGraphics.drawCenteredString(font, text, 0, 0, color);
         poseStack.popPose();
     }
+
+    public static void renderPlayerHead(GuiGraphics g, String playerName, int x, int y, int iconSize, ResourceLocation fallbackRl) {
+        if (playerName == null || playerName.isBlank()) {
+            MyRenderer.renderIcon(g, fallbackRl, x, y, iconSize);
+            return;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        AbstractClientPlayer p = null;
+        if (mc.level != null) {
+            for (AbstractClientPlayer candidate : mc.level.players()) {
+                if (candidate.getName().getString().equals(playerName)) {
+                    p = candidate;
+                    break;
+                }
+            }
+        }
+        if (p != null && p.isSkinLoaded()) {
+            ResourceLocation skin = p.getSkinTextureLocation();
+            g.blit(skin, x, y, iconSize, iconSize, 8.0f, 8.0f, 8, 8, 64, 64);
+            g.blit(skin, x, y, iconSize, iconSize, 40.0f, 8.0f, 8, 8, 64, 64);
+        } else {
+            MyRenderer.renderIcon(g, fallbackRl, x, y, iconSize);
+        }
+    }
 }
