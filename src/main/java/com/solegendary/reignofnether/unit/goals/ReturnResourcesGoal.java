@@ -131,9 +131,4 @@ public class ReturnResourcesGoal extends MoveToTargetBlockGoal {
         buildingTarget = null;
         super.stopMoving();
     }
-
-    @Override
-    protected boolean useRtsPathfinding() {
-        return false;
-    }
 }

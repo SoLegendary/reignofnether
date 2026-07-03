@@ -153,7 +153,13 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         if (getSize() == 1)
             popCost = 0;
 
-        ResourceCost cost = ResourceCosts.SLIME;
+        ResourceCost cost = ResourceCost.Unit(
+            ResourceCosts.SLIME.food,
+            ResourceCosts.SLIME.wood,
+            ResourceCosts.SLIME.ore,
+            ResourceCosts.SLIME.ticks / 20,
+            ResourceCosts.SLIME.population
+        );
         cost.population = popCost;
         return cost;
     }

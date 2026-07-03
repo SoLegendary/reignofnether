@@ -535,9 +535,4 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public boolean isIdle() {
         return ticksIdle > IDLE_TIMEOUT;
     }
-
-    @Override
-    protected boolean useRtsPathfinding() {
-        return false;
-    }
 }

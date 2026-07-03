@@ -66,6 +66,7 @@ public class Beacon extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
         this.maxHealth = 500d;
+        this.maxHealthBonusPerUpgradeLevel = 100d;
 
         this.abilities.add(new BeaconWealth(), Keybindings.abilitySlot1);
         this.abilities.add(new BeaconHaste(), Keybindings.abilitySlot2);

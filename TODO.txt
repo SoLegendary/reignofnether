@@ -53,6 +53,11 @@ Balance
 [✔] The Piglin Merchant and Marauder hitbox sized increased (visually unchanged)
 [✔] Spider hitbox width reduced from 1.4 to 1.0 to improve pathfinding and evasion against projectiles
 
+NEW The Wretched Wraith's bitter frost at rank 1 now produces a constant layer of snow at his feet
+    - Other effects have been shifted up by one rank each
+NEW Snow now cannot melt within 5 blocks of the Wretched Wraith even without Bitter Frost learned
+NEW Beacons now gain 100 additional HP per upgrade they have
+
 Bugfixes
 --------
 [✔] Fixed castle roofs breaking and causing garrisoned units to fall out
@@ -61,6 +66,9 @@ Bugfixes
 [✔] Fixed minimap sometimes showing non-existent units
 [✔] Fixed the observer menu showing stats previous games you spectated
 [✔] Fixed frame drops when selecting really big control groups
+
+
+NEW Fixed slimes sometimes having the wrong population value
 
 Languages
 ---------
