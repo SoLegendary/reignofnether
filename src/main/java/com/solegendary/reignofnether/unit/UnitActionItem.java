@@ -353,9 +353,10 @@ public class UnitActionItem {
                 case RETURN_RESOURCES_TO_CLOSEST -> { // drop resources off early and return to work
                     if (unit instanceof WorkerUnit workerUnit) {
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
-                        if (goal != null) {
-                            goal.saveAndReturnResources();
-                        }
+                        if (goal != null)
+                            goal.saveAndReturnResources(); // saves gather state, then returns
+                    } else if (unit.getReturnResourcesGoal() != null) {
+                        unit.getReturnResourcesGoal().returnToClosestBuilding();
                     }
                 }
                 case DELETE -> {
