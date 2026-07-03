@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.pathfinding.PathfinderConfig;
 import net.minecraft.world.level.GameRules;
 
 public class GameRuleRegistrar {
@@ -23,6 +24,8 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.BooleanValue> DO_NETHER_CONVERSION;
     public static GameRules.Key<GameRules.BooleanValue> BUILDINGS_OUTSIDE_BORDER;
     public static GameRules.Key<GameRules.BooleanValue> RTS_PATHFINDING;
+    public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_THREADS;
+    public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_CHUNK_BUILDS;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -99,6 +102,16 @@ public class GameRuleRegistrar {
         // May cause additional TPS lag on worlds without world borders as they will not have a pregenerated navmesh
         RTS_PATHFINDING = GameRules.register("rtsPathfinding", GameRules.Category.MOBS,
                 GameRules.BooleanValue.create(false)
+        );
+        // number of background threads the RTS grid A* pathfinder uses. defaults to ~half the cores; the
+        // worker pool clamps to [1, 32] and rebuilds itself live when this changes.
+        PATHFINDING_THREADS = GameRules.register("pathfindingThreads", GameRules.Category.MOBS,
+                GameRules.IntegerValue.create(PathfinderConfig.WORKER_THREADS)
+        );
+        // cold chunks the pathfinder warms per tick (main-thread work). higher = faster first paths but more
+        // TPS cost. clamped to [1, 64] by the worker pool.
+        PATHFINDING_CHUNK_BUILDS = GameRules.register("pathfindingChunkBuildsPerTick", GameRules.Category.MOBS,
+                GameRules.IntegerValue.create(PathfinderConfig.CHUNK_BUILDS_PER_TICK_DEFAULT)
         );
     }
 }

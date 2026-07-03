@@ -2,12 +2,15 @@ package com.solegendary.reignofnether.debug;
 
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.pathfinding.PathfinderWorkerPool;
 import com.solegendary.reignofnether.unit.pathfinding.WalkabilityGrid;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+import java.util.concurrent.atomic.LongAdder;
 
 public class RtsDebugServerEvents {
 
@@ -29,15 +32,35 @@ public class RtsDebugServerEvents {
     private static long queueSumThisSecond = 0;
     private static int queueSamplesThisSecond = 0;
 
+    // Path-timing accumulators, averaged once per second for the F7 "Path ms" / "Path e2e" stats.
+    // compute = pure A* time on the worker threads (written concurrently -> LongAdder). e2e = submit ->
+    // delivered wall time incl. queue wait (recorded only on the main thread at result delivery).
+    private static final LongAdder pathComputeNanos = new LongAdder();
+    private static final LongAdder pathComputeCount = new LongAdder();
+    private static long pathE2eNanos = 0;
+    private static int pathE2eCount = 0;
+
+    public static void recordPathCompute(long nanos) {
+        pathComputeNanos.add(nanos);
+        pathComputeCount.increment();
+    }
+
+    // Main-thread only (called from the END-phase result drain).
+    public static void recordPathE2e(long nanos) {
+        pathE2eNanos += nanos;
+        pathE2eCount += 1;
+    }
+
     // logic borrowed from net.minecraftforge.server.command.TPSCommand
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END)
             return;
 
-        // Sample the formation dispatch queue depth every tick (cheap, captures bursts);
-        // averaged at the once-per-second boundary below.
-        queueSumThisSecond += UnitServerEvents.formationDispatchQueueSize();
+        // Sample the pathfinder backlog (parked + in-flight requests) every tick (cheap, captures bursts);
+        // averaged at the once-per-second boundary below. This is the queue that backs up under load and
+        // drives "Path e2e" - the formation dispatch queue drains ~instantly and read ~0.
+        queueSumThisSecond += PathfinderWorkerPool.queueDepth();
         queueSamplesThisSecond += 1;
 
         MinecraftServer server = evt.getServer();
@@ -66,8 +89,16 @@ public class RtsDebugServerEvents {
         queueHistory[statsIndex] = avgQueueThisSec;
         stuckHistory[statsIndex] = stuck;
         statsIndex = (statsIndex + 1) % STATS_WINDOW;
+
+        long computeNanos = pathComputeNanos.sumThenReset();
+        long computeCount = pathComputeCount.sumThenReset();
+        double avgComputeMs = computeCount > 0 ? (computeNanos / (double) computeCount) * 1.0E-6 : 0.0;
+        double avgE2eMs = pathE2eCount > 0 ? (pathE2eNanos / (double) pathE2eCount) * 1.0E-6 : 0.0;
+        pathE2eNanos = 0;
+        pathE2eCount = 0;
+
         RtsDebugStatsClientboundPacket.broadcast(
-                avg(pathsHistory), avg(queueHistory), avg(stuckHistory), worldTickTime);
+                avg(pathsHistory), avg(queueHistory), avg(stuckHistory), worldTickTime, avgComputeMs, avgE2eMs);
         // Built navmesh chunks (overworld) so the debug overlay can show what's cached.
         if (server.overworld() != null)
             RtsDebugChunksClientboundPacket.broadcast(WalkabilityGrid.get(server.overworld()).builtChunkKeys());
