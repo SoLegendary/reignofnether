@@ -316,6 +316,16 @@ public class MoveToTargetBlockGoal extends Goal {
     @Override
     public void stop() {
         isRunning = false;
+        // A goal deactivated with a request still in flight (eg. the attack goal preempting this one via
+        // Flag.MOVE) must not have that path delivered later: by then another goal owns the navigation and
+        // the stale moveTo would steer the unit back toward this goal's old objective. Bump the seq so the
+        // delivery is dropped; moveTarget is kept so a persistent goal resumes via start() with a fresh request.
+        if (pathPending) {
+            pathRequestSeq++;
+            pathPending = false;
+            pendingRepath = false;
+            repathFromFinalNode = null;
+        }
     }
 
     public void stopMoving() {
