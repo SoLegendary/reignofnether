@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.gamerules;
 
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
@@ -41,6 +42,10 @@ public class GameruleClientboundPacket {
     public static void setPlayerGriefing(boolean playerGriefing) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new GameruleClientboundPacket(GameruleAction.SET_PLAYER_GRIEFING, "", playerGriefing ? 1L : 0L));
+    }
+    public static void setImprovedPathfinding(boolean improvedPathfinding) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new GameruleClientboundPacket(GameruleAction.SET_IMPROVED_PATHFINDING, "", improvedPathfinding ? 1L : 0L));
     }
     public static void setGroundYLevel(long groundYLevel) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
@@ -86,10 +91,6 @@ public class GameruleClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new GameruleClientboundPacket(GameruleAction.SET_BUILDINGS_OUTSIDE_BORDER, "", buildingsOutsideBorder ? 1L : 0L));
     }
-    public static void setRtsPathfinding(boolean rtsPathfinding) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new GameruleClientboundPacket(GameruleAction.SET_RTS_PATHFINDING, "", rtsPathfinding ? 1L : 0L));
-    }
 
     public GameruleClientboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -122,6 +123,7 @@ public class GameruleClientboundPacket {
                             case SET_MAX_POPULATION -> GameruleClient.maxPopulation = Math.toIntExact(value);
                             case SET_UNIT_GRIEFING -> GameruleClient.doUnitGriefing = value == 1L;
                             case SET_PLAYER_GRIEFING -> GameruleClient.doPlayerGriefing = value == 1L;
+                            case SET_IMPROVED_PATHFINDING -> GameruleClient.improvedPathfinding = value == 1L;
                             case SET_GROUND_Y_LEVEL -> {
                                 GameruleClient.groundYLevel = value;
                                 OrthoviewClientEvents.setMinOrthoviewY(value + 30);
@@ -148,7 +150,6 @@ public class GameruleClientboundPacket {
                             case SET_SCENARIO_MODE -> GameruleClient.scenarioMode = value == 1L;
                             case SET_COOP_MODE -> GameruleClient.coopMode = value == 1L;
                             case SET_BUILDINGS_OUTSIDE_BORDER -> GameruleClient.buildingsOutsideBorder = value == 1L;
-                            case SET_RTS_PATHFINDING -> GameruleClient.rtsPathfinding = value == 1L;
                         }
                         success.set(true);
                     });

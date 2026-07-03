@@ -657,7 +657,7 @@
     "commands.reignofnether.gamerule.player_griefing": "Игроки могут разрушать блоки ландшафта",
     "commands.reignofnether.gamerule.ground_y_level": "Минимальная высота для камер",
     "commands.reignofnether.gamerule.flying_max_y_level": "Макс. высота для летающих юнитов",
-    "commands.reignofnether.gamerule.rts_pathfinding": "Улучшенный поиск пути (повышает нагрузку на CPU)",
+    "commands.reignofnether.gamerule.improved_pathfinding": "Улучшенный поиск пути (повышает нагрузку на CPU)",
     "commands.reignofnether.gamerule.allow_beacons": "Разрешить рабочим строить Маяки",
     "commands.reignofnether.gamerule.pvp_modes_only": "Отключить Режим Волн и Песочницу",
     "commands.reignofnether.gamerule.beacon_win_minutes": "Время для победы через контроль маяка",

@@ -22,6 +22,7 @@ import net.minecraftforge.common.IPlantable;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ResourceSources {
 
@@ -59,27 +60,25 @@ public class ResourceSources {
         BlockState bs = level.getBlockState(bp);
         Block block = bs.getBlock();
 
-        for (List<ResourceSource> resourceSources : RESOURCE_BLOCK_LISTS)
+        for (List<ResourceSource> resourceSources : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
             for (ResourceSource resourceSource : resourceSources)
                 if (resourceSource.validBlocks.contains(block))
                     return resourceSource;
-        // bs.is(tag) is an O(1) membership test; the old getTags().collect(toSet()).contains(...) allocated a
-        // Set on every call - brutal when ResourceIndex's chunk scan runs this per cell of a resource section.
-        if (bs.is(BlockTags.LOGS))
+        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LOGS))
             return GENERIC_LOG_BLOCK;
-        if (bs.is(BlockTags.LEAVES))
+        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LEAVES))
             return GENERIC_LEAVES_BLOCK;
         return null;
     }
 
     public static ResourceSource getFromBlockState(BlockState bs) {
-        for (List<ResourceSource> resourceSources : RESOURCE_BLOCK_LISTS)
+        for (List<ResourceSource> resourceSources : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
             for (ResourceSource resourceSource : resourceSources)
                 if (resourceSource.validBlocks.contains(bs.getBlock()))
                     return resourceSource;
-        if (bs.is(BlockTags.LOGS))
+        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LOGS))
             return GENERIC_LOG_BLOCK;
-        if (bs.is(BlockTags.LEAVES))
+        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LEAVES))
             return GENERIC_LEAVES_BLOCK;
         return null;
     }
@@ -100,7 +99,7 @@ public class ResourceSources {
     // is the given item an item that is worth resources?
     // used for unit item pickups and player resource deposits
     public static ResourceSource getFromItem(Item item) {
-        for (List<ResourceSource> resourceSources : RESOURCE_BLOCK_LISTS)
+        for (List<ResourceSource> resourceSources : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
             for (ResourceSource resourceSource : resourceSources) {
                 if (resourceSource.items.contains(item))
                     return resourceSource;
@@ -476,10 +475,4 @@ public class ResourceSources {
                     ResourceName.ORE
             )
     );
-
-    // The three resource-block lists in a single immutable view, so the per-block lookups below iterate it
-    // WITHOUT allocating a fresh List.of(...) on every call. Declared last so FOOD/WOOD/ORE_BLOCKS are already
-    // initialised. getFromBlockState in particular runs per cell of every resource section the ResourceIndex
-    // scans and per block change, so the old per-call allocation churned hard during placement bursts.
-    private static final List<List<ResourceSource>> RESOURCE_BLOCK_LISTS = List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS);
 }

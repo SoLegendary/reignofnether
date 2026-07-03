@@ -513,7 +513,7 @@
     "commands.reignofnether.gamerule.player_griefing": "Oyuncular arazi bloklarını kırabilir",
     "commands.reignofnether.gamerule.ground_y_level": "Kameralar için minimum yükseklik",
     "commands.reignofnether.gamerule.flying_max_y_level": "Uçan birimler için maksimum yükseklik",
-    "commands.reignofnether.gamerule.rts_pathfinding": "Yol bulma doğruluğunu ve CPU kullanımını artırır",
+    "commands.reignofnether.gamerule.improved_pathfinding": "Yol bulma doğruluğunu ve CPU kullanımını artırır",
     "commands.reignofnether.gamerule.allow_beacons": "İşçilerin Tapınak inşa etmesine izin verir",
     "commands.reignofnether.gamerule.pvp_modes_only": "Dalga Hayatta Kalma ve Sandbox modlarını devre dışı bırak",
     "commands.reignofnether.gamerule.beacon_win_minutes": "Tapınak kontrolüyle kazanmak için gereken süre",

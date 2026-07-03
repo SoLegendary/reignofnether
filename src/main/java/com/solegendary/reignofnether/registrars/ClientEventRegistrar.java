@@ -11,8 +11,6 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClien
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.commands.CommandsServerEvents;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
-import com.solegendary.reignofnether.debug.RtsDebugNavmesh;
-import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
 import com.solegendary.reignofnether.config.ConfigClientEvents;
 import com.solegendary.reignofnether.config.ConfigVanillaServerEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -56,7 +54,6 @@ import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.worldborder.WorldBorderClientEvents;
-import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 
@@ -102,8 +99,6 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(ScenarioClientEvents.class);
         vanillaEventBus.register(TextInputClientEvents.class);
         vanillaEventBus.register(RtsDebugClientEvents.class);
-        vanillaEventBus.register(RtsDebugNavmesh.class);
-        vanillaEventBus.register(RtsDebugPathPreview.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(GameruleServerEvents.class);
@@ -129,6 +124,5 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CustomBuildingServerEvents.class);
         vanillaEventBus.register(CommandsServerEvents.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
-        vanillaEventBus.register(WorldBorderServerEvents.class);
     }
 }

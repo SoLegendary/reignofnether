@@ -47,9 +47,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public TargetResourcesSave permSaveData = new TargetResourcesSave();
 
     private static final int REACH_RANGE = 5;
-    // How far below a resource block a worker may stand and still reach it: mining reach is REACH_RANGE (3D),
-    // so standing ~4 below an adjacent column keeps it in range (sqrt(1^2 + 4^2) < 5).
-    private static final int MAX_REACH_DOWN = 4;
     private static final int DEFAULT_MAX_GATHER_TICKS = 600; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private float gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
@@ -66,15 +63,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public static final int TICKS_STATIONARY_TIMEOUT = 100; // ticks that the worker hasn't moved and gatherTarget != null
     private BlockPos lastOnPos = null;
     private BlockPos altSearchPos = null; // block search origin that may be used instead of the mob position
-    // Whether the worker is in range and gathering, computed authoritatively on the SERVER and synced to the
-    // client (mirrors BuildRepairGoal.isBuildingServerside). The client must not recompute isBlockInRange
-    // itself - its entity position is interpolated, so it would disagree with the server. Set in
-    // UnitSyncWorkerClientBoundPacket via setIsGatheringServerside.
-    private boolean isGatheringServerside = false;
-
-    public void setIsGatheringServerside(boolean isGathering) {
-        this.isGatheringServerside = isGathering;
-    }
 
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
@@ -112,12 +100,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             }
         }
         if (!hasClearNeighbour)
-            return false;
-
-        // must have a cell a worker can actually STAND in (floor below, head clear) within mining reach -
-        // rejects blocks suspended high off the ground (upper tree logs/leaves) that have air neighbours but
-        // no nearby ground, which the worker can never path up to and would just stall beneath.
-        if (!hasReachableStandSpot(bp))
             return false;
 
         // not targeted by another nearby worker
@@ -197,8 +179,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 else {
                     Optional<BlockPos> bpOpt;
                     if (altSearchPos != null) {
-                        bpOpt = ResourceIndex.get(mob.level()).findClosest(
-                                mob.level(), altSearchPos, REACH_RANGE / 2, data.targetResourceName, BLOCK_CONDITION);
+                        bpOpt = BlockPos.findClosestMatch(
+                                altSearchPos, REACH_RANGE/2, REACH_RANGE/2,
+                            BLOCK_CONDITION);
                         altSearchPos = null;
                     }
                     else {
@@ -210,13 +193,12 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             ticksIdle += 200;
                         }
 
-                        bpOpt = ResourceIndex.get(mob.level()).findClosest(
-                            mob.level(),
+                        bpOpt = BlockPos.findClosestMatch(
                             new BlockPos(
                                     (int) mob.getEyePosition().x,
                                     (int) mob.getEyePosition().y,
                                     (int) mob.getEyePosition().z
-                            ), range, data.targetResourceName,
+                            ), range, range,
                             BLOCK_CONDITION);
                     }
 
@@ -424,37 +406,15 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
 
-    // True if a worker can stand somewhere adjacent to bp (within mining reach) to gather it: a cell with a
-    // solid floor below and clear feet+head, in one of the 4 cardinal neighbour columns across a vertical band
-    // from one above down to MAX_REACH_DOWN below. A block high in the air (no ground in any neighbour column)
-    // fails - that's the "very high tree" case. Checked nearest-first in BLOCK_CONDITION, so a reachable base
-    // log usually passes immediately and we rarely scan the full band.
-    private boolean hasReachableStandSpot(BlockPos bp) {
-        var level = mob.level();
-        for (BlockPos side : List.of(bp.north(), bp.south(), bp.east(), bp.west())) {
-            for (int dy = 1; dy >= -MAX_REACH_DOWN; dy--) {
-                BlockPos feet = side.above(dy); // above(negative) = below
-                if (!MiscUtil.isSolidBlocking(level, feet)
-                        && !MiscUtil.isSolidBlocking(level, feet.above())
-                        && MiscUtil.isSolidBlocking(level, feet.below()))
-                    return true;
-            }
-        }
-        return false;
-    }
-
     private boolean isBlockInRange(BlockPos target) {
-        // Within mining reach (3D). No stuck-worker bonus: a block that's out of range is dropped by the gather
-        // goal's NO_TARGET_TIMEOUT so the worker just searches another one, instead of stretching its reach.
-        return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= REACH_RANGE * REACH_RANGE;
+        int reachRangeBonus = (int) Math.min(5, ticksWithoutTarget / TICK_CD);
+        return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= Math.pow(REACH_RANGE + reachRangeBonus, 2);
     }
 
-    // only count as gathering if in range of the target. The CLIENT trusts the server-synced value (its
-    // entity position is interpolated, so it can't compute isBlockInRange consistently); the SERVER computes
-    // it authoritatively and syncs it via UnitSyncWorkerClientBoundPacket.
+    // only count as gathering if in range of the target
     public boolean isGathering() {
-        if (this.mob.level().isClientSide())
-            return isGatheringServerside;
+        if (!Unit.atMaxResources((Unit) mob) && data.gatherTarget != null && this.mob.level().isClientSide())
+            return isBlockInRange(data.gatherTarget);
 
         if (!Unit.atMaxResources((Unit) mob) && this.data.gatherTarget != null && this.data.targetResourceSource != null &&
             ResourceSources.getBlockResourceName(this.data.gatherTarget, mob.level()) != ResourceName.NONE)

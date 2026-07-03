@@ -90,16 +90,13 @@ import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUT
 
 public class UnitServerEvents {
 
+    public static boolean improvedPathfinding = true;
+
     private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;
 
     // max possible pop you can have regardless of buildings, adjustable via /gamerule maxPopulation
     public static int maxPopulation = ResourceCosts.DEFAULT_MAX_POPULATION;
-
-    // server-side mirror of the rtsPathfinding gamerule: when true, units route through the RTS
-    // grid A* pathfinder (with walkability caching + worker pool); when false they use vanilla
-    // pathfinding and the caching/worker work is skipped. Kept in sync by GameruleServerEvents.
-    public static boolean rtsPathfinding = false;
 
     // actioned only when the associated unit is idle, one at a time
     private static final List<UnitActionItem> unitActionSlowQueue = Collections.synchronizedList(new ArrayList<>());
@@ -133,23 +130,6 @@ public class UnitServerEvents {
 
     // Per-entity last-synced mob effect amplifiers. Null amp means "absent last sync".
     private static final HashMap<Integer, HashMap<MobEffect, Byte>> lastSyncedEffects = new HashMap<>();
-
-    // Time-sliced formation dispatch: large group MOVE commands are spread across multiple ticks
-    // to avoid the spike from N units all running A* in the same tick. LinkedHashMap preserves
-    // insertion order while letting a re-queued unit overwrite its old target (supersession).
-    private static final int FORMATION_DISPATCH_PER_TICK = 5;
-    // unit -> formation slot. Queued so a large selection's moves dispatch time-sliced across ticks
-    // instead of running N concurrent A* searches in one tick.
-    private record FormationOrder(LivingEntity unit, BlockPos target) {}
-    private static final LinkedHashMap<Integer, FormationOrder> formationDispatchQueue = new LinkedHashMap<>();
-
-    public static void queueFormationMove(List<Pair<LivingEntity, BlockPos>> pairs) {
-        synchronized (formationDispatchQueue) {
-            for (Pair<LivingEntity, BlockPos> p : pairs) {
-                formationDispatchQueue.put(p.getFirst().getId(), new FormationOrder(p.getFirst(), p.getSecond()));
-            }
-        }
-    }
 
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
@@ -671,34 +651,6 @@ public class UnitServerEvents {
                 }
             } else {
                 lastHuntedAnimalId = evt.getEntity().getId();
-            }
-        }
-    }
-
-    // Current depth of the formation dispatch queue. Sampled by the rts-debug stats overlay.
-    public static int formationDispatchQueueSize() {
-        synchronized (formationDispatchQueue) {
-            return formationDispatchQueue.size();
-        }
-    }
-
-    @SubscribeEvent
-    public static void onFormationDispatchTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
-            return;
-        synchronized (formationDispatchQueue) {
-            if (formationDispatchQueue.isEmpty())
-                return;
-            int processed = 0;
-            Iterator<FormationOrder> it = formationDispatchQueue.values().iterator();
-            while (processed < FORMATION_DISPATCH_PER_TICK && it.hasNext()) {
-                FormationOrder order = it.next();
-                it.remove();
-                LivingEntity le = order.unit();
-                if (le != null && le.isAlive() && le instanceof Unit unit) {
-                    unit.getMoveGoal().setMoveTarget(order.target());
-                }
-                processed += 1;
             }
         }
     }

@@ -515,7 +515,7 @@
     "commands.reignofnether.gamerule.player_griefing": "Cho phép người chơi chế độ 'Sinh Tồn' phá vỡ các khối",
     "commands.reignofnether.gamerule.ground_y_level": "Độ cao tối thiểu cho camera",
     "commands.reignofnether.gamerule.flying_max_y_level": "Độ cao tối đa của các đơn vị bay",
-    "commands.reignofnether.gamerule.rts_pathfinding": "Cải thiện độ chính xác khi tìm đường, nhưng cũng tăng mức sử dụng CPU",
+    "commands.reignofnether.gamerule.improved_pathfinding": "Cải thiện độ chính xác khi tìm đường, nhưng cũng tăng mức sử dụng CPU",
     "commands.reignofnether.gamerule.allow_beacons": "Cho phép công nhân xây Đèn Hiệu",
     "commands.reignofnether.gamerule.pvp_modes_only": "Vô hiệu chế độ Sinh Tồn Theo Đợt và Sandbox",
     "commands.reignofnether.gamerule.beacon_win_minutes": "Thời gian để thắng bằng cách kiểm soát Đèn Hiệu",

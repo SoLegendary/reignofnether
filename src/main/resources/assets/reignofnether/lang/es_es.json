@@ -515,7 +515,7 @@
     "commands.reignofnether.gamerule.player_griefing": "Los jugadores pueden romper bloques del terreno",
     "commands.reignofnether.gamerule.ground_y_level": "Altura mínima para cámaras",
     "commands.reignofnether.gamerule.flying_max_y_level": "Altura máxima para unidades voladoras",
-    "commands.reignofnether.gamerule.rts_pathfinding": "Aumenta precisión de pathfinding y uso de CPU",
+    "commands.reignofnether.gamerule.improved_pathfinding": "Aumenta precisión de pathfinding y uso de CPU",
     "commands.reignofnether.gamerule.allow_beacons": "Permitir a trabajadores construir Faros",
     "commands.reignofnether.gamerule.pvp_modes_only": "Desactivar Supervivencia por Oleadas y Sandbox",
     "commands.reignofnether.gamerule.beacon_win_minutes": "Tiempo necesario para ganar controlando el faro",

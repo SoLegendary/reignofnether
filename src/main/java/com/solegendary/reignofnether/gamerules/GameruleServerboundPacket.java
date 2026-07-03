@@ -4,9 +4,13 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -38,6 +42,10 @@ public class GameruleServerboundPacket {
     public static void setPlayerGriefing(boolean playerGriefing) {
         PacketHandler.INSTANCE.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_PLAYER_GRIEFING, "", playerGriefing ? 1L : 0L));
+    }
+    public static void setImprovedPathfinding(boolean improvedPathfinding) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_IMPROVED_PATHFINDING, "", improvedPathfinding ? 1L : 0L));
     }
     public static void setGroundYLevel(long groundYLevel) {
         PacketHandler.INSTANCE.sendToServer(
@@ -74,10 +82,6 @@ public class GameruleServerboundPacket {
     public static void setCoopMode(boolean coopMode) {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_COOP_MODE, "", coopMode ? 1L : 0L));
-    }
-    public static void setRtsPathfinding(boolean rtsPathfinding) {
-        PacketHandler.INSTANCE.sendToServer(
-                new GameruleServerboundPacket(GameruleAction.SET_RTS_PATHFINDING, "", rtsPathfinding ? 1L : 0L));
     }
 
     public GameruleServerboundPacket(GameruleAction action, String playerName, Long value) {
@@ -142,6 +146,16 @@ public class GameruleServerboundPacket {
                     gameRules.getRule(GameRuleRegistrar.DO_PLAYER_GRIEFING).set(booleanValue, server);
                     GameruleClientboundPacket.setPlayerGriefing(booleanValue);
                 }
+                case SET_IMPROVED_PATHFINDING -> {
+                    gameRules.getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).set(booleanValue, server);
+                    for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+                        UnitServerEvents.improvedPathfinding = booleanValue;
+                        AttributeInstance ai = le.getAttribute(Attributes.FOLLOW_RANGE);
+                        if (ai != null)
+                            ai.setBaseValue(Unit.getFollowRange());
+                    }
+                    GameruleClientboundPacket.setImprovedPathfinding(booleanValue);
+                }
                 case SET_GROUND_Y_LEVEL -> {
                     gameRules.getRule(GameRuleRegistrar.GROUND_Y_LEVEL).set(Math.toIntExact(value), server);
                     GameruleClientboundPacket.setGroundYLevel(value);
@@ -177,11 +191,6 @@ public class GameruleServerboundPacket {
                 case SET_COOP_MODE -> {
                     gameRules.getRule(GameRuleRegistrar.COOP_MODE).set(booleanValue, server);
                     GameruleClientboundPacket.setCoopMode(booleanValue);
-                }
-                case SET_RTS_PATHFINDING -> {
-                    gameRules.getRule(GameRuleRegistrar.RTS_PATHFINDING).set(booleanValue, server);
-                    UnitServerEvents.rtsPathfinding = booleanValue;
-                    GameruleClientboundPacket.setRtsPathfinding(booleanValue);
                 }
             }
             success.set(true);

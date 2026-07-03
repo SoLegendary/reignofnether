@@ -11,7 +11,6 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
-import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
@@ -105,7 +104,7 @@ public interface Unit {
     BlockPos getAnchor();
 
     static int getFollowRange() {
-        return FOLLOW_RANGE_IMPROVED;
+        return UnitServerEvents.improvedPathfinding ? FOLLOW_RANGE_IMPROVED : FOLLOW_RANGE;
     }
 
     // list of positions to draw lines between to indicate unit intents - will fade over time unless shift is held
@@ -589,7 +588,7 @@ public interface Unit {
     static void fullResetBehaviours(Unit unit) {
         if (((Entity) unit).level().isClientSide() && !Keybindings.shiftMod.isDown()) {
             unit.getCheckpoints().clear();
-            RtsDebugPathPreview.removeUnitPath(((Entity) unit).getId());
+            RtsDebugClientEvents.displayedPaths.remove(((Entity) unit).getId());
         }
         unit.resetBehaviours();
         Unit.resetBehaviours(unit);

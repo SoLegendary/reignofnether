@@ -95,23 +95,8 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     }
 
     private void calcMoveTarget() {
-        if (this.buildingTarget == null)
-            return;
-        // Hold ONE approach cell instead of recomputing the closest perimeter cell from the unit's CURRENT
-        // position every tick. That recompute made the target flip between two near-equidistant cells as the
-        // unit moved, so it oscillated around the boundary ("back and forth") instead of committing to a path.
-        // Like the gather goal holding a fixed block, keep the chosen cell until it's null or built over, then
-        // re-pick. setBuildingTarget nulls moveTarget so a NEW building still gets a fresh approach cell.
-        if (this.moveTarget != null && !isApproachInvalid(this.moveTarget))
-            return;
-        this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1, true);
-    }
-
-    // Re-pick the approach cell only if it got built over (non-bridge), mirroring getClosestGroundPos's own
-    // exclusion. Bridges have special over-water geometry, so their cell is held until the target changes.
-    private boolean isApproachInvalid(BlockPos bp) {
-        return !(buildingTarget.getBuilding() instanceof AbstractBridge)
-                && BuildingUtils.isPosInsideAnyBuilding(this.mob.level().isClientSide(), bp);
+        if (this.buildingTarget != null)
+            this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1, true);
     }
 
     // only count as building if in range of the target - building is actioned in Building.tick()
@@ -143,7 +128,6 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
             }
         }
         this.buildingTarget = target;
-        this.moveTarget = null; // force a fresh approach cell for the new target (calcMoveTarget then holds it)
         calcMoveTarget();
         this.start();
     }

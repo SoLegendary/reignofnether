@@ -686,7 +686,7 @@
   "commands.reignofnether.gamerule.player_griefing": "使处于非 RTS 模式下的玩家能够在对局中破坏地形方块",
   "commands.reignofnether.gamerule.ground_y_level": "为 RTS 视角屏幕设定最小高度",
   "commands.reignofnether.gamerule.flying_max_y_level": "为飞行单位设定最大高度",
-  "commands.reignofnether.gamerule.rts_pathfinding": "使用专门为RTS地图设计的单位寻路",
+  "commands.reignofnether.gamerule.improved_pathfinding": "提升单位寻路算法准确度，但会使 CPU 开销更大",
   "commands.reignofnether.gamerule.allow_beacons": "允许工人单位建造信标",
   "commands.reignofnether.gamerule.pvp_modes_only": "禁用塔防生存模式与沙盒模式",
   "commands.reignofnether.gamerule.beacon_win_minutes": "获胜所需控制信标的时长（分钟）",
@@ -959,7 +959,6 @@
   "server.reignofnether.disabled_cheat": "%s禁用了作弊 %s",
   "server.reignofnether.all_cheats": "%s启用了所有作弊",
   "server.reignofnether.revealed": "%s未能重建主城，行迹已在地图上暴露！",
-  "server.reignofnether.prewarmed_navmesh": "RTS优化地图，已启用改进后的寻路算法",
 
   "server.resources.reignofnether.not_enough_food": "你的食物不足",
   "server.resources.reignofnether.not_enough_wood": "你的木材不足",

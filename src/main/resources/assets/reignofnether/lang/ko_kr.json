@@ -515,7 +515,7 @@
     "commands.reignofnether.gamerule.player_griefing": "플레이어가 지형 블록 파괴 가능",
     "commands.reignofnether.gamerule.ground_y_level": "카메라 최소 높이",
     "commands.reignofnether.gamerule.flying_max_y_level": "비행 유닛 최대 높이",
-    "commands.reignofnether.gamerule.rts_pathfinding": "경로 찾기 정확도 및 CPU 사용량 증가",
+    "commands.reignofnether.gamerule.improved_pathfinding": "경로 찾기 정확도 및 CPU 사용량 증가",
     "commands.reignofnether.gamerule.allow_beacons": "일꾼이 신호기 건설 가능",
     "commands.reignofnether.gamerule.pvp_modes_only": "웨이브 서바이벌 및 샌드박스 비활성화",
     "commands.reignofnether.gamerule.beacon_win_minutes": "신호기 제어로 승리하는 데 필요한 시간",

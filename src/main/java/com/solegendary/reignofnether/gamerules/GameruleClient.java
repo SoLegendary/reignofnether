@@ -38,7 +38,7 @@ public class GameruleClient {
     public static boolean scenarioMode = false;
     public static boolean coopMode = false;
     public static boolean buildingsOutsideBorder = false;
-    public static boolean rtsPathfinding = false; // only for GUI
+    public static boolean improvedPathfinding = true; // only for GUI
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -169,9 +169,9 @@ public class GameruleClient {
                 () -> GameruleServerboundPacket.setCoopMode(!coopMode),
                 I18n.get("commands.reignofnether.gamerule.coop_mode")
         ));
-        buttons.add(new GameruleBooleanButton("rtsPathfinding", rtsPathfinding,
-                () -> GameruleServerboundPacket.setRtsPathfinding(!rtsPathfinding),
-                I18n.get("commands.reignofnether.gamerule.rts_pathfinding")
+        buttons.add(new GameruleBooleanButton("improvedPathfinding", improvedPathfinding,
+            () -> GameruleServerboundPacket.setImprovedPathfinding(!improvedPathfinding),
+            I18n.get("commands.reignofnether.gamerule.improved_pathfinding")
         ));
         buttons.add(new GameruleIntegerButton("allowedHeroes: " + Math.round(allowedHeroes),
             () -> {
