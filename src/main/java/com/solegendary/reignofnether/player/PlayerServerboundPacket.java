@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerboundPacket;
 import com.solegendary.reignofnether.survival.WaveDifficulty;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -82,7 +83,12 @@ public class PlayerServerboundPacket {
                 case VILLAGERS -> PlayerAction.START_RTS_VILLAGERS;
                 case MONSTERS -> PlayerAction.START_RTS_MONSTERS;
                 case PIGLINS -> PlayerAction.START_RTS_PIGLINS;
-                case NONE, NEUTRAL -> PlayerAction.START_RTS_SANDBOX;
+                case RANDOM -> MiscUtil.getRandomItem(List.of(
+                    PlayerAction.START_RTS_VILLAGERS,
+                    PlayerAction.START_RTS_MONSTERS,
+                    PlayerAction.START_RTS_PIGLINS
+                ));
+                default -> PlayerAction.START_RTS_SANDBOX;
             };
             PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(playerAction, MC.player.getId(), x, y, z));
             GameModeServerboundPacket.setAndLockAllClientGameModes(ClientGameModeHelper.gameMode);

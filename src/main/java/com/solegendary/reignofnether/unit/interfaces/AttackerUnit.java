@@ -300,7 +300,7 @@ public interface AttackerUnit {
         if (canAttackBuildings() && !(this instanceof RavagerUnit && ((LivingEntity) this).isVehicle()) &&
                 (!(((Unit) this).getOwnerName()).isEmpty() || level.getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get()))
         {
-            BuildingPlacement closestBuilding = MiscUtil.findClosestAttackableBuilding((Mob) this, aggroRange, level);
+            BuildingPlacement closestBuilding = MiscUtil.findClosestAttackableBuilding((Mob) this, aggroRange);
             if (closestBuilding != null) {
                 if (!((LivingEntity) this).isPassenger())
                     ((Unit) this).getMoveGoal().stopMoving();

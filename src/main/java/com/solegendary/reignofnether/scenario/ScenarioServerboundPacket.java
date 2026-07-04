@@ -72,7 +72,7 @@ public class ScenarioServerboundPacket {
             case VILLAGERS -> ScenarioAction.SET_ROLE_FACTION_VILLAGER;
             case MONSTERS -> ScenarioAction.SET_ROLE_FACTION_MONSTER;
             case PIGLINS -> ScenarioAction.SET_ROLE_FACTION_PIGLIN;
-            case NONE, NEUTRAL -> ScenarioAction.SET_ROLE_FACTION_NEUTRAL;
+            default -> ScenarioAction.SET_ROLE_FACTION_NEUTRAL;
         };
         PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(scenarioAction, roleIndex, 0,0,0, false, 0, ""));
     }

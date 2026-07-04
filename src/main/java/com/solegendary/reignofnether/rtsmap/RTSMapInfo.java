@@ -1,6 +1,12 @@
 package com.solegendary.reignofnether.rtsmap;
 
+import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.ButtonBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,6 +51,9 @@ public class RTSMapInfo {
     }
 
     public List<List<BlockPos>> getTeams() {
+        if (getDefaultMode().equalsIgnoreCase("none"))
+            return List.of();
+
         List<List<Integer>> teamSpawnIds = modes.get(defaultMode);
         if (teamSpawnIds == null) return null;
 
@@ -59,6 +68,6 @@ public class RTSMapInfo {
     }
 
     public boolean supportsMode(String mode) {
-        return modes != null && modes.containsKey(mode);
+        return mode.equalsIgnoreCase("none") ||  modes != null && modes.containsKey(mode);
     }
 }

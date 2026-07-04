@@ -86,7 +86,8 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuildingA
     // bonus for units attacking garrisoned units
     public int getExternalAttackRangeBonus() { return 10; }
 
-    public boolean canDestroyBlock(BlockPos relativeBp) {
+    @Override
+    public boolean canDestroyBlock(BlockPos relativeBp, BuildingPlacement placement) {
         return relativeBp.getY() != 10 &&
                 relativeBp.getY() != 11;
     }

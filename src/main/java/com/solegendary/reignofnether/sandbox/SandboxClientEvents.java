@@ -76,7 +76,7 @@ public class SandboxClientEvents {
             case VILLAGERS -> VillagerUnit.getBuildingButtons();
             case MONSTERS -> ZombieVillagerUnit.getBuildingButtons();
             case PIGLINS -> GruntUnit.getBuildingButtons();
-            case NONE, NEUTRAL-> getNeutralBuildingButtons();
+            default -> getNeutralBuildingButtons();
         };
     }
 
@@ -159,7 +159,7 @@ public class SandboxClientEvents {
                 ProductionItems.PIGLIN_MERCHANT.getPlaceButton(),
                 ProductionItems.WILDFIRE.getPlaceButton()
             );
-            case NONE, NEUTRAL -> List.of(
+            default -> List.of(
                 ProductionItems.ENDERMAN.getPlaceButton(),
                 ProductionItems.POLAR_BEAR.getPlaceButton(),
                 ProductionItems.GRIZZLY_BEAR.getPlaceButton(),
@@ -167,15 +167,6 @@ public class SandboxClientEvents {
                 ProductionItems.WOLF.getPlaceButton(),
                 ProductionItems.LLAMA.getPlaceButton()
             );
-        };
-    }
-
-    private static String getFactionName() {
-        return switch (faction) {
-            case VILLAGERS -> I18n.get("hud.faction.reignofnether.villagers");
-            case MONSTERS -> I18n.get("hud.faction.reignofnether.monsters");
-            case PIGLINS -> I18n.get("hud.faction.reignofnether.piglins");
-            case NONE, NEUTRAL -> I18n.get("hud.faction.reignofnether.neutral");
         };
     }
 
@@ -202,7 +193,7 @@ public class SandboxClientEvents {
                         case VILLAGERS -> faction = Faction.MONSTERS;
                         case MONSTERS -> faction = Faction.PIGLINS;
                         case PIGLINS -> faction = Faction.NONE;
-                        case NONE, NEUTRAL -> faction = Faction.VILLAGERS;
+                        default -> faction = Faction.VILLAGERS;
                     }
                 },
                 () -> {
@@ -210,7 +201,7 @@ public class SandboxClientEvents {
                         case VILLAGERS -> faction = Faction.NONE;
                         case MONSTERS -> faction = Faction.VILLAGERS;
                         case PIGLINS -> faction = Faction.MONSTERS;
-                        case NONE, NEUTRAL -> faction = Faction.PIGLINS;
+                        default -> faction = Faction.PIGLINS;
                     }
                 },
                 List.of(

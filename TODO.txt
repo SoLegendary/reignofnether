@@ -1,23 +1,76 @@
 
-1.20.1-1.3.6b
+1.20.1-1.3.7
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
 
+Hero Items
+----------
+Emerald Resource
+    - Obtainable by killing neutrals, selling items or selling resources
+    - Used to buy resources now instead of direct exchange
+    - Used to buy items from shops
+    - Only shown if you have any
+    - Neutrals now give emerald bounties
+    - Update diplomacy menu resource exchange
+    - Update all other commands related to resources
+    - Resources class constructors should assume emeralds = 0
+
+Hero Items
+    - Hero inventory GUI
+        - Click to use, can have charges and/or cooldown
+        - Drag to move slots, drop on ground, transfer to another hero or sell
+    - While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
+        - Should be visible to all players
+    - Should have tooltips shown even on the ground
+    - Requires right-click to pick up, will not auto-pickup
+
+
+
+Official Map Pack
+-----------------
+[❌] Update Motivational's maps
+[❌] Remove older author's maps
+[❌] Add Killerbee's maps
+
 Quality of Life
 ---------------
+[✔] You can now use `/rtsapi-teams-mode none` on any map to disable all start blocks
+[✔] Added an option to make a custom building not draw aggro from player units
+    - This means idle and attack-moving units won't automatically target it
+[✔] Moved the iron golem default spawn to beside the furnaces to reduce chance of getting stuck on nearby buildings
+[✔] On a countdown game start, your camera is now automatically moved to your starting position
+[✔] The F7 debug menu has been expanded to include navmesh visualisations
+[✔] Added a random faction button to the new start menu
+    - The normal menu does not have it yet (as I'm considering removing this later for full release)
+
 
 
 Balance
 -------
+[✔] The Piglin Merchant and Marauder hitbox sized increased (visually unchanged)
+[✔] Spider hitbox width reduced from 1.4 to 1.0 to improve pathfinding and evasion against projectiles
 
+NEW The Wretched Wraith's bitter frost at rank 1 now produces a constant layer of snow at his feet
+    - Other effects have been shifted up by one rank each
+NEW Snow now cannot melt within 5 blocks of the Wretched Wraith even without Bitter Frost learned
+NEW Beacons now gain 100 additional HP per upgrade they have
 
 Bugfixes
 --------
-[✔] Fixed units not responding to move commands when in large groups
+[✔] Fixed castle roofs breaking and causing garrisoned units to fall out
+[✔] Fixed diagonal bridges not saving correctly
+[✔] Units no longer try to walk through slime blocks
+[✔] Fixed minimap sometimes showing non-existent units
+[✔] Fixed the observer menu showing stats previous games you spectated
+[✔] Fixed frame drops when selecting really big control groups
 
+
+NEW Fixed slimes sometimes having the wrong population value
 
 Languages
 ---------
+
+- show what opponent faction are picking

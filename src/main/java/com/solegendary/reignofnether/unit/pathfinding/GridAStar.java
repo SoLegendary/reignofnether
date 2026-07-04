@@ -16,11 +16,10 @@ public final class GridAStar {
     private static final int[] DZ = GridNeighbors.DZ;
     private static final int[] DY = GridNeighbors.DY;
 
-    // Climb moves for climber units (wall-cling cells only). STRICTLY straight: vertical up/down the SAME column
-    // (the actual climb), plus the 4 cardinal horizontals to step onto/off a wall and traverse a face. NO
-    // diagonals - those let the climb zig-zag. Stepping onto the cliff lip is a flat horizontal move because the
-    // lip cell counts as a climb cell (a wall sits one block below it - see GridNeighbors.adjacentToClimbWall).
-    // All bypass the footprint/floor gates (a cling cell has no floor).
+    // Climb moves for climber units (wall-cling cells only). Strictly straight: vertical up/down the same
+    // column (the climb itself) plus the 4 cardinals to step onto/off a wall and traverse a face. No diagonals
+    // (they'd zig-zag the climb). Stepping onto a cliff lip is a flat horizontal move since the lip counts as a
+    // climb cell (wall one block below, see adjacentToClimbWall). All bypass the footprint/floor gates.
     private static final int[] CLIMB_DX = { 0,  0,   1, -1,  0,  0 };
     private static final int[] CLIMB_DY = { 1, -1,   0,  0,  0,  0 };
     private static final int[] CLIMB_DZ = { 0,  0,   0,  0,  1, -1 };
@@ -97,70 +96,69 @@ public final class GridAStar {
                 if (Float.isInfinite(costMult)) continue;
 
                 if (footprintRadius > 0) {
-                    // Wide unit: its full footprint box must be standable (no wall, corner or drop the body
-                    // would overhang), the vanilla "keep clearance from block borders" rule. See wideFits.
+                    // wide unit: its whole footprint box must be standable (no wall/corner/drop it overhangs) -
+                    // vanilla's "keep clearance from block borders" rule. See wideFits.
                     if (!GridNeighbors.wideFits(view, nx, ny, nz)) continue;
                 } else if (headBlocked(view, nx, ny, nz, clearance)) {
                     // 1-wide unit: only its own column needs headroom for its (possibly tall) height.
                     continue;
                 }
 
-                // Stepping up also needs the full height clear above the ORIGIN so the body can rise into it
-                // (a tall mob can't climb a ledge under an overhang otherwise). For a 2-tall unit, one cell.
+                // stepping up also needs height clear above the origin so the body can rise into it
+                // (else a tall mob can't climb a ledge under an overhang).
                 if (DY[d] == 1 && riseBlocked(view, cur.x, cur.y, cur.z, clearance)) continue;
 
                 if (GridNeighbors.diagonalBlocked(view, mob, cur.x, ny, cur.z, DX[d], DZ[d])) continue;
 
                 float ng = cur.g + GridNeighbors.stepCost(d) * costMult;
-                ng += GridNeighbors.crowdingMalus(view, nx, ny, nz); // avoid walls/edges/corners for ALL units
+                ng += view.crowdAt(nx, ny, nz); // steer all units off walls/edges/corners (precomputed per chunk)
 
                 relax(all, open, nx, ny, nz, ng, gx, gy, gz, cur);
             }
 
-            // Falling: drop straight down MORE than one block where there's no standable cell one step down - a
-            // sheer 2+ block descent like a tall staircase. The +-1 DY neighbour model can't express this, so a
-            // unit stalls at the lip of a drop it can't path (a wide body then spins on the ledge). Vanilla allows
-            // multi-block falls; mirror that. For each horizontal direction, step off the edge into an open column
-            // and land on the first standable cell within MAX_FALL_DROP. The 1-block drop is already handled by the
-            // DY=-1 neighbours above, so this only fires when the one-down cell is NOT a standable step.
+            // Falling: drop more than one block where there's no standable cell one step down - a sheer 2+ block
+            // descent like a tall staircase. The +-1 DY model can't express this, so a unit stalls at the lip (a
+            // wide body spins on the ledge). Vanilla allows multi-block falls; mirror that. For each horizontal
+            // dir, step off the edge into an open column and land on the first standable cell within
+            // MAX_FALL_DROP. The 1-block drop is the DY=-1 neighbours above, so this only fires when the one-down
+            // cell isn't a standable step.
             for (int d = 0; d < 8; d++) { // the 8 horizontal (DY==0) directions
                 int nx = cur.x + DX[d];
                 int nz = cur.z + DZ[d];
                 int fddx = nx - sx, fddz = nz - sz;
                 if (fddx * fddx + fddz * fddz > radiusSq) continue;
 
-                // The body must be able to step horizontally off the edge: the column it enters is clear over its
-                // full height, and a diagonal step doesn't cut through a blocked corner.
+                // body must be able to step off the edge: target column clear over its full height, diagonal
+                // doesn't cut a blocked corner.
                 if (!GridNeighbors.climbColumnClear(view, nx, cur.y, nz)) continue;
                 if (DX[d] != 0 && DZ[d] != 0
                         && GridNeighbors.diagonalBlocked(view, mob, cur.x, cur.y, cur.z, DX[d], DZ[d])) continue;
 
-                // A genuine drop needs open air directly under the edge. If the one-down cell is solid (a wall) or
-                // itself standable (a normal step-down the DY=-1 neighbour already covers), there's no fall here.
+                // a real drop needs open air under the edge. solid (wall) or standable (a normal step-down the
+                // DY=-1 neighbour already covers) means no fall here.
                 if (view.solidAt(nx, cur.y - 1, nz)) continue;
                 if (standable(view, mob, nx, cur.y - 1, nz, clearance, footprintRadius, fireCost)) continue;
 
                 for (int fy = cur.y - 2; fy >= cur.y - PathfinderConfig.MAX_FALL_DROP; fy--) {
                     if (view.solidAt(nx, fy, nz)) break; // hit ground/obstacle before an open landing
                     float lmult = mob.costFor(view.kindAt(nx, fy, nz), fireCost);
-                    if (Float.isInfinite(lmult)) continue; // still mid-air (no floor here) - keep falling
+                    if (Float.isInfinite(lmult)) continue; // still mid-air - keep falling
                     if (footprintRadius > 0 ? !GridNeighbors.wideFits(view, nx, fy, nz)
                                             : headBlocked(view, nx, fy, nz, clearance)) continue;
                     int drop = cur.y - fy;
                     float ng = cur.g + GridNeighbors.stepCost(d) * lmult
                              + PathfinderConfig.FALL_COST_PER_BLOCK * drop
-                             + GridNeighbors.crowdingMalus(view, nx, fy, nz);
+                             + view.crowdAt(nx, fy, nz);
                     relax(all, open, nx, fy, nz, ng, gx, gy, gz, cur);
                     break;
                 }
             }
 
             // Climber units (spiders with wall-climbing on) may also cling to a wall face. A climb cell hangs off
-            // an adjacent wall with no floor and occupies only the unit's own column, so it BYPASSES the costMult
-            // / wideFits / headBlocked / riseBlocked / diagonal gates above (those all assume floor support and a
-            // footprint box). The moves (see CLIMB_*) let the path hug the wall both ways: enter a column from the
-            // ground, climb up/down the face, and step on/off a cliff lip. The main neighbour loop still runs on
-            // every node, so a unit re-enters normal ground movement at the top or bottom automatically.
+            // an adjacent wall with no floor and is the unit's own column, so it bypasses the costMult / wideFits
+            // / headBlocked / riseBlocked / diagonal gates above (all of which assume floor + footprint box). The
+            // CLIMB_* moves hug the wall both ways: enter from the ground, climb the face, step on/off a lip. The
+            // main neighbour loop still runs every node, so the unit rejoins ground movement at top/bottom.
             if (view.canClimb()) {
                 for (int c = 0; c < CLIMB_DX.length; c++) {
                     int nx = cur.x + CLIMB_DX[c];

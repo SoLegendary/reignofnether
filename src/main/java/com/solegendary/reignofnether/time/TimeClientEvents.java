@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.matchstart.MatchStartScreen;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -109,8 +110,8 @@ public class TimeClientEvents {
     // render directly above the minimap
     @SubscribeEvent
     public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
-        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused()
-            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK)) {
+        if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
+            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
             return;
         }
 
@@ -146,7 +147,7 @@ public class TimeClientEvents {
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
-            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK)) {
+            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
             return;
         }
 

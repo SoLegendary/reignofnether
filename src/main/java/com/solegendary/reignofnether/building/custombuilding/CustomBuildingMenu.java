@@ -290,6 +290,14 @@ public class CustomBuildingMenu {
                 },
                 I18n.get("sandbox.reignofnether.custom_buildings.set_destroy_on_reset.tooltip1")
         ));
+        buttonsCol2.add(new BooleanButton(
+                I18n.get("sandbox.reignofnether.custom_buildings.set_draw_aggro.label"), customBuilding.drawAggro,
+                () -> {
+                    CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_DRAW_AGGRO, customBuilding.name, !customBuilding.drawAggro);
+                    customBuilding.drawAggro = !customBuilding.drawAggro;
+                },
+                I18n.get("sandbox.reignofnether.custom_buildings.set_draw_aggro.tooltip1")
+        ));
 
         Button setNightRadiusButton = new IntegerButton(
                 I18n.get("sandbox.reignofnether.custom_buildings.set_night_radius.label") + ": " + customBuilding.nightRadius,

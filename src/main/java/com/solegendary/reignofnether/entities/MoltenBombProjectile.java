@@ -5,16 +5,16 @@ import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
-import com.solegendary.reignofnether.unit.units.piglins.BlazeUnit;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -23,11 +23,8 @@ import net.minecraft.world.entity.projectile.Fireball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.EntityHitResult;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -55,6 +52,15 @@ public class MoltenBombProjectile extends Fireball {
         super.tick();
         if (tickCount > maxTicks)
             this.detonate();
+    }
+
+    @Override
+    protected void onHitEntity(EntityHitResult pResult) {
+        if (this.level().isClientSide() || this.getOwner() == null)
+            return;
+        Relationship rl = UnitServerEvents.getUnitToEntityRelationship((Unit) this.getOwner(), pResult.getEntity());
+        if (rl == Relationship.NEUTRAL || rl == Relationship.HOSTILE)
+            detonate();
     }
 
     @Override

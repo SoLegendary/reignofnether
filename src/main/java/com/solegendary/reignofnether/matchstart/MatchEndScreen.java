@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.player.MatchStatsClientboundPacket.MatchStatRow;
 import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
 import com.solegendary.reignofnether.time.TimeUtils;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -22,10 +23,6 @@ import java.util.Map;
 // it) that groups players by team into WINNER / LOSER sections, showing each player's
 // cumulative match totals plus a per-team party total. Opened by MatchEndClientEvents.
 public class MatchEndScreen extends Screen {
-
-    private static final ResourceLocation VILLAGER_ICON = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
-    private static final ResourceLocation MONSTER_ICON  = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
-    private static final ResourceLocation PIGLIN_ICON   = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
 
     // score array indices (order of RTSPlayerScoresEnum.values())
     private static final int SCORE_BUILDINGS = RTSPlayerScoresEnum.TOTAL_BUILDINGS_CONSTRUCTED.ordinal();
@@ -147,7 +144,7 @@ public class MatchEndScreen extends Screen {
                 g.blit(skin, cl, y, HEAD, HEAD, 40.0f, 8.0f, 8, 8, 64, 64);
 
                 // faction icon
-                ResourceLocation fIcon = factionIcon(row.faction);
+                ResourceLocation fIcon = MiscUtil.getFactionIcon(row.faction);
                 if (fIcon != null)
                     MyRenderer.renderIcon(g, fIcon, cl + HEAD + 4, y, HEAD);
 
@@ -183,15 +180,6 @@ public class MatchEndScreen extends Screen {
     private void drawColHeader(GuiGraphics g, String key, int rightX, int y) {
         String s = Component.translatable(key).getString();
         g.drawString(font, s, rightX - font.width(s), y, TEXT_DIM, true);
-    }
-
-    private static ResourceLocation factionIcon(Faction f) {
-        return switch (f) {
-            case VILLAGERS -> VILLAGER_ICON;
-            case MONSTERS -> MONSTER_ICON;
-            case PIGLINS -> PIGLIN_ICON;
-            default -> null;
-        };
     }
 
     @Override

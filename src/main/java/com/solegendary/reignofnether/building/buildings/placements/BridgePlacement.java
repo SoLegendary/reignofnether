@@ -17,6 +17,7 @@ import java.util.List;
 public class BridgePlacement extends BuildingPlacement {
     public BridgePlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
+        this.isDiagonalBridge = true;
     }
 
     @Override

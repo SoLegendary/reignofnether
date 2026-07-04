@@ -377,6 +377,11 @@ public class OrthoviewClientEvents {
         }
     }
 
+    public static void centreCameraOnPosForPlayer(String playerName, BlockPos bp) {
+        if (MC.player != null && MC.player.getName().getString().equals(playerName))
+            centreCameraOnPos(new Vec3(bp.getX(), bp.getY(), bp.getZ()));
+    }
+
     public static void centreCameraOnPos(BlockPos bp) {
         centreCameraOnPos(new Vec3(bp.getX(), bp.getY(), bp.getZ()));
     }

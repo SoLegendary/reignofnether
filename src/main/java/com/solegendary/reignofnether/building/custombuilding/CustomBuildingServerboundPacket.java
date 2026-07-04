@@ -95,6 +95,7 @@ public class CustomBuildingServerboundPacket {
                     case SET_INVULNERABLE -> customBuilding.invulnerable = this.boolValue;
                     case SET_REPAIRABLE -> customBuilding.repairable = this.boolValue;
                     case SET_DESTROY_ON_RESET -> customBuilding.shouldDestroyOnReset = this.boolValue;
+                    case SET_DRAW_AGGRO -> customBuilding.drawAggro = this.boolValue;
                     case SET_NIGHT_RADIUS -> customBuilding.nightRadius = this.intValue;
                     case SET_NETHER_RADIUS -> customBuilding.netherRadius = this.intValue;
                     case SET_BUILDABLE_BY_VILLAGERS -> customBuilding.buildableByVillagers = this.boolValue;

@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -28,8 +27,6 @@ public class GameruleClient {
     public static int maxPopulation = ResourceCosts.DEFAULT_MAX_POPULATION;
     public static boolean doUnitGriefing = false; // only for GUI
     public static boolean doPlayerGriefing = true; // only for GUI
-    public static boolean rtsPathfinding = false; // only for GUI
-    public static boolean improvedPathfinding = true; // only for GUI
     public static double groundYLevel = -320;
     public static double flyingMaxYLevel = 320;
     public static boolean allowBeacons = true;
@@ -41,8 +38,12 @@ public class GameruleClient {
     public static boolean scenarioMode = false;
     public static boolean coopMode = false;
     public static boolean buildingsOutsideBorder = false;
+    public static boolean rtsPathfinding = false; // only for GUI
 
     public static boolean gamerulesMenuOpen = false;
+
+    public static final String BOOLEAN_BUTTON_NAME = "Boolean Game Rule";
+    public static final String INTEGER_BUTTON_NAME = "Integer Game Rule";
 
     public static Button getGamerulesButton() {
         return new Button(
@@ -68,7 +69,7 @@ public class GameruleClient {
         private final String label;
         public GameruleBooleanButton(String label, boolean enabled, Runnable onLeftClick, String tooltip) {
             super(
-                    "Boolean Game Rule",
+                    BOOLEAN_BUTTON_NAME,
                     8,
                     enabled ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png") :
                             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
@@ -99,7 +100,7 @@ public class GameruleClient {
         private final String label;
         public GameruleIntegerButton(String label, Runnable onLeftClick, Runnable onRightClick, List<FormattedCharSequence> tooltipLines) {
             super(
-                "Integer Game Rule",
+                INTEGER_BUTTON_NAME,
                 8,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png"),
                 (Keybinding) null,
@@ -148,14 +149,6 @@ public class GameruleClient {
             () -> GameruleServerboundPacket.setPlayerGriefing(!doPlayerGriefing),
             I18n.get("commands.reignofnether.gamerule.player_griefing")
         ));
-        buttons.add(new GameruleBooleanButton("rtsPathfinding", rtsPathfinding,
-            () -> GameruleServerboundPacket.setRtsPathfinding(!rtsPathfinding),
-            "Use RTS-optimised pathfinder (async grid A*)."
-        ));
-        buttons.add(new GameruleBooleanButton("improvedPathfinding", improvedPathfinding,
-            () -> GameruleServerboundPacket.setImprovedPathfinding(!improvedPathfinding),
-            I18n.get("commands.reignofnether.gamerule.improved_pathfinding")
-        ));
         buttons.add(new GameruleBooleanButton("allowBeacons", allowBeacons,
             () -> GameruleServerboundPacket.setAllowBeacons(!allowBeacons),
             I18n.get("commands.reignofnether.gamerule.allow_beacons")
@@ -175,6 +168,10 @@ public class GameruleClient {
         buttons.add(new GameruleBooleanButton("coopMode", coopMode,
                 () -> GameruleServerboundPacket.setCoopMode(!coopMode),
                 I18n.get("commands.reignofnether.gamerule.coop_mode")
+        ));
+        buttons.add(new GameruleBooleanButton("rtsPathfinding", rtsPathfinding,
+                () -> GameruleServerboundPacket.setRtsPathfinding(!rtsPathfinding),
+                I18n.get("commands.reignofnether.gamerule.rts_pathfinding")
         ));
         buttons.add(new GameruleIntegerButton("allowedHeroes: " + Math.round(allowedHeroes),
             () -> {
@@ -252,7 +249,7 @@ public class GameruleClient {
         ));
 
         int height = (buttons.size() * 18) - 8;
-        MyRenderer.renderFrameWithBg(guiGraphics, x, y, width, height, 0xA0000000);
+        MyRenderer.renderFrameWithBg(guiGraphics, x, y, width, height, 0xC8000000);
 
         for (Button button : buttons) {
             button.render(guiGraphics, x + 5, y + 5, mouseX, mouseY);

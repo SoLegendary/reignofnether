@@ -71,6 +71,11 @@ public class CallToArmsGoal extends MoveToTargetBlockGoal {
     public BuildingPlacement getBuildingTarget() { return buildingTarget; }
 
     @Override
+    protected boolean useRtsPathfinding() {
+        return false;
+    }
+
+    @Override
     public void stop() {
         buildingTarget = null;
         super.stop();

@@ -153,7 +153,13 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         if (getSize() == 1)
             popCost = 0;
 
-        ResourceCost cost = ResourceCosts.SLIME;
+        ResourceCost cost = ResourceCost.Unit(
+            ResourceCosts.SLIME.food,
+            ResourceCosts.SLIME.wood,
+            ResourceCosts.SLIME.ore,
+            ResourceCosts.SLIME.ticks / 20,
+            ResourceCosts.SLIME.population
+        );
         cost.population = popCost;
         return cost;
     }
@@ -516,9 +522,9 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         if (result && pEntity == consumeTarget) {
             this.setSize(Math.min(MAX_SIZE, getSize() + consumeTarget.getSize() / 2), false);
             if (consumeTarget.getSize() != 1)
-                this.heal((consumeTarget.getUnitMaxHealth() / 2) + 15);
+                this.heal((consumeTarget.getUnitMaxHealth() / 2) + 20);
             else
-                this.heal((consumeTarget.getUnitMaxHealth() / 2));
+                this.heal(consumeTarget.getUnitMaxHealth());
             pEntity.kill();
             consumeTarget = null;
             return true;

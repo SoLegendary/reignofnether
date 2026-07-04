@@ -130,12 +130,14 @@ public class CustomBuildingCommand {
                         .withPosition(bpl.minCorner.offset(-1, 0, -1).getCenter())
                         .withLevel(level)
                         .withSuppressedOutput()
+                        .withPermission(2)
                         .withSource(player);
             } else {
                 source = level.getServer()
                         .createCommandSourceStack()
                         .withPosition(bpl.minCorner.offset(-1, 0, -1).getCenter())
                         .withLevel(level)
+                        .withPermission(2)
                         .withSuppressedOutput();
             }
             level.getServer().getCommands().performPrefixedCommand(source, commandStr);

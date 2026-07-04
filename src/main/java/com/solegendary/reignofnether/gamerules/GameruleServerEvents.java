@@ -4,12 +4,9 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -44,25 +41,6 @@ public class GameruleServerEvents {
             if (args.containsKey("value")) {
                 double flyingMaxYLevel = ((Integer) args.get("value").getResult()).doubleValue();
                 GameruleClientboundPacket.setFlyingMaxYLevel((long) flyingMaxYLevel);
-            }
-        } else if (nodes.get(1).getNode().getName().equals("improvedPathfinding")) {
-            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
-            if (args.containsKey("value")) {
-                boolean value = (boolean) args.get("value").getResult();
-                for (LivingEntity le : UnitServerEvents.getAllUnits()) {
-                    UnitServerEvents.improvedPathfinding = value;
-                    AttributeInstance ai = le.getAttribute(Attributes.FOLLOW_RANGE);
-                    if (ai != null)
-                        ai.setBaseValue(Unit.getFollowRange());
-                }
-                GameruleClientboundPacket.setImprovedPathfinding(value);
-            }
-        } else if (nodes.get(1).getNode().getName().equals("rtsPathfinding")) {
-            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
-            if (args.containsKey("value")) {
-                boolean value = (boolean) args.get("value").getResult();
-                UnitServerEvents.rtsPathfinding = value;
-                GameruleClientboundPacket.setRtsPathfinding(value);
             }
         } else if (nodes.get(1).getNode().getName().equals("neutralAggro")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
@@ -124,6 +102,13 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setBuildingsOutsideBorder(value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("rtsPathfinding")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                UnitServerEvents.rtsPathfinding = value;
+                GameruleClientboundPacket.setRtsPathfinding(value);
+            }
         }
     }
 
@@ -141,11 +126,6 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setUnitGriefing(unitGriefing);
             boolean playerGriefing = server.getGameRules().getRule(GameRuleRegistrar.DO_PLAYER_GRIEFING).get();
             GameruleClientboundPacket.setPlayerGriefing(playerGriefing);
-            boolean rtsPathfinding = server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get();
-            UnitServerEvents.rtsPathfinding = rtsPathfinding;
-            GameruleClientboundPacket.setRtsPathfinding(rtsPathfinding);
-            boolean improvedPathfinding = server.getGameRules().getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).get();
-            GameruleClientboundPacket.setImprovedPathfinding(improvedPathfinding);
             int groundYLevel = server.getGameRules().getRule(GameRuleRegistrar.GROUND_Y_LEVEL).get();
             GameruleClientboundPacket.setGroundYLevel(groundYLevel);
             int flyingMaxYLevel = server.getGameRules().getRule(GameRuleRegistrar.FLYING_MAX_Y_LEVEL).get();
@@ -168,6 +148,9 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setCoopMode(coopMode);
             boolean buildingsOutsideBorder = server.getGameRules().getRule(GameRuleRegistrar.BUILDINGS_OUTSIDE_BORDER).get();
             GameruleClientboundPacket.setBuildingsOutsideBorder(buildingsOutsideBorder);
+            boolean rtsPathfinding = server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get();
+            UnitServerEvents.rtsPathfinding = rtsPathfinding;
+            GameruleClientboundPacket.setRtsPathfinding(rtsPathfinding);
         }
     }
 }

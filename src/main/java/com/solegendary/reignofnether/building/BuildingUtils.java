@@ -366,4 +366,17 @@ public class BuildingUtils {
             return new BlockPos(pos.getX(), pos.getY(), -pos.getZ());
         }
     }
+
+    // not sure why, but this needs to be slightly different to BuildingUtils.rotatePos for some uses
+    public static BlockPos altRotatePos(BlockPos pos, Rotation rot) {
+        if (rot == Rotation.NONE) {
+            return new BlockPos(pos.getX(), pos.getY(), pos.getZ());
+        } else if (rot == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-pos.getZ(), pos.getY(), pos.getX()); // z and x switched
+        } else if (rot == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-pos.getX(), pos.getY(), -pos.getZ());
+        } else {
+            return new BlockPos(pos.getZ(), pos.getY(), -pos.getX()); // z and x switched
+        }
+    }
 }

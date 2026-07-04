@@ -39,6 +39,7 @@ public class Button {
     public int imageSize = DEFAULT_ICON_SIZE;
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
     public boolean stretchIconToBorders = false;
+    public String playerNameForHeadIcon = "";
 
     public ResourceLocation iconResource;
     public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
@@ -71,6 +72,9 @@ public class Button {
     // @ 0.5, bottom half is greyed out
     // @ 1.0, whole button is greyed out
     public float greyPercent = 0.0f;
+
+    public boolean greyWhenDisabled = true;
+    public boolean showSelectedFrameWhenDisabled = false;
 
     Minecraft MC = Minecraft.getInstance();
 
@@ -149,7 +153,10 @@ public class Button {
             MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource, x + xyDiff, y + xyDiff, iconFrameSize, 0x64000000);
         }
 
-        if (bgIconResource != null) {
+        if (!playerNameForHeadIcon.isBlank()) {
+            guiGraphics.pose().translate(0,0,1);
+            MyRenderer.renderPlayerHead(guiGraphics, playerNameForHeadIcon, x + 5, y + 5, 12, bgIconResource);
+        } else if (bgIconResource != null) {
             guiGraphics.pose().translate(0,0,1);
             int iconX = x+4 + (7 - xyDiff - iconSize/2);
             int iconY = y+4 + (7 - xyDiff - iconSize/2);
@@ -167,6 +174,7 @@ public class Button {
                     stretchIconToBorders ? imageSize + 2 : imageSize
             );
         }
+
         // item/unit icon
         if (iconResource != null) {
             int iconX = x+4 + (7 - xyDiff - iconSize/2);
@@ -193,7 +201,7 @@ public class Button {
         renderHotkey(guiGraphics, x, y);
 
         // user is holding click or hotkey down over the button and render frame if so
-        if (isEnabled.get() &&
+        if ((isEnabled.get() || showSelectedFrameWhenDisabled) &&
             (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) &&
                     ((MiscUtil.isLeftClickDown(MC) && onLeftClick != null) ||
                     (MiscUtil.isRightClickDown(MC) && onRightClick != null))
@@ -220,7 +228,7 @@ public class Button {
                     0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
 
-        if (greyPercent > 0 || !isEnabled.get()) {
+        if (greyPercent > 0 || (!isEnabled.get() && greyWhenDisabled)) {
             int greyHeightPx = Math.round(greyPercent * iconFrameSize);
             if (!isEnabled.get())
                 greyHeightPx = 0;

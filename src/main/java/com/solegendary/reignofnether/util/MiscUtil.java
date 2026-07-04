@@ -9,7 +9,9 @@ import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.blocks.WraithSnowLayerBlock;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -420,7 +422,7 @@ public class MiscUtil {
     }
 
 
-    public static BuildingPlacement findClosestAttackableBuilding(Mob unitMob, float range, ServerLevel level) {
+    public static BuildingPlacement findClosestAttackableBuilding(Mob unitMob, float range) {
         List<BuildingPlacement> buildings = unitMob.level().isClientSide() ?
                 BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
 
@@ -447,6 +449,8 @@ public class MiscUtil {
     // owned -> owned ✔ (if hostile)
     private static boolean isBuildingAutoAttackable(Mob unitMob, BuildingPlacement building) {
         if (!building.isAttackable())
+            return false;
+        if (building instanceof CustomBuildingPlacement cb && !cb.getBuilding().drawAggro)
             return false;
 
         Relationship relationship = UnitServerEvents.getUnitToBuildingRelationship((Unit) unitMob, building);
@@ -955,7 +959,8 @@ public class MiscUtil {
             case VILLAGERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
             case MONSTERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
             case PIGLINS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
-            case NONE, NEUTRAL -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep.png");
+            case RANDOM -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark_bg.png");
+            default -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/sheep.png");
         };
     }
 
@@ -1011,5 +1016,12 @@ public class MiscUtil {
 
     public static boolean isMagicDamage(DamageSource source) {
         return source.is(DamageTypeTags.WITCH_RESISTANT_TO) || source.is(DamageTypes.ON_FIRE);
+    }
+
+    public static <T> T getRandomItem(List<T> list) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("List must not be null or empty");
+        }
+        return list.get(RANDOM.nextInt(list.size()));
     }
 }

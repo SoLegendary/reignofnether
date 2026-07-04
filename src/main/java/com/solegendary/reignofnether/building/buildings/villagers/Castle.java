@@ -148,7 +148,9 @@ public class Castle extends ProductionBuilding implements GarrisonableBuildingAd
     public int getExternalAttackRangeBonus() {
         return 15;
     }
-    public boolean canDestroyBlock(BlockPos relativeBp) {
+
+    @Override
+    public boolean canDestroyBlock(BlockPos relativeBp, BuildingPlacement placement) {
         return relativeBp.getY() != 15 && relativeBp.getY() != 17;
     }
 

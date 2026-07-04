@@ -90,14 +90,16 @@ import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUT
 
 public class UnitServerEvents {
 
-    public static boolean improvedPathfinding = true;
-    public static boolean rtsPathfinding = false;
-
     private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;
 
     // max possible pop you can have regardless of buildings, adjustable via /gamerule maxPopulation
     public static int maxPopulation = ResourceCosts.DEFAULT_MAX_POPULATION;
+
+    // server-side mirror of the rtsPathfinding gamerule: when true, units route through the RTS
+    // grid A* pathfinder (with walkability caching + worker pool); when false they use vanilla
+    // pathfinding and the caching/worker work is skipped. Kept in sync by GameruleServerEvents.
+    public static boolean rtsPathfinding = false;
 
     // actioned only when the associated unit is idle, one at a time
     private static final List<UnitActionItem> unitActionSlowQueue = Collections.synchronizedList(new ArrayList<>());
@@ -392,6 +394,7 @@ public class UnitServerEvents {
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0f);
+            mob.setPathfindingMalus(BlockPathTypes.STICKY_HONEY, 1.0f);
         }
 
         if (evt.getEntity() instanceof Unit unit && evt.getEntity() instanceof LivingEntity entity
@@ -708,7 +711,6 @@ public class UnitServerEvents {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD) {
             return;
         }
-        UnitSeparation.applySeparation(allUnits);
         unitSyncTicks -= 1;
         if (unitSyncTicks <= 0) {
             unitSyncTicks = UNIT_SYNC_TICKS_MAX;

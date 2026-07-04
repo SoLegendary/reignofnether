@@ -448,6 +448,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
                 }
             }
             snowToPlace = newSnowQueue;
+
             // heal while on wraith snow
             int layers = BlockUtils.getWraithSnowLayers(level().getBlockState(getOnPos().above()));
             if (onGround() && layers > 0 && tickCount % 20 == 0) {
@@ -456,6 +457,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         }
         if (!level().isClientSide()) {
             tickFrostBlink();
+            tickBitterFrost();
         }
         tickBlizzard();
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
@@ -645,6 +647,18 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         }
     }
 
+    private void tickBitterFrost() {
+        if (getBitterFrost().getRank(this) >= 1 && tickCount % 5 == 0 && onGround()) {
+            BlockPos onPos = getOnPos().above();
+            for (BlockPos pos : List.of(onPos, onPos.north(), onPos.south(), onPos.west(), onPos.east())) {
+                BlockState bs = level().getBlockState(pos);
+                if (bs.getBlock() != BlockRegistrar.WRAITH_SNOW_LAYER.get()) {
+                    BlockServerEvents.placeWraithSnow((ServerLevel) level(), pos, getId(),  false);
+                }
+            }
+        }
+    }
+
     private void freezeRandomNearbyEnemy() {
         ArrayList<LivingEntity> mobs = new ArrayList<>(MiscUtil.getEntitiesWithinRange(position(), Blizzard.RADIUS, LivingEntity.class, level()));
         Collections.shuffle(mobs);
@@ -754,7 +768,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         boolean result = super.doHurtTarget(pEntity);
-        if (result && getBitterFrost().getRank(this) >= 1 && !level().isClientSide()) {
+        if (result && getBitterFrost().getRank(this) >= 2 && !level().isClientSide()) {
             snowToPlace.putAll(BlockServerEvents.getSnowPositions(level(), pEntity.getOnPos().above(), 1));
         }
         return result;
@@ -763,7 +777,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
         boolean result = super.hurt(pSource, pAmount);
-        if (result && getBitterFrost().getRank(this) >= 2 && !level().isClientSide()) {
+        if (result && getBitterFrost().getRank(this) >= 3 && !level().isClientSide()) {
             if (pSource.getEntity() instanceof Mob mob) {
                 BlockServerEvents.placeWraithSnow((ServerLevel) level(), mob.getOnPos().above(), getId());
             } else if (pSource.getEntity() instanceof Projectile projectile && projectile.getOwner() instanceof Mob mob) {

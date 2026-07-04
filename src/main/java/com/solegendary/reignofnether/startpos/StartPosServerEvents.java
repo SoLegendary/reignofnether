@@ -134,8 +134,12 @@ public class StartPosServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-        for (StartPos startPos : startPoses)
-            StartPosClientboundPacket.addPos(startPos);
+        for (StartPos startPos : startPoses) {
+            if (startPos.enabled)
+                StartPosClientboundPacket.addPos(startPos);
+            else
+                StartPosClientboundPacket.addDisabledPos(startPos);
+        }
     }
 
     private static void cullInvalidPoses(ServerLevel serverLevel) {

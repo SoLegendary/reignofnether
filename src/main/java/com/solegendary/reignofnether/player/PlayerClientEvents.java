@@ -15,11 +15,13 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.hud.buttons.HelperButtons;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
@@ -320,6 +322,9 @@ public class PlayerClientEvents {
         CustomBuildingClientEvents.customBuildings.clear();
         CustomBuildingClientEvents.setCustomBuildingToEdit(null);
         AlliancesClient.resetAllAlliances();
+        RTSMapInfoClientEvents.reset();
+        MinimapClientEvents.clearMinimapUnits();
+        PlayerDisplayClientEvents.clearAll();
     }
 
     @SubscribeEvent

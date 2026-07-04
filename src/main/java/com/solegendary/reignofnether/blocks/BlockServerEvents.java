@@ -175,6 +175,10 @@ public class BlockServerEvents {
     }
 
     public static boolean placeWraithSnow(ServerLevel level, BlockPos pos, int ownerId) {
+        return placeWraithSnow(level, pos, ownerId, true);
+    }
+
+    public static boolean placeWraithSnow(ServerLevel level, BlockPos pos, int ownerId, boolean breakWithSound) {
         if (!BlockUtils.canPlaceSnow(level, pos))
             return false;
 
@@ -203,8 +207,10 @@ public class BlockServerEvents {
                 BlockState newLayer = targetBs.setValue(BlockStateProperties.LAYERS, targetLayers + 1);
                 level.setBlockAndUpdate(targetPos, newLayer);
             }
-            level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, targetPos, Block.getId(snowBs));
-            level.levelEvent(targetBs.getSoundType().getPlaceSound().hashCode(), targetPos, Block.getId(snowBs));
+            if (breakWithSound) {
+                level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, targetPos, Block.getId(snowBs));
+                level.levelEvent(targetBs.getSoundType().getPlaceSound().hashCode(), targetPos, Block.getId(snowBs));
+            }
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof WraithSnowBlockEntity snowBe) {
                 snowBe.setOwnerId(ownerId);

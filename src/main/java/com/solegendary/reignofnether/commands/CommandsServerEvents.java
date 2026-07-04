@@ -25,6 +25,8 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoAction;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientboundPacket;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
@@ -1149,6 +1151,7 @@ public class CommandsServerEvents {
 			return 0;
 		}
 		RTSMapInfoServerEvents.rtsMapInfo.setDefaultMode(mode);
+		RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MODE, RTSMapInfoServerEvents.rtsMapInfo.getDefaultMode());
 		ctx.getSource().sendSuccess(
 				() -> Component.literal("Set starting teams mode to '" + mode + "'"),
 				true

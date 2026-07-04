@@ -54,16 +54,16 @@ public class ResearchSpiderWebs extends ProductionItem {
                         ResearchClient.hasResearch(ProductionItems.RESEARCH_SPIDER_WEBS),
                 () -> true,
                 List.of(
-                        fcs(I18n.get("research.reignofnether.sticky_webbing"), true),
+                        fcs(I18n.get("research.reignofnether.spider_webs"), true),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedTime(cost),
                         fcs(""),
-                        fcs(I18n.get("research.reignofnether.sticky_webbing.tooltip1")),
-                        fcs(I18n.get("research.reignofnether.sticky_webbing.tooltip2")),
+                        fcs(I18n.get("research.reignofnether.spider_webs.tooltip1")),
+                        fcs(I18n.get("research.reignofnether.spider_webs.tooltip2")),
                         fcs(""),
-                        fcs(I18n.get("research.reignofnether.sticky_webbing.tooltip3")),
+                        fcs(I18n.get("research.reignofnether.spider_webs.tooltip3")),
                         fcs(""),
-                        fcs(I18n.get("research.reignofnether.sticky_webbing.tooltip4"))
+                        fcs(I18n.get("research.reignofnether.spider_webs.tooltip4"))
                 ),
                 this
         );

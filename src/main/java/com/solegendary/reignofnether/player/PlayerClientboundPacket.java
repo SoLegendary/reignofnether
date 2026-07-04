@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.faction.Faction;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -21,6 +22,7 @@ public class PlayerClientboundPacket {
     int value2;
     Faction faction;
     TradeAction tradeAction; // for updating market rates
+    BlockPos pos;
 
     public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
@@ -102,6 +104,21 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(tradeAction, playerName, (long) value));
     }
 
+    public static void teleport(String playerName, BlockPos pos) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.TELEPORT, playerName, pos));
+    }
+
+    public PlayerClientboundPacket(PlayerAction playerAction, String playerName, BlockPos pos) {
+        this.playerAction = playerAction;
+        this.playerName = playerName;
+        this.value1 = 0L;
+        this.value2 = 0;
+        this.faction = Faction.NONE;
+        this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
+        this.pos = pos;
+    }
+
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1, int value2, Faction faction) {
         this.playerAction = playerAction;
         this.playerName = playerName;
@@ -109,6 +126,7 @@ public class PlayerClientboundPacket {
         this.value2 = value2;
         this.faction = faction;
         this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
+        this.pos = new BlockPos(0,0,0);
     }
 
     public PlayerClientboundPacket(TradeAction tradeAction, String playerName, Long value1) {
@@ -118,6 +136,7 @@ public class PlayerClientboundPacket {
         this.value2 = 0;
         this.faction = Faction.NONE;
         this.tradeAction = tradeAction;
+        this.pos = new BlockPos(0,0,0);
     }
 
     public PlayerClientboundPacket(FriendlyByteBuf buffer) {
@@ -127,6 +146,7 @@ public class PlayerClientboundPacket {
         this.value2 = buffer.readInt();
         this.faction = buffer.readEnum(Faction.class);
         this.tradeAction = buffer.readEnum(TradeAction.class);
+        this.pos = buffer.readBlockPos();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -136,6 +156,7 @@ public class PlayerClientboundPacket {
         buffer.writeInt(this.value2);
         buffer.writeEnum(this.faction);
         buffer.writeEnum(this.tradeAction);
+        buffer.writeBlockPos(this.pos);
     }
 
     // server-side packet-consuming functions
@@ -146,6 +167,7 @@ public class PlayerClientboundPacket {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         switch (playerAction) {
+                            case TELEPORT -> OrthoviewClientEvents.centreCameraOnPosForPlayer(playerName, pos);
                             case DEFEAT -> PlayerClientEvents.defeat(playerName);
                             case VICTORY -> PlayerClientEvents.victory(playerName);
                             case ADD_RTS_PLAYER -> PlayerClientEvents.addRTSPlayer(playerName, faction, value1, value2);

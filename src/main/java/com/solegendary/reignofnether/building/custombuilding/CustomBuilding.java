@@ -161,6 +161,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         attributesNbt.putInt("garrisonCapacity", this.garrisonCapacity);
         attributesNbt.putInt("garrisonRange", this.garrisonRange);
         attributesNbt.putInt("maxHealth", (int) this.maxHealth);
+        attributesNbt.putBoolean("drawAggro", this.drawAggro);
     }
 
     private void unpackAttributesNbt() {
@@ -182,6 +183,8 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         this.garrisonRange = attributesNbt.getInt("garrisonRange");
         if (attributesNbt.contains("maxHealth"))
             this.maxHealth = attributesNbt.getInt("maxHealth");
+        if (attributesNbt.contains("drawAggro"))
+            this.drawAggro = attributesNbt.getBoolean("drawAggro");
     }
 
     public void packCommandsNbt() {

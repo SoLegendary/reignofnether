@@ -10,8 +10,6 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> MAX_POPULATION;
     public static GameRules.Key<GameRules.BooleanValue> DO_UNIT_GRIEFING;
     public static GameRules.Key<GameRules.BooleanValue> DO_PLAYER_GRIEFING;
-    public static GameRules.Key<GameRules.BooleanValue> RTS_PATHFINDING;
-    public static GameRules.Key<GameRules.BooleanValue> IMPROVED_PATHFINDING;
     public static GameRules.Key<GameRules.IntegerValue> GROUND_Y_LEVEL;
     public static GameRules.Key<GameRules.IntegerValue> FLYING_MAX_Y_LEVEL;
     public static GameRules.Key<GameRules.BooleanValue> ALLOW_BEACONS;
@@ -24,6 +22,7 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.BooleanValue> COOP_MODE;
     public static GameRules.Key<GameRules.BooleanValue> DO_NETHER_CONVERSION;
     public static GameRules.Key<GameRules.BooleanValue> BUILDINGS_OUTSIDE_BORDER;
+    public static GameRules.Key<GameRules.BooleanValue> RTS_PATHFINDING;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -44,14 +43,6 @@ public class GameRuleRegistrar {
         );
         // allow players to break blocks other than buildings and resource blocks
         DO_PLAYER_GRIEFING = GameRules.register("doPlayerGriefing", GameRules.Category.PLAYER,
-                GameRules.BooleanValue.create(true)
-        );
-        // use RTS-optimised pathfinder (grid A*, flowfields, async worker) instead of vanilla
-        RTS_PATHFINDING = GameRules.register("rtsPathfinding", GameRules.Category.MOBS,
-                GameRules.BooleanValue.create(false)
-        );
-        // increase pathfinding accuracy in exchange for increased CPU usage
-        IMPROVED_PATHFINDING = GameRules.register("improvedPathfinding", GameRules.Category.MOBS,
                 GameRules.BooleanValue.create(true)
         );
         // sets the minimum Y level for the camera so it doesn't fall into the void
@@ -101,6 +92,13 @@ public class GameRuleRegistrar {
         // allow buildings outside the worldborder
         BUILDINGS_OUTSIDE_BORDER = GameRules.register("buildingsOutsideBorder", GameRules.Category.MISC,
                 GameRules.BooleanValue.create(true)
+        );
+        // use the RTS-optimised pathfinder (async grid A*, walkability cache) instead of vanilla.
+        // Auto-enabled at world load for RTS-optimised maps (small world border) - see
+        // WorldBorderServerEvents - which also prewarms the navmesh. Off otherwise.
+        // May cause additional TPS lag on worlds without world borders as they will not have a pregenerated navmesh
+        RTS_PATHFINDING = GameRules.register("rtsPathfinding", GameRules.Category.MOBS,
+                GameRules.BooleanValue.create(false)
         );
     }
 }

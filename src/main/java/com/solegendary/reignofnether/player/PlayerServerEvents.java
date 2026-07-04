@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
@@ -392,6 +393,9 @@ public class PlayerServerEvents {
     // - spawns workers outside the foundations
     // - no start messages are sent other than the one from the countdown
     public static void startRTS(int playerId, Vec3 pos, Faction faction, int startPosColorId) {
+        if (faction == Faction.RANDOM) {
+            faction = MiscUtil.getRandomItem(List.of(Faction.VILLAGERS, Faction.MONSTERS, Faction.PIGLINS));
+        }
         ReignOfNether.LOGGER.info("[Player] startRTS: playerId={}, pos=[{},{},{}], faction={}, startPosColorId={}", playerId, pos.x, pos.y, pos.z, faction, startPosColorId);
         synchronized (rtsPlayers) {
             boolean readiedStart = startPosColorId != 0;
@@ -427,7 +431,7 @@ public class PlayerServerEvents {
                 case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
                 case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
                 case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
-                case NONE, NEUTRAL -> null;
+                default -> null;
             };
             rtsPlayers.add(RTSPlayer.getNewPlayer(
                     serverPlayer.getName().getString(),
@@ -499,6 +503,7 @@ public class PlayerServerEvents {
                         workerIds[i] = workers.get(i).getId();
                     }
                     BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, playerName, workerIds, false, false);
+                    PlayerClientboundPacket.teleport(playerName, BlockPos.containing(pos));
                 }
                 for (RTSPlayer rtsPlayer : rtsPlayers) {
                     String playerName1 = rtsPlayer.name;
@@ -550,7 +555,7 @@ public class PlayerServerEvents {
                 case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
                 case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
                 case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
-                case NONE, NEUTRAL -> null;
+                default -> null;
             };
             RTSPlayer bot = RTSPlayer.getNewBot(name, faction);
             rtsPlayers.add(bot);

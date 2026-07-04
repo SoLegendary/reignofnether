@@ -329,7 +329,7 @@ public class ScenarioMenu {
             case VILLAGERS -> I18n.get("hud.faction.reignofnether.villagers");
             case MONSTERS -> I18n.get("hud.faction.reignofnether.monsters");
             case PIGLINS -> I18n.get("hud.faction.reignofnether.piglins");
-            case NONE, NEUTRAL -> I18n.get("hud.faction.reignofnether.neutral");
+            default -> I18n.get("hud.faction.reignofnether.neutral");
         };
         String label = I18n.get("sandbox.reignofnether.faction_button1", factionStr);
         evt.getGuiGraphics().drawString(MC.font, label, x + 27, y + 7, 0xFFFFFF);

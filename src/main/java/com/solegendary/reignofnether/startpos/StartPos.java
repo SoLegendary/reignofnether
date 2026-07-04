@@ -53,12 +53,7 @@ public class StartPos {
 
     public ResourceLocation getIcon() {
         if (!playerName.isBlank() && faction != Faction.NONE) {
-            return switch (faction) {
-                case VILLAGERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
-                case MONSTERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
-                case PIGLINS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
-                default -> null;
-            };
+            return MiscUtil.getFactionIcon(faction);
         }
         return getIcon(MiscUtil.getColorName(colorId, true));
     }
@@ -135,6 +130,8 @@ public class StartPos {
                 .tooltipLines(fcsList)
                 .iconSize(MinimapClientEvents.isLargeMap() ? 6 : 4)
                 .imageSize(MinimapClientEvents.isLargeMap() ? 12 : 10)
+                .greyWhenDisabled(false)
+                .playerNameForHeadIcon(playerName)
                 .build();
     }
 }

@@ -70,18 +70,18 @@ public class StartButtons {
     );
 
     public static Button piglinStartButton = new Button(
-        "Piglins",
-        ICON_SIZE,
-        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
-        (Keybinding) null,
-        () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_PIGLINS,
-        () -> TutorialClientEvents.isEnabled() || !PlayerClientEvents.canStartRTS,
-        () -> !TutorialClientEvents.isEnabled(),
-        () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_PIGLINS),
-        null,
-        List.of(
-            fcs(LanguageUtil.getTranslation("hud.startbuttons.piglins.reignofnether.first"), true),
-            fcs(LanguageUtil.getTranslation("hud.startbuttons.piglins.reignofnether.second"))
-        )
+            "Piglins",
+            ICON_SIZE,
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"),
+            (Keybinding) null,
+            () -> CursorClientEvents.getLeftClickAction() == UnitAction.STARTRTS_PIGLINS,
+            () -> TutorialClientEvents.isEnabled() || !PlayerClientEvents.canStartRTS,
+            () -> !TutorialClientEvents.isEnabled(),
+            () -> CursorClientEvents.setLeftClickAction(UnitAction.STARTRTS_PIGLINS),
+            null,
+            List.of(
+                    fcs(LanguageUtil.getTranslation("hud.startbuttons.piglins.reignofnether.first"), true),
+                    fcs(LanguageUtil.getTranslation("hud.startbuttons.piglins.reignofnether.second"))
+            )
     );
 }

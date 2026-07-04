@@ -11,8 +11,7 @@ public enum MobilityClass {
     public static MobilityClass of(Unit unit) {
         if (!(unit instanceof Mob mob)) return HUMANOID;
         if (mob instanceof Drowned || mob instanceof WaterAnimal) return AQUATIC;
-        // Anything wider than a full block spans more than one cell and needs a multi-cell footprint;
-        // sub-block-wide humanoids fit a single cell.
+        // Wider than a full block spans multiple cells and needs a multi-cell footprint; narrower fits one cell.
         if (mob.getBbWidth() > 1.0f) return LARGE;
         return HUMANOID;
     }
@@ -25,12 +24,13 @@ public enum MobilityClass {
                 if (this == LARGE)   return 8.0f;
                 return 5.0f;
             case WalkabilityBuilder.KIND_FIRE:  return PathfinderConfig.FIRE_AVOID_COST;
+            case WalkabilityBuilder.KIND_SLIME:  return PathfinderConfig.SLIME_AVOID_COST;
             default: return Float.POSITIVE_INFINITY;
         }
     }
 
-    // Mobility (land/water) is the same for every unit of a class, but the fire cost is per-unit (it depends
-    // on fire immunity + the unit's DAMAGE_FIRE malus), so the A* search injects it per request.
+    // Land/water cost is the same for every unit of a class, but fire cost is per-unit (depends on fire immunity
+    // + the unit's DAMAGE_FIRE malus), so A* injects it per request.
     public float costFor(byte kind, float fireCost) {
         if (kind == WalkabilityBuilder.KIND_FIRE) return fireCost;
         return costFor(kind);
