@@ -16,17 +16,21 @@ public class RtsDebugStatsClientboundPacket {
     private final int queueAvg;
     private final int stuckAvg;
     private final double tickTime;
+    private final double pathComputeMs; // avg pure A* compute time (worker threads)
+    private final double pathE2eMs;     // avg submit -> delivered time (incl. queue wait)
 
-    public static void broadcast(int pathsAvg, int queueAvg, int stuckAvg, double tickTime) {
+    public static void broadcast(int pathsAvg, int queueAvg, int stuckAvg, double tickTime, double pathComputeMs, double pathE2eMs) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new RtsDebugStatsClientboundPacket(pathsAvg, queueAvg, stuckAvg, tickTime));
+                new RtsDebugStatsClientboundPacket(pathsAvg, queueAvg, stuckAvg, tickTime, pathComputeMs, pathE2eMs));
     }
 
-    public RtsDebugStatsClientboundPacket(int pathsAvg, int queueAvg, int stuckAvg, double tickTime) {
+    public RtsDebugStatsClientboundPacket(int pathsAvg, int queueAvg, int stuckAvg, double tickTime, double pathComputeMs, double pathE2eMs) {
         this.pathsAvg = pathsAvg;
         this.queueAvg = queueAvg;
         this.stuckAvg = stuckAvg;
         this.tickTime = tickTime;
+        this.pathComputeMs = pathComputeMs;
+        this.pathE2eMs = pathE2eMs;
     }
 
     public RtsDebugStatsClientboundPacket(FriendlyByteBuf buffer) {
@@ -34,6 +38,8 @@ public class RtsDebugStatsClientboundPacket {
         this.queueAvg = buffer.readVarInt();
         this.stuckAvg = buffer.readVarInt();
         this.tickTime = buffer.readDouble();
+        this.pathComputeMs = buffer.readDouble();
+        this.pathE2eMs = buffer.readDouble();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -41,6 +47,8 @@ public class RtsDebugStatsClientboundPacket {
         buffer.writeVarInt(this.queueAvg);
         buffer.writeVarInt(this.stuckAvg);
         buffer.writeDouble(this.tickTime);
+        buffer.writeDouble(this.pathComputeMs);
+        buffer.writeDouble(this.pathE2eMs);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
@@ -50,6 +58,8 @@ public class RtsDebugStatsClientboundPacket {
                 RtsDebugClientEvents.queueAvg = this.queueAvg;
                 RtsDebugClientEvents.stuckAvg = this.stuckAvg;
                 RtsDebugClientEvents.tickTime = this.tickTime;
+                RtsDebugClientEvents.pathComputeMs = this.pathComputeMs;
+                RtsDebugClientEvents.pathE2eMs = this.pathE2eMs;
             });
         });
         ctx.get().setPacketHandled(true);

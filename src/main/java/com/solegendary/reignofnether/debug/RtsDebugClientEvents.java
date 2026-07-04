@@ -28,6 +28,8 @@ public class RtsDebugClientEvents {
     public static int queueAvg = 0;
     public static int stuckAvg = 0;
     public static double tickTime = 10; // time to perform one tick in milliseconds
+    public static double pathComputeMs = 0; // avg pure A* compute time per path
+    public static double pathE2eMs = 0;     // avg submit -> delivered time per path (incl. queue wait)
 
     public static double getCappedTPS() {
         return Math.min(1000.0 / tickTime, 20);
@@ -77,6 +79,8 @@ public class RtsDebugClientEvents {
             evt.getGuiGraphics().drawString(MC.font, "Paths/s: " + pathsAvg,                             x, y + lineH * 6, 0xFFFFFF);
             evt.getGuiGraphics().drawString(MC.font, "Queue: " + queueAvg,                               x, y + lineH * 7, 0xFFFFFF);
             evt.getGuiGraphics().drawString(MC.font, "Stuck: " + stuckAvg,                               x, y + lineH * 8, stuckAvg > 0 ? 0xFF6060 : 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, "Path ms: " + String.format("%.2f", pathComputeMs),  x, y + lineH * 9, 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, "Path e2e: " + String.format("%.2f", pathE2eMs),     x, y + lineH * 10, 0xFFFFFF);
         }
         if (displayMode == DebugDisplayMode.NAVMESH) {
             evt.getGuiGraphics().drawString(MC.font, "NAVMESH",            x, y + lineH * 4, 0xFFFFFF);
