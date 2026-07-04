@@ -543,7 +543,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 zombieUnit.moveTo(blockpos, 0.0F, 0.0F);
                 zombieUnit.setOwnerName(this.getOwnerName());
                 this.level().addFreshEntity(zombieUnit);
-                zombieUnit.getPersistentData().putBoolean("isSummoned", true);
+                zombieUnit.setIsSummoned(true);
 
                 ItemStack helmet = new ItemStack(Items.LEATHER_HELMET);
                 ItemStack chestPlate = new ItemStack(Items.LEATHER_CHESTPLATE);

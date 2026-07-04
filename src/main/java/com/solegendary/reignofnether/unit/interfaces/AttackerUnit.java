@@ -77,6 +77,7 @@ public interface AttackerUnit {
     public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour);
 
 
+
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setUnitAttackTarget(@Nullable LivingEntity target) {
         if (target != null) {
@@ -242,7 +243,7 @@ public interface AttackerUnit {
         }
 
         if (!unitMob.level().isClientSide && unitMob.tickCount % 40 == 0) {
-            if (attackerUnit.getAttackMoveTarget() != null && attackerUnit.getEnemySearchBehaviour() != EnemySearchBehaviour.NONE) {
+            if (attackerUnit.getAttackMoveTarget() != null && attackerUnit.getEnemySearchBehaviour() == EnemySearchBehaviour.NONE) {
                 boolean hasNoTargets = ((Unit) attackerUnit).getTargetGoal().getTarget() == null;
                 if (attackerUnit.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg && mabg.getBuildingTarget() != null)
                     hasNoTargets = false;

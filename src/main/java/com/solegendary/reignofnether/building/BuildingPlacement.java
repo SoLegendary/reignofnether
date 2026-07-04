@@ -461,7 +461,7 @@ public class BuildingPlacement {
 
     // health and maxHealth are normalised to 0 being point of destruction
     public int getHealth() {
-        return (int) Math.round((((getBlocksPlaced() - partialBlocksDestroyed) / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
+        return (int) Math.round((((getBlocksPlaced() - (partialBlocksDestroyed) / 2) / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 
     public int getMaxHealth() {

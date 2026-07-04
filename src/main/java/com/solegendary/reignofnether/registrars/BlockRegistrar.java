@@ -261,6 +261,12 @@ public class BlockRegistrar {
                             .instrument(NoteBlockInstrument.SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)),
             CreativeModeTabs.BUILDING_BLOCKS);
 
+    public static final RegistryObject<Block> SPIDER_FRIENDLY_BARRIER = registerBlock("spider_friendly_barrier",
+            () -> new SpiderFriendlyBarrierBlock(BlockBehaviour.Properties.of()
+                    .strength(-1.0F, 3600000.0F)
+                    .noOcclusion()
+            ), CreativeModeTabs.BUILDING_BLOCKS);
+
     private static boolean always(BlockState p_50775_, BlockGetter p_50776_, BlockPos p_50777_) {
         return true;
     }

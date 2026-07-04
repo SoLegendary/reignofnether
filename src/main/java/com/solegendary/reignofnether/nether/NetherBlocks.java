@@ -8,8 +8,11 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.MapColor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,11 +27,18 @@ public class NetherBlocks {
 
     public static BlockState getNetherBlock(Level level, BlockPos overworldBp) {
         BlockState overworldBs = level.getBlockState(overworldBp);
-        if (!overworldBs.isAir())
+        if (!overworldBs.isAir()) {
             for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet())
                 for (Block block : entrySet.getValue())
                     if (overworldBs.getBlock().equals(block))
                         return entrySet.getKey().defaultBlockState();
+
+            String descId = overworldBs.getBlock().getDescriptionId();
+            if (descId.contains("concrete_powder"))
+                return Blocks.SOUL_SOIL.defaultBlockState();
+            else if (descId.contains("terracotta") && !descId.contains("glazed_terracotta"))
+                return Blocks.NETHERRACK.defaultBlockState();
+        }
         return null;
     }
 
@@ -145,6 +155,7 @@ public class NetherBlocks {
             Blocks.PINK_TULIP
     );
 
+    public static final Map<Block, List<String>> STRING_MAPPINGS = new HashMap<>(); // if block key ends in this string
     public static final Map<Block, List<Block>> MAPPINGS = new HashMap<>();
     public static final Map<Block, List<Block>> PLANT_MAPPINGS = new HashMap<>();
 
@@ -202,13 +213,6 @@ public class NetherBlocks {
                 Blocks.GRANITE,
                 Blocks.SNOW_BLOCK,
                 Blocks.POWDER_SNOW,
-                Blocks.TERRACOTTA,
-                Blocks.RED_TERRACOTTA,
-                Blocks.ORANGE_TERRACOTTA,
-                Blocks.YELLOW_TERRACOTTA,
-                Blocks.BROWN_TERRACOTTA,
-                Blocks.WHITE_TERRACOTTA,
-                Blocks.LIGHT_GRAY_TERRACOTTA,
                 Blocks.MOSSY_COBBLESTONE,
                 Blocks.PRISMARINE
             ));

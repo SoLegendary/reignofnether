@@ -47,7 +47,11 @@ Balance
 
 Bugfixes
 --------
-[❌] Capturing a custom building on differet corners creates a placement at the wrong position
+[✔] Fixed RTS Structure Blocks not creating a custom building sometimes
+[✔] Fixed summoned zombies taking up population
+[✔] All non-glazed terracottas and concrete powders now convert to netherrack and soul soil respectively
+[✔] Fixed custom buildings with small block counts displaying health incorrectly
+[✔] Fixed units being unable to shift queue attack moves
 
 Languages
 ---------
