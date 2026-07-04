@@ -295,10 +295,13 @@ public class MoveToTargetBlockGoal extends Goal {
         }
         this.moveTarget = bp;
 
-        // The engine's GoalSelector calls start() itself when this goal goes idle -> active, so only
-        // fire start() manually when the goal is already running (re-issuing a target to a moving unit,
-        // where canContinueToUse stays true and the engine won't re-path). Avoids double-pathing one order.
-        if (changed && !this.mob.level().isClientSide() && isRunning)
+        // Fire start() on every target change. This must NOT be gated on isRunning: cast goals
+        // (GenericTargetedSpellGoal) and CallToArmsGoal are ticked manually from the unit's tick() and are
+        // never registered with the GoalSelector, so no engine ever start()s them - gating here left them
+        // with a moveTarget but no path (heroes standing still on out-of-range casts). For engine-managed
+        // goals this can double-path one order (engine start() follows on activation), but the superseded
+        // request is dropped at the build-queue head by its seq guard before costing any chunk-build budget.
+        if (changed && !this.mob.level().isClientSide())
             this.start();
     }
 
