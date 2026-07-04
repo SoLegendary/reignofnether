@@ -45,13 +45,6 @@ public class CustomBuildingServerEvents {
         saveCustomBuildings(BuildingServerEvents.getServerLevel());
     }
 
-    public static boolean createAndRegisterNewCustomBuilding(ResourceLocation structureRL, String structureName, ServerLevel level, BlockPos pos) {
-        BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof RTSStructureBlockEntity rtsBe) {
-            return createAndRegisterNewCustomBuilding(structureRL, structureName, level, pos.offset(1,0,1), rtsBe.getStructureSize());
-        }
-        return true;
-    }
 
     // registers and places a new custom building on server and client
     public static boolean createAndRegisterNewCustomBuilding(ResourceLocation structureRL, String structureName, ServerLevel level,

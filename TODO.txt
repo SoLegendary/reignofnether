@@ -47,7 +47,7 @@ Balance
 
 Bugfixes
 --------
-
+[❌] Capturing a custom building on differet corners creates a placement at the wrong position
 
 Languages
 ---------
