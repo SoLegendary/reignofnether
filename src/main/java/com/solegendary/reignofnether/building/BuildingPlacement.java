@@ -1109,7 +1109,7 @@ public class BuildingPlacement {
                  || spawnBs.is(BlockTags.LOGS) || spawnBs.is(BlockTags.PLANKS)
                  || spawnBp.distSqr(centrePos) < ANIMAL_SPAWN_RANGE_MIN * ANIMAL_SPAWN_RANGE_MIN
                  || spawnBp.distSqr(centrePos) > range * range
-                 || Math.abs(spawnBp.getY() - minCorner.getY()) >= 4
+                 || Math.abs(spawnBp.getY() - minCorner.getY()) >= 3
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp)
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp.above())
                  || !level.getWorldBorder().isWithinBounds(spawnBp)

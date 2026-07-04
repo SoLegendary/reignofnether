@@ -38,12 +38,14 @@ Official Map Pack
 
 Quality of Life
 ---------------
-
+[✔] Reduced the minimum height difference that capitol animals can spawn at from 4 to 3 blocks
+[✔] Added a new attribute "evasionChance"
+    - When any projectile spawns, they roll a random accuracy value between 0 and 1 and will miss any target with a lower evasion chance
 
 Balance
 -------
-[❌] Wraith buffs?
-
+[🟡] Wraith health reduced from 50 to 35, but they now have 50% evasion against physical attacks
+[🟡] Windcaller health raised from 40 to 45
 
 Bugfixes
 --------
@@ -52,6 +54,7 @@ Bugfixes
 [✔] All non-glazed terracottas and concrete powders now convert to netherrack and soul soil respectively
 [✔] Fixed custom buildings with small block counts displaying health incorrectly
 [✔] Fixed units being unable to shift queue attack moves
+[✔] Fixed ghast fireballs being unable to hit windcallers
 
 Languages
 ---------

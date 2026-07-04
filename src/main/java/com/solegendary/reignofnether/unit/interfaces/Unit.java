@@ -201,6 +201,11 @@ public interface Unit {
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.MAGIC_DAMAGE_RESIST.get().getDefaultValue());
     }
 
+    public default float getEvasionChance() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.EVASION_CHANCE.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.EVASION_CHANCE.get().getDefaultValue());
+    }
+
     // SOURCE: resistance mob effect
     default double getUnitResistPercentage() {
         Mob mob = (Mob) this;

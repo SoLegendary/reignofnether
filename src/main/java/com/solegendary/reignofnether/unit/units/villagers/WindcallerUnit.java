@@ -185,7 +185,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     final static public float attackDamage = 5.0f;
     final static public float attacksPerSecondFlying = 0.25f;
     final static public float attacksPerSecond = 0.30f;
-    final static public float maxHealth = 40.0f;
+    final static public float maxHealth = 45.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float movementSpeedFlying = 0.30f;

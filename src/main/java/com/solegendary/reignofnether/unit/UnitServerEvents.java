@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuild
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
+import com.solegendary.reignofnether.entities.GhastUnitFireball;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -109,6 +110,8 @@ public class UnitServerEvents {
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
     private static final HashMap<Integer, ChunkAccess> forcedUnitChunks = new HashMap<>();
+
+    private static final Random RANDOM = new Random();
 
     private static final List<MobEffect> SYNCED_MOB_EFFECTS = List.of(
         MobEffects.DAMAGE_RESISTANCE,
@@ -434,6 +437,10 @@ public class UnitServerEvents {
                 true
             );
             forcedUnitChunks.put(entity.getId(), chunk);
+        }
+
+        if (evt.getEntity() instanceof Projectile proj) {
+            proj.getPersistentData().putFloat("accuracyRoll", RANDOM.nextFloat());
         }
     }
 
@@ -1020,6 +1027,10 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof HeroUnit && evt.getSource().getEntity() instanceof PhantomSummon) {
             evt.setAmount(evt.getAmount() * PhantomSummon.HERO_DAMAGE_MULT);
         }
+
+        if (evt.getSource().getDirectEntity() instanceof GhastUnitFireball) {
+            evt.setAmount(0); // flying units hit only, explosion will do enough damage anyway
+        }
     }
 
     @SubscribeEvent
@@ -1042,7 +1053,7 @@ public class UnitServerEvents {
         // prevent fireballs actually directly hitting anything, except other ghasts
         //  instead just relying on splash damage and fire creation
         if (owner instanceof GhastUnit && hit != null) {
-            if (!(hit instanceof GhastUnit)) {
+            if (!(hit instanceof Unit unit && unit.isFlyingUnit())) {
                 evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
             }
         }
@@ -1056,6 +1067,12 @@ public class UnitServerEvents {
                 }
                 evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
             }
+        }
+
+        if (hit instanceof Unit unit && evt.getProjectile().getPersistentData().contains("accuracyRoll")) {
+            float accuracyRoll = evt.getProjectile().getPersistentData().getFloat("accuracyRoll");
+            if (accuracyRoll < unit.getEvasionChance())
+                evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
         }
     }
 
