@@ -896,6 +896,8 @@
     "hud.enchant.reignofnether.flame.tooltip": "Ignites enemies on hit",
     "hud.enchant.reignofnether.fire_aspect": "Fire Aspect",
     "hud.enchant.reignofnether.fire_aspect.tooltip": "Ignites enemies on hit",
+    "hud.enchant.reignofnether.longshot": "Longshot",
+    "hud.enchant.reignofnether.longshot.tooltip": "Raises attack range",
     "hud.enchant.reignofnether.march_of_progress": "March of Progress",
     "hud.enchant.reignofnether.march_of_progress.tooltip": "Doubles the effect of all enchantments",
 

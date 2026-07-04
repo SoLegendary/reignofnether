@@ -330,6 +330,10 @@ public interface AttackerUnit {
         return false;
     }
 
+    public default boolean hasBonusRange() {
+        return false;
+    }
+
     public default float getAttackCooldownMultiplier() {
         MobEffectInstance disarm = ((LivingEntity) (this)).getEffect(MobEffectRegistrar.DISARM.get());
         if (disarm != null) {

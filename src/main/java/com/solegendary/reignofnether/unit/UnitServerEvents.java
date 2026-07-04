@@ -841,10 +841,10 @@ public class UnitServerEvents {
     }
 
     private static boolean shouldIgnoreKnockback(LivingDamageEvent evt) {
-        Entity projectile = evt.getSource().getDirectEntity();
+        Entity directEntity = evt.getSource().getDirectEntity();
         Entity sourceEntity = evt.getSource().getEntity();
 
-        if (sourceEntity instanceof HeadhunterUnit headhunterUnit && projectile instanceof ThrownTrident) {
+        if (sourceEntity instanceof HeadhunterUnit headhunterUnit && directEntity instanceof ThrownTrident) {
             return !ResearchServerEvents.playerHasResearch(headhunterUnit.getOwnerName(),
                     ProductionItems.RESEARCH_HEAVY_TRIDENTS
             );
@@ -855,13 +855,17 @@ public class UnitServerEvents {
             return true;
         if (sourceEntity instanceof SlimeUnit slimeUnit && slimeUnit.isTiny())
             return true;
-        if (projectile instanceof Fireball && sourceEntity instanceof BlazeUnit)
+        if (directEntity instanceof Fireball && sourceEntity instanceof BlazeUnit)
             return true;
-        if (projectile instanceof AbstractArrow)
+        if (directEntity instanceof AbstractArrow)
             return true;
-        if (projectile instanceof WindcallerProjectile proj && !(proj.getOwner() instanceof WindcallerUnit windcallerUnit && windcallerUnit.getPunchLevel() > 0))
+        if (directEntity instanceof WindcallerProjectile proj && !(proj.getOwner() instanceof WindcallerUnit windcallerUnit && windcallerUnit.getPunchLevel() > 0))
             return true;
-        if (projectile instanceof BlazeUnitFireball)
+        if (directEntity instanceof BlazeUnitFireball)
+            return true;
+        if (sourceEntity instanceof WorkerUnit &&
+            sourceEntity instanceof Mob mob &&
+            ResourceSources.isHuntableAnimal(mob.getTarget()))
             return true;
 
         return evt.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO) && evt.getSource().isIndirect()
