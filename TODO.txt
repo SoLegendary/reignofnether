@@ -47,7 +47,8 @@ Quality of Life
 
 Balance
 -------
-[✔] You can now substitute a Slime Pit for one of the Stronghold prerequisite buildings
+[✔] Monsters can now substitute a Slime Pit for any of the Stronghold prerequisites
+[✔] Piglins can now substitute a Basalt Springs for a Wither Shrine for the Fortress prerequisites
 [✔] Castles now require a Witch Hut instead of a Barracks
 [✔] Wraith health reduced from 50 to 35, but they now have 50% evasion against physical attacks
 [✔] Windcaller health raised from 40 to 45

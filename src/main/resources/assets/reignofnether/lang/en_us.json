@@ -562,7 +562,7 @@
     "buildings.reignofnether.fortress": "Fortress",
     "buildings.reignofnether.fortress.tooltip1": "An imposing nether fortress that allows military portals",
     "buildings.reignofnether.fortress.tooltip2": "to produce ghasts and garrisons up to %d units.",
-    "buildings.reignofnether.fortress.tooltip3": "Requires a Flame Sanctuary and a Wither Shrine.",
+    "buildings.reignofnether.fortress.tooltip3": "Requires a Flame Sanctuary and a Wither Shrine or Basalt Springs.",
     "buildings.reignofnether.hoglin_stables": "Hoglin Stables",
     "buildings.reignofnether.hoglin_stables.tooltip1": "A shelter to keep Hoglins stabled in the overworld, ",
     "buildings.reignofnether.hoglin_stables.tooltip2": "enabling their production at military portals.",

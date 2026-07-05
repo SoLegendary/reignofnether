@@ -55,6 +55,13 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
 
     public Faction getFaction() {return Faction.PIGLINS;}
 
+    private boolean hasPrerequisiteBuildings() {
+        boolean hasFlameSanctuary = BuildingClientEvents.hasFinishedBuilding(Buildings.FLAME_SANCTUARY);
+        boolean hasShrineOrSprings = BuildingClientEvents.hasFinishedBuilding(Buildings.BASALT_SPRINGS) ||
+                                BuildingClientEvents.hasFinishedBuilding(Buildings.WITHER_SHRINE);
+        return hasFlameSanctuary && hasShrineOrSprings;
+    }
+
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
@@ -64,9 +71,7 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.FORTRESS,
             () -> false,
-            () -> (BuildingClientEvents.hasFinishedBuilding(Buildings.FLAME_SANCTUARY) &&
-                    BuildingClientEvents.hasFinishedBuilding(Buildings.WITHER_SHRINE)) ||
-                    ResearchClient.hasCheat("modifythephasevariance"),
+            () -> hasPrerequisiteBuildings() || ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
                     FormattedCharSequence.forward(I18n.get("buildings.reignofnether.fortress"), Style.EMPTY.withBold(true)),
                     ResourceCosts.getFormattedCost(cost),
