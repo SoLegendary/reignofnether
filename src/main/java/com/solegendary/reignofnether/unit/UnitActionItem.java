@@ -253,6 +253,7 @@ public class UnitActionItem {
                             usePortalGoal.setBuildingTarget(preselectedBlockPos);
                     } else if (actionableUnits.size() == 1) {
                         unit.setMoveTarget(preselectedBlockPos);
+                        unit.getMoveGoal().setManualMove(true); // disengage order: hold fire until arrival
                     } else {
                         formationUnits.add(unit);
                     }
@@ -352,9 +353,10 @@ public class UnitActionItem {
                 case RETURN_RESOURCES_TO_CLOSEST -> { // drop resources off early and return to work
                     if (unit instanceof WorkerUnit workerUnit) {
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
-                        if (goal != null) {
-                            goal.saveAndReturnResources();
-                        }
+                        if (goal != null)
+                            goal.saveAndReturnResources(); // saves gather state, then returns
+                    } else if (unit.getReturnResourcesGoal() != null) {
+                        unit.getReturnResourcesGoal().returnToClosestBuilding();
                     }
                 }
                 case DELETE -> {
@@ -412,11 +414,16 @@ public class UnitActionItem {
                 if (!isRedundantMove((Unit) pair.getFirst(), pair.getSecond()))
                     filtered.add(pair);
             }
-            // Small groups dispatch immediately; large groups queue for time-sliced dispatch on the
-            // server so we don't run N concurrent A* searches in the same tick.
-            if (level.isClientSide() || filtered.size() <= 20) {
+            // Dispatch immediately on the client, when RTS pathfinding is on, or for small groups. The
+            // time-sliced queue is ONLY needed to spread out vanilla's synchronous main-thread A* for a
+            // large group; the RTS pathfinder already queues + backpressures requests off-thread, so it
+            // doesn't need the stagger - and staggering leaves units idle for a few ticks after their
+            // combat state was reset, in which the aggressive-when-idle scan re-acquires the enemy they
+            // were just ordered away from (the "team move-away snaps back to attacking" bug).
+            if (level.isClientSide() || UnitServerEvents.rtsPathfinding || filtered.size() <= 20) {
                 for (Pair<LivingEntity, BlockPos> pair : filtered) {
                     ((Unit) pair.getFirst()).getMoveGoal().setMoveTarget(pair.getSecond());
+                    ((Unit) pair.getFirst()).getMoveGoal().setManualMove(true); // disengage order
                 }
             } else {
                 UnitServerEvents.queueFormationMove(filtered);

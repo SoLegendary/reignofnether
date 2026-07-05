@@ -231,8 +231,10 @@ public interface AttackerUnit {
                     attackerUnit.setUnitAttackTarget((LivingEntity) lastDSEntity);
                 }
             }
-            // enact aggression when idle
-            if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle())
+            // enact aggression when idle - but not during a manual "disengage" move order, even if the unit
+            // momentarily reads as idle (eg. stationaryNearMoveTarget near the end of its path). Suppressing
+            // acquisition here keeps Mob.target null, so the priority-2 attack goal can't override the move.
+            if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle() && !unit.getMoveGoal().isManualMove())
                 attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level());
 
             // if attacking another unit as melee, retarget the closest unit periodically

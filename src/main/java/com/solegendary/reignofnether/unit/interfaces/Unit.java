@@ -678,7 +678,11 @@ public interface Unit {
         boolean stationaryNearMoveTarget = false;
         if (this.getMoveGoal().getMoveTarget() != null) {
             double distToMoveTarget = ((LivingEntity) this).distanceToSqr(this.getMoveGoal().getMoveTarget().getCenter());
-            boolean stationary = ((Mob) this).getDeltaMovement().x == 0 || ((Mob) this).getDeltaMovement().z == 0;
+            // Genuinely stuck = barely moving on BOTH axes. Must be && (not ||): a unit walking straight along
+            // one axis has ~0 velocity on the other, so || wrongly reads it as stationary while it's still moving.
+            // Epsilon, not == 0: physics rarely lands exactly on zero.
+            net.minecraft.world.phys.Vec3 dm = ((Mob) this).getDeltaMovement();
+            boolean stationary = Math.abs(dm.x) < 1.0e-3 && Math.abs(dm.z) < 1.0e-3;
             stationaryNearMoveTarget = stationary && distToMoveTarget < 4;
         }
         return (this.getMoveGoal().getMoveTarget() == null || stationaryNearMoveTarget) &&
