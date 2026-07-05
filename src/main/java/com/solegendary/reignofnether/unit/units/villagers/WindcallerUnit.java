@@ -516,7 +516,8 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
-        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+        if (!hasLongshot())
+            this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
 
         if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_UPGRADED_WINDCALLERS) && !isFlying()) {
             setFlying(true);

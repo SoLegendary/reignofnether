@@ -44,6 +44,7 @@ Quality of Life
     - All projectiles roll a random accuracy value between 0 and 1 on spawn and miss targets with a higher evasion chance
 [✔] Slimes and magma cubes no longer auto-consume targets that have auto-consume on
 [✔] Villagers and zombie villagers now auto-drop resources and gather nearby resources when they finish a stockpile
+[✔] Aggro range is now always considered to be as far as attack range at a minimum
 
 Balance
 -------
@@ -62,7 +63,6 @@ Bugfixes
 [✔] Fixed custom buildings with small block counts displaying health incorrectly
 [✔] Fixed being unable to shift queue attack moves
 [✔] Fixed ghast fireballs being unable to hit windcallers
-
 
 Languages
 ---------
