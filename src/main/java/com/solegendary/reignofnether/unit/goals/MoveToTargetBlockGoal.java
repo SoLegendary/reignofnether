@@ -25,14 +25,6 @@ public class MoveToTargetBlockGoal extends Goal {
     @Nullable protected BlockPos moveTarget = null;
     protected boolean persistent; // will keep trying to move back to the target if moved externally
     protected int moveReachRange = 0; // how far away from the target block to stop moving (manhattan distance)
-    // True while this is a manual "disengage" MOVE order (plain move command), as opposed to attack-move,
-    // gather, build, etc. While set, AttackerUnit auto-aggro (idle-aggression, retaliation, retarget) is
-    // suppressed so a re-acquired enemy can't silently override the order the player gave - the attack goal
-    // outranks the move goal, so without this a re-aggro hijacks the move. Cleared on arrival, stopMoving,
-    // or any fresh target (a new attack/attack-move order goes through fullResetBehaviours -> stopMoving).
-    protected boolean manualMove = false;
-    public boolean isManualMove() { return manualMove && moveTarget != null; }
-    public void setManualMove(boolean manualMove) { this.manualMove = manualMove; }
 
     protected final int RECALC_COOLDOWN_MAX = 20;
     protected static final int RECALC_COOLDOWN_CAP = 200; // ~10s cap for exponential backoff on stuck units
@@ -128,7 +120,6 @@ public class MoveToTargetBlockGoal extends Goal {
         else if (this.mob.getNavigation().isDone()) {
             if (!persistent && !((Unit) this.mob).getHoldPosition()) {
                 moveTarget = null;
-                manualMove = false; // arrived: drop hold-fire so normal aggression resumes
             }
             return false;
         }
@@ -291,7 +282,6 @@ public class MoveToTargetBlockGoal extends Goal {
         if (changed) {
             resetRecalcBackoff();
             recalcCooldown = 0;
-            manualMove = false; // a fresh target defaults to non-manual; the MOVE command re-flags it after
         }
         this.moveTarget = bp;
 
@@ -336,7 +326,6 @@ public class MoveToTargetBlockGoal extends Goal {
         pathPending = false;
         pendingRepath = false;
         repathFromFinalNode = null;
-        manualMove = false;
         pathRequestSeq++; // cancel any in-flight path so a late result can't restart movement after a stop.
         this.moveTarget = null;
         this.mob.getNavigation().stop();

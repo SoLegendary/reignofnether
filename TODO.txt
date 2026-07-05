@@ -61,5 +61,7 @@ Bugfixes
 [✔] Fixed being unable to shift queue attack moves
 [✔] Fixed ghast fireballs being unable to hit windcallers
 
+spell goal in progress doesn't make you non-idle
+
 Languages
 ---------

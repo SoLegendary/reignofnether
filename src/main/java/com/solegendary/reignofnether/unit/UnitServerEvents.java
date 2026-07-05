@@ -699,7 +699,6 @@ public class UnitServerEvents {
                 LivingEntity le = order.unit();
                 if (le != null && le.isAlive() && le instanceof Unit unit) {
                     unit.getMoveGoal().setMoveTarget(order.target());
-                    unit.getMoveGoal().setManualMove(true); // formation dispatch only holds plain MOVE orders
                 }
                 processed += 1;
             }

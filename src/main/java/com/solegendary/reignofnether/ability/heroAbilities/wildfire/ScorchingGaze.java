@@ -8,8 +8,11 @@ import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
+import com.solegendary.reignofnether.unit.goals.GenericUntargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -33,6 +36,16 @@ public class ScorchingGaze extends HeroAbility {
 
     public static final int MIN_MAGMA_DURATION = 200;
     public static final int MAX_MAGMA_DURATION = 300;
+
+    @Override
+    public boolean isCasting(Unit unit) {
+        if (unit instanceof WildfireUnit wildfireUnit) {
+            GenericTargetedSpellGoal goal = wildfireUnit.getCastScorchingGazeGoal();
+            if (goal != null)
+                return goal.isCasting();
+        }
+        return false;
+    }
 
     public ScorchingGaze() {
         super(3, 50, UnitAction.SCORCHING_GAZE, 30 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);

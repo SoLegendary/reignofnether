@@ -685,7 +685,8 @@ public interface Unit {
             boolean stationary = Math.abs(dm.x) < 1.0e-3 && Math.abs(dm.z) < 1.0e-3;
             stationaryNearMoveTarget = stationary && distToMoveTarget < 4;
         }
-        return (this.getMoveGoal().getMoveTarget() == null || stationaryNearMoveTarget) &&
+        boolean isMoving = !((Mob) this).getNavigation().isDone() || this.getMoveGoal().getMoveTarget() != null;
+        return (!isMoving || stationaryNearMoveTarget) &&
                 this.getFollowTarget() == null &&
                 idleAttacker &&
                 idleWorker &&

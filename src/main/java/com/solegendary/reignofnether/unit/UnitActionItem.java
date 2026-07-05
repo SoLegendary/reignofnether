@@ -253,7 +253,6 @@ public class UnitActionItem {
                             usePortalGoal.setBuildingTarget(preselectedBlockPos);
                     } else if (actionableUnits.size() == 1) {
                         unit.setMoveTarget(preselectedBlockPos);
-                        unit.getMoveGoal().setManualMove(true); // disengage order: hold fire until arrival
                     } else {
                         formationUnits.add(unit);
                     }
@@ -423,7 +422,6 @@ public class UnitActionItem {
             if (level.isClientSide() || UnitServerEvents.rtsPathfinding || filtered.size() <= 20) {
                 for (Pair<LivingEntity, BlockPos> pair : filtered) {
                     ((Unit) pair.getFirst()).getMoveGoal().setMoveTarget(pair.getSecond());
-                    ((Unit) pair.getFirst()).getMoveGoal().setManualMove(true); // disengage order
                 }
             } else {
                 UnitServerEvents.queueFormationMove(filtered);
