@@ -41,15 +41,16 @@ Quality of Life
 [✔] Reduced the minimum height difference that capitol animals can spawn at from 4 to 3 blocks
 [✔] Workers no longer knockback animals
 [✔] Added a new unit attribute "evasionChance"
-    - When any projectile spawns, they roll a random accuracy value between 0 and 1 and will miss any target with a lower evasion chance
-[❌] Slimes and magma cubes no longer auto-consume targets that have auto-consume on
+    - All projectiles roll a random accuracy value between 0 and 1 on spawn and miss targets with a higher evasion chance
+[✔] Slimes and magma cubes no longer auto-consume targets that have auto-consume on
 
 Balance
 -------
+[✔] You can now substitute a Slime Pit for one of the Stronghold prerequisite buildings
+[✔] Castles now require a Witch Hut instead of a Barracks
 [✔] Wraith health reduced from 50 to 35, but they now have 50% evasion against physical attacks
 [✔] Windcaller health raised from 40 to 45
 [✔] Windcaller martial enchantment changed from Punch to Longshot (+4 range)
-[❌] You can now substitute a Slime Pit for one of the other buildings as a prerequisite for Strongholds
 
 Bugfixes
 --------
@@ -57,7 +58,7 @@ Bugfixes
 [✔] Fixed summoned zombies taking up population
 [✔] All non-glazed terracottas and concrete powders now convert to netherrack and soul soil respectively
 [✔] Fixed custom buildings with small block counts displaying health incorrectly
-[✔] Fixed units being unable to shift queue attack moves
+[✔] Fixed being unable to shift queue attack moves
 [✔] Fixed ghast fireballs being unable to hit windcallers
 
 Languages

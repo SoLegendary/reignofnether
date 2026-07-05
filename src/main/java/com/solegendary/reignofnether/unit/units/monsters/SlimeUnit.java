@@ -403,7 +403,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
             SlimeUnit closestTarget = null;
 
             for (SlimeUnit slime : nearbyEntities) {
-                if (slime.getOwnerName().equals(getOwnerName()) && slime != this && slime.getSize() == STARTING_SIZE) {
+                if (slime.getOwnerName().equals(getOwnerName()) && slime != this && slime.getSize() == STARTING_SIZE && !slime.autocastingConsume()) {
                     double dist = position().distanceTo(slime.position());
                     if (dist < closestDist) {
                         closestDist = dist;
