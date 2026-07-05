@@ -66,6 +66,10 @@ public class AlliancesClient {
         }
     }
 
+    public static boolean isAlliedOrOwned(String owner1, String owner2) {
+        return isAllied(owner1, owner2) || owner1.equals(owner2);
+    }
+
     public static boolean isAllied(String owner1, String owner2) {
         return alliances.getOrDefault(owner1, Collections.emptySet()).contains(owner2);
     }

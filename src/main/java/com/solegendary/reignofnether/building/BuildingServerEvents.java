@@ -82,7 +82,6 @@ public class BuildingServerEvents {
 
     // buildings that currently exist serverside
     private static final ArrayList<BuildingPlacement> buildings = new ArrayList<>();
-    private static final ArrayList<BuildingPlacement>  garrisonableBuildings = new ArrayList<>();
 
     public static final ArrayList<NetherZone> netherZones = new ArrayList<>();
 
@@ -91,7 +90,11 @@ public class BuildingServerEvents {
     }
 
     public static List<BuildingPlacement> getGarrisonableBuildings() {
-        return garrisonableBuildings;
+        ArrayList<BuildingPlacement> garrs = new ArrayList<>();
+        for (BuildingPlacement bpl : buildings)
+            if (bpl.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class))
+                garrs.add(bpl);
+        return garrs;
     }
 
     public static final Random random = new Random();
@@ -183,10 +186,6 @@ public class BuildingServerEvents {
                     building.scenarioRoleIndex = b.scenarioRoleIndex;
                     building.isBuilt = b.isBuilt;
                     BuildingServerEvents.getBuildings().add(building);
-                    GarrisonableBuildingAddon gba;
-                    if (building.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class)) {
-                        garrisonableBuildings.add(building);
-                    }
                     if (building instanceof ProductionPlacement pb) {
                         pb.setRallyPoint(b.rallyPoint);
                     }
@@ -331,9 +330,6 @@ public class BuildingServerEvents {
                     BuildingUtils.clearBuildingArea(newBuilding);
                 }
                 buildings.add(newBuilding);
-                if (newBuilding.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class)) {
-                    garrisonableBuildings.add(newBuilding);
-                }
                 newBuilding.forceChunk(true);
                 int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
 
