@@ -79,17 +79,9 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         }
         if (!BuildingUtils.isBuildingBuildable(this.mob.level().isClientSide(), buildingTarget)) {
             if (!startNextQueuedBuilding()) {
-                if (buildingTarget instanceof FarmPlacement && mob instanceof WorkerUnit workerUnit) {
+                if (buildingTarget instanceof FarmPlacement && mob instanceof WorkerUnit) {
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetFarm(buildingTarget);
-                }
-                // look for the nearest resource to gather after completing a stockpile
-                else if (buildingTarget.getBuilding() instanceof OakStockpile stockpile &&
-                        !buildingTarget.isBuilt &&
-                        mob instanceof WorkerUnit workerUnit &&
-                        workerUnit.getBuildRepairGoal().isBuilding()) {
-                    ((Unit) mob).getReturnResourcesGoal().depositItems();
-                    workerUnit.getGatherResourceGoal().setTargetResourceName(stockpile.mostAbundantNearbyResource);
                 }
                 stopBuilding();
             }

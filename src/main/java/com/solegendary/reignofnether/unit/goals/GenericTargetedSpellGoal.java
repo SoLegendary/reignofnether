@@ -18,6 +18,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
@@ -117,6 +118,23 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
                 castTarget.getX(), castTarget.getZ()) <= finalRange)
             return true;
         return false;
+    }
+
+    @Override
+    public void setMoveTarget(@Nullable BlockPos bp) {
+        if (bp != null) {
+            MiscUtil.addUnitCheckpoint((Unit) mob, bp, true);
+        }
+        // bandaid fix for units sometimes not listening to unit targets from idle
+        boolean changed = !Objects.equals(bp, this.moveTarget) || (mob.tickCount % 10 == 0 && mob.getNavigation().isDone());
+        if (changed) {
+            resetRecalcBackoff();
+            recalcCooldown = 0;
+        }
+        this.moveTarget = bp;
+
+        if (changed && !this.mob.level().isClientSide())
+            this.start();
     }
 
     @Override

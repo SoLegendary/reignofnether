@@ -122,6 +122,7 @@ public class CustomBuildingServerEvents {
     }
 
     public static void loadCustomBuildings(ServerLevel level) {
+        customBuildings.clear();
         CustomBuildingSaveData customBuildingData = CustomBuildingSaveData.getInstance(level);
         customBuildingData.customBuildings.forEach(bSave -> {
             CustomBuilding building = new CustomBuilding(bSave.buildingName, bSave.structureSize, Blocks.COMMAND_BLOCK, bSave.structureNbt, bSave.attributesNbt, bSave.commandsNbt);

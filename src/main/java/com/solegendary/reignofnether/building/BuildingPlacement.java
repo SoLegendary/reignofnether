@@ -325,7 +325,7 @@ public class BuildingPlacement {
             this.blockPlaceQueue.add(block);
     }
 
-    public ArrayList<WorkerUnit> getBuilders(Level level) {
+    public ArrayList<WorkerUnit> getBuilders() {
         ArrayList<WorkerUnit> builders = new ArrayList<>();
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (entity instanceof WorkerUnit workerUnit) {
@@ -519,7 +519,7 @@ public class BuildingPlacement {
         }
         if (!validBlocks.isEmpty()) {
             if (getBuilding() instanceof AbstractBridge) {
-                ArrayList<WorkerUnit> builders = getBuilders(this.level);
+                ArrayList<WorkerUnit> builders = getBuilders();
                 if (!builders.isEmpty()) {
                     BlockPos builderPos = ((LivingEntity) builders.get(new Random().nextInt(builders.size()))).getOnPos();
                     validBlocks.sort(Comparator.comparing(bb -> bb.getBlockPos().distSqr(builderPos)));
@@ -908,7 +908,7 @@ public class BuildingPlacement {
     }
 
     private void handleServerTick(ServerLevel serverLevel, float blocksPlaced, float blocksTotal) {
-        ArrayList<WorkerUnit> workerUnits = getBuilders(serverLevel);
+        ArrayList<WorkerUnit> workerUnits = getBuilders();
         int builderCount = workerUnits.size();
 
         for (WorkerUnit workerUnit : workerUnits) {

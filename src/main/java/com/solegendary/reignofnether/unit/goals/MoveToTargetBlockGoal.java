@@ -17,6 +17,7 @@ import net.minecraft.world.level.pathfinder.Path;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
 public class MoveToTargetBlockGoal extends Goal {
@@ -232,7 +233,7 @@ public class MoveToTargetBlockGoal extends Goal {
         // already behind the unit by advancing to the node nearest its current position.
         snapPathToMob();
         if (wasRepath) {
-            if (java.util.Objects.equals(repathFromFinalNode, getFinalNodePos()))
+            if (Objects.equals(repathFromFinalNode, getFinalNodePos()))
                 backoffRecalcCooldown();
             else
                 resetRecalcBackoff();
@@ -274,23 +275,14 @@ public class MoveToTargetBlockGoal extends Goal {
         if (bp != null) {
             MiscUtil.addUnitCheckpoint((Unit) mob, bp, true);
         }
-        // Only fire a fresh path on an actual target CHANGE. GatherResourcesGoal re-asserts the same block
-        // target every tick for persistence; pathing on each would spam snap-and-fail requests at solid resource
-        // blocks. A real change also bumps the request seq in start(), superseding any stale path still
-        // computing for the old target. A stall on an unchanged target is re-pathed by canContinueToUse instead.
-        boolean changed = !java.util.Objects.equals(bp, this.moveTarget);
+        // Only fire a fresh path on an actual target change
+        boolean changed = !Objects.equals(bp, this.moveTarget);
         if (changed) {
             resetRecalcBackoff();
             recalcCooldown = 0;
         }
         this.moveTarget = bp;
 
-        // Fire start() on every target change. This must NOT be gated on isRunning: cast goals
-        // (GenericTargetedSpellGoal) and CallToArmsGoal are ticked manually from the unit's tick() and are
-        // never registered with the GoalSelector, so no engine ever start()s them - gating here left them
-        // with a moveTarget but no path (heroes standing still on out-of-range casts). For engine-managed
-        // goals this can double-path one order (engine start() follows on activation), but the superseded
-        // request is dropped at the build-queue head by its seq guard before costing any chunk-build budget.
         if (changed && !this.mob.level().isClientSide())
             this.start();
     }

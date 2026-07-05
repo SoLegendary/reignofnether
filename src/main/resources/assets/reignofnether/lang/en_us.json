@@ -179,6 +179,7 @@
     "abilities.reignofnether.fear": "Fear",
     "abilities.reignofnether.fear.tooltip1": "Terrify a unit, making it uncontrollably run ",
     "abilities.reignofnether.fear.tooltip2": "away for %d seconds. Cannot be used on heroes.",
+    "abilities.reignofnether.fear.error": "Can't be used on heroes.",
     "abilities.reignofnether.possess": "Possess",
     "abilities.reignofnether.possess.tooltip1": "Channel to sacrifice the wraith to take permanent control of a non-hero unit.",
     "abilities.reignofnether.possess.tooltip2": "The possession is stopped if the wraith dies or is too far out of range",

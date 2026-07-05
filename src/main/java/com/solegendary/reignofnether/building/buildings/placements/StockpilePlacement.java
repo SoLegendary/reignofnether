@@ -3,7 +3,10 @@ package com.solegendary.reignofnether.building.buildings.placements;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -21,7 +24,14 @@ public class StockpilePlacement extends ProductionPlacement {
     public StockpilePlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
         this.findMostAbundantNearbyResource();
-        findMostAbundantNearbyResource(); // Why call twice
+    }
+
+    public void onBuilt() {
+        super.onBuilt();
+        for (WorkerUnit builder : this.getBuilders()) {
+            ((Unit) builder).getReturnResourcesGoal().depositItems();
+            builder.getGatherResourceGoal().setTargetResourceName(mostAbundantNearbyResource);
+        }
     }
 
     public void findMostAbundantNearbyResource() {
@@ -34,7 +44,6 @@ public class StockpilePlacement extends ProductionPlacement {
 
             Predicate<BlockPos> BLOCK_CONDITION = bp -> {
                 BlockState bs = getLevel().getBlockState(bp);
-                BlockState bsAbove = getLevel().getBlockState(bp.above());
                 ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, getLevel());
 
                 // is a valid resource block and meets the target ResourceSource's blockstate condition

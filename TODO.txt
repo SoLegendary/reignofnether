@@ -43,6 +43,7 @@ Quality of Life
 [✔] Added a new unit attribute "evasionChance"
     - All projectiles roll a random accuracy value between 0 and 1 on spawn and miss targets with a higher evasion chance
 [✔] Slimes and magma cubes no longer auto-consume targets that have auto-consume on
+[✔] Villagers and zombie villagers now auto-drop resources and gather nearby resources when they finish a stockpile
 
 Balance
 -------
@@ -61,7 +62,6 @@ Bugfixes
 [✔] Fixed being unable to shift queue attack moves
 [✔] Fixed ghast fireballs being unable to hit windcallers
 
-spell goal in progress doesn't make you non-idle
 
 Languages
 ---------

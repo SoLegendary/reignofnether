@@ -5,10 +5,12 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
@@ -70,6 +72,11 @@ public class Fear extends Ability {
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
         if (!isOffCooldown(unitUsing))
             return;
+        if (targetEntity instanceof HeroUnit) {
+            if (level.isClientSide())
+                HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.fear.error"));
+            return;
+        }
         if (unitUsing instanceof WraithUnit wraithUnit) {
             wraithUnit.getFearGoal().setAbility(this);
             wraithUnit.getFearGoal().setTarget(targetEntity);
