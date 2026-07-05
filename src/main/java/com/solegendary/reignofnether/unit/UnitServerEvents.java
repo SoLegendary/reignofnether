@@ -134,12 +134,14 @@ public class UnitServerEvents {
     // Per-entity last-synced mob effect amplifiers. Null amp means "absent last sync".
     private static final HashMap<Integer, HashMap<MobEffect, Byte>> lastSyncedEffects = new HashMap<>();
 
-    // Time-sliced formation dispatch: large group MOVE commands are spread across multiple ticks
-    // to avoid the spike from N units all running A* in the same tick. LinkedHashMap preserves
+    // Time-sliced formation dispatch: VANILLA-ONLY (rtsPathfinding off). Large group MOVE commands
+    // are spread across ticks to avoid the spike from N units all running vanilla's synchronous main-thread
+    // A* in the same tick. With RTS pathfinding on, moves dispatch immediately (UnitActionItem) since the
+    // worker pool queues + backpressures off-thread, so this queue stays empty. LinkedHashMap preserves
     // insertion order while letting a re-queued unit overwrite its old target (supersession).
     private static final int FORMATION_DISPATCH_PER_TICK = 5;
-    // unit -> formation slot. Queued so a large selection's moves dispatch time-sliced across ticks
-    // instead of running N concurrent A* searches in one tick.
+    // unit -> formation slot. Queued so a large vanilla selection's moves dispatch time-sliced across ticks
+    // instead of running N concurrent synchronous A* searches in one tick.
     private record FormationOrder(LivingEntity unit, BlockPos target) {}
     private static final LinkedHashMap<Integer, FormationOrder> formationDispatchQueue = new LinkedHashMap<>();
 
@@ -675,13 +677,6 @@ public class UnitServerEvents {
         }
     }
 
-    // Current depth of the formation dispatch queue. Sampled by the rts-debug stats overlay.
-    public static int formationDispatchQueueSize() {
-        synchronized (formationDispatchQueue) {
-            return formationDispatchQueue.size();
-        }
-    }
-
     @SubscribeEvent
     public static void onFormationDispatchTick(TickEvent.LevelTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
@@ -697,6 +692,7 @@ public class UnitServerEvents {
                 LivingEntity le = order.unit();
                 if (le != null && le.isAlive() && le instanceof Unit unit) {
                     unit.getMoveGoal().setMoveTarget(order.target());
+                    unit.getMoveGoal().setManualMove(true); // formation dispatch only holds plain MOVE orders
                 }
                 processed += 1;
             }

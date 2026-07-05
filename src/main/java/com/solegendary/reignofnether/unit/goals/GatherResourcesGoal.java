@@ -141,6 +141,16 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         super(mob, true, REACH_RANGE - 1);
     }
 
+    // moveReachRange is REACH_RANGE-1 (4), so the base recalc threshold is 16, but isBlockInRange() gathers
+    // out to REACH_RANGE (5). That 4-5 block band is where a worker is gathering yet still "too far ->
+    // repath", which makes it shuffle back and forth. Match the threshold to the gather reach so a worker in
+    // range to chop never triggers a recalc; a genuinely-unreachable block is dropped by NO_TARGET_TIMEOUT /
+    // TICKS_STATIONARY_TIMEOUT instead.
+    @Override
+    public double getMinDistToRecalculateSqr() {
+        return Math.max(super.getMinDistToRecalculateSqr(), REACH_RANGE * REACH_RANGE);
+    }
+
     public void syncFromServer(ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
         this.data.targetResourceName = gatherName;
         this.data.gatherTarget = gatherPos;

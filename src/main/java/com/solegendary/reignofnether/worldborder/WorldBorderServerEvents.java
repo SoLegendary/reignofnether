@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.pathfinding.PathfinderConfig;
 import com.solegendary.reignofnether.unit.pathfinding.WalkabilityGrid;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -14,7 +13,6 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -41,20 +39,27 @@ public class WorldBorderServerEvents {
         if (border.getSize() > RTS_OPTIMIZED_BORDER)
             return;
 
-        //ReignOfNether.LOGGER.info(
-        //        "RTS-optimised map detected (world border = {} blocks) - enabling improved pathfinding + navmesh precompute",
-        //        (int) border.getSize());
+        ReignOfNether.LOGGER.info(
+                "RTS-optimised map detected (world border = {} blocks) - enabling improved pathfinding + navmesh precompute",
+                (int) border.getSize());
 
         // Turn the rtsPathfinding gamerule on for this map (the gamerule's own default stays off, so
         // vanilla maps are unaffected) and mirror it to the server flag + any clients, reusing the existing
         // gamerule plumbing. At server-start there are no clients yet; player-join sync handles late joiners.
-        /*
         server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).set(true, server);
         UnitServerEvents.rtsPathfinding = true;
         GameruleClientboundPacket.setRtsPathfinding(true);
 
-        prewarmNavmesh(level, border);
-         */
+        // Elevate the per-tick warm budget across the prewarm load window, restoring the configured value
+        // after. (The synchronous prewarm loop below bypasses this budget; this only affects any runtime
+        // warming that occurs during loading.)
+        int configuredBudget = PathfinderConfig.maxChunkBuildsPerTick;
+        PathfinderConfig.maxChunkBuildsPerTick = PathfinderConfig.CHUNK_BUILDS_PER_TICK_PREWARM;
+        try {
+            prewarmNavmesh(level, border);
+        } finally {
+            PathfinderConfig.maxChunkBuildsPerTick = configuredBudget;
+        }
     }
 
     // Force-load and classify every chunk inside the world border so the navmesh is fully warm before play.
