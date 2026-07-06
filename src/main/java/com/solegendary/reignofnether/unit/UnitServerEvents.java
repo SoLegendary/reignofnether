@@ -675,8 +675,30 @@ public class UnitServerEvents {
                         }
                     }
                 }
+                // insert a drop-off command without disrupting other queued commands
                 if (Unit.atThresholdResources(unit)) {
-                    unit.getReturnResourcesGoal().returnToClosestBuilding();
+                    int unitId = ((Mob) unit).getId();
+                    boolean hasDropOffCommandQueued = false;
+                    for (UnitActionItem uai : unitActionSlowQueue) {
+                        for (int id : uai.getUnitIds()) {
+                            if (id == unitId && (
+                                uai.getAction() == UnitAction.RETURN_RESOURCES_TO_CLOSEST ||
+                                uai.getAction() == UnitAction.RETURN_RESOURCES)) {
+                                hasDropOffCommandQueued = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!hasDropOffCommandQueued) {
+                        unitActionSlowQueue.add(0, new UnitActionItem(
+                                unit.getOwnerName(),
+                                UnitAction.RETURN_RESOURCES_TO_CLOSEST,
+                                -1,
+                                new int[]{((Entity) unit).getId()},
+                                new BlockPos(0, 0, 0),
+                                new BlockPos(0, 0, 0)
+                        ));
+                    }
                 }
             } else {
                 lastHuntedAnimalId = evt.getEntity().getId();

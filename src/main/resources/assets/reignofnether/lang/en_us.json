@@ -699,6 +699,7 @@
     "commands.reignofnether.error.unknown_building": "Unknown building name",
     "commands.reignofnether.error.unknown_resource": "Unknown resource name",
     "commands.reignofnether.error.no_server_level": "Server level is not ready yet",
+    "commands.reignofnether.error.export_custom_buildings": "Exporting custom buildings - Exit and log into a new world to transfer them there, or close your Minecraft client to cancel.",
 
     "argument.reignofnether.building.options.unknown.error": "Unknown option",
     "argument.reignofnether.building.options.inapplicable.error": "Invalid option",

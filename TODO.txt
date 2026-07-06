@@ -46,6 +46,11 @@ Quality of Life
 [✔] Villagers and zombie villagers now auto-drop resources and gather nearby resources when they finish a stockpile
 [✔] Aggro range is now always as far as attack range at a minimum
 
+[🟡] Workers now drop off resources between kills if multiple animals are shift-queued
+[❌] No checkpoints on shift click attack
+[✔] /rtsapi-export-custom-buildings
+    - "Exporting X custom buildings - exit and log into a new world to transfer them there"
+
 Balance
 -------
 [✔] Monsters can now substitute a Slime Pit for any of the Stronghold prerequisites
@@ -63,6 +68,7 @@ Bugfixes
 [✔] Fixed custom buildings with small block counts displaying health incorrectly
 [✔] Fixed being unable to shift queue attack moves
 [✔] Fixed ghast fireballs being unable to hit windcallers
+[✔] Scorching gaze now correctly aggros neutral enemies
 
 Languages
 ---------

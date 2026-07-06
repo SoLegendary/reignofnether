@@ -276,9 +276,6 @@ public class UnitActionItem {
                         attackerUnit.setUnitAttackTargetForced((LivingEntity) level.getEntity(unitId));
                     } else {
                         LivingEntity livingEntity = (LivingEntity) level.getEntity(unitId);
-                        if (livingEntity != null) {
-                            MiscUtil.addUnitCheckpoint(unit, unitId, true);
-                        }
                         unit.setFollowTarget(livingEntity);
                     }
                 }
