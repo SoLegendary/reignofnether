@@ -63,6 +63,15 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
         return Faction.MONSTERS;
     }
 
+    private boolean hasPrerequisiteBuildings() {
+        int count = 0;
+        if (BuildingClientEvents.hasFinishedBuilding(Buildings.LABORATORY)) count++;
+        if (BuildingClientEvents.hasFinishedBuilding(Buildings.SPIDER_LAIR)) count++;
+        if (BuildingClientEvents.hasFinishedBuilding(Buildings.DUNGEON)) count++;
+        if (BuildingClientEvents.hasFinishedBuilding(Buildings.SLIME_PIT)) count++;
+        return count >= 3;
+    }
+
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
@@ -71,11 +80,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.STRONGHOLD,
             () -> false,
-            () -> (
-                BuildingClientEvents.hasFinishedBuilding(Buildings.LABORATORY)
-                    && BuildingClientEvents.hasFinishedBuilding(Buildings.SPIDER_LAIR)
-                    && BuildingClientEvents.hasFinishedBuilding(Buildings.DUNGEON)
-            ) || ResearchClient.hasCheat("modifythephasevariance"),
+            () -> hasPrerequisiteBuildings() || ResearchClient.hasCheat("modifythephasevariance"),
             List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.stronghold"),
                     Style.EMPTY.withBold(true)
                 ),

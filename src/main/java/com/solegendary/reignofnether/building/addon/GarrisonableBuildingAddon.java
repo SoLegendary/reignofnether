@@ -73,15 +73,14 @@ public interface GarrisonableBuildingAddon extends BuildingAddon{
         for (BuildingPlacement building : buildings) {
             GarrisonableBuildingAddon gba = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class);
             if (gba != null) {
-                boolean isAllied;
+                boolean isAlliedOrOwned;
                 if (entity.level().isClientSide()) {
-                    isAllied = AlliancesClient.isAllied(unit.getOwnerName(), building.ownerName);
-                }
-                else {
-                    isAllied = AlliancesServerEvents.isAllied(unit.getOwnerName(), building.ownerName);
+                    isAlliedOrOwned = AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), building.ownerName);
+                } else {
+                    isAlliedOrOwned = AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), building.ownerName);
                 }
 
-                if ((!unit.getOwnerName().equals(building.ownerName) && !isAllied && (!unit.getOwnerName().isEmpty() || !building.ownerName.isEmpty())) ||
+                if ((!isAlliedOrOwned && (!unit.getOwnerName().isEmpty() || !building.ownerName.isEmpty())) ||
                         gba.getCapacity() <= 0 || !building.isBuilt ||
                         !building.isPosInsideBuilding(((LivingEntity) unit).getOnPos().above())) {
                     continue;

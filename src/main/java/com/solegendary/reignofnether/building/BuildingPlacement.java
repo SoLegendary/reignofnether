@@ -325,7 +325,7 @@ public class BuildingPlacement {
             this.blockPlaceQueue.add(block);
     }
 
-    public ArrayList<WorkerUnit> getBuilders(Level level) {
+    public ArrayList<WorkerUnit> getBuilders() {
         ArrayList<WorkerUnit> builders = new ArrayList<>();
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             if (entity instanceof WorkerUnit workerUnit) {
@@ -461,7 +461,7 @@ public class BuildingPlacement {
 
     // health and maxHealth are normalised to 0 being point of destruction
     public int getHealth() {
-        return (int) Math.round((((getBlocksPlaced() - partialBlocksDestroyed) / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
+        return (int) Math.round((((getBlocksPlaced() - (partialBlocksDestroyed) / 2) / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 
     public int getMaxHealth() {
@@ -519,7 +519,7 @@ public class BuildingPlacement {
         }
         if (!validBlocks.isEmpty()) {
             if (getBuilding() instanceof AbstractBridge) {
-                ArrayList<WorkerUnit> builders = getBuilders(this.level);
+                ArrayList<WorkerUnit> builders = getBuilders();
                 if (!builders.isEmpty()) {
                     BlockPos builderPos = ((LivingEntity) builders.get(new Random().nextInt(builders.size()))).getOnPos();
                     validBlocks.sort(Comparator.comparing(bb -> bb.getBlockPos().distSqr(builderPos)));
@@ -908,7 +908,7 @@ public class BuildingPlacement {
     }
 
     private void handleServerTick(ServerLevel serverLevel, float blocksPlaced, float blocksTotal) {
-        ArrayList<WorkerUnit> workerUnits = getBuilders(serverLevel);
+        ArrayList<WorkerUnit> workerUnits = getBuilders();
         int builderCount = workerUnits.size();
 
         for (WorkerUnit workerUnit : workerUnits) {
@@ -1109,7 +1109,7 @@ public class BuildingPlacement {
                  || spawnBs.is(BlockTags.LOGS) || spawnBs.is(BlockTags.PLANKS)
                  || spawnBp.distSqr(centrePos) < ANIMAL_SPAWN_RANGE_MIN * ANIMAL_SPAWN_RANGE_MIN
                  || spawnBp.distSqr(centrePos) > range * range
-                 || Math.abs(spawnBp.getY() - minCorner.getY()) >= 4
+                 || Math.abs(spawnBp.getY() - minCorner.getY()) >= 3
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp)
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp.above())
                  || !level.getWorldBorder().isWithinBounds(spawnBp)

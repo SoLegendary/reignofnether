@@ -178,9 +178,10 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-    final static public float maxHealth = 50.0f;
+    final static public float maxHealth = 35.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
+    final static public float evasionChance = 0.5f;
 
     public int maxResources = 100;
 
@@ -284,6 +285,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
                 .add(Attributes.ARMOR, WraithUnit.armorValue)
                 .add(Attributes.ATTACK_KNOCKBACK, 0f)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 9999.0f)
+                .add(AttributeRegistrar.EVASION_CHANCE.get(), evasionChance)
                 .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)

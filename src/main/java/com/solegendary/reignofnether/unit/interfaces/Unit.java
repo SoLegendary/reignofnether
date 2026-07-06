@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
 import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.FancyFeast;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -201,6 +202,11 @@ public interface Unit {
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.MAGIC_DAMAGE_RESIST.get().getDefaultValue());
     }
 
+    public default float getEvasionChance() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.EVASION_CHANCE.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.EVASION_CHANCE.get().getDefaultValue());
+    }
+
     // SOURCE: resistance mob effect
     default double getUnitResistPercentage() {
         Mob mob = (Mob) this;
@@ -250,17 +256,21 @@ public interface Unit {
         // ------------- CHECKPOINT LOGIC ------------- //
         if (unitMob.level().isClientSide()) {
 
-            unit.getCheckpoints().removeIf(c -> c.isForEntity() && !c.entity.isAlive() || c.ticksLeft <= 0);
+            unit.getCheckpoints().removeIf(c -> (c.isForEntity() && !c.entity.isAlive()) || c.ticksLeft <= 0);
 
             for (Checkpoint cp : unit.getCheckpoints()) {
                 cp.tick();
                 boolean buildingIsDone = false;
-                if (unit instanceof WorkerUnit workerUnit && !cp.isForEntity()) {
+                if (unit instanceof WorkerUnit && !cp.isForEntity()) {
                     if (cp.placement != null && cp.placement.isBuilt && cp.placement.getHealth() >= cp.placement.getMaxHealth())
                         buildingIsDone = true;
                 }
-                if (((Mob) unit).getOnPos().distToCenterSqr(cp.getPos()) < 4f || buildingIsDone)
+                if (cp.isGreen) {
+                    if (((Mob) unit).getOnPos().distToCenterSqr(cp.getPos()) < 4f || buildingIsDone)
+                        cp.startFading();
+                } else if (cp.isForEntity() && !cp.entity.isAlive()) {
                     cp.startFading();
+                }
             }
         } else {
             checkAndPickupEdibleFood(unit);
@@ -680,7 +690,8 @@ public interface Unit {
             boolean stationary = Math.abs(dm.x) < 1.0e-3 && Math.abs(dm.z) < 1.0e-3;
             stationaryNearMoveTarget = stationary && distToMoveTarget < 4;
         }
-        return (this.getMoveGoal().getMoveTarget() == null || stationaryNearMoveTarget) &&
+        boolean isMoving = !((Mob) this).getNavigation().isDone() || this.getMoveGoal().getMoveTarget() != null;
+        return (!isMoving || stationaryNearMoveTarget) &&
                 this.getFollowTarget() == null &&
                 idleAttacker &&
                 idleWorker &&
@@ -853,5 +864,12 @@ public interface Unit {
     // used for things like channeling blizzard on the wraith to prevent accidental cancels
     default boolean ignoreNonStopCommands() {
         return false;
+    }
+
+    default void aggroToEnemyIfIdle(Unit aggroTarget) {
+        if (((Entity) this).level().isClientSide())
+            return;
+        if (isIdle() && !AlliancesServerEvents.isAlliedOrOwned(this.getOwnerName(), aggroTarget.getOwnerName()))
+            this.getTargetGoal().setTarget((LivingEntity) aggroTarget);
     }
 }

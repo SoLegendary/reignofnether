@@ -125,6 +125,15 @@ public class PassiveIcons {
                     fcs(I18n.get("hud.enchant.reignofnether.punch.tooltip"))
             )
     );
+    public static final EnchantmentIcon LONGSHOT = new EnchantmentIcon(
+            EnchantmentRegistrar.LONGSHOT.get(),
+            EquipmentSlot.MAINHAND,
+            getEnchantedItemStack(Items.SPYGLASS),
+            List.of(
+                    fcs(I18n.get("hud.enchant.reignofnether.longshot"), true),
+                    fcs(I18n.get("hud.enchant.reignofnether.longshot.tooltip"))
+            )
+    );
     public static final EnchantmentIcon PIERCING = new EnchantmentIcon(
             Enchantments.PIERCING,
             EquipmentSlot.MAINHAND,
@@ -190,6 +199,7 @@ public class PassiveIcons {
             ZEAL,
             GUST,
             PUNCH,
+            LONGSHOT,
             FORTIFYING,
             POWER,
             PIERCING,

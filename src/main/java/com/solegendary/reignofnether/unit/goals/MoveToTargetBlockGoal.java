@@ -17,6 +17,7 @@ import net.minecraft.world.level.pathfinder.Path;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 
 public class MoveToTargetBlockGoal extends Goal {
@@ -25,14 +26,6 @@ public class MoveToTargetBlockGoal extends Goal {
     @Nullable protected BlockPos moveTarget = null;
     protected boolean persistent; // will keep trying to move back to the target if moved externally
     protected int moveReachRange = 0; // how far away from the target block to stop moving (manhattan distance)
-    // True while this is a manual "disengage" MOVE order (plain move command), as opposed to attack-move,
-    // gather, build, etc. While set, AttackerUnit auto-aggro (idle-aggression, retaliation, retarget) is
-    // suppressed so a re-acquired enemy can't silently override the order the player gave - the attack goal
-    // outranks the move goal, so without this a re-aggro hijacks the move. Cleared on arrival, stopMoving,
-    // or any fresh target (a new attack/attack-move order goes through fullResetBehaviours -> stopMoving).
-    protected boolean manualMove = false;
-    public boolean isManualMove() { return manualMove && moveTarget != null; }
-    public void setManualMove(boolean manualMove) { this.manualMove = manualMove; }
 
     protected final int RECALC_COOLDOWN_MAX = 20;
     protected static final int RECALC_COOLDOWN_CAP = 200; // ~10s cap for exponential backoff on stuck units
@@ -128,7 +121,6 @@ public class MoveToTargetBlockGoal extends Goal {
         else if (this.mob.getNavigation().isDone()) {
             if (!persistent && !((Unit) this.mob).getHoldPosition()) {
                 moveTarget = null;
-                manualMove = false; // arrived: drop hold-fire so normal aggression resumes
             }
             return false;
         }
@@ -241,7 +233,7 @@ public class MoveToTargetBlockGoal extends Goal {
         // already behind the unit by advancing to the node nearest its current position.
         snapPathToMob();
         if (wasRepath) {
-            if (java.util.Objects.equals(repathFromFinalNode, getFinalNodePos()))
+            if (Objects.equals(repathFromFinalNode, getFinalNodePos()))
                 backoffRecalcCooldown();
             else
                 resetRecalcBackoff();
@@ -283,24 +275,14 @@ public class MoveToTargetBlockGoal extends Goal {
         if (bp != null) {
             MiscUtil.addUnitCheckpoint((Unit) mob, bp, true);
         }
-        // Only fire a fresh path on an actual target CHANGE. GatherResourcesGoal re-asserts the same block
-        // target every tick for persistence; pathing on each would spam snap-and-fail requests at solid resource
-        // blocks. A real change also bumps the request seq in start(), superseding any stale path still
-        // computing for the old target. A stall on an unchanged target is re-pathed by canContinueToUse instead.
-        boolean changed = !java.util.Objects.equals(bp, this.moveTarget);
+        // Only fire a fresh path on an actual target change
+        boolean changed = !Objects.equals(bp, this.moveTarget);
         if (changed) {
             resetRecalcBackoff();
             recalcCooldown = 0;
-            manualMove = false; // a fresh target defaults to non-manual; the MOVE command re-flags it after
         }
         this.moveTarget = bp;
 
-        // Fire start() on every target change. This must NOT be gated on isRunning: cast goals
-        // (GenericTargetedSpellGoal) and CallToArmsGoal are ticked manually from the unit's tick() and are
-        // never registered with the GoalSelector, so no engine ever start()s them - gating here left them
-        // with a moveTarget but no path (heroes standing still on out-of-range casts). For engine-managed
-        // goals this can double-path one order (engine start() follows on activation), but the superseded
-        // request is dropped at the build-queue head by its seq guard before costing any chunk-build budget.
         if (changed && !this.mob.level().isClientSide())
             this.start();
     }
@@ -336,7 +318,6 @@ public class MoveToTargetBlockGoal extends Goal {
         pathPending = false;
         pendingRepath = false;
         repathFromFinalNode = null;
-        manualMove = false;
         pathRequestSeq++; // cancel any in-flight path so a late result can't restart movement after a stop.
         this.moveTarget = null;
         this.mob.getNavigation().stop();

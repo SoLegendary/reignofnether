@@ -38,16 +38,36 @@ Official Map Pack
 
 Quality of Life
 ---------------
-
+[✔] Reduced the minimum height difference that capitol animals can spawn at from 4 to 3 blocks
+[✔] Workers no longer knockback animals
+[✔] Added a new unit attribute "evasionChance"
+    - All projectiles roll a random accuracy value between 0 and 1 on spawn and miss targets with a higher evasion chance
+[✔] Slimes and magma cubes no longer auto-consume targets that have auto-consume on
+[✔] Villagers and zombie villagers now auto-drop resources and gather nearby resources when they finish a stockpile
+[✔] Aggro range is now always as far as attack range at a minimum
+[✔] Workers now drop off resources between kills if multiple animals are shift-queued
+[✔] /rtsapi-export-custom-buildings
+    - "Exporting X custom buildings - exit and log into a new world to transfer them there"
 
 Balance
 -------
-[❌] Wraith buffs?
-
+[✔] Monsters can now substitute a Slime Pit for any of the Stronghold prerequisites
+[✔] Piglins can now substitute a Basalt Springs for a Wither Shrine for the Fortress prerequisites
+[✔] Castles now require a Witch Hut instead of a Barracks
+[✔] Wraith health reduced from 50 to 35, but they now have 50% evasion against physical attacks
+[✔] Windcaller health raised from 40 to 45
+[✔] Windcaller martial enchantment changed from Punch to Longshot (+4 range)
 
 Bugfixes
 --------
-
+[✔] Fixed RTS Structure Blocks sometimes not creating a placed building
+[✔] Fixed summoned zombies taking up population
+[✔] All non-glazed terracottas and concrete powders now convert to netherrack and soul soil respectively
+[✔] Endstone and endstone bricks now convert to netherrack and nether bricks respectively
+[✔] Fixed custom buildings with small block counts displaying health incorrectly
+[✔] Fixed being unable to shift queue attack moves
+[✔] Fixed ghast fireballs being unable to hit windcallers
+[✔] Scorching gaze now correctly aggros neutral enemies
 
 Languages
 ---------

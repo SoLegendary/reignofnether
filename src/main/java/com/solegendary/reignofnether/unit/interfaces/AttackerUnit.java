@@ -52,8 +52,10 @@ public interface AttackerUnit {
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACKS_PER_SECOND.get().getDefaultValue());
     }
     public default float getAggroRange() {
+        float attackRange = getAttackRange();
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.AGGRO_RANGE.get());
-        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.AGGRO_RANGE.get().getDefaultValue());
+        float aggroRange = (float) (attr != null ?  attr.getValue() : AttributeRegistrar.AGGRO_RANGE.get().getDefaultValue());
+        return Math.max(attackRange, aggroRange);
     }
     public default float getAttackRange() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
@@ -75,6 +77,7 @@ public interface AttackerUnit {
 
     public EnemySearchBehaviour getEnemySearchBehaviour(); // not necessarily the same goal, eg. could be melee or ranged
     public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour);
+
 
 
     // chase and attack the target ignoring all else until it is dead or out of sight
@@ -204,11 +207,8 @@ public interface AttackerUnit {
             // retaliate against a mob that damaged us UNLESS already on another command
             if (unitMob.getLastDamageSource() != null &&
                     attackerUnit.getWillRetaliate() &&
-                    !isAttackingBuilding &&
                     unit.getTargetGoal().getTarget() == null &&
-                    (unit.getMoveGoal().getMoveTarget() == null || unit.getHoldPosition()) &&
-                    unit.getFollowTarget() == null &&
-                    !isCasting) {
+                    !isCasting && unit.isIdle()) {
 
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
 
@@ -230,10 +230,8 @@ public interface AttackerUnit {
                     attackerUnit.setUnitAttackTarget((LivingEntity) lastDSEntity);
                 }
             }
-            // enact aggression when idle - but not during a manual "disengage" move order, even if the unit
-            // momentarily reads as idle (eg. stationaryNearMoveTarget near the end of its path). Suppressing
-            // acquisition here keeps Mob.target null, so the priority-2 attack goal can't override the move.
-            if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle() && !unit.getMoveGoal().isManualMove())
+            // idle auto-aggression
+            if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle())
                 attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level());
 
             // if attacking another unit as melee, retarget the closest unit periodically
@@ -244,7 +242,7 @@ public interface AttackerUnit {
         }
 
         if (!unitMob.level().isClientSide && unitMob.tickCount % 40 == 0) {
-            if (attackerUnit.getAttackMoveTarget() != null && attackerUnit.getEnemySearchBehaviour() != EnemySearchBehaviour.NONE) {
+            if (attackerUnit.getAttackMoveTarget() != null && attackerUnit.getEnemySearchBehaviour() == EnemySearchBehaviour.NONE) {
                 boolean hasNoTargets = ((Unit) attackerUnit).getTargetGoal().getTarget() == null;
                 if (attackerUnit.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg && mabg.getBuildingTarget() != null)
                     hasNoTargets = false;
@@ -328,6 +326,10 @@ public interface AttackerUnit {
     }
 
     public default boolean hasBonusDamage() {
+        return false;
+    }
+
+    public default boolean hasBonusRange() {
         return false;
     }
 

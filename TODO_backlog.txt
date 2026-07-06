@@ -30,6 +30,8 @@ Scenario roles:
 
 [❌] Config to allow changing resource block values, including modded blocks
 
+[❌] Horses for villagers and change captain flags to be a resistance aura?
+
 
 Bugfixes
 --------

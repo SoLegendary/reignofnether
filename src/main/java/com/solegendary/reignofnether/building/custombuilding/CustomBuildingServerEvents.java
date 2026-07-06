@@ -32,6 +32,8 @@ public class CustomBuildingServerEvents {
     // since every custom building has a different structure, we need to maintain a list of them here
     public static final Set<CustomBuilding> customBuildings = new HashSet<>();
 
+    public static boolean retainBuildings = false; // retain custom buildiongs across singleplayer worlds in the same client session
+
     public static CustomBuilding getCustomBuilding(String name) {
         for (CustomBuilding building : customBuildings)
             if (building.name.equals(name))
@@ -45,13 +47,6 @@ public class CustomBuildingServerEvents {
         saveCustomBuildings(BuildingServerEvents.getServerLevel());
     }
 
-    public static boolean createAndRegisterNewCustomBuilding(ResourceLocation structureRL, String structureName, ServerLevel level, BlockPos pos) {
-        BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof RTSStructureBlockEntity rtsBe) {
-            return createAndRegisterNewCustomBuilding(structureRL, structureName, level, pos.offset(1,0,1), rtsBe.getStructureSize());
-        }
-        return true;
-    }
 
     // registers and places a new custom building on server and client
     public static boolean createAndRegisterNewCustomBuilding(ResourceLocation structureRL, String structureName, ServerLevel level,
@@ -129,6 +124,9 @@ public class CustomBuildingServerEvents {
     }
 
     public static void loadCustomBuildings(ServerLevel level) {
+        if (!retainBuildings)
+            customBuildings.clear();
+
         CustomBuildingSaveData customBuildingData = CustomBuildingSaveData.getInstance(level);
         customBuildingData.customBuildings.forEach(bSave -> {
             CustomBuilding building = new CustomBuilding(bSave.buildingName, bSave.structureSize, Blocks.COMMAND_BLOCK, bSave.structureNbt, bSave.attributesNbt, bSave.commandsNbt);

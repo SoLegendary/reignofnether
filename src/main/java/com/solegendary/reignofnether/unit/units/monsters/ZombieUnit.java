@@ -122,11 +122,17 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor = SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.INT);
 
+    public boolean isSummoned() { return this.entityData.get(isSummonedAccessor); }
+    public void setIsSummoned(boolean index) { this.entityData.set(isSummonedAccessor, index); }
+    public static final EntityDataAccessor<Boolean> isSummonedAccessor = SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.BOOLEAN);
+
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
         this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(isSummonedAccessor, false);
     }
 
     // combat stats
@@ -217,10 +223,6 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
                 }
             }
         }
-    }
-
-    public boolean isSummoned() {
-        return getPersistentData().contains("isSummoned") && getPersistentData().getBoolean("isSummoned");
     }
 
     @Override

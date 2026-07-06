@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -181,11 +182,12 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     // endregion
 
     final static public int LEVITATE_TICKS = 80;
+    final static public int LONGSHOT_BONUS_RANGE = 4;
 
     final static public float attackDamage = 5.0f;
     final static public float attacksPerSecondFlying = 0.25f;
     final static public float attacksPerSecond = 0.30f;
-    final static public float maxHealth = 40.0f;
+    final static public float maxHealth = 45.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float movementSpeedFlying = 0.30f;
@@ -292,7 +294,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
             this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeedFlying);
             this.getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get()).setBaseValue(attacksPerSecondFlying);
-            this.getAttribute(AttributeRegistrar.ATTACK_RANGE.get()).setBaseValue(attackRangeFlying);
+            this.getAttribute(AttributeRegistrar.ATTACK_RANGE.get()).setBaseValue(attackRangeFlying + (hasLongshot() ? LONGSHOT_BONUS_RANGE : 0));
 
             if (!level().isClientSide() && doAnimationAndSound) {
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.CHARGE_SPELL, this);
@@ -309,11 +311,16 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
             this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
             this.getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get()).setBaseValue(attacksPerSecond);
-            this.getAttribute(AttributeRegistrar.ATTACK_RANGE.get()).setBaseValue(attackRange);
+            this.getAttribute(AttributeRegistrar.ATTACK_RANGE.get()).setBaseValue(attackRange + (hasLongshot() ? LONGSHOT_BONUS_RANGE : 0));
 
             if (!level().isClientSide() && doAnimationAndSound)
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.STOP, this);
         }
+    }
+
+    protected boolean hasLongshot() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        return itemStack.getEnchantmentLevel(EnchantmentRegistrar.LONGSHOT.get()) > 0;
     }
 
     @Override
@@ -509,7 +516,8 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
-        this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+        if (!hasLongshot())
+            this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
 
         if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_UPGRADED_WINDCALLERS) && !isFlying()) {
             setFlying(true);
@@ -564,5 +572,10 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
         return pSpawnData;
+    }
+
+    @Override
+    public boolean hasBonusRange() {
+        return hasLongshot();
     }
 }

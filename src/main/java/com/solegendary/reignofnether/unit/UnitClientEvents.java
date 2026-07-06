@@ -347,6 +347,7 @@ public class UnitClientEvents {
 
         if (MC.player != null) {
             var selUnits = new LinkedList<LivingEntity>();
+            int targetEntityId = !preselectedUnits.isEmpty() ? preselectedUnits.get(0).getId() : -1;
             loop:
             for (LivingEntity livingEntity : selectedUnits) {
                 if (livingEntity instanceof Unit unit) {
@@ -364,8 +365,8 @@ public class UnitClientEvents {
             UnitActionItem actionItem = new UnitActionItem(
                 playerName,
                 action,
-                    !preselectedUnits.isEmpty() ? preselectedUnits.get(0).getId() : -1,
-                    ArrayUtil.livingEntityListToIdArray(selUnits),
+                targetEntityId,
+                ArrayUtil.livingEntityListToIdArray(selUnits),
                 bp,
                 HudClientEvents.hudSelectedPlacement != null ? HudClientEvents.hudSelectedPlacement.originPos : new BlockPos(0,0,0)
             );
@@ -374,8 +375,8 @@ public class UnitClientEvents {
             PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
                 playerName,
                 action,
-                    !preselectedUnits.isEmpty() ? preselectedUnits.get(0).getId() : -1,
-                    ArrayUtil.livingEntityListToIdArray(selUnits),
+                targetEntityId,
+                ArrayUtil.livingEntityListToIdArray(selUnits),
                 bp,
                 HudClientEvents.hudSelectedPlacement != null ? HudClientEvents.hudSelectedPlacement.originPos : new BlockPos(0,0,0),
                 Keybindings.shiftMod.isDown()

@@ -503,7 +503,6 @@ public class CommandsServerEvents {
 										)))))
 		);
 
-
 		dispatcher.register(Commands.literal("rts-reset")
 				.requires(source -> source.hasPermission(2))
 				.executes(ctx -> PlayerServerEvents.resetRTS(false))
@@ -511,6 +510,18 @@ public class CommandsServerEvents {
 		dispatcher.register(Commands.literal("rts-hard-reset")
 				.requires(source -> source.hasPermission(2))
 				.executes(ctx -> PlayerServerEvents.resetRTS(true))
+		);
+
+		dispatcher.register(Commands.literal("rtsapi-export-custom-buildings")
+				.requires(source -> source.hasPermission(2))
+				.executes(ctx -> {
+					CustomBuildingServerEvents.retainBuildings = true;
+					ctx.getSource().sendSuccess(
+							() -> Component.translatable("commands.reignofnether.error.export_custom_buildings"),
+							true
+					);
+					return 1;
+				})
 		);
 	}
 	

@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuild
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
+import com.solegendary.reignofnether.entities.GhastUnitFireball;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -109,6 +110,8 @@ public class UnitServerEvents {
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
     private static final HashMap<Integer, ChunkAccess> forcedUnitChunks = new HashMap<>();
+
+    private static final Random RANDOM = new Random();
 
     private static final List<MobEffect> SYNCED_MOB_EFFECTS = List.of(
         MobEffects.DAMAGE_RESISTANCE,
@@ -437,6 +440,10 @@ public class UnitServerEvents {
             );
             forcedUnitChunks.put(entity.getId(), chunk);
         }
+
+        if (evt.getEntity() instanceof Projectile proj) {
+            proj.getPersistentData().putFloat("accuracyRoll", RANDOM.nextFloat());
+        }
     }
 
     @SubscribeEvent
@@ -668,8 +675,30 @@ public class UnitServerEvents {
                         }
                     }
                 }
+                // insert a drop-off command without disrupting other queued commands
                 if (Unit.atThresholdResources(unit)) {
-                    unit.getReturnResourcesGoal().returnToClosestBuilding();
+                    int unitId = ((Mob) unit).getId();
+                    boolean hasDropOffCommandQueued = false;
+                    for (UnitActionItem uai : unitActionSlowQueue) {
+                        for (int id : uai.getUnitIds()) {
+                            if (id == unitId && (
+                                uai.getAction() == UnitAction.RETURN_RESOURCES_TO_CLOSEST ||
+                                uai.getAction() == UnitAction.RETURN_RESOURCES)) {
+                                hasDropOffCommandQueued = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!hasDropOffCommandQueued) {
+                        unitActionSlowQueue.add(0, new UnitActionItem(
+                                unit.getOwnerName(),
+                                UnitAction.RETURN_RESOURCES_TO_CLOSEST,
+                                -1,
+                                new int[]{((Entity) unit).getId()},
+                                new BlockPos(0, 0, 0),
+                                new BlockPos(0, 0, 0)
+                        ));
+                    }
                 }
             } else {
                 lastHuntedAnimalId = evt.getEntity().getId();
@@ -692,7 +721,6 @@ public class UnitServerEvents {
                 LivingEntity le = order.unit();
                 if (le != null && le.isAlive() && le instanceof Unit unit) {
                     unit.getMoveGoal().setMoveTarget(order.target());
-                    unit.getMoveGoal().setManualMove(true); // formation dispatch only holds plain MOVE orders
                 }
                 processed += 1;
             }
@@ -830,10 +858,10 @@ public class UnitServerEvents {
     }
 
     private static boolean shouldIgnoreKnockback(LivingDamageEvent evt) {
-        Entity projectile = evt.getSource().getDirectEntity();
+        Entity directEntity = evt.getSource().getDirectEntity();
         Entity sourceEntity = evt.getSource().getEntity();
 
-        if (sourceEntity instanceof HeadhunterUnit headhunterUnit && projectile instanceof ThrownTrident) {
+        if (sourceEntity instanceof HeadhunterUnit headhunterUnit && directEntity instanceof ThrownTrident) {
             return !ResearchServerEvents.playerHasResearch(headhunterUnit.getOwnerName(),
                     ProductionItems.RESEARCH_HEAVY_TRIDENTS
             );
@@ -844,13 +872,17 @@ public class UnitServerEvents {
             return true;
         if (sourceEntity instanceof SlimeUnit slimeUnit && slimeUnit.isTiny())
             return true;
-        if (projectile instanceof Fireball && sourceEntity instanceof BlazeUnit)
+        if (directEntity instanceof Fireball && sourceEntity instanceof BlazeUnit)
             return true;
-        if (projectile instanceof AbstractArrow)
+        if (directEntity instanceof AbstractArrow)
             return true;
-        if (projectile instanceof WindcallerProjectile proj && !(proj.getOwner() instanceof WindcallerUnit windcallerUnit && windcallerUnit.getPunchLevel() > 0))
+        if (directEntity instanceof WindcallerProjectile proj && !(proj.getOwner() instanceof WindcallerUnit windcallerUnit && windcallerUnit.getPunchLevel() > 0))
             return true;
-        if (projectile instanceof BlazeUnitFireball)
+        if (directEntity instanceof BlazeUnitFireball)
+            return true;
+        if (sourceEntity instanceof WorkerUnit &&
+            sourceEntity instanceof Mob mob &&
+            ResourceSources.isHuntableAnimal(mob.getTarget()))
             return true;
 
         return evt.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO) && evt.getSource().isIndirect()
@@ -1016,6 +1048,10 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof HeroUnit && evt.getSource().getEntity() instanceof PhantomSummon) {
             evt.setAmount(evt.getAmount() * PhantomSummon.HERO_DAMAGE_MULT);
         }
+
+        if (evt.getSource().getDirectEntity() instanceof GhastUnitFireball) {
+            evt.setAmount(0); // flying units hit only, explosion will do enough damage anyway
+        }
     }
 
     @SubscribeEvent
@@ -1038,7 +1074,7 @@ public class UnitServerEvents {
         // prevent fireballs actually directly hitting anything, except other ghasts
         //  instead just relying on splash damage and fire creation
         if (owner instanceof GhastUnit && hit != null) {
-            if (!(hit instanceof GhastUnit)) {
+            if (!(hit instanceof Unit unit && unit.isFlyingUnit())) {
                 evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
             }
         }
@@ -1052,6 +1088,12 @@ public class UnitServerEvents {
                 }
                 evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
             }
+        }
+
+        if (hit instanceof Unit unit && evt.getProjectile().getPersistentData().contains("accuracyRoll")) {
+            float accuracyRoll = evt.getProjectile().getPersistentData().getFloat("accuracyRoll");
+            if (accuracyRoll < unit.getEvasionChance())
+                evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
         }
     }
 

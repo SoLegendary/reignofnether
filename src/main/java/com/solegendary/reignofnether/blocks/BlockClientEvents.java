@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -20,6 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -73,6 +75,20 @@ public class BlockClientEvents {
                     float yOffset = snowLayers * 0.125f;
                     MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, yOffset, bp, 0f, 0.8f, 0f, 0.3f);
                 }
+            }
+        }
+        if (MC.player == null || MC.level == null) return;
+        ItemStack heldItem = MC.player.getMainHandItem();
+        if (!heldItem.is(BlockRegistrar.SPIDER_FRIENDLY_BARRIER.get().asItem()))
+            return;
+
+        BlockPos playerPos = MC.player.blockPosition();
+        BlockPos min = playerPos.offset(-10, -10, -10);
+        BlockPos max = playerPos.offset(10, 10, 10);
+
+        for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+            if (MC.level.getBlockState(pos).getBlock() instanceof SpiderFriendlyBarrierBlock) {
+                MyRenderer.drawBlockOutline(evt.getPoseStack(), pos, 0.6f);
             }
         }
     }

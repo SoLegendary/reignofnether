@@ -596,6 +596,9 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
                 else
                     militiaUnit.swordEnchanted = true;
             }
+            if (entity instanceof WindcallerUnit windcallerUnit) {
+                windcallerUnit.updateFlyingStates(false);
+            }
         }
         if (!level().isClientSide)
             playEnchantSound();

@@ -437,7 +437,9 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             renderedStats.add(new RenderedStat(
                     ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/bow.png"),
                     rangeStr,
-                    UnitStatType.RANGE
+                    UnitStatType.RANGE,
+                    attackerUnit.hasBonusRange() ? 0xFF2BFF2B : 0xFFFFFFFF,
+                    0
             ));
         }
 

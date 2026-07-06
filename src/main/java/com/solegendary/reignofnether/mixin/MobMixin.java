@@ -4,7 +4,10 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.BlockUtils;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -19,8 +22,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
+import java.util.Random;
 
 // prevent vexes from charging enemies too far from their parent EvokerUnit
 @Mixin(Mob.class)
@@ -74,5 +79,18 @@ public abstract class MobMixin extends LivingEntity {
                 hurt(damageSources().magic(), layers + (inIce ? 3 : 0));
             }
         }
+    }
+
+    private static final Random RANDOM = new Random();
+
+    @Inject(
+            method = "doHurtTarget",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void doHurtTarget(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
+        if (pEntity instanceof Unit unit && unit.getEvasionChance() > 0)
+            if (RANDOM.nextFloat() < unit.getEvasionChance())
+                cir.setReturnValue(false);
     }
 }

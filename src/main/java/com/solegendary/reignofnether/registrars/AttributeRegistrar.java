@@ -47,6 +47,12 @@ public class AttributeRegistrar {
                             .setSyncable(true)
             );
 
+    public static final RegistryObject<Attribute> EVASION_CHANCE =
+            ATTRIBUTES.register("evasion_chance",
+                    () -> new RangedAttribute("attribute.reignofnether.evasion_chance", 0.0, 0, 1.0)
+                            .setSyncable(true)
+            );
+
     public static final RegistryObject<Attribute> BASE_MAX_HEALTH =
             ATTRIBUTES.register("base_max_health",
                     () -> new RangedAttribute("attribute.reignofnether.base_max_health", 100, 1, 999999)

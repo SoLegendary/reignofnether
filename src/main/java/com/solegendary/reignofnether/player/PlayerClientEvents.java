@@ -325,6 +325,7 @@ public class PlayerClientEvents {
         RTSMapInfoClientEvents.reset();
         MinimapClientEvents.clearMinimapUnits();
         PlayerDisplayClientEvents.clearAll();
+        rtsPlayers.clear();
     }
 
     @SubscribeEvent

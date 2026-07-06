@@ -158,8 +158,7 @@ public class MiscUtil {
 
     public static void addUnitCheckpoint(Unit unit, BlockPos blockPos, boolean green) {
         if (((Entity) unit).level().isClientSide()) {
-            boolean clearExisting = !Keybindings.shiftMod.isDown();
-            if (clearExisting)
+            if (!Keybindings.shiftMod.isDown())
                 unit.getCheckpoints().clear();
             unit.getCheckpoints().add(new Checkpoint(blockPos, green));
         }
@@ -167,8 +166,9 @@ public class MiscUtil {
 
     public static void addUnitCheckpoint(Unit unit, int id, boolean green) {
         Level level = ((Entity) unit).level();
-        if (level.isClientSide() && !Keybindings.shiftMod.isDown()) {
-            unit.getCheckpoints().clear();
+        if (level.isClientSide()) {
+            if (!Keybindings.shiftMod.isDown())
+                unit.getCheckpoints().clear();
             unit.getCheckpoints().add(new Checkpoint(level.getEntity(id), green));
         }
     }

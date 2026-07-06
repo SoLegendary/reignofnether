@@ -95,7 +95,7 @@ public class Castle extends ProductionBuilding implements GarrisonableBuildingAd
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.CASTLE,
             TutorialClientEvents::isEnabled,
             () -> (
-                BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS)
+                BuildingClientEvents.hasFinishedBuilding(Buildings.WITCH_HUT)
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.BLACKSMITH)
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.ARCANE_TOWER)
             ) || ResearchClient.hasCheat("modifythephasevariance"),
