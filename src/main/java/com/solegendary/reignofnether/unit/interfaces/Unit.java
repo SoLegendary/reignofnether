@@ -261,12 +261,16 @@ public interface Unit {
             for (Checkpoint cp : unit.getCheckpoints()) {
                 cp.tick();
                 boolean buildingIsDone = false;
-                if (unit instanceof WorkerUnit workerUnit && !cp.isForEntity()) {
+                if (unit instanceof WorkerUnit && !cp.isForEntity()) {
                     if (cp.placement != null && cp.placement.isBuilt && cp.placement.getHealth() >= cp.placement.getMaxHealth())
                         buildingIsDone = true;
                 }
-                if (((Mob) unit).getOnPos().distToCenterSqr(cp.getPos()) < 4f || buildingIsDone)
+                if (cp.isGreen) {
+                    if (((Mob) unit).getOnPos().distToCenterSqr(cp.getPos()) < 4f || buildingIsDone)
+                        cp.startFading();
+                } else if (cp.isForEntity() && !cp.entity.isAlive()) {
                     cp.startFading();
+                }
             }
         } else {
             checkAndPickupEdibleFood(unit);

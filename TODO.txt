@@ -45,9 +45,7 @@ Quality of Life
 [✔] Slimes and magma cubes no longer auto-consume targets that have auto-consume on
 [✔] Villagers and zombie villagers now auto-drop resources and gather nearby resources when they finish a stockpile
 [✔] Aggro range is now always as far as attack range at a minimum
-
-[🟡] Workers now drop off resources between kills if multiple animals are shift-queued
-[❌] No checkpoints on shift click attack
+[✔] Workers now drop off resources between kills if multiple animals are shift-queued
 [✔] /rtsapi-export-custom-buildings
     - "Exporting X custom buildings - exit and log into a new world to transfer them there"
 
@@ -65,6 +63,7 @@ Bugfixes
 [✔] Fixed RTS Structure Blocks sometimes not creating a placed building
 [✔] Fixed summoned zombies taking up population
 [✔] All non-glazed terracottas and concrete powders now convert to netherrack and soul soil respectively
+[✔] Endstone and endstone bricks now convert to netherrack and nether bricks respectively
 [✔] Fixed custom buildings with small block counts displaying health incorrectly
 [✔] Fixed being unable to shift queue attack moves
 [✔] Fixed ghast fireballs being unable to hit windcallers

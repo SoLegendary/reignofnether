@@ -214,7 +214,8 @@ public class NetherBlocks {
                 Blocks.SNOW_BLOCK,
                 Blocks.POWDER_SNOW,
                 Blocks.MOSSY_COBBLESTONE,
-                Blocks.PRISMARINE
+                Blocks.PRISMARINE,
+                Blocks.END_STONE
             ));
         MAPPINGS.put(Blocks.NETHER_BRICKS,
             List.of(
@@ -222,7 +223,8 @@ public class NetherBlocks {
                 Blocks.CRACKED_STONE_BRICKS,
                 Blocks.MOSSY_STONE_BRICKS,
                 Blocks.PRISMARINE_BRICKS,
-                Blocks.DARK_PRISMARINE
+                Blocks.DARK_PRISMARINE,
+                Blocks.END_STONE_BRICKS
             ));
         MAPPINGS.put(Blocks.CHISELED_NETHER_BRICKS,
             List.of(
