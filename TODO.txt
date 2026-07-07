@@ -52,7 +52,7 @@ Bugfixes
 [✔] Slimes and magma cubes no longer get stuck in lava (but slimes are not fire proof)
 [🟡] Fixed Iron golems getting stuck after spawning
 [🟡] Units are now much less likely to walk into water on rtsPathfinding
-[❌] Fixed players not being defeated if their last building was a capturable neutral building that was recaptured
+[🟡] Fixed players not being defeated if their last building was a capturable neutral building that was recaptured
 
 Languages
 ---------
