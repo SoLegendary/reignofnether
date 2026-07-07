@@ -46,14 +46,14 @@ Quality of Life
 Balance
 -------
 
+
+
 Bugfixes
 --------
+[✔] Magma cubes no longer get stuck in lava
 [🟡] Fixed Iron golems getting stuck after spawning
 [🟡] Units are now much less likely to walk into water on rtsPathfinding (water malus too low)
 
-[❌] Workers will spin in place after being produced.
-[❌] Workers will take long detours and harvest resources diagonally.
-[❌] Workers will randomly gather other resources—they might collect food from other fields and abandon their own.
 
 Languages
 ---------
