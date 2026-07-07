@@ -39,6 +39,7 @@ public class GameruleClient {
     public static boolean coopMode = false;
     public static boolean buildingsOutsideBorder = false;
     public static boolean rtsPathfinding = false; // only for GUI
+    public static int animalSpawnYDiff = 5;
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -247,8 +248,23 @@ public class GameruleClient {
                 fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
             )
         ));
+        buttons.add(new GameruleIntegerButton("animalSpawnYDiff: " + Math.round(animalSpawnYDiff),
+            () -> {
+                int value = Math.min(100, animalSpawnYDiff + (Keybindings.shiftMod.isDown() ? 5 : 1));
+                GameruleServerboundPacket.setAnimalSpawnYDiff(value);
+            },
+            () -> {
+                int value = Math.max(1, animalSpawnYDiff - (Keybindings.shiftMod.isDown() ? 5 : 1));
+                GameruleServerboundPacket.setAnimalSpawnYDiff(value);
+            },
+            List.of(
+                    fcs(I18n.get("commands.reignofnether.gamerule.animal_spawn_y_diff")),
+                    fcs(I18n.get("hud.gamerule.reignofnether.click")),
+                    fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
+            )
+        ));
 
-        int height = (buttons.size() * 18) - 8;
+        int height = (buttons.size() * 18) - 12;
         MyRenderer.renderFrameWithBg(guiGraphics, x, y, width, height, 0xC8000000);
 
         for (Button button : buttons) {

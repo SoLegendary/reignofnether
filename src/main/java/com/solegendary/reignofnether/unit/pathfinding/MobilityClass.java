@@ -18,11 +18,10 @@ public enum MobilityClass {
 
     public float costFor(byte kind) {
         switch (kind) {
-            case WalkabilityBuilder.KIND_LAND:  return 1.0f;
+            case WalkabilityBuilder.KIND_LAND: return 1.0f;
             case WalkabilityBuilder.KIND_WATER:
-                if (this == AQUATIC) return 0.8f;
-                if (this == LARGE)   return 8.0f;
-                return 5.0f;
+                if (this == AQUATIC) return 5.0f;
+                return 20.0f;
             case WalkabilityBuilder.KIND_FIRE:  return PathfinderConfig.FIRE_AVOID_COST;
             case WalkabilityBuilder.KIND_SLIME:  return PathfinderConfig.SLIME_AVOID_COST;
             default: return Float.POSITIVE_INFINITY;

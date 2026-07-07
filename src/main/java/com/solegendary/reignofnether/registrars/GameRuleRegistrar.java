@@ -26,6 +26,7 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.BooleanValue> RTS_PATHFINDING;
     public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_THREADS;
     public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_CHUNK_BUILDS;
+    public static GameRules.Key<GameRules.IntegerValue> ANIMAL_SPAWN_Y_DIFF;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -112,6 +113,10 @@ public class GameRuleRegistrar {
         // TPS cost. clamped to [1, 64] by the worker pool.
         PATHFINDING_CHUNK_BUILDS = GameRules.register("pathfindingChunkBuildsPerTick", GameRules.Category.MOBS,
                 GameRules.IntegerValue.create(PathfinderConfig.CHUNK_BUILDS_PER_TICK_DEFAULT)
+        );
+        // Difference in level that animals can spawn around capitols at
+        ANIMAL_SPAWN_Y_DIFF = GameRules.register("animalSpawnYDiff", GameRules.Category.MOBS,
+                GameRules.IntegerValue.create(5)
         );
     }
 }

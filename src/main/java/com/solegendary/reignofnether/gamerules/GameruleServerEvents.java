@@ -122,6 +122,12 @@ public class GameruleServerEvents {
                 int value = (int) args.get("value").getResult();
                 PathfinderWorkerPool.setChunkBuildsPerTick(value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("animalSpawnYDiff")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                double animalSpawnYDiff = ((Integer) args.get("value").getResult()).doubleValue();
+                GameruleClientboundPacket.setAnimalSpawnYDiff((long) animalSpawnYDiff);
+            }
         }
     }
 
@@ -164,6 +170,8 @@ public class GameruleServerEvents {
             boolean rtsPathfinding = server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get();
             UnitServerEvents.rtsPathfinding = rtsPathfinding;
             GameruleClientboundPacket.setRtsPathfinding(rtsPathfinding);
+            int animalSpawnYDiff = server.getGameRules().getRule(GameRuleRegistrar.ANIMAL_SPAWN_Y_DIFF).get();
+            GameruleClientboundPacket.setAnimalSpawnYDiff(animalSpawnYDiff);
         }
     }
 }

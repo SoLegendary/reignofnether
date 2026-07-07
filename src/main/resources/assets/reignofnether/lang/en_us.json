@@ -696,6 +696,7 @@
     "commands.reignofnether.gamerule.lock_alliances": "Disallow changing allies during a match",
     "commands.reignofnether.gamerule.allowed_heroes": "How many heroes players can train",
     "commands.reignofnether.gamerule.coop_mode": "All human players are allied; victory only via commands or beacon",
+    "commands.reignofnether.gamerule.animal_spawn_y_diff": "Y level difference that animals can spawn at near capitols",
     "commands.reignofnether.error.unknown_building": "Unknown building name",
     "commands.reignofnether.error.unknown_resource": "Unknown resource name",
     "commands.reignofnether.error.no_server_level": "Server level is not ready yet",

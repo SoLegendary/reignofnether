@@ -1104,9 +1104,9 @@ public class BuildingPlacement {
                 }
             }
         } while (!spawnBs.isSolid()
-                 || spawnBs.is(BlockTags.LEAVES)
                  || spawnBs.getBlock() == Blocks.BARRIER
-                 || spawnBs.is(BlockTags.LOGS) || spawnBs.is(BlockTags.PLANKS)
+                 || spawnBs.is(BlockTags.PLANKS)
+                 || ResourceSources.getBlockResourceName(spawnBp, level) != ResourceName.NONE
                  || spawnBp.distSqr(centrePos) < ANIMAL_SPAWN_RANGE_MIN * ANIMAL_SPAWN_RANGE_MIN
                  || spawnBp.distSqr(centrePos) > range * range
                  || Math.abs(spawnBp.getY() - minCorner.getY()) >= 3
@@ -1114,6 +1114,7 @@ public class BuildingPlacement {
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp.above())
                  || !level.getWorldBorder().isWithinBounds(spawnBp)
                  || spawnBs.is(BlockTags.FENCES)
+                 || spawnBs.is(BlockTags.WALLS)
                  || BlockUtils.isBottomSlab(spawnBs));
 
         EntityType<? extends Animal> animalType = null;
