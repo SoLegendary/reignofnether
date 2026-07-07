@@ -34,7 +34,7 @@ Official Map Pack
 [❌] Update Motivational's maps
 [❌] Add Killerbee's maps
 [❌] Remove older author's maps
-
+[❌] Set world borders and animalSpawnYDiff
 
 Quality of Life
 ---------------
@@ -47,13 +47,12 @@ Balance
 -------
 
 
-
 Bugfixes
 --------
-[✔] Magma cubes no longer get stuck in lava
+[✔] Slimes and magma cubes no longer get stuck in lava (but slimes are not fire proof)
 [🟡] Fixed Iron golems getting stuck after spawning
-[🟡] Units are now much less likely to walk into water on rtsPathfinding (water malus too low)
-
+[🟡] Units are now much less likely to walk into water on rtsPathfinding
+[❌] Game doesn't end when last player's buildings are destroyed, if there are neutral buildings on the map
 
 Languages
 ---------
