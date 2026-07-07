@@ -1259,6 +1259,12 @@ public class BuildingPlacement {
             }
             if (highestPop > 0 && highestPopPlayer != null) {
                 boolean capturedByAlly = AlliancesServerEvents.isAllied(ownerName, highestPopPlayer);
+
+                if (!highestPopPlayer.equals(ownerName) &&
+                    BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0 &&
+                    !SandboxServer.isSandboxPlayer(ownerName)) {
+                    PlayerServerEvents.defeat(ownerName, Component.translatable("server.reignofnether.lost_buildings").getString());
+                }
                 ownerName = highestPopPlayer;
 
                 if (this instanceof BeaconPlacement beacon)
