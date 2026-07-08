@@ -18,9 +18,11 @@ import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -108,6 +110,7 @@ public class Bloodlust extends Ability {
 
         if (!level.isClientSide()) {
             SoundClientboundPacket.playSoundAtPos(SoundAction.BLOODLUST_2, ((LivingEntity) unitUsing).getOnPos().above());
+            Unit.addParticlesAroundSelf(unitUsing, ParticleTypes.ANGRY_VILLAGER);
         }
         setToMaxCooldown(unitUsing);
         ((LivingEntity) unitUsing).addEffect(new MobEffectInstance(MobEffectRegistrar.BLOODLUST.get(), DURATION_SECONDS * 20, 0));

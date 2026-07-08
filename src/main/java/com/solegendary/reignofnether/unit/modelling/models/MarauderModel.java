@@ -178,7 +178,7 @@ public class MarauderModel<T extends Entity> extends KeyframeHierarchicalModel<T
 		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
 			restart(marauder, marauder.walkAnimState, ageInTicks);
 			if (marauder.hasEffectWithDuration(MobEffectRegistrar.BLOODLUST.get()))
-				animateWalk(MarauderAnimations.RUN, limbSwing, limbSwingAmount, speed/2, speed/2);
+				animateWalk(MarauderAnimations.RUN, limbSwing, limbSwingAmount, speed * 0.4f, speed * 0.4f);
 			else
 				animateWalk(MarauderAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}

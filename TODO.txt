@@ -38,7 +38,7 @@ Official Map Pack
 
 Quality of Life
 ---------------
-[✔] Improved marauder animations, smoothing out the walk cycle and doing a run animation when bloodlusted
+[✔] Improved marauder animations, including a new run animation when bloodlusted
     - Thanks @Lurtz!
 [✔] Animals can no longer spawn on resource blocks
 [✔] Added gamerule animalSpawnYDiff (default 5)
@@ -47,7 +47,7 @@ Quality of Life
 Balance
 -------
 [✔] Capturable buildings can no longer be deleted (except in sandbox)
-[✔] Bloodlust now has a 5 second cooldown and a sound effect
+[✔] Bloodlust now has a 5 second cooldown, more obvious particles and a sound effect
 
 Bugfixes
 --------
