@@ -1111,7 +1111,7 @@ public class BuildingPlacement {
                  || ResourceSources.getBlockResourceName(spawnBp, level) != ResourceName.NONE
                  || spawnBp.distSqr(centrePos) < ANIMAL_SPAWN_RANGE_MIN * ANIMAL_SPAWN_RANGE_MIN
                  || spawnBp.distSqr(centrePos) > range * range
-                 || Math.abs(spawnBp.getY() - minCorner.getY()) >= animalSpawnYDiff
+                 || Math.abs(spawnBp.getY() - minCorner.below().getY()) > animalSpawnYDiff
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp)
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp.above())
                  || !level.getWorldBorder().isWithinBounds(spawnBp)
@@ -1261,7 +1261,7 @@ public class BuildingPlacement {
                 boolean capturedByAlly = AlliancesServerEvents.isAllied(ownerName, highestPopPlayer);
 
                 if (!highestPopPlayer.equals(ownerName) &&
-                    BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0 &&
+                    BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 1 && // this one is about to change, making it 0
                     !SandboxServer.isSandboxPlayer(ownerName)) {
                     PlayerServerEvents.defeat(ownerName, Component.translatable("server.reignofnether.lost_buildings").getString());
                 }

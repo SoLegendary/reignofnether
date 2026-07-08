@@ -114,7 +114,7 @@ public class CustomBuildingClientEvents {
         hudZones.clear();
         renderedButtons.clear();
         if (customBuildingToEdit != null && MC.screen instanceof TopdownGui) {
-            int blitX = 100;
+            int blitX = 120;
             int blitY = 30;
             int width = 315;
             int height = 225;

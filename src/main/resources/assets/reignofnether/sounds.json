@@ -35,6 +35,10 @@
         "subtitle": "sounds.reignofnether.bloodlust",
         "sounds": [ "reignofnether:bloodlust" ]
     },
+    "bloodlust_2": {
+        "subtitle": "sounds.reignofnether.bloodlust_2",
+        "sounds": [ "reignofnether:bloodlust_2" ]
+    },
     "heroism": {
         "subtitle": "sounds.reignofnether.heroism",
         "sounds": [ "reignofnether:heroism" ]

@@ -475,6 +475,8 @@ public class BuildingServerEvents {
         if (building.isBuilt && !SandboxServer.isSandboxPlayer(playerName) &&
             BuildingUtils.getTotalCompletedBuildingsOwned(false, building.ownerName) == 1)
             return;
+        if (building.getBuilding().capturable && !SandboxServer.isAnyoneASandboxPlayer())
+            return;
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);

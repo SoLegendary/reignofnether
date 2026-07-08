@@ -80,6 +80,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
                 "modifythephasevariance"),
             List.of(fcs(I18n.get("buildings.reignofnether.sculk_catalyst"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedPop(cost),
                 fcs(""),
                 fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip1")),
                 fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip2", MIN_NIGHT_RANGE)),

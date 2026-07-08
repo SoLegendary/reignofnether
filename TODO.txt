@@ -38,21 +38,24 @@ Official Map Pack
 
 Quality of Life
 ---------------
-[❌] Reworked marauder animations
-[🟡] Animals can no longer spawn on resource blocks
-[🟡] Added gamerule animalSpawnYDiff (default 5)
+[✔] Improved marauder animations, smoothing out the walk cycle and doing a run animation when bloodlusted
+    - Thanks @Lurtz!
+[✔] Animals can no longer spawn on resource blocks
+[✔] Added gamerule animalSpawnYDiff (default 5)
     - Sets the Y level difference between capitols and valid animal spawn positions
 
 Balance
 -------
-
+[✔] Capturable buildings can no longer be deleted (except in sandbox)
+[✔] Bloodlust now has a 5 second cooldown and a sound effect
 
 Bugfixes
 --------
-[✔] Slimes and magma cubes no longer get stuck in lava (but slimes are not fire proof)
-[🟡] Fixed Iron golems getting stuck after spawning
-[🟡] Units are now much less likely to walk into water on rtsPathfinding
-[🟡] Fixed players not being defeated if their last building was a capturable neutral building that was recaptured
+[✔] Fixed maps on low Y levels having laggy pathfinding with `rtsPathfinding` on
+[✔] Slimes and magma cubes no longer get stuck in lava (but slimes are not fire proof!)
+[✔] Fixed Iron golems getting stuck after spawning
+[✔] Units are now much less likely to walk into water on rtsPathfinding
+[✔] Fixed players not being defeated if their last building was a capturable neutral building that was recaptured
 
 Languages
 ---------

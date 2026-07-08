@@ -966,6 +966,7 @@
     "server.reignofnether.all_cheats": "%s enabled all cheats",
     "server.reignofnether.revealed": "%s has not rebuilt their capitol and is being revealed!",
     "server.reignofnether.prewarmed_navmesh": "RTS-optimised map, improved pathfinding enabled",
+    "server.reignofnether.cannot_delete_capturable": "Cannot delete a capturable building",
 
     "server.resources.reignofnether.not_enough_food": "You don't have enough food",
     "server.resources.reignofnether.not_enough_wood": "You don't have enough wood",

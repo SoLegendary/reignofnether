@@ -9,6 +9,8 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -42,7 +44,7 @@ public class Bloodlust extends Ability {
     public Bloodlust() {
         super(
                 UnitAction.BLOOD_LUST,
-                0,
+                100,
                 0,
                 0,
                 false,
@@ -104,6 +106,10 @@ public class Bloodlust extends Ability {
         else
             ((LivingEntity) unitUsing).hurt(level.damageSources().magic(), getHealthCost(unitUsing));
 
+        if (!level.isClientSide()) {
+            SoundClientboundPacket.playSoundAtPos(SoundAction.BLOODLUST_2, ((LivingEntity) unitUsing).getOnPos().above());
+        }
+        setToMaxCooldown(unitUsing);
         ((LivingEntity) unitUsing).addEffect(new MobEffectInstance(MobEffectRegistrar.BLOODLUST.get(), DURATION_SECONDS * 20, 0));
         ((LivingEntity) unitUsing).addEffect(new MobEffectInstance(MobEffects.REGENERATION, (int) (getHealthCost(unitUsing) * 20 * 2.5f) + 40, 0));
     }
