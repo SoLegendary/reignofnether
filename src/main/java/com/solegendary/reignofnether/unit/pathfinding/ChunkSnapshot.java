@@ -25,7 +25,7 @@ public final class ChunkSnapshot implements WalkabilityView {
 
     public static ChunkSnapshot capture(Level level, BlockPos start, BlockPos target, int dilation, MobilityClass mobility, int clearanceCells, int footprintRadius, float fireCost, boolean canClimb) {
         WalkabilityGrid grid = WalkabilityGrid.get(level);
-        CaptureRegion region = regionFor(start, target, dilation);
+        CaptureRegion region = regionFor(level, start, target, dilation);
         Long2ObjectOpenHashMap<WalkabilityGridChunk> map =
                 new Long2ObjectOpenHashMap<>((region.cx1 - region.cx0 + 1) * (region.cz1 - region.cz0 + 1));
         for (int cx = region.cx0; cx <= region.cx1; cx++) {
@@ -50,15 +50,21 @@ public final class ChunkSnapshot implements WalkabilityView {
         public int chunkCount() { return (cx1 - cx0 + 1) * (cz1 - cz0 + 1); }
     }
 
-    public static CaptureRegion regionFor(BlockPos start, BlockPos target, int dilation) {
+    public static CaptureRegion regionFor(Level level, BlockPos start, BlockPos target, int dilation) {
         int minX = Math.min(start.getX(), target.getX()) - dilation;
         int maxX = Math.max(start.getX(), target.getX()) + dilation;
         int minZ = Math.min(start.getZ(), target.getZ()) - dilation;
         int maxZ = Math.max(start.getZ(), target.getZ()) + dilation;
-        // A* hugs the surface between start and target, so only classify a Y band around it.
+        // A* hugs the surface between start and target, so only classify a Y band around it. Clamp to the
+        // world build limits with the same rule as WalkabilityGridChunk.build: a built chunk can never store
+        // a band past them, so an unclamped want here would fail covers()/isBuilt forever (e.g. superflat
+        // surface at y=-60 wants minY=-92 but builds store -64) and every request re-warms its whole corridor.
         int band = PathfinderConfig.VERTICAL_RADIUS + PathfinderConfig.VERTICAL_WINDOW_SLACK;
         int refY = (start.getY() + target.getY()) / 2;
-        return new CaptureRegion(minX >> 4, maxX >> 4, minZ >> 4, maxZ >> 4, refY - band, refY + band);
+        int wantMinY = Math.max(level.getMinBuildHeight(), refY - band);
+        int wantMaxY = Math.min(level.getMaxBuildHeight(), refY + band);
+        if (wantMaxY <= wantMinY) wantMaxY = Math.min(level.getMaxBuildHeight(), wantMinY + 1);
+        return new CaptureRegion(minX >> 4, maxX >> 4, minZ >> 4, maxZ >> 4, wantMinY, wantMaxY);
     }
 
     private WalkabilityGridChunk chunkAt(int wx, int wz) {
