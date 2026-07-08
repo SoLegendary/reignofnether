@@ -109,6 +109,9 @@ public class WorldBorderServerEvents {
 
     // Y band to classify for a chunk: span the chunk's surface heights (sampled at its corners + centre) and
     // pad to the pathfinder's vertical window so a unit pathing across this chunk has headroom above/below.
+    // The pad below must match what runtime requests want (ChunkSnapshot.regionFor pads refY by
+    // VERTICAL_RADIUS + SLACK both ways, and refY ~= the surface feet Y this heightmap returns) - a shallower
+    // prewarm band fails covers() on first touch and every prewarmed chunk gets union-rebuilt, wasting the prewarm.
     private static int[] surfaceBand(ChunkAccess chunk) {
         int[] xs = {0, 15, 0, 15, 8};
         int[] zs = {0, 0, 15, 15, 8};
@@ -119,8 +122,9 @@ public class WorldBorderServerEvents {
             if (h < minSurf) minSurf = h;
             if (h > maxSurf) maxSurf = h;
         }
-        int minY = minSurf - PathfinderConfig.VERTICAL_WINDOW_SLACK;
-        int maxY = maxSurf + PathfinderConfig.VERTICAL_RADIUS + PathfinderConfig.VERTICAL_WINDOW_SLACK;
+        int band = PathfinderConfig.VERTICAL_RADIUS + PathfinderConfig.VERTICAL_WINDOW_SLACK;
+        int minY = Math.max(chunk.getMinBuildHeight(), minSurf - band);
+        int maxY = Math.min(chunk.getMaxBuildHeight(), maxSurf + band);
         return new int[]{minY, maxY};
     }
 }
