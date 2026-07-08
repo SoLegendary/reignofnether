@@ -21,7 +21,7 @@ public enum MobilityClass {
             case WalkabilityBuilder.KIND_LAND: return 1.0f;
             case WalkabilityBuilder.KIND_WATER:
                 if (this == AQUATIC) return 5.0f;
-                return 20.0f;
+                return 25.0f;
             case WalkabilityBuilder.KIND_FIRE:  return PathfinderConfig.FIRE_AVOID_COST;
             case WalkabilityBuilder.KIND_SLIME:  return PathfinderConfig.SLIME_AVOID_COST;
             default: return Float.POSITIVE_INFINITY;
