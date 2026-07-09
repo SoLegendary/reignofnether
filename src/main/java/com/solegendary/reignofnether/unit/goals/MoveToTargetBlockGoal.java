@@ -144,8 +144,7 @@ public class MoveToTargetBlockGoal extends Goal {
 
         // When the rtsPathfinding gamerule is on, route through the async grid A* pathfinder.
         if (useRtsPathfinding()) {
-            if (mob.getBbWidth() > 1.0f)
-                this.mob.setMaxUpStep(1.15f);
+            this.mob.setMaxUpStep(1.15f);
             if (this.mob.getNavigation() instanceof GroundPathNavigation gpn) gpn.setCanFloat(true);
             this.mob.getNavigation().stop();
             MobilityClass mobility = MobilityClass.of(u);
