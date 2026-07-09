@@ -416,7 +416,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
                 setUnitAttackTarget(closestTarget);
             }
         }
-        if (isInLava())
+        if (isInWater() || isInLava())
             setDeltaMovement(new Vec3(0, 0.25, 0));
     }
 
