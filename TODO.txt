@@ -50,6 +50,7 @@ Balance
 -------
 [✔] Capturable buildings can no longer be deleted (except in sandbox)
 [✔] Bloodlust now has a 5 second cooldown, more obvious particles and a sound effect
+[✔] When rtsPathfinding is enabled, all large units will gain smooth movement up 1-block high ledges
 
 [❌] Increase capitol build speed when there is no capitol built
 
