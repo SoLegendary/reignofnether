@@ -29,12 +29,6 @@ Hero Items
 
 
 
-Official Map Pack
------------------
-[❌] Update Motivational's maps
-[❌] Add Killerbee's maps
-[❌] Remove older author's maps
-[❌] Set world borders and animalSpawnYDiff
 
 Quality of Life
 ---------------
@@ -61,8 +55,6 @@ Bugfixes
 [✔] Fixed Iron golems getting stuck after spawning
 [✔] Units are now much less likely to walk into water on rtsPathfinding
 [✔] Fixed players not being defeated if their last building was a capturable neutral building that was recaptured
-
-[❌] Big units on rtsPathfinding can't jump up from a path block
 
 Languages
 ---------
