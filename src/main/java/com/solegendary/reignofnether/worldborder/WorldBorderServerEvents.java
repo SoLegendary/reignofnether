@@ -19,11 +19,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class WorldBorderServerEvents {
 
     // A world border this small (blocks) means the map was purpose-built for RoN RTS: it's "RTS-optimised".
-    // 1024 = 64x64 chunks. We never change the border - we only read it as the signal to switch the map into
+    // 1280 = 80x80 chunks. We never change the border - we only read it as the signal to switch the map into
     // RTS-optimised mode (improved pathfinding + navmesh precompute). A vanilla map's border is ~60M wide, so
     // it stays on vanilla pathfinding untouched. The whole bounded play area fits in the walkability cache
     // (see PathfinderConfig.MAX_CACHED_CHUNKS), which is what makes the full-map precompute worthwhile.
-    public static final int RTS_OPTIMIZED_BORDER = 1024;
+    public static final int RTS_OPTIMIZED_BORDER = 1280;
 
     public static boolean prewarmedNavmesh = false;
 
