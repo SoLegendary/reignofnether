@@ -9,6 +9,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -20,6 +21,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.gui.TitleScreenModUpdateIndicator;
 import net.minecraftforge.internal.BrandingControl;
@@ -52,6 +56,7 @@ public class TitleScreenMixin extends Screen {
     @Nullable @Shadow(remap = false) private TitleScreenModUpdateIndicator modUpdateNotification;
     private AbstractWidget lilypadButton;
     private AbstractWidget discordButton;
+    private AbstractWidget mapsButton;
 
     protected TitleScreenMixin(Component pTitle) {
         super(pTitle);
@@ -151,11 +156,41 @@ public class TitleScreenMixin extends Screen {
 
                 pPoseStack.popPose();
             }
-
         };
+
+        // --- "Get RTS maps!" button ---
+        // Styled like the vanilla language-select button, to the right of the singleplayer button
+        int mapsButtonSize = 20;
+        int mapsButtonX = (this.width / 2) + 104;
+        int mapsButtonY = (this.height / 4) + 48;
+
+        this.mapsButton = new AbstractWidget(mapsButtonX, mapsButtonY, mapsButtonSize, mapsButtonSize, Component.empty()) {
+            @Override
+            public void onClick(double pMouseX, double pMouseY) {
+                openLink("https://www.curseforge.com/minecraft/mc-mods/reign-of-nether-rts-in-minecraft");
+            }
+            @Override
+            protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+                narrationElementOutput.add(NarratedElementType.TITLE, Component.literal("Get RTS maps!"));
+            }
+            @Override
+            public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+                // Same background sprite vanilla uses for the language/accessibility square buttons
+                ResourceLocation buttonSprite = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,
+                        this.isHoveredOrFocused() ? "textures/hud/title_button_highlighted.png" : "textures/hud/title_button.png");
+                guiGraphics.blit(buttonSprite, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
+                ItemStack mapStack = new ItemStack(Items.FILLED_MAP);
+                mapStack.enchant(Enchantments.UNBREAKING, 1);
+                int itemX = this.getX() + (this.width - 16) / 2;
+                int itemY = this.getY() + (this.height - 16) / 2;
+                guiGraphics.renderItem(mapStack, itemX, itemY);
+            }
+        };
+        this.mapsButton.setTooltip(Tooltip.create(Component.literal("Get RTS maps!")));
 
         this.addRenderableWidget(this.lilypadButton);
         this.addRenderableWidget(this.discordButton);
+        this.addRenderableWidget(this.mapsButton);
     }
 
 

@@ -44,6 +44,7 @@ Quality of Life
 [✔] Added gamerule animalSpawnYDiff (default 5)
     - Sets the Y level difference between capitols and valid animal spawn positions
 [✔] Mousing over a catalyst with a sonic boom and sculk amplifiers researched indicates its split range
+[🟡] Added a button to the main menu that links to the new map pack
 
 Balance
 -------
@@ -59,6 +60,8 @@ Bugfixes
 [✔] Fixed Iron golems getting stuck after spawning
 [✔] Units are now much less likely to walk into water on rtsPathfinding
 [✔] Fixed players not being defeated if their last building was a capturable neutral building that was recaptured
+
+[❌] Big units on rtsPathfinding can't jump up from a path block
 
 Languages
 ---------
