@@ -79,6 +79,10 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_RTS_PATHFINDING, "", rtsPathfinding ? 1L : 0L));
     }
+    public static void setAnimalSpawnYDiff(long animalSpawnYDiff) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_ANIMAL_SPAWN_Y_DIFF, "", animalSpawnYDiff));
+    }
 
     public GameruleServerboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -182,6 +186,10 @@ public class GameruleServerboundPacket {
                     gameRules.getRule(GameRuleRegistrar.RTS_PATHFINDING).set(booleanValue, server);
                     UnitServerEvents.rtsPathfinding = booleanValue;
                     GameruleClientboundPacket.setRtsPathfinding(booleanValue);
+                }
+                case SET_ANIMAL_SPAWN_Y_DIFF -> {
+                    gameRules.getRule(GameRuleRegistrar.ANIMAL_SPAWN_Y_DIFF).set(Math.toIntExact(value), server);
+                    GameruleClientboundPacket.setAnimalSpawnYDiff(value);
                 }
             }
             success.set(true);

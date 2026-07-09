@@ -1,5 +1,5 @@
 
-1.20.1-1.3.8
+1.20.1-1.3.8a
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -29,45 +29,32 @@ Hero Items
 
 
 
-Official Map Pack
------------------
-[❌] Update Motivational's maps
-[❌] Add Killerbee's maps
-[❌] Remove older author's maps
-
 
 Quality of Life
 ---------------
-[✔] Reduced the minimum height difference that capitol animals can spawn at from 4 to 3 blocks
-[✔] Workers no longer knockback animals
-[✔] Added a new unit attribute "evasionChance"
-    - All projectiles roll a random accuracy value between 0 and 1 on spawn and miss targets with a higher evasion chance
-[✔] Slimes and magma cubes no longer auto-consume targets that have auto-consume on
-[✔] Villagers and zombie villagers now auto-drop resources and gather nearby resources when they finish a stockpile
-[✔] Aggro range is now always as far as attack range at a minimum
-[✔] Workers now drop off resources between kills if multiple animals are shift-queued
-[✔] /rtsapi-export-custom-buildings
-    - "Exporting X custom buildings - exit and log into a new world to transfer them there"
+[✔] Improved marauder animations, including a new run animation when bloodlusted
+    - Thanks @Lurtz!
+[✔] Animals can no longer spawn on resource blocks
+[✔] Added gamerule animalSpawnYDiff (default 5)
+    - Sets the Y level difference between capitols and valid animal spawn positions
+[✔] Mousing over a catalyst with a sonic boom and sculk amplifiers researched indicates its split range
+[🟡] Added a button to the main menu that links to the new map pack
 
 Balance
 -------
-[✔] Monsters can now substitute a Slime Pit for any of the Stronghold prerequisites
-[✔] Piglins can now substitute a Basalt Springs for a Wither Shrine for the Fortress prerequisites
-[✔] Castles now require a Witch Hut instead of a Barracks
-[✔] Wraith health reduced from 50 to 35, but they now have 50% evasion against physical attacks
-[✔] Windcaller health raised from 40 to 45
-[✔] Windcaller martial enchantment changed from Punch to Longshot (+4 range)
+[✔] Capturable buildings can no longer be deleted (except in sandbox)
+[✔] Bloodlust now has a 5 second cooldown, more obvious particles and a sound effect
+[✔] When rtsPathfinding is enabled, all large units will gain smooth movement when climbing blocks
+
+[❌] Increase capitol build speed when there is no capitol built
 
 Bugfixes
 --------
-[✔] Fixed RTS Structure Blocks sometimes not creating a placed building
-[✔] Fixed summoned zombies taking up population
-[✔] All non-glazed terracottas and concrete powders now convert to netherrack and soul soil respectively
-[✔] Endstone and endstone bricks now convert to netherrack and nether bricks respectively
-[✔] Fixed custom buildings with small block counts displaying health incorrectly
-[✔] Fixed being unable to shift queue attack moves
-[✔] Fixed ghast fireballs being unable to hit windcallers
-[✔] Scorching gaze now correctly aggros neutral enemies
+[✔] Fixed maps on low Y levels having laggy pathfinding with `rtsPathfinding` on
+[✔] Slimes and magma cubes no longer get stuck in lava (but slimes are not fire proof!)
+[✔] Fixed Iron golems getting stuck after spawning
+[✔] Units are now much less likely to walk into water on rtsPathfinding
+[✔] Fixed players not being defeated if their last building was a capturable neutral building that was recaptured
 
 Languages
 ---------

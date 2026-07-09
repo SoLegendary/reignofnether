@@ -176,7 +176,7 @@ public final class PathfinderWorkerPool {
             return;
         }
         int dilation = PathfinderConfig.dilationFor(start, target);
-        ChunkSnapshot.CaptureRegion region = ChunkSnapshot.regionFor(start, target, dilation);
+        ChunkSnapshot.CaptureRegion region = ChunkSnapshot.regionFor(level, start, target, dilation);
         BUILD_QUEUE.add(new PendingBuild(level, start, target, reach, mobility, clearanceCells,
                 footprintRadius, fireCost, canClimb, maxNodes, region, valid, onReady, System.nanoTime()));
     }

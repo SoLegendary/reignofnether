@@ -41,6 +41,11 @@ public class SlimeUnitMoveControl extends MoveControl {
         return this.slime.isTiny() ? SoundEvents.SLIME_JUMP_SMALL : SoundEvents.SLIME_JUMP;
     }
 
+    public void setWantedMovement(double pSpeed) {
+        this.speedModifier = pSpeed;
+        this.operation = Operation.MOVE_TO;
+    }
+
     // if we have direct line of sight of the end pos, then dont worry about smart pathfinding (it's slower anyway)
     @Override
     public void tick() {

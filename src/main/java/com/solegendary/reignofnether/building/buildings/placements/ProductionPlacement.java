@@ -25,6 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -143,11 +144,16 @@ public class ProductionPlacement extends BuildingPlacement {
                 true,
                 false
         );
+
+
         BlockPos defaultRallyPoint = getDefaultOutdoorSpawnPoint();
 
         final List<BlockPos> fRallyPoints = this.rallyPoints.isEmpty() ? List.of(defaultRallyPoint) : this.rallyPoints;
 
         if (entity instanceof Unit unit) {
+            if (entityType == EntityRegistrar.IRON_GOLEM_UNIT.get()) // bandaid fix, for some reason golems don't move after spawn until nudged
+                entity.push(0.01, 0, 0);
+
             unit.setOwnerName(ownerName);
             unit.setupEquipmentAndUpgradesServer();
 

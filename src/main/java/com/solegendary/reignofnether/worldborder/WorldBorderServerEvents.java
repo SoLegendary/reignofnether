@@ -19,11 +19,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class WorldBorderServerEvents {
 
     // A world border this small (blocks) means the map was purpose-built for RoN RTS: it's "RTS-optimised".
-    // 1024 = 64x64 chunks. We never change the border - we only read it as the signal to switch the map into
+    // 1280 = 80x80 chunks. We never change the border - we only read it as the signal to switch the map into
     // RTS-optimised mode (improved pathfinding + navmesh precompute). A vanilla map's border is ~60M wide, so
     // it stays on vanilla pathfinding untouched. The whole bounded play area fits in the walkability cache
     // (see PathfinderConfig.MAX_CACHED_CHUNKS), which is what makes the full-map precompute worthwhile.
-    public static final int RTS_OPTIMIZED_BORDER = 1024;
+    public static final int RTS_OPTIMIZED_BORDER = 1280;
 
     public static boolean prewarmedNavmesh = false;
 
@@ -109,6 +109,9 @@ public class WorldBorderServerEvents {
 
     // Y band to classify for a chunk: span the chunk's surface heights (sampled at its corners + centre) and
     // pad to the pathfinder's vertical window so a unit pathing across this chunk has headroom above/below.
+    // The pad below must match what runtime requests want (ChunkSnapshot.regionFor pads refY by
+    // VERTICAL_RADIUS + SLACK both ways, and refY ~= the surface feet Y this heightmap returns) - a shallower
+    // prewarm band fails covers() on first touch and every prewarmed chunk gets union-rebuilt, wasting the prewarm.
     private static int[] surfaceBand(ChunkAccess chunk) {
         int[] xs = {0, 15, 0, 15, 8};
         int[] zs = {0, 0, 15, 15, 8};
@@ -119,8 +122,9 @@ public class WorldBorderServerEvents {
             if (h < minSurf) minSurf = h;
             if (h > maxSurf) maxSurf = h;
         }
-        int minY = minSurf - PathfinderConfig.VERTICAL_WINDOW_SLACK;
-        int maxY = maxSurf + PathfinderConfig.VERTICAL_RADIUS + PathfinderConfig.VERTICAL_WINDOW_SLACK;
+        int band = PathfinderConfig.VERTICAL_RADIUS + PathfinderConfig.VERTICAL_WINDOW_SLACK;
+        int minY = Math.max(chunk.getMinBuildHeight(), minSurf - band);
+        int maxY = Math.min(chunk.getMaxBuildHeight(), maxSurf + band);
         return new int[]{minY, maxY};
     }
 }

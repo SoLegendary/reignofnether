@@ -90,6 +90,10 @@ public class GameruleClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new GameruleClientboundPacket(GameruleAction.SET_RTS_PATHFINDING, "", rtsPathfinding ? 1L : 0L));
     }
+    public static void setAnimalSpawnYDiff(long yDiff) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new GameruleClientboundPacket(GameruleAction.SET_ANIMAL_SPAWN_Y_DIFF, "", yDiff));
+    }
 
     public GameruleClientboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -149,6 +153,7 @@ public class GameruleClientboundPacket {
                             case SET_COOP_MODE -> GameruleClient.coopMode = value == 1L;
                             case SET_BUILDINGS_OUTSIDE_BORDER -> GameruleClient.buildingsOutsideBorder = value == 1L;
                             case SET_RTS_PATHFINDING -> GameruleClient.rtsPathfinding = value == 1L;
+                            case SET_ANIMAL_SPAWN_Y_DIFF -> GameruleClient.animalSpawnYDiff = Math.toIntExact(value);
                         }
                         success.set(true);
                     });

@@ -5,6 +5,7 @@ package com.solegendary.reignofnether.unit.modelling.models;// Made with Blockbe
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.modelling.animations.MarauderAnimations;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -176,7 +177,10 @@ public class MarauderModel<T extends Entity> extends KeyframeHierarchicalModel<T
 		// walk animation
 		else if (!entity.isInWaterOrBubble() && limbSwingAmount > 0.001f) {
 			restart(marauder, marauder.walkAnimState, ageInTicks);
-			animateWalk(MarauderAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
+			if (marauder.hasEffectWithDuration(MobEffectRegistrar.BLOODLUST.get()))
+				animateWalk(MarauderAnimations.RUN, limbSwing, limbSwingAmount, speed * 0.4f, speed * 0.4f);
+			else
+				animateWalk(MarauderAnimations.WALK, limbSwing, limbSwingAmount, speed, speed);
 		}
 		// idle animation
 		else {

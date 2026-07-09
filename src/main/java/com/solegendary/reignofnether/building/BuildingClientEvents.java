@@ -954,7 +954,9 @@ public class BuildingClientEvents {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_DELETE) {
             boolean isSandboxPlayer = MC.player != null && SandboxClientEvents.isSandboxPlayer(MC.player.getName().getString());
             BuildingPlacement building = HudClientEvents.hudSelectedPlacement;
-            if (building != null &&
+            if (building != null && building.getBuilding().capturable && !isSandboxPlayer) {
+                HudClientEvents.showTemporaryMessage(I18n.get("server.reignofnether.cannot_delete_capturable"));
+            } else if (building != null &&
                 ((building.isBuilt && getPlayerToBuildingRelationship(building) == Relationship.OWNED) || isSandboxPlayer)) {
                 HudClientEvents.hudSelectedPlacement = null;
                 BuildingServerboundPacket.cancelBuilding(building.minCorner, MC.player.getName().getString());

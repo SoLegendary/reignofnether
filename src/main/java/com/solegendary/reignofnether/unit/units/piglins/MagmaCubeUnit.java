@@ -44,6 +44,11 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
     }
     @Override public Faction getFaction() {return Faction.PIGLINS;}
 
+    @Override
+    protected boolean isAffectedByFluids() {
+        return !isInLava();
+    }
+
     public MagmaCubeUnit(EntityType<? extends SlimeUnit> entityType, Level level) {
         super(entityType, level);
         this.shouldSpawnSlimes = false;

@@ -242,6 +242,7 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.FORGE_ARMOUR, SoundEvents.SMITHING_TABLE_USE);
         SOUND_MAP.put(SoundAction.LEVEL_UP, SoundEvents.PLAYER_LEVELUP);
         SOUND_MAP.put(SoundAction.BLOODLUST, SoundRegistrar.BLOODLUST.get());
+        SOUND_MAP.put(SoundAction.BLOODLUST_2, SoundRegistrar.BLOODLUST_2.get());
         SOUND_MAP.put(SoundAction.HEROISM, SoundRegistrar.HEROISM.get());
         SOUND_MAP.put(SoundAction.WRETCHED_WRAITH_ATTACK_QUIET, SoundRegistrar.WRETCHED_WRAITH_ATTACK_QUIET.get());
         SOUND_MAP.put(SoundAction.WRETCHED_WRAITH_ATTACK_LOUD, SoundRegistrar.WRETCHED_WRAITH_ATTACK_LOUD.get());

@@ -24,6 +24,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
+import com.solegendary.reignofnether.gamerules.GameruleServerEvents;
 import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -1049,7 +1050,7 @@ public class BuildingPlacement {
 
     // if there aren't already too many animals nearby, spawn some random huntable animals
     private void spawnHuntableAnimalsNearby(int range) {
-        if (level.isClientSide()) {
+        if (level.isClientSide() || level.getServer() == null) {
             return;
         }
         int retries = 0;
@@ -1076,6 +1077,7 @@ public class BuildingPlacement {
         BlockState spawnBs;
         BlockPos spawnBp;
         Random random = new Random();
+        int animalSpawnYDiff = level.getServer().getGameRules().getInt(GameRuleRegistrar.ANIMAL_SPAWN_Y_DIFF);
 
         do {
             int x = centrePos.getX() + random.nextInt(-range / 2, range / 2);
@@ -1104,16 +1106,17 @@ public class BuildingPlacement {
                 }
             }
         } while (!spawnBs.isSolid()
-                 || spawnBs.is(BlockTags.LEAVES)
                  || spawnBs.getBlock() == Blocks.BARRIER
-                 || spawnBs.is(BlockTags.LOGS) || spawnBs.is(BlockTags.PLANKS)
+                 || spawnBs.is(BlockTags.PLANKS)
+                 || ResourceSources.getBlockResourceName(spawnBp, level) != ResourceName.NONE
                  || spawnBp.distSqr(centrePos) < ANIMAL_SPAWN_RANGE_MIN * ANIMAL_SPAWN_RANGE_MIN
                  || spawnBp.distSqr(centrePos) > range * range
-                 || Math.abs(spawnBp.getY() - minCorner.getY()) >= 3
+                 || Math.abs(spawnBp.getY() - minCorner.below().getY()) > animalSpawnYDiff
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp)
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp.above())
                  || !level.getWorldBorder().isWithinBounds(spawnBp)
                  || spawnBs.is(BlockTags.FENCES)
+                 || spawnBs.is(BlockTags.WALLS)
                  || BlockUtils.isBottomSlab(spawnBs));
 
         EntityType<? extends Animal> animalType = null;
@@ -1256,6 +1259,12 @@ public class BuildingPlacement {
             }
             if (highestPop > 0 && highestPopPlayer != null) {
                 boolean capturedByAlly = AlliancesServerEvents.isAllied(ownerName, highestPopPlayer);
+
+                if (!highestPopPlayer.equals(ownerName) &&
+                    BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 1 && // this one is about to change, making it 0
+                    !SandboxServer.isSandboxPlayer(ownerName)) {
+                    PlayerServerEvents.defeat(ownerName, Component.translatable("server.reignofnether.lost_buildings").getString());
+                }
                 ownerName = highestPopPlayer;
 
                 if (this instanceof BeaconPlacement beacon)

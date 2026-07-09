@@ -2,17 +2,20 @@ package com.solegendary.reignofnether.blocks;
 
 
 import com.mojang.datafixers.util.Pair;
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.ability.abilities.SonicBoom;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
+import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.researchItems.ResearchSculkAmplifiers;
 import com.solegendary.reignofnether.resources.BlockUtils;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -27,6 +30,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 public class BlockClientEvents {
@@ -59,15 +63,14 @@ public class BlockClientEvents {
             }
         }
 
-        if (nightSourceOriginToPlace != null && MC.level != null) {
-            Set<BlockPos> bps =  MiscUtil.CircleUtil.getCircle(nightSourceOriginToPlace.getFirst(), nightSourceOriginToPlace.getSecond());
+        if (tempMouseCircleOrigin != null && MC.level != null) {
+            Set<BlockPos> bps = MiscUtil.CircleUtil.getCircle(tempMouseCircleOrigin.getFirst(), tempMouseCircleOrigin.getSecond());
             for (BlockPos bp : bps) {
                 int snowLayers = BlockUtils.getSnowLayers(MC.level.getBlockState(bp.above()));
                 float yOffset = snowLayers * 0.125f;
                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, yOffset, bp, 0f, 0.8f, 0f, 0.3f);
             }
         }
-
         for (LivingEntity le : UnitClientEvents.getSelectedUnits()) {
             if (le instanceof RangeIndicator ri) {
                 for (BlockPos bp : ri.getHighlightBps()) {
@@ -97,7 +100,8 @@ public class BlockClientEvents {
     private static final int NIGHT_SOURCES_UPDATE_TICKS_MAX = 50;
     private static int nightSourcesUpdateTicks = NIGHT_SOURCES_UPDATE_TICKS_MAX;
     public static ArrayList<Pair<BlockPos, Integer>> nightSourceOrigins = new ArrayList<>();
-    public static Pair<BlockPos, Integer> nightSourceOriginToPlace = null;
+    // temp circle for stuff like placing a night source building, mousing over a catalyst with sonic boom, etc.
+    public static Pair<BlockPos, Integer> tempMouseCircleOrigin = null;
     public static final int VISIBLE_BORDER_ADJ = 2; // shrink a bit so borderlines themselves are safe to walk on
 
     @SubscribeEvent
@@ -113,10 +117,16 @@ public class BlockClientEvents {
             nsa0 = building.getActiveAddon(NightSourceAddon.class);
         }
         if (nightSourcesUpdateTicks % 2 == 0) {
-            if (nsa0 != null)
-                nightSourceOriginToPlace = new Pair<>(CursorClientEvents.getPreselectedBlockPos(), nsa0.getDefaultNightRange() - VISIBLE_BORDER_ADJ);
-            else
-                nightSourceOriginToPlace = null;
+            if (nsa0 != null) {
+                tempMouseCircleOrigin = new Pair<>(CursorClientEvents.getPreselectedBlockPos(), nsa0.getDefaultNightRange() - VISIBLE_BORDER_ADJ);
+            } else if (BuildingClientEvents.getPreselectedBuilding() instanceof SculkCatalystPlacement scp &&
+                        CursorClientEvents.getLeftClickAction() == UnitAction.CAST_SONIC_BOOM &&
+                        ResearchClient.hasResearch(ProductionItems.RESEARCH_SCULK_AMPLIFIERS) &&
+                        MC.player != null && scp.ownerName.equals(MC.player.getName().getString())) {
+                tempMouseCircleOrigin = new Pair<>(scp.centrePos, ResearchSculkAmplifiers.SPLIT_BOOM_RANGE);
+            } else {
+                tempMouseCircleOrigin = null;
+            }
         }
 
         if (nightSourcesUpdateTicks <= 0) {
