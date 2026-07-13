@@ -28,19 +28,29 @@ Hero Items
     - Requires right-click to pick up, will not auto-pickup
 
 
-
+[🟡] Review Erfinder's proof of concept PR
 
 Quality of Life
 ---------------
-
+[✔] Ctrl + right-clicking to set a rally point will make spawned units attack-move towards the rally
+     - Ctrl + right-clicking an enemy unit makes spawned units attack that unit
+[✔] The tooltips for custom building costs now show exactly how much bounty they give
+[✔] Windcallers let out small puffs of air when landing
+[🟡] The fast build cheat (warpten) now builds 4x faster while in sandbox mode
+[❌] Custom buildings can now have up to 100 custom commands
+[🟡] You can now upgrade multiple of the same building without needing to click each one
 
 Balance
 -------
-[❌] Increase capitol build speed when there is no capitol built
+[❌] Increase capitol build speed at start of the game
 
 Bugfixes
 --------
+[✔] Fixed bridges not being neutral when built
+[✔] Units no longer avoid lilypads on rtsPathfinding
+[✔] Using possession with multiple wraiths doesn't switch to next idle one
 
+[❌] Absorption healthbar is not correct (if there's any absorption, they have max health)
 
 Languages
 ---------

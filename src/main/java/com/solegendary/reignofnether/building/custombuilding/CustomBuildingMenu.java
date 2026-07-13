@@ -21,6 +21,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.getCustomBuildingToEdit;
 import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.setCustomBuildingToEdit;
+import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_BUILDING_BOUNTY_PERCENT;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
@@ -190,7 +191,7 @@ public class CustomBuildingMenu {
                     CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_FOOD_COST, customBuilding.name, value);
                     customBuilding.cost.food = value;
                 },
-                I18n.get("sandbox.reignofnether.custom_buildings.set_food_cost.tooltip1")
+                I18n.get("sandbox.reignofnether.custom_buildings.set_food_cost.tooltip1", customBuilding.cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT)
         );
         setFoodCostButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
         buttonsCol1.add(setFoodCostButton);
@@ -207,7 +208,7 @@ public class CustomBuildingMenu {
                     CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_WOOD_COST, customBuilding.name, value);
                     customBuilding.cost.wood = value;
                 },
-                I18n.get("sandbox.reignofnether.custom_buildings.set_wood_cost.tooltip1")
+                I18n.get("sandbox.reignofnether.custom_buildings.set_wood_cost.tooltip1", customBuilding.cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT)
         );
         setWoodCostButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
         buttonsCol1.add(setWoodCostButton);
@@ -224,7 +225,7 @@ public class CustomBuildingMenu {
                     CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_ORE_COST, customBuilding.name, value);
                     customBuilding.cost.ore = value;
                 },
-                I18n.get("sandbox.reignofnether.custom_buildings.set_ore_cost.tooltip1")
+                I18n.get("sandbox.reignofnether.custom_buildings.set_ore_cost.tooltip1", customBuilding.cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT)
         );
         setOreCostButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
         buttonsCol1.add(setOreCostButton);

@@ -56,7 +56,7 @@ public class Possess extends Ability {
         if (unit instanceof WraithUnit wraithUnit) {
             GenericTargetedSpellGoal goal = wraithUnit.getPossessGoal();
             if (goal != null)
-                return goal.isCasting();
+                return goal.isCasting() || goal.getMoveTarget() != null || goal.getTargetEntity() != null;
         }
         return false;
     }
