@@ -43,6 +43,8 @@ public final class WalkabilityBuilder {
         if (MiscUtil.isSolidBlocking(level, head) || BlockUtils.isLeafBlock(headBs) || isFenceLike(headBs)) return KIND_BLOCKED;
 
         BlockState floorBs = level.getBlockState(floor);
+        if (floorBs.getBlock() == Blocks.WATER && feetBs.getBlock() == Blocks.LILY_PAD)
+            return KIND_LAND;
 
         FluidState feetFluid = feetBs.getFluidState();
         if (feetFluid.is(FluidTags.LAVA)) return KIND_LAVA;

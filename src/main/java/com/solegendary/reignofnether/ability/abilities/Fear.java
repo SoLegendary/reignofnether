@@ -10,9 +10,12 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
+import com.solegendary.reignofnether.unit.goals.SonicBoomGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
+import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
@@ -66,6 +69,16 @@ public class Fear extends Ability {
                 this,
                 unit
         );
+    }
+
+    @Override
+    public boolean isCasting(Unit unit) {
+        if (unit instanceof WraithUnit wraithUnit) {
+            GenericTargetedSpellGoal goal = wraithUnit.getFearGoal();
+            if (goal != null)
+                return goal.isCasting() || goal.getMoveTarget() != null || goal.getTargetEntity() != null;
+        }
+        return false;
     }
 
     @Override

@@ -338,17 +338,28 @@ public class BuildingServerEvents {
                         if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
                             placeScaffoldingUnder(block, newBuilding);
 
-                for (BuildingBlock block : newBuilding.blocks) {
-                    if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
-                        && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
-                        newBuilding.addToBlockPlaceQueue(block);
+                boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(ownerName, "warpten");
+                if (SandboxServer.isAnyoneASandboxPlayer() && hasFastBuildCheat) {
+                    newBuilding.maxBlocksPerTick = 4;
+                    newBuilding.queueAllBlocks(serverLevel);
+                } else {
+                    // speed up first capitol
+                    if (newBuilding.isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0) {
+                        newBuilding.blocksPerBuild = 2;
+                        newBuilding.maxBlocksPerTick = 2;
+                    }
+                    for (BuildingBlock block : newBuilding.blocks) {
+                        if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
+                                && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
+                            newBuilding.addToBlockPlaceQueue(block);
+                        }
                     }
                 }
 
                 BuildingClientboundPacket.placeBuilding(pos,
                     building,
                     rotation,
-                    ownerName,
+                    newBuilding.getBuilding() instanceof AbstractBridge ? "" : ownerName,
                     -1,
                     newBuilding.blockPlaceQueue.size(),
                     isDiagonalBridge,
@@ -379,6 +390,9 @@ public class BuildingServerEvents {
                         moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
                     }
                 }
+                if (newBuilding.getBuilding() instanceof AbstractBridge)
+                    newBuilding.ownerName = "";
+
             } else if (!PlayerServerEvents.isBot(ownerName)) {
                 warnInsufficientResources(newBuilding);
             }
@@ -543,7 +557,7 @@ public class BuildingServerEvents {
                     building.ownerName,
                     building.scenarioRoleIndex,
                     building.blockPlaceQueue.size(),
-                    building.getBuilding() instanceof AbstractBridge bridge && building.getDataStorage().getData(AbstractBridge.DIAGONAL),
+                    building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                     building.getUpgradeLevel(),
                     building.isBuilt,
                     building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
@@ -574,7 +588,7 @@ public class BuildingServerEvents {
                         building.ownerName,
                         building.scenarioRoleIndex,
                         building.blockPlaceQueue.size(),
-                        building.getBuilding() instanceof AbstractBridge bridge && building.getDataStorage().getData(AbstractBridge.DIAGONAL),
+                        building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                         building.getUpgradeLevel(),
                         building.isBuilt,
                         building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,

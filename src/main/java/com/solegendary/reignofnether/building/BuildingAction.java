@@ -10,7 +10,9 @@ public enum BuildingAction {
     REMOVE, // removes a building withouit destroying its blocks
     SYNC_BLOCKS_AND_OWNER, // sync client building health with server (client doesn't always have the blocks loaded to check natively)
     SET_RALLY_POINT,
+    SET_ATTACK_RALLY_POINT,
     ADD_RALLY_POINT,
+    ADD_ATTACK_RALLY_POINT,
     SET_RALLY_POINT_ENTITY,
     START_PRODUCTION, // start ProductionItem
     COMPLETE_PRODUCTION, // don't let client complete items themselves, only via reflected clientbound packets for consistency

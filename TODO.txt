@@ -1,5 +1,5 @@
 
-1.20.1-1.3.8a
+1.20.1-1.3.8b
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -29,32 +29,28 @@ Hero Items
 
 
 
-
 Quality of Life
 ---------------
-[✔] Improved marauder animations, including a new run animation when bloodlusted
-    - Thanks @Lurtz!
-[✔] Animals can no longer spawn on resource blocks
-[✔] Added gamerule animalSpawnYDiff (default 5)
-    - Sets the Y level difference between capitols and valid animal spawn positions
-[✔] Mousing over a catalyst with a sonic boom and sculk amplifiers researched indicates its split range
-[🟡] Added a button to the main menu that links to the new map pack
-
-Balance
--------
-[✔] Capturable buildings can no longer be deleted (except in sandbox)
-[✔] Bloodlust now has a 5 second cooldown, more obvious particles and a sound effect
-[✔] When rtsPathfinding is enabled, all large units will gain smooth movement when climbing blocks
-
-[❌] Increase capitol build speed when there is no capitol built
+[✔] Ctrl + right-clicking to set a rally point will make spawned units attack-move towards the rally
+     - Ctrl + right-clicking an enemy unit makes spawned units attack that unit
+[✔] The tooltips for custom building costs now show exactly how much bounty they give
+[✔] Windcallers let out small puffs of air when landing
+[✔] You can now upgrade multiple of the same building without needing to click each one
+[✔] Vanilla Iron Golems no longer attack villager faction units
+    - However, player units still attack them unless /gamerule neutralAggro is off
+[✔] All buildings now build 4x faster in sandbox mode when the fast build cheat (warpten) is enabled
+[✔] Starting capitols now build 2x faster
+[✔] Custom buildings can now have up to 50 custom commands
 
 Bugfixes
 --------
-[✔] Fixed maps on low Y levels having laggy pathfinding with `rtsPathfinding` on
-[✔] Slimes and magma cubes no longer get stuck in lava (but slimes are not fire proof!)
-[✔] Fixed Iron golems getting stuck after spawning
-[✔] Units are now much less likely to walk into water on rtsPathfinding
-[✔] Fixed players not being defeated if their last building was a capturable neutral building that was recaptured
+[✔] Fixed bridges not being neutral when built
+[✔] Units no longer avoid lilypads on rtsPathfinding
+[✔] Using possession with multiple wraiths doesn't switch to next idle one
+[✔] Fixed not being able to edit custom building commands when set to specific triggers
+
+[❌] Absorption healthbar is not correct (if there's any absorption, they have max health)
+[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
 
 Languages
 ---------

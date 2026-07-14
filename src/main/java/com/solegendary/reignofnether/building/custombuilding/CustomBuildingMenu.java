@@ -21,6 +21,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.getCustomBuildingToEdit;
 import static com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents.setCustomBuildingToEdit;
+import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_BUILDING_BOUNTY_PERCENT;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
@@ -70,11 +71,11 @@ public class CustomBuildingMenu {
 
         boolean confirm = CustomBuildingClientEvents.deregisterConfirm;
         List<FormattedCharSequence> tooltips = confirm ? List.of(
-            fcs(I18n.get("sandbox.reignofnether.custom_buildings.deregister.tooltip1"), true),
-            fcs(I18n.get("sandbox.reignofnether.custom_buildings.deregister.confirm"))
+                fcs(I18n.get("sandbox.reignofnether.custom_buildings.deregister.tooltip1"), true),
+                fcs(I18n.get("sandbox.reignofnether.custom_buildings.deregister.confirm"))
         ) : List.of(
-            fcs(I18n.get("sandbox.reignofnether.custom_buildings.deregister.tooltip1"), true),
-            fcs(I18n.get("sandbox.reignofnether.custom_buildings.deregister.tooltip2"))
+                fcs(I18n.get("sandbox.reignofnether.custom_buildings.deregister.tooltip1"), true),
+                fcs(I18n.get("sandbox.reignofnether.custom_buildings.deregister.tooltip2"))
         );
 
         Button deregisterButton = new Button("Deregister Custom Building",
@@ -104,20 +105,24 @@ public class CustomBuildingMenu {
         return deregisterButton;
     }
 
-    public static Button renderCommandsMenuButton(ScreenEvent.Render.Post evt, int x, int y) {
-        List<FormattedCharSequence> tooltips = CustomBuildingClientEvents.showCommandsMenu ?
-            List.of(fcs(I18n.get("sandbox.reignofnether.custom_buildings.switch_to_general_menu"))) :
-            List.of(fcs(I18n.get("sandbox.reignofnether.custom_buildings.switch_to_commands_menu")));
+    public static List<Button> renderCommandsMenuButton(ScreenEvent.Render.Post evt, int x, int y) {
+        ArrayList<Button> buttons = new ArrayList<>();
+        boolean showCommandsMenu = CustomBuildingClientEvents.showCommandsMenu;
+
+        List<FormattedCharSequence> tooltips = showCommandsMenu ?
+                List.of(fcs(I18n.get("sandbox.reignofnether.custom_buildings.switch_to_general_menu"))) :
+                List.of(fcs(I18n.get("sandbox.reignofnether.custom_buildings.switch_to_commands_menu")));
 
         Button commandsMenuButton = new ButtonBuilder("Toggle Commands Menu")
                 .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png"))
                 .onLeftClick(() -> {
-                    CustomBuildingClientEvents.showCommandsMenu = !CustomBuildingClientEvents.showCommandsMenu;
+                    CustomBuildingClientEvents.showCommandsMenu = !showCommandsMenu;
                     CustomBuildingMenu.forceRefreshCommandEditBoxes();
                 })
                 .tooltipLines(tooltips)
                 .build();
         renderButton(commandsMenuButton, x, y, evt);
+        buttons.add(commandsMenuButton);
 
         CustomBuilding building = getCustomBuildingToEdit();
         int commandCount = 0;
@@ -126,8 +131,32 @@ public class CustomBuildingMenu {
                 if (command.condition != CustomBuildingCommand.TriggerCondition.NONE && !command.commandStr.isBlank())
                     commandCount += 1;
 
-        evt.getGuiGraphics().drawString(MC.font, I18n.get("sandbox.reignofnether.custom_buildings.commands_count", commandCount) ,x + 25, y + 7, 0xFFFFFF);
-        return commandsMenuButton;
+        evt.getGuiGraphics().drawString(MC.font,
+                I18n.get("sandbox.reignofnether.custom_buildings.commands_count", commandCount),
+                x + (showCommandsMenu ? 50 : 25),
+                y + 7,
+                0xFFFFFF);
+
+        if (showCommandsMenu && building != null && building.commands.size() < MAX_COMMANDS) {
+            Button addButton = new ButtonBuilder("Add Command")
+                    .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/corner_plus.png"))
+                    .bgIconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/chain_command_block_back.png"))
+                    .onLeftClick(() -> {
+                        if (building.commands.size() < MAX_COMMANDS)
+                            building.commands.add(new CustomBuildingCommand());
+                        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.ADD_COMMAND, building.name);
+                        // jump the view down to reveal the newly-added row
+                        commandScrollOffset = maxCommandScrollOffset(building.commands.size());
+                        forceRefreshCommandEditBoxes();
+                    })
+                    .tooltipLines(List.of(
+                            fcs(I18n.get("sandbox.reignofnether.custom_buildings.commands.add"))))
+                    .build();
+            renderButton(addButton, x + 25, y, evt);
+            buttons.add(addButton);
+        }
+
+        return buttons;
     }
 
 
@@ -190,7 +219,7 @@ public class CustomBuildingMenu {
                     CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_FOOD_COST, customBuilding.name, value);
                     customBuilding.cost.food = value;
                 },
-                I18n.get("sandbox.reignofnether.custom_buildings.set_food_cost.tooltip1")
+                I18n.get("sandbox.reignofnether.custom_buildings.set_food_cost.tooltip1", customBuilding.cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT)
         );
         setFoodCostButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat.png");
         buttonsCol1.add(setFoodCostButton);
@@ -207,7 +236,7 @@ public class CustomBuildingMenu {
                     CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_WOOD_COST, customBuilding.name, value);
                     customBuilding.cost.wood = value;
                 },
-                I18n.get("sandbox.reignofnether.custom_buildings.set_wood_cost.tooltip1")
+                I18n.get("sandbox.reignofnether.custom_buildings.set_wood_cost.tooltip1", customBuilding.cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT)
         );
         setWoodCostButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood.png");
         buttonsCol1.add(setWoodCostButton);
@@ -224,7 +253,7 @@ public class CustomBuildingMenu {
                     CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.SET_ORE_COST, customBuilding.name, value);
                     customBuilding.cost.ore = value;
                 },
-                I18n.get("sandbox.reignofnether.custom_buildings.set_ore_cost.tooltip1")
+                I18n.get("sandbox.reignofnether.custom_buildings.set_ore_cost.tooltip1", customBuilding.cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT)
         );
         setOreCostButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
         buttonsCol1.add(setOreCostButton);
@@ -399,25 +428,57 @@ public class CustomBuildingMenu {
         return tooltips;
     }
 
-    private static final int MAX_COMMANDS = 8;
+    private static final int MAX_COMMANDS = 50;
     private static final int COMMAND_ROW_HEIGHT = 16;
     private static final int EDIT_BOX_HEIGHT = 12;
     private static final int CONDITION_BUTTON_WIDTH = 32;
     private static final int TEXT_EDIT_BOX_WIDTH = 180;
     private static final int COOLDOWN_EDIT_BOX_WIDTH = 40;
 
+    // how many command rows are visible in the scrollable viewport at once
+    private static final int VISIBLE_COMMAND_ROWS = 8;
+    private static final int SCROLLBAR_WIDTH = 6;
+    // gap between the delete-command button column and the scrollbar
+    private static final int SCROLLBAR_X_OFFSET = COOLDOWN_EDIT_BOX_WIDTH + TEXT_EDIT_BOX_WIDTH + 80;
+
+    // index of the first command row currently visible (i.e. scroll position)
+    private static int commandScrollOffset = 0;
+
     private static final ArrayList<MyEditBox> commandEditBoxes = new ArrayList<>();
     private static final ArrayList<MyEditBox> commandCooldownEditBoxes = new ArrayList<>();
+    private static boolean commandEditBoxesDirty = true;
 
-    /** Tear down all currently-registered EditBoxes and rebuild them for the given building. */
+    private static int maxCommandScrollOffset(int totalCommands) {
+        return Math.max(0, totalCommands - VISIBLE_COMMAND_ROWS);
+    }
+
+    private static void clampCommandScrollOffset(int totalCommands) {
+        commandScrollOffset = Math.min(Math.max(commandScrollOffset, 0), maxCommandScrollOffset(totalCommands));
+    }
+
+    /** Scroll the commands list by the given number of rows (positive = down, negative = up). Clamped to bounds. */
+    public static void scrollCommands(int rows) {
+        CustomBuilding building = getCustomBuildingToEdit();
+        int total = building == null ? 0 : building.commands.size();
+        commandScrollOffset += rows;
+        clampCommandScrollOffset(total);
+        forceRefreshCommandEditBoxes();
+    }
+
+    /** Tear down all currently-registered EditBoxes and rebuild them for the currently visible rows only. */
     private static void registerCommandEditBoxes(CustomBuilding customBuilding, int x, int y) {
         forceRefreshCommandEditBoxes();
 
+        clampCommandScrollOffset(customBuilding.commands.size());
+
         int editBoxX = x + CONDITION_BUTTON_WIDTH;
 
-        for (int i = 0; i < customBuilding.commands.size(); i++) {
+        int firstVisible = commandScrollOffset;
+        int lastVisibleExclusive = Math.min(customBuilding.commands.size(), commandScrollOffset + VISIBLE_COMMAND_ROWS);
+
+        for (int i = firstVisible; i < lastVisibleExclusive; i++) {
             final int idx = i;
-            int rowY = y + i * (COMMAND_ROW_HEIGHT + 2) + (COMMAND_ROW_HEIGHT - EDIT_BOX_HEIGHT) / 2;
+            int rowY = y + (i - firstVisible) * (COMMAND_ROW_HEIGHT + 2) + (COMMAND_ROW_HEIGHT - EDIT_BOX_HEIGHT) / 2;
             CustomBuildingCommand cmd = customBuilding.commands.get(idx);
 
             MyEditBox textBox = new MyEditBox.Builder(editBoxX, rowY, TEXT_EDIT_BOX_WIDTH, EDIT_BOX_HEIGHT)
@@ -457,6 +518,8 @@ public class CustomBuildingMenu {
             TextInputClientEvents.registerEditBox(textBox);
             commandEditBoxes.add(textBox);
         }
+
+        commandEditBoxesDirty = false;
     }
 
     // run this to force a rebuild on the next render frame
@@ -467,6 +530,7 @@ public class CustomBuildingMenu {
             TextInputClientEvents.deregisterEditBox(box);
         commandEditBoxes.clear();
         commandCooldownEditBoxes.clear();
+        commandEditBoxesDirty = true;
     }
 
 
@@ -475,14 +539,18 @@ public class CustomBuildingMenu {
 
         CustomBuildingCommand.TriggerCondition[] conditions = CustomBuildingCommand.TriggerCondition.values();
 
-        if (!customBuilding.commands.isEmpty())
-            if (commandEditBoxes.isEmpty() || commandCooldownEditBoxes.isEmpty())
-                registerCommandEditBoxes(customBuilding, x, y);
+        clampCommandScrollOffset(customBuilding.commands.size());
 
-        for (int i = 0; i < customBuilding.commands.size(); i++) {
+        if (!customBuilding.commands.isEmpty() && commandEditBoxesDirty)
+            registerCommandEditBoxes(customBuilding, x, y);
+
+        int firstVisible = commandScrollOffset;
+        int lastVisibleExclusive = Math.min(customBuilding.commands.size(), commandScrollOffset + VISIBLE_COMMAND_ROWS);
+
+        for (int i = firstVisible; i < lastVisibleExclusive; i++) {
             final int idx = i;
             CustomBuildingCommand cmd = customBuilding.commands.get(idx);
-            int rowY = y + i * (COMMAND_ROW_HEIGHT + 2);
+            int rowY = y + (i - firstVisible) * (COMMAND_ROW_HEIGHT + 2);
 
             ResourceLocation condRl = switch (cmd.condition) {
                 case ON_BUILD_COMPLETE          -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_pickaxe.png");
@@ -552,7 +620,7 @@ public class CustomBuildingMenu {
                         forceRefreshCommandEditBoxes();
                     })
                     .tooltipLines(List.of(
-                        fcs(I18n.get("sandbox.reignofnether.custom_buildings.commands.delete"))
+                            fcs(I18n.get("sandbox.reignofnether.custom_buildings.commands.delete"))
                     ))
                     .iconSize(10)
                     .build();
@@ -561,23 +629,32 @@ public class CustomBuildingMenu {
             buttons.add(deleteButton);
         }
 
-        if (customBuilding.commands.size() < MAX_COMMANDS) {
-            int addBtnY = y + customBuilding.commands.size() * (COMMAND_ROW_HEIGHT + 2) + 4;
-            Button addButton = new ButtonBuilder("Add Command")
-                    .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/corner_plus.png"))
-                    .bgIconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/chain_command_block_back.png"))
-                    .onLeftClick(() -> {
-                        if (customBuilding.commands.size() < MAX_COMMANDS)
-                            customBuilding.commands.add(new CustomBuildingCommand());
-                        CustomBuildingServerboundPacket.customiseBuilding(CustomBuildingAction.ADD_COMMAND, customBuilding.name);
-                        forceRefreshCommandEditBoxes();
-                    })
-                    .tooltipLines(List.of(
-                            fcs(I18n.get("sandbox.reignofnether.custom_buildings.commands.add"))))
-                    .build();
-            renderButton(addButton, x + 6, addBtnY, evt);
-            buttons.add(addButton);
+        buttons.addAll(renderCommandsScrollbar(evt, customBuilding, x, y));
+
+        return buttons;
+    }
+
+    private static List<Button> renderCommandsScrollbar(ScreenEvent.Render.Post evt, CustomBuilding customBuilding, int x, int y) {
+        ArrayList<Button> buttons = new ArrayList<>();
+
+        int total = customBuilding.commands.size();
+        int viewportHeight = VISIBLE_COMMAND_ROWS * (COMMAND_ROW_HEIGHT + 2);
+        int scrollbarX = x + SCROLLBAR_X_OFFSET;
+
+        // only show scroll controls once there are more commands than fit in the viewport
+        if (total <= VISIBLE_COMMAND_ROWS) {
+            return buttons;
         }
+
+        int trackY = y;
+        int trackHeight = viewportHeight;
+        evt.getGuiGraphics().fill(scrollbarX, trackY, scrollbarX + SCROLLBAR_WIDTH, trackY + trackHeight, 0x40000000);
+
+        int maxOffset = maxCommandScrollOffset(total);
+        int thumbHeight = Math.max(8, trackHeight * VISIBLE_COMMAND_ROWS / total);
+        int thumbTravel = trackHeight - thumbHeight;
+        int thumbY = trackY + (maxOffset == 0 ? 0 : thumbTravel * commandScrollOffset / maxOffset);
+        evt.getGuiGraphics().fill(scrollbarX, thumbY, scrollbarX + SCROLLBAR_WIDTH, thumbY + thumbHeight, 0xFFAAAAAA);
 
         return buttons;
     }

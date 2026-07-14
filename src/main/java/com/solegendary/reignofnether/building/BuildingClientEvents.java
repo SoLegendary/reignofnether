@@ -689,24 +689,26 @@ public class BuildingClientEvents {
                 if (!selProdBuilding.getRallyPoints().isEmpty() && MC.level != null) {
                     Vec3 lastPos = Vec3.atBottomCenterOf(selProdBuilding.centrePos.above());
                     for (BlockPos bp : selProdBuilding.getRallyPoints()) {
-                        MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, lastPos, Vec3.atBottomCenterOf(bp.above()), 0, 1, 0, a);
+                        boolean isRed = selProdBuilding.attackRally;
+                        MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, lastPos, Vec3.atBottomCenterOf(bp.above()), isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
                         if (MiscUtil.isSnowLayerBlock(MC.level.getBlockState(bp.offset(0,1,0)).getBlock())) {
                             AABB aabb = new AABB(bp);
                             aabb = aabb.setMaxY(aabb.maxY + 0.13f);
-                            MyRenderer.drawSolidBox(evt.getPoseStack(), vertexConsumerEntityTranslucent, aabb, Direction.UP, 0, 1, 0, a,
+                            MyRenderer.drawSolidBox(evt.getPoseStack(), vertexConsumerEntityTranslucent, aabb, Direction.UP,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a,
                                     ResourceLocation.fromNamespaceAndPath("forge", "textures/white.png"));
                         } else {
-                            MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, bp, 0, 1, 0, a);
+                            MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, bp,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
                         }
                         lastPos = Vec3.atBottomCenterOf(bp.above());
                     }
                 } else if (selProdBuilding.getRallyPointEntity() != null) {
                     LivingEntity le = selProdBuilding.getRallyPointEntity();
+                    boolean isRed = selProdBuilding.attackRally;
                     MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, new Vec3(selBuilding.centrePos.getX(),
                         selBuilding.centrePos.getY(),
                         selBuilding.centrePos.getZ()
-                    ), new Vec3(le.getX(), le.getEyeY(), le.getZ()), 0, 1, 0, a);
-                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumerNoDepthLine, le.getBoundingBox(), 0, 1.0f, 0, a, false);
+                    ), new Vec3(le.getX(), le.getEyeY(), le.getZ()),  isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
+                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumerNoDepthLine, le.getBoundingBox(), isRed ? 1 : 0, isRed ? 0 : 1, 0, a, false);
                 }
             }
             if (selBuilding instanceof PortalPlacement portal && portal.hasDestination()) {
@@ -930,12 +932,26 @@ public class BuildingClientEvents {
                             );
                         } else {
                             BlockPos rallyPoint = CursorClientEvents.getPreselectedBlockPos();
-                            if (Keybindings.shiftMod.isDown()) {
-                                selProdBuilding.addRallyPoint(rallyPoint);
-                                BuildingServerboundPacket.addRallyPoint(selBuilding.originPos, rallyPoint);
+                            if (Keybindings.ctrlMod.isDown()) {
+                                if (Keybindings.shiftMod.isDown()) {
+                                    selProdBuilding.addRallyPoint(rallyPoint);
+                                    selProdBuilding.attackRally = true;
+                                    BuildingServerboundPacket.addAttackRallyPoint(selBuilding.originPos, rallyPoint);
+                                } else {
+                                    selProdBuilding.setRallyPoint(rallyPoint);
+                                    selProdBuilding.attackRally = true;
+                                    BuildingServerboundPacket.setAttackRallyPoint(selBuilding.originPos, rallyPoint);
+                                }
                             } else {
-                                selProdBuilding.setRallyPoint(rallyPoint);
-                                BuildingServerboundPacket.setRallyPoint(selBuilding.originPos, rallyPoint);
+                                if (Keybindings.shiftMod.isDown()) {
+                                    selProdBuilding.addRallyPoint(rallyPoint);
+                                    selProdBuilding.attackRally = false;
+                                    BuildingServerboundPacket.addRallyPoint(selBuilding.originPos, rallyPoint);
+                                } else {
+                                    selProdBuilding.setRallyPoint(rallyPoint);
+                                    selProdBuilding.attackRally = false;
+                                    BuildingServerboundPacket.setRallyPoint(selBuilding.originPos, rallyPoint);
+                                }
                             }
                         }
                     }

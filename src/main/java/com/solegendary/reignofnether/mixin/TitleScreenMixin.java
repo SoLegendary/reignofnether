@@ -183,6 +183,7 @@ public class TitleScreenMixin extends Screen {
                 mapStack.enchant(Enchantments.UNBREAKING, 1);
                 int itemX = this.getX() + (this.width - 16) / 2;
                 int itemY = this.getY() + (this.height - 16) / 2;
+                guiGraphics.pose().translate(0,0,-10);
                 guiGraphics.renderItem(mapStack, itemX, itemY);
             }
         };

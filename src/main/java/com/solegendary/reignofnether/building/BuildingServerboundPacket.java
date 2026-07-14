@@ -90,9 +90,19 @@ public class BuildingServerboundPacket {
                 BuildingAction.SET_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
+    public static void setAttackRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.SET_ATTACK_RALLY_POINT,
+                "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
+    }
     public static void addRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.ADD_RALLY_POINT,
+                "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
+    }
+    public static void addAttackRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.ADD_ATTACK_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
     public static void setRallyPointEntity(BlockPos buildingPos, int entityId) {
@@ -205,12 +215,28 @@ public class BuildingServerboundPacket {
                     BuildingServerEvents.cancelBuilding(building, this.ownerName);
                 }
                 case SET_RALLY_POINT -> {
-                    if (building instanceof ProductionPlacement productionBuilding)
+                    if (building instanceof ProductionPlacement productionBuilding) {
                         productionBuilding.setRallyPoint(rallyPos);
+                        productionBuilding.attackRally = false;
+                    }
+                }
+                case SET_ATTACK_RALLY_POINT -> {
+                    if (building instanceof ProductionPlacement productionBuilding) {
+                        productionBuilding.setRallyPoint(rallyPos);
+                        productionBuilding.attackRally = true;
+                    }
                 }
                 case ADD_RALLY_POINT -> {
-                    if (building instanceof ProductionPlacement productionBuilding)
+                    if (building instanceof ProductionPlacement productionBuilding) {
                         productionBuilding.addRallyPoint(rallyPos);
+                        productionBuilding.attackRally = false;
+                    }
+                }
+                case ADD_ATTACK_RALLY_POINT -> {
+                    if (building instanceof ProductionPlacement productionBuilding) {
+                        productionBuilding.addRallyPoint(rallyPos);
+                        productionBuilding.attackRally = true;
+                    }
                 }
                 case SET_RALLY_POINT_ENTITY -> {
                     if (building instanceof ProductionPlacement productionBuilding) {
