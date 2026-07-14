@@ -438,7 +438,6 @@ public class CustomBuildingMenu {
     // how many command rows are visible in the scrollable viewport at once
     private static final int VISIBLE_COMMAND_ROWS = 8;
     private static final int SCROLLBAR_WIDTH = 6;
-    private static final int SCROLLBAR_BUTTON_SIZE = 10;
     // gap between the delete-command button column and the scrollbar
     private static final int SCROLLBAR_X_OFFSET = COOLDOWN_EDIT_BOX_WIDTH + TEXT_EDIT_BOX_WIDTH + 80;
 

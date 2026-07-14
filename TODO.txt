@@ -37,18 +37,20 @@ Quality of Life
 [✔] Windcallers let out small puffs of air when landing
 [✔] You can now upgrade multiple of the same building without needing to click each one
 [✔] Vanilla Iron Golems no longer attack villager faction units
-[🟡] All buildings now build 4x faster in sandbox mode when the fast build cheat (warpten) is enabled
-[🟡] Starting capitols now build 2x faster
-[🟡] Custom buildings can now have up to 50 custom commands
+    - However, player units still attack them unless /gamerule neutralAggro is off
+[✔] All buildings now build 4x faster in sandbox mode when the fast build cheat (warpten) is enabled
+[✔] Starting capitols now build 2x faster
+[✔] Custom buildings can now have up to 50 custom commands
 
 Bugfixes
 --------
 [✔] Fixed bridges not being neutral when built
 [✔] Units no longer avoid lilypads on rtsPathfinding
 [✔] Using possession with multiple wraiths doesn't switch to next idle one
-[🟡] Fixed not being able to edit custom building commands when set to specific triggers
+[✔] Fixed not being able to edit custom building commands when set to specific triggers
 
 [❌] Absorption healthbar is not correct (if there's any absorption, they have max health)
+[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
 
 Languages
 ---------

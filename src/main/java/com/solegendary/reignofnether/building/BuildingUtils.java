@@ -262,19 +262,6 @@ public class BuildingUtils {
         return false;
     }
 
-    public static boolean isPosInsideAnyNonBridgeBuilding(boolean isClientSide, BlockPos bp) {
-        List<BuildingPlacement> buildings;
-        if (isClientSide)
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
-
-        for (BuildingPlacement building : buildings)
-            if (!(building.getBuilding() instanceof AbstractBridge) && building.isPosInsideBuilding(bp))
-                return true;
-        return false;
-    }
-
     @Nullable
     public static BuildingPlacement findClosestBuilding(boolean isClientSide, Vec3 pos, Predicate<BuildingPlacement> condition) {
         List<BuildingPlacement> buildings;
