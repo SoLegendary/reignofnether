@@ -123,6 +123,7 @@ public class BuildingPlacement {
 
     private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned;
     public float msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
+    public int blocksPerBuild = 1; // number of blocks built per build action
 
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float MIN_BLOCKS_PERCENT = 0.5f;
@@ -482,6 +483,9 @@ public class BuildingPlacement {
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
     public void queueNextBlock(ServerLevel level, String builderName) {
+        if (blocksPerBuild <= 0)
+            return;
+
         // if the building is already constructed then start subtracting resources for repairs
         if (isBuilt) {
             if (!ResourcesServerEvents.canAfford(builderName, ResourceName.WOOD, 1)) {
@@ -534,7 +538,9 @@ public class BuildingPlacement {
                     validBlocks.sort(Comparator.comparing(bb -> bb.getBlockPos().distSqr(builderPos)));
                 }
             }
-            addToBlockPlaceQueue(validBlocks.get(0));
+            for (int i = 0; i < validBlocks.size() && i < blocksPerBuild; i++) {
+                addToBlockPlaceQueue(validBlocks.get(i));
+            }
         }
         partialBlocksDestroyed = 0d;
     }

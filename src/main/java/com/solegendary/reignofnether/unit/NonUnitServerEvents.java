@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -13,11 +16,13 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
@@ -85,6 +90,14 @@ public class NonUnitServerEvents {
                         pfMob.setTarget(target);
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onGolemChangeTarget(LivingChangeTargetEvent evt) {
+        LivingEntity le = evt.getEntity();
+        if (le instanceof IronGolem && !(le instanceof Unit) && evt.getNewTarget() instanceof Unit unit && unit.getFaction() == Faction.VILLAGERS) {
+            evt.setCanceled(true); // prevent vanilla golems attacking villager faction units
         }
     }
 

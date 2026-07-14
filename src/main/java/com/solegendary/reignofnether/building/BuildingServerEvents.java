@@ -343,6 +343,11 @@ public class BuildingServerEvents {
                     newBuilding.maxBlocksPerTick = 4;
                     newBuilding.queueAllBlocks(serverLevel);
                 } else {
+                    // speed up first capitol
+                    if (newBuilding.isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0) {
+                        newBuilding.blocksPerBuild = 2;
+                        newBuilding.maxBlocksPerTick = 2;
+                    }
                     for (BuildingBlock block : newBuilding.blocks) {
                         if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
                                 && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {

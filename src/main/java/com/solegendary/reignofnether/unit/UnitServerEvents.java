@@ -393,7 +393,6 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
-
         if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof Mob mob) {
             mob.setBaby(false);
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
