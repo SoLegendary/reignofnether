@@ -62,6 +62,7 @@ import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -88,6 +89,7 @@ import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
 import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_UNIT_BOUNTY_PERCENT;
+import static com.solegendary.reignofnether.resources.ResourcesServerEvents.UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
 
 public class UnitServerEvents {
 
@@ -592,13 +594,20 @@ public class UnitServerEvents {
                 vUnit.incrementHunterExp();
         }
 
-        if (evt.getEntity() instanceof Unit unitKilled && unitKilled.getOwnerName().isEmpty()) {
-            if (evt.getSource().getEntity() instanceof Unit unit) {
+        if (evt.getEntity() instanceof Unit unitKilled && evt.getSource().getEntity() instanceof Unit unit) {
+            float bountyPercent = 0;
+            if (unitKilled.getOwnerName().isEmpty()) {
+                bountyPercent = NEUTRAL_UNIT_BOUNTY_PERCENT;
+            } else if (!AlliancesServerEvents.isAlliedOrOwned(unitKilled.getOwnerName(), unit.getOwnerName())) {
+                int lootingLevel = ((LivingEntity) unit).getMainHandItem().getEnchantmentLevel(Enchantments.MOB_LOOTING);
+                bountyPercent = lootingLevel * UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
+            }
+            if (bountyPercent > 0) {
                 ResourceCost cost = unitKilled.getCost();
                 Resources resources = new Resources(unit.getOwnerName(),
-                        (int) (cost.food * NEUTRAL_UNIT_BOUNTY_PERCENT),
-                        (int) (cost.wood * NEUTRAL_UNIT_BOUNTY_PERCENT),
-                        (int) (cost.ore * NEUTRAL_UNIT_BOUNTY_PERCENT)
+                        (int) (cost.food * bountyPercent),
+                        (int) (cost.wood * bountyPercent),
+                        (int) (cost.ore * bountyPercent)
                 );
                 if (resources.getTotalValue() > 0) {
                     ResourcesClientboundPacket.showFloatingText(resources, evt.getEntity().getOnPos());
@@ -860,11 +869,10 @@ public class UnitServerEvents {
         Entity directEntity = evt.getSource().getDirectEntity();
         Entity sourceEntity = evt.getSource().getEntity();
 
-        if (sourceEntity instanceof HeadhunterUnit headhunterUnit && directEntity instanceof ThrownTrident) {
-            return !ResearchServerEvents.playerHasResearch(headhunterUnit.getOwnerName(),
-                    ProductionItems.RESEARCH_HEAVY_TRIDENTS
-            );
+        if (sourceEntity instanceof LivingEntity le && (le.getMainHandItem().getEnchantmentLevel(Enchantments.PUNCH_ARROWS) > 0)) {
+            return false;
         }
+
         if (sourceEntity instanceof WretchedWraithUnit)
             return true;
         if (sourceEntity instanceof WraithUnit)
@@ -875,7 +883,7 @@ public class UnitServerEvents {
             return true;
         if (directEntity instanceof AbstractArrow)
             return true;
-        if (directEntity instanceof WindcallerProjectile proj && !(proj.getOwner() instanceof WindcallerUnit windcallerUnit && windcallerUnit.getPunchLevel() > 0))
+        if (directEntity instanceof WindcallerProjectile)
             return true;
         if (directEntity instanceof BlazeUnitFireball)
             return true;
@@ -886,15 +894,6 @@ public class UnitServerEvents {
 
         return evt.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO) && evt.getSource().isIndirect()
                 && (!(sourceEntity instanceof EvokerUnit));
-    }
-
-    private static boolean shouldIncreaseKnockback(LivingDamageEvent evt) {
-        Entity projectile = evt.getSource().getDirectEntity();
-
-        if (projectile instanceof WindcallerProjectile proj && proj.getOwner() instanceof WindcallerUnit windcallerUnit)
-            return windcallerUnit.getPunchLevel() > 1;
-
-        return false;
     }
 
     public static Entity spawnMob(
@@ -940,9 +939,6 @@ public class UnitServerEvents {
 
         if (shouldIgnoreKnockback(evt)) {
             knockbackIgnoreIds.add(evt.getEntity().getId());
-        }
-        if (shouldIncreaseKnockback(evt)) {
-            knockbackIncreaseIds.add(evt.getEntity().getId());
         }
 
         // halve friendly fire from your own/friendly creepers (but still cause knockback)
@@ -1131,8 +1127,10 @@ public class UnitServerEvents {
         }
     }
 
+    private static float KNOCKBACK_RESIST_PER_TICKS = 0.01f;
+
     public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();
-    public static ArrayList<Integer> knockbackIncreaseIds = new ArrayList<>();
+    public static ArrayList<Pair<Integer, Integer>> knockbackResistIds = new ArrayList<>();
 
     @SubscribeEvent
     public static void onLivingKnockBack(LivingKnockBackEvent evt) {
@@ -1146,9 +1144,6 @@ public class UnitServerEvents {
             evt.setCanceled(true);
         else if (knockbackIgnoreIds.removeIf(i -> i == evt.getEntity().getId()))
             evt.setCanceled(true);
-
-        if (!evt.isCanceled() && knockbackIncreaseIds.removeIf(i -> i == evt.getEntity().getId()))
-            evt.setStrength(evt.getStrength() * 2);
     }
 
     public static void debug1(BlockPos pos) {

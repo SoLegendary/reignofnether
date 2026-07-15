@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.TargetResourcesSave;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -74,6 +75,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     public void setIsGatheringServerside(boolean isGathering) {
         this.isGatheringServerside = isGathering;
+    }
+
+    private int getReplantWoodCost() {
+        return (mob instanceof ZombieVillagerUnit) ? ResourceCosts.REDUCED_REPLANT_WOOD_COST : ResourceCosts.REPLANT_WOOD_COST;
     }
 
     // whenever we attempt to assign a block as a target it must pass this test
@@ -286,7 +291,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
 
                         if (canAffordReplant()) {
-                            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -ResourceCosts.REPLANT_WOOD_COST, 0));
+                            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -getReplantWoodCost(), 0));
                             mob.level().setBlockAndUpdate(data.gatherTarget.above(), ((WorkerUnit) mob).getReplantBlockState());
                             removeGatherTarget();
                         }
@@ -473,7 +478,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     private boolean canAffordReplant() {
-        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), ResourceName.WOOD, ResourceCosts.REPLANT_WOOD_COST);
+        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), ResourceName.WOOD, getReplantWoodCost());
     }
 
     public void setTargetResourceName(ResourceName resourceName) {

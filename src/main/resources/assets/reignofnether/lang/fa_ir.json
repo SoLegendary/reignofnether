@@ -435,7 +435,7 @@
     "buildings.reignofnether.mausoleum.tooltip2": "زمان را تا فاصله %d بلاکی نیمه شب قرار میدهد.",
     "buildings.reignofnether.mausoleum.tooltip3": "فقط یک کپیتول میتواند کارگر تولید کند در یک زمان.",
     "buildings.reignofnether.pumpkin_farm": "مزرعه کدو",
-    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d  +  %d  به ازای هر محصول کاشته شده",
+    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %dبه ازای هر محصول کاشته شده",
     "buildings.reignofnether.pumpkin_farm.tooltip2": "مزرعه کدویی که میتوان برای کشت غذا در آن شخم زد.",
     "buildings.reignofnether.pumpkin_farm.tooltip3": "کدو ها نیازی به کاشت دوباره ندارند اما در عوض ساخت مزارع چوب بیشتری نیاز دارد.",
     "buildings.reignofnether.spider_lair": "لانه عنکبوت",
@@ -681,11 +681,11 @@
     "hud.startbuttons.piglins.reignofnether.second": "سه عدد کارگر پیگلین در مکان انتخاب شده ظاهر میشوند.",
 
     "hud.startbuttons.villagers.reignofnether.first_startpos": "به عنوان روستا اماده بازی شوید",
-    "hud.startbuttons.villagers.reignofnether.second_startpos": "با یک مرکز شهر و 3 روستایی شروع کنید.",
+    "hud.startbuttons.villagers.reignofnether.second_startpos": "با یک مرکز شهر و d% روستایی شروع کنید.",
     "hud.startbuttons.monsters.reignofnether.first_startpos": "به عنوان هیولاها اماده بازی شوید",
-    "hud.startbuttons.monsters.reignofnether.second_startpos": "با یک مقبره و 3 روستایی زامبی شروع کنید.",
+    "hud.startbuttons.monsters.reignofnether.second_startpos": "با یک مقبره و d% روستایی زامبی شروع کنید.",
     "hud.startbuttons.piglins.reignofnether.first_startpos": "به عنوان پیگلین ها اماده بازی شوید",
-    "hud.startbuttons.piglins.reignofnether.second_startpos": "با یک پورتال مرکزی و 3 پیگلین کارگر شروع کنید.",
+    "hud.startbuttons.piglins.reignofnether.second_startpos": "با یک پورتال مرکزی وd% پیگلین کارگر شروع کنید.",
 
     "hud.orthoview.reignofnether.hiding_leaves_around": "مخفی کردن برگ ها: اطراف نیرو ها و نشان گر موس",
     "hud.orthoview.reignofnether.hiding_leaves_all": "مخفی کردن برگ ها: همه",

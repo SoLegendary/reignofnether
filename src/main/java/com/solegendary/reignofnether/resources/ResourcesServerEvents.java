@@ -60,10 +60,11 @@ public class ResourcesServerEvents {
     public static final int STARTING_FOOD_SANDBOX = 999999;
     public static final int STARTING_WOOD_SANDBOX = 999999;
     public static final int STARTING_ORE_SANDBOX = 999999;
-    public static final int STARTING_FOOD = 100;
-    public static final int STARTING_WOOD = 450;
+    public static final int STARTING_FOOD = 150;
+    public static final int STARTING_WOOD = 500;
     public static final int STARTING_ORE = 250;
 
+    public static final float UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL = 0.25f;
     public static final float NEUTRAL_UNIT_BOUNTY_PERCENT = 0.25f;
     public static final float NEUTRAL_BUILDING_BOUNTY_PERCENT = 0.25f;
 

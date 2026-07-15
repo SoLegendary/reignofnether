@@ -76,9 +76,9 @@ public class BuildingServerEvents {
     private static final int TNT_BUILDING_BASE_DAMAGE = 20;
     private static final int MAX_SCAFFOLD_DEPTH = 5;
 
-    private static ServerLevel serverLevel = null;
+    private static @Nullable ServerLevel serverLevel = null;
 
-    public static ServerLevel getServerLevel() { return serverLevel; }
+    public static @Nullable ServerLevel getServerLevel() { return serverLevel; }
 
     // buildings that currently exist serverside
     private static final ArrayList<BuildingPlacement> buildings = new ArrayList<>();
@@ -117,7 +117,9 @@ public class BuildingServerEvents {
     }
 
     public static void saveBuildings(ServerLevel level) {
-        BuildingSaveData buildingData = BuildingSaveData.getInstance(serverLevel);
+        if (level == null)
+            return;
+        BuildingSaveData buildingData = BuildingSaveData.getInstance(level);
         buildingData.buildings.clear();
 
         getBuildings().forEach(b -> {
@@ -288,6 +290,9 @@ public class BuildingServerEvents {
         boolean isDiagonalBridge,
         boolean fromCommand // ignore resources, terrain or any other restrictions and self-build
     ) {
+        if (serverLevel == null)
+            return null;
+
         BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
             serverLevel,
             pos,
@@ -398,7 +403,7 @@ public class BuildingServerEvents {
             }
             if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
                 newBuilding.getBuilding().shouldDestroyOnReset = false;
-                saveBuildings(getServerLevel());
+                saveBuildings(serverLevel);
             }
             return newBuilding;
         }
@@ -433,6 +438,9 @@ public class BuildingServerEvents {
 
 
     private static void assignBuilderUnits(int[] builderUnitIds, boolean queue, BuildingPlacement newBuilding) {
+        if (serverLevel == null)
+            return;
+
         for (int id : builderUnitIds) {
             Entity entity = serverLevel.getEntity(id);
             if (entity instanceof WorkerUnit workerUnit) {
@@ -496,7 +504,9 @@ public class BuildingServerEvents {
         buildings.remove(building);
         NetherConvertingAddon ncb;
         if ((ncb = building.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(building) > 0 && ncb.getNetherZone(building) != null) {
-            ncb.getNetherZone(building).startRestoring();
+            NetherZone nz = ncb.getNetherZone(building);
+            if (nz != null)
+                nz.startRestoring();
             saveNetherZones(serverLevel);
         }
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
@@ -667,7 +677,9 @@ public class BuildingServerEvents {
             if (b.shouldBeDestroyed()) {
                 NetherConvertingAddon ncb;
                 if ((ncb = b.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(b) > 0 && ncb.getNetherZone(b) != null) {
-                    ncb.getNetherZone(b).startRestoring();
+                    NetherZone nz = ncb.getNetherZone(b);
+                    if (nz != null)
+                        nz.startRestoring();
                     saveNetherZones(serverLevel);
                 }
                 FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
@@ -785,7 +797,7 @@ public class BuildingServerEvents {
             }
         }
         // don't do any block damage apart from the scripted building damage above or damage to leaves/tnt
-        if (!serverLevel.getGameRules().getRule(GameRuleRegistrar.DO_UNIT_GRIEFING).get()) {
+        if (serverLevel == null || !serverLevel.getGameRules().getRule(GameRuleRegistrar.DO_UNIT_GRIEFING).get()) {
             evt.getAffectedBlocks().removeIf(bp -> {
                 BlockState bs = evt.getLevel().getBlockState(bp);
                 return !(bs.getBlock() instanceof LeavesBlock) && !(bs.getBlock() instanceof TntBlock);

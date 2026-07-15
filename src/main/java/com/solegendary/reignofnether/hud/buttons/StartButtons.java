@@ -20,6 +20,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class StartButtons {
 
     public static final int ICON_SIZE = 14;
+    private static final int STARTING_WORKERS = 5;
 
     public static Button sandboxStartButton = new Button(
             "Sandbox",
@@ -49,7 +50,7 @@ public class StartButtons {
         null,
         List.of(
             fcs(LanguageUtil.getTranslation("hud.startbuttons.villagers.reignofnether.first"), true),
-            fcs(LanguageUtil.getTranslation("hud.startbuttons.villagers.reignofnether.second"))
+            fcs(LanguageUtil.getTranslation("hud.startbuttons.villagers.reignofnether.second", STARTING_WORKERS))
         )
     );
 
@@ -65,7 +66,7 @@ public class StartButtons {
         null,
         List.of(
             fcs(LanguageUtil.getTranslation("hud.startbuttons.monsters.reignofnether.first"), true),
-            fcs(LanguageUtil.getTranslation("hud.startbuttons.monsters.reignofnether.second"))
+            fcs(LanguageUtil.getTranslation("hud.startbuttons.monsters.reignofnether.second", STARTING_WORKERS))
         )
     );
 
@@ -81,7 +82,7 @@ public class StartButtons {
             null,
             List.of(
                     fcs(LanguageUtil.getTranslation("hud.startbuttons.piglins.reignofnether.first"), true),
-                    fcs(LanguageUtil.getTranslation("hud.startbuttons.piglins.reignofnether.second"))
+                    fcs(LanguageUtil.getTranslation("hud.startbuttons.piglins.reignofnether.second", STARTING_WORKERS))
             )
     );
 }

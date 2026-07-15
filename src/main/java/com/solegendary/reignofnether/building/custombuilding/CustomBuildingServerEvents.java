@@ -106,6 +106,8 @@ public class CustomBuildingServerEvents {
     }
 
     public static void saveCustomBuildings(ServerLevel level) {
+        if (level == null)
+            return;
         CustomBuildingSaveData customBuildingData = CustomBuildingSaveData.getInstance(level);
         customBuildingData.customBuildings.clear();
         customBuildings.forEach(b -> {
