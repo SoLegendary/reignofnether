@@ -103,7 +103,8 @@ public class NonUnitServerEvents {
 
         // prevent vanilla mobs attacking their RoN faction equivalents
         if (!(le instanceof Unit) && evt.getNewTarget() instanceof Unit unit) {
-            if (le instanceof IronGolem && unit.getFaction() == Faction.VILLAGERS) {
+            if ((le instanceof IronGolem || le instanceof AbstractIllager) &&
+                    unit.getFaction() == Faction.VILLAGERS) {
                 evt.setCanceled(true);
             } else if ((le instanceof AbstractSkeleton || le instanceof Zombie || le instanceof Creeper || le instanceof Spider || le instanceof Slime || le instanceof Warden) &&
                     unit.getFaction() == Faction.MONSTERS) {

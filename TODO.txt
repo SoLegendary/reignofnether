@@ -31,8 +31,7 @@ Hero Items
 
 Quality of Life
 ---------------
-[🟡] Vanilla monster mobs are no longer aggressive to monster faction units
-[🟡] Vanilla nether mobs are no longer aggressive to piglin faction units
+[✔] Vanilla monsters and piglin mobs are no longer aggressive to their RoN faction counterparts
 
 Bugfixes
 --------
