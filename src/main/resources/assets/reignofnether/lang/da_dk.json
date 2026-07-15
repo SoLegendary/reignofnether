@@ -178,7 +178,7 @@
   "buildings.reignofnether.mausoleum.tooltip2": "Forvrænger tiden til midnat inden for en radius af %d blokke.",
   "buildings.reignofnether.mausoleum.tooltip3": "Du kan kun have én hovedbygningsstruktur ad gangen.",
   "buildings.reignofnether.pumpkin_farm": "Græskarfarm",
-  "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d  +  %d  pr. afgrøde plantet",
+  "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d",
   "buildings.reignofnether.pumpkin_farm.tooltip2": "En græskarmark, der kan høstes for at samle mad.",
   "buildings.reignofnether.pumpkin_farm.tooltip3": "Græskar skal ikke genplantes, men farme koster mere op front.",
   "buildings.reignofnether.spider_lair": "Edderkoppely",
@@ -333,11 +333,11 @@
   "hud.map.reignofnether.close": "Luk",
 
   "hud.startbuttons.villagers.reignofnether.first": "Deltag i spillet som Villager Fraktionen.",
-  "hud.startbuttons.villagers.reignofnether.second": "Spawnt 3 villagers på målområdet.",
+  "hud.startbuttons.villagers.reignofnether.second": "Spawnt %d villagers på målområdet.",
   "hud.startbuttons.monsters.reignofnether.first": "Deltag i spillet som Monster Fraktionen.",
-  "hud.startbuttons.monsters.reignofnether.second": "Spawnt 3 zombie villagers på målområdet.",
+  "hud.startbuttons.monsters.reignofnether.second": "Spawnt %d zombie villagers på målområdet.",
   "hud.startbuttons.piglins.reignofnether.first": "Deltag i spillet som Piglin Fraktionen.",
-  "hud.startbuttons.piglins.reignofnether.second": "Spawnt 3 piglin grunts på målområdet.",
+  "hud.startbuttons.piglins.reignofnether.second": "Spawnt %d piglin grunts på målområdet.",
 
   "hud.orthoview.reignofnether.hiding_leaves_around": "Skjuler blade: omkring enheder og cursor",
   "hud.orthoview.reignofnether.hiding_leaves_all": "Skjuler blade: alle",

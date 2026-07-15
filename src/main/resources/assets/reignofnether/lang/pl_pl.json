@@ -205,7 +205,7 @@
     "buildings.reignofnether.mausoleum.tooltip2": "Zniekształca czas do północy w promieniu %d bloku.",
     "buildings.reignofnether.mausoleum.tooltip3": "„Tylko jeden kapitol może produkować pracowników w danym czasie.",
     "buildings.reignofnether.pumpkin_farm": "Farma dyń",
-    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d  +  %d  za każdą posadzoną rośline",
+    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d",
     "buildings.reignofnether.pumpkin_farm.tooltip2": "Pole dyni, na którym można zbierać żywność.",
     "buildings.reignofnether.pumpkin_farm.tooltip3": "Dynie nie muszą być odsadzane, ale koszty budowy farmy są wyższe.",
     "buildings.reignofnether.spider_lair": "Legowisko pająków",
@@ -374,11 +374,11 @@
     "hud.map.reignofnether.close": "Zamknij",
 
     "hud.startbuttons.villagers.reignofnether.first": "Dołącz do gry jako frakcja osadników.",
-    "hud.startbuttons.villagers.reignofnether.second": "Przywołuje 3 osadników w miejscu docelowym.",
+    "hud.startbuttons.villagers.reignofnether.second": "Przywołuje %d osadników w miejscu docelowym.",
     "hud.startbuttons.monsters.reignofnether.first": "Dołącz do gry jako frakcja potworów.",
-    "hud.startbuttons.monsters.reignofnether.second": "Przywołuje 3 osadników-zombie w miejscu docelowym.",
+    "hud.startbuttons.monsters.reignofnether.second": "Przywołuje %d osadników-zombie w miejscu docelowym.",
     "hud.startbuttons.piglins.reignofnether.first": "Dołącz do gry jako frakcja piglinów.",
-    "hud.startbuttons.piglins.reignofnether.second": "Przywołuje 3 piglinów w miejscu docelowym.",
+    "hud.startbuttons.piglins.reignofnether.second": "Przywołuje %d piglinów w miejscu docelowym.",
 
     "hud.orthoview.reignofnether.hiding_leaves_around": "Ukrywanie liści: wokół jednostek i kursora",
     "hud.orthoview.reignofnether.hiding_leaves_all": "Ukrywanie liści: wszystkie",

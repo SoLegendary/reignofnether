@@ -445,12 +445,20 @@ public class PlayerServerEvents {
 
             ServerLevel level = (ServerLevel) serverPlayer.level();
             ArrayList<Entity> workers = new ArrayList<>();
-            for (int i = -1; i <= 1; i++) {
+
+            List<BlockPos> bp0s = List.of(
+                    new BlockPos((int) pos.x,0,(int) pos.z),
+                    new BlockPos((int) pos.x+1,0,(int) pos.z),
+                    new BlockPos((int) pos.x,0,(int) pos.z+1),
+                    new BlockPos((int) pos.x-1,0,(int) pos.z),
+                    new BlockPos((int) pos.x,0,(int) pos.z-1)
+            );
+            for (BlockPos bp0 : bp0s) {
                 Entity entity = entityType != null ? entityType.create(level) : null;
                 if (entity != null) {
-                    BlockPos bp = MiscUtil.getHighestNonAirBlock(level, new BlockPos((int) (pos.x + i), 0, (int) pos.z))
-                        .above()
-                        .above();
+                    BlockPos bp = MiscUtil.getHighestNonAirBlock(level, bp0)
+                            .above()
+                            .above();
                     ((Unit) entity).setOwnerName(playerName);
                     entity.moveTo(bp, 0, 0);
                     if (!readiedStart)
@@ -495,7 +503,7 @@ public class PlayerServerEvents {
                 if (building != null) {
                     BlockPos bp = getBuildingOriginPos(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), blocks);
                     for (int i = 0; i < workers.size(); i++) {
-                        workers.get(i).moveTo(bp.offset(i, 0, 0), 0, 0);
+                        workers.get(i).moveTo(bp.offset(-1, 1, i), 0, 0);
                         level.addFreshEntity(workers.get(i));
                     }
                     var workerIds = new int[workers.size()];

@@ -408,6 +408,10 @@ public class BuildingPlacement {
                     continue;
 
                 float dist = (float) bpTarget.distToCenterSqr(bp.getX(), bp.getY(), bp.getZ());
+                BlockState bs = level.getBlockState(bp);
+                BlockState bsBelow = level.getBlockState(bp.below());
+                if (!bs.getFluidState().isEmpty() || !bsBelow.getFluidState().isEmpty())
+                    dist += 100; // disincentivise walking onto water/lava
 
                 if (dist < minDist) {
                     minDist = dist;

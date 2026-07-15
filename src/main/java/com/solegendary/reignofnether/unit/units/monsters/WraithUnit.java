@@ -475,8 +475,9 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
         if (mei != null) {
             amp = mei.getAmplifier() + 1;
         }
-        // play possess sound
+        float health = getHealth();
         kill();
+        // full possession
         if (targetEntity instanceof Unit unit && unit.getCost().population <= (amp + 1) * Possess.POP_PER_WRAITH) {
             targetEntity.removeEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get());
             unit.setOwnerName(this.getOwnerName());
@@ -488,8 +489,9 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
                     if (entity instanceof Unit unit1 && unit1.getTargetGoal().getTarget() == unit && unit1.getOwnerName().equals(unit.getOwnerName()))
                         Unit.fullResetBehaviours(unit1);
                 SoundClientboundPacket.playSoundAtPos(SoundAction.WRAITH_POSSESS_FULL, targetEntity.blockPosition());
+                targetEntity.heal(health);
             }
-        } else {
+        } else { // partial possession
             targetEntity.addEffect(new MobEffectInstance(
                     MobEffectRegistrar.PARTIALLY_POSSESSED.get(),
                     Possess.PARTIAL_POSSESS_DURATION_SECONDS * 20,

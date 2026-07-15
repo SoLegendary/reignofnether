@@ -188,6 +188,8 @@ public final class PathfinderWorkerPool {
         int budget = PathfinderConfig.maxChunkBuildsPerTick;
         while (budget > 0 && !BUILD_QUEUE.isEmpty()) {
             PendingBuild pb = BUILD_QUEUE.peekFirst();
+            if (pb == null)
+                break;
             // Drop work for units that died, were removed, or whose request was superseded by a newer order
             // (valid bundles isAlive + the goal's current seq), so stale entries don't burn chunk-build budget
             // and starve live requests. onPathReady discards the result via its own seq guard.

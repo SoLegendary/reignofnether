@@ -299,12 +299,12 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
             ItemStack tridentStack = new ItemStack(Items.TRIDENT);
             AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
             tridentStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
-
-            if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_HEAVY_TRIDENTS))
-                tridentStack.enchant(Enchantments.PUNCH_ARROWS, 1);
-
             this.setItemSlot(EquipmentSlot.MAINHAND, tridentStack);
         }
+        //if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_HEAVY_TRIDENTS))
+        //    this.getItemBySlot(EquipmentSlot.MAINHAND).enchant(Enchantments.PUNCH_ARROWS, 1);
+        if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_GREEDY_TRIDENTS))
+            this.getItemBySlot(EquipmentSlot.MAINHAND).enchant(Enchantments.MOB_LOOTING, 1);
     }
 
     @Override

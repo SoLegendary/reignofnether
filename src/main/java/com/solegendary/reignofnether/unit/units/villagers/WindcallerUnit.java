@@ -538,11 +538,6 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         }
     }
 
-    public int getPunchLevel() {
-        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getEnchantmentLevel(Enchantments.PUNCH_ARROWS);
-    }
-
     @Override
     public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         if (pTarget == null)

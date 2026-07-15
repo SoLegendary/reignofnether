@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -17,7 +18,10 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.IronGolem;
-import net.minecraft.world.entity.monster.Vex;
+import net.minecraft.world.entity.monster.*;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
@@ -94,10 +98,20 @@ public class NonUnitServerEvents {
     }
 
     @SubscribeEvent
-    public static void onGolemChangeTarget(LivingChangeTargetEvent evt) {
+    public static void onChangeTarget(LivingChangeTargetEvent evt) {
         LivingEntity le = evt.getEntity();
-        if (le instanceof IronGolem && !(le instanceof Unit) && evt.getNewTarget() instanceof Unit unit && unit.getFaction() == Faction.VILLAGERS) {
-            evt.setCanceled(true); // prevent vanilla golems attacking villager faction units
+
+        // prevent vanilla mobs attacking their RoN faction equivalents
+        if (!(le instanceof Unit) && evt.getNewTarget() instanceof Unit unit) {
+            if (le instanceof IronGolem && unit.getFaction() == Faction.VILLAGERS) {
+                evt.setCanceled(true);
+            } else if ((le instanceof AbstractSkeleton || le instanceof Zombie || le instanceof Creeper || le instanceof Spider || le instanceof Slime || le instanceof Warden) &&
+                    unit.getFaction() == Faction.MONSTERS) {
+                evt.setCanceled(true);
+            } else if ((le instanceof AbstractPiglin || le instanceof Hoglin || le instanceof Ghast || le instanceof Blaze || le instanceof WitherSkeleton) &&
+                    unit.getFaction() == Faction.PIGLINS) {
+                evt.setCanceled(true);
+            }
         }
     }
 

@@ -595,7 +595,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                     else if (i > 0 && !headhunterUnit.hasFlameTrident()) {
                         ItemStack itemStack = new ItemStack(Items.TRIDENT);
                         itemStack.enchant(Enchantments.FLAMING_ARROWS, 1);
-                        itemStack.enchant(Enchantments.PUNCH_ARROWS, 1);
+                        itemStack.enchant(Enchantments.MOB_LOOTING, 1);
                         items.add(itemStack);
                     } else {
                         items.add(new ItemStack(Items.ENCHANTED_GOLDEN_APPLE));

@@ -1,20 +1,13 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
-import com.solegendary.reignofnether.building.production.ProdDupeRule;
-import com.solegendary.reignofnether.building.production.ProductionItem;
-import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.building.production.StopProductionButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.building.production.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.building.production.StartProductionButton;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import net.minecraft.client.resources.language.I18n;
@@ -26,18 +19,18 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ResearchHeavyTridents extends ProductionItem {
+public class ResearchGreedyTridents extends ProductionItem {
 
-    public final static String itemName = "Heavy Tridents";
-    public final static ResourceCost cost = ResourceCosts.RESEARCH_HEAVY_TRIDENTS;
+    public final static String itemName = "Greedy Tridents";
+    public final static ResourceCost cost = ResourceCosts.RESEARCH_GREEDY_TRIDENTS;
 
-    public ResearchHeavyTridents() {
+    public ResearchGreedyTridents() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_HEAVY_TRIDENTS);
+                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_GREEDY_TRIDENTS);
             } else {
-                ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_HEAVY_TRIDENTS);
+                ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_GREEDY_TRIDENTS);
                 for (LivingEntity le : UnitServerEvents.getAllUnits()) {
                     if (le instanceof HeadhunterUnit headhunterUnit)
                         headhunterUnit.setupEquipmentAndUpgradesServer();
@@ -47,36 +40,40 @@ public class ResearchHeavyTridents extends ProductionItem {
     }
 
     public String getItemName() {
-        return ResearchHeavyTridents.itemName;
+        return ResearchGreedyTridents.itemName;
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        return new StartProductionButton(ResearchHeavyTridents.itemName,
+        StartProductionButton button = new StartProductionButton(ResearchGreedyTridents.itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/trident.png"),
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
-            () -> ProductionItems.RESEARCH_HEAVY_TRIDENTS.itemIsBeingProduced(prodBuilding.ownerName)
-                || ResearchClient.hasResearch(ProductionItems.RESEARCH_HEAVY_TRIDENTS),
+            () -> ProductionItems.RESEARCH_GREEDY_TRIDENTS.itemIsBeingProduced(prodBuilding.ownerName)
+                || ResearchClient.hasResearch(ProductionItems.RESEARCH_GREEDY_TRIDENTS),
             () -> true,
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.heavy_tridents"),
+            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.greedy_tridents"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.heavy_tridents.tooltip1"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.greedy_tridents.tooltip1"), Style.EMPTY)
             ),
             this
         );
+        button.bgIconResource = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/emerald.png");
+        return button;
     }
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
-        return new StopProductionButton(ResearchHeavyTridents.itemName,
+        StopProductionButton button = new StopProductionButton(ResearchGreedyTridents.itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/trident.png"),
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             prodBuilding,
             this,
             first
         );
+        button.bgIconResource = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/emerald.png");
+        return button;
     }
 }

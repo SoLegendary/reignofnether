@@ -177,7 +177,7 @@
     "buildings.reignofnether.mausoleum.tooltip2": "Distorce o tempo para a meia-noite dentro de um raio de %d blocos.",
     "buildings.reignofnether.mausoleum.tooltip3": "Você pode ter apenas um edifício capitólio de cada vez.",
     "buildings.reignofnether.pumpkin_farm": "Fazenda de Abóboras",
-    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d  +  %d  por  colheita  plantada",
+    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d",
     "buildings.reignofnether.pumpkin_farm.tooltip2": "Um campo de abóboras que pode ser colhido para coletar comida.",
     "buildings.reignofnether.pumpkin_farm.tooltip3": "As abóboras não precisam ser replantadas, mas as fazendas custam mais inicialmente.",
     "buildings.reignofnether.spider_lair": "Covil das Aranhas",
@@ -332,11 +332,11 @@
     "hud.map.reignofnether.close": "Fechar",
 
     "hud.startbuttons.villagers.reignofnether.first": "Entrar no jogo como a Facção dos Aldeões.",
-    "hud.startbuttons.villagers.reignofnether.second": "Cria 3 aldeões no local alvo.",
+    "hud.startbuttons.villagers.reignofnether.second": "Cria %d aldeões no local alvo.",
     "hud.startbuttons.monsters.reignofnether.first": "Entrar no jogo como a Facção dos Monstros.",
-    "hud.startbuttons.monsters.reignofnether.second": "Cria 3 aldeões zumbis no local alvo.",
+    "hud.startbuttons.monsters.reignofnether.second": "Cria %d aldeões zumbis no local alvo.",
     "hud.startbuttons.piglins.reignofnether.first": "Entrar no jogo como a Facção dos Piglins.",
-    "hud.startbuttons.piglins.reignofnether.second": "Cria 3 piglins grunhidos no local alvo.",
+    "hud.startbuttons.piglins.reignofnether.second": "Cria %d piglins grunhidos no local alvo.",
 
     "hud.orthoview.reignofnether.hiding_leaves_around": "Ocultando folhas: ao redor das unidades e cursor",
     "hud.orthoview.reignofnether.hiding_leaves_all": "Ocultando folhas: tudo",

@@ -87,7 +87,7 @@ public interface Unit {
     int ANCHOR_RETREAT_RANGE = 30;
 
     int PIGLIN_HEALING_TICKS = 8 * ResourceCost.TICKS_PER_SECOND;
-    int MONSTER_HEALING_TICKS = 12 * ResourceCost.TICKS_PER_SECOND;
+    int MONSTER_HEALING_TICKS = 8 * ResourceCost.TICKS_PER_SECOND;
 
     // used for increasing pathfinding calculation range, default is 16 for most mobs
     int FOLLOW_RANGE_IMPROVED = 64;
