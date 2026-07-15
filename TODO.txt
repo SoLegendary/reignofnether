@@ -28,20 +28,6 @@ Hero Items
     - Requires right-click to pick up, will not auto-pickup
 
 
-
-Quality of Life
----------------
-[✔] Vanilla monsters and piglin mobs are no longer aggressive to their RoN faction counterparts
-
-Bugfixes
---------
-[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
-[❌] Absorption healthbar is not correct (if there's any absorption, they have max health)
-[✔] Fixed a crash related to molten bomb explosions near buildings
-[✔] Workers are much less likely to walk into water when placing a building near water
-[✔] Fixed existing headhunters not showing an enchantment tooltip when upgraded
-[✔] Villager stockpiles no longer have scaffolding so workers don't get stuck in them
-
 Balance
 -------
 [✔] All players now start with 5 workers at the start of the game
@@ -65,6 +51,21 @@ Monsters
 [✔] Pumpkin farm cost reduced from 200 wood to 175 wood
 [✔] Planting pumpkin seeds no longer costs wood
 [✔] Wraiths now transfer their remaining health into the unit that they possess to heal it
+
+Quality of Life
+---------------
+[✔] Vanilla monsters and piglin mobs are no longer aggressive to their RoN faction counterparts
+
+Bugfixes
+--------
+[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
+[❌] Absorption healthbar is not correct (if there's any absorption, they have max health)
+[✔] Fixed a crash related to molten bomb explosions near buildings
+[✔] Workers are much less likely to walk into water when placing a building near water
+[✔] Fixed existing headhunters not showing an enchantment tooltip when upgraded
+[✔] Villager stockpiles no longer have scaffolding so workers don't get stuck in them
+
+
 
 Languages
 ---------
