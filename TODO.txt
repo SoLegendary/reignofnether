@@ -50,6 +50,7 @@ Balance
 Piglins
 [✔] Obsidian near lava now catches fire - this discourages crossing obsidian lines formed across lava
 [✔] The Heavy Tridents upgrade has been replaced with Greedy Tridents
+    - Costs 350 wood, 350 ore, 160s
     - When upgraded, headhunter tridents are enchanted with Looting I, granting a 25% bounty to any units they kill
     - To get the bounty, the headhunter needs to be the one to kill the unit
     - Looting also works for any unit if they have a weapon enchanted with it via commands
