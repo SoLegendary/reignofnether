@@ -41,6 +41,8 @@ public class ProductionPlacement extends BuildingPlacement {
         if (building instanceof ProductionBuilding productionBuilding) {
             productionButtons = productionBuilding.productions.getButtons(this);
         }
+        if (isCapitol)
+            this.allowProdWhileBuilding = true;
     }
 
     @Nullable
@@ -149,9 +151,6 @@ public class ProductionPlacement extends BuildingPlacement {
         final List<BlockPos> fRallyPoints = this.rallyPoints.isEmpty() ? List.of(defaultRallyPoint) : this.rallyPoints;
 
         if (entity instanceof Unit unit) {
-            if (entityType == EntityRegistrar.IRON_GOLEM_UNIT.get()) // bandaid fix, for some reason golems don't move after spawn until nudged
-                entity.push(0.01, 0, 0);
-
             unit.setOwnerName(ownerName);
             unit.setupEquipmentAndUpgradesServer();
 

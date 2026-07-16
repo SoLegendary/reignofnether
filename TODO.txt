@@ -1,5 +1,5 @@
 
-1.20.1-1.3.8c
+1.20.1-1.3.8d
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -30,40 +30,24 @@ Hero Items
 
 Balance
 -------
-[✔] All players now start with 5 workers at the start of the game
-[✔] Raised starting resources by 50 food and 50 wood
-
-Piglins
-[✔] Obsidian near lava now catches fire - this discourages crossing obsidian lines formed across lava
-[✔] The Heavy Tridents upgrade has been replaced with Greedy Tridents
-    - Costs 350 wood, 350 ore, 160s
-    - When upgraded, headhunter tridents are enchanted with Looting I, granting a 25% bounty to any units they kill
-    - To get the bounty, the headhunter needs to be the one to kill the unit
-    - Looting also works for any unit if they have a weapon enchanted with it via commands
-    - This does not stack with the 25% bounty granted by neutral units
-
-Villagers
-[✔] Villager house cost reduced from 100 wood to 90 wood
-
-Monsters
-[✔] Monster unit regen at night increased from 1/12hp/s to 1/8hp/s
-    - This is still doubled if it's both true night and you're under a night zone
-[✔] Pumpkin farm cost reduced from 200 wood to 175 wood
-[✔] Planting pumpkin seeds no longer costs wood
-[✔] Wraiths now transfer their remaining health into the unit that they possess to heal it
+[✔] Piglin Merchant attack and cast windups reduced by 8 ticks (0.4s)
+[✔] Throw TNT actual thrown range reduced by 2
+    - This makes it better match the targeted location on flat ground
+[✔] Fancy Feast cooldown reduced from 45s to 40s
+[✔] Slime and Magma cube HP raised by ~11% at all sizes except tiny
 
 Quality of Life
 ---------------
-[✔] Vanilla monsters and piglin mobs are no longer aggressive to their RoN faction counterparts
+[✔] You can now queue workers and set rally points from capitols before it's finished building
+[✔] Added a custom building command trigger: ON_SCENARIO_START
+[✔] Custom building command cooldowns and trigger counts are now saved between world restarts
 
 Bugfixes
 --------
 [❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
-[❌] Absorption healthbar is not correct (if there's any absorption, they have max health)
-[✔] Fixed a crash related to molten bomb explosions near buildings
-[✔] Workers are much less likely to walk into water when placing a building near water
-[✔] Fixed existing headhunters not showing an enchantment tooltip when upgraded
-[✔] Villager stockpiles no longer have scaffolding so workers don't get stuck in them
+[✔] Fixed units with the fortifying enchantment always showing as having max hp
+[✔] Fixed iron golems not being able to move when built by villagers
+[✔] Destroyed farm blocks no longer drop any items
 
 
 

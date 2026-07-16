@@ -6,6 +6,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.commands.CommandSourceStack;
@@ -27,6 +29,7 @@ public class CustomBuildingCommand {
         OFF_COOLDOWN_IF_COMPLETE,
         OFF_COOLDOWN_IF_GARRISONED,
         OFF_COOLDOWN_IF_CAPTURED,
+        ON_SCENARIO_START,
         NONE
     }
 
@@ -36,7 +39,8 @@ public class CustomBuildingCommand {
             TriggerCondition.ON_DAMAGE_TAKEN,
             TriggerCondition.OFF_COOLDOWN_IF_COMPLETE,
             TriggerCondition.OFF_COOLDOWN_IF_GARRISONED,
-            TriggerCondition.OFF_COOLDOWN_IF_CAPTURED
+            TriggerCondition.OFF_COOLDOWN_IF_CAPTURED,
+            TriggerCondition.ON_SCENARIO_START
         ).contains(condition);
     }
 
@@ -101,19 +105,25 @@ public class CustomBuildingCommand {
     public void tick(BuildingPlacement bpl) {
         if (!hasCooldownCondition())
             return;
+
+        boolean scenarioStarted = ScenarioServerEvents.isScenarioStarted((ServerLevel) bpl.level);
+        if (condition == TriggerCondition.ON_SCENARIO_START && !scenarioStarted)
+            return;
+
         if (tickCooldown > 0)
             tickCooldown -= 1;
-        if (tickCooldown <= 0 && checkTickingCondition(bpl)) {
+        if (tickCooldown <= 0 && checkTickingCondition(bpl, scenarioStarted)) {
             run(bpl);
         }
     }
 
-    public boolean checkTickingCondition(BuildingPlacement bpl) {
+    public boolean checkTickingCondition(BuildingPlacement bpl, boolean scenarioStarted) {
         GarrisonableBuildingAddon gba;
         return switch (condition) {
             case OFF_COOLDOWN_IF_COMPLETE -> bpl.isBuilt;
             case OFF_COOLDOWN_IF_GARRISONED -> (gba = bpl.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null && !gba.getOccupants(bpl).isEmpty();
             case OFF_COOLDOWN_IF_CAPTURED -> !bpl.ownerName.isBlank();
+            case ON_SCENARIO_START -> scenarioStarted && triggerCount <= 0;
             case ON_CAPTURE -> !bpl.ownerName.isBlank() && triggerCount <= 0;
             default -> false;
         };
@@ -145,5 +155,10 @@ public class CustomBuildingCommand {
             setCooldownToMax();
             triggerCount += 1;
         }
+    }
+
+    public void reset() {
+        triggerCount = 0;
+        setCooldownToMax();
     }
 }

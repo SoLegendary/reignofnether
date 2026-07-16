@@ -6,6 +6,9 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingCommand;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
@@ -16,6 +19,7 @@ public class CustomBuildingPlacement extends BuildingPlacement {
     public final ArrayList<BlockPos> garrisonEntries = new ArrayList<>();
     public final ArrayList<BlockPos> garrisonExits = new ArrayList<>();
     public final ArrayList<CustomBuildingCommand> commands = new ArrayList<>();
+    public ListTag commandsNbt = new ListTag();
 
     public CustomBuildingPlacement(CustomBuilding customBuilding, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(customBuilding, level, originPos, rotation, ownerName, blocks, isCapitol);
@@ -34,6 +38,29 @@ public class CustomBuildingPlacement extends BuildingPlacement {
             newCommand.commandStr = command.commandStr;
             newCommand.condition = command.condition;
             this.commands.add(newCommand);
+        }
+    }
+
+    public void packCommandsNbt() {
+        this.commandsNbt.clear();
+        for (CustomBuildingCommand command : commands) {
+            CompoundTag ctag = new CompoundTag();
+            ctag.putInt("tickCooldown", command.tickCooldown);
+            ctag.putInt("tickCooldownMax", command.tickCooldownMax);
+            ctag.putString("commandStr", command.commandStr);
+            ctag.putString("condition", command.condition.toString());
+            ctag.putInt("triggerCount", command.triggerCount);
+            this.commandsNbt.add(ctag);
+        }
+    }
+
+    public void setAndUnpackCommandsNbt(ListTag nbt) {
+        if (nbt.isEmpty())
+            return;
+        this.commands.clear();
+        this.commandsNbt = nbt;
+        for (Tag tag : this.commandsNbt) {
+            this.commands.add(CustomBuildingCommand.getFromNbt((CompoundTag) tag));
         }
     }
 
@@ -83,5 +110,11 @@ public class CustomBuildingPlacement extends BuildingPlacement {
         if (!tickLevel.isClientSide())
             for (CustomBuildingCommand command : commands)
                 command.tick(this);
+    }
+
+    public void resetAllCommands() {
+        for (CustomBuildingCommand command : commands) {
+            command.reset();
+        }
     }
 }

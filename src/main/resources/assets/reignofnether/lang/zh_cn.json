@@ -696,6 +696,7 @@
   "commands.reignofnether.gamerule.lock_alliances": "不允许在对局中途修改同盟关系",
   "commands.reignofnether.gamerule.allowed_heroes": "玩家能够训练的英雄总数",
   "commands.reignofnether.gamerule.coop_mode": "所有真人玩家均为同盟。当前仅可通过命令/信标获胜",
+  "commands.reignofnether.gamerule.animal_spawn_y_diff": "主城建筑在Y轴上相差的范围。动物可在此范围内自然生成",
   "commands.reignofnether.error.unknown_building": "未知建筑名称",
   "commands.reignofnether.error.unknown_resource": "未知资源名称",
   "commands.reignofnether.error.no_server_level": "服务端世界生成尚未初始化",
@@ -902,6 +903,8 @@
   "hud.enchant.reignofnether.longshot.tooltip": "增加攻击范围",
   "hud.enchant.reignofnether.march_of_progress": "进取行军",
   "hud.enchant.reignofnether.march_of_progress.tooltip": "使所有魔咒的效果翻倍",
+  "hud.enchant.reignofnether.looting": "抢夺",
+  "hud.enchant.reignofnether.looting.tooltip": "使击杀获得的掉落物提升",
 
 
   "hud.faction.reignofnether.villagers": "村民",
@@ -965,6 +968,7 @@
   "server.reignofnether.all_cheats": "%s启用了所有作弊",
   "server.reignofnether.revealed": "%s未能重建主城，行迹已在地图上暴露！",
   "server.reignofnether.prewarmed_navmesh": "RTS优化地图，已启用改进后的寻路算法",
+  "server.reignofnether.cannot_delete_capturable": "无法删除已被占据的建筑",
 
   "server.resources.reignofnether.not_enough_food": "你的食物不足",
   "server.resources.reignofnether.not_enough_wood": "你的木材不足",
@@ -1014,6 +1018,8 @@
   "research.reignofnether.golem_smithing.tooltip1": "使你的村民工人能够建造铁傀儡。",
   "research.reignofnether.heavy_tridents": "重型三叉戟",
   "research.reignofnether.heavy_tridents.tooltip1": "使你的猎头者的三叉戟能够击退敌人。",
+  "research.reignofnether.greedy_tridents": "贪婪三叉戟",
+  "research.reignofnether.greedy_tridents.tooltip1": "使你的猎头者的三叉戟击杀敌人掉落的物品增加。",
   "research.reignofnether.cleaving_flails": "分裂连枷",
   "research.reignofnether.cleaving_flails.tooltip1": "猪灵流掠者每次攻击将额外击中主目标旁的",
   "research.reignofnether.cleaving_flails.tooltip2": "两名随机敌方单位，但对其造成的伤害与效果较弱。",

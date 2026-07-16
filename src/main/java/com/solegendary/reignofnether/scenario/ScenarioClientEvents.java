@@ -155,11 +155,6 @@ public class ScenarioClientEvents {
                     return true;
                 })
                 .onLeftClick(() -> PlayerServerboundPacket.startRTSScenario(roleIndexToPlay))
-                .onRightClick(() -> {
-                    roleIndexToPlay += 1;
-                    if (roleIndexToPlay >= scenarioRoles.size())
-                        roleIndexToPlay = 0;
-                })
                 .tooltipLines(List.of(
                         fcs(I18n.get("hud.gamemode.reignofnether.start_scenario"), true)
                 )).build();
