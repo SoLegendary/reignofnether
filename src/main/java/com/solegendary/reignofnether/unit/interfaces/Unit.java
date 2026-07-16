@@ -395,7 +395,7 @@ public interface Unit {
         if (unitMob.tickCount % 80 == 0) {
             int fortifyingLevel = unitMob.getItemBySlot(EquipmentSlot.CHEST).getEnchantmentLevel(EnchantmentRegistrar.FORTYIFYING.get());
             float absorbHp = unitMob.getAbsorptionAmount();
-            if (fortifyingLevel > 0 && absorbHp < fortifyingLevel * ProtectiveEnchantment.MAX_ABSORB_HP)
+            if (fortifyingLevel > 0 && absorbHp < fortifyingLevel * ProtectiveEnchantment.MAX_ABSORB_HP_PER_FORTIFYING_LEVEL)
                 unitMob.setAbsorptionAmount(absorbHp + 1);
         }
 
@@ -412,6 +412,13 @@ public interface Unit {
                 int ticks = unitMob.getEffect(MobEffectRegistrar.SCORCHING_FIRE.get()).getDuration();
                 unitMob.setRemainingFireTicks(ticks);
             }
+        }
+
+        // possible fix for units getting stuck randomly on rtsPathfinding
+        if (unitMob.tickCount % 60 == 0 && BuildingUtils.isPosInsideAnyBuilding(unitMob.level().isClientSide(), unitMob.getOnPos())) {
+            boolean bool1 = unitMob.getRandom().nextBoolean();
+            boolean bool2 = unitMob.getRandom().nextBoolean();
+            unitMob.push(0.005d * (bool1 ? -1 : 1), 0, 0.005d * (bool2 ? -1 : 1));
         }
     }
 

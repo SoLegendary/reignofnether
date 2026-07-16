@@ -34,7 +34,7 @@ public class FancyFeast extends HeroAbility {
 
     public static final int RANGE = 10;
 
-    private static final int CD_MAX_SECONDS = 45 * ResourceCost.TICKS_PER_SECOND;
+    private static final int CD_MAX_SECONDS = 40 * ResourceCost.TICKS_PER_SECOND;
     public static final int BASE_ITEMS = 6;
     public static final int BONUS_ITEMS_PER_CHUNK_RESOURCES = 2;
     public static int MANA_REFUND_PER_CHUNK_RESOURCES = 10;

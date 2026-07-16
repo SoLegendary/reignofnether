@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.gamerules.GameruleServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -133,6 +134,10 @@ public class ScenarioServerEvents {
             }
         }
         return count;
+    }
+
+    public static boolean isScenarioStarted(ServerLevel level) {
+        return !PlayerServerEvents.rtsPlayers.isEmpty() && level.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();
     }
 }
 

@@ -35,6 +35,7 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,8 +43,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -54,7 +58,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.event.entity.item.ItemEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -127,6 +133,9 @@ public class BuildingServerEvents {
             if (b instanceof PortalPlacement portal) {
                 portalType = portal.getPortalType();
             }
+            if (b instanceof CustomBuildingPlacement cb) {
+                cb.packCommandsNbt();
+            }
             buildingData.buildings.add(new BuildingSave(b.originPos,
                     level,
                     b.getBuilding(),
@@ -140,7 +149,8 @@ public class BuildingServerEvents {
                     b instanceof PortalPlacement portal && portal.hasDestination() ? portal.destination : new BlockPos(0,0,0),
                     b.scenarioRoleIndex,
                     b.getDataStorage(),
-                    b.partialBlocksDestroyed
+                    b.partialBlocksDestroyed,
+                    b instanceof CustomBuildingPlacement cb ? cb.commandsNbt : new ListTag()
             ));
             //ReignOfNether.LOGGER.info("saved buildings/nether in serverevents: " + b.originPos);
         });
@@ -221,6 +231,10 @@ public class BuildingServerEvents {
                                 break;
                             }
                     }
+                    if (building instanceof CustomBuildingPlacement cb) {
+                        cb.setAndUnpackCommandsNbt(b.commandsNbt);
+                    }
+
                     ReignOfNether.LOGGER.info("loaded building in serverevents: " + b.building.name + "|" + b.originPos);
                 }
             });
@@ -833,6 +847,17 @@ public class BuildingServerEvents {
     public static void onCropTrample(BlockEvent.FarmlandTrampleEvent evt) {
         if (BuildingUtils.isPosInsideAnyBuilding(evt.getEntity().level().isClientSide(), evt.getPos())) {
             evt.setCanceled(true);
+        }
+    }
+
+    // prevent crops from becoming items when a farm is damaged
+    @SubscribeEvent
+    public static void onItemDrop(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof ItemEntity ie && BuildingUtils.isPosInsideFarm(evt.getLevel().isClientSide(), ie.getOnPos())) {
+            Item item = ie.getItem().getItem();
+            if (List.of(Items.NETHER_WART, Items.WHEAT, Items.CARROT, Items.BEETROOT, Items.POTATO).contains(item)) {
+                evt.setCanceled(true);
+            }
         }
     }
 

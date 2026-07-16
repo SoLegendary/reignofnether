@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.data.DataStorage;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 
@@ -23,11 +24,12 @@ public class BuildingSave {
     public int scenarioRoleIndex;
     public DataStorage dataStorage;
     public double partialBlocksDestroyed;
+    public ListTag commandsNbt;
 
     public BuildingSave(BlockPos originPos, Level level, Building building, String ownerName, Rotation rotation,
                         BlockPos rallyPoint, boolean isDiagonalBridge, boolean isBuilt, int upgradeLevel,
                         PortalPlacement.PortalType portalType, BlockPos portalDestination, int scenarioRoleIndex,
-                        DataStorage dataStorage, double partialBlocksDestroyed) {
+                        DataStorage dataStorage, double partialBlocksDestroyed, ListTag commandsNbt) {
         this.originPos = originPos;
         this.level = level;
         this.building = building;
@@ -42,5 +44,6 @@ public class BuildingSave {
         this.scenarioRoleIndex = scenarioRoleIndex;
         this.dataStorage = dataStorage;
         this.partialBlocksDestroyed = partialBlocksDestroyed;
+        this.commandsNbt = commandsNbt;
     }
 }

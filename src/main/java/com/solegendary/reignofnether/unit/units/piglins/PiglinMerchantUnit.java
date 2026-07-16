@@ -251,7 +251,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     @Override
     public int getAttackWindupTicks() {
-        return 32;
+        return 24;
     }
 
     // non-looping animations
@@ -279,15 +279,20 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 activeAnimDef = PiglinMerchantAnimations.ATTACK;
                 activeAnimState = attackAnimState;
                 animateScale = 1.0f;
+                animateSpeed = 1.333f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
                 activeAnimDef = PiglinMerchantAnimations.SPELL_FULL;
                 activeAnimState = spellActivateAnimState;
                 animateScale = 1.0f;
+                animateSpeed = 1.0f;
                 startAnimation(activeAnimDef);
             }
-            default -> animateScaleReducing = true;
+            default ->  {
+                animateScaleReducing = true;
+                animateSpeed = 1.0f;
+            }
         }
     }
 
@@ -417,7 +422,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.castTNTGoal = new GenericTargetedSpellGoal(
                 this,
-                32,
+                getAttackWindupTicks(),
                 ThrowTNT.RANGE,
                 UnitAnimationAction.ATTACK_UNIT,
                 null,
@@ -426,7 +431,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         );
         this.castFancyFeastGoal = new GenericTargetedSpellGoal(
                 this,
-                32,
+                getAttackWindupTicks(),
                 FancyFeast.RANGE,
                 UnitAnimationAction.ATTACK_UNIT,
                 null,
@@ -512,7 +517,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         Vec3 dMove = Vec3.atCenterOf(targetBp).subtract(this.getEyePosition())
                 .multiply(1,0,1)
                 .scale(0.04)
-                .add(0,0.5,0);
+                .add(0,0.4,0);
         tnt.setDeltaMovement(dMove);
         level().addFreshEntity(tnt);
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.EGG_THROW,

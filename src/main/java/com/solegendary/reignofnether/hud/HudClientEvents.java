@@ -553,14 +553,14 @@ public class HudClientEvents {
                 }
                 if (hudSelectedPlacement.isBuilt || hudSelectedPlacement.allowProdWhileBuilding) {
 
-                    if (!hudSelectedPlacement.isBuilt)
-                        blitX += Button.DEFAULT_ICON_FRAME_SIZE;
-
-                    List<AbilityButton> buildingAbilities = hudSelectedPlacement.getAbilityButtons()
-                            .stream()
-                            .filter(b -> b != null && !b.isHidden.get())
-                            .toList();
-                    if (buildingAbilities.size() > 0) {
+                    List<AbilityButton> buildingAbilities = List.of();
+                    if (hudSelectedPlacement.isBuilt) {
+                        buildingAbilities = hudSelectedPlacement.getAbilityButtons()
+                                .stream()
+                                .filter(b -> b != null && !b.isHidden.get())
+                                .toList();
+                    }
+                    if (buildingAbilities.size() > 0 || !hudSelectedPlacement.isBuilt) {
                         blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
                     }
 

@@ -560,6 +560,7 @@ public class CustomBuildingMenu {
                 case OFF_COOLDOWN_IF_COMPLETE   -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/clock.png");
                 case OFF_COOLDOWN_IF_GARRISONED -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/ladder.png");
                 case OFF_COOLDOWN_IF_CAPTURED   -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/clock_half.png");
+                case ON_SCENARIO_START          -> ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/writable_book.png");
                 case NONE                       -> null;
             };
             ResourceLocation bgRl = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/nether_star.png");
@@ -572,6 +573,7 @@ public class CustomBuildingMenu {
                 case OFF_COOLDOWN_IF_COMPLETE   -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_complete");
                 case OFF_COOLDOWN_IF_GARRISONED -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_garrisoned");
                 case OFF_COOLDOWN_IF_CAPTURED   -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_captured");
+                case ON_SCENARIO_START          -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.on_scenario_start");
                 case NONE                       -> I18n.get("sandbox.reignofnether.custom_buildings.commands.trigger.none");
             };
 

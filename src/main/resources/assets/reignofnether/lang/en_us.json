@@ -1726,6 +1726,7 @@
     "sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_complete": "Trigger: Off cooldown if complete",
     "sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_garrisoned": "Trigger: Off cooldown if garrisoned",
     "sandbox.reignofnether.custom_buildings.commands.trigger.off_cooldown_if_captured": "Trigger: Off cooldown if captured",
+    "sandbox.reignofnether.custom_buildings.commands.trigger.on_scenario_start": "Trigger: On Scenario Start (after cooldown delay)",
     "sandbox.reignofnether.custom_buildings.commands.trigger.none": "Trigger: None",
     "sandbox.reignofnether.custom_buildings.commands.add": "Add new command",
     "sandbox.reignofnether.custom_buildings.commands.delete": "Delete command",
