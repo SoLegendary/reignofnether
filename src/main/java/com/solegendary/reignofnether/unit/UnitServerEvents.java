@@ -115,32 +115,6 @@ public class UnitServerEvents {
 
     private static final Random RANDOM = new Random();
 
-    private static final List<MobEffect> SYNCED_MOB_EFFECTS = List.of(
-        MobEffects.DAMAGE_RESISTANCE,
-        MobEffects.WEAKNESS,
-        MobEffects.DAMAGE_BOOST,
-        MobEffectRegistrar.STUN.get(),
-        MobEffectRegistrar.FREEZE.get(),
-        MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(),
-        MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(),
-        MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(),
-        MobEffectRegistrar.ATTACK_SLOWDOWN.get(),
-        MobEffectRegistrar.TEMPORARY_EFFICIENCY.get(),
-        MobEffectRegistrar.BLOODLUST.get(),
-        MobEffectRegistrar.FROST_DAMAGE.get(),
-        MobEffectRegistrar.DISARM.get(),
-        MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get(),
-        MobEffectRegistrar.SCORCHING_FIRE.get(),
-        MobEffectRegistrar.SOULS_AFLAME.get(),
-        MobEffectRegistrar.ANGRY.get(),
-        MobEffectRegistrar.FEARFUL.get(),
-        MobEffectRegistrar.PARTIALLY_POSSESSED.get(),
-        MobEffects.LEVITATION
-    );
-
-    // Per-entity last-synced mob effect amplifiers. Null amp means "absent last sync".
-    private static final HashMap<Integer, HashMap<MobEffect, Byte>> lastSyncedEffects = new HashMap<>();
-
     // Time-sliced formation dispatch: VANILLA-ONLY (rtsPathfinding off). Large group MOVE commands
     // are spread across ticks to avoid the spike from N units all running vanilla's synchronous main-thread
     // A* in the same tick. With RTS pathfinding on, moves dispatch immediately (UnitActionItem) since the
@@ -464,7 +438,6 @@ public class UnitServerEvents {
             && !evt.getLevel().isClientSide) {
 
             allUnits.removeIf(e -> e.getId() == entity.getId());
-            lastSyncedEffects.remove(entity.getId());
             UnitSyncClientboundPacket.sendLeavePacket(entity);
 
             //ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
@@ -761,22 +734,6 @@ public class UnitServerEvents {
                 if (entity instanceof Unit unit) {
                     UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                     UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
-
-                    HashMap<MobEffect, Byte> lastState = lastSyncedEffects.computeIfAbsent(entity.getId(), k -> new HashMap<>());
-                    for (MobEffect me : SYNCED_MOB_EFFECTS) {
-                        MobEffectInstance mei = entity.getEffect(me);
-                        Byte lastAmp = lastState.get(me);
-                        if (mei != null) {
-                            byte amp = (byte) mei.getAmplifier();
-                            if (lastAmp == null || lastAmp != amp) {
-                                UnitSyncMobEffectsClientboundPacket.addEffectClientside(entity, mei);
-                                lastState.put(me, amp);
-                            }
-                        } else if (lastAmp != null) {
-                            UnitSyncMobEffectsClientboundPacket.removeEffectClientside(entity, me);
-                            lastState.remove(me);
-                        }
-                    }
 
                     if (unit.getAnchor() != null)
                         UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
@@ -1111,6 +1068,8 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit unit && MobEffectRegistrar.isInterrupt(evt.getEffectInstance().getEffect()) && unit.uninterruptable()) {
             evt.setCanceled(true);
         }
+        if (!evt.getEntity().level().isClientSide())
+            UnitSyncMobEffectsClientboundPacket.addEffectClientside(evt.getEntity(), evt.getEffectInstance());
     }
 
     @SubscribeEvent
@@ -1124,6 +1083,8 @@ public class UnitServerEvents {
                 EnchantmentHelper.setEnchantments(new HashMap<>(), evt.getEntity().getMainHandItem());
             }
         }
+        if (!evt.getEntity().level().isClientSide())
+            UnitSyncMobEffectsClientboundPacket.removeEffectClientside(evt.getEntity(), evt.getEffectInstance().getEffect());
     }
 
     @SubscribeEvent

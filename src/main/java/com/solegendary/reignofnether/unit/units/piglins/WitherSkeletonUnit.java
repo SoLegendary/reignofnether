@@ -316,8 +316,8 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     public static final int EFFECT_DURATION = 6;
     public static final int WITHER_MAX_AMPLIFIER = 5; // amplifier starts at 0
     public static final int WITHER_MAX_AMPLIFIER_HERO = 3;
-    public static final int WEAKNESS_MAX_STACKS = 4; // amplifier starts at 0
-    public static final int WEAKNESS_MAX_AMPLIFIER_HERO = 2;
+    public static final int WEAKNESS_MAX_AMPLIFIER = 3; // 4 stacks, -80% dmg
+    public static final int WEAKNESS_MAX_AMPLIFIER_HERO = 1; // 2 stacks, -40% dmg
 
     public static void applyStackingEffect(LivingEntity le, MobEffect mobEffect, int maxAmp) {
         int amplifier = 0;
@@ -340,7 +340,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
         } else {
             if (pEntity instanceof LivingEntity le) {
                 applyStackingEffect(le, MobEffects.WITHER, le instanceof HeroUnit ? WITHER_MAX_AMPLIFIER_HERO : WITHER_MAX_AMPLIFIER);
-                applyStackingEffect(le, MobEffects.WEAKNESS, le instanceof HeroUnit ? WEAKNESS_MAX_AMPLIFIER_HERO : WEAKNESS_MAX_STACKS);
+                applyStackingEffect(le, MobEffects.WEAKNESS, le instanceof HeroUnit ? WEAKNESS_MAX_AMPLIFIER_HERO : WEAKNESS_MAX_AMPLIFIER);
             }
             return true;
         }
