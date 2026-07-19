@@ -34,12 +34,15 @@ Balance
 
 Quality of Life
 ---------------
+[❌] Reduce starting capitol build speed by 33%
+[❌] Hero level ups are now heard by other players and show a particle effect
 
 Bugfixes
 --------
 [❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
-
-
+[❌] Villagers farming randomly get stuck and can't move to reach further blocks
+    - Make them always be able to reach resource blocks while in farm bounds?
+[❌] Big units (esp. marauders) get stuck on transport portals when going through in big groups
 
 Languages
 ---------
