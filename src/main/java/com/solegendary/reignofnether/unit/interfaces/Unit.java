@@ -415,11 +415,13 @@ public interface Unit {
         }
 
         // possible fix for units getting stuck randomly on rtsPathfinding
+        /*
         if (unitMob.tickCount % 60 == 0 && BuildingUtils.isPosInsideAnyBuilding(unitMob.level().isClientSide(), unitMob.getOnPos())) {
             boolean bool1 = unitMob.getRandom().nextBoolean();
             boolean bool2 = unitMob.getRandom().nextBoolean();
             unitMob.push(0.005d * (bool1 ? -1 : 1), 0, 0.005d * (bool2 ? -1 : 1));
         }
+         */
     }
 
     private static void checkAndPickupResources(Unit unit) {

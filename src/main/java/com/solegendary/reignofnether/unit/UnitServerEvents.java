@@ -404,7 +404,7 @@ public class UnitServerEvents {
         }
 
         // for some reason some units need to be nudged a little on spawn or they can't move
-        if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof LivingEntity le) {
+        if (!evt.getLevel().isClientSide() && evt.getEntity() instanceof Unit && evt.getEntity() instanceof LivingEntity le) {
             boolean bool1 = le.getRandom().nextBoolean();
             boolean bool2 = le.getRandom().nextBoolean();
             evt.getEntity().push(0.005d * (bool1 ? -1 : 1), 0, 0.005d * (bool2 ? -1 : 1));
