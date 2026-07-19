@@ -39,13 +39,15 @@ Quality of Life
 [❌] Reduced starting capitol build speed by 33%
 [🟡] Improved hero particle effect visibility and added level up particles
 [🟡] Hero and higher value units are now prioritised for selection and attacks when mousing over dense groups
-[🟡] Weakness and Strength now affect all unit auto-attacks, modifying it by 20% of the base damage per level
+[🟡] Weakness and Strength now affect all unit auto-attacks, modifying it by 20% of base damage per level
+[❌] Setting a capitol's rally point to a resource block will make trained workers auto-gather that resource when they arrive there
 
 Bugfixes
 --------
 [❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
 [🟡] Workers assigned to a farm can now always reach all food blocks on that farm
 [🟡] Big units no longer get stuck on transport portals when going through in big groups
+[❌] Shift clicking a unit to hunt multiple enemies still sometimes doesn't have them drop off in between kills
 
 Languages
 ---------

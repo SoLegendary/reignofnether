@@ -30,16 +30,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.*;
@@ -103,7 +100,7 @@ public class CursorClientEvents {
         return leftClickSandboxAction;
     }
 
-    public static boolean isRightDragCouldStart() {
+    public static boolean isRightClickDown() {
         return rightClickDown;
     }
 
@@ -306,9 +303,11 @@ public class CursorClientEvents {
         // **********************
         List<ItemEntity> nearbyItems = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 30, ItemEntity.class, MC.level);
 
+        ItemClientEvents.clearPreselectedItems();
         for (ItemEntity itemEntity : nearbyItems) {
             // inflate by set amount to improve click accuracy
-            AABB entityaabb = itemEntity.getBoundingBox().inflate(0.1);
+            AABB entityaabb = itemEntity.getBoundingBox().inflate(0.25);
+            entityaabb.setMaxY(entityaabb.maxY + 0.75d);
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
                 ItemClientEvents.addPreselectedItem(itemEntity);
@@ -506,6 +505,7 @@ public class CursorClientEvents {
                     !leftClickDown && ownAnySelected &&
                     UnitClientEvents.getPreselectedUnits().size() == 0 &&
                     BuildingClientEvents.getPreselectedBuilding() == null &&
+                    ItemClientEvents.getPreselectedItems().isEmpty() &&
                     !buildingTargetedByWorker && !buildingTargetedByAttacker) || isLeftClickActionStartRTS || getLeftClickSandboxAction() != null) {
 
                 ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");

@@ -1,10 +1,16 @@
 package com.solegendary.reignofnether.items;
 
+import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.List;
 
@@ -17,15 +23,45 @@ import java.util.List;
 //    - RoN mana potion ✔
 //    - Ron RTS Start Block ❌
 
-public class UnitItem {
+public abstract class UnitItem {
     final Item item;
-    final ResourceLocation iconRl;
-    List<FormattedCharSequence> tooltip;
+    public final ResourceLocation iconRl;
+    int stackQty = 1;
+    public List<FormattedCharSequence> tooltip;
+    List<Pair<Enchantment, Integer>> enchantments = List.of();
 
     public UnitItem(Item item, ResourceLocation iconRl) {
         this.item = item;
         this.iconRl = iconRl;
+    }
 
+    public UnitItem(Item item, ResourceLocation iconRl, List<Pair<Enchantment, Integer>> enchantments) {
+        this.item = item;
+        this.iconRl = iconRl;
+        this.enchantments = enchantments;
+    }
+
+    public UnitItem(Item item, ResourceLocation iconRl, int stackQty) {
+        this.item = item;
+        this.iconRl = iconRl;
+        this.stackQty = stackQty;
+    }
+
+    public List<FormattedCharSequence> getTooltip() {
+        return tooltip;
+    }
+
+    public Component getName() {
+        return new ItemStack(item).getHoverName();
+    }
+
+    public ItemStack getItemStack() {
+        ItemStack stack = new ItemStack(item);
+        for (Pair<Enchantment, Integer> pair : enchantments) {
+            stack.enchant(pair.getFirst(), pair.getSecond());
+        }
+        stack.setCount(stackQty);
+        return stack;
     }
 
     public Button getButton() {

@@ -19,8 +19,7 @@ public class ItemUtil {
     }
 
     public static boolean isUnitItem(Item item) {
-        ResourceSource res = ResourceSources.getFromItem(item);
-        return (res != null && res.resourceValue > 0) || getUnitItem(item) != null;
+        return getUnitItem(item) != null;
     }
 
     @Nullable

@@ -385,7 +385,7 @@ public class UnitClientEvents {
     }
 
     private static void resolveMoveAction() {
-        if (CursorClientEvents.isRightDragCouldStart() && !selectedUnits.isEmpty()) {
+        if (CursorClientEvents.isRightClickDown() && !selectedUnits.isEmpty()) {
             rightClickMoveDeferred = true;
             return;
         }
