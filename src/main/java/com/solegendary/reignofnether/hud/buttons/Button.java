@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.hud;
+package com.solegendary.reignofnether.hud.buttons;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
@@ -30,9 +30,9 @@ public class Button {
     public String name;
     public int x; // top left
     public int y;
-    int iconSize;
-    int iconFrameSize;
-    int iconSelectedFrameSize;
+    public int iconSize;
+    public int iconFrameSize;
+    public int iconSelectedFrameSize;
     public static int DEFAULT_ICON_SIZE = 14;
     public static int DEFAULT_ICON_FRAME_SIZE = 22;
     public int tooltipOffsetY = 0;
@@ -76,7 +76,7 @@ public class Button {
     public boolean greyWhenDisabled = true;
     public boolean showSelectedFrameWhenDisabled = false;
 
-    Minecraft MC = Minecraft.getInstance();
+    protected Minecraft MC = Minecraft.getInstance();
 
     // constructor for ability/action/production buttons
     public Button(String name, int iconSize, ResourceLocation iconRl, @Nullable Keybinding hotkey, Supplier<Boolean> isSelected,

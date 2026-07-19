@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;

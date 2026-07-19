@@ -2,13 +2,9 @@ package com.solegendary.reignofnether.building.production;
 
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
-
-import java.util.List;
-import java.util.function.Supplier;
 
 public class StopProductionButton extends Button {
    public StopProductionButton(String name, ResourceLocation rl, ProductionPlacement placement, ProductionItem production, boolean first) {

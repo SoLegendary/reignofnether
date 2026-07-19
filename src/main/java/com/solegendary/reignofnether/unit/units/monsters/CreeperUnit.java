@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.monsters;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Explode;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -287,7 +288,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
         );
     }
     @Override
-    public boolean hasBonusDamage() {
-        return true;
+    public int getDamageTooltipColour() {
+        return TooltipColours.GREEN;
     }
 }

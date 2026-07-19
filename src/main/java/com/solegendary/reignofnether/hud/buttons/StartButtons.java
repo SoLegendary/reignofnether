@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;

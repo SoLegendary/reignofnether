@@ -2,12 +2,11 @@ package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;

@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.building.buildings.placements;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.production.*;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.*;

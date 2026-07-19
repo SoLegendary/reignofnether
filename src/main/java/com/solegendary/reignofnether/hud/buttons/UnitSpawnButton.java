@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.sandbox.SandboxAction;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
@@ -10,7 +9,6 @@ import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 public class UnitSpawnButton extends Button {
     public UnitSpawnButton(String name, ResourceLocation iconRl, @Nullable List<FormattedCharSequence> tooltipLines) {

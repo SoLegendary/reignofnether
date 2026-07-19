@@ -117,6 +117,8 @@ public class UnitServerEvents {
 
     private static final List<MobEffect> SYNCED_MOB_EFFECTS = List.of(
         MobEffects.DAMAGE_RESISTANCE,
+        MobEffects.WEAKNESS,
+        MobEffects.DAMAGE_BOOST,
         MobEffectRegistrar.STUN.get(),
         MobEffectRegistrar.FREEZE.get(),
         MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(),

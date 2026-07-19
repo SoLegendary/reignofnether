@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -704,8 +705,8 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return true;
+    public int getDamageTooltipColour() {
+        return TooltipColours.GREEN;
     }
 
     @Override

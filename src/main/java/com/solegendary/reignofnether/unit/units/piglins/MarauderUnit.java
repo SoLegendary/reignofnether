@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -430,7 +431,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return isNextHitBig();
+    public int getDamageTooltipColour() {
+        return isNextHitBig() ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

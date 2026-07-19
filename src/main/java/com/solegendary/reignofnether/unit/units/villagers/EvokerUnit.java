@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.enchantments.VigorEnchantment;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -504,7 +505,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         return pSpawnData;
     }
 
-    public boolean hasBonusDamage() {
-        return getUnitAttackDamage() > attackDamage;
+    public int getDamageTooltipColour() {
+        return getUnitAttackDamage() > attackDamage ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

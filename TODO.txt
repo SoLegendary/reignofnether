@@ -30,19 +30,22 @@ Hero Items
 
 Balance
 -------
-[❌] Wither also causes weakness at 20% per stack
+[🟡] Wither Skeletons now cause stacking weakness on hit
+    - Regular units can have max 4 stacks of weakness, heroes can have 2
+[🟡] Wither Death Clouds add 1 stack of weakness
 
 Quality of Life
 ---------------
-[❌] Reduce starting capitol build speed by 33%
-[❌] Hero level ups are now heard by other players and show a particle effect
+[❌] Reduced starting capitol build speed by 33%
+[🟡] Improved hero particle effect visibility and added level up particles
+[🟡] Hero and higher value units are now prioritised for selection and attacks when mousing over dense groups
+[🟡] Weakness and Strength now affect all unit auto-attacks, modifying it by 20% of the base damage per level
 
 Bugfixes
 --------
 [❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
-[❌] Villagers farming randomly get stuck and can't move to reach further blocks
-    - Make them always be able to reach resource blocks while in farm bounds?
-[❌] Big units (esp. marauders) get stuck on transport portals when going through in big groups
+[🟡] Workers assigned to a farm can now always reach all food blocks on that farm
+[🟡] Big units no longer get stuck on transport portals when going through in big groups
 
 Languages
 ---------

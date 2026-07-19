@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.blaze3d.platform.Lighting;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
@@ -25,12 +24,7 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
-import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
-import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
-import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -59,7 +53,6 @@ import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantments;
 import org.apache.commons.lang3.text.WordUtils;
 import org.joml.Quaternionf;
 
@@ -67,6 +60,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.solegendary.reignofnether.hud.TooltipColours.*;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
@@ -239,7 +233,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                 x += EnchantmentIcon.ICON_SIZE / 2;
         }
         if (!(entity instanceof Player)) {
-            guiGraphics.drawString(Minecraft.getInstance().font, name, x + 4, y - 9, 0xFFFFFFFF);
+            guiGraphics.drawString(Minecraft.getInstance().font, name, x + 4, y - 9, WHITE);
         }
         x = xOrig;
         if (entity instanceof HeroUnit) {
@@ -352,7 +346,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         public ResourceLocation icon;
         public String text;
         public UnitStatType type;
-        public int colour = 0xFFFFFF;
+        public int colour = WHITE;
         public int textXOffset = 0;
 
         public RenderedStat(ResourceLocation icon, String text, UnitStatType type) {
@@ -401,23 +395,32 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             if (unit instanceof Mob mob && mob.isVehicle() && mob.getFirstPassenger() instanceof AttackerUnit passenger) {
                 atkStr += "+" + (int) passenger.getUnitAttackDamage();
             }
+
+            int damageTooltipColour = attackerUnit.getDamageTooltipColour();
+            float attackDmg = attackerUnit.getUnitAttackDamage();
+            float baseAttackDmg = attackerUnit.getBaseUnitAttackDamage();
+            if (attackDmg < baseAttackDmg)
+                damageTooltipColour = RED;
+            else if (attackDmg > baseAttackDmg)
+                damageTooltipColour = GREEN;
+
             renderedStats.add(new RenderedStat(
                     ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/sword.png"),
                     atkStr,
                     UnitStatType.ATTACK_DAMAGE,
-                    attackerUnit.hasBonusDamage() ? 0xFF2BFF2B : 0xFFFFFFFF,
+                    damageTooltipColour,
                     0
             ));
             DecimalFormat df2 = new DecimalFormat("###.##");
 
-            int atkSpdColour = 0xFFFFFFFF;
+            int atkSpdColour = LIGHT_BLUE;
             float attacksPerSecond = Math.round(attackerUnit.getAttacksPerSecond() * 100f) / 100f;
             float baseAttacksPerSecond = Math.round(attackerUnit.getBaseAttacksPerSecond() * 100f) / 100f;
 
             if (attacksPerSecond > baseAttacksPerSecond) {
-                atkSpdColour = 0xFF2BFF2B;
+                atkSpdColour = GREEN;
             } else if (attacksPerSecond < baseAttacksPerSecond) {
-                atkSpdColour = 0xFFFC3838;
+                atkSpdColour = RED;
             }
             renderedStats.add(new RenderedStat(
                     ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/sparkler.png"),
@@ -438,12 +441,12 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                     ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/bow.png"),
                     rangeStr,
                     UnitStatType.RANGE,
-                    attackerUnit.hasBonusRange() ? 0xFF2BFF2B : 0xFFFFFFFF,
+                    attackerUnit.hasBonusRange() ? GREEN : WHITE,
                     0
             ));
         }
 
-        int armourColor = 0xFFFFFFFF;
+        int armourColor = WHITE;
         double physicalArmour = unit.getUnitPhysicalArmorPercentage();
         double rangedArmour = unit.getUnitRangedArmorPercentage();
         double magicArmour = unit.getUnitMagicArmorPercentage();
@@ -455,37 +458,37 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         if (physicalArmour != 0) {
             armourStr = (int) (physicalArmour * 100) + "%";
-            armourColor = 0xFF2BFF2B;
+            armourColor = GREEN;
             avgArmourInv *= (1 - physicalArmour);
             nonZeroArmourTypes += 1;
         }
         if (rangedArmour != 0) {
             armourStr = (int) (rangedArmour * 100) + "%";
-            armourColor = 0xFFFCFC2B;
+            armourColor = YELLOW;
             avgArmourInv *= (1 - rangedArmour);
             nonZeroArmourTypes += 1;
         }
         if (resistArmour != 0) {
             armourStr = (int) (resistArmour * 100) + "%";
-            armourColor = 0xFF42DDDD;
+            armourColor = LIGHT_BLUE;
             avgArmourInv *= (1 - resistArmour);
             nonZeroArmourTypes += 1;
         }
         if (magicArmour != 0 && resistArmour <= 0) { // resistArmour includes magicArmour
             armourStr = (int) (magicArmour * 100) + "%";
-            armourColor = 0xFF5B5BFC;
+            armourColor = DARK_BLUE;
             avgArmourInv *= (1 - magicArmour);
             nonZeroArmourTypes += 1;
         }
         if (nonZeroArmourTypes > 1) {
             armourStr = "~" + (int) ((1 - avgArmourInv) * 100) + "%";
-            armourColor = 0xFF42DDDD;
+            armourColor = LIGHT_BLUE;
         }
         if (armourStr.contains("~") && armourStr.contains("-")) {
             armourStr = armourStr.replace("~", "");
         }
         if (armourStr.contains("-")) {
-            armourColor = 0xFFFC3838;
+            armourColor = RED;
         }
 
         renderedStats.add(new RenderedStat(
@@ -503,12 +506,12 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield()) {
             msInt *= ToggleShield.MOVESPEED_MULTIPLIER;
         }
-        int msColour = 0xFFFFFFFF;
+        int msColour = WHITE;
         double msAttr = ((Mob) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
         if (msAttr < unit.getMovementSpeed() || (unit instanceof BruteUnit bruteUnit && bruteUnit.isHoldingUpShield())) {
-            msColour = 0xFF2BFF2B;
+            msColour = GREEN;
         } else if (msAttr > unit.getMovementSpeed()) {
-            msColour = 0xFFFC3838;
+            msColour = RED;
         }
         renderedStats.add(new RenderedStat(
                 ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/boots.png"),
@@ -527,7 +530,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                     fcs((heroLvl >= 10 ? heroLvString : heroLvlString), true),
                     blitXIcon + 1,
                     blitYIcon - 1,
-                    0xFFFFFFFF
+                    WHITE
             );
             blitYIcon += HERO_Y_OFFSET + 1;
         }
@@ -638,7 +641,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                     statStrings.get(i),
                     blitXIcon + 12,
                     blitYIcon,
-                    redText ? 0xFF2525 : 0xFFFFFF
+                    redText ? RED : WHITE
                 );
                 blitYIcon += 10;
             }

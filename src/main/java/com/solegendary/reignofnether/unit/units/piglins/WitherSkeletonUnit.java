@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -22,7 +23,6 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +30,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -72,7 +73,6 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -243,6 +243,16 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
             aec.setRadiusPerTick(-aec.getRadius() / (float)aec.getDuration());
             aec.addEffect(new MobEffectInstance(MobEffects.WITHER, 2 * 20, 1));
             level().addFreshEntity(aec);
+
+            AreaEffectCloud aec2 = new AreaEffectCloud(level(), getX(), getY(), getZ());
+            aec2.setOwner(this);
+            aec2.setRadius(4.0F);
+            aec2.setRadiusOnUse(0);
+            aec2.setDurationOnUse(0);
+            aec2.setDuration(2 * 20);
+            aec2.setRadiusPerTick(-aec2.getRadius() / (float)aec2.getDuration());
+            aec2.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 2 * 20, 0));
+            level().addFreshEntity(aec2);
         }
         if (deathCloudTicks > 0)
             deathCloudTicks -= 1;
@@ -303,25 +313,24 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
         return itemStack.getItem() == Items.NETHERITE_CHESTPLATE;
     }
 
-    public static final int WITHER_SECONDS = 6;
+    public static final int EFFECT_DURATION = 6;
     public static final int WITHER_MAX_AMPLIFIER = 5; // amplifier starts at 0
     public static final int WITHER_MAX_AMPLIFIER_HERO = 3;
+    public static final int WEAKNESS_MAX_STACKS = 4; // amplifier starts at 0
+    public static final int WEAKNESS_MAX_AMPLIFIER_HERO = 2;
 
-    public static void applyStackingWither(LivingEntity le) {
+    public static void applyStackingEffect(LivingEntity le, MobEffect mobEffect, int maxAmp) {
         int amplifier = 0;
-        MobEffectInstance witherEffect = null;
-        for (MobEffectInstance effect : (le).getActiveEffects())
-            if (effect.getEffect() == MobEffects.WITHER)
-                witherEffect = effect;
+        MobEffectInstance mei = null;
+        for (MobEffectInstance activeMei : (le).getActiveEffects())
+            if (activeMei.getEffect() == mobEffect)
+                mei = activeMei;
 
-        if (witherEffect != null) {
-            int maxAmp = WITHER_MAX_AMPLIFIER;
-            if (le instanceof HeroUnit heroUnit)
-                maxAmp = WITHER_MAX_AMPLIFIER_HERO;
-            amplifier = Math.min(maxAmp, witherEffect.getAmplifier() + 1);
-            le.removeEffect(MobEffects.WITHER);
+        if (mei != null) {
+            amplifier = Math.min(maxAmp, mei.getAmplifier() + 1);
+            le.removeEffect(mobEffect);
         }
-        le.addEffect(new MobEffectInstance(MobEffects.WITHER, WITHER_SECONDS * 20, amplifier), null);
+        le.addEffect(new MobEffectInstance(mobEffect, EFFECT_DURATION * 20, amplifier), null);
     }
 
     @Override
@@ -329,8 +338,10 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
         if (!super.doHurtTarget(pEntity)) {
             return false;
         } else {
-            if (pEntity instanceof LivingEntity le)
-                applyStackingWither(le);
+            if (pEntity instanceof LivingEntity le) {
+                applyStackingEffect(le, MobEffects.WITHER, le instanceof HeroUnit ? WITHER_MAX_AMPLIFIER_HERO : WITHER_MAX_AMPLIFIER);
+                applyStackingEffect(le, MobEffects.WEAKNESS, le instanceof HeroUnit ? WEAKNESS_MAX_AMPLIFIER_HERO : WEAKNESS_MAX_STACKS);
+            }
             return true;
         }
     }
@@ -369,7 +380,12 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return getSharpnessLevel() > 0;
+    public int getDamageTooltipColour() {
+        return getSharpnessLevel() > 0 ? TooltipColours.GREEN : TooltipColours.WHITE;
+    }
+
+    @Override
+    public boolean canBeAffected(MobEffectInstance pPotioneffect) {
+        return pPotioneffect.getEffect() != MobEffects.WEAKNESS && super.canBeAffected(pPotioneffect);
     }
 }

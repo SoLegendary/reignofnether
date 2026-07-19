@@ -1,10 +1,9 @@
 package com.solegendary.reignofnether.ability.heroAbilities.enchanter;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -26,8 +25,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;

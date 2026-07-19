@@ -10,7 +10,7 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;

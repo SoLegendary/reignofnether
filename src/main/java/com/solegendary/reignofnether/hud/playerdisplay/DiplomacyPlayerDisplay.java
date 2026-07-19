@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.alliance.AllianceAction;
 import com.solegendary.reignofnether.alliance.AllianceServerboundPacket;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;

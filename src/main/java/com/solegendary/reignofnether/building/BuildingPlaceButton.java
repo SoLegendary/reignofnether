@@ -1,12 +1,10 @@
 package com.solegendary.reignofnether.building;
 
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Supplier;
 

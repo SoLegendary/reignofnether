@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -374,7 +375,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return hasEnchantedNetheriteSword() || getSharpnessLevel() > 0;
+    public int getDamageTooltipColour() {
+        return (hasEnchantedNetheriteSword() || getSharpnessLevel() > 0) ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

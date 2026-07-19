@@ -1,8 +1,8 @@
 package com.solegendary.reignofnether.rtsmap;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.hud.ButtonBuilder;
+import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;

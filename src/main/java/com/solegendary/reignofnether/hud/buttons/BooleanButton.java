@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;

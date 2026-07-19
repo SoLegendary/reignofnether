@@ -8,7 +8,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.CrashReport;

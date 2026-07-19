@@ -459,8 +459,13 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     private boolean isBlockInRange(BlockPos target) {
-        // Within mining reach (3D). No stuck-worker bonus: a block that's out of range is dropped by the gather
-        // goal's NO_TARGET_TIMEOUT so the worker just searches another one, instead of stretching its reach.
+        // always in range if the gatherer is assigned to a farm
+        if (getTargetFarm() != null &&
+            getTargetFarm().isPosInsideBuilding(mob.getOnPos()) &&
+            getGatherTarget() != null &&
+            getTargetFarm().isPosInsideBuilding(getGatherTarget()))
+            return true;
+
         return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= REACH_RANGE * REACH_RANGE;
     }
 
@@ -471,7 +476,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (this.mob.level().isClientSide())
             return isGatheringServerside;
 
-        if (!Unit.atMaxResources((Unit) mob) && this.data.gatherTarget != null && this.data.targetResourceSource != null &&
+         if (!Unit.atMaxResources((Unit) mob) && this.data.gatherTarget != null && this.data.targetResourceSource != null &&
             ResourceSources.getBlockResourceName(this.data.gatherTarget, mob.level()) != ResourceName.NONE)
             return isBlockInRange(data.gatherTarget);
         return false;

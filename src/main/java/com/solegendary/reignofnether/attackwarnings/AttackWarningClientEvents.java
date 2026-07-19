@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.attackwarnings;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
