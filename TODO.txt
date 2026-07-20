@@ -47,7 +47,8 @@ Quality of Life
 [✔] `/rtsapi-set-unit-enemy-search` now stops all current unit actions before applying the new search type
 [✔] Workers ordered to hunt an animal when at max resources will first drop them off
 [✔] Items that units pick up including resources and Piglin Merchant loot now have mouse-over tooltips
-
+[✔] Neutral buildings with 1-9 blocks are no longer shown on the minimap
+[✔] Neutral buildings with 11-49 blocks are now smaller on the minimap
 
 Bugfixes
 --------

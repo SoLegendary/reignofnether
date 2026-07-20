@@ -92,8 +92,6 @@ public class MinimapClientEvents {
     private static final int UNIT_THICKNESS = 1;
     private static final int PLAYER_RADIUS = 5;
     private static final int PLAYER_THICKNESS = 1;
-    private static final int BUILDING_RADIUS = 7;
-    private static final int BUILDING_THICKNESS = 2;
     private static final int START_POS_RADIUS = 7;
     private static final int START_POS_THICKNESS = 2;
     private static final int MARKER_RADIUS = 16;
@@ -718,8 +716,8 @@ public class MinimapClientEvents {
 
         for (Pair<BlockPos, Integer> ns : BlockClientEvents.nightSourceOrigins) {
 
-            int xc = ns.getFirst().getX() + (BUILDING_RADIUS / 2);
-            int zc = ns.getFirst().getZ() + (BUILDING_RADIUS / 2);
+            int xc = ns.getFirst().getX() + (7 / 2);
+            int zc = ns.getFirst().getZ() + (7 / 2);
             int xN = xc - xc_world + (mapGuiRadius * 2);
             int zN = zc - zc_world + (mapGuiRadius * 2);
 
@@ -748,6 +746,34 @@ public class MinimapClientEvents {
         }
     }
 
+    private static int getBuildingRadius(BuildingPlacement placement) {
+        int blockCount = placement.getHighestBlockCountReached();
+        if (placement.ownerName.isBlank()) {
+            if (blockCount < 20) {
+                return 0;
+            } else if (blockCount < 50) {
+                return 4;
+            } else {
+                return 7;
+            }
+        }
+        return 7;
+    }
+
+    private static int getBuildingThickness(BuildingPlacement placement) {
+        int blockCount = placement.getHighestBlockCountReached();
+        if (placement.ownerName.isBlank()) {
+            if (blockCount < 20) {
+                return 0;
+            } else if (blockCount < 50) {
+                return 1;
+            } else {
+                return 2;
+            }
+        }
+        return 2;
+    }
+
     private static void updateMapUnitsAndBuildings() {
         // draw buildings
         for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
@@ -755,17 +781,19 @@ public class MinimapClientEvents {
             if (!building.isExploredClientside || building.getBuilding() instanceof AbstractBridge)
                 continue;
 
-            int xc = building.centrePos.getX() + (BUILDING_RADIUS / 2);
-            int zc = building.centrePos.getZ() + (BUILDING_RADIUS / 2);
-            var rgb = PlayerColors.getPlayerDisplayColorHex(building.ownerName);
-            if (!FogOfWarClientEvents.isBuildingInBrightChunk(building)) {
-                var color = new Color(rgb);
-                color = new Color(color.getRed() / 2, color.getGreen() / 2, color.getBlue() / 2);
-                rgb = color.getRGB();
+            int buildingRadius = getBuildingRadius(building);
+            int buildingThickness = getBuildingThickness(building);
+            if (buildingRadius > 0) {
+                int xc = building.centrePos.getX() + (buildingRadius / 2);
+                int zc = building.centrePos.getZ() + (buildingRadius / 2);
+                var rgb = PlayerColors.getPlayerDisplayColorHex(building.ownerName);
+                if (!FogOfWarClientEvents.isBuildingInBrightChunk(building)) {
+                    var color = new Color(rgb);
+                    color = new Color(color.getRed() / 2, color.getGreen() / 2, color.getBlue() / 2);
+                    rgb = color.getRGB();
+                }
+                drawBuildingOnMap(xc, zc, rgb, buildingRadius, buildingThickness);
             }
-
-
-            drawBuildingOnMap(xc, zc, rgb);
         }
         // draw starting locations
         if (MC.level != null && StartPosClientEvents.isEnabled() &&
@@ -814,16 +842,16 @@ public class MinimapClientEvents {
 
     }
 
-    private static void drawBuildingOnMap(int xc, int zc, int color) {
-        for (int x = xc - BUILDING_RADIUS; x < xc + BUILDING_RADIUS; x++) {
-            for (int z = zc - BUILDING_RADIUS; z < zc + BUILDING_RADIUS; z++) {
+    private static void drawBuildingOnMap(int xc, int zc, int color, int radius, int thickness) {
+        for (int x = xc - radius; x < xc + radius; x++) {
+            for (int z = zc - radius; z < zc + radius; z++) {
                 if (isWorldXZinsideMap(x, z)) {
-                    int x0 = x - xc + BUILDING_RADIUS;
-                    int z0 = z - zc + BUILDING_RADIUS;
+                    int x0 = x - xc + radius;
+                    int z0 = z - zc + radius;
 
                     // if pixel is on the edge of the square keep it coloured black
-                    var rgb = (x0 < BUILDING_THICKNESS || x0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS ||
-                            z0 < BUILDING_THICKNESS || z0 >= (BUILDING_RADIUS * 2) - BUILDING_THICKNESS)
+                    var rgb = (x0 < thickness || x0 >= (radius * 2) - thickness ||
+                            z0 < thickness || z0 >= (radius * 2) - thickness)
                             ? 0x000000
                             : color;
 
