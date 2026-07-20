@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -368,7 +369,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return hasFlameTrident() || getPowerLevel() > 0;
+    public int getDamageTooltipColour() {
+        return (hasFlameTrident() || getPowerLevel() > 0) ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

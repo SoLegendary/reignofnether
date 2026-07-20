@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -346,7 +347,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
         );
     }
     @Override
-    public boolean hasBonusDamage() {
-        return true;
+    public int getDamageTooltipColour() {
+        return TooltipColours.GREEN;
     }
 }

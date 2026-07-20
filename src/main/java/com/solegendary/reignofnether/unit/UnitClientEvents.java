@@ -22,6 +22,7 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -385,7 +386,7 @@ public class UnitClientEvents {
     }
 
     private static void resolveMoveAction() {
-        if (CursorClientEvents.isRightDragCouldStart() && !selectedUnits.isEmpty()) {
+        if (CursorClientEvents.isRightClickDown() && !selectedUnits.isEmpty()) {
             rightClickMoveDeferred = true;
             return;
         }
@@ -474,7 +475,7 @@ public class UnitClientEvents {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 if (entity instanceof Unit unit) {
-                    unit.getItems().removeIf(i -> !ResourceSources.isPreparedFood(i.getItem()));
+                    unit.getItems().removeIf(i -> !ItemUtil.isPreparedEdibleFood(i.getItem()));
                     unit.getItems().add(new ItemStack(Items.SUGAR, res.food));
                     unit.getItems().add(new ItemStack(Items.STICK, res.wood));
                     unit.getItems().add(new ItemStack(Items.STONE, res.ore));

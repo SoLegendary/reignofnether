@@ -7,8 +7,8 @@ package com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -27,6 +27,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
+import static com.solegendary.reignofnether.items.ItemUtil.*;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
@@ -38,10 +39,6 @@ public class FancyFeast extends HeroAbility {
     public static final int BASE_ITEMS = 6;
     public static final int BONUS_ITEMS_PER_CHUNK_RESOURCES = 2;
     public static int MANA_REFUND_PER_CHUNK_RESOURCES = 10;
-
-    public static final float HEALTH_PER_BREAD = 12;
-    public static final float HEALTH_PER_CHICKEN = 18;
-    public static final float HEALTH_PER_BEEF = 24;
 
     public FancyFeast() {
         super(3, 70, UnitAction.FANCY_FEAST, CD_MAX_SECONDS, RANGE, 0, false);

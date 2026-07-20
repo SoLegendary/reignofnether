@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -142,10 +143,11 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public boolean getWillRetaliate() {return willRetaliate;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getUnitAttackDamage() {
+        float dmg = AttackerUnit.super.getUnitAttackDamage();
         if (useCleavingHitDamage) {
-            return cleavingHitDamage;
+            return dmg + cleavingHitDamageMod;
         }
-        return isNextHitBig() ? bigHitDamage : attackDamage;}
+        return isNextHitBig() ? dmg + bigHitDamageMod : dmg;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
@@ -160,8 +162,8 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     // endregion
 
     final static public float attackDamage = 7.0f;
-    final static public float bigHitDamage = 10.0f;
-    final static public float cleavingHitDamage = 5f;
+    final static public float bigHitDamageMod = 3f;
+    final static public float cleavingHitDamageMod = -2;
     final static public float attacksPerSecond = 0.4f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
@@ -430,7 +432,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return isNextHitBig();
+    public int getDamageTooltipColour() {
+        return isNextHitBig() ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

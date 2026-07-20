@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -499,8 +500,8 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     }
 
     @Override
-    public boolean hasBonusDamage() {
+    public int getDamageTooltipColour() {
         return (isUsingBow() && getPowerLevel() > 0) ||
-                (!isUsingBow() && getSharpnessLevel() > 0);
+                (!isUsingBow() && getSharpnessLevel() > 0) ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

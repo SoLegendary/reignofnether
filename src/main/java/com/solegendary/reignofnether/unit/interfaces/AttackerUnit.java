@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
@@ -19,6 +20,7 @@ import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -38,6 +40,9 @@ import java.util.Comparator;
 import java.util.List;
 
 public interface AttackerUnit {
+
+    public static final float ATTACK_DAMAGE_REDUCTION_PER_WEAK = 0.2f;
+    public static final float ATTACK_DAMAGE_INCREASE_PER_STRENGTH = 0.2f;
 
     public boolean getWillRetaliate();
     public default float getAttacksPerSecond() {
@@ -61,13 +66,27 @@ public interface AttackerUnit {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
     }
-    public default float getUnitAttackDamage() {
+    public default float getBaseUnitAttackDamage() {
         float bonus = 0;
         if (this instanceof HeroUnit heroUnit) {
             bonus = heroUnit.getAttackBonusPerLevel() * heroUnit.getHeroLevel();
         }
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
+    }
+    public default float getUnitAttackDamage() {
+        float value = getBaseUnitAttackDamage();
+        MobEffectInstance weakMei = ((LivingEntity) this).getEffect(MobEffects.WEAKNESS);
+        float weak = 0;
+        if (weakMei != null && weakMei.getDuration() > 0) {
+            weak = (weakMei.getAmplifier() + 1) * ATTACK_DAMAGE_REDUCTION_PER_WEAK;
+        }
+        MobEffectInstance strMei = ((LivingEntity) this).getEffect(MobEffects.DAMAGE_BOOST);
+        float str = 0;
+        if (strMei != null && strMei.getDuration() > 0) {
+            str = (strMei.getAmplifier() + 1) * ATTACK_DAMAGE_INCREASE_PER_STRENGTH;
+        }
+        return Math.max(0, value * (1 - weak + str));
     }
     public BlockPos getAttackMoveTarget();
     public boolean canAttackBuildings();
@@ -77,8 +96,6 @@ public interface AttackerUnit {
 
     public EnemySearchBehaviour getEnemySearchBehaviour(); // not necessarily the same goal, eg. could be melee or ranged
     public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour);
-
-
 
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setUnitAttackTarget(@Nullable LivingEntity target) {
@@ -325,8 +342,8 @@ public interface AttackerUnit {
         return 0f;
     }
 
-    public default boolean hasBonusDamage() {
-        return false;
+    public default int getDamageTooltipColour() {
+        return TooltipColours.WHITE;
     }
 
     public default boolean hasBonusRange() {

@@ -109,35 +109,13 @@ public class UnitServerEvents {
     // actioned ASAP regardless of what the unit was doing
     private static final List<UnitActionItem> unitActionFastQueue = Collections.synchronizedList(new ArrayList<>());
 
+    public static List<UnitActionItem> getUnitActionSlowQueue() { return unitActionSlowQueue; }
+
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
     private static final HashMap<Integer, ChunkAccess> forcedUnitChunks = new HashMap<>();
 
     private static final Random RANDOM = new Random();
-
-    private static final List<MobEffect> SYNCED_MOB_EFFECTS = List.of(
-        MobEffects.DAMAGE_RESISTANCE,
-        MobEffectRegistrar.STUN.get(),
-        MobEffectRegistrar.FREEZE.get(),
-        MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(),
-        MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(),
-        MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(),
-        MobEffectRegistrar.ATTACK_SLOWDOWN.get(),
-        MobEffectRegistrar.TEMPORARY_EFFICIENCY.get(),
-        MobEffectRegistrar.BLOODLUST.get(),
-        MobEffectRegistrar.FROST_DAMAGE.get(),
-        MobEffectRegistrar.DISARM.get(),
-        MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get(),
-        MobEffectRegistrar.SCORCHING_FIRE.get(),
-        MobEffectRegistrar.SOULS_AFLAME.get(),
-        MobEffectRegistrar.ANGRY.get(),
-        MobEffectRegistrar.FEARFUL.get(),
-        MobEffectRegistrar.PARTIALLY_POSSESSED.get(),
-        MobEffects.LEVITATION
-    );
-
-    // Per-entity last-synced mob effect amplifiers. Null amp means "absent last sync".
-    private static final HashMap<Integer, HashMap<MobEffect, Byte>> lastSyncedEffects = new HashMap<>();
 
     // Time-sliced formation dispatch: VANILLA-ONLY (rtsPathfinding off). Large group MOVE commands
     // are spread across ticks to avoid the spike from N units all running vanilla's synchronous main-thread
@@ -189,6 +167,8 @@ public class UnitServerEvents {
         if (level != null) {
             saveFallenHeroUnits(level);
             saveGatherTargets(level);
+            allUnits.clear();
+            forcedUnitChunks.clear();
         }
     }
 
@@ -462,7 +442,6 @@ public class UnitServerEvents {
             && !evt.getLevel().isClientSide) {
 
             allUnits.removeIf(e -> e.getId() == entity.getId());
-            lastSyncedEffects.remove(entity.getId());
             UnitSyncClientboundPacket.sendLeavePacket(entity);
 
             //ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
@@ -673,16 +652,18 @@ public class UnitServerEvents {
     public static void onDropItem(LivingDropsEvent evt) {
         if (ResourceSources.isHuntableAnimal(evt.getEntity()) && !evt.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO) && evt.getSource()
             .getEntity() instanceof Unit unit && evt.getSource().getEntity() instanceof WorkerUnit && evt.getSource()
-            .getEntity() instanceof Mob mob && mob.canPickUpLoot() && !Unit.atMaxResources(unit)) {
+            .getEntity() instanceof Mob mob && mob.canPickUpLoot()) {
 
-            evt.setCanceled(true);
+            if (!Unit.atMaxResources(unit))
+                evt.setCanceled(true);
 
             if (lastHuntedAnimalId != evt.getEntity().getId()) {
                 for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
                     ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
 
                     if (res != null) {
-                        unit.getItems().add(itemStack);
+                        if (!Unit.atMaxResources(unit))
+                            unit.getItems().add(itemStack);
                         if (unit instanceof VillagerUnit vUnit) {
                             vUnit.incrementHunterExp();
                             if (!(evt.getEntity() instanceof Chicken))
@@ -704,14 +685,13 @@ public class UnitServerEvents {
                             }
                         }
                     }
+                    System.out.println("hasDropOffCommandQueued: " + hasDropOffCommandQueued);
                     if (!hasDropOffCommandQueued) {
                         unitActionSlowQueue.add(0, new UnitActionItem(
                                 unit.getOwnerName(),
                                 UnitAction.RETURN_RESOURCES_TO_CLOSEST,
                                 -1,
-                                new int[]{((Entity) unit).getId()},
-                                new BlockPos(0, 0, 0),
-                                new BlockPos(0, 0, 0)
+                                new int[]{((Entity) unit).getId()}
                         ));
                     }
                 }
@@ -759,22 +739,6 @@ public class UnitServerEvents {
                 if (entity instanceof Unit unit) {
                     UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                     UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
-
-                    HashMap<MobEffect, Byte> lastState = lastSyncedEffects.computeIfAbsent(entity.getId(), k -> new HashMap<>());
-                    for (MobEffect me : SYNCED_MOB_EFFECTS) {
-                        MobEffectInstance mei = entity.getEffect(me);
-                        Byte lastAmp = lastState.get(me);
-                        if (mei != null) {
-                            byte amp = (byte) mei.getAmplifier();
-                            if (lastAmp == null || lastAmp != amp) {
-                                UnitSyncMobEffectsClientboundPacket.addEffectClientside(entity, mei);
-                                lastState.put(me, amp);
-                            }
-                        } else if (lastAmp != null) {
-                            UnitSyncMobEffectsClientboundPacket.removeEffectClientside(entity, me);
-                            lastState.remove(me);
-                        }
-                    }
 
                     if (unit.getAnchor() != null)
                         UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
@@ -1109,6 +1073,8 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit unit && MobEffectRegistrar.isInterrupt(evt.getEffectInstance().getEffect()) && unit.uninterruptable()) {
             evt.setCanceled(true);
         }
+        if (!evt.getEntity().level().isClientSide())
+            UnitSyncMobEffectsClientboundPacket.addEffectClientside(evt.getEntity(), evt.getEffectInstance());
     }
 
     @SubscribeEvent
@@ -1122,6 +1088,8 @@ public class UnitServerEvents {
                 EnchantmentHelper.setEnchantments(new HashMap<>(), evt.getEntity().getMainHandItem());
             }
         }
+        if (!evt.getEntity().level().isClientSide())
+            UnitSyncMobEffectsClientboundPacket.removeEffectClientside(evt.getEntity(), evt.getEffectInstance().getEffect());
     }
 
     @SubscribeEvent

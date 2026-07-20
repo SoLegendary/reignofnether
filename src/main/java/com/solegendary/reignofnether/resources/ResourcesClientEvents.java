@@ -5,6 +5,7 @@ import com.mojang.math.Axis;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -22,6 +23,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -54,17 +56,31 @@ public class ResourcesClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(ScreenEvent.Render evt) {
-        if (HudClientEvents.hudSelectedEntity instanceof WorkerUnit workerUnit &&
-            UnitClientEvents.getPlayerToEntityRelationship((LivingEntity) workerUnit) == Relationship.OWNED &&
-            MC.level != null && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
-
+        if (MC.level != null && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
             BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
             ResourceSource res = ResourceSources.getFromBlockPos(preSelBp, MC.level);
-            if (res != null && res.resourceValue > 0 && !BuildingUtils.isPosInsideAnyBuilding(true, preSelBp)) {
+            boolean isItem = false;
+            int itemCount = 1;
+            if (res == null || res.resourceValue == 0) {
+                for (ItemEntity itemEntity : ItemClientEvents.getPreselectedItems()) {
+                    ResourceSource resItem = ResourceSources.getFromItem(itemEntity.getItem().getItem());
+                    if (resItem != null && resItem.resourceValue > 0) {
+                        res = resItem;
+                        isItem = true;
+                        itemCount = itemEntity.getItem().getCount();
+                        break;
+                    }
+                }
+            }
+            boolean workerSelected = HudClientEvents.hudSelectedEntity instanceof WorkerUnit workerUnit &&
+                    UnitClientEvents.getPlayerToEntityRelationship((LivingEntity) workerUnit) == Relationship.OWNED;
+            boolean notInBuilding = !BuildingUtils.isPosInsideAnyBuilding(true, preSelBp);
+
+            if (res != null && res.resourceValue > 0 && (isItem || (workerSelected && notInBuilding))) {
                 String str = switch (res.resourceName) {
-                    case FOOD -> "\uE000  " + res.resourceValue;
-                    case WOOD -> "\uE001  " + res.resourceValue;
-                    case ORE -> "\uE002  " + res.resourceValue;
+                    case FOOD -> "\uE000  " + (res.resourceValue * itemCount);
+                    case WOOD -> "\uE001  " + (res.resourceValue * itemCount);
+                    case ORE -> "\uE002  " + (res.resourceValue * itemCount);
                     case NONE -> "";
                 };
                 MyRenderer.renderTooltip(evt.getGuiGraphics(),

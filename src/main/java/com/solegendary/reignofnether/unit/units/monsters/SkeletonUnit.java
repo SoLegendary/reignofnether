@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.MountSpider;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -328,7 +329,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return getPowerLevel() > 0;
+    public int getDamageTooltipColour() {
+        return getPowerLevel() > 0 ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

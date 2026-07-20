@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.AttackGround;
 import com.solegendary.reignofnether.entities.GhastUnitFireball;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -407,8 +408,8 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         );
     }
     @Override
-    public boolean hasBonusDamage() {
-        return true;
+    public int getDamageTooltipColour() {
+        return TooltipColours.GREEN;
     }
 
 

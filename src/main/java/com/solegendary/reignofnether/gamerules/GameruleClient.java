@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.gamerules;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -67,6 +67,7 @@ public class GameruleClient {
     }
 
     private static class GameruleBooleanButton extends Button {
+        private static final Minecraft MC = Minecraft.getInstance();
         private final String label;
         public GameruleBooleanButton(String label, boolean enabled, Runnable onLeftClick, String tooltip) {
             super(
@@ -98,6 +99,7 @@ public class GameruleClient {
     }
 
     private static class GameruleIntegerButton extends Button {
+        private static final Minecraft MC = Minecraft.getInstance();
         private final String label;
         public GameruleIntegerButton(String label, Runnable onLeftClick, Runnable onRightClick, List<FormattedCharSequence> tooltipLines) {
             super(

@@ -2,19 +2,17 @@ package com.solegendary.reignofnether.unit.interfaces;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.HeroProductionItem;
-import com.solegendary.reignofnether.building.production.ProductionBuilding;
-import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -22,11 +20,10 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.HeroUnitSave;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.packets.UnitSyncAbilityClientboundPacket;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -189,6 +186,8 @@ public interface HeroUnit extends Unit {
             setSkillPoints(getSkillPoints() + levelDiff);
             HeroClientboundPacket.setSkillPoints(((LivingEntity) this).getId(), getSkillPoints());
             SoundClientboundPacket.playSoundAtPos(SoundAction.LEVEL_UP, ((LivingEntity) this).getOnPos());
+            MiscUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 10,
+                    ((LivingEntity) this).level(), ((LivingEntity) this).getEyePosition(), 0.5f);
             setStatsForLevel();
             ((LivingEntity) this).heal(levelDiff * getHealthBonusPerLevel());
         }

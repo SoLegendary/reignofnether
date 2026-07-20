@@ -8,8 +8,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.RectZone;
+import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -31,6 +31,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -46,6 +47,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 
@@ -516,6 +518,37 @@ public class MyRenderer {
             guiGraphics.renderTooltip(MC.font, tooltipLines, mouseX, mouseY - (9 * (tooltipLines.size() - 1)));
             guiGraphics.pose().translate(0, 0, -3000);
         }
+    }
+
+    public static void renderItemEntityTooltip(GuiGraphics guiGraphics, UnitItem unitItem, int mouseX, int mouseY) {
+        if (unitItem == null || MC.screen == null)
+            return;
+
+        final int iconSize = 16;
+        int spaceWidth = MC.font.width(" ");
+        int paddingChars = iconSize / Math.max(spaceWidth, 1);
+        String pad = " ".repeat(paddingChars);
+        Component name = unitItem.iconRl != null ? Component.literal(pad).append(unitItem.getName()) : unitItem.getName();
+        List<FormattedCharSequence> lore = unitItem.getTooltip();
+
+        List<FormattedCharSequence> lines = new ArrayList<>();
+        lines.add(name.getVisualOrderText());
+        if (lore != null)
+            lines.addAll(lore);
+
+        if (mouseY < MC.screen.height / 2)
+            mouseY += (lines.size() * 10);
+
+        int textY = mouseY - (9 * (lines.size() - 1));
+
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 3000);
+        if (unitItem.iconRl != null)
+            guiGraphics.blit(unitItem.iconRl, mouseX + 18, textY - 16, 0, 0, iconSize, iconSize, iconSize, iconSize);
+        guiGraphics.pose().translate(0, 0, -1500);
+        guiGraphics.renderTooltip(MC.font, lines, mouseX + 8, textY);
+        guiGraphics.pose().translate(0, 0, -1500);
+        guiGraphics.pose().popPose();
     }
 
     public static void renderItemInFrontOfEntityFace(PoseStack poseStack, LivingEntity entity, float partialTicks, ItemStack itemStack) {

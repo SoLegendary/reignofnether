@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -337,8 +338,8 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return true;
+    public int getDamageTooltipColour() {
+        return TooltipColours.GREEN;
     }
 
     @Override

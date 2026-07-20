@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.enchantments.MaimingEnchantment;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -319,7 +320,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return getSharpnessLevel() > 0;
+    public int getDamageTooltipColour() {
+        return getSharpnessLevel() > 0 ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

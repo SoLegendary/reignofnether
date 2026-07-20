@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.ability;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;

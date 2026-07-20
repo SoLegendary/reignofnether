@@ -2,11 +2,10 @@ package com.solegendary.reignofnether.gamemode;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.matchstart.MatchStartScreen;
-import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
