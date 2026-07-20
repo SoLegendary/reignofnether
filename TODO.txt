@@ -46,7 +46,7 @@ Quality of Life
 [✔] Workers rallied to a resource now auto-gather that resource even if the exact block is already mined
 [✔] `/rtsapi-set-unit-enemy-search` now stops all current unit actions before applying the new search type
 [✔] Workers ordered to hunt an animal when at max resources will first drop them off
-[🟡] Items that units pick up including resources and Piglin Merchant loot now have mouse-over tooltips
+[✔] Items that units pick up including resources and Piglin Merchant loot now have mouse-over tooltips
 
 
 Bugfixes

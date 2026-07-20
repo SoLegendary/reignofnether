@@ -20,6 +20,8 @@ public class ItemClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    public static boolean isRenderingTooltip = false;
+
     // items moused over
     private static final ArrayList<ItemEntity> preselectedItems = new ArrayList<>();
 
@@ -44,7 +46,7 @@ public class ItemClientEvents {
             for (ItemEntity itemEntity : preselectedItems) {
                 ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
                 boolean isResourceItem = res != null && res.resourceValue > 0;
-                if (ItemUtil.isUnitItem(itemEntity) || isResourceItem || ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
+                if (!isRenderingTooltip && ItemUtil.isUnitItem(itemEntity) || isResourceItem || ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
                     MyRenderer.drawBoxBottom(
                             evt.getPoseStack(),
                             itemEntity.getBoundingBox().inflate(0.25, 0, 0.25),
@@ -58,15 +60,19 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
+        isRenderingTooltip = false;
         if (OrthoviewClientEvents.isEnabled()) {
             for (ItemEntity itemEntity : preselectedItems) {
                 UnitItem unitItem = ItemUtil.getUnitItem(itemEntity.getItem().getItem());
                 if (unitItem != null) {
                     MyRenderer.renderItemEntityTooltip(evt.getGuiGraphics(), unitItem, evt.getMouseX(), evt.getMouseY());
+                    isRenderingTooltip = true;
                     break;
                 } else if (ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
                     UnitItem foodUnitItem = new EdibleFoodItem(itemEntity.getItem().getItem(), itemEntity.getItem().getCount());
                     MyRenderer.renderTooltip(evt.getGuiGraphics(), foodUnitItem.getTooltip(), evt.getMouseX(), evt.getMouseY());
+                    isRenderingTooltip = true;
+                    break;
                 }
             }
         }
