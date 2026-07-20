@@ -277,9 +277,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             makeVeteran();
     }
 
-    // chickens only worth 1, other animals worth 2
-    // does 2 damage to huntable animals (3 for veteran)
-    final static public int HUNTER_EXP_REQ = 8;
+    // chickens only worth 1, other animals worth 2, hunters do bonus damage to animals
+    final static public int HUNTER_EXP_REQ = 4;
     public int hunterExp = 0;
     public void incrementHunterExp() {
         hunterExp += hasSpeedCheat() ? 10 : 1;

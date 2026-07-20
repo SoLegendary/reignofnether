@@ -658,19 +658,15 @@ public class UnitServerEvents {
                 evt.setCanceled(true);
 
             if (lastHuntedAnimalId != evt.getEntity().getId()) {
-                for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
-                    ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
 
-                    if (res != null) {
-                        if (!Unit.atMaxResources(unit))
+                if (!Unit.atMaxResources(unit)) {
+                    for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
+                        ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
+                        if (res != null)
                             unit.getItems().add(itemStack);
-                        if (unit instanceof VillagerUnit vUnit) {
-                            vUnit.incrementHunterExp();
-                            if (!(evt.getEntity() instanceof Chicken))
-                                vUnit.incrementHunterExp();
-                        }
                     }
                 }
+
                 // insert a drop-off command without disrupting other queued commands
                 if (Unit.atThresholdResources(unit)) {
                     int unitId = ((Mob) unit).getId();
@@ -685,7 +681,6 @@ public class UnitServerEvents {
                             }
                         }
                     }
-                    System.out.println("hasDropOffCommandQueued: " + hasDropOffCommandQueued);
                     if (!hasDropOffCommandQueued) {
                         unitActionSlowQueue.add(0, new UnitActionItem(
                                 unit.getOwnerName(),
