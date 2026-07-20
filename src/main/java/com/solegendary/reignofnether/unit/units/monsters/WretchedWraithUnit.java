@@ -776,6 +776,8 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
+        if ((frostBlinkInProgress || level().isClientSide()) && (pSource.is(DamageTypes.FELL_OUT_OF_WORLD) || pSource.is(DamageTypes.IN_WALL)))
+            return false;
         boolean result = super.hurt(pSource, pAmount);
         if (result && getBitterFrost().getRank(this) >= 3 && !level().isClientSide()) {
             if (pSource.getEntity() instanceof Mob mob) {

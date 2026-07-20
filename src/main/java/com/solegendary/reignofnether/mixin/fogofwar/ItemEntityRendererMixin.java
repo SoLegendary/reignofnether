@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.mixin.fogofwar;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import net.minecraft.client.renderer.LightTexture;
@@ -56,7 +57,7 @@ public abstract class ItemEntityRendererMixin {
         Item item = itemEntity.getItem().getItem();
         if (!OrthoviewClientEvents.isEnabled())
             return false;
-        return ResourceSources.isPreparedFood(item) ||
+        return ItemUtil.isPreparedEdibleFood(item) ||
                 ResourceSources.getFromItem(item) != null ||
                 enlargedItems.contains(item);
     }

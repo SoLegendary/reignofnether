@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -35,6 +36,7 @@ public class ProductionPlacement extends BuildingPlacement {
     public List<Button> productionButtons;
     public final List<ActiveProduction> productionQueue = new ArrayList<>();
     public boolean attackRally = false;
+    public ResourceName rallyResourceName = ResourceName.NONE; // used to set worker resource targets
 
     public ProductionPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
@@ -74,6 +76,7 @@ public class ProductionPlacement extends BuildingPlacement {
         if (!isPosInsideBuilding(rallyPoint))
             this.rallyPoints.add(rallyPoint);
         this.rallyPointEntity = null;
+        rallyResourceName = ResourceSources.getBlockResourceName(rallyPoint, level);
     }
 
     public void addRallyPoint(BlockPos rallyPoint) {
@@ -82,6 +85,7 @@ public class ProductionPlacement extends BuildingPlacement {
         if (!isPosInsideBuilding(rallyPoint))
             this.rallyPoints.add(rallyPoint);
         this.rallyPointEntity = null;
+        rallyResourceName = ResourceSources.getBlockResourceName(rallyPoint, level);
     }
 
     public boolean canSetRallyPoint() {
@@ -196,6 +200,11 @@ public class ProductionPlacement extends BuildingPlacement {
                                     new BlockPos(0,0,0),
                                     fi > 0
                             );
+                    });
+                    CompletableFuture.delayedExecutor(750, TimeUnit.MILLISECONDS).execute(() -> {
+                        if (!attackRally && unit instanceof WorkerUnit workerUnit)
+                            if (rallyResourceName != ResourceName.NONE)
+                                workerUnit.getGatherResourceGoal().setTargetResourceName(rallyResourceName);
                     });
                 }
             }

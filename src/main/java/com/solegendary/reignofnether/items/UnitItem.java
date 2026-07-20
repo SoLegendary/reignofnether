@@ -26,8 +26,7 @@ import java.util.List;
 public abstract class UnitItem {
     final Item item;
     public final ResourceLocation iconRl;
-    int stackQty = 1;
-    public List<FormattedCharSequence> tooltip;
+    protected int stackQty = 1;
     List<Pair<Enchantment, Integer>> enchantments = List.of();
 
     public UnitItem(Item item, ResourceLocation iconRl) {
@@ -48,7 +47,7 @@ public abstract class UnitItem {
     }
 
     public List<FormattedCharSequence> getTooltip() {
-        return tooltip;
+        return List.of();
     }
 
     public Component getName() {
@@ -66,7 +65,7 @@ public abstract class UnitItem {
 
     public Button getButton() {
         return new ButtonBuilder("button_" + item.getDescriptionId())
-                .tooltipLines(tooltip)
+                .tooltipLines(getTooltip())
                 .build();
     }
 

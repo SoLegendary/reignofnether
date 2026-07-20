@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.unit.interfaces;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
-import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.FancyFeast;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
@@ -16,6 +15,7 @@ import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
+import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -99,8 +99,6 @@ public interface Unit {
         return map;
     }
 
-    static float HEAL_PER_NUTRITION = 2.5f;
-
     // position that neutral units run back to when past leash range
     void setAnchor(BlockPos bp);
     BlockPos getAnchor();
@@ -129,13 +127,13 @@ public interface Unit {
     public default boolean isEatingFood() { return getEatingTicksLeft() > 0; };
     public default boolean isHoldingEdibleFood() {
         for (ItemStack itemStack : getItems())
-            if (ResourceSources.isPreparedFood(itemStack.getItem()))
+            if (ItemUtil.isPreparedEdibleFood(itemStack.getItem()))
                 return true;
         return false;
     };
     public default Item getFoodBeingEaten() {
         for (ItemStack itemStack : getItems())
-            if (ResourceSources.isPreparedFood(itemStack.getItem()))
+            if (ItemUtil.isPreparedEdibleFood(itemStack.getItem()))
                 return itemStack.getItem();
         return Items.AIR;
     }
@@ -347,23 +345,16 @@ public interface Unit {
             unit.setEatingTicksLeft(unit.getEatingTicksLeft() - 1);
             if (!unit.isEatingFood()) {
                 for (ItemStack itemStack : unit.getItems()) {
-                    if (ResourceSources.isPreparedFood(itemStack.getItem())) {
+                    if (ItemUtil.isPreparedEdibleFood(itemStack.getItem())) {
                         unitMob.level().playSound(null, unitMob.getX(), unitMob.getY(), unitMob.getZ(),
                                 SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F,
                                 unitMob.getRandom().nextFloat() * 0.1F + 0.9F
                         );
-                        int nutrition = itemStack.getItem().getFoodProperties(itemStack, (LivingEntity) unit).getNutrition();
                         if (itemStack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
                             unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, 5));
                             unitMob.setAbsorptionAmount(24);
-                        } else if (itemStack.getItem() == Items.BREAD) {
-                            unitMob.heal(FancyFeast.HEALTH_PER_BREAD);
-                        } else if (itemStack.getItem() == Items.COOKED_CHICKEN) {
-                            unitMob.heal(FancyFeast.HEALTH_PER_CHICKEN);
-                        } else if (itemStack.getItem() == Items.COOKED_BEEF) {
-                            unitMob.heal(FancyFeast.HEALTH_PER_BEEF);
                         } else {
-                            unitMob.heal(nutrition * HEAL_PER_NUTRITION);
+                            unitMob.heal(ItemUtil.getFoodHealAmount(itemStack));
                         }
                         itemStack.setCount(itemStack.getCount() - 1);
                         break;
@@ -377,7 +368,7 @@ public interface Unit {
             }
         } else {
             for (ItemStack itemStack : unit.getItems()) {
-                if (ResourceSources.isPreparedFood(itemStack.getItem())) {
+                if (ItemUtil.isPreparedEdibleFood(itemStack.getItem())) {
                     unit.setEatingTicksLeft(40);
                     break;
                 }
@@ -494,8 +485,8 @@ public interface Unit {
                 }
                 Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
                 if (!itementity.isRemoved() && !itemstack.isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive() && !unit.getOwnerName().isEmpty() &&
-                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ResourceSources.isPreparedFood(itemstack.getItem())) {
-                    if (ResourceSources.isPreparedFood(itemstack.getItem()) &&
+                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isPreparedEdibleFood(itemstack.getItem())) {
+                    if (ItemUtil.isPreparedEdibleFood(itemstack.getItem()) &&
                             (unitMob.getHealth() < unitMob.getMaxHealth() || itemstack.getItem() == Items.ENCHANTED_GOLDEN_APPLE)) {
                         unitMob.onItemPickup(itementity);
                         unitMob.take(itementity, 1);

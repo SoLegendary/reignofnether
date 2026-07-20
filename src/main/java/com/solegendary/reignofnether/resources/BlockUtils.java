@@ -6,8 +6,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.SlabType;
@@ -86,8 +85,18 @@ public class BlockUtils {
         return isWraithSnow(bs) || isVanillaSnow(bs) ? bs.getValue(BlockStateProperties.LAYERS) : 0;
     }
     public static boolean canPlaceSnow(Level level, BlockPos pos) {
+        BlockState bs = level.getBlockState(pos);
+        BlockState bsBelow = level.getBlockState(pos.below());
         return !MiscUtil.isSolidBlocking(level, pos) &&
                 MiscUtil.isSolidBlocking(level, pos.below()) &&
-                !BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), pos);
+                !isBottomSlab(bsBelow) &&
+                !(bsBelow.getBlock() instanceof StairBlock) &&
+                !(bsBelow.getBlock() instanceof FenceBlock) &&
+                !(bsBelow.getBlock() instanceof WallBlock) &&
+                !(bsBelow.getBlock() instanceof TrapDoorBlock) &&
+                !(bsBelow.getBlock() instanceof SculkSensorBlock) &&
+                !(bs.getBlock() instanceof SkullBlock) &&
+                (!BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), pos.below()) || !(bs.getBlock() instanceof BushBlock)) &&
+                (!BuildingUtils.isPosInsideFarm(level.isClientSide(), pos.below()) || bsBelow.getBlock().getDescriptionId().contains("_log"));
     }
 }

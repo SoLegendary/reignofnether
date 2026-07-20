@@ -97,8 +97,6 @@ public interface AttackerUnit {
     public EnemySearchBehaviour getEnemySearchBehaviour(); // not necessarily the same goal, eg. could be melee or ranged
     public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour);
 
-
-
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setUnitAttackTarget(@Nullable LivingEntity target) {
         if (target != null) {

@@ -165,12 +165,12 @@ public class MiscUtil {
         }
     }
 
-    public static void addUnitCheckpoint(Unit unit, int id, boolean green) {
+    public static void addUnitCheckpoint(Unit unit, int entityId, boolean green) {
         Level level = ((Entity) unit).level();
         if (level.isClientSide()) {
             if (!Keybindings.shiftMod.isDown())
                 unit.getCheckpoints().clear();
-            unit.getCheckpoints().add(new Checkpoint(level.getEntity(id), green));
+            unit.getCheckpoints().add(new Checkpoint(level.getEntity(entityId), green));
         }
     }
 

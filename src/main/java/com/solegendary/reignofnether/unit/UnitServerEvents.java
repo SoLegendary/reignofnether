@@ -109,6 +109,8 @@ public class UnitServerEvents {
     // actioned ASAP regardless of what the unit was doing
     private static final List<UnitActionItem> unitActionFastQueue = Collections.synchronizedList(new ArrayList<>());
 
+    public static List<UnitActionItem> getUnitActionSlowQueue() { return unitActionSlowQueue; }
+
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
     private static final HashMap<Integer, ChunkAccess> forcedUnitChunks = new HashMap<>();
@@ -165,6 +167,8 @@ public class UnitServerEvents {
         if (level != null) {
             saveFallenHeroUnits(level);
             saveGatherTargets(level);
+            allUnits.clear();
+            forcedUnitChunks.clear();
         }
     }
 
@@ -648,16 +652,18 @@ public class UnitServerEvents {
     public static void onDropItem(LivingDropsEvent evt) {
         if (ResourceSources.isHuntableAnimal(evt.getEntity()) && !evt.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO) && evt.getSource()
             .getEntity() instanceof Unit unit && evt.getSource().getEntity() instanceof WorkerUnit && evt.getSource()
-            .getEntity() instanceof Mob mob && mob.canPickUpLoot() && !Unit.atMaxResources(unit)) {
+            .getEntity() instanceof Mob mob && mob.canPickUpLoot()) {
 
-            evt.setCanceled(true);
+            if (!Unit.atMaxResources(unit))
+                evt.setCanceled(true);
 
             if (lastHuntedAnimalId != evt.getEntity().getId()) {
                 for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
                     ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
 
                     if (res != null) {
-                        unit.getItems().add(itemStack);
+                        if (!Unit.atMaxResources(unit))
+                            unit.getItems().add(itemStack);
                         if (unit instanceof VillagerUnit vUnit) {
                             vUnit.incrementHunterExp();
                             if (!(evt.getEntity() instanceof Chicken))
@@ -679,14 +685,13 @@ public class UnitServerEvents {
                             }
                         }
                     }
+                    System.out.println("hasDropOffCommandQueued: " + hasDropOffCommandQueued);
                     if (!hasDropOffCommandQueued) {
                         unitActionSlowQueue.add(0, new UnitActionItem(
                                 unit.getOwnerName(),
                                 UnitAction.RETURN_RESOURCES_TO_CLOSEST,
                                 -1,
-                                new int[]{((Entity) unit).getId()},
-                                new BlockPos(0, 0, 0),
-                                new BlockPos(0, 0, 0)
+                                new int[]{((Entity) unit).getId()}
                         ));
                     }
                 }

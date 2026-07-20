@@ -528,7 +528,7 @@ public class MyRenderer {
         int spaceWidth = MC.font.width(" ");
         int paddingChars = iconSize / Math.max(spaceWidth, 1);
         String pad = " ".repeat(paddingChars);
-        Component name = Component.literal(pad).append(unitItem.getName());
+        Component name = unitItem.iconRl != null ? Component.literal(pad).append(unitItem.getName()) : unitItem.getName();
         List<FormattedCharSequence> lore = unitItem.getTooltip();
 
         List<FormattedCharSequence> lines = new ArrayList<>();
@@ -543,7 +543,8 @@ public class MyRenderer {
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 3000);
-        guiGraphics.blit(unitItem.iconRl, mouseX + 18, textY - 16, 0, 0, iconSize, iconSize, iconSize, iconSize);
+        if (unitItem.iconRl != null)
+            guiGraphics.blit(unitItem.iconRl, mouseX + 18, textY - 16, 0, 0, iconSize, iconSize, iconSize, iconSize);
         guiGraphics.pose().translate(0, 0, -1500);
         guiGraphics.renderTooltip(MC.font, lines, mouseX + 8, textY);
         guiGraphics.pose().translate(0, 0, -1500);

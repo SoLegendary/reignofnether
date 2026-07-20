@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.items;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -43,7 +44,7 @@ public class ItemClientEvents {
             for (ItemEntity itemEntity : preselectedItems) {
                 ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
                 boolean isResourceItem = res != null && res.resourceValue > 0;
-                if (ItemUtil.isUnitItem(itemEntity) || isResourceItem) {
+                if (ItemUtil.isUnitItem(itemEntity) || isResourceItem || ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
                     MyRenderer.drawBoxBottom(
                             evt.getPoseStack(),
                             itemEntity.getBoundingBox().inflate(0.25, 0, 0.25),
@@ -63,6 +64,9 @@ public class ItemClientEvents {
                 if (unitItem != null) {
                     MyRenderer.renderItemEntityTooltip(evt.getGuiGraphics(), unitItem, evt.getMouseX(), evt.getMouseY());
                     break;
+                } else if (ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
+                    UnitItem foodUnitItem = new EdibleFoodItem(itemEntity.getItem().getItem(), itemEntity.getItem().getCount());
+                    MyRenderer.renderTooltip(evt.getGuiGraphics(), foodUnitItem.getTooltip(), evt.getMouseX(), evt.getMouseY());
                 }
             }
         }
