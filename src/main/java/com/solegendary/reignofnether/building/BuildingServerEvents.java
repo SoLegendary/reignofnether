@@ -705,7 +705,7 @@ public class BuildingServerEvents {
         for (BuildingPlacement building : buildingsToDestroy)
             building.destroy(serverLevel);
 
-        for (BuildingPlacement building : buildings)
+        for (BuildingPlacement building : new ArrayList<>(buildings))
             building.tick(serverLevel);
 
         for (NetherZone netherConversionZone : netherZones)

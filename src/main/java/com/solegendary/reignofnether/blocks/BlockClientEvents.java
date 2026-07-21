@@ -48,7 +48,7 @@ public class BlockClientEvents {
             return;
         }
         // draw range indicators for buildings with abilities and monster night sources
-        for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
+        for (BuildingPlacement building : new ArrayList<>(BuildingClientEvents.getBuildings())) {
             RangeIndicatorAddon ria;
             if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
                 for (BlockPos bp : ria.getHighlightBps(building)) {

@@ -2,6 +2,9 @@
 Features
 --------
 
+[❌] Map marker (render the tutorial floating arrow sprite in world)
+    - Needs reverse of worldPosToMinimapScreen()
+
 [❌] Custom building buttons
     - Customisable icon, name, tooltip, range, cooldown, activation type (on-click, entity-target, ground target)
     - Can be used for an ability, production, etc.
@@ -35,9 +38,9 @@ Scenario roles:
 
 Bugfixes
 --------
-[❌] Players logging in messes up the observer menu (and freezes resources?)
-[❌] bridge scroll bug (up and down vs left/right?)
 [❌] Fix day/night time when /gamerule doDaylightCycle false
+[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
+
 
 Quality of Life Features
 ------------------------
