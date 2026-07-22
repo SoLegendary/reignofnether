@@ -40,6 +40,9 @@
         "fire.FireBlockMixin",
         "fire.MagmaBlockMixin",
         "fire.WalkNodeEvaluatorMixin",
+        "fogofwar.ChunkMapMixin",
+        "fogofwar.ChunkMapInitialSendMixin",
+        "fogofwar.TrackedEntityMixin",
         "goals.MobMixin",
         "goals.RandomStrollGoalMixin"
     ],
@@ -64,14 +67,15 @@
         "SplashRendererAccessor",
         "TitleScreenMixin",
         "TopdownGuiMixin",
+        "fogofwar.BiomeColorsMixin",
+        "fogofwar.BlockColorsAccessor",
         "fogofwar.CompiledChunkMixin",
         "fogofwar.EntityRenderDispatcherMixin",
         "fogofwar.EntityShadowMixin",
         "fogofwar.ItemEntityRendererMixin",
         "fogofwar.LevelRendererMixin",
         "fogofwar.LiquidBlockRendererMixin",
-        "fogofwar.ModelBlockRendererCacheMixin",
-        "fogofwar.ModelBlockRendererMixin",
-        "fogofwar.SingleQuadParticleMixin"
+        "fogofwar.SingleQuadParticleMixin",
+        "fogofwar.WorldBorderRenderMixin"
     ]
 }

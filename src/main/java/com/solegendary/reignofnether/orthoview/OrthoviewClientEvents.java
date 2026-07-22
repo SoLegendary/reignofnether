@@ -34,7 +34,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -242,7 +244,26 @@ public class OrthoviewClientEvents {
         if (MC.player != null) {
             Vec2 XZRotated = MyMath.rotateCoords(x, z, -camRotX - camRotAdjX);
             MC.player.move(MoverType.SELF, new Vec3(XZRotated.x, y, XZRotated.y));
+            clampPlayerToWorldBorder();
         }
+    }
+
+    // spectator skips vanilla border collision, so snap back inside on every move
+    private static void clampPlayerToWorldBorder() {
+        if (MC.player == null || MC.level == null) return;
+        WorldBorder border = MC.level.getWorldBorder();
+        double margin = 1.0D;
+        double minX = border.getMinX() + margin;
+        double maxX = border.getMaxX() - margin;
+        double minZ = border.getMinZ() + margin;
+        double maxZ = border.getMaxZ() - margin;
+        if (maxX <= minX || maxZ <= minZ) return;
+        double x = MC.player.getX();
+        double z = MC.player.getZ();
+        double cx = Mth.clamp(x, minX, maxX);
+        double cz = Mth.clamp(z, minZ, maxZ);
+        if (cx != x || cz != z)
+            MC.player.setPos(cx, MC.player.getY(), cz);
     }
 
     // lock the camera and move it towards a location, remain locked for cameraLockTicks
@@ -313,6 +334,7 @@ public class OrthoviewClientEvents {
             float zoomDiff = (ZOOM_DEFAULT - forcePanOriginalZoom) / FORCE_PAN_TICKS_MAX;
             zoom += zoomDiff;
             MC.player.move(MoverType.SELF, new Vec3(xDiff, 0, zDiff));
+            clampPlayerToWorldBorder();
             forcePanTicksLeft -= 1;
         }
         updateOrthoviewY();
