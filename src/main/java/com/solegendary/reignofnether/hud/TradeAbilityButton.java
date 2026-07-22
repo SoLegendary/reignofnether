@@ -1,8 +1,8 @@
 package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.abilities.TradeResources;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.GuiGraphics;

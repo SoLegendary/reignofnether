@@ -353,7 +353,7 @@
     "buildings.reignofnether.mausoleum.tooltip2": "%d블록 반경 내에서 시간을 자정으로 왜곡하며,",
     "buildings.reignofnether.mausoleum.tooltip4": "추가 영묘는 %d블록 반경으로 감소합니다.",
     "buildings.reignofnether.pumpkin_farm": "호박 농장",
-    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d  +  %d  /  \uE000",
+    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d",
     "buildings.reignofnether.pumpkin_farm.tooltip2": "수확하여 음식을 모을 수 있는 호박밭.",
     "buildings.reignofnether.pumpkin_farm.tooltip3": "호박은 재배식할 필요가 없지만 농장 비용이 더 비쌉니다.",
     "buildings.reignofnether.spider_lair": "거미 소굴",

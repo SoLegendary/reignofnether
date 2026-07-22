@@ -137,30 +137,6 @@ public class ResourceSources {
         return List.of();
     }
 
-    private static List<Item> edibleFoods = List.of(
-        Items.COOKED_BEEF,
-        Items.COOKED_CHICKEN,
-        Items.COOKED_COD,
-        Items.COOKED_PORKCHOP,
-        Items.COOKED_RABBIT,
-        Items.COOKED_SALMON,
-        Items.COOKED_MUTTON,
-        Items.COOKIE,
-        Items.BREAD,
-        Items.PUMPKIN_PIE,
-        Items.MUSHROOM_STEW,
-        Items.RABBIT_STEW,
-        Items.BEETROOT_SOUP,
-        Items.BAKED_POTATO,
-        Items.GOLDEN_APPLE,
-        Items.ENCHANTED_GOLDEN_APPLE,
-        Items.GOLDEN_CARROT
-    );
-
-    public static boolean isPreparedFood(Item item) {
-        return item.isEdible() && edibleFoods.contains(item);
-    }
-
     public static final int REPLANT_TICKS_MAX = 10;
 
     public static final ResourceSource GENERIC_LOG_BLOCK = new ResourceSource("Unknown Logs",

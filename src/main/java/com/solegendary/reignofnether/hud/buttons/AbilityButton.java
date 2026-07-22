@@ -1,17 +1,17 @@
-package com.solegendary.reignofnether.hud;
+package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.ability.abilities.Sacrifice;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.entity.LivingEntity;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -26,7 +26,6 @@ public class AbilityButton extends Button {
     public int extraLabelColour = 0xFFFFFF;
     @Nullable private Unit unit;
     @Nullable private BuildingPlacement placement;
-    public boolean isPassengerAbility = false;
 
     public AbilityButton(String name, ResourceLocation rl, Keybinding hotkey, Supplier<Boolean> isSelected,
                          Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, Runnable onLeftClick, Runnable onRightClick,

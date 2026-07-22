@@ -1080,6 +1080,7 @@ public class CommandsServerEvents {
 				&& entity instanceof Unit unit
 				&& unit.getOwnerName().equals(ownerName)
 				&& isWithin(entity.getOnPos(), min, max)) {
+				Unit.fullResetBehaviours(unit);
 				attacker.setEnemySearchBehaviour(behaviour);
 				changed++;
 			}

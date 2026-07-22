@@ -2,15 +2,10 @@ package com.solegendary.reignofnether.startpos;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.hud.Button;
-import com.solegendary.reignofnether.hud.ButtonBuilder;
+import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.player.PlayerColors;
-import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
-import com.solegendary.reignofnether.util.MyRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
@@ -18,7 +13,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.material.MapColor;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 

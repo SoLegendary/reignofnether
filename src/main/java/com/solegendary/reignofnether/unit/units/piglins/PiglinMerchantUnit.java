@@ -12,6 +12,8 @@ import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
@@ -251,7 +253,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     @Override
     public int getAttackWindupTicks() {
-        return 32;
+        return 24;
     }
 
     // non-looping animations
@@ -279,15 +281,20 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 activeAnimDef = PiglinMerchantAnimations.ATTACK;
                 activeAnimState = attackAnimState;
                 animateScale = 1.0f;
+                animateSpeed = 1.333f;
                 startAnimation(activeAnimDef);
             }
             case CAST_SPELL -> {
                 activeAnimDef = PiglinMerchantAnimations.SPELL_FULL;
                 activeAnimState = spellActivateAnimState;
                 animateScale = 1.0f;
+                animateSpeed = 1.0f;
                 startAnimation(activeAnimDef);
             }
-            default -> animateScaleReducing = true;
+            default ->  {
+                animateScaleReducing = true;
+                animateSpeed = 1.0f;
+            }
         }
     }
 
@@ -417,7 +424,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.castTNTGoal = new GenericTargetedSpellGoal(
                 this,
-                32,
+                getAttackWindupTicks(),
                 ThrowTNT.RANGE,
                 UnitAnimationAction.ATTACK_UNIT,
                 null,
@@ -426,7 +433,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         );
         this.castFancyFeastGoal = new GenericTargetedSpellGoal(
                 this,
-                32,
+                getAttackWindupTicks(),
                 FancyFeast.RANGE,
                 UnitAnimationAction.ATTACK_UNIT,
                 null,
@@ -512,7 +519,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         Vec3 dMove = Vec3.atCenterOf(targetBp).subtract(this.getEyePosition())
                 .multiply(1,0,1)
                 .scale(0.04)
-                .add(0,0.5,0);
+                .add(0,0.4,0);
         tnt.setDeltaMovement(dMove);
         level().addFreshEntity(tnt);
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.EGG_THROW,
@@ -573,6 +580,11 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         ArrayList<LivingEntity> units = new ArrayList<>(list);
         Collections.shuffle(units);
 
+        ItemStack appleStack = UnitItems.MERCHANT_GOLDEN_APPLE.getItemStack();
+        ItemStack chestPlateStack = UnitItems.MERCHANT_CHESTPLATE.getItemStack();
+        ItemStack swordStack = UnitItems.MERCHANT_SWORD.getItemStack();
+        ItemStack tridentStack = UnitItems.MERCHANT_TRIDENT.getItemStack();
+
         for (int n = 0; n < amount; n++) {
             if (units.size() > n) {
                 int i = random.nextInt(100);
@@ -580,36 +592,31 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
                 if (unit instanceof BruteUnit bruteUnit) {
                     if (i >= 50 && !bruteUnit.hasNetheriteChestplate())
-                        items.add(new ItemStack(Items.NETHERITE_CHESTPLATE));
+                        items.add(chestPlateStack);
                     else if (i > 0 && !bruteUnit.hasEnchantedNetheriteSword()) {
-                        ItemStack itemStack = new ItemStack(Items.NETHERITE_SWORD);
-                        itemStack.enchant(Enchantments.FIRE_ASPECT, 1);
-                        items.add(itemStack);
+                        items.add(swordStack);
                     } else {
-                        items.add(new ItemStack(Items.ENCHANTED_GOLDEN_APPLE));
+                        items.add(appleStack);
                     }
                 }
                 else if (unit instanceof HeadhunterUnit headhunterUnit) {
                     if (i >= 50 && !headhunterUnit.hasNetheriteChestplate())
-                        items.add(new ItemStack(Items.NETHERITE_CHESTPLATE));
+                        items.add(chestPlateStack);
                     else if (i > 0 && !headhunterUnit.hasFlameTrident()) {
-                        ItemStack itemStack = new ItemStack(Items.TRIDENT);
-                        itemStack.enchant(Enchantments.FLAMING_ARROWS, 1);
-                        itemStack.enchant(Enchantments.PUNCH_ARROWS, 1);
-                        items.add(itemStack);
+                        items.add(tridentStack);
                     } else {
-                        items.add(new ItemStack(Items.ENCHANTED_GOLDEN_APPLE));
+                        items.add(appleStack);
                     }
                 }
                 else if ((unit instanceof HoglinUnit && !(unit instanceof ArmouredHoglinUnit)) ||
                         (unit instanceof WitherSkeletonUnit wither && !wither.hasNetheriteChestplate()) ||
                         (unit instanceof MarauderUnit marauder && !marauder.hasNetheriteChestplate())) {
-                    items.add(new ItemStack(Items.NETHERITE_CHESTPLATE));
+                    items.add(chestPlateStack);
                 } else {
-                    items.add(new ItemStack(Items.ENCHANTED_GOLDEN_APPLE));
+                    items.add(appleStack);
                 }
             } else {
-                items.add(new ItemStack(Items.ENCHANTED_GOLDEN_APPLE));
+                items.add(appleStack);
             }
         }
         return items;

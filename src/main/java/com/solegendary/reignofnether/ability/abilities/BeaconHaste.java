@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.ability.abilities;
 import com.solegendary.reignofnether.ability.BeaconAbility;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;

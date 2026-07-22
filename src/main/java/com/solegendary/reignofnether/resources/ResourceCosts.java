@@ -143,6 +143,7 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_BRUTE_SHIELDS = new ResourceCost(ID, "RESEARCH_BRUTE_SHIELDS");
     public static final ResourceCost RESEARCH_HOGLIN_CAVALRY = new ResourceCost(ID, "RESEARCH_HOGLIN_CAVALRY");
     public static final ResourceCost RESEARCH_HEAVY_TRIDENTS = new ResourceCost(ID, "RESEARCH_HEAVY_TRIDENTS");
+    public static final ResourceCost RESEARCH_GREEDY_TRIDENTS = new ResourceCost(ID, "RESEARCH_GREEDY_TRIDENTS");
     public static final ResourceCost RESEARCH_CLEAVING_FLAILS = new ResourceCost(ID, "RESEARCH_CLEAVING_FLAILS");
     public static final ResourceCost RESEARCH_BLAZE_FIRE_WALL = new ResourceCost(ID, "RESEARCH_BLAZE_FIRE_WALL");
     public static final ResourceCost RESEARCH_FIRE_RESISTANCE = new ResourceCost(ID, "RESEARCH_FIRE_RESISTANCE");
@@ -342,6 +343,7 @@ public class ResourceCosts {
         RESEARCH_BRUTE_SHIELDS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BRUTE_SHIELDS);
         RESEARCH_HOGLIN_CAVALRY.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_HOGLIN_CAVALRY);
         RESEARCH_HEAVY_TRIDENTS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_HEAVY_TRIDENTS);
+        RESEARCH_GREEDY_TRIDENTS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_GREEDY_TRIDENTS);
         RESEARCH_CLEAVING_FLAILS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_CLEAVING_FLAILS);
         RESEARCH_BLAZE_FIRE_WALL.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BLAZE_FIRE_WALL);
         RESEARCH_FIRE_RESISTANCE.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_FIRE_RESISTANCE);

@@ -26,6 +26,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.gui.TitleScreenModUpdateIndicator;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.internal.BrandingControl;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
@@ -183,7 +184,16 @@ public class TitleScreenMixin extends Screen {
                 mapStack.enchant(Enchantments.UNBREAKING, 1);
                 int itemX = this.getX() + (this.width - 16) / 2;
                 int itemY = this.getY() + (this.height - 16) / 2;
-                guiGraphics.renderItem(mapStack, itemX, itemY);
+
+                // prevent rendering over essential tooltip
+                int essX = mapsButtonX;
+                int essY = mapsButtonY + mapsButtonSize + 4;
+                boolean mouseOverEssentialButton = pMouseX >= essX && pMouseX < essX + mapsButtonSize &&
+                                                    pMouseY >= essY && pMouseY < essY + mapsButtonSize &&
+                                                    !ModList.get().isLoaded("essential");
+                if (!mouseOverEssentialButton)
+                    guiGraphics.renderItem(mapStack, itemX, itemY);
+                RenderSystem.enableDepthTest();
             }
         };
         this.mapsButton.setTooltip(Tooltip.create(Component.literal("Get RTS maps!")));

@@ -1,8 +1,7 @@
-package com.solegendary.reignofnether.hud;
+package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;

@@ -28,6 +28,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.hud.TitleClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.matchstart.MatchEndClientEvents;
 import com.solegendary.reignofnether.matchstart.MatchStartClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -130,5 +131,6 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CommandsServerEvents.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
         vanillaEventBus.register(WorldBorderServerEvents.class);
+        vanillaEventBus.register(ItemClientEvents.class);
     }
 }

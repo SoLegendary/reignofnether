@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.TargetResourcesSave;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -74,6 +75,10 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
     public void setIsGatheringServerside(boolean isGathering) {
         this.isGatheringServerside = isGathering;
+    }
+
+    private int getReplantWoodCost() {
+        return (mob instanceof ZombieVillagerUnit) ? ResourceCosts.REDUCED_REPLANT_WOOD_COST : ResourceCosts.REPLANT_WOOD_COST;
     }
 
     // whenever we attempt to assign a block as a target it must pass this test
@@ -286,7 +291,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
 
                         if (canAffordReplant()) {
-                            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -ResourceCosts.REPLANT_WOOD_COST, 0));
+                            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -getReplantWoodCost(), 0));
                             mob.level().setBlockAndUpdate(data.gatherTarget.above(), ((WorkerUnit) mob).getReplantBlockState());
                             removeGatherTarget();
                         }
@@ -454,8 +459,13 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     private boolean isBlockInRange(BlockPos target) {
-        // Within mining reach (3D). No stuck-worker bonus: a block that's out of range is dropped by the gather
-        // goal's NO_TARGET_TIMEOUT so the worker just searches another one, instead of stretching its reach.
+        // always in range if the gatherer is assigned to a farm
+        if (getTargetFarm() != null &&
+            getTargetFarm().isPosInsideBuilding(mob.getOnPos()) &&
+            getGatherTarget() != null &&
+            getTargetFarm().isPosInsideBuilding(getGatherTarget()))
+            return true;
+
         return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= REACH_RANGE * REACH_RANGE;
     }
 
@@ -466,14 +476,14 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (this.mob.level().isClientSide())
             return isGatheringServerside;
 
-        if (!Unit.atMaxResources((Unit) mob) && this.data.gatherTarget != null && this.data.targetResourceSource != null &&
+         if (!Unit.atMaxResources((Unit) mob) && this.data.gatherTarget != null && this.data.targetResourceSource != null &&
             ResourceSources.getBlockResourceName(this.data.gatherTarget, mob.level()) != ResourceName.NONE)
             return isBlockInRange(data.gatherTarget);
         return false;
     }
 
     private boolean canAffordReplant() {
-        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), ResourceName.WOOD, ResourceCosts.REPLANT_WOOD_COST);
+        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), ResourceName.WOOD, getReplantWoodCost());
     }
 
     public void setTargetResourceName(ResourceName resourceName) {

@@ -2,12 +2,11 @@ package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.Relationship;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.MapColor;

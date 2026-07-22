@@ -23,9 +23,8 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
-import com.solegendary.reignofnether.gamerules.GameruleServerEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
@@ -123,6 +122,7 @@ public class BuildingPlacement {
 
     private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned;
     public float msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
+    public int blocksPerBuild = 1; // number of blocks built per build action
 
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
     public final float MIN_BLOCKS_PERCENT = 0.5f;
@@ -163,6 +163,7 @@ public class BuildingPlacement {
     public boolean isDiagonalBridge = false;
 
     public boolean selfBuilding = false; // if set to true, will build itself quickly without workers (but not repair)
+    public int maxBlocksPerTick = 1; // maximum number of blocks that can be built per tick
 
     protected List<AbilityButton> abilityButtons = new ArrayList<>();
     protected List<Ability> abilities = new ArrayList<>();
@@ -406,6 +407,10 @@ public class BuildingPlacement {
                     continue;
 
                 float dist = (float) bpTarget.distToCenterSqr(bp.getX(), bp.getY(), bp.getZ());
+                BlockState bs = level.getBlockState(bp);
+                BlockState bsBelow = level.getBlockState(bp.below());
+                if (!bs.getFluidState().isEmpty() || !bsBelow.getFluidState().isEmpty())
+                    dist += 100; // disincentivise walking onto water/lava
 
                 if (dist < minDist) {
                     minDist = dist;
@@ -469,10 +474,21 @@ public class BuildingPlacement {
                     ((getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 
+    public void queueAllBlocks(ServerLevel level) {
+        blockPlaceQueue.removeIf(b -> b.getBlockState().getBlock() != Blocks.SCAFFOLDING);
+        for (BuildingBlock block : blocks) {
+            if (!block.isPlaced(level) && !block.getBlockState().isAir())
+                addToBlockPlaceQueue(block);
+        }
+    }
+
     // place blocks according to the following rules:
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
-    public void buildNextBlock(ServerLevel level, String builderName) {
+    public void queueNextBlock(ServerLevel level, String builderName) {
+        if (blocksPerBuild <= 0)
+            return;
+
         // if the building is already constructed then start subtracting resources for repairs
         if (isBuilt) {
             if (!ResourcesServerEvents.canAfford(builderName, ResourceName.WOOD, 1)) {
@@ -525,7 +541,9 @@ public class BuildingPlacement {
                     validBlocks.sort(Comparator.comparing(bb -> bb.getBlockPos().distSqr(builderPos)));
                 }
             }
-            addToBlockPlaceQueue(validBlocks.get(0));
+            for (int i = 0; i < validBlocks.size() && i < blocksPerBuild; i++) {
+                addToBlockPlaceQueue(validBlocks.get(i));
+            }
         }
         partialBlocksDestroyed = 0d;
     }
@@ -923,11 +941,10 @@ public class BuildingPlacement {
                 builderCount += 1;
         }
 
-        boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(this.ownerName, "warpten");
+        boolean hasFastBuildCheat =  ResearchServerEvents.playerHasCheat(this.ownerName, "warpten");
 
         // place a block if the tick has run down
         if (blocksPlaced < blocksTotal) {
-
             if (builderCount > 0) {
                 this.ticksToExtinguish += 1;
                 if (ticksToExtinguish >= TICKS_TO_EXTINGUISH) {
@@ -980,70 +997,74 @@ public class BuildingPlacement {
                                 break;
                             }
                         }
-                        buildNextBlock(serverLevel, ownerName);
+                        queueNextBlock(serverLevel, ownerName);
                     }
                 }
             } else if ((selfBuilding || hasFastBuildCheat) && !isBuilt) {
-                buildNextBlock(serverLevel, ownerName);
+                queueNextBlock(serverLevel, ownerName);
             }
         } else {
             this.ticksToExtinguish = 0;
         }
-
-        // blocks that will build themselves on each tick (eg. foundations from placement, upgrade sections)
-        if (!blockPlaceQueue.isEmpty()) {
-            BuildingBlock nextBlock = blockPlaceQueue.get(0);
-            BlockPos bp = nextBlock.getBlockPos();
-            BlockState bs = nextBlock.getBlockState();
-            Block blockBelow = level.getBlockState(bp.below()).getBlock();
-            CompoundTag bNbt = nextBlock.getBlockNbt();
-            if (level.isLoaded(bp)) {
-                if (blockBelow == Blocks.FARMLAND || blockBelow == Blocks.DIRT_PATH)
-                    level.setBlockAndUpdate(bp.below(), Blocks.DIRT.defaultBlockState());
-                level.setBlockAndUpdate(bp, bs);
-                if (bNbt != null) {
-                    if (bs.getBlock() == Blocks.SCULK_CATALYST) {
-                        BlockEntity be = level.getBlockEntity(bp);
-                        if (be != null) {
-                            CompoundTag safeTag = bNbt.copy();
-                            safeTag.remove("vibration");
-                            safeTag.remove("listener");
-                            safeTag.remove("vibration_data");
-                            safeTag.remove("VibrationSystem");
-                            safeTag.remove("event_delay");
-                            safeTag.remove("event_distance");
-                            safeTag.remove("selector");
-                            safeTag.remove("source");
-                            be.load(safeTag);
-                            be.setChanged();
-                        }
-                    } else {
-                        BlockEntity be = BlockEntity.loadStatic(bp, bs, bNbt);
-                        if (be != null)
-                            level.setBlockEntity(be);
-                    }
-                }
-                // avoid creating a bubble column block
-                if (bs.getFluidState().is(FluidTags.WATER)) {
-                    if (level.getBlockState(bp.below()).getBlock() == Blocks.SOUL_SAND) {
-                        level.setBlockAndUpdate(bp.below(), Blocks.SOUL_SOIL.defaultBlockState());
-                    } else if (level.getBlockState(bp.below()).getBlock() == Blocks.MAGMA_BLOCK ||
-                               level.getBlockState(bp.below()).getBlock() == BlockRegistrar.WALKABLE_MAGMA_BLOCK.get()) {
-                        level.setBlockAndUpdate(bp.below(), Blocks.COBBLESTONE.defaultBlockState());
-                    }
-                }
-                if (blockMap.containsKey(bp)) placedBlockPosSet.add(bp);
-                level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
-                level.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
-                blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
-                onBlockBuilt(bp, bs);
-                if (this.getBlocksPlaced() > highestBlockCountReached) {
-                    highestBlockCountReached = this.getBlocksPlaced();
-                }
-            }
+        for (int i = 0; i < maxBlocksPerTick; i++) {
+            buildNextBlock();
         }
         if (isBuilt && tickAgeAfterBuilt % 10 == 0 && getBuilding().capturable) {
             checkIfCaptured(serverLevel);
+        }
+    }
+
+    private void buildNextBlock() {
+        if (blockPlaceQueue.isEmpty())
+            return;
+        BuildingBlock nextBlock = blockPlaceQueue.get(0);
+        BlockPos bp = nextBlock.getBlockPos();
+        BlockState bs = nextBlock.getBlockState();
+        Block blockBelow = level.getBlockState(bp.below()).getBlock();
+        CompoundTag bNbt = nextBlock.getBlockNbt();
+        if (level.isLoaded(bp)) {
+            if (blockBelow == Blocks.FARMLAND || blockBelow == Blocks.DIRT_PATH)
+                level.setBlockAndUpdate(bp.below(), Blocks.DIRT.defaultBlockState());
+            level.setBlockAndUpdate(bp, bs);
+            if (bNbt != null) {
+                if (bs.getBlock() == Blocks.SCULK_CATALYST) {
+                    BlockEntity be = level.getBlockEntity(bp);
+                    if (be != null) {
+                        CompoundTag safeTag = bNbt.copy();
+                        safeTag.remove("vibration");
+                        safeTag.remove("listener");
+                        safeTag.remove("vibration_data");
+                        safeTag.remove("VibrationSystem");
+                        safeTag.remove("event_delay");
+                        safeTag.remove("event_distance");
+                        safeTag.remove("selector");
+                        safeTag.remove("source");
+                        be.load(safeTag);
+                        be.setChanged();
+                    }
+                } else {
+                    BlockEntity be = BlockEntity.loadStatic(bp, bs, bNbt);
+                    if (be != null)
+                        level.setBlockEntity(be);
+                }
+            }
+            // avoid creating a bubble column block
+            if (bs.getFluidState().is(FluidTags.WATER)) {
+                if (level.getBlockState(bp.below()).getBlock() == Blocks.SOUL_SAND) {
+                    level.setBlockAndUpdate(bp.below(), Blocks.SOUL_SOIL.defaultBlockState());
+                } else if (level.getBlockState(bp.below()).getBlock() == Blocks.MAGMA_BLOCK ||
+                        level.getBlockState(bp.below()).getBlock() == BlockRegistrar.WALKABLE_MAGMA_BLOCK.get()) {
+                    level.setBlockAndUpdate(bp.below(), Blocks.COBBLESTONE.defaultBlockState());
+                }
+            }
+            if (blockMap.containsKey(bp)) placedBlockPosSet.add(bp);
+            level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(bs));
+            level.levelEvent(bs.getSoundType().getPlaceSound().hashCode(), bp, Block.getId(bs));
+            blockPlaceQueue.removeIf(i -> i.equals(nextBlock));
+            onBlockBuilt(bp, bs);
+            if (this.getBlocksPlaced() > highestBlockCountReached) {
+                highestBlockCountReached = this.getBlocksPlaced();
+            }
         }
     }
 

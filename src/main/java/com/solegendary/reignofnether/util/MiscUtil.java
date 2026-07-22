@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.util;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
@@ -11,13 +12,12 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
-import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.blocks.NightCircleMode;
@@ -167,12 +167,12 @@ public class MiscUtil {
         }
     }
 
-    public static void addUnitCheckpoint(Unit unit, int id, boolean green) {
+    public static void addUnitCheckpoint(Unit unit, int entityId, boolean green) {
         Level level = ((Entity) unit).level();
         if (level.isClientSide()) {
             if (!Keybindings.shiftMod.isDown())
                 unit.getCheckpoints().clear();
-            unit.getCheckpoints().add(new Checkpoint(level.getEntity(id), green));
+            unit.getCheckpoints().add(new Checkpoint(level.getEntity(entityId), green));
         }
     }
 
@@ -798,6 +798,10 @@ public class MiscUtil {
     }
 
     public static float getMaxAbsorptionAmount(LivingEntity entity) {
+        int fortifyingLvl = entity.getItemBySlot(EquipmentSlot.CHEST).getEnchantmentLevel(EnchantmentRegistrar.FORTYIFYING.get());
+        if (fortifyingLvl > 0) {
+            return fortifyingLvl * ProtectiveEnchantment.MAX_ABSORB_HP_PER_FORTIFYING_LEVEL;
+        }
         MobEffectInstance mei = entity.getEffect(MobEffects.ABSORPTION);
         if (mei != null) {
             return (mei.getAmplifier() + 1) * 4.0f;

@@ -5,6 +5,8 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.*;
+import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -155,11 +157,6 @@ public class ScenarioClientEvents {
                     return true;
                 })
                 .onLeftClick(() -> PlayerServerboundPacket.startRTSScenario(roleIndexToPlay))
-                .onRightClick(() -> {
-                    roleIndexToPlay += 1;
-                    if (roleIndexToPlay >= scenarioRoles.size())
-                        roleIndexToPlay = 0;
-                })
                 .tooltipLines(List.of(
                         fcs(I18n.get("hud.gamemode.reignofnether.start_scenario"), true)
                 )).build();

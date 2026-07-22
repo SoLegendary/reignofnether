@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.entities.models.MagicProjectileModel;
-import com.solegendary.reignofnether.entities.renderers.MagicProjectileRenderer;
 import com.solegendary.reignofnether.entities.renderers.NecromancerProjectileRenderer;
 import com.solegendary.reignofnether.entities.renderers.ThrowableTntRenderer;
 import com.solegendary.reignofnether.entities.renderers.WindcallerProjectileRenderer;
@@ -16,6 +15,7 @@ import com.solegendary.reignofnether.mixin.fogofwar.BlockColorsAccessor;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.particles.BigEnchantParticle;
 import com.solegendary.reignofnether.particles.BigSoulFlameParticle;
+import com.solegendary.reignofnether.particles.LevelUpParticle;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.unit.modelling.models.*;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
@@ -268,6 +268,10 @@ public class ClientModEvents {
         evt.registerSpriteSet(
                 ParticleRegistrar.BIG_SOUL_FLAME.get(),
                 BigSoulFlameParticle.Provider::new
+        );
+        evt.registerSpriteSet(
+                ParticleRegistrar.LEVEL_UP.get(),
+                LevelUpParticle.Provider::new
         );
     }
 

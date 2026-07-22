@@ -156,6 +156,7 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_BRUTE_SHIELDS.define(BUILDER);
         ResearchCosts.RESEARCH_HOGLIN_CAVALRY.define(BUILDER);
         ResearchCosts.RESEARCH_HEAVY_TRIDENTS.define(BUILDER);
+        ResearchCosts.RESEARCH_GREEDY_TRIDENTS.define(BUILDER);
         ResearchCosts.RESEARCH_CLEAVING_FLAILS.define(BUILDER);
         ResearchCosts.RESEARCH_BLAZE_FIRE_WALL.define(BUILDER);
         ResearchCosts.RESEARCH_FIRE_RESISTANCE.define(BUILDER);
@@ -259,7 +260,7 @@ public class ReignOfNetherCommonConfigs {
         // Monsters
         public static final ResourceCostConfigEntry MAUSOLEUM = ResourceCostConfigEntry.Building(0,350,250, 10, ResourceCosts.MAUSOLEUM, "Mausoleum Config");
         public static final ResourceCostConfigEntry HAUNTED_HOUSE = ResourceCostConfigEntry.Building(0,100,0, 10, ResourceCosts.HAUNTED_HOUSE, "Haunted House Config");
-        public static final ResourceCostConfigEntry PUMPKIN_FARM = ResourceCostConfigEntry.Building(0,200,0, 0, ResourceCosts.PUMPKIN_FARM, "Pumpkin Farm Config");
+        public static final ResourceCostConfigEntry PUMPKIN_FARM = ResourceCostConfigEntry.Building(0,175,0, 0, ResourceCosts.PUMPKIN_FARM, "Pumpkin Farm Config");
         public static final ResourceCostConfigEntry SCULK_CATALYST = ResourceCostConfigEntry.Building(0,125,0, 12, ResourceCosts.SCULK_CATALYST, "Sculk Catalyst Config");
         public static final ResourceCostConfigEntry GRAVEYARD = ResourceCostConfigEntry.Building(0,150,0, 0, ResourceCosts.GRAVEYARD, "Graveyard Config");
         public static final ResourceCostConfigEntry SPIDER_LAIR = ResourceCostConfigEntry.Building(0,150,75, 0, ResourceCosts.SPIDER_LAIR, "Spider Lair Config");
@@ -273,7 +274,7 @@ public class ReignOfNetherCommonConfigs {
 
         // Villagers
         public static final ResourceCostConfigEntry TOWN_CENTRE = ResourceCostConfigEntry.Building(0,350,250, 10, ResourceCosts.TOWN_CENTRE, "Town Centre Config");
-        public static final ResourceCostConfigEntry VILLAGER_HOUSE = ResourceCostConfigEntry.Building(0,100,0, 10, ResourceCosts.VILLAGER_HOUSE, "Villager House Config");
+        public static final ResourceCostConfigEntry VILLAGER_HOUSE = ResourceCostConfigEntry.Building(0,90,0, 10, ResourceCosts.VILLAGER_HOUSE, "Villager House Config");
         public static final ResourceCostConfigEntry WHEAT_FARM = ResourceCostConfigEntry.Building(0,150,0, 0, ResourceCosts.WHEAT_FARM, "Wheat Farm Config");
         public static final ResourceCostConfigEntry BARRACKS = ResourceCostConfigEntry.Building(0,150,0, 0, ResourceCosts.BARRACKS, "Barracks Config");
         public static final ResourceCostConfigEntry BLACKSMITH = ResourceCostConfigEntry.Building(0,100,300, 0, ResourceCosts.BLACKSMITH, "Blacksmith Config");
@@ -330,6 +331,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_BRUTE_SHIELDS = ResourceCostConfigEntry.Research(0,300,300, 150, ResourceCosts.RESEARCH_BRUTE_SHIELDS, "Brute Shields Research Config");
         public static final ResourceCostConfigEntry RESEARCH_HOGLIN_CAVALRY = ResourceCostConfigEntry.Research(400,350,0, 180, ResourceCosts.RESEARCH_HOGLIN_CAVALRY, "Hoglin Cavalry Research Config");
         public static final ResourceCostConfigEntry RESEARCH_HEAVY_TRIDENTS = ResourceCostConfigEntry.Research(0, 300, 300, 150, ResourceCosts.RESEARCH_HEAVY_TRIDENTS, "Heavy Tridents Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_GREEDY_TRIDENTS = ResourceCostConfigEntry.Research(0, 350, 350, 160, ResourceCosts.RESEARCH_GREEDY_TRIDENTS, "Greedy Tridents Research Config");
         public static final ResourceCostConfigEntry RESEARCH_CLEAVING_FLAILS = ResourceCostConfigEntry.Research(0, 350, 350, 160, ResourceCosts.RESEARCH_CLEAVING_FLAILS, "Cleaving Flails Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BLAZE_FIRE_WALL = ResourceCostConfigEntry.Research(400, 0, 300, 150, ResourceCosts.RESEARCH_BLAZE_FIRE_WALL, "Blaze Fire Wall Research Config");
         public static final ResourceCostConfigEntry RESEARCH_FIRE_RESISTANCE = ResourceCostConfigEntry.Research(0, 125, 125, 60, ResourceCosts.RESEARCH_FIRE_RESISTANCE, "Fire Resistance Research Config");

@@ -353,7 +353,7 @@
     "buildings.reignofnether.mausoleum.tooltip2": "Distorsiona el tiempo hasta medianoche en un radio de %d bloques.",
     "buildings.reignofnether.mausoleum.tooltip3": "Solo una capital puede producir trabajadores a la vez.",
     "buildings.reignofnether.pumpkin_farm": "Granja de Calabazas",
-    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d  +  %d  por  cultivo  plantado",
+    "buildings.reignofnether.pumpkin_farm.tooltip1": "\uE001  %d",
     "buildings.reignofnether.pumpkin_farm.tooltip2": "Un campo de calabazas que puede cosecharse para obtener comida.",
     "buildings.reignofnether.pumpkin_farm.tooltip3": "No requieren replantación pero las granjas cuestan más inicialmente.",
     "buildings.reignofnether.spider_lair": "Guarida de Arañas",
@@ -599,11 +599,11 @@
     "hud.startbuttons.piglins.reignofnether.second": "Genera 3 piglins comunes en la ubicación objetivo.",
 
     "hud.startbuttons.villagers.reignofnether.first_startpos": "Listo para jugar como Aldeanos",
-    "hud.startbuttons.villagers.reignofnether.second_startpos": "Comienza con un Centro Urbano y 3 aldeanos.",
+    "hud.startbuttons.villagers.reignofnether.second_startpos": "Comienza con un Centro Urbano y %d aldeanos.",
     "hud.startbuttons.monsters.reignofnether.first_startpos": "Listo para jugar como Monstruos",
-    "hud.startbuttons.monsters.reignofnether.second_startpos": "Comienza con un Mausoleo y 3 aldeanos zombis.",
+    "hud.startbuttons.monsters.reignofnether.second_startpos": "Comienza con un Mausoleo y %d aldeanos zombis.",
     "hud.startbuttons.piglins.reignofnether.first_startpos": "Listo para jugar como Piglins",
-    "hud.startbuttons.piglins.reignofnether.second_startpos": "Comienza con un Portal Central y 3 piglins comunes.",
+    "hud.startbuttons.piglins.reignofnether.second_startpos": "Comienza con un Portal Central y %d piglins comunes.",
 
     "hud.orthoview.reignofnether.hiding_leaves_around": "Ocultando hojas: alrededor de unidades y cursor",
     "hud.orthoview.reignofnether.hiding_leaves_all": "Ocultando hojas: todas",

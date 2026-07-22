@@ -34,6 +34,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -59,9 +60,11 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.stringtemplate.v4.misc.Misc;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -324,7 +327,17 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     }
 
     @Override
-    protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) { }
+    protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
+        if (!this.level().isClientSide && this.fallDistance > 3.0F && pOnGround && !pState.isAir()) {
+            MiscUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position().add(0, 0.1f, 0));
+        }
+        // super.super method logic (entity.class)
+        if (pOnGround) {
+            this.resetFallDistance();
+        } else if (pY < 0.0) {
+            this.fallDistance -= (float)pY;
+        }
+    }
 
     @Override
     public void travel(Vec3 pTravelVector) {
@@ -523,11 +536,6 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
             setFlying(true);
             updateFlyingStates(false);
         }
-    }
-
-    public int getPunchLevel() {
-        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getEnchantmentLevel(Enchantments.PUNCH_ARROWS);
     }
 
     @Override

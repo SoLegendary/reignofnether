@@ -62,6 +62,7 @@ import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -88,6 +89,7 @@ import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
 import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_UNIT_BOUNTY_PERCENT;
+import static com.solegendary.reignofnether.resources.ResourcesServerEvents.UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
 
 public class UnitServerEvents {
 
@@ -107,35 +109,13 @@ public class UnitServerEvents {
     // actioned ASAP regardless of what the unit was doing
     private static final List<UnitActionItem> unitActionFastQueue = Collections.synchronizedList(new ArrayList<>());
 
+    public static List<UnitActionItem> getUnitActionSlowQueue() { return unitActionSlowQueue; }
+
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
     private static final HashMap<Integer, ChunkAccess> forcedUnitChunks = new HashMap<>();
 
     private static final Random RANDOM = new Random();
-
-    private static final List<MobEffect> SYNCED_MOB_EFFECTS = List.of(
-        MobEffects.DAMAGE_RESISTANCE,
-        MobEffectRegistrar.STUN.get(),
-        MobEffectRegistrar.FREEZE.get(),
-        MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(),
-        MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(),
-        MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(),
-        MobEffectRegistrar.ATTACK_SLOWDOWN.get(),
-        MobEffectRegistrar.TEMPORARY_EFFICIENCY.get(),
-        MobEffectRegistrar.BLOODLUST.get(),
-        MobEffectRegistrar.FROST_DAMAGE.get(),
-        MobEffectRegistrar.DISARM.get(),
-        MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get(),
-        MobEffectRegistrar.SCORCHING_FIRE.get(),
-        MobEffectRegistrar.SOULS_AFLAME.get(),
-        MobEffectRegistrar.ANGRY.get(),
-        MobEffectRegistrar.FEARFUL.get(),
-        MobEffectRegistrar.PARTIALLY_POSSESSED.get(),
-        MobEffects.LEVITATION
-    );
-
-    // Per-entity last-synced mob effect amplifiers. Null amp means "absent last sync".
-    private static final HashMap<Integer, HashMap<MobEffect, Byte>> lastSyncedEffects = new HashMap<>();
 
     // Time-sliced formation dispatch: VANILLA-ONLY (rtsPathfinding off). Large group MOVE commands
     // are spread across ticks to avoid the spike from N units all running vanilla's synchronous main-thread
@@ -187,6 +167,8 @@ public class UnitServerEvents {
         if (level != null) {
             saveFallenHeroUnits(level);
             saveGatherTargets(level);
+            allUnits.clear();
+            forcedUnitChunks.clear();
         }
     }
 
@@ -393,13 +375,19 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
-
         if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof Mob mob) {
             mob.setBaby(false);
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.STICKY_HONEY, 1.0f);
+        }
+
+        // for some reason some units need to be nudged a little on spawn or they can't move
+        if (!evt.getLevel().isClientSide() && evt.getEntity() instanceof Unit && evt.getEntity() instanceof LivingEntity le) {
+            boolean bool1 = le.getRandom().nextBoolean();
+            boolean bool2 = le.getRandom().nextBoolean();
+            evt.getEntity().push(0.005d * (bool1 ? -1 : 1), 0, 0.005d * (bool2 ? -1 : 1));
         }
 
         if (evt.getEntity() instanceof Unit unit && evt.getEntity() instanceof LivingEntity entity
@@ -454,7 +442,6 @@ public class UnitServerEvents {
             && !evt.getLevel().isClientSide) {
 
             allUnits.removeIf(e -> e.getId() == entity.getId());
-            lastSyncedEffects.remove(entity.getId());
             UnitSyncClientboundPacket.sendLeavePacket(entity);
 
             //ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
@@ -593,13 +580,20 @@ public class UnitServerEvents {
                 vUnit.incrementHunterExp();
         }
 
-        if (evt.getEntity() instanceof Unit unitKilled && unitKilled.getOwnerName().isEmpty()) {
-            if (evt.getSource().getEntity() instanceof Unit unit) {
+        if (evt.getEntity() instanceof Unit unitKilled && evt.getSource().getEntity() instanceof Unit unit) {
+            float bountyPercent = 0;
+            if (unitKilled.getOwnerName().isEmpty()) {
+                bountyPercent = NEUTRAL_UNIT_BOUNTY_PERCENT;
+            } else if (!AlliancesServerEvents.isAlliedOrOwned(unitKilled.getOwnerName(), unit.getOwnerName())) {
+                int lootingLevel = ((LivingEntity) unit).getMainHandItem().getEnchantmentLevel(Enchantments.MOB_LOOTING);
+                bountyPercent = lootingLevel * UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
+            }
+            if (bountyPercent > 0) {
                 ResourceCost cost = unitKilled.getCost();
                 Resources resources = new Resources(unit.getOwnerName(),
-                        (int) (cost.food * NEUTRAL_UNIT_BOUNTY_PERCENT),
-                        (int) (cost.wood * NEUTRAL_UNIT_BOUNTY_PERCENT),
-                        (int) (cost.ore * NEUTRAL_UNIT_BOUNTY_PERCENT)
+                        (int) (cost.food * bountyPercent),
+                        (int) (cost.wood * bountyPercent),
+                        (int) (cost.ore * bountyPercent)
                 );
                 if (resources.getTotalValue() > 0) {
                     ResourcesClientboundPacket.showFloatingText(resources, evt.getEntity().getOnPos());
@@ -658,23 +652,21 @@ public class UnitServerEvents {
     public static void onDropItem(LivingDropsEvent evt) {
         if (ResourceSources.isHuntableAnimal(evt.getEntity()) && !evt.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO) && evt.getSource()
             .getEntity() instanceof Unit unit && evt.getSource().getEntity() instanceof WorkerUnit && evt.getSource()
-            .getEntity() instanceof Mob mob && mob.canPickUpLoot() && !Unit.atMaxResources(unit)) {
+            .getEntity() instanceof Mob mob && mob.canPickUpLoot()) {
 
-            evt.setCanceled(true);
+            if (!Unit.atMaxResources(unit))
+                evt.setCanceled(true);
 
             if (lastHuntedAnimalId != evt.getEntity().getId()) {
-                for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
-                    ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
 
-                    if (res != null) {
-                        unit.getItems().add(itemStack);
-                        if (unit instanceof VillagerUnit vUnit) {
-                            vUnit.incrementHunterExp();
-                            if (!(evt.getEntity() instanceof Chicken))
-                                vUnit.incrementHunterExp();
-                        }
+                if (!Unit.atMaxResources(unit)) {
+                    for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
+                        ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
+                        if (res != null)
+                            unit.getItems().add(itemStack);
                     }
                 }
+
                 // insert a drop-off command without disrupting other queued commands
                 if (Unit.atThresholdResources(unit)) {
                     int unitId = ((Mob) unit).getId();
@@ -694,9 +686,7 @@ public class UnitServerEvents {
                                 unit.getOwnerName(),
                                 UnitAction.RETURN_RESOURCES_TO_CLOSEST,
                                 -1,
-                                new int[]{((Entity) unit).getId()},
-                                new BlockPos(0, 0, 0),
-                                new BlockPos(0, 0, 0)
+                                new int[]{((Entity) unit).getId()}
                         ));
                     }
                 }
@@ -744,22 +734,6 @@ public class UnitServerEvents {
                 if (entity instanceof Unit unit) {
                     UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                     UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
-
-                    HashMap<MobEffect, Byte> lastState = lastSyncedEffects.computeIfAbsent(entity.getId(), k -> new HashMap<>());
-                    for (MobEffect me : SYNCED_MOB_EFFECTS) {
-                        MobEffectInstance mei = entity.getEffect(me);
-                        Byte lastAmp = lastState.get(me);
-                        if (mei != null) {
-                            byte amp = (byte) mei.getAmplifier();
-                            if (lastAmp == null || lastAmp != amp) {
-                                UnitSyncMobEffectsClientboundPacket.addEffectClientside(entity, mei);
-                                lastState.put(me, amp);
-                            }
-                        } else if (lastAmp != null) {
-                            UnitSyncMobEffectsClientboundPacket.removeEffectClientside(entity, me);
-                            lastState.remove(me);
-                        }
-                    }
 
                     if (unit.getAnchor() != null)
                         UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
@@ -861,11 +835,10 @@ public class UnitServerEvents {
         Entity directEntity = evt.getSource().getDirectEntity();
         Entity sourceEntity = evt.getSource().getEntity();
 
-        if (sourceEntity instanceof HeadhunterUnit headhunterUnit && directEntity instanceof ThrownTrident) {
-            return !ResearchServerEvents.playerHasResearch(headhunterUnit.getOwnerName(),
-                    ProductionItems.RESEARCH_HEAVY_TRIDENTS
-            );
+        if (sourceEntity instanceof LivingEntity le && (le.getMainHandItem().getEnchantmentLevel(Enchantments.PUNCH_ARROWS) > 0)) {
+            return false;
         }
+
         if (sourceEntity instanceof WretchedWraithUnit)
             return true;
         if (sourceEntity instanceof WraithUnit)
@@ -876,7 +849,7 @@ public class UnitServerEvents {
             return true;
         if (directEntity instanceof AbstractArrow)
             return true;
-        if (directEntity instanceof WindcallerProjectile proj && !(proj.getOwner() instanceof WindcallerUnit windcallerUnit && windcallerUnit.getPunchLevel() > 0))
+        if (directEntity instanceof WindcallerProjectile)
             return true;
         if (directEntity instanceof BlazeUnitFireball)
             return true;
@@ -887,15 +860,6 @@ public class UnitServerEvents {
 
         return evt.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO) && evt.getSource().isIndirect()
                 && (!(sourceEntity instanceof EvokerUnit));
-    }
-
-    private static boolean shouldIncreaseKnockback(LivingDamageEvent evt) {
-        Entity projectile = evt.getSource().getDirectEntity();
-
-        if (projectile instanceof WindcallerProjectile proj && proj.getOwner() instanceof WindcallerUnit windcallerUnit)
-            return windcallerUnit.getPunchLevel() > 1;
-
-        return false;
     }
 
     public static Entity spawnMob(
@@ -941,9 +905,6 @@ public class UnitServerEvents {
 
         if (shouldIgnoreKnockback(evt)) {
             knockbackIgnoreIds.add(evt.getEntity().getId());
-        }
-        if (shouldIncreaseKnockback(evt)) {
-            knockbackIncreaseIds.add(evt.getEntity().getId());
         }
 
         // halve friendly fire from your own/friendly creepers (but still cause knockback)
@@ -1107,6 +1068,8 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit unit && MobEffectRegistrar.isInterrupt(evt.getEffectInstance().getEffect()) && unit.uninterruptable()) {
             evt.setCanceled(true);
         }
+        if (!evt.getEntity().level().isClientSide())
+            UnitSyncMobEffectsClientboundPacket.addEffectClientside(evt.getEntity(), evt.getEffectInstance());
     }
 
     @SubscribeEvent
@@ -1120,6 +1083,8 @@ public class UnitServerEvents {
                 EnchantmentHelper.setEnchantments(new HashMap<>(), evt.getEntity().getMainHandItem());
             }
         }
+        if (!evt.getEntity().level().isClientSide())
+            UnitSyncMobEffectsClientboundPacket.removeEffectClientside(evt.getEntity(), evt.getEffectInstance().getEffect());
     }
 
     @SubscribeEvent
@@ -1132,8 +1097,10 @@ public class UnitServerEvents {
         }
     }
 
+    private static float KNOCKBACK_RESIST_PER_TICKS = 0.01f;
+
     public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();
-    public static ArrayList<Integer> knockbackIncreaseIds = new ArrayList<>();
+    public static ArrayList<Pair<Integer, Integer>> knockbackResistIds = new ArrayList<>();
 
     @SubscribeEvent
     public static void onLivingKnockBack(LivingKnockBackEvent evt) {
@@ -1147,9 +1114,6 @@ public class UnitServerEvents {
             evt.setCanceled(true);
         else if (knockbackIgnoreIds.removeIf(i -> i == evt.getEntity().getId()))
             evt.setCanceled(true);
-
-        if (!evt.isCanceled() && knockbackIncreaseIds.removeIf(i -> i == evt.getEntity().getId()))
-            evt.setStrength(evt.getStrength() * 2);
     }
 
     public static void debug1(BlockPos pos) {

@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -19,6 +20,7 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -28,15 +30,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.*;
@@ -50,6 +50,7 @@ import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -99,7 +100,7 @@ public class CursorClientEvents {
         return leftClickSandboxAction;
     }
 
-    public static boolean isRightDragCouldStart() {
+    public static boolean isRightClickDown() {
         return rightClickDown;
     }
 
@@ -268,6 +269,17 @@ public class CursorClientEvents {
         // Find entity moused over and/or selected
         // ****************************************
         List<LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 30, LivingEntity.class, MC.level);
+        nearbyEntities.sort(Comparator.comparing((le) -> {
+            int priority = 0;
+            if (le instanceof HeroUnit)
+                priority += 5;
+            if (le instanceof Unit unit) {
+                priority += 1;
+                priority += unit.getAbilities().get().size();
+                priority += unit.getCost().population;
+            }
+            return -priority;
+        }));
 
         UnitClientEvents.clearPreselectedUnits();
 
@@ -283,6 +295,22 @@ public class CursorClientEvents {
                 UnitClientEvents.addPreselectedUnit(entity);
                 if (UnitClientEvents.getPreselectedUnits().size() > 0)
                     break; // only allow one moused-over unit at a time
+            }
+        }
+
+        // **********************
+        // Find items moused over
+        // **********************
+        List<ItemEntity> nearbyItems = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 30, ItemEntity.class, MC.level);
+
+        ItemClientEvents.clearPreselectedItems();
+        for (ItemEntity itemEntity : nearbyItems) {
+            // inflate by set amount to improve click accuracy
+            AABB entityaabb = itemEntity.getBoundingBox().inflate(0.25);
+            entityaabb.setMaxY(entityaabb.maxY + 0.75d);
+
+            if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
+                ItemClientEvents.addPreselectedItem(itemEntity);
             }
         }
 
@@ -477,6 +505,7 @@ public class CursorClientEvents {
                     !leftClickDown && ownAnySelected &&
                     UnitClientEvents.getPreselectedUnits().size() == 0 &&
                     BuildingClientEvents.getPreselectedBuilding() == null &&
+                    ItemClientEvents.getPreselectedItems().isEmpty() &&
                     !buildingTargetedByWorker && !buildingTargetedByAttacker) || isLeftClickActionStartRTS || getLeftClickSandboxAction() != null) {
 
                 ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");

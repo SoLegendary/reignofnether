@@ -22,9 +22,7 @@ import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
-import com.solegendary.reignofnether.hud.buttons.ActionButtons;
-import com.solegendary.reignofnether.hud.buttons.HelperButtons;
-import com.solegendary.reignofnether.hud.buttons.StartButtons;
+import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -554,14 +552,14 @@ public class HudClientEvents {
                 }
                 if (hudSelectedPlacement.isBuilt || hudSelectedPlacement.allowProdWhileBuilding) {
 
-                    if (!hudSelectedPlacement.isBuilt)
-                        blitX += Button.DEFAULT_ICON_FRAME_SIZE;
-
-                    List<AbilityButton> buildingAbilities = hudSelectedPlacement.getAbilityButtons()
-                            .stream()
-                            .filter(b -> b != null && !b.isHidden.get())
-                            .toList();
-                    if (buildingAbilities.size() > 0) {
+                    List<AbilityButton> buildingAbilities = List.of();
+                    if (hudSelectedPlacement.isBuilt) {
+                        buildingAbilities = hudSelectedPlacement.getAbilityButtons()
+                                .stream()
+                                .filter(b -> b != null && !b.isHidden.get())
+                                .toList();
+                    }
+                    if (buildingAbilities.size() > 0 || !hudSelectedPlacement.isBuilt) {
                         blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
                     }
 

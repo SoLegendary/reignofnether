@@ -10,7 +10,8 @@ import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.TooltipColours;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -27,7 +28,6 @@ import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import net.minecraft.client.resources.language.I18n;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
@@ -277,9 +277,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             makeVeteran();
     }
 
-    // chickens only worth 1, other animals worth 2
-    // does 2 damage to huntable animals (3 for veteran)
-    final static public int HUNTER_EXP_REQ = 8;
+    // chickens only worth 1, other animals worth 2, hunters do bonus damage to animals
+    final static public int HUNTER_EXP_REQ = 4;
     public int hunterExp = 0;
     public void incrementHunterExp() {
         hunterExp += hasSpeedCheat() ? 10 : 1;
@@ -528,8 +527,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         }
     }
     @Override
-    public boolean hasBonusDamage() {
-        return getUnitProfession() == HUNTER;
+    public int getDamageTooltipColour() {
+        return getUnitProfession() == HUNTER ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 
     private static final EntityDataAccessor<VillagerData> VILLAGER_DATA;

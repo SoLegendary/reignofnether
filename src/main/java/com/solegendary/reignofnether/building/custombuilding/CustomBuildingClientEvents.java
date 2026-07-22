@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -26,6 +26,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static net.minecraft.util.Mth.sign;
 
 public class CustomBuildingClientEvents {
 
@@ -128,7 +129,7 @@ public class CustomBuildingClientEvents {
             } else {
                 renderedButtons.addAll(CustomBuildingMenu.renderCommandsButtonsAndInputs(evt, customBuildingToEdit, blitX + 6, blitY + 38));
             }
-            renderedButtons.add(CustomBuildingMenu.renderCommandsMenuButton(evt, blitX + 10, blitY + height - 32));
+            renderedButtons.addAll(CustomBuildingMenu.renderCommandsMenuButton(evt, blitX + 10, blitY + height - 32));
             hudZones.add(new RectZone(blitX, blitY, blitX + width, blitY + height));
         }
     }
@@ -148,6 +149,13 @@ public class CustomBuildingClientEvents {
             } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
                 button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMouseScroll(ScreenEvent.MouseScrolled.Post evt) {
+        if (customBuildingToEdit != null && showCommandsMenu) {
+            CustomBuildingMenu.scrollCommands(-sign(evt.getScrollDelta()));
         }
     }
 }

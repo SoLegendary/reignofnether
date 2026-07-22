@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.scenario;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.MyEditBox;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.ScreenEvent;

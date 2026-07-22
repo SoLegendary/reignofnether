@@ -35,6 +35,7 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,8 +43,11 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -54,7 +58,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.event.entity.item.ItemEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -76,9 +82,9 @@ public class BuildingServerEvents {
     private static final int TNT_BUILDING_BASE_DAMAGE = 20;
     private static final int MAX_SCAFFOLD_DEPTH = 5;
 
-    private static ServerLevel serverLevel = null;
+    private static @Nullable ServerLevel serverLevel = null;
 
-    public static ServerLevel getServerLevel() { return serverLevel; }
+    public static @Nullable ServerLevel getServerLevel() { return serverLevel; }
 
     // buildings that currently exist serverside
     private static final ArrayList<BuildingPlacement> buildings = new ArrayList<>();
@@ -117,13 +123,18 @@ public class BuildingServerEvents {
     }
 
     public static void saveBuildings(ServerLevel level) {
-        BuildingSaveData buildingData = BuildingSaveData.getInstance(serverLevel);
+        if (level == null)
+            return;
+        BuildingSaveData buildingData = BuildingSaveData.getInstance(level);
         buildingData.buildings.clear();
 
         getBuildings().forEach(b -> {
             PortalPlacement.PortalType portalType = null;
             if (b instanceof PortalPlacement portal) {
                 portalType = portal.getPortalType();
+            }
+            if (b instanceof CustomBuildingPlacement cb) {
+                cb.packCommandsNbt();
             }
             buildingData.buildings.add(new BuildingSave(b.originPos,
                     level,
@@ -138,7 +149,8 @@ public class BuildingServerEvents {
                     b instanceof PortalPlacement portal && portal.hasDestination() ? portal.destination : new BlockPos(0,0,0),
                     b.scenarioRoleIndex,
                     b.getDataStorage(),
-                    b.partialBlocksDestroyed
+                    b.partialBlocksDestroyed,
+                    b instanceof CustomBuildingPlacement cb ? cb.commandsNbt : new ListTag()
             ));
             //ReignOfNether.LOGGER.info("saved buildings/nether in serverevents: " + b.originPos);
         });
@@ -219,6 +231,10 @@ public class BuildingServerEvents {
                                 break;
                             }
                     }
+                    if (building instanceof CustomBuildingPlacement cb) {
+                        cb.setAndUnpackCommandsNbt(b.commandsNbt);
+                    }
+
                     ReignOfNether.LOGGER.info("loaded building in serverevents: " + b.building.name + "|" + b.originPos);
                 }
             });
@@ -288,6 +304,9 @@ public class BuildingServerEvents {
         boolean isDiagonalBridge,
         boolean fromCommand // ignore resources, terrain or any other restrictions and self-build
     ) {
+        if (serverLevel == null)
+            return null;
+
         BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
             serverLevel,
             pos,
@@ -338,17 +357,28 @@ public class BuildingServerEvents {
                         if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
                             placeScaffoldingUnder(block, newBuilding);
 
-                for (BuildingBlock block : newBuilding.blocks) {
-                    if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
-                        && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
-                        newBuilding.addToBlockPlaceQueue(block);
+                boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(ownerName, "warpten");
+                if (SandboxServer.isAnyoneASandboxPlayer() && hasFastBuildCheat) {
+                    newBuilding.maxBlocksPerTick = 4;
+                    newBuilding.queueAllBlocks(serverLevel);
+                } else {
+                    // speed up first capitol
+                    if (newBuilding.isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0) {
+                        newBuilding.blocksPerBuild = 2;
+                        newBuilding.maxBlocksPerTick = 2;
+                    }
+                    for (BuildingBlock block : newBuilding.blocks) {
+                        if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
+                                && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
+                            newBuilding.addToBlockPlaceQueue(block);
+                        }
                     }
                 }
 
                 BuildingClientboundPacket.placeBuilding(pos,
                     building,
                     rotation,
-                    ownerName,
+                    newBuilding.getBuilding() instanceof AbstractBridge ? "" : ownerName,
                     -1,
                     newBuilding.blockPlaceQueue.size(),
                     isDiagonalBridge,
@@ -379,12 +409,15 @@ public class BuildingServerEvents {
                         moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
                     }
                 }
+                if (newBuilding.getBuilding() instanceof AbstractBridge)
+                    newBuilding.ownerName = "";
+
             } else if (!PlayerServerEvents.isBot(ownerName)) {
                 warnInsufficientResources(newBuilding);
             }
             if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
                 newBuilding.getBuilding().shouldDestroyOnReset = false;
-                saveBuildings(getServerLevel());
+                saveBuildings(serverLevel);
             }
             return newBuilding;
         }
@@ -419,6 +452,9 @@ public class BuildingServerEvents {
 
 
     private static void assignBuilderUnits(int[] builderUnitIds, boolean queue, BuildingPlacement newBuilding) {
+        if (serverLevel == null)
+            return;
+
         for (int id : builderUnitIds) {
             Entity entity = serverLevel.getEntity(id);
             if (entity instanceof WorkerUnit workerUnit) {
@@ -482,7 +518,9 @@ public class BuildingServerEvents {
         buildings.remove(building);
         NetherConvertingAddon ncb;
         if ((ncb = building.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(building) > 0 && ncb.getNetherZone(building) != null) {
-            ncb.getNetherZone(building).startRestoring();
+            NetherZone nz = ncb.getNetherZone(building);
+            if (nz != null)
+                nz.startRestoring();
             saveNetherZones(serverLevel);
         }
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
@@ -542,7 +580,7 @@ public class BuildingServerEvents {
                     building.ownerName,
                     building.scenarioRoleIndex,
                     building.blockPlaceQueue.size(),
-                    building.getBuilding() instanceof AbstractBridge bridge && building.getDataStorage().getData(AbstractBridge.DIAGONAL),
+                    building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                     building.getUpgradeLevel(),
                     building.isBuilt,
                     building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
@@ -573,7 +611,7 @@ public class BuildingServerEvents {
                         building.ownerName,
                         building.scenarioRoleIndex,
                         building.blockPlaceQueue.size(),
-                        building.getBuilding() instanceof AbstractBridge bridge && building.getDataStorage().getData(AbstractBridge.DIAGONAL),
+                        building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                         building.getUpgradeLevel(),
                         building.isBuilt,
                         building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
@@ -652,7 +690,9 @@ public class BuildingServerEvents {
             if (b.shouldBeDestroyed()) {
                 NetherConvertingAddon ncb;
                 if ((ncb = b.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(b) > 0 && ncb.getNetherZone(b) != null) {
-                    ncb.getNetherZone(b).startRestoring();
+                    NetherZone nz = ncb.getNetherZone(b);
+                    if (nz != null)
+                        nz.startRestoring();
                     saveNetherZones(serverLevel);
                 }
                 FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
@@ -770,7 +810,7 @@ public class BuildingServerEvents {
             }
         }
         // don't do any block damage apart from the scripted building damage above or damage to leaves/tnt
-        if (!serverLevel.getGameRules().getRule(GameRuleRegistrar.DO_UNIT_GRIEFING).get()) {
+        if (serverLevel == null || !serverLevel.getGameRules().getRule(GameRuleRegistrar.DO_UNIT_GRIEFING).get()) {
             evt.getAffectedBlocks().removeIf(bp -> {
                 BlockState bs = evt.getLevel().getBlockState(bp);
                 return !(bs.getBlock() instanceof LeavesBlock) && !(bs.getBlock() instanceof TntBlock);
@@ -806,6 +846,17 @@ public class BuildingServerEvents {
     public static void onCropTrample(BlockEvent.FarmlandTrampleEvent evt) {
         if (BuildingUtils.isPosInsideAnyBuilding(evt.getEntity().level().isClientSide(), evt.getPos())) {
             evt.setCanceled(true);
+        }
+    }
+
+    // prevent crops from becoming items when a farm is damaged
+    @SubscribeEvent
+    public static void onItemDrop(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof ItemEntity ie && BuildingUtils.isPosInsideFarm(evt.getLevel().isClientSide(), ie.getOnPos())) {
+            Item item = ie.getItem().getItem();
+            if (List.of(Items.NETHER_WART, Items.WHEAT, Items.CARROT, Items.BEETROOT, Items.POTATO).contains(item)) {
+                evt.setCanceled(true);
+            }
         }
     }
 

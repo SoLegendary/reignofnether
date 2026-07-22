@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.SpinWebs;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
@@ -59,7 +60,7 @@ public class PoisonSpiderUnit extends SpiderUnit implements Unit, AttackerUnit {
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return true;
+    public int getDamageTooltipColour() {
+        return TooltipColours.GREEN;
     }
 }

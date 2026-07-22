@@ -75,6 +75,20 @@ public class UnitActionItem {
     );
 
     public UnitActionItem(
+            String ownerName,
+            UnitAction action,
+            int unitId,
+            int[] unitIds
+    ) {
+        this.ownerName = ownerName;
+        this.action = action;
+        this.unitId = unitId;
+        this.unitIds = unitIds;
+        this.preselectedBlockPos = new BlockPos(0,0,0);
+        this.selectedBuildingPos = new BlockPos(0,0,0);
+    }
+
+    public UnitActionItem(
         String ownerName,
         UnitAction action,
         int unitId,
@@ -271,12 +285,30 @@ public class UnitActionItem {
                     }
                 }
                 case ATTACK -> {
-                    // if the unit can't actually attack just treat this as a follow action
+                    LivingEntity le = (LivingEntity) level.getEntity(unitId);
                     if (unit instanceof AttackerUnit attackerUnit) {
-                        attackerUnit.setUnitAttackTargetForced((LivingEntity) level.getEntity(unitId));
-                    } else {
-                        LivingEntity livingEntity = (LivingEntity) level.getEntity(unitId);
-                        unit.setFollowTarget(livingEntity);
+                        if (unit instanceof WorkerUnit && ResourceSources.isHuntableAnimal(le) && Unit.atMaxResources(unit)) {
+                            if (level.isClientSide()) {
+                                HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.worker_inv_full"));
+                            } else {
+                                UnitServerEvents.getUnitActionSlowQueue().add(0, new UnitActionItem(
+                                        unit.getOwnerName(),
+                                        UnitAction.ATTACK,
+                                        unitId,
+                                        unitIds
+                                ));
+                                UnitServerEvents.getUnitActionSlowQueue().add(0, new UnitActionItem(
+                                        unit.getOwnerName(),
+                                        UnitAction.RETURN_RESOURCES_TO_CLOSEST,
+                                        -1,
+                                        unitIds
+                                ));
+                            }
+                        } else {
+                            attackerUnit.setUnitAttackTargetForced(le);
+                        }
+                    } else { // if the unit can't actually attack just treat this as a follow action
+                        unit.setFollowTarget(le);
                     }
                 }
                 case ATTACK_BUILDING -> {
