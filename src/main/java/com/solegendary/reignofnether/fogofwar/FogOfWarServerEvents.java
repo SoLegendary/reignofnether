@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.server.level.ServerLevel;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -140,9 +142,28 @@ public class FogOfWarServerEvents {
         syncClientFog();
     }
 
+    // On an RTS map, adopt any snapshot left on disk by a prior session so a mid-match server restart keeps
+    // serving it instead of recapturing (or briefly leaking the live world before the next capture).
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+        if (level != null && WorldBorderServerEvents.isRtsOptimisedMap(level))
+            FogChunkSnapshot.rebuildIndex(level);
+    }
+
     public static void setEnabled(boolean value) {
         if (!value && isForceFog()) {
             ReignOfNether.LOGGER.info("[FogOfWar] Disable refused: gamerule reignofnetherForceFog is true");
+            return;
+        }
+        // Fog only works on an RTS-optimised map: the small world border bounds the play area, so the
+        // pre-match snapshot (FogChunkSnapshot) can cover it in full and dark chunks can never fall back
+        // to the live world on reload/relog. On a vanilla-sized border the snapshot can't be captured, so
+        // refuse rather than silently leaking. A null serverLevel can't be verified, so it's refused too.
+        if (value && !WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
+            ReignOfNether.LOGGER.info("[FogOfWar] Enable refused: not an RTS-optimised map (world border > {})",
+                    WorldBorderServerEvents.RTS_OPTIMIZED_BORDER);
+            sendMessageToAllPlayers("server.reignofnether.fog_requires_rts_map", true);
             return;
         }
         boolean wasEnabled = enabled;
@@ -190,7 +211,9 @@ public class FogOfWarServerEvents {
 
         serverLevel = (ServerLevel) evt.level;
 
-        if (!enabled && isForceFog())
+        // Only attempt the forced auto-enable on an RTS-optimised map; otherwise setEnabled would refuse
+        // and spam the log/chat every tick. On a vanilla-sized map force-fog simply stays inert.
+        if (!enabled && isForceFog() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel))
             setEnabled(true);
 
         if (!enabled) return;

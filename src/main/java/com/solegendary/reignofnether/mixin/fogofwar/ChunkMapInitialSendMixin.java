@@ -32,9 +32,13 @@ public abstract class ChunkMapInitialSendMixin {
         if (!FogOfWarServerEvents.isFogActiveFor(sp)) return;
         ChunkPos pos = chunk.getPos();
         if (FogOfWarServerEvents.isChunkBrightFor(sp, pos)) return;
+        // Dark chunk: serve the pre-match snapshot instead of the live chunk. Fail closed - if no snapshot
+        // exists (capture IO error, or a chunk outside the captured border) still cancel the vanilla send so
+        // a fog-dark player can never receive live block data on (re)load. Fog is gated to RTS-optimised maps
+        // so every in-border chunk is snapshotted; this is defence-in-depth for the edge cases.
         ClientboundLevelChunkWithLightPacket snap = FogChunkSnapshot.get(pos);
-        if (snap == null) return;
-        sp.connection.send(snap);
+        if (snap != null)
+            sp.connection.send(snap);
         ci.cancel();
     }
 }

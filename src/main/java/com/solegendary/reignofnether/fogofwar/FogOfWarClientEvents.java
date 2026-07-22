@@ -7,10 +7,13 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
+import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
@@ -135,6 +138,12 @@ public class FogOfWarClientEvents {
         return enabled && localIsRTSPlayer;
     }
 
+    // client-side mirror of WorldBorderServerEvents.isRtsOptimisedMap using the client's known border
+    public static boolean isOnRtsOptimisedMap() {
+        return MC.level != null
+                && MC.level.getWorldBorder().getSize() <= WorldBorderServerEvents.RTS_OPTIMIZED_BORDER;
+    }
+
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("enable")
@@ -143,6 +152,13 @@ public class FogOfWarClientEvents {
                         return -1;
                     if (!MC.player.hasPermissions(4))
                         return -1;
+                    // Fog only works on RTS-optimised maps; refuse locally so the toggle is effectively
+                    // hidden on vanilla-sized maps instead of bouncing off the server.
+                    if (!isOnRtsOptimisedMap()) {
+                        MC.player.sendSystemMessage(Component.literal(
+                                I18n.get("server.reignofnether.fog_requires_rts_map")));
+                        return -1;
+                    }
                     setServerFog(true);
                     return 1;
                 })));

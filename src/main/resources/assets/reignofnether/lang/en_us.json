@@ -948,6 +948,7 @@
     "server.reignofnether.sync_disabled": "RTS login-syncing has been disabled.",
     "server.reignofnether.enabled_fog_of_war": "Enabled fog of war for all players",
     "server.reignofnether.disabled_fog_of_war": "Disabled fog of war for all players",
+    "server.reignofnether.fog_requires_rts_map": "Fog of war requires an RTS-optimised map (small world border)",
     "server.reignofnether.locked": "This match has been locked from new RTS players joining.",
     "server.reignofnether.already_started": "You already started your RTS match!",
     "server.reignofnether.already_started_scenario": "You already started this scenario!",

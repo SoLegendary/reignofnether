@@ -27,6 +27,13 @@ public class WorldBorderServerEvents {
 
     public static boolean prewarmedNavmesh = false;
 
+    // A small world border is the signal that a map was purpose-built for RoN RTS. Fog of war and the
+    // improved pathfinding/navmesh precompute both key off this: the whole play area is bounded, so it
+    // fits in caches and can be snapshotted in full (see FogChunkSnapshot).
+    public static boolean isRtsOptimisedMap(ServerLevel level) {
+        return level != null && level.getWorldBorder().getSize() <= RTS_OPTIMIZED_BORDER;
+    }
+
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent evt) {
         MinecraftServer server = evt.getServer();
@@ -36,7 +43,7 @@ public class WorldBorderServerEvents {
 
         WorldBorder border = level.getWorldBorder();
         // A small world border marks an RTS-optimised map; a vanilla-sized border is left fully untouched.
-        if (border.getSize() > RTS_OPTIMIZED_BORDER)
+        if (!isRtsOptimisedMap(level))
             return;
 
         ReignOfNether.LOGGER.info(
