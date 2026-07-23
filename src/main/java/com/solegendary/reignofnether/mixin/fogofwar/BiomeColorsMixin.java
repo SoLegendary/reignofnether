@@ -4,8 +4,6 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.ChunkPos;
-import java.util.Set;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,19 +32,17 @@ public abstract class BiomeColorsMixin {
         if (level == null || pos == null) return;
         if (!FogOfWarClientEvents.isEnabled()) return;
 
-        // Embeddium samples 4 positions per vertex; some land in the neighbor chunk.
-        // Tint if any of the 4 touched chunks is dark to avoid bright seams.
-        Set<ChunkPos> bright = FogOfWarClientEvents.brightChunks;
-        int cx = pos.getX() >> 4;
-        int cz = pos.getZ() >> 4;
-        int cxW = (pos.getX() - 1) >> 4;
-        int czN = (pos.getZ() - 1) >> 4;
-        boolean allBright =
-                bright.contains(new ChunkPos(cx, cz)) &&
-                (cxW == cx || bright.contains(new ChunkPos(cxW, cz))) &&
-                (czN == cz || bright.contains(new ChunkPos(cx, czN))) &&
-                ((cxW == cx && czN == cz) || bright.contains(new ChunkPos(cxW, czN)));
-        if (allBright) return;
+        // The average-color sample straddles the block's W/N edges (and Embeddium samples 4 positions per
+        // vertex). Test block-level visibility at all four touched corners and tint if any is fogged, so the
+        // block-granular fog edge has no bright seam.
+        int x = pos.getX();
+        int z = pos.getZ();
+        boolean allVisible =
+                FogOfWarClientEvents.isBlockVisible(x, z) &&
+                FogOfWarClientEvents.isBlockVisible(x - 1, z) &&
+                FogOfWarClientEvents.isBlockVisible(x, z - 1) &&
+                FogOfWarClientEvents.isBlockVisible(x - 1, z - 1);
+        if (allVisible) return;
 
         int original = cir.getReturnValueI();
         int fog = FogOfWarClientEvents.FOG_TINT_RGB;

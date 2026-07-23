@@ -12,7 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.List;
 
-// drop fog-dark players from chunk broadcasts so their client view freezes
+// drop fog-dark players from chunk broadcasts so their client view freezes; edge chunks pass here and get
+// per-column packet filtering in ChunkHolderMixin instead
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin {
 
@@ -31,8 +32,9 @@ public abstract class ChunkMapMixin {
         List<ServerPlayer> filtered = null;
         for (int i = 0; i < base.size(); i++) {
             ServerPlayer sp = base.get(i);
+            // drop players for whom this chunk is dark (not sent); edge refinement is per-packet
             boolean visible = !FogOfWarServerEvents.isFogActiveFor(sp)
-                    || FogOfWarServerEvents.isChunkBrightFor(sp, pos);
+                    || FogOfWarServerEvents.isChunkSentFor(sp, pos);
             if (!visible) {
                 if (filtered == null) filtered = new ArrayList<>(base.subList(0, i));
             } else if (filtered != null) {

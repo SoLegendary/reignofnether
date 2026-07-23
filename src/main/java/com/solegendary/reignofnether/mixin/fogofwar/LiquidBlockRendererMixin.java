@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import net.minecraft.client.renderer.block.LiquidBlockRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +24,7 @@ public abstract class LiquidBlockRendererMixin {
     private int ron_fogTintLiquid(IClientFluidTypeExtensions self, FluidState state, BlockAndTintGetter level, BlockPos pos) {
         int original = self.getTintColor(state, level, pos);
         if (!FogOfWarClientEvents.isEnabled()) return original;
-        if (FogOfWarClientEvents.brightChunks.contains(new ChunkPos(pos))) return original;
+        if (FogOfWarClientEvents.isBlockVisible(pos)) return original;
 
         int fog = FogOfWarClientEvents.FOG_TINT_RGB;
         int a = (original >>> 24) & 0xFF;

@@ -23,7 +23,9 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,8 +40,15 @@ public class FogOfWarClientEvents {
     public static final int CHUNK_FAR_VIEW_DIST = 2;
     private static final Minecraft MC = Minecraft.getInstance();
 
-    // mirror of the server's authoritative bright set for this player
+    // mirror of the server's authoritative sent (bright) set for this player
     public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
+
+    // Per-edge-chunk 16x16 column visibility bitmask (long[4] = 256 bits, index = (localX<<4)|localZ),
+    // server-authoritative: arrives with the bright set in FogChunksClientboundPacket, so the tint circle
+    // always matches the data/entity gating the server applied. A bright chunk with no entry is fully
+    // visible (live). Published as an immutable snapshot via a volatile ref so the off-thread chunk mesher
+    // reads it lock-free.
+    private static volatile Map<ChunkPos, long[]> edgeMasks = Map.of();
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = false;
@@ -55,7 +64,7 @@ public class FogOfWarClientEvents {
 
     public static boolean movedToCapitol = false;
 
-    public static void applyServerFogState(Set<ChunkPos> bright) {
+    public static void applyServerFogState(Set<ChunkPos> bright, Map<ChunkPos, long[]> masks) {
         Set<ChunkPos> newlyDark = new HashSet<>(brightChunks);
         newlyDark.removeAll(bright);
         Set<ChunkPos> newlyBright = new HashSet<>(bright);
@@ -63,6 +72,11 @@ public class FogOfWarClientEvents {
 
         brightChunks.clear();
         brightChunks.addAll(bright);
+
+        // Publish the server's edge masks atomically with the bright set (same packet), so there is never
+        // a window where a chunk is bright but its mask hasn't caught up.
+        Map<ChunkPos, long[]> oldMasks = edgeMasks;
+        edgeMasks = masks;
 
         // collect the union of (flipped chunk + 8 neighbors) so adjacent flips don't
         // re-dirty the same sections 9× each
@@ -79,6 +93,9 @@ public class FogOfWarClientEvents {
                 }
             }
         }
+        // re-mesh chunks whose mask changed (with neighbors: border columns affect adjacent chunks' tint
+        // sampling in BiomeColorsMixin)
+        for (ChunkPos cpos : diffMasks(oldMasks, masks)) addWithNeighbors(toRerender, cpos);
         markSectionsDirty(toRerender);
     }
 
@@ -97,6 +114,41 @@ public class FogOfWarClientEvents {
                 MC.levelRenderer.setSectionDirty(cpos.x, y, cpos.z);
             }
         }
+    }
+
+    // Block-level visibility used by the fog tint hooks (FogTintingBlockColor, BiomeColorsMixin,
+    // LiquidBlockRendererMixin) in place of the old whole-chunk brightChunks test. Called from the
+    // off-thread chunk mesher, so it only reads immutable published state. O(1).
+    public static boolean isBlockVisible(BlockPos pos) {
+        return isBlockVisible(pos.getX(), pos.getZ());
+    }
+
+    public static boolean isBlockVisible(int x, int z) {
+        ChunkPos cp = new ChunkPos(x >> 4, z >> 4);
+        if (!brightChunks.contains(cp)) return false;              // server-dark chunk: fully fogged
+        long[] mask = edgeMasks.get(cp);                            // single volatile read
+        if (mask == null) return true;                             // live chunk (no mask): fully visible
+        int i = ((x & 15) << 4) | (z & 15);
+        return (mask[i >> 6] & (1L << (i & 63))) != 0;
+    }
+
+    // Column-visibility mask if this chunk is an edge chunk, else null. Used by ClientChunkCacheMixin to
+    // keep fogged columns rendering their previous state when the server resends a full edge chunk.
+    public static long[] getEdgeMask(int chunkX, int chunkZ) {
+        if (!isEnabled()) return null;
+        return edgeMasks.get(new ChunkPos(chunkX, chunkZ));
+    }
+
+    // Chunks whose mask differs (added, removed, or bits changed) need a re-mesh.
+    private static Set<ChunkPos> diffMasks(Map<ChunkPos, long[]> oldM, Map<ChunkPos, long[]> newM) {
+        Set<ChunkPos> changed = new HashSet<>();
+        for (Map.Entry<ChunkPos, long[]> e : newM.entrySet()) {
+            long[] o = oldM.get(e.getKey());
+            if (o == null || !Arrays.equals(o, e.getValue())) changed.add(e.getKey());
+        }
+        for (ChunkPos cp : oldM.keySet())
+            if (!newM.containsKey(cp)) changed.add(cp); // removed -> reverts to full-bright fallback
+        return changed;
     }
 
     @SubscribeEvent
@@ -130,6 +182,7 @@ public class FogOfWarClientEvents {
 
             if (!enabled) {
                 brightChunks.clear();
+                edgeMasks = Map.of();
             }
         }
     }
@@ -184,17 +237,20 @@ public class FogOfWarClientEvents {
         return false;
     }
 
+    // Kept named isInBrightChunk for its many callers, but now block-granular: a position is "bright" only
+    // if visible at block level, so entities/items/particles hide inside the fogged part of an edge chunk
+    // (own + allied units are viewers, always inside their own circle, so they never self-hide).
     public static boolean isInBrightChunk(BlockPos bp) {
         if (!isEnabled() || MC.level == null)
             return true;
-        return brightChunks.contains(new ChunkPos(bp));
+        return isBlockVisible(bp);
     }
 
     public static boolean isInBrightChunk(Entity entity) {
         if (!isEnabled() || MC.level == null)
             return true;
 
-        if (brightChunks.contains(new ChunkPos(entity.getOnPos()))) return true;
+        if (isBlockVisible(entity.getOnPos())) return true;
 
         return entity instanceof RangedAttackerUnit rangedAttackerUnit &&
                 rangedAttackerUnit.getFogRevealDuration() > 0;

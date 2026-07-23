@@ -1,9 +1,9 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.ChunkPos;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,8 +20,9 @@ public abstract class TrackedEntityMixin {
     @Inject(method = "updatePlayer", at = @At("HEAD"), cancellable = true)
     private void reignofnether$gateEntityVisibility(ServerPlayer player, CallbackInfo ci) {
         if (!FogOfWarServerEvents.isFogActiveFor(player)) return;
-        ChunkPos cp = new ChunkPos(entity.blockPosition());
-        if (FogOfWarServerEvents.isChunkBrightFor(player, cp)) return;
+        // block-level gate: an enemy entity hides unless its own column is inside the viewer's circle
+        BlockPos bp = entity.blockPosition();
+        if (FogOfWarServerEvents.isBlockVisibleFor(player, bp.getX(), bp.getZ())) return;
         ci.cancel();
     }
 }
