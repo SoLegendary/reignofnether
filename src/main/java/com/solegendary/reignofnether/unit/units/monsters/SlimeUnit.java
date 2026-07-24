@@ -390,6 +390,8 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
     }
 
+    SlimeJumpMoveControl jumpMoveControl = new SlimeJumpMoveControl(this);
+    SlimeRollMoveControl rollMoveControl = new SlimeRollMoveControl(this);
 
     // Rendering-only interpolation copies, same pattern as Slime's squish/oSquish.
     public float rollAngle = 0;
@@ -502,10 +504,10 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
             setDeltaMovement(new Vec3(0, 0.25, 0));
 
         if (isInRangeOfAttackTarget() && !(getMoveControl() instanceof SlimeJumpMoveControl)) {
-            this.moveControl = new SlimeJumpMoveControl(this);
+            this.moveControl = jumpMoveControl;
             this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed * SlimeJumpMoveControl.MOVESPEED_MULTIPLIER);
         } else if (!isInRangeOfAttackTarget() && !(getMoveControl() instanceof SlimeRollMoveControl)) {
-            this.moveControl = new SlimeRollMoveControl(this);
+            this.moveControl = rollMoveControl; // TODO: roll towards an attack target
             this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
         }
 

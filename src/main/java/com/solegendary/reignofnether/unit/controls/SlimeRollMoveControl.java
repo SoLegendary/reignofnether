@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.controls;
 
+import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackSlimeUnitGoal;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
@@ -76,6 +78,11 @@ public class SlimeRollMoveControl extends MoveControl {
     @Override
     public void tick() {
         BlockPos targetPos = slime.getMoveGoal().getMoveTarget();
+        if (targetPos == null && slime.getTargetGoal().getTarget() != null)
+            targetPos = slime.getTargetGoal().getTarget().getOnPos();
+        if (targetPos == null && slime.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg)
+            targetPos = mabg.getMoveTarget();
+
         double distSqr = 999;
         if (targetPos != null) {
             distSqr = mob.distanceToSqr(targetPos.getCenter());
