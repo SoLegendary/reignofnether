@@ -59,7 +59,6 @@
         "MobRendererMixin",
         "MusicManagerMixin",
         "OrthoViewMixin",
-        "RenderChunkRegionMixin",
         "ResourceLoadStateTrackerMixin",
         "SplashRendererAccessor",
         "TitleScreenMixin",

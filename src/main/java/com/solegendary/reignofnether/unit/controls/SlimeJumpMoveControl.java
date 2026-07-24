@@ -13,16 +13,18 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.Random;
 
-public class SlimeUnitMoveControl extends MoveControl {
+public class SlimeJumpMoveControl extends MoveControl {
     private int jumpDelay;
     private final SlimeUnit slime;
     private float yRot;
     private boolean hasLineOfSight = false;
     private double lastDistToNodeSqr = Integer.MAX_VALUE;
 
+    public static final float MOVESPEED_MULTIPLIER = 1/0.45f; // when using jumping movement, we need to increase movespeed a lot more
+
     private static final Random RANDOM = new Random();
 
-    public SlimeUnitMoveControl(SlimeUnit pSlime) {
+    public SlimeJumpMoveControl(SlimeUnit pSlime) {
         super(pSlime);
         this.slime = pSlime;
     }

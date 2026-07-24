@@ -71,6 +71,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -1525,9 +1526,25 @@ public class UnitClientEvents {
     }
      */
 
+
     /*
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
+
+        if (!getSelectedUnits().isEmpty() && getSelectedUnits().get(0) instanceof SlimeUnit slime) {
+            if (evt.getKeyCode() == GLFW.GLFW_KEY_W) {
+                slime.sideAngleX += 90;
+            } else if (evt.getKeyCode() == GLFW.GLFW_KEY_A) {
+                slime.sideAngleY -= 90;
+            } else if (evt.getKeyCode() == GLFW.GLFW_KEY_S) {
+                slime.sideAngleX -= 90;
+            } else if (evt.getKeyCode() == GLFW.GLFW_KEY_D) {
+                slime.sideAngleY += 90;
+            }
+        }*/
+
+
+        /*
         if (Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE && !getAllUnits().isEmpty()) {
             PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
                     "",
@@ -1544,8 +1561,9 @@ public class UnitClientEvents {
                     new BlockPos(0,0,0)
             ));
         }
-    }
-     */
+
+
+    }*/
 
     /*
     public static int pitch = 0;
@@ -1563,13 +1581,17 @@ public class UnitClientEvents {
         }
     }
 
-
+     */
+    /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
-                "pitch: " +  pitch,
-                "yaw: " + yaw,
-        });
+        if (!getSelectedUnits().isEmpty() && getSelectedUnits().get(0) instanceof SlimeUnit slime) {
+            MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[]{
+                    "rollAngle: " + slime.rollAngle,
+                    "sideAngleX: " + slime.sideAngleX,
+                    "sideAngleY: " + slime.sideAngleY,
+            });
+        }
     }
      */
 }
