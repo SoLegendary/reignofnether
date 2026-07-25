@@ -8,22 +8,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 
-/**
- * A MoveControl for slime-type units that replaces the vanilla "hop toward target" movement
- * with a periodic burst-slide: the slime winds up (squishes inward), then snaps forward in a
- * fast, short slide, then rests/cools down before the next burst. Squish values are driven
- * directly so the model visually contracts before the burst and stretches during it.
- *
- * All timing/animation knobs are adjustable private fields near the top of the class so units
- * can be tuned per slime type by editing the values directly.
- */
 public class SlimeRollMoveControl extends MoveControl {
 
     private final SlimeUnit slime;
-
-    // ---------------------------------------------------------------------
-    // Tunable timing parameters (in ticks, 20 ticks = 1 second)
-    // ---------------------------------------------------------------------
 
     /** How long the slide burst itself lasts, in ticks. */
     private int burstDurationTicks = 6;
@@ -33,10 +20,6 @@ public class SlimeRollMoveControl extends MoveControl {
 
     /** How long the "wind up" squish-contraction lasts before the burst fires, in ticks. */
     private int windUpDurationTicks = 4;
-
-    // ---------------------------------------------------------------------
-    // Tunable speed/animation parameters
-    // ---------------------------------------------------------------------
 
     /** Multiplier applied to the mob's movement speed attribute while actively sliding. */
     private double burstSpeedMultiplier = 1;
@@ -77,12 +60,7 @@ public class SlimeRollMoveControl extends MoveControl {
 
     @Override
     public void tick() {
-        BlockPos targetPos = slime.getMoveGoal().getMoveTarget();
-        if (targetPos == null && slime.getTargetGoal().getTarget() != null)
-            targetPos = slime.getTargetGoal().getTarget().getOnPos();
-        if (targetPos == null && slime.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg)
-            targetPos = mabg.getMoveTarget();
-
+        BlockPos targetPos = slime.getMoveTarget();
         double distSqr = 999;
         if (targetPos != null) {
             distSqr = mob.distanceToSqr(targetPos.getCenter());
@@ -139,8 +117,7 @@ public class SlimeRollMoveControl extends MoveControl {
         this.mob.yBodyRot = this.mob.getYRot();
         this.mob.yHeadRot = this.mob.getYRot();
 
-        double speed = this.speedModifier * this.burstSpeedMultiplier
-                * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED);
+        double speed = this.speedModifier * this.mob.getAttributeValue(Attributes.MOVEMENT_SPEED);
         this.mob.setSpeed((float) speed);
         this.mob.setZza(1.0F);
 

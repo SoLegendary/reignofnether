@@ -34,11 +34,10 @@ public class SlimeUnitRenderer extends MobRenderer<SlimeUnit, SlimeModel<SlimeUn
     }
 
     protected void scale(SlimeUnit slime, PoseStack pPoseStack, float pPartialTickTime) {
-        float $$3 = 0.999F;
         pPoseStack.scale(0.999F, 0.999F, 0.999F);
         pPoseStack.translate(0.0F, 0.001F, 0.0F);
         float $$4 = (float)slime.getSize();
-        float $$5 = Mth.lerp(pPartialTickTime, slime.oSquish + slime.extraSquish, slime.squish + slime.extraSquish) / ($$4 * 0.5F + 1.0F);
+        float $$5 = Mth.lerp(pPartialTickTime, slime.oSquish, slime.squish) / ($$4 * 0.5F + 1.0F);
         float $$6 = 1.0F / ($$5 + 1.0F);
         pPoseStack.scale($$6 * $$4, 1.0F / $$6 * $$4, $$6 * $$4);
     }
@@ -50,13 +49,10 @@ public class SlimeUnitRenderer extends MobRenderer<SlimeUnit, SlimeModel<SlimeUn
     @Override
     protected void setupRotations(SlimeUnit entity, PoseStack poseStack, float ageInTicks,
                                   float rotationYaw, float partialTicks) {
-        // "sideways" axis running left-to-right across the model.
         super.setupRotations(entity, poseStack, ageInTicks, rotationYaw, partialTicks);
 
         float rollDegrees = Mth.lerp(partialTicks, entity.oRollAngle, entity.rollAngle);
 
-        // Pivot around the model's vertical center rather than its feet, so it
-        // reads as a ball rolling forward instead of tipping over at the base.
         float halfHeight = entity.getBbHeight() / 2.0F;
         poseStack.translate(0.0, halfHeight, 0.0);
         poseStack.mulPose(Axis.XN.rotationDegrees(rollDegrees));

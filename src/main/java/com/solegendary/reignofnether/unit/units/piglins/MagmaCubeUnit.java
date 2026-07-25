@@ -73,6 +73,12 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
 
     public void tick() {
         super.tick();
+
+        if (!onGround() && !isUsingJumpingMovement()) {
+            oSquish = 0;
+            squish = 0;
+        }
+
         if (!level().isClientSide()) {
             setFireTicks += 1;
             if (setFireTicks >= SET_FIRE_TICKS_MAX) {
@@ -120,6 +126,28 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
             return false;
 
         return super.hurt(pSource, pAmount);
+    }
+
+    @Override
+    protected void handleRoll() {
+        if (isUsingJumpingMovement()) { // roll towards 0 so the magma cube slinky animation doesn't render sideways or upsidedown
+            this.prevRollTrackX = this.getX();
+            this.prevRollTrackZ = this.getZ();
+            float target = (float) Math.round(this.rollAngle / 180.0) * 180.0F;
+            float diff = target - this.rollAngle;
+            float step = Math.signum(diff) * Math.min(Math.abs(diff), REST_SETTLE_DEGREES_PER_TICK);
+            this.oRollAngle = this.rollAngle;
+            this.rollAngle += step;
+            normaliseRollAngles();
+        } else {
+            super.handleRoll();
+        }
+    }
+
+    @Override
+    protected void onFinishedRoll() {
+        createMagma();
+        super.onFinishedRoll();
     }
 
 
