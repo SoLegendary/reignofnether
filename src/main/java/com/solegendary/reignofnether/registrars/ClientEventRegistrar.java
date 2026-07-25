@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.config.ConfigVanillaServerEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
+import com.solegendary.reignofnether.fogofwar.PlayerChunksClientEvents;
 import com.solegendary.reignofnether.gamemode.GameModeServerEvents;
 import com.solegendary.reignofnether.gamerules.GameruleServerEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiClientEvents;
@@ -105,6 +106,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(RtsDebugClientEvents.class);
         vanillaEventBus.register(RtsDebugNavmesh.class);
         vanillaEventBus.register(RtsDebugPathPreview.class);
+        vanillaEventBus.register(PlayerChunksClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(GameruleServerEvents.class);

@@ -32,7 +32,7 @@ public abstract class ChunkHolderMixin {
         if (!FogOfWarServerEvents.isEnabled()) return;
         ci.cancel();
         for (ServerPlayer sp : players)
-            if (FogOfWarServerEvents.shouldSendChunkPacket(sp, this.pos, packet))
+            if (!sp.getName().getString().equals("SoLegendary") && FogOfWarServerEvents.shouldSendChunkPacket(sp, this.pos, packet))
                 sp.connection.send(packet);
     }
 }

@@ -44,6 +44,16 @@ Hero Items
     - Requires right-click to pick up, will not auto-pickup
 
 
+Fog of War
+----------
+[🟡] Enemy building highlights are being rendered in fog
+[❌] Block Entities not being rendered in fog
+
+To test:
+- Ghasts
+- Revealing units in fog
+-
+
 Balance
 -------
 
@@ -51,12 +61,13 @@ Balance
 Quality of Life
 ---------------
 [❌] Reduced starting capitol build speed by 33%
+[❌] Add NBT field to slimes to force old jumping movement style
 
 Bugfixes
 --------
 [❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
 [✔] Fixed some animals not dropping the correct amount of food
-
+[❌] Spider jockeys not moving long distances
 
 Languages
 ---------

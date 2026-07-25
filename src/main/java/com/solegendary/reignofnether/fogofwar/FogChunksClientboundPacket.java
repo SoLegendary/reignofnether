@@ -24,10 +24,12 @@ public class FogChunksClientboundPacket {
     public final Map<ChunkPos, long[]> edgeMasks;
 
     public static void send(ServerPlayer player, Set<ChunkPos> bright, Map<ChunkPos, long[]> edgeMasks) {
+        //if (player.getName().getString().equals("SoLegendary")) {
         PacketHandler.INSTANCE.send(
                 PacketDistributor.PLAYER.with(() -> player),
                 new FogChunksClientboundPacket(bright, edgeMasks)
         );
+        //}
     }
 
     public FogChunksClientboundPacket(Set<ChunkPos> bright, Map<ChunkPos, long[]> edgeMasks) {

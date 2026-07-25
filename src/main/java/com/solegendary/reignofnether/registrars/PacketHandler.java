@@ -12,10 +12,7 @@ import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerboundPacket;
 import com.solegendary.reignofnether.config.ClientboundSyncResourceCostPacket;
-import com.solegendary.reignofnether.fogofwar.FogChunksClientboundPacket;
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
-import com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket;
-import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
+import com.solegendary.reignofnether.fogofwar.*;
 import com.solegendary.reignofnether.gamemode.GameModeClientboundPacket;
 import com.solegendary.reignofnether.gamemode.GameModeServerboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
@@ -353,6 +350,12 @@ public final class PacketHandler {
                 .encoder(RTSMapInfoServerboundPacket::encode)
                 .decoder(RTSMapInfoServerboundPacket::new)
                 .consumerMainThread(RTSMapInfoServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(PlayerChunksClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PlayerChunksClientboundPacket::encode)
+                .decoder(PlayerChunksClientboundPacket::new)
+                .consumerMainThread(PlayerChunksClientboundPacket::handle)
                 .add();
     }
 }

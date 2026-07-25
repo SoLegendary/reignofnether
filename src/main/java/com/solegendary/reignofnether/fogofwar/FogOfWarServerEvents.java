@@ -89,8 +89,8 @@ public class FogOfWarServerEvents {
     public static final int CHUNK_FAR_VIEW_DIST = 2;
     // Block-radius vision. MUST match the client's FogOfWarClientEvents.BLOCK_VIEW_DIST/BLOCK_FAR_VIEW_DIST so
     // what the server securely sends lines up with the circle the client renders.
-    public static final int NEAR_SIGHT_BLOCKS = 32;
-    public static final int FAR_SIGHT_BLOCKS = 48;
+    public static final int NEAR_SIGHT_BLOCKS = 16;
+    public static final int FAR_SIGHT_BLOCKS = 32;
     private static final int UPDATE_TICKS = 10;
     private static int ticksUntilUpdate = UPDATE_TICKS;
 
@@ -318,6 +318,9 @@ public class FogOfWarServerEvents {
         }
         ticksUntilUpdate = UPDATE_TICKS;
         updatePlayerBrightChunks();
+        for (ServerPlayer p : PlayerServerEvents.orthoviewPlayers)
+            PlayerChunksClientboundPacket.send(p, playerLiveChunks, playerSentChunks);
+
     }
 
     private static void updatePlayerBrightChunks() {
