@@ -41,8 +41,8 @@
         "fire.MagmaBlockMixin",
         "fire.WalkNodeEvaluatorMixin",
         "fogofwar.ChunkHolderMixin",
-        "fogofwar.ChunkMapMixin",
         "fogofwar.ChunkMapInitialSendMixin",
+        "fogofwar.ChunkMapMixin",
         "fogofwar.TrackedEntityMixin",
         "goals.MobMixin",
         "goals.RandomStrollGoalMixin"
