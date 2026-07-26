@@ -35,14 +35,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
@@ -462,9 +455,15 @@ public class FogOfWarServerEvents {
             if (prevSent == null || !prevSent.equals(sent) || !masksEqual(prevEdge, edge))
                 FogChunksClientboundPacket.send(sp, sent, edge);
 
-            for (LevelChunk chunk : resendChunks)
-                sp.connection.send(new ClientboundLevelChunkWithLightPacket(
-                        chunk, level.getLightEngine(), null, null));
+            // noLight == client retains its cached lighting
+            // this does mean there might be lighting bugs for corners of edge chunks out of view
+            // TODO: to fix this, apply masking to light updates clientside too?
+            BitSet noLight = new BitSet();
+            for (LevelChunk chunk : resendChunks) {
+                boolean updateLight = live.contains(chunk.getPos()) || sent.contains(chunk.getPos());
+                sp.connection.send(new ClientboundLevelChunkWithLightPacket(chunk, level.getLightEngine(),
+                        updateLight ? null : noLight, updateLight ? null : noLight));
+            }
         }
     }
 

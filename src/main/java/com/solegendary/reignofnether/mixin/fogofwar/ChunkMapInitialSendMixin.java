@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.fogofwar.FogChunkSnapshot;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
@@ -31,22 +32,17 @@ public abstract class ChunkMapInitialSendMixin {
         if (!FogOfWarServerEvents.isEnabled()) return;
         if (!FogOfWarServerEvents.isFogActiveFor(sp)) return;
 
-        ci.cancel();
-
         ChunkPos pos = chunk.getPos();
-        // Only fully-live chunks get live data on load. An EDGE chunk is served the snapshot too (its
-        // fogged columns must never show current state), then a queued fog-tick resend refreshes it; the
-        // client-side merge (ClientChunkCacheMixin) applies that resend only to the visible columns.
+
         if (FogOfWarServerEvents.isChunkLiveFor(sp, pos)) return;
+        ClientboundLevelChunkWithLightPacket snap = FogChunkSnapshot.get(pos);
+        if (snap != null) {
+            sp.connection.send(snap);
+        }
         if (FogOfWarServerEvents.isChunkSentFor(sp, pos))
             FogOfWarServerEvents.queueResend(sp.getUUID(), pos);
-        // Serve the pre-match snapshot instead of the live chunk. Fail closed - if no snapshot exists
-        // (capture IO error, or a chunk outside the captured border) still cancel the vanilla send so
-        // a fog-dark player can never receive live block data on (re)load. Fog is gated to RTS-optimised
-        // maps so every in-border chunk is snapshotted; this is defence-in-depth for the edge cases.
-        ClientboundLevelChunkWithLightPacket snap = FogChunkSnapshot.get(pos);
-        if (snap != null)
-            sp.connection.send(snap);
+
         ci.cancel();
+
     }
 }
