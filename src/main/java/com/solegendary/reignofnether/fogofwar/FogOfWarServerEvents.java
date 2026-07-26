@@ -320,7 +320,6 @@ public class FogOfWarServerEvents {
         updatePlayerBrightChunks();
         for (ServerPlayer p : PlayerServerEvents.orthoviewPlayers)
             PlayerChunksClientboundPacket.send(p, playerLiveChunks, playerSentChunks);
-
     }
 
     private static void updatePlayerBrightChunks() {

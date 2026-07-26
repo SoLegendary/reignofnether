@@ -31,10 +31,7 @@ public abstract class ChunkMapInitialSendMixin {
         if (!FogOfWarServerEvents.isEnabled()) return;
         if (!FogOfWarServerEvents.isFogActiveFor(sp)) return;
 
-        if (sp.getName().getString().equals("SoLegendary")) {
-            ci.cancel();
-            return;
-        }
+        ci.cancel();
 
         ChunkPos pos = chunk.getPos();
         // Only fully-live chunks get live data on load. An EDGE chunk is served the snapshot too (its

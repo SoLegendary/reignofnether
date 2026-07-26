@@ -42,7 +42,6 @@ public abstract class ChunkMapMixin {
             }
         }
         if (filtered != null) {
-            filtered.removeIf(sp -> sp.getName().getString().equals("SoLegendary"));
             cir.setReturnValue(filtered);
         }
     }
