@@ -4,95 +4,156 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.sounds.SoundClientEvents;
-import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket.setServerFog;
 
 public class FogOfWarClientEvents {
-    public static final float BRIGHT = 1.0f;
-    public static final float DARK = 0.35f;
-    public static final float EXTRA_DARK = 0.10f;
+
+    // RGB multiplier baked into block vertex colors in dark chunks (see BlockColorsMixin).
+    public static final int FOG_TINT_RGB = 0x7882A0;
 
     public static final int CHUNK_VIEW_DIST = 1;
     public static final int CHUNK_FAR_VIEW_DIST = 2;
     private static final Minecraft MC = Minecraft.getInstance();
-    private static final int UPDATE_TICKS_MAX = 10;
-    private static int updateTicksLeft = UPDATE_TICKS_MAX;
 
+    // mirror of the server's authoritative sent (bright) set for this player
     public static final Set<ChunkPos> brightChunks = ConcurrentHashMap.newKeySet();
-    public static final Set<ChunkPos> lastBrightChunks = ConcurrentHashMap.newKeySet();
-    public static final Set<ChunkPos> rerenderChunks = ConcurrentHashMap.newKeySet();
 
-    // chunks that will not update while we are looking at them
-    public static final Set<BlockPos> semiFrozenChunks = ConcurrentHashMap.newKeySet();
-
-    // chunkInfos that should never be updated, even if the client does a reset or moves the camera out of range
-    public static final Set<FrozenChunk> frozenChunks = ConcurrentHashMap.newKeySet();
-
-    public static boolean fogEnableWarningSent = false;
+    // Per-edge-chunk 16x16 column visibility bitmask (long[4] = 256 bits, index = (localX<<4)|localZ),
+    // server-authoritative: arrives with the bright set in FogChunksClientboundPacket, so the tint circle
+    // always matches the data/entity gating the server applied. A bright chunk with no entry is fully
+    // visible (live). Published as an immutable snapshot via a volatile ref so the off-thread chunk mesher
+    // reads it lock-free.
+    private static volatile Map<ChunkPos, long[]> edgeMasks = Map.of();
 
     // if false, disables ALL mixins related to fog of war
     private static boolean enabled = false;
 
-    private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
+    // cached - isEnabled() runs per quad during chunk mesh rebuilds
+    private static volatile boolean localIsRTSPlayer = false;
+
+    public static void refreshLocalIsRTSPlayer() {
+        boolean was = localIsRTSPlayer;
+        localIsRTSPlayer = MC.player != null && PlayerClientEvents.isRTSPlayer();
+        if (was != localIsRTSPlayer && enabled) resetFogChunks();
+    }
 
     public static boolean movedToCapitol = false;
 
-    // mark these renderChunks as dirty the next time they're rendered
-    // this is so we chunks that were explored while not in frustum have lighting updated correctly
-    public static Set<ChunkPos> chunksToRefresh = new HashSet<>();
+    public static void applyServerFogState(Set<ChunkPos> bright, Map<ChunkPos, long[]> masks) {
+        Set<ChunkPos> newlyDark = new HashSet<>(brightChunks);
+        newlyDark.removeAll(bright);
+        Set<ChunkPos> newlyBright = new HashSet<>(bright);
+        newlyBright.removeAll(brightChunks);
 
-    public static ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum = new ObjectArrayList<>();
+        brightChunks.clear();
+        brightChunks.addAll(bright);
 
+        // Publish the server's edge masks atomically with the bright set (same packet), so there is never
+        // a window where a chunk is bright but its mask hasn't caught up.
+        Map<ChunkPos, long[]> oldMasks = edgeMasks;
+        edgeMasks = masks;
 
-
-    public static void revealOrHidePlayer(boolean reveal, String playerName) {
-        if (reveal)
-            revealedPlayerNames.add(playerName);
-        else
-            revealedPlayerNames.removeIf(p -> p.equals(playerName));
+        // collect the union of (flipped chunk + 8 neighbors) so adjacent flips don't
+        // re-dirty the same sections 9× each
+        Set<ChunkPos> toRerender = new HashSet<>();
+        for (ChunkPos cpos : newlyDark) addWithNeighbors(toRerender, cpos);
+        for (ChunkPos cpos : newlyBright) {
+            addWithNeighbors(toRerender, cpos);
+            if (MC.level != null) {
+                for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
+                    if (building.isExploredClientside) continue;
+                    for (BlockPos bp : building.getRenderChunkOrigins(false))
+                        if (MC.level.getChunk(bp).getPos().equals(cpos))
+                            building.isExploredClientside = true;
+                }
+            }
+        }
+        // re-mesh chunks whose mask changed (with neighbors: border columns affect adjacent chunks' tint
+        // sampling in BiomeColorsMixin)
+        for (ChunkPos cpos : diffMasks(oldMasks, masks)) addWithNeighbors(toRerender, cpos);
+        markSectionsDirty(toRerender);
     }
 
-    public static boolean isPlayerRevealed(String name) {
-        if (!PlayerClientEvents.isRTSPlayer())
-            return true;
+    private static void addWithNeighbors(Set<ChunkPos> set, ChunkPos cpos) {
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dz = -1; dz <= 1; dz++)
+                set.add(new ChunkPos(cpos.x + dx, cpos.z + dz));
+    }
 
-        return revealedPlayerNames.contains(name);
+    private static void markSectionsDirty(Set<ChunkPos> chunks) {
+        if (MC.level == null || MC.levelRenderer == null || chunks.isEmpty()) return;
+        int minSection = MC.level.getMinSection();
+        int maxSection = MC.level.getMaxSection();
+        for (ChunkPos cpos : chunks) {
+            for (int y = minSection; y < maxSection; y++) {
+                MC.levelRenderer.setSectionDirty(cpos.x, y, cpos.z);
+            }
+        }
+    }
+
+    // Block-level visibility used by the fog tint hooks (FogTintingBlockColor, BiomeColorsMixin,
+    // LiquidBlockRendererMixin) in place of the old whole-chunk brightChunks test. Called from the
+    // off-thread chunk mesher, so it only reads immutable published state. O(1).
+    public static boolean isBlockVisible(BlockPos pos) {
+        return isBlockVisible(pos.getX(), pos.getZ());
+    }
+
+    public static boolean isBlockVisible(int x, int z) {
+        ChunkPos cp = new ChunkPos(x >> 4, z >> 4);
+        if (!brightChunks.contains(cp)) return false;              // server-dark chunk: fully fogged
+        long[] mask = edgeMasks.get(cp);                            // single volatile read
+        if (mask == null) return true;                             // live chunk (no mask): fully visible
+        int i = ((x & 15) << 4) | (z & 15);
+        return (mask[i >> 6] & (1L << (i & 63))) != 0;
+    }
+
+    // Column-visibility mask if this chunk is an edge chunk, else null. Used by ClientChunkCacheMixin to
+    // keep fogged columns rendering their previous state when the server resends a full edge chunk.
+    public static long[] getEdgeMask(int chunkX, int chunkZ) {
+        if (!isEnabled()) return null;
+        return edgeMasks.get(new ChunkPos(chunkX, chunkZ));
+    }
+
+    // Chunks whose mask differs (added, removed, or bits changed) need a re-mesh.
+    private static Set<ChunkPos> diffMasks(Map<ChunkPos, long[]> oldM, Map<ChunkPos, long[]> newM) {
+        Set<ChunkPos> changed = new HashSet<>();
+        for (Map.Entry<ChunkPos, long[]> e : newM.entrySet()) {
+            long[] o = oldM.get(e.getKey());
+            if (o == null || !Arrays.equals(o, e.getValue())) changed.add(e.getKey());
+        }
+        for (ChunkPos cp : oldM.keySet())
+            if (!newM.containsKey(cp)) changed.add(cp); // removed -> reverts to full-bright fallback
+        return changed;
     }
 
     @SubscribeEvent
@@ -114,7 +175,6 @@ public class FogOfWarClientEvents {
     // reload chunks like player pressed F3 + A
     public static void resetFogChunks() {
         MC.levelRenderer.allChanged();
-        semiFrozenChunks.clear();
     }
 
     public static void setEnabled(boolean value) {
@@ -125,20 +185,21 @@ public class FogOfWarClientEvents {
             enabled = value;
             resetFogChunks();
 
-            if (enabled) {
-                updateFogChunks();
-                for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-                    building.freezeChunks(MC.player.getName().getString(), false);
-            } else {
-                for (FrozenChunk frozenChunk : frozenChunks)
-                    frozenChunk.unloadBlocks();
-                frozenChunks.clear();
+            if (!enabled) {
+                brightChunks.clear();
+                edgeMasks = Map.of();
             }
         }
     }
 
     public static boolean isEnabled() {
-        return enabled;
+        return enabled && localIsRTSPlayer;
+    }
+
+    // client-side mirror of WorldBorderServerEvents.isRtsOptimisedMap using the client's known border
+    public static boolean isOnRtsOptimisedMap() {
+        return MC.level != null
+                && MC.level.getWorldBorder().getSize() <= WorldBorderServerEvents.RTS_OPTIMIZED_BORDER;
     }
 
     @SubscribeEvent
@@ -149,25 +210,14 @@ public class FogOfWarClientEvents {
                         return -1;
                     if (!MC.player.hasPermissions(4))
                         return -1;
-                    //if (TutorialClientEvents.isEnabled()) {
-                    //    MC.player.sendSystemMessage(Component.literal("Fog of war is not available in the tutorial."));
-                    //    return -1;
-                    //}
-                    if (!fogEnableWarningSent) {
-                        fogEnableWarningSent = true;
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("fogofwar.reignofnether.warning").withStyle(Style.EMPTY.withBold(true)));
-                        MC.player.sendSystemMessage(Component.translatable("fogofwar.reignofnether.experimental"));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("fogofwar.reignofnether.optifine_crash"));
-                        MC.player.sendSystemMessage(Component.translatable("fogofwar.reignofnether.chunk_bugs"));
-                        MC.player.sendSystemMessage(Component.translatable("fogofwar.reignofnether.cpu_usage"));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("fogofwar.reignofnether.to_confirm"));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                    } else {
-                        setServerFog(true);
+                    // Fog only works on RTS-optimised maps; refuse locally so the toggle is effectively
+                    // hidden on vanilla-sized maps instead of bouncing off the server.
+                    if (!isOnRtsOptimisedMap()) {
+                        MC.player.sendSystemMessage(Component.literal(
+                                I18n.get("server.reignofnether.fog_requires_rts_map")));
+                        return -1;
                     }
+                    setServerFog(true);
                     return 1;
                 })));
         evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("disable")
@@ -181,25 +231,6 @@ public class FogOfWarClientEvents {
                 })));
     }
 
-    // returns the shade modifier that should be applied at a given position based on the fog of war state there
-    public static float getPosBrightness(BlockPos pPos) {
-        if (MC.level == null) //!isEnabled() ||
-            return BRIGHT;
-
-        if (!MC.level.getWorldBorder().isWithinBounds(pPos))
-            return EXTRA_DARK;
-
-        // first check if the ChunkPos is already occupied as this is faster
-        for (ChunkPos chunkPos : brightChunks)
-            if (new ChunkPos(pPos).equals(chunkPos))
-                return BRIGHT;
-
-        if (isEnabled())
-            return DARK;
-        else
-            return BRIGHT;
-    }
-
     public static boolean isBuildingInBrightChunk(BuildingPlacement building) {
         if (!isEnabled())
             return true;
@@ -211,22 +242,20 @@ public class FogOfWarClientEvents {
         return false;
     }
 
+    // Kept named isInBrightChunk for its many callers, but now block-granular: a position is "bright" only
+    // if visible at block level, so entities/items/particles hide inside the fogged part of an edge chunk
+    // (own + allied units are viewers, always inside their own circle, so they never self-hide).
     public static boolean isInBrightChunk(BlockPos bp) {
         if (!isEnabled() || MC.level == null)
             return true;
-
-        // first check if the ChunkPos is already occupied as this is faster
-        if (brightChunks.contains(new ChunkPos(bp))) return true;
-
-        return false;
+        return isBlockVisible(bp);
     }
 
     public static boolean isInBrightChunk(Entity entity) {
         if (!isEnabled() || MC.level == null)
             return true;
 
-        // first check if the ChunkPos is already occupied as this is faster
-        if (brightChunks.contains(entity.getOnPos())) return true;
+        if (isBlockVisible(entity.getOnPos())) return true;
 
         return entity instanceof RangedAttackerUnit rangedAttackerUnit &&
                 rangedAttackerUnit.getFogRevealDuration() > 0;
@@ -246,186 +275,6 @@ public class FogOfWarClientEvents {
         evt.setCanceled(true);
     }
 
-    // returns all chunks that are occupied by an opponent's building and/or unit
-    public static Set<ChunkPos> getEnemyOccupiedChunks() {
-        Set<ChunkPos> enemyOccupiedChunks = ConcurrentHashMap.newKeySet();
-
-        for (LivingEntity entity : UnitClientEvents.getAllUnits())
-            if (UnitClientEvents.getPlayerToEntityRelationship(entity) != Relationship.OWNED)
-                enemyOccupiedChunks.add(new ChunkPos(entity.getOnPos()));
-
-        for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-            if (BuildingClientEvents.getPlayerToBuildingRelationship(building) != Relationship.OWNED &&
-                    !isPlayerRevealed(building.ownerName) && MC.level != null) {
-                for (BlockPos bp : building.getRenderChunkOrigins(true)) {
-                    ChunkPos pos = MC.level.getChunk(bp).getPos();
-                    enemyOccupiedChunks.add(pos);
-                }
-            }
-
-        return enemyOccupiedChunks;
-    }
-
-    public static void updateFogChunks() {
-        brightChunks.clear();
-        Set<ChunkPos> viewerChunks = ConcurrentHashMap.newKeySet();
-        Set<ChunkPos> farViewerChunks = ConcurrentHashMap.newKeySet();
-
-        // get chunks that have units/buildings that can see
-        for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
-            if (entity instanceof Unit unit && MC.player != null) {
-                if (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
-                        (isPlayerRevealed(unit.getOwnerName())) ||
-                        AlliancesClient.isAllied(MC.player.getName().getString(), unit.getOwnerName())) {
-                    if (entity instanceof GhastUnit)
-                        farViewerChunks.add(new ChunkPos(entity.getOnPos()));
-                    else
-                        viewerChunks.add(new ChunkPos(entity.getOnPos()));
-                }
-            }
-        }
-        for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-            if (BuildingClientEvents.getPlayerToBuildingRelationship(building) == Relationship.OWNED ||
-                    isPlayerRevealed(building.ownerName)) {
-                if ((building.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class) && GarrisonableBuildingAddon.getNumOccupants(building) > 0 && building.isBuilt) ||
-                        building.isCapitol)
-                    farViewerChunks.add(new ChunkPos(building.centrePos));
-                else
-                    viewerChunks.add(new ChunkPos(building.centrePos));
-            }
-        }
-
-        for (ChunkPos chunkPos : viewerChunks)
-            for (int x = -CHUNK_VIEW_DIST; x <= CHUNK_VIEW_DIST; x++)
-                for (int z = -CHUNK_VIEW_DIST; z <= CHUNK_VIEW_DIST; z++)
-                    brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
-
-        for (ChunkPos chunkPos : farViewerChunks)
-            for (int x = -CHUNK_FAR_VIEW_DIST; x <= CHUNK_FAR_VIEW_DIST; x++)
-                for (int z = -CHUNK_FAR_VIEW_DIST; z <= CHUNK_FAR_VIEW_DIST; z++)
-                    brightChunks.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
-
-        Set<ChunkPos> newlyDarkChunks = ConcurrentHashMap.newKeySet();
-        newlyDarkChunks.addAll(lastBrightChunks);
-        newlyDarkChunks.removeAll(brightChunks);
-
-        for (ChunkPos cpos : newlyDarkChunks) {
-            onChunkUnexplore(cpos);
-            for (int x = -1; x <= 1; x++)
-                for (int z = -1; z <= 1; z++)
-                    rerenderChunks.add(new ChunkPos(cpos.x + x, cpos.z + z));
-        }
-        Set<ChunkPos> newlyBrightChunks = ConcurrentHashMap.newKeySet();
-        newlyBrightChunks.addAll(brightChunks);
-        newlyBrightChunks.removeAll(lastBrightChunks);
-
-        for (ChunkPos cpos : newlyBrightChunks)
-            onChunkExplore(cpos);
-
-        if (OrthoviewClientEvents.isEnabled())
-            semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
-                    .distSqr(MC.player.getOnPos()) > Math.pow(OrthoviewClientEvents.getZoom() * 3, 2));
-        else
-            semiFrozenChunks.removeIf(bp -> bp.offset(8,8,8)
-                    .distSqr(MC.player.getOnPos()) > Math.pow(MC.levelRenderer.getLastViewDistance() * 8, 2));
-        semiFrozenChunks.removeIf(bp -> {
-            if (isInBrightChunk(bp)) {
-                updateChunkLighting(bp);
-                return true;
-            }
-            return false;
-        });
-
-        lastBrightChunks.clear();
-        lastBrightChunks.addAll(brightChunks);
-    }
-
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (!isEnabled() || MC.level == null || MC.player == null || evt.phase != TickEvent.Phase.END)
-            return;
-
-        if (updateTicksLeft > 0) {
-            updateTicksLeft -= 1;
-        } else {
-            updateTicksLeft = UPDATE_TICKS_MAX;
-
-            updateFogChunks();
-        }
-    }
-
-    public static void updateChunkLighting(BlockPos originBp) {
-        if (MC.level == null)
-            return;
-
-        for (int i = 0; i < 4; i++) {
-            BlockPos updatePos = originBp.offset(4*i, 0, 4*i);
-            for (int y = MC.level.getMaxBuildHeight(); y > MC.level.getMinBuildHeight(); y -= 1) {
-                BlockPos bp = new BlockPos(updatePos.getX(), y, updatePos.getZ());
-                BlockState bs = MC.level.getBlockState(bp);
-                if (!bs.isAir()) {
-                    MC.level.setBlockAndUpdate(bp, Blocks.GLOWSTONE.defaultBlockState());
-                    MC.level.setBlockAndUpdate(bp, bs);
-                    break;
-                }
-            }
-        }
-    }
-
-    // triggered when a chunk goes from dark to bright
-    public static void onChunkExplore(ChunkPos cpos) {
-        if (MC.level == null)
-            return;
-
-        Set<ChunkPos> chunksInFrustum = renderChunksInFrustum.stream()
-                .map(rci -> MC.level.getChunk(rci.chunk.getOrigin()).getPos())
-                .collect(Collectors.toSet());
-
-        if (!chunksInFrustum.contains(cpos)) {
-            //System.out.println("explored chunk outside of frustum at: " + cpos);
-            chunksToRefresh.add(cpos);
-        }
-
-        frozenChunks.removeIf(fc -> fc.removeOnExplore && MC.level.getChunk(fc.origin).getPos().equals(cpos));
-
-        for (FrozenChunk frozenChunk : frozenChunks)
-            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos))
-                frozenChunk.unloadBlocks();
-
-        for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-            if (building.isExploredClientside)
-                continue;
-            for (BlockPos bp : building.getRenderChunkOrigins(false))
-                if (bp.getX() == cpos.getWorldPosition().getX() &&
-                    bp.getZ() == cpos.getWorldPosition().getZ())
-                    building.isExploredClientside = true;
-        }
-    }
-
-    // triggered when a chunk goes from bright to dark
-    public static void onChunkUnexplore(ChunkPos cpos) {
-        frozenChunks.removeIf(fc -> fc.removeOnExplore && MC.level.getChunk(fc.origin).getPos().equals(cpos));
-        for (FrozenChunk frozenChunk : frozenChunks)
-            if (MC.level.getChunk(frozenChunk.origin).getPos().equals(cpos) && MC.level.isLoaded(frozenChunk.origin))
-                frozenChunk.saveBlocks(); // only save blocks with faked chunks for NEW frozen chunks
-    }
-
-    @SubscribeEvent
-    public static void onChunkLoad(ChunkEvent.Load evt) {
-        BlockPos bp = evt.getChunk().getPos().getWorldPosition();
-        // save any unsaved frozenChunks
-        for (FrozenChunk fc : frozenChunks) {
-            if (evt.getLevel().isClientSide() &&
-                    bp.getX() == fc.origin.getX() &&
-                    bp.getZ() == fc.origin.getZ()) {
-                if (fc.unsaved)
-                    fc.saveFakeBlocks();
-                if (!isInBrightChunk(bp))
-                    fc.loadBlocks();
-            }
-        }
-    }
-
     public static void setBuildingDestroyedServerside(BlockPos buildingOrigin) {
         for (BuildingPlacement building : BuildingClientEvents.getBuildings())
             if (building.originPos.equals(buildingOrigin))
@@ -438,40 +287,10 @@ public class FogOfWarClientEvents {
                 building.isBuiltServerside = true;
     }
 
-    // show corners of all frozenChunks
-    @SubscribeEvent
-    public static void onRenderLevel(RenderLevelStageEvent evt) {
-        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS)
-            return;
-
-        /*
-        for (FrozenChunk frozenChunk : frozenChunks) {
-            BlockPos bp = frozenChunk.origin;
-            Vec3 vec3 = new Vec3(bp.getX(), bp.getY(), bp.getZ());
-            MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(0,15,0), 1, 1, 1, 1);
-            MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(15,0,0), 1, 1, 1, 1);
-            MyRenderer.drawLine(evt.getPoseStack(), vec3, vec3.add(0,0,15), 1, 1, 1, 1);
-        }
-         */
-    }
-
     public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
         if (MC.player != null && MC.player.getName().getString().equals(playerBeingAttacked))
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (entity.getId() == unitId && entity instanceof RangedAttackerUnit unit)
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
     }
-
-    public static void unmuteChunks() {
-        SoundClientEvents.mutedBps.clear();
-    }
-
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "semiFrozenChunks: " + semiFrozenChunks.size(),
-        });
-    }
-     */
 }

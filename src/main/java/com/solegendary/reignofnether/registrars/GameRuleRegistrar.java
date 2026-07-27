@@ -23,6 +23,7 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.BooleanValue> COOP_MODE;
     public static GameRules.Key<GameRules.BooleanValue> DO_NETHER_CONVERSION;
     public static GameRules.Key<GameRules.BooleanValue> BUILDINGS_OUTSIDE_BORDER;
+    public static GameRules.Key<GameRules.BooleanValue> FORCE_FOG;
     public static GameRules.Key<GameRules.BooleanValue> RTS_PATHFINDING;
     public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_THREADS;
     public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_CHUNK_BUILDS;
@@ -96,6 +97,10 @@ public class GameRuleRegistrar {
         // allow buildings outside the worldborder
         BUILDINGS_OUTSIDE_BORDER = GameRules.register("buildingsOutsideBorder", GameRules.Category.MISC,
                 GameRules.BooleanValue.create(true)
+        );
+        // when true, fog of war auto-enables on world tick and any disable attempt is refused
+        FORCE_FOG = GameRules.register("reignofnetherForceFog", GameRules.Category.MISC,
+                GameRules.BooleanValue.create(false)
         );
         // use the RTS-optimised pathfinder (async grid A*, walkability cache) instead of vanilla.
         // Auto-enabled at world load for RTS-optimised maps (small world border) - see

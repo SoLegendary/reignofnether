@@ -572,7 +572,6 @@ public class BuildingServerEvents {
         }
     }
 
-    //TODO only send to the joining player, not to everyone
     private static void placeBuildingsClientside() {
         for (BuildingPlacement building : buildings) {
             BuildingClientboundPacket.placeBuilding(building.originPos,

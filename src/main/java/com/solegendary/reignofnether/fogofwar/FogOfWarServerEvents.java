@@ -1,22 +1,42 @@
 package com.solegendary.reignofnether.fogofwar;
 
-import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
+import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.BlockTags;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import java.util.ArrayList;
-import java.util.Comparator;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
 
@@ -25,19 +45,246 @@ public class FogOfWarServerEvents {
     private static boolean enabled = false; // enforced for all clients
     private static ServerLevel serverLevel = null;
 
+    // Per-player vision, recomputed every UPDATE_TICKS ticks. Three tiers:
+    //  - liveChunks: chunks FULLY inside the block-radius circle -> receive all live updates unfiltered.
+    //  - sentChunks (= live + partially-covered "edge"): chunks the client has data for and renders. Edge
+    //    chunks get per-column gated updates (shouldSendChunkPacket): visible columns update live, fogged
+    //    columns stay frozen so out-of-circle changes don't leak.
+    //  - edgeMasks: 16x16 covered-column bitmask (long[4]) per edge chunk. Authoritative for entity gating,
+    //    update gating AND the client's fog tint (synced via FogChunksClientboundPacket).
+    private static final Map<UUID, Set<ChunkPos>> playerLiveChunks = new ConcurrentHashMap<>();
+    private static final Map<UUID, Set<ChunkPos>> playerSentChunks = new ConcurrentHashMap<>();
+    private static final Map<UUID, Map<ChunkPos, long[]>> playerEdgeMasks = new ConcurrentHashMap<>();
+
+    // (player, chunk) pairs needing a full-chunk resend at the next fog tick: a multi-block section update
+    // straddled the vision circle in an edge chunk, so the packet was dropped for that player but part of
+    // the change IS visible to them. Drained by updatePlayerBrightChunks.
+    private static final Map<UUID, Set<ChunkPos>> pendingResends = new ConcurrentHashMap<>();
+
+    // players whose units/buildings ignore fog and are visible to everyone
+    private static final Set<String> revealedPlayerNames = ConcurrentHashMap.newKeySet();
+
+    // entityId -> server tick when temporary "attacked-from-fog" reveal expires
+    private static final Map<Integer, Long> revealedUnitExpiryTick = new ConcurrentHashMap<>();
+
+    public static void setPlayerRevealed(String playerName, boolean reveal) {
+        if (reveal) revealedPlayerNames.add(playerName);
+        else revealedPlayerNames.remove(playerName);
+    }
+
+    public static void revealRangedUnit(int unitId, int durationTicks) {
+        if (serverLevel == null) return;
+        long expireAt = serverLevel.getGameTime() + durationTicks;
+        revealedUnitExpiryTick.merge(unitId, expireAt, Math::max);
+    }
+
+    public static final int CHUNK_VIEW_DIST = 1;
+    public static final int CHUNK_FAR_VIEW_DIST = 2;
+    // Block-radius vision. MUST match the client's FogOfWarClientEvents.BLOCK_VIEW_DIST/BLOCK_FAR_VIEW_DIST so
+    // what the server securely sends lines up with the circle the client renders.
+    public static final int NEAR_SIGHT_BLOCKS = 16;
+    public static final int FAR_SIGHT_BLOCKS = 32;
+    private static final int UPDATE_TICKS = 10;
+    private static int ticksUntilUpdate = UPDATE_TICKS;
+
+    // Cache "is RTS player" per UUID — ChunkMapMixin.getPlayers calls this for every player on
+    // every chunk broadcast, and PlayerServerEvents.isRTSPlayer iterates a synchronized list with
+    // string compares. Invalidated by PlayerServerEvents.invalidateFogRtsCache() on every mutation.
+    private static final Map<UUID, Boolean> isRtsPlayerCache = new ConcurrentHashMap<>();
+
+    public static void invalidateRtsCache() {
+        isRtsPlayerCache.clear();
+    }
+
+    // match by name; entity ids change on reconnect
+    public static boolean isFogActiveFor(ServerPlayer player) {
+        if (!enabled) return false;
+        Boolean cached = isRtsPlayerCache.get(player.getUUID());
+        if (cached != null) return cached;
+        boolean v = PlayerServerEvents.isRTSPlayer(player.getName().getString());
+        isRtsPlayerCache.put(player.getUUID(), v);
+        return v;
+    }
+
+    // A chunk is "live" (receives all updates unfiltered) only when fully inside the vision circle.
+    public static boolean isChunkLiveFor(ServerPlayer player, ChunkPos pos) {
+        if (!isFogActiveFor(player)) return true;
+        Set<ChunkPos> set = playerLiveChunks.get(player.getUUID());
+        return set != null && set.contains(pos);
+    }
+
+    // A chunk is "sent" (client has its data / renders it) when live or edge. The initial chunk send
+    // (ChunkMapInitialSendMixin) serves live data for these and the snapshot for everything else.
+    public static boolean isChunkSentFor(ServerPlayer player, ChunkPos pos) {
+        if (!isFogActiveFor(player)) return true;
+        Set<ChunkPos> set = playerSentChunks.get(player.getUUID());
+        return set != null && set.contains(pos);
+    }
+
+    // Block-level visibility for entity gating: live chunk -> visible; edge chunk -> covered-column bit; else
+    // hidden. Lets enemy units hide exactly at the circle instead of one whole chunk out.
+    public static boolean isBlockVisibleFor(ServerPlayer player, int x, int z) {
+        if (!isFogActiveFor(player)) return true;
+        UUID uuid = player.getUUID();
+        ChunkPos cp = new ChunkPos(x >> 4, z >> 4);
+        Set<ChunkPos> live = playerLiveChunks.get(uuid);
+        if (live != null && live.contains(cp)) return true;
+        Map<ChunkPos, long[]> masks = playerEdgeMasks.get(uuid);
+        if (masks == null) return false;
+        long[] mask = masks.get(cp);
+        if (mask == null) return false;
+        int i = ((x & 15) << 4) | (z & 15);
+        return (mask[i >> 6] & (1L << (i & 63))) != 0;
+    }
+
+    // Per-packet gate for chunk broadcasts (ChunkHolderMixin). Live chunk -> everything passes; edge chunk
+    // -> per-column filtering so the visible part updates live while the fogged part stays frozen:
+    //  - single block / block entity update: pass iff its column is inside the circle
+    //  - multi-block section update: pass iff ALL its columns are visible; if only SOME are, drop it but
+    //    queue a full-chunk resend at the next fog tick so the visible columns still catch up (<=0.5s)
+    //  - anything else (light updates etc.): frozen
+    public static boolean shouldSendChunkPacket(ServerPlayer sp, ChunkPos pos, Packet<?> packet) {
+        if (!isFogActiveFor(sp)) return true;
+        UUID uuid = sp.getUUID();
+        Set<ChunkPos> live = playerLiveChunks.get(uuid);
+        if (live != null && live.contains(pos)) return true;
+        Set<ChunkPos> sent = playerSentChunks.get(uuid);
+        if (sent == null || !sent.contains(pos)) return false; // dark: fully frozen
+
+        if (packet instanceof ClientboundBlockUpdatePacket p) {
+            BlockPos bp = p.getPos();
+            return isBlockVisibleFor(sp, bp.getX(), bp.getZ());
+        }
+        if (packet instanceof ClientboundBlockEntityDataPacket p) {
+            BlockPos bp = p.getPos();
+            return isBlockVisibleFor(sp, bp.getX(), bp.getZ());
+        }
+        if (packet instanceof ClientboundSectionBlocksUpdatePacket p) {
+            int[] visibleTotal = new int[2];
+            p.runUpdates((bp, state) -> {
+                visibleTotal[1]++;
+                if (isBlockVisibleFor(sp, bp.getX(), bp.getZ())) visibleTotal[0]++;
+            });
+            if (visibleTotal[0] == visibleTotal[1]) return true;
+            if (visibleTotal[0] > 0)
+                queueResend(uuid, pos);
+            return false;
+        }
+        return false;
+    }
+
+    // schedule a full-chunk resend to this player at the next fog tick (client-side merge keeps its fogged
+    // columns frozen, so this only refreshes the visible part)
+    public static void queueResend(UUID playerId, ChunkPos pos) {
+        pendingResends.computeIfAbsent(playerId, k -> ConcurrentHashMap.newKeySet()).add(pos);
+    }
+
+    public static Set<ChunkPos> getBuildingChunks(BuildingPlacement b) {
+        int minCx = b.minCorner.getX() >> 4;
+        int maxCx = b.maxCorner.getX() >> 4;
+        int minCz = b.minCorner.getZ() >> 4;
+        int maxCz = b.maxCorner.getZ() >> 4;
+        Set<ChunkPos> chunks = new HashSet<>();
+        for (int cx = minCx; cx <= maxCx; cx++)
+            for (int cz = minCz; cz <= maxCz; cz++)
+                chunks.add(new ChunkPos(cx, cz));
+        return chunks;
+    }
+
+    public static boolean canPlayerSeeChunks(ServerPlayer sp, Set<ChunkPos> chunks) {
+        if (!isFogActiveFor(sp)) return true;
+        Set<ChunkPos> sent = playerSentChunks.get(sp.getUUID());
+        if (sent == null) return false;
+        for (ChunkPos cp : chunks)
+            if (sent.contains(cp)) return true;
+        return false;
+    }
+
+    private static void clearPlayerVision(UUID playerId) {
+        playerLiveChunks.remove(playerId);
+        playerSentChunks.remove(playerId);
+        playerEdgeMasks.remove(playerId);
+        pendingResends.remove(playerId);
+    }
+
+    public static void onPlayerDisconnect(UUID playerId) {
+        clearPlayerVision(playerId);
+        isRtsPlayerCache.remove(playerId);
+    }
+
+    // drop bookkeeping so re-entering orthoview later resends a full vision set
+    public static void onPlayerExitOrthoview(ServerPlayer player) {
+        clearPlayerVision(player.getUUID());
+    }
+
+    public static boolean isForceFog() {
+        return serverLevel != null && serverLevel.getGameRules().getBoolean(GameRuleRegistrar.FORCE_FOG);
+    }
+
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         syncClientFog();
     }
 
+    // On an RTS map, adopt any snapshot left on disk by a prior session so a mid-match server restart keeps
+    // serving it instead of recapturing (or briefly leaking the live world before the next capture).
+    @SubscribeEvent
+    public static void onServerStarted(ServerStartedEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+        if (level != null && WorldBorderServerEvents.isRtsOptimisedMap(level))
+            FogChunkSnapshot.rebuildIndex(level);
+    }
+
     public static void setEnabled(boolean value) {
+        if (!value && isForceFog()) {
+            ReignOfNether.LOGGER.info("[FogOfWar] Disable refused: gamerule reignofnetherForceFog is true");
+            return;
+        }
+        // Fog only works on an RTS-optimised map: the small world border bounds the play area, so the
+        // pre-match snapshot (FogChunkSnapshot) can cover it in full and dark chunks can never fall back
+        // to the live world on reload/relog. On a vanilla-sized border the snapshot can't be captured, so
+        // refuse rather than silently leaking. A null serverLevel can't be verified, so it's refused too.
+        if (value && !WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
+            ReignOfNether.LOGGER.info("[FogOfWar] Enable refused: not an RTS-optimised map (world border > {})",
+                    WorldBorderServerEvents.RTS_OPTIMIZED_BORDER);
+            sendMessageToAllPlayers("server.reignofnether.fog_requires_rts_map", true);
+            return;
+        }
+        boolean wasEnabled = enabled;
         enabled = value;
         if (enabled)
             sendMessageToAllPlayers("server.reignofnether.enabled_fog_of_war", true);
         else
             sendMessageToAllPlayers("server.reignofnether.disabled_fog_of_war", true);
 
+        // force a full resync on the next tick (clients clear their own set on disable)
+        playerLiveChunks.clear();
+        playerSentChunks.clear();
+        playerEdgeMasks.clear();
+        pendingResends.clear();
+
         syncClientFog();
+
+        // vanilla only diffs tracking on movement; force a resync for stale chunks
+        if (wasEnabled && !enabled && serverLevel != null) {
+            resendAllTrackedChunks();
+        }
+    }
+
+    private static void resendAllTrackedChunks() {
+        int viewDist = serverLevel.getServer().getPlayerList().getViewDistance();
+        for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers()) {
+            ChunkPos center = sp.chunkPosition();
+            ServerLevel level = sp.serverLevel();
+            for (int dx = -viewDist; dx <= viewDist; dx++) {
+                for (int dz = -viewDist; dz <= viewDist; dz++) {
+                    LevelChunk chunk = level.getChunkSource().getChunk(center.x + dx, center.z + dz, false);
+                    if (chunk == null) continue;
+                    sp.connection.send(new ClientboundLevelChunkWithLightPacket(
+                            chunk, level.getLightEngine(), null, null));
+                }
+            }
+        }
     }
 
     public static boolean isEnabled() {
@@ -50,6 +297,256 @@ public class FogOfWarServerEvents {
             return;
 
         serverLevel = (ServerLevel) evt.level;
+
+        // Only attempt the forced auto-enable on an RTS-optimised map; otherwise setEnabled would refuse
+        // and spam the log/chat every tick. On a vanilla-sized map force-fog simply stays inert.
+        if (!enabled && isForceFog() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel))
+            setEnabled(true);
+
+        if (!enabled) return;
+
+        if (ticksUntilUpdate > 0) {
+            ticksUntilUpdate--;
+            return;
+        }
+        ticksUntilUpdate = UPDATE_TICKS;
+        updatePlayerBrightChunks();
+        for (ServerPlayer p : PlayerServerEvents.orthoviewPlayers)
+            PlayerChunksClientboundPacket.send(p, playerLiveChunks, playerSentChunks);
+    }
+
+    private static void updatePlayerBrightChunks() {
+        if (serverLevel == null) return;
+
+        long now = serverLevel.getGameTime();
+        revealedUnitExpiryTick.entrySet().removeIf(e -> e.getValue() < now);
+
+        // Precompute orthoview UUIDs (O(1) lookup instead of stream.anyMatch per player)
+        Set<UUID> orthoviewUuids = new HashSet<>();
+        for (ServerPlayer p : PlayerServerEvents.orthoviewPlayers)
+            orthoviewUuids.add(p.getUUID());
+
+        // Bucket each viewer's BLOCK position by owner (near vs far sight); forceRevealed stays chunk-level.
+        Map<String, LongOpenHashSet> nearByOwner = new HashMap<>();
+        Map<String, LongOpenHashSet> farByOwner = new HashMap<>();
+        LongOpenHashSet forceRevealedChunks = new LongOpenHashSet();
+
+        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+            if (!(le instanceof Unit unit)) continue;
+            String unitOwner = unit.getOwnerName();
+            int bx = le.blockPosition().getX(), bz = le.blockPosition().getZ();
+            long packed = blockLong(bx, bz);
+            if (le instanceof GhastUnit)
+                farByOwner.computeIfAbsent(unitOwner, k -> new LongOpenHashSet()).add(packed);
+            else
+                nearByOwner.computeIfAbsent(unitOwner, k -> new LongOpenHashSet()).add(packed);
+            if (revealedPlayerNames.contains(unitOwner) || revealedUnitExpiryTick.containsKey(le.getId()))
+                forceRevealedChunks.add(ChunkPos.asLong(bx >> 4, bz >> 4));
+        }
+
+        for (BuildingPlacement b : BuildingServerEvents.getBuildings()) {
+            int bx = b.centrePos.getX(), bz = b.centrePos.getZ();
+            long packed = blockLong(bx, bz);
+            boolean farSight = b.isCapitol ||
+                    (b.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class) &&
+                            GarrisonableBuildingAddon.getNumOccupants(b) > 0 && b.isBuilt);
+            if (farSight)
+                farByOwner.computeIfAbsent(b.ownerName, k -> new LongOpenHashSet()).add(packed);
+            else
+                nearByOwner.computeIfAbsent(b.ownerName, k -> new LongOpenHashSet()).add(packed);
+            if (revealedPlayerNames.contains(b.ownerName))
+                forceRevealedChunks.add(ChunkPos.asLong(bx >> 4, bz >> 4));
+        }
+
+        // Rasterise each owner's viewer circles ONCE into covered-column masks (chunkLong -> 16x16 bitmask),
+        // reused across that owner + all its allies.
+        Map<String, Long2ObjectOpenHashMap<long[]>> coveredByOwner = new HashMap<>();
+        Set<String> owners = new HashSet<>(nearByOwner.keySet());
+        owners.addAll(farByOwner.keySet());
+        for (String owner : owners) {
+            Long2ObjectOpenHashMap<long[]> masks = new Long2ObjectOpenHashMap<>();
+            rasterizeViewers(masks, nearByOwner.get(owner), NEAR_SIGHT_BLOCKS);
+            rasterizeViewers(masks, farByOwner.get(owner), FAR_SIGHT_BLOCKS);
+            coveredByOwner.put(owner, masks);
+        }
+
+        for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers()) {
+            UUID uuid = sp.getUUID();
+            if (!isFogActiveFor(sp)) {
+                clearPlayerVision(uuid);
+                continue;
+            }
+            String ownerName = sp.getName().getString();
+
+            // Union this player's own + allied owners' covered masks (+ FPS self-bubble).
+            Long2ObjectOpenHashMap<long[]> covered = new Long2ObjectOpenHashMap<>();
+            if (!orthoviewUuids.contains(uuid))
+                rasterizeCircle(covered, sp.blockPosition().getX(), sp.blockPosition().getZ(), NEAR_SIGHT_BLOCKS);
+            mergeMasks(covered, coveredByOwner.get(ownerName));
+            Set<String> alliedOwners = collectAlliedOwners(ownerName, nearByOwner.keySet(), farByOwner.keySet());
+            for (String ally : alliedOwners)
+                mergeMasks(covered, coveredByOwner.get(ally));
+
+            // Classify: fully-covered chunk -> live; partially-covered -> edge (keep its column mask).
+            Set<ChunkPos> live = new HashSet<>();
+            Map<ChunkPos, long[]> edge = new HashMap<>();
+            for (Long2ObjectMap.Entry<long[]> e : covered.long2ObjectEntrySet()) {
+                ChunkPos cp = new ChunkPos(e.getLongKey());
+                if (maskFull(e.getValue())) live.add(cp);
+                else edge.put(cp, e.getValue());
+            }
+            // Force-revealed chunks are fully visible (bypass the circle).
+            for (LongIterator it = forceRevealedChunks.iterator(); it.hasNext(); ) {
+                ChunkPos cp = new ChunkPos(it.nextLong());
+                live.add(cp);
+                edge.remove(cp);
+            }
+            Set<ChunkPos> sent = new HashSet<>(live);
+            sent.addAll(edge.keySet());
+
+            Set<ChunkPos> prevLive = playerLiveChunks.get(uuid);
+            Set<ChunkPos> prevSent = playerSentChunks.get(uuid);
+            Map<ChunkPos, long[]> prevEdge = playerEdgeMasks.get(uuid);
+
+            // Full-chunk resends needed this tick:
+            //  - newly sent chunk
+            //  - edge -> live promotion (fogged columns were gated while edge, so the client copy is stale)
+            //  - still-edge chunk whose mask GREW (the newly covered columns were fogged, hence stale)
+            //  - queued by shouldSendChunkPacket (mixed multi-block update straddling the circle)
+            Set<ChunkPos> toResend = new HashSet<>();
+            for (ChunkPos cp : sent) {
+                if (prevSent == null || !prevSent.contains(cp)) { toResend.add(cp); continue; }
+                boolean nowLive = live.contains(cp);
+                boolean wasLive = prevLive != null && prevLive.contains(cp);
+                if (nowLive && !wasLive) { toResend.add(cp); continue; }
+                if (!nowLive && prevEdge != null) {
+                    long[] pm = prevEdge.get(cp);
+                    long[] nm = edge.get(cp);
+                    if (pm != null && nm != null && maskGrew(pm, nm)) toResend.add(cp);
+                }
+            }
+            Set<ChunkPos> pending = pendingResends.remove(uuid);
+            if (pending != null)
+                for (ChunkPos cp : pending)
+                    if (sent.contains(cp)) toResend.add(cp);
+
+            // Resolve resend chunks first: an unloaded chunk is dropped from this tick's vision (never tell
+            // the client a chunk is sent when it got no data for it) and retries on a later recompute.
+            ServerLevel level = sp.serverLevel();
+            List<LevelChunk> resendChunks = new ArrayList<>(toResend.size());
+            for (ChunkPos cp : toResend) {
+                LevelChunk chunk = level.getChunkSource().getChunk(cp.x, cp.z, false);
+                if (chunk == null) {
+                    sent.remove(cp);
+                    live.remove(cp);
+                    edge.remove(cp);
+                    continue;
+                }
+                resendChunks.add(chunk);
+            }
+
+            playerLiveChunks.put(uuid, live);
+            playerSentChunks.put(uuid, sent);
+            playerEdgeMasks.put(uuid, edge);
+
+            // The mask packet must go out BEFORE the chunk resends: the client merges each incoming chunk
+            // against its CURRENT mask (restoring fogged columns, see ClientChunkCacheMixin), so it needs
+            // the new mask first or newly-visible columns would stay frozen at their stale state.
+            if (prevSent == null || !prevSent.equals(sent) || !masksEqual(prevEdge, edge))
+                FogChunksClientboundPacket.send(sp, sent, edge);
+
+            // noLight == client retains its cached lighting
+            // this does mean there might be lighting bugs for corners of edge chunks out of view
+            // TODO: to fix this, apply masking to light updates clientside too?
+            BitSet noLight = new BitSet();
+            for (LevelChunk chunk : resendChunks) {
+                boolean updateLight = live.contains(chunk.getPos()) || sent.contains(chunk.getPos());
+                sp.connection.send(new ClientboundLevelChunkWithLightPacket(chunk, level.getLightEngine(),
+                        updateLight ? null : noLight, updateLight ? null : noLight));
+            }
+        }
+    }
+
+    private static long blockLong(int x, int z) {
+        return ((long) x << 32) | (z & 0xFFFFFFFFL);
+    }
+
+    private static void rasterizeViewers(Long2ObjectOpenHashMap<long[]> masks, LongOpenHashSet viewers, int r) {
+        if (viewers == null) return;
+        for (LongIterator it = viewers.iterator(); it.hasNext(); ) {
+            long p = it.nextLong();
+            rasterizeCircle(masks, (int) (p >> 32), (int) p, r);
+        }
+    }
+
+    // Stamp a filled block-radius circle into per-chunk 16x16 column masks. Iterates chunk-by-chunk so each
+    // chunk does at most one map lookup regardless of how many of its columns the circle covers.
+    private static void rasterizeCircle(Long2ObjectOpenHashMap<long[]> masks, int cx, int cz, int r) {
+        int r2 = r * r;
+        int minCX = (cx - r) >> 4, maxCX = (cx + r) >> 4;
+        int minCZ = (cz - r) >> 4, maxCZ = (cz + r) >> 4;
+        for (int chX = minCX; chX <= maxCX; chX++) {
+            for (int chZ = minCZ; chZ <= maxCZ; chZ++) {
+                long cl = ChunkPos.asLong(chX, chZ);
+                long[] mask = null;
+                int baseX = chX << 4, baseZ = chZ << 4;
+                for (int lx = 0; lx < 16; lx++) {
+                    int dx = baseX + lx - cx;
+                    int dx2 = dx * dx;
+                    if (dx2 > r2) continue;
+                    for (int lz = 0; lz < 16; lz++) {
+                        int dz = baseZ + lz - cz;
+                        if (dx2 + dz * dz > r2) continue;
+                        if (mask == null) {
+                            mask = masks.get(cl);
+                            if (mask == null) { mask = new long[4]; masks.put(cl, mask); }
+                        }
+                        int i = (lx << 4) | lz;
+                        mask[i >> 6] |= (1L << (i & 63));
+                    }
+                }
+            }
+        }
+    }
+
+    // OR src masks into dest, cloning on first insert so the shared owner-cache mask is never mutated.
+    private static void mergeMasks(Long2ObjectOpenHashMap<long[]> dest, Long2ObjectOpenHashMap<long[]> src) {
+        if (src == null) return;
+        for (Long2ObjectMap.Entry<long[]> e : src.long2ObjectEntrySet()) {
+            long[] sm = e.getValue();
+            long[] dm = dest.get(e.getLongKey());
+            if (dm == null) dest.put(e.getLongKey(), sm.clone());
+            else { dm[0] |= sm[0]; dm[1] |= sm[1]; dm[2] |= sm[2]; dm[3] |= sm[3]; }
+        }
+    }
+
+    private static boolean maskFull(long[] mask) {
+        return mask[0] == -1L && mask[1] == -1L && mask[2] == -1L && mask[3] == -1L;
+    }
+
+    // any column covered now that wasn't before (shrinking alone is not growth)
+    private static boolean maskGrew(long[] prev, long[] now) {
+        return (now[0] & ~prev[0]) != 0 || (now[1] & ~prev[1]) != 0
+            || (now[2] & ~prev[2]) != 0 || (now[3] & ~prev[3]) != 0;
+    }
+
+    private static boolean masksEqual(Map<ChunkPos, long[]> a, Map<ChunkPos, long[]> b) {
+        if (a == null) return b == null || b.isEmpty();
+        if (a.size() != b.size()) return false;
+        for (Map.Entry<ChunkPos, long[]> e : a.entrySet()) {
+            long[] other = b.get(e.getKey());
+            if (other == null || !Arrays.equals(e.getValue(), other)) return false;
+        }
+        return true;
+    }
+
+    private static Set<String> collectAlliedOwners(String me, Set<String> nearOwners, Set<String> farOwners) {
+        Set<String> out = new HashSet<>();
+        for (String o : nearOwners)
+            if (!o.equals(me) && AlliancesServerEvents.isAllied(me, o)) out.add(o);
+        for (String o : farOwners)
+            if (!o.equals(me) && !out.contains(o) && AlliancesServerEvents.isAllied(me, o)) out.add(o);
+        return out;
     }
 
     // register here too for command blocks
@@ -67,49 +564,12 @@ public class FogOfWarServerEvents {
                 })));
     }
 
-    // sets the fog to match what all
     private static void syncClientFog() {
         FogOfWarClientboundPacket.setEnabled(enabled);
     }
 
-    // updates all blocks in the renderchunk to force all clients to match the server
-    public static void syncClientBlocks(BlockPos renderChunkOrigin) {
-        if (serverLevel == null)
-            return;
-
-        ArrayList<Pair<BlockPos, BlockState>> plants = new ArrayList<>();
-
-        // The 16³ region lies entirely in one chunk — fetch it once instead of looking it up per read.
-        LevelChunk chunk = serverLevel.getChunkAt(renderChunkOrigin);
-
-        for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 16; y++) {
-                for (int z = 0; z < 16; z++) {
-                    BlockPos bp = renderChunkOrigin.offset(x,y,z);
-                    BlockState bs = chunk.getBlockState(bp);
-                    if (bs.is(BlockTags.REPLACEABLE_BY_TREES) || bs.getBlock() instanceof IPlantable) {
-                        plants.add(new Pair<>(bp, bs));
-                    }
-                }
-            }
-        }
-        for (Pair<BlockPos, BlockState> plant : plants)
-            serverLevel.setBlockAndUpdate(plant.getFirst(), Blocks.AIR.defaultBlockState());
-
-        for (int x = 0; x < 16; x++) {
-            for (int y = 0; y < 16; y++) {
-                for (int z = 0; z < 16; z++) {
-                    BlockPos bp = renderChunkOrigin.offset(x,y,z);
-                    BlockState bs = chunk.getBlockState(bp);
-                    serverLevel.setBlockAndUpdate(bp, Blocks.BEDROCK.defaultBlockState());
-                    serverLevel.setBlockAndUpdate(bp, bs);
-                }
-            }
-        }
-        plants.sort(Comparator.comparing(p -> ((Pair<BlockPos, BlockState>) p).getFirst().getY()).reversed());
-        for (Pair<BlockPos, BlockState> plant : plants)
-            serverLevel.setBlockAndUpdate(plant.getFirst(), plant.getSecond());
-
-        FrozenChunkClientboundPacket.unmuteChunks();
+    @SubscribeEvent
+    public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {
+        onPlayerDisconnect(evt.getEntity().getUUID());
     }
 }

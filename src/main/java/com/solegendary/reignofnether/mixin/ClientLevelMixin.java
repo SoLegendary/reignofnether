@@ -184,4 +184,14 @@ public class ClientLevelMixin {
         if (TimeClientEvents.isBloodMoonActive())
             cir.setReturnValue(new Vec3(0.25f, 0f, 0f));
     }
+
+    @Inject(
+            method = "setServerVerifiedBlockState",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void reignofnether$gateFoggedBlockUpdate(BlockPos pPos, BlockState pState, int pFlags, CallbackInfo ci) {
+        if (FogOfWarClientEvents.isEnabled() && !FogOfWarClientEvents.isBlockVisible(pPos))
+            ci.cancel();
+    }
 }
