@@ -22,36 +22,18 @@ Quality of Life
 [❌] Gamerule to turn off item drops from blocks (for performance)
 [❌] Hay bales are now harvestable for 20 food each
 
-Hero Items
-----------
-Emerald Resource
-    - Obtainable by killing neutrals, selling items or selling resources
-    - Used to buy resources now instead of direct exchange
-    - Used to buy items from shops
-    - Only shown if you have any
-    - Neutrals now give emerald bounties
-    - Update diplomacy menu resource exchange
-    - Update all other commands related to resources
-    - Resources class constructors should assume emeralds = 0
-
-Hero Items
-    - Hero inventory GUI
-        - Click to use, can have charges and/or cooldown
-        - Drag to move slots, drop on ground, transfer to another hero or sell
-    - While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
-        - Should be visible to all players
-    - Should have tooltips shown even on the ground
-    - Requires right-click to pick up, will not auto-pickup
 
 Fog of war
-    - RenderChunkRegionMixin and LightEngineMixin
-        - Hide any blocks inside building bounds if (out of view && !isExploredClientside)
-        - Render phantom blocks if (out of view && isExploredClientside)
-    - FogOfWarClientEvents
-        - Method to determine whether a specific block should be hidden or not
-    - BuildingClientEvents
-        - Method to determine if isVisible or not (visible if any corner is in view)
+----------
+[❌] Disable fog snapshotting above a set world border size (it's currently trying to snapshot forever)
+[❌] Apply edge masking to light states too
+[❌] Allow spectators to see fog, but with vision of all players
+[❌] Set a per-unit and per-building sight range attribute
+[❌] Circular vision isn't being applied when enemies are revealed for not having a capitol
 
+[❌] Allow queueing of placements in fog
+[❌] Show neutral units and buildings on minimap
+    - Last known position only
 
 Slime rolling
 -------------
@@ -66,15 +48,12 @@ Balance
 
 Quality of Life
 ---------------
-[❌] Reduced starting capitol build speed by 33%
 [❌] Add NBT field to slimes to force old jumping movement style
 [❌] RTS units no longer aggro onto vanilla units of the same faction, regardless of /gamerule neutralAggro
 [❌] Vanilla units no longer aggro onto FPV players who are allied to an RTS player of the matching faction
 
 Bugfixes
 --------
-[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
-[✔] Fixed some animals not dropping the correct amount of food
 [❌] Switching singleplayer worlds no longer retains research and cheats
 [❌] Spider jockeys not moving long distances
 

@@ -2,6 +2,29 @@
 Features
 --------
 
+Hero Items
+----------
+Emerald Resource
+    - Obtainable by killing neutrals, selling items or selling resources
+    - Used to buy resources now instead of direct exchange
+    - Used to buy items from shops
+    - Only shown if you have any
+    - Neutrals now give emerald bounties
+    - Update diplomacy menu resource exchange
+    - Update all other commands related to resources
+    - Resources class constructors should assume emeralds = 0
+
+Hero Items
+    - Hero inventory GUI
+        - Click to use, can have charges and/or cooldown
+        - Drag to move slots, drop on ground, transfer to another hero or sell
+    - While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
+        - Should be visible to all players
+    - Should have tooltips shown even on the ground
+    - Requires right-click to pick up, will not auto-pickup
+
+[❌] Camera hotkeys (see starcraft example)
+
 [❌] Custom building buttons
     - Customisable icon, name, tooltip, range, cooldown, activation type (on-click, entity-target, ground target)
     - Can be used for an ability, production, etc.
@@ -11,8 +34,6 @@ Features
     - Half pierce and multishot damage
 
 [❌] Save control groups to world per player
-
-[❌] Camera hotkeys (see starcraft example)
 
 Scenario roles:
     [❌] Use start menu colours for each role
@@ -24,10 +45,6 @@ Scenario roles:
 
 [❌] Let villagers repair iron golems with ore for 1hp per ore, masons repair faster
 
-[❌] Nydus worm-style ability for transport portals
-    - Because without Fog of war, transport portals are too weak
-    - Includes minimap and sound warning
-
 [❌] Config to allow changing resource block values, including modded blocks
 
 [❌] Horses for villagers and change captain flags to be a resistance aura?
@@ -35,13 +52,13 @@ Scenario roles:
 
 Bugfixes
 --------
+[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
 [❌] Players logging in messes up the observer menu (and freezes resources?)
 [❌] bridge scroll bug (up and down vs left/right?)
 [❌] Fix day/night time when /gamerule doDaylightCycle false
 
 Quality of Life Features
 ------------------------
-
 [❌] Handicap command
     - Makes all resource costs some % higher than normal
 
