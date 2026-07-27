@@ -1,26 +1,10 @@
 
-1.20.1-1.3.8g-beta-1
+1.20.1-2.0.0-beta-2
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
-Bugfixes
---------
-[✔] Removed a block from watchtower entrances to stop taller units getting stuck on exit
-[✔] Fixed a crash from selecting a lot of buildings and mousing over the + tooltip
-[✔] Fixed selected building buttons not showing any labels
-[🟡] Windcaller attack sounds not playing
-[❌] Fixed chunk generation making too many server logs
-[❌] Add translation logs for entity.reignofnether.ENTITY_NAME
-[🟡] Iron golem hotkey on Villager units changed to G to fix a conflict with Call to Arms
-[🟡] Fixed windcallers randomly spawning as captains
-
-Quality of Life
----------------
-[❌] Waypoint looping (by shift clicking back onto a previous waypoint it will automatically cycle the list once it reaches the end)
-[❌] Gamerule to turn off item drops from blocks (for performance)
-[❌] Hay bales are now harvestable for 20 food each
 
 
 Fog of war
@@ -30,10 +14,15 @@ Fog of war
 [❌] Allow spectators to see fog, but with vision of all players
 [❌] Set a per-unit and per-building sight range attribute
 [🟡] Circular vision isn't being applied when enemies are revealed for not having a capitol
+[❌] Sparta's crash
 
 [❌] Allow queueing of placements in fog
 [❌] Show neutral units and buildings on minimap
     - Last known position only
+
+
+
+NOTE: seems to be chunks missing on reload only on local server, more prevalent on actual match, not sandbox
 
 Slime rolling
 -------------
