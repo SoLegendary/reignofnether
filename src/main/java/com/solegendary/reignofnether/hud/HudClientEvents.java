@@ -62,6 +62,7 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.resources.language.I18n;
@@ -2102,6 +2103,7 @@ public class HudClientEvents {
             BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
             evt.getGuiGraphics().drawString(MC.font, I18n.get("hud.reignofnether.block_pos", bp.toShortString()), 100, y, 0xFFFFFF);
             evt.getGuiGraphics().drawString(MC.font, MC.level.getBlockState(bp).getBlock().toString().replaceFirst("Block", ""), 100, y + 10, 0xFFFFFF);
+            evt.getGuiGraphics().drawString(MC.font, "Chunk: " + MC.level.getChunkAt(bp).getPos(), 100, y + 20, 0xFFFFFF);
         }
     }
 }

@@ -21,7 +21,6 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
-import com.solegendary.reignofnether.fogofwar.FrozenChunk;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
@@ -1194,43 +1193,6 @@ public class BuildingPlacement {
         return origins;
     }
 
-    public void freezeChunks(String localPlayerName, boolean forceFakeBlocks) {
-        if (!level.isClientSide) {
-            return;
-        }
-        if (ownerName.equals(localPlayerName)) {
-            return;
-        }
-
-        for (BlockPos bp : getRenderChunkOrigins(true)) {
-            BlockPos roundedOrigin = bp.offset(-bp.getX() % 16, -bp.getY() % 16, -bp.getZ() % 16);
-
-            //ReignOfNether.LOGGER.info("Froze chunk at: " + roundedOrigin);
-
-            FrozenChunk newFrozenChunk = null;
-            for (FrozenChunk frozenChunk : FogOfWarClientEvents.frozenChunks) {
-                if (roundedOrigin.equals(frozenChunk.origin)) {
-                    newFrozenChunk = new FrozenChunk(roundedOrigin, this, frozenChunk);
-                    break;
-                }
-            }
-            if (newFrozenChunk == null) {
-                newFrozenChunk = new FrozenChunk(roundedOrigin, this, forceFakeBlocks);
-            }
-
-            FogOfWarClientEvents.frozenChunks.add(newFrozenChunk);
-        }
-    }
-
-    public void unFreezeChunks() {
-        if (level.isClientSide) {
-            for (BlockPos bp : getRenderChunkOrigins(true))
-                for (FrozenChunk fc : FogOfWarClientEvents.frozenChunks)
-                    if (fc.building != null && fc.building.originPos.equals(originPos)) {
-                        fc.removeOnExplore = true;
-                    }
-        }
-    }
 
     public int getUpgradeLevel() {
         return getBuilding().getUpgradeLevel(this);

@@ -1019,13 +1019,7 @@ public class BuildingClientEvents {
 
             // cleanup destroyed buildings
             selectedBuildings.removeIf(BuildingPlacement::shouldBeDestroyed);
-            buildings.removeIf(b -> {
-                if (b.shouldBeDestroyed()) {
-                    b.unFreezeChunks();
-                    return true;
-                }
-                return false;
-            });
+            buildings.removeIf(BuildingPlacement::shouldBeDestroyed);
         }
     }
 
@@ -1119,9 +1113,6 @@ public class BuildingClientEvents {
                 }
             }
             buildings.add(newBuilding);
-            if (FogOfWarClientEvents.isEnabled()) {
-                newBuilding.freezeChunks(MC.player.getName().getString(), forPlayerLoggingIn);
-            }
 
             // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
             // they are frozen so move them to their capitol (or any of their buildings if they don't have one)

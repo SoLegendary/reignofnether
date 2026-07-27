@@ -7,16 +7,22 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -43,6 +49,21 @@ public class BuildingClientboundPacket {
     public boolean forPlayerLoggingIn; // is this placement for someone logging in currently joined?
     public double partialBlocksDestroyed = 0;
 
+    // send only to players whose fog reveals at least one chunk of this building's footprint
+    private static void sendFiltered(BlockPos buildingPos, BuildingClientboundPacket packet) {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) return;
+        BuildingPlacement b = findBuilding(false, buildingPos);
+        Set<ChunkPos> chunks = b != null
+            ? FogOfWarServerEvents.getBuildingChunks(b)
+            : Set.of(new ChunkPos(buildingPos));
+        for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
+            if (FogOfWarServerEvents.canPlayerSeeChunks(sp, chunks)) {
+                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
+            }
+        }
+    }
+
     public static void placeBuilding(
         BlockPos buildingPos,
         Building building,
@@ -57,7 +78,7 @@ public class BuildingClientboundPacket {
         BlockPos portalDestination,
         boolean forPlayerLoggingIn
     ) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new BuildingClientboundPacket(
+        sendFiltered(buildingPos, new BuildingClientboundPacket(
             building instanceof CustomBuilding ? BuildingAction.PLACE_CUSTOM : BuildingAction.PLACE,
             building instanceof CustomBuilding ? EMPTY : ReignOfNetherRegistries.BUILDING.getKey(building),
             building.name,
@@ -94,11 +115,11 @@ public class BuildingClientboundPacket {
                 false
         );
         packet.partialBlocksDestroyed = partialBlocksDestroyed;
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), packet);
+        sendFiltered(buildingPos, packet);
     }
 
     public static void startProduction(BlockPos buildingPos, ProductionItem item) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        sendFiltered(buildingPos,
             new BuildingClientboundPacket(BuildingAction.START_PRODUCTION,
                 ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item),
                 "",
@@ -108,7 +129,7 @@ public class BuildingClientboundPacket {
     }
 
     public static void cancelProduction(BlockPos buildingPos, ProductionItem item, boolean frontItem) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        sendFiltered(buildingPos,
             new BuildingClientboundPacket(frontItem
                                           ? BuildingAction.CANCEL_PRODUCTION
                                           : BuildingAction.CANCEL_BACK_PRODUCTION,
@@ -120,7 +141,7 @@ public class BuildingClientboundPacket {
     }
 
     public static void changePortal(BlockPos buildingPos, PortalPlacement.PortalType type) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        sendFiltered(buildingPos,
             new BuildingClientboundPacket(BuildingAction.CHANGE_PORTAL,
                 EMPTY,
                 "",
@@ -141,19 +162,19 @@ public class BuildingClientboundPacket {
     }
 
     public static void clearQueue(BlockPos buildingPos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        sendFiltered(buildingPos,
             new BuildingClientboundPacket(BuildingAction.CLEAR_PRODUCTION, EMPTY,"", buildingPos)
         );
     }
 
     public static void completeProduction(BlockPos buildingPos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        sendFiltered(buildingPos,
             new BuildingClientboundPacket(BuildingAction.COMPLETE_PRODUCTION, EMPTY,"", buildingPos)
         );
     }
 
     public static void removeBuilding(BlockPos buildingPos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        sendFiltered(buildingPos,
             new BuildingClientboundPacket(BuildingAction.REMOVE, EMPTY, "", buildingPos)
         );
     }

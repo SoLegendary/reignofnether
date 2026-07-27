@@ -9,6 +9,9 @@ import com.solegendary.reignofnether.entities.models.MagicProjectileModel;
 import com.solegendary.reignofnether.entities.renderers.NecromancerProjectileRenderer;
 import com.solegendary.reignofnether.entities.renderers.ThrowableTntRenderer;
 import com.solegendary.reignofnether.entities.renderers.WindcallerProjectileRenderer;
+import com.solegendary.reignofnether.fogofwar.FogTintingBakedModel;
+import com.solegendary.reignofnether.fogofwar.FogTintingBlockColor;
+import com.solegendary.reignofnether.mixin.fogofwar.BlockColorsAccessor;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.particles.BigEnchantParticle;
 import com.solegendary.reignofnether.particles.BigSoulFlameParticle;
@@ -16,6 +19,8 @@ import com.solegendary.reignofnether.particles.LevelUpParticle;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.unit.modelling.models.*;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.model.SkullModel;
 import net.minecraft.client.model.geom.EntityModelSet;
@@ -24,16 +29,21 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.*;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
@@ -42,7 +52,18 @@ import java.util.HashSet;
 @Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID, bus = Bus.MOD, value = Dist.CLIENT)
 public class ClientModEvents {
 
+    // wrap every baked model so the fog tint applies to untinted quads
     @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public static void onModifyBakingResult(ModelEvent.ModifyBakingResult evt) {
+        var models = evt.getModels();
+        for (var entry : models.entrySet()) {
+            entry.setValue(new FogTintingBakedModel(entry.getValue()));
+        }
+    }
+
+    // LOWEST so we wrap after vanilla and other mods
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     @OnlyIn(Dist.CLIENT)
     public static void onBlockColourEvent(RegisterColorHandlersEvent.Block evt) {
         evt.register((bs, blockAndTintGetter, bp, tintIndex) -> {
@@ -64,6 +85,23 @@ public class ClientModEvents {
                 (state, level, pos, tintIndex) -> 0xE0E0E0,
                 BlockRegistrar.WRAITH_SNOW_LAYER.get()
         );
+
+        // wrap every block's provider with the fog multiplier; skip biome-tinted (BiomeColorsMixin handles those)
+        java.util.Set<Block> biomeTinted = java.util.Set.of(
+                Blocks.GRASS_BLOCK, Blocks.FERN, Blocks.GRASS, Blocks.POTTED_FERN,
+                Blocks.PINK_PETALS, Blocks.SUGAR_CANE, Blocks.LARGE_FERN, Blocks.TALL_GRASS,
+                Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES,
+                Blocks.DARK_OAK_LEAVES, Blocks.VINE, Blocks.MANGROVE_LEAVES,
+                Blocks.WATER, Blocks.BUBBLE_COLUMN
+        );
+        BlockColors blockColors = evt.getBlockColors();
+        java.util.Map<Holder.Reference<Block>, BlockColor> map =
+                ((BlockColorsAccessor) (Object) blockColors).getBlockColors();
+        for (Block block : ForgeRegistries.BLOCKS.getValues()) {
+            if (biomeTinted.contains(block)) continue;
+            BlockColor existing = map.get(ForgeRegistries.BLOCKS.getDelegateOrThrow(block));
+            evt.register(new FogTintingBlockColor(existing), block);
+        }
     }
 
     @SubscribeEvent
