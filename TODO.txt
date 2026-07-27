@@ -25,11 +25,11 @@ Quality of Life
 
 Fog of war
 ----------
-[❌] Disable fog snapshotting above a set world border size (it's currently trying to snapshot forever)
-[❌] Apply edge masking to light states too
+[✔] Disable fog snapshotting above a set world border size
+[✔] Apply edge masking to light states too
 [❌] Allow spectators to see fog, but with vision of all players
 [❌] Set a per-unit and per-building sight range attribute
-[❌] Circular vision isn't being applied when enemies are revealed for not having a capitol
+[🟡] Circular vision isn't being applied when enemies are revealed for not having a capitol
 
 [❌] Allow queueing of placements in fog
 [❌] Show neutral units and buildings on minimap
@@ -40,7 +40,8 @@ Slime rolling
 [✔] Slimes and magma cubes now roll to move instead of jumping, meaning they can now use the new rtsPathfinding!
 [✔] When close to an attack target (unit or building) they will revert back to jumping motions for attacks
 [✔] Movement speed has been reduced from 27 to 25, but they now glide up stairs smoothly
-
+[✔] You can set the 'forceJumping' flag in data to make them follow the old behaviour, eg:
+    /summon reignofnether:slime_unit ~ ~ ~ {ForgeData:{forceJumping:1b}}
 
 Balance
 -------

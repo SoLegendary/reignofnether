@@ -42,6 +42,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -438,7 +439,7 @@ public class PlayerServerEvents {
                 default -> null;
             };
             // first RTS join into a fresh game: snapshot the playable area for late joiners
-            if (!readiedStart && rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny())
+            if (!readiedStart && rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel))
                 FogChunkSnapshot.captureWorldBorder((ServerLevel) serverPlayer.level());
             rtsPlayers.add(RTSPlayer.getNewPlayer(
                     serverPlayer.getName().getString(),
