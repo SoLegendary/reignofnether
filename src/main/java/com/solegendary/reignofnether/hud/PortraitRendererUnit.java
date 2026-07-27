@@ -19,11 +19,13 @@ import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitStatType;
+import com.solegendary.reignofnether.unit.controls.SlimeJumpMoveControl;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -500,8 +502,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         ));
         AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
         int msInt = ms != null ? (int) (ms.getValue() * 101) : 0;
-        if (unit instanceof Slime) {
-            msInt *= 0.45f;
+        if (unit instanceof SlimeUnit slimeUnit && slimeUnit.isUsingJumpingMovement()) {
+            msInt /= SlimeJumpMoveControl.MOVESPEED_MULTIPLIER;
         }
         if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield()) {
             msInt *= ToggleShield.MOVESPEED_MULTIPLIER;

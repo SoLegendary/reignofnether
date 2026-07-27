@@ -12,7 +12,8 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
-import com.solegendary.reignofnether.unit.controls.SlimeUnitMoveControl;
+import com.solegendary.reignofnether.unit.controls.SlimeJumpMoveControl;
+import com.solegendary.reignofnether.unit.controls.SlimeRollMoveControl;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -20,18 +21,16 @@ import com.solegendary.reignofnether.unit.units.piglins.MagmaCubeUnit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -178,7 +177,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     final static public float attackDamagePerSize = 2.0f;
     final static public float attacksPerSecond = 0.5f;
     final static public float armorPerSize = 1.2f;
-    final static public float movementSpeed = 0.6f; // needs to be 2x other units
+    final static public float movementSpeed = 0.22f;
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
@@ -197,9 +196,11 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     public SlimeUnit consumeTarget = null;
 
+    public float extraSquish = 0f;
+
     public SlimeUnit(EntityType<? extends Slime> entityType, Level level) {
         super(entityType, level);
-        this.moveControl = new SlimeUnitMoveControl(this);
+        this.moveControl = new SlimeRollMoveControl(this);
         updateAbilityButtons();
     }
 
@@ -360,9 +361,18 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     @Override
     public void jumpFromGround() {
         Vec3 vec3 = this.getDeltaMovement();
-        this.setDeltaMovement(vec3.x, (double)(this.getJumpPower() + (float)this.getSize() * 0.1F), vec3.z);
+        this.setDeltaMovement(vec3.x, this.getJumpPower(), vec3.z);
         this.hasImpulse = true;
         ForgeHooks.onLivingJump(this);
+    }
+
+    @Override
+    protected float getJumpPower() {
+        float power = 0.42F * this.getBlockJumpFactor() + this.getJumpBoostPower();
+        if (isInRangeOfAttackTarget()) {
+            power += (float)this.getSize() * 0.1F;
+        }
+        return power;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -380,7 +390,81 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
     }
 
+    SlimeJumpMoveControl jumpMoveControl = new SlimeJumpMoveControl(this);
+    SlimeRollMoveControl rollMoveControl = new SlimeRollMoveControl(this);
+
+    // Rendering-only interpolation copies, same pattern as Slime's squish/oSquish.
+    public float rollAngle = 0;
+    public float oRollAngle = 0;
+
+    // Internal tracking of last tick's position, to measure horizontal movement.
+    private double prevRollTrackX;
+    private double prevRollTrackZ;
+
+    /** Degrees of roll per block of horizontal distance moved, while actively moving. */
+    private static final float ROLL_DEGREES_PER_BLOCK_ROLLING = 37.5f;
+    private static final float ROLL_DEGREES_PER_BLOCK_JUMPING = 50f;
+
+    /** Fixed settle speed (degrees/tick) used to ease toward the nearest corner while at rest. */
+    private static final float REST_SETTLE_DEGREES_PER_TICK = 12.0F;
+
+    /** Horizontal distance below which the slime is considered "at rest" for rotation purposes. */
+    private static final double MOVEMENT_THRESHOLD = 0.005;
+
+    private float getRollDegreesPerBlock() {
+        if (isUsingJumpingMovement())
+            return ROLL_DEGREES_PER_BLOCK_JUMPING;
+        return ROLL_DEGREES_PER_BLOCK_ROLLING;
+    }
+
+    private void handleRoll() {
+        double dx = this.getX() - this.prevRollTrackX;
+        double dz = this.getZ() - this.prevRollTrackZ;
+        double horizontalMoved = Math.sqrt(dx * dx + dz * dz);
+        this.prevRollTrackX = this.getX();
+        this.prevRollTrackZ = this.getZ();
+
+        boolean isMoving = horizontalMoved > MOVEMENT_THRESHOLD;
+
+        float target;
+        float maxStep;
+        if (isMoving) {
+            // Always the next multiple of 90 strictly ahead - never looks back.
+            target = (float) (Math.floor(this.rollAngle / 90.0) + 1.0) * 90.0F;
+            maxStep = (float) (horizontalMoved * getRollDegreesPerBlock());
+        } else {
+            // The nearest multiple of 90 - settles forward or backward, whichever is closer.
+            target = (float) Math.round(this.rollAngle / 90.0) * 90.0F;
+            maxStep = REST_SETTLE_DEGREES_PER_TICK;
+        }
+
+        float diff = target - this.rollAngle;
+        float step = Math.signum(diff) * Math.min(Math.abs(diff), maxStep);
+
+        this.oRollAngle = this.rollAngle;
+        this.rollAngle += step;
+
+        if (oRollAngle >= 360)
+            oRollAngle -= 360;
+        if (rollAngle >= 360)
+            rollAngle -= 360;
+        if (oRollAngle <= 360)
+            oRollAngle += 360;
+        if (rollAngle <= 360)
+            rollAngle += 360;
+    }
+
+    @Override
+    public float getViewYRot(float pPartialTick) {
+        return this.getYRot();
+    }
+
+    public boolean isUsingJumpingMovement() {
+        return getMoveControl() instanceof SlimeJumpMoveControl;
+    }
+
     public void tick() {
+        this.setMaxUpStep(1.15f);
         this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
@@ -418,6 +502,33 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         }
         if (isInWater() || isInLava())
             setDeltaMovement(new Vec3(0, 0.25, 0));
+
+        if (isInRangeOfAttackTarget() && !(getMoveControl() instanceof SlimeJumpMoveControl)) {
+            this.moveControl = jumpMoveControl;
+            this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed * SlimeJumpMoveControl.MOVESPEED_MULTIPLIER);
+        } else if (!isInRangeOfAttackTarget() && !(getMoveControl() instanceof SlimeRollMoveControl)) {
+            this.moveControl = rollMoveControl; // TODO: roll towards an attack target
+            this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
+        }
+
+        if (getDeltaMovement().length() > 0.1) {
+            long period = (long) Math.max(100, 1000 - (getMovementSpeed() * 1000));
+            this.extraSquish = MiscUtil.getOscillatingFloat(getSize() * -0.2f, getSize() * 0.2f, 0, period);
+        } else
+            this.extraSquish = MiscUtil.getOscillatingFloat(getSize() * -0.1f, getSize()  * 0.1f, 0, 2000);
+
+        if (level().isClientSide()) {
+            handleRoll();
+        }
+    }
+
+    double JUMP_PREFERRED_RANGE_SQR = 6 * 6; // within this range of an attack target, we prefer to use jumping move control instead
+
+    private boolean isInRangeOfAttackTarget() {
+        if (getTargetGoal().getTarget() != null) {
+            return getTargetGoal().getTarget().distanceToSqr(this) < JUMP_PREFERRED_RANGE_SQR;
+        }
+        return false;
     }
 
     @Override
@@ -506,7 +617,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         this.goalSelector.addGoal(2, attackBuildingGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.targetSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
+        //this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
     @Override

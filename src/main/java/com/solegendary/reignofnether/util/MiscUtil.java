@@ -552,17 +552,22 @@ public class MiscUtil {
         return (blue << 16) | (green << 8) | (red);
     }
 
-    // get a float that ranges between 0-1 (1 cycle per second) based on the system clock
-    // used for oscillating an alpha value to make a rendered object pulse
+    // get a float that ranges between 0-1 (1 cycle per periodMs milliseconds) based on the system clock
+// used for oscillating an alpha value to make a rendered object pulse
     public static float getOscillatingFloat(double min, double max) {
-        return getOscillatingFloat(min, max, 0);
+        return getOscillatingFloat(min, max, 0, 1000);
     }
 
     public static float getOscillatingFloat(double min, double max, long timeOffset) {
+        return getOscillatingFloat(min, max, timeOffset, 1000);
+    }
+
+    public static float getOscillatingFloat(double min, double max, long timeOffset, long periodMs) {
         long ms = System.currentTimeMillis() + timeOffset;
-        String msStr = String.valueOf(ms);
-        String last3Digits = msStr.substring(msStr.length() - 3);
-        double msOsc = (Math.abs(Double.parseDouble(last3Digits) - 500) / 250) - 1; // +-1 along linear scale
+        double t = ms % periodMs; // position within the current cycle, 0..periodMs
+        double half = periodMs / 2.0;
+        double quarter = periodMs / 4.0;
+        double msOsc = (Math.abs(t - half) / quarter) - 1; // +-1 along linear scale
         msOsc = (Math.asin(msOsc) / Math.PI) + 0.5d; // 0-1 along sin scale
         msOsc *= (max - min);
         msOsc += min;
