@@ -52,15 +52,13 @@ Fog of war
     - BuildingClientEvents
         - Method to determine if isVisible or not (visible if any corner is in view)
 
-Fog of War
-----------
-[🟡] Enemy building highlights are being rendered in fog
-[❌] Block Entities not being rendered in fog
 
-To test:
-- Ghasts
-- Revealing units in fog
--
+Slime rolling
+-------------
+[✔] Slimes and magma cubes now roll to move instead of jumping, meaning they can now use the new rtsPathfinding!
+[✔] When close to an attack target (unit or building) they will revert back to jumping motions for attacks
+[✔] Movement speed has been reduced from 27 to 25, but they now glide up stairs smoothly
+
 
 Balance
 -------
@@ -77,6 +75,7 @@ Bugfixes
 --------
 [❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
 [✔] Fixed some animals not dropping the correct amount of food
+[❌] Switching singleplayer worlds no longer retains research and cheats
 [❌] Spider jockeys not moving long distances
 
 Languages

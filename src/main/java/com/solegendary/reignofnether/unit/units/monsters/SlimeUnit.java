@@ -177,7 +177,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     final static public float attackDamagePerSize = 2.0f;
     final static public float attacksPerSecond = 0.5f;
     final static public float armorPerSize = 1.2f;
-    final static public float movementSpeed = 0.22f;
+    final static public float movementSpeed = 0.25f;
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
@@ -196,12 +196,19 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     public SlimeUnit consumeTarget = null;
 
-    public float extraSquish = 0f;
-
     public SlimeUnit(EntityType<? extends Slime> entityType, Level level) {
         super(entityType, level);
         this.moveControl = new SlimeRollMoveControl(this);
         updateAbilityButtons();
+    }
+
+    public BlockPos getMoveTarget() {
+        BlockPos targetPos = getMoveGoal().getMoveTarget();
+        if (targetPos == null && getTargetGoal().getTarget() != null)
+            targetPos = getTargetGoal().getTarget().getOnPos().above();
+        if (targetPos == null && getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg)
+            targetPos = mabg.getMoveTarget();
+        return targetPos;
     }
 
     // big slimes sometimes bounce off of each other midair
@@ -398,26 +405,27 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public float oRollAngle = 0;
 
     // Internal tracking of last tick's position, to measure horizontal movement.
-    private double prevRollTrackX;
-    private double prevRollTrackZ;
+    protected double prevRollTrackX;
+    protected double prevRollTrackZ;
 
-    /** Degrees of roll per block of horizontal distance moved, while actively moving. */
-    private static final float ROLL_DEGREES_PER_BLOCK_ROLLING = 37.5f;
-    private static final float ROLL_DEGREES_PER_BLOCK_JUMPING = 50f;
+    /** Degrees of roll per block of horizontal distance moved, while actively moving.
+     *  This needs to be changed if either speed OR SlimeRollMoveControl lengths are changed */
+    protected static final float ROLL_DEGREES_PER_BLOCK_ROLLING = 33f;
+    protected static final float ROLL_DEGREES_PER_BLOCK_JUMPING = 44f;
 
     /** Fixed settle speed (degrees/tick) used to ease toward the nearest corner while at rest. */
-    private static final float REST_SETTLE_DEGREES_PER_TICK = 12.0F;
+    protected static final float REST_SETTLE_DEGREES_PER_TICK = 12f;
 
     /** Horizontal distance below which the slime is considered "at rest" for rotation purposes. */
-    private static final double MOVEMENT_THRESHOLD = 0.005;
+    protected static final double MOVEMENT_THRESHOLD = 0.005;
 
-    private float getRollDegreesPerBlock() {
+    protected float getRollDegreesPerBlock() {
         if (isUsingJumpingMovement())
             return ROLL_DEGREES_PER_BLOCK_JUMPING;
         return ROLL_DEGREES_PER_BLOCK_ROLLING;
     }
 
-    private void handleRoll() {
+    protected void handleRoll() {
         double dx = this.getX() - this.prevRollTrackX;
         double dz = this.getZ() - this.prevRollTrackZ;
         double horizontalMoved = Math.sqrt(dx * dx + dz * dz);
@@ -441,22 +449,41 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         float diff = target - this.rollAngle;
         float step = Math.signum(diff) * Math.min(Math.abs(diff), maxStep);
 
+        float prevRollAngle = this.rollAngle;
+
         this.oRollAngle = this.rollAngle;
         this.rollAngle += step;
 
-        if (oRollAngle >= 360)
-            oRollAngle -= 360;
-        if (rollAngle >= 360)
-            rollAngle -= 360;
-        if (oRollAngle <= 360)
-            oRollAngle += 360;
-        if (rollAngle <= 360)
-            rollAngle += 360;
+        if (!isUsingJumpingMovement() && rollAngle % 90 == 0 && !(prevRollAngle % 90 == 0)) {
+            this.onFinishedRoll();
+        }
+        normaliseRollAngles();
     }
 
-    @Override
-    public float getViewYRot(float pPartialTick) {
-        return this.getYRot();
+    protected void normaliseRollAngles() {
+        if (oRollAngle >= 3600)
+            oRollAngle -= 3600;
+        if (rollAngle >= 3600)
+            rollAngle -= 3600;
+        if (oRollAngle <= 3600)
+            oRollAngle += 3600;
+        if (rollAngle <= 3600)
+            rollAngle += 3600;
+    }
+
+    protected void onFinishedRoll() {
+        int i = this.getSize();
+        if (!this.spawnCustomParticles()) {
+            for(int j = 0; j < i * 8; ++j) {
+                float f = this.random.nextFloat() * 6.2831855F;
+                float f1 = this.random.nextFloat() * 0.5F + 0.5F;
+                float f2 = Mth.sin(f) * (float)i * 0.5F * f1;
+                float f3 = Mth.cos(f) * (float)i * 0.5F * f1;
+                this.level().addParticle(this.getParticleType(), this.getX() + (double)f2, this.getY(), this.getZ() + (double)f3, 0.0, 0.0, 0.0);
+            }
+        }
+        this.playSound(this.getSquishSound(), this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.5F));
+        this.targetSquish = -0.5F;
     }
 
     public boolean isUsingJumpingMovement() {
@@ -503,19 +530,16 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         if (isInWater() || isInLava())
             setDeltaMovement(new Vec3(0, 0.25, 0));
 
-        if (isInRangeOfAttackTarget() && !(getMoveControl() instanceof SlimeJumpMoveControl)) {
-            this.moveControl = jumpMoveControl;
-            this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed * SlimeJumpMoveControl.MOVESPEED_MULTIPLIER);
-        } else if (!isInRangeOfAttackTarget() && !(getMoveControl() instanceof SlimeRollMoveControl)) {
-            this.moveControl = rollMoveControl; // TODO: roll towards an attack target
-            this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
+        if (onGround()) {
+            boolean inAttackRange = isInRangeOfAttackTarget();
+            if (inAttackRange && !(getMoveControl() instanceof SlimeJumpMoveControl)) {
+                this.moveControl = jumpMoveControl;
+                this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed * SlimeJumpMoveControl.MOVESPEED_MULTIPLIER);
+            } else if (!inAttackRange && !(getMoveControl() instanceof SlimeRollMoveControl)) {
+                this.moveControl = rollMoveControl;
+                this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
+            }
         }
-
-        if (getDeltaMovement().length() > 0.1) {
-            long period = (long) Math.max(100, 1000 - (getMovementSpeed() * 1000));
-            this.extraSquish = MiscUtil.getOscillatingFloat(getSize() * -0.2f, getSize() * 0.2f, 0, period);
-        } else
-            this.extraSquish = MiscUtil.getOscillatingFloat(getSize() * -0.1f, getSize()  * 0.1f, 0, 2000);
 
         if (level().isClientSide()) {
             handleRoll();
@@ -525,8 +549,10 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     double JUMP_PREFERRED_RANGE_SQR = 6 * 6; // within this range of an attack target, we prefer to use jumping move control instead
 
     private boolean isInRangeOfAttackTarget() {
-        if (getTargetGoal().getTarget() != null) {
-            return getTargetGoal().getTarget().distanceToSqr(this) < JUMP_PREFERRED_RANGE_SQR;
+        boolean hasBuildingTarget = getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg && mabg.getBuildingTarget() != null;
+        boolean hasEntityTarget = getTargetGoal().getTarget() != null;
+        if ((hasBuildingTarget || hasEntityTarget) && getMoveTarget() != null) {
+            return getMoveTarget().getCenter().distanceToSqr(position()) < JUMP_PREFERRED_RANGE_SQR;
         }
         return false;
     }
