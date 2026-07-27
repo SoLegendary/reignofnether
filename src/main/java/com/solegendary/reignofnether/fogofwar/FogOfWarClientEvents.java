@@ -41,8 +41,6 @@ public class FogOfWarClientEvents {
     // RGB multiplier baked into block vertex colors in dark chunks (see BlockColorsMixin).
     public static final int FOG_TINT_RGB = 0x7882A0;
 
-    public static final int CHUNK_VIEW_DIST = 1;
-    public static final int CHUNK_FAR_VIEW_DIST = 2;
     private static final Minecraft MC = Minecraft.getInstance();
 
     // mirror of the server's authoritative sent (bright) set for this player
@@ -135,6 +133,27 @@ public class FogOfWarClientEvents {
         if (mask == null) return true;                             // live chunk (no mask): fully visible
         int i = ((x & 15) << 4) | (z & 15);
         return (mask[i >> 6] & (1L << (i & 63))) != 0;
+    }
+
+    private static final long[] ALL_FOGGED = new long[4]; // read-only; every column masked
+
+    // Chunks whose most recent chunk packet created them from scratch. The light engine holds empty section
+    // data for these, so incoming light has to be adopted wholesale - merging against it freezes black.
+    private static final Set<ChunkPos> freshlyLoaded = ConcurrentHashMap.newKeySet();
+
+    public static void setChunkFreshlyLoaded(int chunkX, int chunkZ, boolean fresh) {
+        ChunkPos cp = new ChunkPos(chunkX, chunkZ);
+        if (fresh) freshlyLoaded.add(cp); else freshlyLoaded.remove(cp);
+    }
+
+    // Column mask for merging incoming light: null = adopt server light untouched (fog off, or a fully
+    // visible chunk), otherwise a 0 column keeps whatever light the client already has.
+    public static long[] getLightMask(int chunkX, int chunkZ) {
+        if (!isEnabled()) return null;
+        ChunkPos cp = new ChunkPos(chunkX, chunkZ);
+        if (freshlyLoaded.contains(cp)) return null;   // nothing remembered to preserve
+        if (!brightChunks.contains(cp)) return ALL_FOGGED;
+        return edgeMasks.get(cp);
     }
 
     // Column-visibility mask if this chunk is an edge chunk, else null. Used by ClientChunkCacheMixin to

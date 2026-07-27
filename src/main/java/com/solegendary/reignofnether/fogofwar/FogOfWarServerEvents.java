@@ -78,8 +78,6 @@ public class FogOfWarServerEvents {
         revealedUnitExpiryTick.merge(unitId, expireAt, Math::max);
     }
 
-    public static final int CHUNK_VIEW_DIST = 1;
-    public static final int CHUNK_FAR_VIEW_DIST = 2;
     // Block-radius vision. MUST match the client's FogOfWarClientEvents.BLOCK_VIEW_DIST/BLOCK_FAR_VIEW_DIST so
     // what the server securely sends lines up with the circle the client renders.
     public static final int NEAR_SIGHT_BLOCKS = 16;
@@ -457,7 +455,6 @@ public class FogOfWarServerEvents {
 
             // noLight == client retains its cached lighting
             // this does mean there might be lighting bugs for corners of edge chunks out of view
-            // TODO: to fix this, apply masking to light updates clientside too?
             BitSet noLight = new BitSet();
             for (LevelChunk chunk : resendChunks) {
                 boolean updateLight = live.contains(chunk.getPos()) || sent.contains(chunk.getPos());

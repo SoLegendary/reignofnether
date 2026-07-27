@@ -51,6 +51,7 @@ Quality of Life
 [❌] Add NBT field to slimes to force old jumping movement style
 [❌] RTS units no longer aggro onto vanilla units of the same faction, regardless of /gamerule neutralAggro
 [❌] Vanilla units no longer aggro onto FPV players who are allied to an RTS player of the matching faction
+[❌] Players and spectators in RTS cam can no longer go beyond the worldborder
 
 Bugfixes
 --------
