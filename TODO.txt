@@ -9,22 +9,12 @@
 
 Fog of war
 ----------
-[✔] Disable fog snapshotting above a set world border size
-[✔] Apply edge masking to light states too
-[✔] Circular vision isn't being applied when enemies are revealed for not having a capitol
-[✔] Ignore no-capitol reveal for scenario NPCs
-[✔] Set a per-unit and per-building sight range attribute
-    All heroes - 24
-    Windcallers while flying - 24
-    Pillagers - 18
-    Ghasts - 32
-    Spiders at night - 20
-    Wardens - 12
-    All garrisoned buildings & Capitols - 32
-    All other units and buildings - 16
+[✔] Ghasts have 24 sight range
+    - They still have 30 attack range, so they'll need spotters to attack at full range
+[✔] Building highlights appearing too soon
+    - Probably based
 
 [❌] Reveal attackers for attacking ground (to any nearby owners of units/buildings at the target pos)
-[❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Allow spectators to see fog, but with vision of all players
 [❌] Update night circle vision separate from buildings
     - If entered clientside, verify from server whether it's really that size or even still there
@@ -34,7 +24,9 @@ Fog of war
 [❌] Allow queueing of placements in fog
 [❌] Show neutral units and buildings on minimap
     - Last known position only
-
+[❌] Add commands for revealing in fog, temporarily or permanently
+[❌] Scout units from capitol + 1 free on match start
+    - wolves for villagers, zombie horse for monsters, striders for piglins
 
 
 NOTE: seems to be chunks missing on reload only on local server, more prevalent on actual match, not sandbox

@@ -197,13 +197,12 @@ public class FogOfWarServerEvents {
         return chunks;
     }
 
-    public static boolean canPlayerSeeChunks(ServerPlayer sp, Set<ChunkPos> chunks) {
+    public static boolean canPlayerSeeBuilding(ServerPlayer sp, BuildingPlacement b) {
         if (!isFogActiveFor(sp)) return true;
-        Set<ChunkPos> sent = playerEdgeChunks.get(sp.getUUID());
-        if (sent == null) return false;
-        for (ChunkPos cp : chunks)
-            if (sent.contains(cp)) return true;
-        return false;
+        return isBlockVisibleFor(sp, b.maxCorner.getX(), b.maxCorner.getZ()) ||
+                isBlockVisibleFor(sp, b.minCorner.getX(), b.minCorner.getZ()) ||
+                isBlockVisibleFor(sp, b.maxCorner.getX(), b.minCorner.getZ()) ||
+                isBlockVisibleFor(sp, b.minCorner.getX(), b.maxCorner.getZ());
     }
 
     private static void clearPlayerVision(UUID playerId) {
