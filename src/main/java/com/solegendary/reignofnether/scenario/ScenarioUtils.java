@@ -19,4 +19,13 @@ public class ScenarioUtils {
                 return role;
         return null;
     }
+
+    @Nullable
+    public static boolean isScenarioNpc(boolean isClientSide, int roleIndex) {
+        List<ScenarioRole> roles = isClientSide ? ScenarioClientEvents.scenarioRoles : ScenarioServerEvents.scenarioRoles;
+        for (ScenarioRole role : roles)
+            if (role.index == roleIndex)
+                return role.isNpc;
+        return false;
+    }
 }

@@ -8,6 +8,9 @@ import com.solegendary.reignofnether.building.buildings.placements.BeaconPlaceme
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 
 import java.util.*;
 
@@ -124,7 +127,8 @@ public class RTSPlayer {
                     if (FogOfWarServerEvents.isEnabled()) {
                         PlayerServerEvents.sendMessageToAllPlayers("server.reignofnether.revealed", false, this.name);
                     }
-                    FogOfWarClientboundPacket.revealOrHidePlayer(true, this.name);
+                    if (!ScenarioUtils.isScenarioNpc(false, scenarioRoleIndex))
+                        FogOfWarClientboundPacket.revealOrHidePlayer(true, this.name);
                 }
             }
         } else {

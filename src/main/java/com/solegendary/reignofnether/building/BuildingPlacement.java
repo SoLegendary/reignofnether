@@ -38,6 +38,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -211,7 +212,7 @@ public class BuildingPlacement {
             return Building.CAPITOL_SIGHT_RANGE;
         else if (getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class) &&
                 GarrisonableBuildingAddon.getNumOccupants(this) > 0 && isBuilt)
-            return Building.GARRISON_SIGHT_RANGE;
+            return Building.DEFAULT_SIGHT_RANGE + Building.GARRISONED_BONUS_SIGHT_RANGE;
         return Building.DEFAULT_SIGHT_RANGE;
     }
 
@@ -703,7 +704,7 @@ public class BuildingPlacement {
                         break;
                     }
                 }
-                if (!flag && FogOfWarServerEvents.isEnabled()) {
+                if (!flag && FogOfWarServerEvents.isEnabled() && !ScenarioUtils.isScenarioNpc(false, scenarioRoleIndex)) {
                     sendMessageToAllPlayers("server.reignofnether.lost_capitol",
                         false,
                         this.ownerName,

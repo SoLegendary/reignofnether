@@ -48,7 +48,7 @@ public abstract class Building {
 
     public static final int CAPITOL_SIGHT_RANGE = 32;
     public static final int DEFAULT_SIGHT_RANGE = 16;
-    public static final int GARRISON_SIGHT_RANGE = 32;
+    public static final int GARRISONED_BONUS_SIGHT_RANGE = 16;
 
     public ResourceCost cost;
     public boolean selfBuilding = false;

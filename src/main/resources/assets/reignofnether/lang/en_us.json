@@ -1350,7 +1350,7 @@
     "entity.reignofnether.spider_unit": "Spider",
     "entity.reignofnether.spider_unit.tooltip1": "A giant spider that is nimble but frail.",
     "entity.reignofnether.spider_unit.tooltip2": "Can be upgraded to allow skeletons to ride them.",
-    "entity.reignofnether.spider_unit.tooltip3": "Spiders move much more slowly under sunlight.",
+    "entity.reignofnether.spider_unit.tooltip3": "Spiders are slow under sunlight but gain bonus vision at night.",
     "entity.reignofnether.stray_unit": "Stray",
     "entity.reignofnether.stray_unit.tooltip1": "A chilling variant of the skeleton that fires slowing arrows.",
     "entity.reignofnether.stray_unit.tooltip2": "Strays will burn under sunlight.",

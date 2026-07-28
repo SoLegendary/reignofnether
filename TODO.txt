@@ -11,12 +11,19 @@ Fog of war
 ----------
 [✔] Disable fog snapshotting above a set world border size
 [✔] Apply edge masking to light states too
-[✔] Set a per-unit and per-building sight range attribute
 [✔] Circular vision isn't being applied when enemies are revealed for not having a capitol
+[✔] Ignore no-capitol reveal for scenario NPCs
+[✔] Set a per-unit and per-building sight range attribute
+    All heroes - 24
+    Windcallers while flying - 24
+    Pillagers - 18
+    Ghasts - 32
+    Spiders at night - 20
+    Wardens - 12
+    All garrisoned buildings & Capitols - 32
+    All other units and buildings - 16
 
-[❌] Reveal attackers upon dealing damage for explosive ranged attacks (to account for attack-ground options)
-[❌] Ignore no-capitol reveal for scenario NPCs
-
+[❌] Reveal attackers for attacking ground (to any nearby owners of units/buildings at the target pos)
 [❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Allow spectators to see fog, but with vision of all players
 [❌] Update night circle vision separate from buildings
@@ -55,6 +62,7 @@ Bugfixes
 --------
 [❌] Switching singleplayer worlds no longer retains research and cheats
 [❌] Spider jockeys not moving long distances
+[❌] Destroying your capitol no longer grants unlimited militia range
 
 Languages
 ---------
