@@ -11,11 +11,13 @@ Fog of war
 ----------
 [✔] Disable fog snapshotting above a set world border size
 [✔] Apply edge masking to light states too
-[❌] Set a per-unit and per-building sight range attribute
+[✔] Set a per-unit and per-building sight range attribute
+[✔] Circular vision isn't being applied when enemies are revealed for not having a capitol
 
-[❌] Circular vision isn't being applied when enemies are revealed for not having a capitol
+[❌] Reveal attackers upon dealing damage for explosive ranged attacks (to account for attack-ground options)
 [❌] Ignore no-capitol reveal for scenario NPCs
 
+[❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Allow spectators to see fog, but with vision of all players
 [❌] Update night circle vision separate from buildings
     - If entered clientside, verify from server whether it's really that size or even still there

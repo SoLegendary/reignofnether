@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
@@ -206,7 +207,12 @@ public class BuildingPlacement {
     }
 
     public int getSightRange() {
-        return getBuilding().sightRange;
+        if (isCapitol)
+            return Building.CAPITOL_SIGHT_RANGE;
+        else if (getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class) &&
+                GarrisonableBuildingAddon.getNumOccupants(this) > 0 && isBuilt)
+            return Building.GARRISON_SIGHT_RANGE;
+        return Building.DEFAULT_SIGHT_RANGE;
     }
 
     private EntityType<? extends Animal> lastAnimalType = null;

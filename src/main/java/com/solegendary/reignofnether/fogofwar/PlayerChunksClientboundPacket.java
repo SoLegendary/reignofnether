@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 public class PlayerChunksClientboundPacket {
 
     public final Map<UUID, Set<ChunkPos>> liveChunks;
-    public final Map<UUID, Set<ChunkPos>> sentChunks;
+    public final Map<UUID, Set<ChunkPos>> edgeChunks;
 
     public static void send(ServerPlayer player, Map<UUID, Set<ChunkPos>> liveChunks, Map<UUID, Set<ChunkPos>> sentChunks) {
         PacketHandler.INSTANCE.send(
@@ -27,14 +27,14 @@ public class PlayerChunksClientboundPacket {
         );
     }
 
-    public PlayerChunksClientboundPacket(Map<UUID, Set<ChunkPos>> liveChunks, Map<UUID, Set<ChunkPos>> sentChunks) {
+    public PlayerChunksClientboundPacket(Map<UUID, Set<ChunkPos>> liveChunks, Map<UUID, Set<ChunkPos>> edgeChunks) {
         this.liveChunks = liveChunks;
-        this.sentChunks = sentChunks;
+        this.edgeChunks = edgeChunks;
     }
 
     public PlayerChunksClientboundPacket(FriendlyByteBuf buf) {
         this.liveChunks = readMap(buf);
-        this.sentChunks = readMap(buf);
+        this.edgeChunks = readMap(buf);
     }
 
     private static Map<UUID, Set<ChunkPos>> readMap(FriendlyByteBuf buf) {
@@ -64,14 +64,14 @@ public class PlayerChunksClientboundPacket {
 
     public void encode(FriendlyByteBuf buf) {
         writeMap(buf, liveChunks);
-        writeMap(buf, sentChunks);
+        writeMap(buf, edgeChunks);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                PlayerChunksClientEvents.applyServerState(liveChunks, sentChunks);
+                PlayerChunksClientEvents.applyServerState(liveChunks, edgeChunks);
                 success.set(true);
             });
         });

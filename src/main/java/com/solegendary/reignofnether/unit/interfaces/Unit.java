@@ -162,9 +162,9 @@ public interface Unit {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(Attributes.MAX_HEALTH);
         return (float) (attr != null ?  attr.getValue() : Attributes.MAX_HEALTH.getDefaultValue()) + bonus;
     }
-    public default float getSightRange() {
+    public default int getSightRange() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.SIGHT_RANGE.get());
-        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.SIGHT_RANGE.get().getDefaultValue());
+        return (int) Math.round(attr != null ?  attr.getValue() : AttributeRegistrar.SIGHT_RANGE.get().getDefaultValue());
     }
 
     public ResourceCost getCost();
