@@ -205,6 +205,10 @@ public class BuildingPlacement {
         return targetStand;
     }
 
+    public int getSightRange() {
+        return getBuilding().sightRange;
+    }
+
     private EntityType<? extends Animal> lastAnimalType = null;
 
     public double getHealthPerBlock() {

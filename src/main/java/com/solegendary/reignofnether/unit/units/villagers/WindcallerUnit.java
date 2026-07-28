@@ -406,6 +406,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), 24)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0);
     }
 

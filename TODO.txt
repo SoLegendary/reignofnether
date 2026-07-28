@@ -11,10 +11,15 @@ Fog of war
 ----------
 [✔] Disable fog snapshotting above a set world border size
 [✔] Apply edge masking to light states too
-[❌] Allow spectators to see fog, but with vision of all players
-[❌] Ignore no-capitol reveal for scenario NPCs
 [❌] Set a per-unit and per-building sight range attribute
+
 [❌] Circular vision isn't being applied when enemies are revealed for not having a capitol
+[❌] Ignore no-capitol reveal for scenario NPCs
+
+[❌] Allow spectators to see fog, but with vision of all players
+[❌] Update night circle vision separate from buildings
+    - If entered clientside, verify from server whether it's really that size or even still there
+    - If entered serverside, sent to client the new range
 [❌] Sparta's crash
 
 [❌] Allow queueing of placements in fog
@@ -42,6 +47,7 @@ Quality of Life
 [❌] RTS units no longer aggro onto vanilla units of the same faction, regardless of /gamerule neutralAggro
 [❌] Vanilla units no longer aggro onto FPV players who are allied to an RTS player of the matching faction
 [❌] Players and spectators in RTS cam can no longer go beyond the worldborder
+[❌] Day/night sound effects and announcement
 
 Bugfixes
 --------

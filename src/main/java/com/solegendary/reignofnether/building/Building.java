@@ -45,6 +45,7 @@ public abstract class Building {
     public boolean repairable = true;
     public boolean shouldDestroyOnReset = true;
     public boolean drawAggro = true;
+    public int sightRange = 16;
 
     public ResourceCost cost;
     public boolean selfBuilding = false;
