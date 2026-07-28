@@ -12,6 +12,7 @@ Fog of war
 [✔] Disable fog snapshotting above a set world border size
 [✔] Apply edge masking to light states too
 [❌] Allow spectators to see fog, but with vision of all players
+[❌] Ignore no-capitol reveal for scenario NPCs
 [❌] Set a per-unit and per-building sight range attribute
 [❌] Circular vision isn't being applied when enemies are revealed for not having a capitol
 [❌] Sparta's crash

@@ -17,7 +17,6 @@ import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
@@ -439,8 +438,8 @@ public class PlayerServerEvents {
                 default -> null;
             };
             // first RTS join into a fresh game: snapshot the playable area for late joiners
-            if (!readiedStart && rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel))
-                FogChunkSnapshot.captureWorldBorder((ServerLevel) serverPlayer.level());
+            if (rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel))
+                FogChunkSnapshot.captureFogChunks((ServerLevel) serverPlayer.level());
             rtsPlayers.add(RTSPlayer.getNewPlayer(
                     serverPlayer.getName().getString(),
                     faction,
