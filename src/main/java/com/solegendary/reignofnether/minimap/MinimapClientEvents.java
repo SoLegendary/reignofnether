@@ -670,59 +670,7 @@ public class MinimapClientEvents {
         forceUpdateAllPartitions = false;
     }
 
-    private static void updateMapViewQuad() {
-        if (MC.level == null || MC.player == null || suppressViewQuad) {
-            return;
-        }
 
-        // get world position of corners of the screen
-        int yOffset = 0;//(int) (MC.player.getY() - 100) * 5;
-
-        Vector3d tl = MiscUtil.screenPosToWorldPos(MC, 0, -yOffset);
-        Vector3d bl = MiscUtil.screenPosToWorldPos(MC, 0, MC.getWindow().getGuiScaledHeight() - yOffset);
-        Vector3d br = MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), MC.getWindow().getGuiScaledHeight() - yOffset);
-        Vector3d tr = MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), -yOffset);
-
-        Vector3d[] corners = new Vector3d[] { tl, bl, br, tr };
-        // adjust corners according to camera angle
-        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
-        corners[0] = MyMath.addVector3d(corners[0], lookVector, 90 - OrthoviewClientEvents.getCamRotY());
-        corners[1] = MyMath.addVector3d(corners[1], lookVector, 75 - OrthoviewClientEvents.getCamRotY());
-        corners[2] = MyMath.addVector3d(corners[2], lookVector, 75 - OrthoviewClientEvents.getCamRotY());
-        corners[3] = MyMath.addVector3d(corners[3], lookVector, 90 - OrthoviewClientEvents.getCamRotY());
-
-        int zMin = zc_world - worldRadius;
-        int zMax = zc_world + worldRadius;
-        int xMin = xc_world - worldRadius;
-        int xMax = xc_world + worldRadius;
-
-        // draw terrain blocks
-        for (int z = zMin; z < zMax; z++) {
-            xLoop:
-            for (int x = xMin; x < xMax; x++) {
-
-                // draw view quad
-                for (int i = 0; i < corners.length; i++) {
-                    int j = i + 1;
-                    if (j >= corners.length) {
-                        j = 0;
-                    }
-
-                    if (MyMath.isPointOnLine(new Vec2((float) corners[i].x, (float) corners[i].z),
-                        new Vec2((float) corners[j].x, (float) corners[j].z),
-                        new Vec2(x, z),
-                        OrthoviewClientEvents.getZoom() * 2
-                        // larger = thicker line
-                    )) {
-                        int x0 = x - xc_world + worldRadius;
-                        int z0 = z - zc_world + worldRadius;
-                        mapColoursOverlays[x0][z0] = 0xFFFFFFFF;
-                        continue xLoop;
-                    }
-                }
-            }
-        }
-    }
 
     private static void updateNightCircles() {
 
@@ -1384,7 +1332,8 @@ public class MinimapClientEvents {
         mapMarkers.removeIf(MapMarker::tick);
 
         updateMapUnitsAndBuildings();
-        updateMapViewQuad();
+        if (!suppressViewQuad)
+            mapColoursOverlays = MinimapViewQuadRenderer.updateMapViewQuad(mapColoursOverlays);
 
         // as the map area increases, decrease refresh rate to maintain FPS
         terrainPartition += 1;
@@ -1406,7 +1355,7 @@ public class MinimapClientEvents {
         if (tickCount >= maxRenderTicks) {
             tickCount = 0;
             double avgMs = (renderTimeNanoSeconds / 10000000d);
-            System.out.println("Avg minimap render time (" + maxRenderTicks + " ticks) " + (Math.round(avgMs * 10.0) / 10.0) + "ms");
+            System.out.println("Avg x10 (" + maxRenderTicks + " ticks) " + (Math.round(avgMs * 10.0) / 10.0) + "ms");
             renderTimeNanoSeconds = 0;
         }
     }
