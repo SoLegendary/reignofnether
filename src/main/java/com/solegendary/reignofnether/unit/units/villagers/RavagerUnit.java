@@ -273,7 +273,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     }
 
     public void startToRoar() {
-        this.playSound(SoundEvents.RAVAGER_ROAR, 2.0F, 1.0F);
+        this.playSound(SoundEvents.RAVAGER_ROAR, 1.5F, 1.0F);
         this.roarTick = 40;
     }
 

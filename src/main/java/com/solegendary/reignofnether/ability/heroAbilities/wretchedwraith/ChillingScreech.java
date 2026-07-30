@@ -137,7 +137,7 @@ public class ChillingScreech extends HeroAbility {
         ((WretchedWraithUnit) unitUsing).getCastChillingScreechGoal().setAbility(this);
         ((WretchedWraithUnit) unitUsing).getCastChillingScreechGoal().startCasting();
         if (!level.isClientSide()) {
-            SoundClientboundPacket.playSoundAtPos(SoundAction.WRETCHED_WRAITH_ATTACK_LOUD, ((WretchedWraithUnit) unitUsing).blockPosition(), 0.6f);
+            SoundClientboundPacket.playSoundAtPos(SoundAction.WRETCHED_WRAITH_ATTACK_LOUD, ((WretchedWraithUnit) unitUsing).blockPosition(), 0.9f);
         }
     }
 
@@ -146,7 +146,7 @@ public class ChillingScreech extends HeroAbility {
         ((WretchedWraithUnit) unitUsing).getCastChillingScreechGoal().setAbility(this);
         ((WretchedWraithUnit) unitUsing).getCastChillingScreechGoal().startCasting();
         if (!level.isClientSide()) {
-            SoundClientboundPacket.playSoundAtPos(SoundAction.WRETCHED_WRAITH_ATTACK_LOUD, ((WretchedWraithUnit) unitUsing).blockPosition(), 0.6f);
+            SoundClientboundPacket.playSoundAtPos(SoundAction.WRETCHED_WRAITH_ATTACK_LOUD, ((WretchedWraithUnit) unitUsing).blockPosition(), 0.9f);
         }
     }
 }
