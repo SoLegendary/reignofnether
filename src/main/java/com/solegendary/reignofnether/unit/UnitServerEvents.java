@@ -651,6 +651,8 @@ public class UnitServerEvents {
                 }
             }
         }
+
+        //worker drops
     }
 
     // prevent onDropItem firing twice if the same animal is killed by two workers on the same tick
@@ -677,6 +679,7 @@ public class UnitServerEvents {
                 }
 
                 // insert a drop-off command without disrupting other queued commands
+                /*
                 if (Unit.atThresholdResources(unit)) {
                     int unitId = ((Mob) unit).getId();
                     boolean hasDropOffCommandQueued = false;
@@ -699,6 +702,8 @@ public class UnitServerEvents {
                         ));
                     }
                 }
+
+                 */
             } else {
                 lastHuntedAnimalId = evt.getEntity().getId();
             }

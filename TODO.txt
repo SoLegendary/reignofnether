@@ -54,8 +54,9 @@ Bugfixes
 [✔] Switching singleplayer worlds no longer retains research and cheats
 [✔] Spider jockeys not moving long distances
 [✔] Destroying your capitol no longer grants unlimited militia range
-[❌] Workers not returning resources - happens with chickens specifically?
-[✔] Fixed the Wildfire Molten bomb going berserk if the Wildfire died before it detonated
+[✔] Fixed the Wildfire Molten bomb going crazy if the Wildfire died before it detonated
+[🟡] Workers not returning resources - happens with chickens specifically?
+    - Test on lilypad
 
 Languages
 ---------
