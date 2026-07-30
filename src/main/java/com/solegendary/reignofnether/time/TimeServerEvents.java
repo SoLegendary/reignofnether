@@ -122,7 +122,7 @@ public class TimeServerEvents {
             }
             else if (lastTime <= TimeUtils.DAWN && normTime > TimeUtils.DAWN) {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.dawn", true);
-                SoundClientboundPacket.playSoundForAllPlayers(SoundAction.DAWN_ROOSTER);
+                SoundClientboundPacket.playSoundForAllPlayers(SoundAction.DAWN_ROOSTER, 0.9f);
             }
         }
         lastTime = normTime;

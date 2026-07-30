@@ -15,10 +15,11 @@ Fog of war
 [✔] Improved minimap performance in fog by a lot
 
 [❌] Reveal attackers for attacking ground (to any nearby owners of units/buildings at the target pos)
-[❌] Allow spectators to see fog, but with vision of all players
 [❌] Update night circle vision separate from buildings
     - If entered clientside, verify from server whether it's really that size or even still there
     - If entered serverside, sent to client the new range
+
+[❌] Allow spectators to see fog, but with vision of all players
 [❌] Sparta's crash
 
 [❌] Allow queueing of placements in fog
