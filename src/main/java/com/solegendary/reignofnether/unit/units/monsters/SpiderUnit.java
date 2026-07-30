@@ -273,6 +273,10 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
             }
             lastOnPos = getOnPos();
         }
+
+        if (this.isVehicle())
+            if (this.getMoveGoal().canUse())
+                this.getMoveGoal().canContinueToUse();
     }
 
     private Set<BlockPos> highlightBps = new HashSet<>();

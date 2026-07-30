@@ -63,6 +63,7 @@ import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
@@ -240,17 +241,17 @@ public class MinimapClientEvents {
         g.blit(mapTexLoc, x, y, w, h, 0, 0, tex, tex, tex, tex);
     }
 
-    public static org.joml.Vector2f worldToRect(int worldX, int worldZ,
+    public static Vector2f worldToRect(int worldX, int worldZ,
                                                 int rectX, int rectY, int rectW, int rectH) {
         int centreX = xc_world;
         int centreZ = zc_world;
         int span = worldRadius * 2;
         float u = (worldX - (centreX - worldRadius)) / (float) span;
         float v = (worldZ - (centreZ - worldRadius)) / (float) span;
-        return new org.joml.Vector2f(rectX + u * rectW, rectY + v * rectH);
+        return new Vector2f(rectX + u * rectW, rectY + v * rectH);
     }
 
-    public static net.minecraft.core.BlockPos rectToWorld(int sx, int sy,
+    public static BlockPos rectToWorld(int sx, int sy,
                                                           int rectX, int rectY, int rectW, int rectH) {
         float u = (sx - rectX) / (float) Math.max(1, rectW);
         float v = (sy - rectY) / (float) Math.max(1, rectH);
@@ -258,11 +259,10 @@ public class MinimapClientEvents {
         int wx = (int) (xc_world - worldRadius + u * span);
         int wz = (int) (zc_world - worldRadius + v * span);
         int y = 64;
-        net.minecraft.client.Minecraft mc = Minecraft.getInstance();
-        if (mc.level != null) {
-            y = mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, wx, wz);
+        if (MC.level != null) {
+            y = MC.level.getHeight(Heightmap.Types.MOTION_BLOCKING, wx, wz);
         }
-        return new net.minecraft.core.BlockPos(wx, y, wz);
+        return new BlockPos(wx, y, wz);
     }
 
     public static void setLargeMap(boolean large) {
@@ -531,7 +531,15 @@ public class MinimapClientEvents {
         int xMin = xc_world - worldRadius;
         int xMax = xc_world + worldRadius;
 
-        Set<ChunkPos> brightChunks = FogOfWarClientEvents.brightChunks;
+        // sampled once per pass rather than per column: cheaper, and stops a mid-loop fog toggle
+        // from producing a half-shaded map
+        final boolean fogEnabled = FogOfWarClientEvents.isEnabled();
+        final BlockPos.MutableBlockPos borderPos = new BlockPos.MutableBlockPos();
+
+        // fog state for the chunk the scan is currently inside; refreshed only on chunk boundaries
+        long cachedChunkKey = ChunkPos.INVALID_CHUNK_POS;
+        boolean chunkBright = true;
+        long[] edgeMask = null;
 
         // draw terrain blocks
         for (int z = zMin; z < zMax; z++) {
@@ -558,20 +566,28 @@ public class MinimapClientEvents {
                 }
             }
 
+            final int chunkZ = z >> 4;
+
             for (int x = xMin; x < xMax; x++) {
 
-                boolean isBright = false;
-                if (FogOfWarClientEvents.isEnabled()) {
-                    // apply a much slower update rate to dark chunks
-                    for (ChunkPos chunkPos : brightChunks) {
-                        if (x >= chunkPos.getMinBlockX() && x <= chunkPos.getMaxBlockX() && z >= chunkPos.getMinBlockZ()
-                            && z <= chunkPos.getMaxBlockZ()) {
-                            isBright = true;
-                            break;
-                        }
+                boolean columnVisible = true;
+                if (fogEnabled) {
+                    int chunkX = x >> 4;
+                    long chunkKey = ChunkPos.asLong(chunkX, chunkZ);
+                    if (chunkKey != cachedChunkKey) { // ~once per 16 columns
+                        cachedChunkKey = chunkKey;
+                        chunkBright = FogOfWarClientEvents.brightChunks.contains(new ChunkPos(chunkX, chunkZ));
+                        edgeMask = chunkBright ? FogOfWarClientEvents.getEdgeMask(chunkX, chunkZ) : null;
                     }
-                    if (!isBright && skipDarkPartition) {
+                    // apply a much slower update rate to dark chunks
+                    if (skipDarkPartition && !chunkBright) {
                         continue;
+                    }
+                    if (!chunkBright) {
+                        columnVisible = false;
+                    } else if (edgeMask != null) {
+                        int i = ((x & 15) << 4) | (z & 15);
+                        columnVisible = (edgeMask[i >> 6] & (1L << (i & 63))) != 0;
                     }
                 }
 
@@ -592,7 +608,7 @@ public class MinimapClientEvents {
                 } while (true);
 
                 int yNorth = MC.level.getChunkAt(new BlockPos(x, 0, z - 1))
-                    .getHeight(Heightmap.Types.WORLD_SURFACE, x, z - 1);
+                        .getHeight(Heightmap.Types.WORLD_SURFACE, x, z - 1);
                 BlockState bsNorth;
                 do {
                     bsNorth = MC.level.getBlockState(new BlockPos(x, yNorth, z - 1));
@@ -640,13 +656,12 @@ public class MinimapClientEvents {
                 int x0 = x - xc_world + worldRadius;
                 int z0 = z - zc_world + worldRadius;
 
-                BlockPos pos = new BlockPos(x, 0, z);
-                if (!MC.level.getWorldBorder().isWithinBounds(pos)) {
+                borderPos.set(x, 0, z);
+                if (!MC.level.getWorldBorder().isWithinBounds(borderPos)) {
                     rgb = MiscUtil.shadeHexRGB(rgb, EXTRA_DARK);
-                } else if (!FogOfWarClientEvents.isInBrightChunk(pos)) {
+                } else if (!columnVisible) {
                     rgb = MiscUtil.shadeHexRGB(rgb, DARK);
                 }
-
 
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColoursTerrain[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
@@ -1349,10 +1364,16 @@ public class MinimapClientEvents {
         //});
     }
 
+    private static long renderTimeNanoSeconds = 0;
+    private static int tickCount = 0;
+    private static int maxRenderTicks = 100;
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
+        if (evt.phase != TickEvent.Phase.END || !OrthoviewClientEvents.isEnabled())
             return;
+
+        long t0 = System.nanoTime();
 
         updateMapTerrain(terrainPartition, darkTerrainPartition);
         mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
@@ -1377,5 +1398,16 @@ public class MinimapClientEvents {
         }
 
         updateMapTexture();
+
+        long t1 = System.nanoTime();
+
+        tickCount += 1;
+        renderTimeNanoSeconds += t1 - t0;
+        if (tickCount >= maxRenderTicks) {
+            tickCount = 0;
+            double avgMs = (renderTimeNanoSeconds / 10000000d);
+            System.out.println("Avg minimap render time (" + maxRenderTicks + " ticks) " + (Math.round(avgMs * 10.0) / 10.0) + "ms");
+            renderTimeNanoSeconds = 0;
+        }
     }
 }

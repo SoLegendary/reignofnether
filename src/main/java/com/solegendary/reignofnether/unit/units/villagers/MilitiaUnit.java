@@ -325,7 +325,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
                         (b) -> b.isBuilt && b.ownerName.equals(getOwnerName()) && b.getBuilding() instanceof TownCentre);
 
                 int range = TownCentre.MILITIA_RANGE;
-                if (building != null &&
+                if (building == null ||
                     distanceToSqr(building.centrePos.getX(), building.centrePos.getY(), building.centrePos.getZ()) > range * range) {
                     convertToVillager();
                 }

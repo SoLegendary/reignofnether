@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -45,6 +46,12 @@ public class ResearchServerEvents {
 
             ReignOfNether.LOGGER.info("loaded " + researchItems.size() + " researchItems in serverevents");
         }
+    }
+
+    @SubscribeEvent
+    public static void onServerStopping(ServerStoppingEvent evt) {
+        researchItems.clear();
+        cheatItems.clear();
     }
 
     public static void removeAllResearch() {

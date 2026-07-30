@@ -21,6 +21,7 @@ import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.entities.GhastUnitFireball;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
+import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -170,6 +171,10 @@ public class UnitServerEvents {
             allUnits.clear();
             forcedUnitChunks.clear();
         }
+    }
+
+    public static void addUnitPoofs(Level level, Entity entity) {
+        MiscUtil.addParticleExplosion(ParticleTypes.POOF, 35, level, entity.position());
     }
 
     public static void saveFallenHeroUnits(ServerLevel level) {
@@ -375,6 +380,10 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof LivingEntity le &&
+                (ResourceSources.isHuntableAnimal(le) || le instanceof PhantomSummon || le instanceof Unit))
+            addUnitPoofs(evt.getLevel(), le);
+
         if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof Mob mob) {
             mob.setBaby(false);
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
