@@ -1312,10 +1312,6 @@ public class MinimapClientEvents {
         //});
     }
 
-    private static long renderTimeNanoSeconds = 0;
-    private static int tickCount = 0;
-    private static int maxRenderTicks = 100;
-
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END || !OrthoviewClientEvents.isEnabled())
@@ -1345,18 +1341,6 @@ public class MinimapClientEvents {
                 darkTerrainPartition = 1;
             }
         }
-
         updateMapTexture();
-
-        long t1 = System.nanoTime();
-
-        tickCount += 1;
-        renderTimeNanoSeconds += t1 - t0;
-        if (tickCount >= maxRenderTicks) {
-            tickCount = 0;
-            double avgMs = (renderTimeNanoSeconds / 10000000d);
-            System.out.println("Avg x10 (" + maxRenderTicks + " ticks) " + (Math.round(avgMs * 10.0) / 10.0) + "ms");
-            renderTimeNanoSeconds = 0;
-        }
     }
 }
