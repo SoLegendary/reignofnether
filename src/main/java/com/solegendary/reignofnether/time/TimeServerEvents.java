@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -39,6 +40,8 @@ public class TimeServerEvents {
     private static LivingEntity bloodMoonOwner = null;
     private static BlockPos bloodMoonTarget = null; // area to spawn enemies
     private static boolean zombieOrSkeleton = true;
+
+    private static long lastTime = -1;
 
     public static void resetBloodMoon() {
         bloodMoonTicksLeft = 0;
@@ -110,6 +113,19 @@ public class TimeServerEvents {
                 AbilityClientboundPacket.doAbility(bloodMoonOwner.getId(), UnitAction.BLOOD_MOON, bloodMoonTicksLeft, bloodMoonTarget);
             }
         }
+
+        long normTime = TimeUtils.normaliseTime(evt.level.getDayTime());
+        if (!SurvivalServerEvents.isEnabled() && !PlayerServerEvents.rtsPlayers.isEmpty() && lastTime >= 0) {
+            if (lastTime <= TimeUtils.DUSK && normTime > TimeUtils.DUSK) {
+                PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.dusk", true);
+                SoundClientboundPacket.playSoundForAllPlayers(SoundAction.DUSK_WOLF);
+            }
+            else if (lastTime <= TimeUtils.DAWN && normTime > TimeUtils.DAWN) {
+                PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.dawn", true);
+                SoundClientboundPacket.playSoundForAllPlayers(SoundAction.DAWN_ROOSTER);
+            }
+        }
+        lastTime = normTime;
     }
 }
 

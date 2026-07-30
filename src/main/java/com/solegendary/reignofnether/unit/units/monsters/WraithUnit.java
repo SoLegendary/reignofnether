@@ -332,6 +332,11 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
     }
 
     @Override
+    public boolean isIdle() {
+        return Unit.super.isIdle() && !getPossessGoal().isCasting();
+    }
+
+    @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         if (super.doHurtTarget(pEntity) && pEntity instanceof LivingEntity le) {
             Ability ability = getFearAbility();

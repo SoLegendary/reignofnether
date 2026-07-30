@@ -40,6 +40,14 @@ public class SoundRegistrar {
             SOUND_EVENTS.register("chat", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "chat")));
 
+    public static final RegistryObject<SoundEvent> DAWN_ROOSTER =
+            SOUND_EVENTS.register("dawn_rooster", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "dawn_rooster")));
+
+    public static final RegistryObject<SoundEvent> DUSK_WOLF =
+            SOUND_EVENTS.register("dusk_wolf", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "dusk_wolf")));
+
     public static final RegistryObject<SoundEvent> MAIN_MENU =
             SOUND_EVENTS.register("main_menu", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "main_menu")));
