@@ -1,5 +1,5 @@
 
-1.20.1-1.4.0-beta-3
+1.20.1-1.4.0
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
