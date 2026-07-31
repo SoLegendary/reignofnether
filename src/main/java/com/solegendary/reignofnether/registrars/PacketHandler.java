@@ -21,6 +21,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hero.FallenHeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerServerboundPacket;
 import com.solegendary.reignofnether.player.MatchStatsClientboundPacket;
@@ -356,6 +357,12 @@ public final class PacketHandler {
                 .encoder(PlayerChunksClientboundPacket::encode)
                 .decoder(PlayerChunksClientboundPacket::new)
                 .consumerMainThread(PlayerChunksClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(HudClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(HudClientboundPacket::encode)
+                .decoder(HudClientboundPacket::new)
+                .consumerMainThread(HudClientboundPacket::handle)
                 .add();
     }
 }

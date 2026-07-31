@@ -56,6 +56,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -684,6 +685,12 @@ public interface Unit {
         if (this instanceof WorkerUnit)
             idleWorker = WorkerUnit.isIdle((WorkerUnit) this);
 
+        for (Goal goal : ((Mob) this).goalSelector.getAvailableGoals()) {
+            if (goal instanceof GenericUntargetedSpellGoal spellGoal && spellGoal.isCasting())
+                return false;
+            if (goal instanceof GenericTargetedSpellGoal spellGoal && spellGoal.isCasting())
+                return false;
+        }
         // some larger mobs like bears get stuck near their movetarget so nav won't be done but it also won't be null
         boolean stationaryNearMoveTarget = false;
         if (this.getMoveGoal().getMoveTarget() != null) {

@@ -740,20 +740,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public boolean isIdle() {
-        boolean idleAttacker = getAttackMoveTarget() == null &&
-                !hasLivingTarget() &&
-                !AttackerUnit.isAttackingBuilding(this);
-
-        // some larger mobs like bears get stuck near their movetarget so nav won't be done but it also won't be null
-        boolean stationaryNearMoveTarget = false;
-        if (this.getMoveGoal().getMoveTarget() != null) {
-            double distToMoveTarget = this.distanceToSqr(this.getMoveGoal().getMoveTarget().getCenter());
-            boolean stationary = this.getDeltaMovement().x == 0 || this.getDeltaMovement().z == 0;
-            stationaryNearMoveTarget = stationary && distToMoveTarget < 4;
-        }
-        return (this.getMoveGoal().getMoveTarget() == null || stationaryNearMoveTarget) &&
-                this.getFollowTarget() == null &&
-                idleAttacker &&
+        return HeroUnit.super.isIdle() &&
                 !isBlizzardInProgress() &&
                 !isFrostBlinkInProgress();
     }

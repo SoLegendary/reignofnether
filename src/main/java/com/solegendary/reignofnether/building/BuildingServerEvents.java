@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.ability.EquipAbility;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
@@ -18,6 +19,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
@@ -36,6 +38,7 @@ import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -509,10 +512,19 @@ public class BuildingServerEvents {
         if (building == null)
             return;
         if (building.isBuilt && !SandboxServer.isSandboxPlayer(playerName) &&
-            BuildingUtils.getTotalCompletedBuildingsOwned(false, building.ownerName) == 1)
+            BuildingUtils.getTotalCompletedBuildingsOwned(false, building.ownerName) == 1) {
+            HudClientboundPacket.showTempMessageI18n(playerName,"hud.helperbuttons.reignofnether.cancel.error");
             return;
-        if (building.getBuilding().capturable && !SandboxServer.isAnyoneASandboxPlayer())
+        }
+        if (building.getBuilding().capturable && !SandboxServer.isAnyoneASandboxPlayer()) {
+            HudClientboundPacket.showTempMessageI18n(playerName,"hud.helperbuttons.reignofnether.cancel.error");
             return;
+        }
+        NightSourceAddon nsa = building.getBuilding().getActiveAddon(NightSourceAddon.class);
+        if (nsa != null && nsa.getNightRange(building) > 0 && building.isBuilt && !SandboxServer.isAnyoneASandboxPlayer()) {
+            HudClientboundPacket.showTempMessageI18n(playerName,"hud.helperbuttons.reignofnether.cancel.error");
+            return;
+        }
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);

@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -58,6 +60,9 @@ public class ResourceSources {
     public static ResourceSource getFromBlockPos(BlockPos bp, Level level) {
         BlockState bs = level.getBlockState(bp);
         Block block = bs.getBlock();
+
+        if ((block == Blocks.FARMLAND || block == Blocks.SOUL_SAND) && !BuildingUtils.isPosInsideFarm(level.isClientSide, bp))
+            return null;
 
         for (List<ResourceSource> resourceSources : RESOURCE_BLOCK_LISTS)
             for (ResourceSource resourceSource : resourceSources)

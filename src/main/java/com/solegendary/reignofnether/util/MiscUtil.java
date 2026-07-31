@@ -23,6 +23,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.blocks.NightCircleMode;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
@@ -393,6 +394,10 @@ public class MiscUtil {
                     targetUnit.getOwnerName().equals(BloodMoon.ENEMY_NAME) &&
                     unitMob instanceof GhastUnit)
                 return false;
+
+            // don't target vanilla units of the same faction
+            if (!(targetEntity instanceof Unit) && NonUnitServerEvents.getNonUnitFaction(targetEntity) == ((Unit) unitMob).getFaction())
+                return false;
         }
 
         if (targetEntity instanceof Player player && (player.isCreative() || player.isSpectator()))
@@ -411,6 +416,8 @@ public class MiscUtil {
         }
         boolean isPassiveNonUnit = !(targetEntity instanceof Unit) &&
                 (targetEntity instanceof Animal || targetEntity instanceof AbstractFish || targetEntity instanceof Villager);
+
+
 
         // Checks if neutral units can be attacked based on neutralAggro flag and other conditions
         boolean canAttackNeutral =

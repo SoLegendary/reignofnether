@@ -37,7 +37,8 @@ public abstract class AbstractBridge extends Building {
     }
 
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName, boolean diagonal) {
-        BuildingPlacement placement = new BridgePlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level, diagonal), level, pos, rotation), this.isCapitol);
+        BuildingPlacement placement = new BridgePlacement(this, level, pos, rotation, ownerName,
+                BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level, diagonal), level, pos, rotation), this.isCapitol, diagonal);
         return placement;
     }
 

@@ -252,6 +252,15 @@ public class HudClientEvents {
         return name;
     }
 
+    public static void showTempMessageI18n(String msgKey) {
+        showTemporaryMessage(I18n.get(msgKey), TEMP_MSG_TICKS_MAX);
+    }
+
+    public static void showTempMessageI18n(String msgKey, int ticks) {
+        tempMsgTicksLeft = ticks;
+        tempMsg = I18n.get(msgKey);
+    }
+
     public static void showTemporaryMessage(String msg) {
         showTemporaryMessage(msg, TEMP_MSG_TICKS_MAX);
     }

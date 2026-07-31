@@ -799,6 +799,7 @@
     "hud.helperbuttons.reignofnether.select_all_military_units": "Select all military units",
     "hud.helperbuttons.reignofnether.select_all_military_units_shift": "(Shift-click to select only on screen)",
     "hud.helperbuttons.reignofnether.cancel": "Cancel",
+    "hud.helperbuttons.reignofnether.cancel.error": "Cannot delete this building",
 
     "hud.helperbuttons.reignofnether.beacon.beacon_level_title": "Beacon Level: %d/%d",
     "hud.helperbuttons.reignofnether.beacon.no_controller": "No one controls the beacon",
