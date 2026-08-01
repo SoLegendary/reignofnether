@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CallToArmsUnit;
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -95,6 +96,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
     Ability autocast;
 
+    private final HashMap<BlockPos, Building> queuedBuildings = new HashMap<>();
+    public HashMap<BlockPos, Building> getQueuedBuildings() { return queuedBuildings; }
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }

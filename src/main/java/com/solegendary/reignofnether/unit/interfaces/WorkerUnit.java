@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
@@ -7,12 +8,15 @@ import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Map;
 
 import static com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession.*;
 
@@ -21,6 +25,10 @@ public interface WorkerUnit {
     public BuildRepairGoal getBuildRepairGoal();
     public GatherResourcesGoal getGatherResourceGoal();
     public BlockState getReplantBlockState();
+
+    // buildings which are due to be placed but currently can't
+    // will be drawn with green highlight blocks until placed
+    public Map<BlockPos, Building> getQueuedBuildings();
 
     public static void tick(WorkerUnit unit) {
         BuildRepairGoal buildRepairGoal = unit.getBuildRepairGoal();
@@ -96,6 +104,7 @@ public interface WorkerUnit {
     public static void resetBehaviours(WorkerUnit unit) {
         unit.getBuildRepairGoal().stopBuilding();
         unit.getGatherResourceGoal().stopGathering();
+        unit.getQueuedBuildings().clear();
     }
 
     // only properly works serverside - clientside requires packet updates

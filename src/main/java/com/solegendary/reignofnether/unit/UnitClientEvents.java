@@ -724,7 +724,6 @@ public class UnitClientEvents {
                             e.getId() == MC.player.getId()
                 );
             }
-            BuildingClientEvents.isBuilt = false;
             lastLeftClickTime = System.currentTimeMillis();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {

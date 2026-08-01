@@ -72,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.isBridge;
 import static com.solegendary.reignofnether.hud.HudClientEvents.*;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 public class BuildingClientEvents {
@@ -102,24 +103,9 @@ public class BuildingClientEvents {
     private static Rotation buildingRotation = Rotation.NONE;
     private static Vec3i buildingDimensions = new Vec3i(0, 0, 0);
 
-    public static ArrayList<BuildingBlock> getBlocksToDraw() { return blocksToDraw; }
-
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long DOUBLE_CLICK_TIME_MS = 500;
 
-    public static boolean isBuilt = false;
-
-    // minimum % of blocks below a building that need to be supported by a solid block for it to be placeable
-    // 1 means you can't have any gaps at all, 0 means you can place buildings in mid-air
-    private static final float MIN_SUPPORTED_BLOCKS_PERCENT = 0.6f;
-
-    private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f; // piglin buildings must be build on at least 80%
-    // nether blocks
-
-    private static final int MIN_BRIDGE_SIZE = 10; // a bridge must have at least 10 blocks to be placeable
-    private static final float MIN_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.20f; // at least 20% of covered blocks must be
-    // liquid
-    private static final float MAX_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.95f; // at least 5% of covered blocks must be solid
 
 
     // can only be one preselected building as you can't box-select them like units
@@ -176,9 +162,6 @@ public class BuildingClientEvents {
         UnitClientEvents.clearSelectedUnits();
     }
 
-    private static boolean isBuildingToPlaceABridge() {
-        return buildingToPlace instanceof AbstractBridge;
-    }
 
     // switch to the building with the least production, so we can spread out production items
     public static void switchHudToIdlestBuilding() {
@@ -257,7 +240,10 @@ public class BuildingClientEvents {
         if (buildingToPlace == null)
             return;
 
-        boolean valid = isBuildingPlacementValid(originPos);
+        boolean valid = BuildingValidators.isBuildingPlacementValid(
+                MC.level, buildingToPlace, originPos, MC.player.getName().getString(), buildingRotation, buildingDimensions,
+                isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
+        );
 
         int minX = 999999;
         int minY = 999999;
@@ -268,8 +254,8 @@ public class BuildingClientEvents {
         ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
         var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         for (BuildingBlock block : blocksToDraw) {
-            if (buildingToPlace != null && isBuildingToPlaceABridge()
-                && MC.level != null && AbstractBridge.shouldCullBlock(originPos.offset(0, 1, 0), block, MC.level)) {
+            if (isBridge(buildingToPlace)
+                    && MC.level != null && AbstractBridge.shouldCullBlock(originPos.offset(0, 1, 0), block, MC.level)) {
                 continue;
             }
 
@@ -332,7 +318,7 @@ public class BuildingClientEvents {
         // highlight yellow if we are placing a portal on overworld terrain
         if (valid) {
             if (buildingToPlace instanceof PortalBasic &&
-                    !isOnNetherBlocks(blocksToDraw, originPos)) {
+                    !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos)) {
                 r = 0.5f;
                 g = 0.5f;
             }
@@ -354,241 +340,6 @@ public class BuildingClientEvents {
         MyRenderer.drawLineBox(matrix, aabb2, r, g, 0, 0.25f);
     }
 
-    public static boolean isBuildingPlacementValid(BlockPos originPos) {
-        return !isBuildingPlacementInAirOrOnIllegalBlocks(originPos) &&
-                !isBuildingPlacementClipping(originPos) &&
-                (!isOverlappingAnyOtherBuilding() || SandboxClientEvents.isSandboxPlayer()) &&
-                isNonPiglinOrOnNetherBlocks(originPos) &&
-                isNonBridgeOrValidBridge(originPos) &&
-                FogOfWarClientEvents.isInBrightChunk(originPos) &&
-                isBuildingPlacementWithinWorldBorder(originPos) &&
-                isNotTutorialOrNearValidCapitolPosition(originPos);
-    }
-
-    public static void checkBuildingPlacementValidityWithMessages(BlockPos originPos) {
-        if (!isBuildingPlacementWithinWorldBorder(originPos)) {
-            showTemporaryMessage(I18n.get("building.reignofnether.outside_map"));
-        } else if (isBuildingPlacementInAirOrOnIllegalBlocks(originPos)) {
-            showTemporaryMessage(I18n.get("building.reignofnether.ground_not_flat"));
-        } else if (isBuildingPlacementClipping(originPos)) {
-            showTemporaryMessage(I18n.get("building.reignofnether.ground_not_flat"));
-        } else if (isOverlappingAnyOtherBuilding() && !SandboxClientEvents.isSandboxPlayer()) {
-            showTemporaryMessage(I18n.get("building.reignofnether.too_close"));
-        } else if (!isNonPiglinOrOnNetherBlocks(originPos)) {
-            showTemporaryMessage(I18n.get("building.reignofnether.must_be_nether"));
-        } else if (!isNonBridgeOrValidBridge(originPos)) {
-            showTemporaryMessage(I18n.get("building.reignofnether.must_be_liquid"));
-        } else if (!FogOfWarClientEvents.isInBrightChunk(originPos)) {
-            showTemporaryMessage(I18n.get("building.reignofnether.unexplored"));
-        } else if (!isNotTutorialOrNearValidCapitolPosition(originPos)) {
-            showTemporaryMessage(I18n.get("building.reignofnether.build_centre_here"));
-            OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50);
-        }
-
-    }
-
-    // disallow any building block from clipping into any other existing blocks
-    private static boolean isBuildingPlacementClipping(BlockPos originPos) {
-        if (MC.level == null) {
-            return false;
-        }
-        if (isBuildingToPlaceABridge() || GameruleClient.slantedBuilding) {
-            return false;
-        }
-
-        for (BuildingBlock block : blocksToDraw) {
-            BlockPos bp = block.getBlockPos().offset(originPos).offset(0, 1, 0);
-            if ((MC.level.getBlockState(bp).isSolid() || !MC.level.getBlockState(bp).getFluidState().isEmpty()) && (block.getBlockState().isSolid() || !block.getBlockState().getFluidState().isEmpty())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // 90% all solid blocks at the base of the building must be on top of solid non-barrier blocks to be placeable
-    // excluding those under blocks which aren't solid anyway
-    private static boolean isBuildingPlacementInAirOrOnIllegalBlocks(BlockPos originPos) {
-        if (isBuildingToPlaceABridge() || GameruleClient.slantedBuilding) {
-            return false;
-        }
-        int solidBlocksBelow = 0;
-        int blocksBelow = 0;
-        for (BuildingBlock block : blocksToDraw) {
-            if (block.getBlockPos().getY() == 0 && MC.level != null) {
-                BlockPos bp = block.getBlockPos().offset(originPos).offset(0, 1, 0);
-                BlockState bs = block.getBlockState(); // building block
-                BlockState bsBelow = MC.level.getBlockState(bp.below()); // world block
-
-                if (bs.isSolid() && !(bsBelow.getBlock() instanceof IceBlock)) {
-                    blocksBelow += 1;
-                    if (bsBelow.isSolid() &&
-                            !(bsBelow.getBlock() instanceof LeavesBlock) &&
-                            !(bsBelow.getBlock() instanceof BarrierBlock) &&
-                            !(bsBelow.getBlock() instanceof SlabBlock && bsBelow.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.BOTTOM)) {
-                        solidBlocksBelow += 1;
-                    }
-                }
-            }
-        }
-        if (blocksBelow <= 0) {
-            return false; // avoid division by 0
-        }
-        return ((float) solidBlocksBelow / (float) blocksBelow) < MIN_SUPPORTED_BLOCKS_PERCENT;
-    }
-
-    // disallow the building borders from overlapping any other's, even if they don't collide physical blocks
-    // also allow for a 1 block gap between buildings so units can spawn and stairs don't have their blockstates
-    // messed up
-    private static boolean isOverlappingAnyOtherBuilding() {
-
-        BlockPos origin = getBuildingOriginPos(CursorClientEvents.getPreselectedBlockPos());
-        Vec3i originOffset = new Vec3i(origin.getX(), origin.getY(), origin.getZ());
-        BlockPos minPos = BuildingUtils.getMinCorner(blocksToDraw).offset(originOffset);//.offset(-1, -1, -1);
-        BlockPos maxPos = BuildingUtils.getMaxCorner(blocksToDraw).offset(originOffset);//.offset(1, 1, 1);
-
-        for (BuildingPlacement building : buildings) {
-            for (BuildingBlock block : building.blocks) {
-                if (isBuildingToPlaceABridge() && building.getBuilding() instanceof AbstractBridge) {
-                    continue;
-                }
-                BlockPos bp = block.getBlockPos();
-                if (bp.getX() >= minPos.getX() && bp.getX() <= maxPos.getX() && bp.getY() >= minPos.getY()
-                    && bp.getY() <= maxPos.getY() && bp.getZ() >= minPos.getZ() && bp.getZ() <= maxPos.getZ()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static boolean isNonPiglinOrOnNetherBlocks(BlockPos originPos) {
-        if (isBuildingToPlaceABridge()) {
-            return true;
-        }
-        boolean netherTerrainCustomBuilding = buildingToPlace instanceof CustomBuilding cb && cb.netherTerrainOnly;
-        if (!netherTerrainCustomBuilding && buildingToPlace.getFaction() != Faction.PIGLINS || buildingToPlace instanceof CentralPortal) {
-            return true;
-        }
-        if (buildingToPlace instanceof PortalBasic) {
-            return true;
-        }
-        return isOnNetherBlocks(blocksToDraw, originPos);
-    }
-
-    public static boolean isOnNetherBlocks(List<BuildingBlock> blocks, BlockPos originPos) {
-        int netherBlocksBelow = 0;
-        int blocksBelow = 0;
-        for (BuildingBlock block : blocks) {
-            if (block.getBlockPos().getY() == 0 && MC.level != null) {
-                BlockPos bp = block.getBlockPos().offset(originPos).offset(0, 1, 0);
-                BlockState bs = block.getBlockState(); // building block
-                if (bs.isSolid()) {
-                    blocksBelow += 1;
-                    if (NetherBlocks.isNetherBlock(MC.level, bp.below())) {
-                        netherBlocksBelow += 1;
-                    }
-                }
-            }
-        }
-        if (blocksBelow <= 0) {
-            return false; // avoid division by 0
-        }
-        return ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
-    }
-
-    // bridges should be connected to land or another bridge and be touching water
-    private static boolean isNonBridgeOrValidBridge(BlockPos originPos) {
-        if (!isBuildingToPlaceABridge()) {
-            return true;
-        }
-
-        int placeableBlocks = 0;
-        for (BuildingBlock block : blocksToDraw)
-            if (!AbstractBridge.shouldCullBlock(originPos.offset(0, 1, 0), block, MC.level) && !block.getBlockState()
-                .isAir()) {
-                placeableBlocks += 1;
-            }
-        if (placeableBlocks < MIN_BRIDGE_SIZE) {
-            return false;
-        }
-
-        int bridgeBlocks = 0;
-        int waterBlocksClipping = 0;
-        for (BuildingBlock block : blocksToDraw) {
-            if (block.getBlockState().isAir()) {
-                continue;
-            }
-            if (MC.level != null) {
-                BlockPos bp = block.getBlockPos().offset(originPos).offset(0, 1, 0);
-                BlockState bs = block.getBlockState(); // building block
-                BlockState bsWorld = MC.level.getBlockState(bp); // world block
-
-                // top y level should not be touching any water at all
-                if (block.getBlockPos().getY() == 1) {
-                    if ((bs.getBlock() instanceof FenceBlock) && !bsWorld.getFluidState().isEmpty()) {
-                        return false;
-                    }
-                }
-
-                if (block.getBlockPos().getY() == 0) {
-                    bridgeBlocks += 1;
-                    if (!bsWorld.getFluidState().isEmpty() || bsWorld.getBlock() instanceof SeagrassBlock
-                        || bsWorld.getBlock() instanceof KelpBlock) {
-                        waterBlocksClipping += 1;
-                    }
-                }
-            }
-        }
-        if (bridgeBlocks <= 0) {
-            return false; // avoid division by 0
-        }
-        float percentWater = (float) waterBlocksClipping / (float) bridgeBlocks;
-        return percentWater > MIN_BRIDGE_LIQUID_BLOCKS_PERCENT && percentWater < MAX_BRIDGE_LIQUID_BLOCKS_PERCENT;
-    }
-
-    private static boolean isNotTutorialOrNearValidCapitolPosition(BlockPos originPos) {
-        if (!TutorialClientEvents.isEnabled()) {
-            return true;
-        }
-
-        if (!(buildingToPlace instanceof TownCentre)) {
-            return true;
-        }
-
-        return TutorialClientEvents.BUILD_CAPITOL_POS.distSqr(originPos) < 625; // 25 block range
-    }
-
-    private static boolean isBuildingPlacementWithinWorldBorder(BlockPos originPos) {
-        if (MC.level == null || buildingToPlace == null)
-            return false;
-        if (GameruleClient.buildingsOutsideBorder)
-            return true;
-
-        int minX = 999999;
-        int minZ = 999999;
-        int maxX = -999999;
-        int maxZ = -999999;
-        for (BuildingBlock block : blocksToDraw) {
-            var bp = block.getBlockPos();
-            if (bp.getX() < minX) {
-                minX = bp.getX();
-            }
-            if (bp.getZ() < minZ) {
-                minZ = bp.getZ();
-            }
-            if (bp.getX() > maxX) {
-                maxX = bp.getX();
-            }
-            if (bp.getZ() > maxZ) {
-                maxZ = bp.getZ();
-            }
-        }
-        int buildingRadius = Math.max(maxZ - minZ, maxX - minX) / 2;
-
-        BlockPos cursorPos = CursorClientEvents.getPreselectedBlockPos();
-        return MC.level.getWorldBorder().getDistanceToBorder(cursorPos.getX(), cursorPos.getZ()) > buildingRadius;
-    }
-
     /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
@@ -601,37 +352,6 @@ public class BuildingClientEvents {
     }
      */
 
-    // gets the cursor position rotated according to the preselected building
-    public static BlockPos getBuildingOriginPos(BlockPos bp) {
-        int xAdj = 0;
-        int zAdj = 0;
-        int xRadius = buildingDimensions.getX() / 2;
-        int zRadius = buildingDimensions.getZ() / 2;
-
-        switch (buildingRotation) {
-            case NONE -> {
-                xAdj = -xRadius;
-                zAdj = -zRadius;
-            }
-            case CLOCKWISE_90 -> {
-                xAdj = xRadius;
-                zAdj = -zRadius;
-            }
-            case CLOCKWISE_180 -> {
-                xAdj = xRadius;
-                zAdj = zRadius;
-            }
-            case COUNTERCLOCKWISE_90 -> {
-                xAdj = -xRadius;
-                zAdj = zRadius;
-            }
-        }
-        if (isBuildingToPlaceABridge()) {
-            bp = bp.offset(0, -1, 0);
-        }
-
-        return bp.offset(xAdj, 0, zAdj);
-    }
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) throws NoSuchFieldException {
@@ -642,7 +362,11 @@ public class BuildingClientEvents {
             return;
         }
 
-        drawBuildingToPlace(evt.getPoseStack(), getBuildingOriginPos(CursorClientEvents.getPreselectedBlockPos()), 0);
+        drawBuildingToPlace(
+                evt.getPoseStack(),
+                BuildingUtils.getBuildingOriginPos(CursorClientEvents.getPreselectedBlockPos(), isBridge(buildingToPlace), buildingRotation, buildingDimensions),
+                0
+        );
 
         BuildingPlacement preselectedBuilding = getPreselectedBuilding();
 
@@ -776,13 +500,19 @@ public class BuildingClientEvents {
             return;
         }
 
-        BlockPos pos = getBuildingOriginPos(CursorClientEvents.getPreselectedBlockPos());
+        BlockPos pos = BuildingUtils.getBuildingOriginPos(CursorClientEvents.getPreselectedBlockPos(), isBridge(buildingToPlace), buildingRotation, buildingDimensions);
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             BuildingPlacement preSelBuilding = getPreselectedBuilding();
 
+            String errorMsgKey = BuildingValidators.getBuildingPlacementValidityError(
+                    MC.level, buildingToPlace, CursorClientEvents.getPreselectedBlockPos(), MC.player.getName().getString(),
+                    buildingRotation, buildingDimensions, isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
+            );
+            boolean valid = errorMsgKey == null;
+
             // place a new building
-            if (buildingToPlace != null && isBuildingPlacementValid(pos) && MC.player != null) {
+            if (buildingToPlace != null && valid && MC.player != null) {
                 Building building = buildingToPlace;
 
                 ArrayList<Integer> builderIds = new ArrayList<>();
@@ -802,7 +532,7 @@ public class BuildingClientEvents {
                         ownerName = "Enemy";
 
                     BuildingServerboundPacket.placeAndQueueBuilding(building,
-                        isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
+                        BuildingUtils.isBridge(buildingToPlace) && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
                         buildingRotation,
                         hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : ownerName,
                         ids,
@@ -842,14 +572,13 @@ public class BuildingClientEvents {
                         builderArray[i] = builderIds.get(i);
                     }
                     BuildingServerboundPacket.placeBuilding(buildingToPlace,
-                        isBuildingToPlaceABridge() && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
+                        isBridge(buildingToPlace) && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
                         buildingRotation,
                         hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : ownerName,
                         builderArray,
                         isBridgeDiagonal()
                     );
                     setBuildingToPlace(null);
-                    isBuilt = true;
 
                     if (hasSelectedWorkers) {
                         for (LivingEntity entity : getSelectedUnits()) {
@@ -907,8 +636,8 @@ public class BuildingClientEvents {
                         addSelectedBuilding(preSelBuilding);
                     }
                 }
-            } else {
-                checkBuildingPlacementValidityWithMessages(pos);
+            } else if (errorMsgKey != null) {
+                showTemporaryMessage(I18n.get(errorMsgKey));
             }
 
             // deselect any non-owned buildings if we managed to select them with owned buildings

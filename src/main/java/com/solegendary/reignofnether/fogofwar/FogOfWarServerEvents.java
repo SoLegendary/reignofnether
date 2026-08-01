@@ -118,6 +118,15 @@ public class FogOfWarServerEvents {
         return set != null && set.contains(pos);
     }
 
+    public static boolean isBlockVisibleFor(String playerName, int x, int z) {
+        if (serverLevel == null)
+            return false;
+        for (ServerPlayer sp : serverLevel.players())
+            if (sp.getName().getString().equals(playerName))
+                return isBlockVisibleFor(sp, x, z);
+        return false;
+    }
+
     // Block-level visibility for entity gating: live chunk -> visible; edge chunk -> covered-column bit; else
     // hidden. Lets enemy units hide exactly at the circle instead of one whole chunk out.
     public static boolean isBlockVisibleFor(ServerPlayer player, int x, int z) {

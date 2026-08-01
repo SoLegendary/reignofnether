@@ -896,28 +896,4 @@ public class BuildingServerEvents {
             }
         }
     }
-
-    private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f;
-
-    public static boolean isOnNetherBlocks(List<BuildingBlock> blocks, BlockPos originPos, ServerLevel level) {
-        int netherBlocksBelow = 0;
-        int blocksBelow = 0;
-        for (BuildingBlock block : blocks) {
-            if (block.getBlockPos().getY() == originPos.getY() + 1 && level != null) {
-                BlockPos bp = block.getBlockPos();
-                BlockState bs = block.getBlockState(); // building block
-
-                if (bs.isSolid()) {
-                    blocksBelow += 1;
-                    if (NetherBlocks.isNetherBlock(level, bp.below())) {
-                        netherBlocksBelow += 1;
-                    }
-                }
-            }
-        }
-        if (blocksBelow <= 0) {
-            return false; // avoid division by 0
-        }
-        return ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
-    }
 }
