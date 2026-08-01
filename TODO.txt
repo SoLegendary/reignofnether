@@ -9,7 +9,6 @@
 
 Fog of war
 ----------
-[❌] Allow queueing of placements in fog
 [❌] Show neutral units and buildings on minimap
     - Last known position only
 
@@ -26,7 +25,7 @@ Fog of war
     - wolves for villagers, zombie horse for monsters, striders for piglins
 
 
-Fog building queueing:
+[❌] Fog building queueing:
     - if the placement is in fog, then instead of attempting to place it immediately:
         1. Persist the blocks to draw
         2. Move the worker to the position

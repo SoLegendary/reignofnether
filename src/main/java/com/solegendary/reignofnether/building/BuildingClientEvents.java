@@ -232,6 +232,11 @@ public class BuildingClientEvents {
         }
     }
 
+    public static void drawBuildingToPlace(PoseStack matrix, int forceColour) {
+        BlockPos bp = BuildingUtils.getBuildingOriginPos(CursorClientEvents.getPreselectedBlockPos(), isBridge(buildingToPlace), buildingRotation, buildingDimensions);
+        drawBuildingToPlace(matrix, bp, forceColour);
+    }
+
     // draws the building with a green/red overlay (based on placement validity) at the target position
     // based on whether the location is valid or not
     // location should be 1 space above the selected spot

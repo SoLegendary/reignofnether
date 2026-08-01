@@ -183,7 +183,7 @@ public class StartPosClientEvents {
                 int forceColour = 2;
                 if (startPos.playerName.equals(MC.player.getName().getString()))
                     forceColour = 1;
-                BuildingClientEvents.drawBuildingToPlace(evt.getPoseStack(), BuildingClientEvents.getBuildingOriginPos(startPos.pos), forceColour);
+                BuildingClientEvents.drawBuildingToPlace(evt.getPoseStack(), forceColour);
                 BuildingClientEvents.setBuildingToPlace(null);
             }
         }
