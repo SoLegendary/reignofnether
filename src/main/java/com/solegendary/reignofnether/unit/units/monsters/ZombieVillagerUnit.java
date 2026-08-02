@@ -2,8 +2,9 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
@@ -43,7 +44,6 @@ import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -73,8 +73,10 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
 
     Ability autocast;
 
-    private final HashMap<BlockPos, Building> queuedBuildings = new HashMap<>();
-    public HashMap<BlockPos, Building> getQueuedBuildings() { return queuedBuildings; }
+    private final ArrayList<BuildingPlacement> fogQueuedBuildings = new ArrayList<>();
+    public ArrayList<BuildingPlacement> getFogQueuedBuildings() { return fogQueuedBuildings; }
+    private final Map<BlockPos, List<BuildingBlock>> fogQueuedBlocksToDraw = new HashMap<>();
+    public Map<BlockPos, List<BuildingBlock>> getFogQueuedBlocksToDraw() { return fogQueuedBlocksToDraw; }
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }

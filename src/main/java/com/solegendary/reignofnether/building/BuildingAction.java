@@ -6,7 +6,6 @@ public enum BuildingAction {
     PLACE_AND_QUEUE, // PLACE but add to the worker's queue action
     PLACE_CUSTOM, // custom building; itemName == structure name instead of a building registry key
     PLACE_AND_QUEUE_CUSTOM,
-    PLACE_IN_FOG, // when placing a building in fog, foundations aren't placed (PLACE) until the area is visible
     DESTROY, // WIP building cancelled by owner or destroyed by someone
     REMOVE, // removes a building withouit destroying its blocks
     SYNC_BLOCKS_AND_OWNER, // sync client building health with server (client doesn't always have the blocks loaded to check natively)

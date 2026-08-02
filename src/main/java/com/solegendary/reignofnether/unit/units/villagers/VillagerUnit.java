@@ -7,7 +7,9 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CallToArmsUnit;
 import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
@@ -72,6 +74,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession.*;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -96,8 +99,10 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
     Ability autocast;
 
-    private final HashMap<BlockPos, Building> queuedBuildings = new HashMap<>();
-    public HashMap<BlockPos, Building> getQueuedBuildings() { return queuedBuildings; }
+    private final ArrayList<BuildingPlacement> fogQueuedBuildings = new ArrayList<>();
+    public ArrayList<BuildingPlacement> getFogQueuedBuildings() { return fogQueuedBuildings; }
+    private final Map<BlockPos, List<BuildingBlock>> fogQueuedBlocksToDraw = new HashMap<>();
+    public Map<BlockPos, List<BuildingBlock>> getFogQueuedBlocksToDraw() { return fogQueuedBlocksToDraw; }
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }

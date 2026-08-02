@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
-import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
@@ -14,8 +15,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession.*;
@@ -26,9 +30,10 @@ public interface WorkerUnit {
     public GatherResourcesGoal getGatherResourceGoal();
     public BlockState getReplantBlockState();
 
-    // buildings which are due to be placed but currently can't
-    // will be drawn with green highlight blocks until placed
-    public Map<BlockPos, Building> getQueuedBuildings();
+    // buildings which are due to be placed but currently can't due to fog, will be placed once discovered
+    public ArrayList<BuildingPlacement> getFogQueuedBuildings(); // serverside only
+    // drawn with green highlight blocks until placed
+    public Map<BlockPos, List<BuildingBlock>> getFogQueuedBlocksToDraw(); // clientside rendering only
 
     public static void tick(WorkerUnit unit) {
         BuildRepairGoal buildRepairGoal = unit.getBuildRepairGoal();
@@ -104,7 +109,8 @@ public interface WorkerUnit {
     public static void resetBehaviours(WorkerUnit unit) {
         unit.getBuildRepairGoal().stopBuilding();
         unit.getGatherResourceGoal().stopGathering();
-        unit.getQueuedBuildings().clear();
+        unit.getFogQueuedBuildings().clear();
+        unit.getFogQueuedBlocksToDraw().clear();
     }
 
     // only properly works serverside - clientside requires packet updates

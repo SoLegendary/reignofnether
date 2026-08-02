@@ -34,7 +34,9 @@ Fog of war
             - Error if no resources available or otherwise is invalid
         4. Allow shift-queueing
     - save as list<BlockPos, Building> in workers
-
+    [❌] shift-queueing
+    [❌] tutorial move cam command
+    [🟡] Test all validity conditions
 
 
 Slime rolling

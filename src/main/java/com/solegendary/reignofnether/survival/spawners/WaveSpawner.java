@@ -200,7 +200,9 @@ public class WaveSpawner {
                 ENEMY_OWNER_NAME,
                 new int[] {},
                 false,
-                false
+                false,
+                true,
+                true
         );
         if (placement != null)
             placement.selfBuilding = true;

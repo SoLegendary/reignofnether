@@ -518,7 +518,7 @@ public class PlayerServerEvents {
                     for (int i = 0; i < workers.size(); i++) {
                         workerIds[i] = workers.get(i).getId();
                     }
-                    BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, playerName, workerIds, false, false);
+                    BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, playerName, workerIds, false, false, true, true);
                     PlayerClientboundPacket.teleport(playerName, BlockPos.containing(pos));
                 }
                 for (RTSPlayer rtsPlayer : rtsPlayers) {

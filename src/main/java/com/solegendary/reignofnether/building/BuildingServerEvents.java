@@ -18,9 +18,9 @@ import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuild
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
-import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -38,7 +38,6 @@ import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -57,13 +56,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.TntBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.event.entity.item.ItemEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -285,101 +282,127 @@ public class BuildingServerEvents {
 
     @Nullable
     public static BuildingPlacement placeBuilding(
-            Building building,
-            BlockPos pos,
-            Rotation rotation,
-            String ownerName,
-            int[] builderUnitIds,
-            boolean queue,
-            boolean isDiagonalBridge
-    ) {
-        return placeBuilding(building, pos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, false);
-    }
-
-    @Nullable
-    public static BuildingPlacement placeBuilding(
         Building building,
-        BlockPos pos,
+        BlockPos originPos,
         Rotation rotation,
         String ownerName,
         int[] builderUnitIds,
-        boolean queue,
+        boolean queue, // shift-queue the building for assigned workers
         boolean isDiagonalBridge,
-        boolean fromCommand // ignore resources, terrain or any other restrictions and self-build
+        boolean fromCommand, // ignore resources, terrain or any other restrictions and self-build
+        boolean ignoreFog
     ) {
         if (serverLevel == null)
             return null;
 
         BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
             serverLevel,
-            pos,
+            originPos,
             rotation,
             ownerName,
             isDiagonalBridge
         );
         boolean buildingExists = false;
         for (BuildingPlacement placement : buildings) {
-            if (placement.originPos.equals(pos)) {
+            if (placement.originPos.equals(originPos)) {
                 buildingExists = true;
                 break;
             }
         }
         if (newBuilding != null && !buildingExists) {
-            // Handle special building (Iron Golem)
-            if (newBuilding.getBuilding() instanceof IronGolemBuilding) {
-                int currentPop = UnitServerEvents.getCurrentPopulation(ownerName);
-                int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 
-                boolean canAffordPop = false;
-                for (Resources resources : ResourcesServerEvents.resourcesList) {
-                    if (resources.ownerName.equals(ownerName)
-                         && (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply) {
-                        canAffordPop = true;
-                        break;
+            boolean isSandbox = false;// SandboxServer.isAnyoneASandboxPlayer();
+            if (!fromCommand && !isSandbox && !BuildingValidators.isInBrightChunk(serverLevel, newBuilding.centrePos, ownerName) && !ignoreFog) {
+                for (int id : builderUnitIds) {
+                    Entity entity = serverLevel.getEntity(id);
+                    if (entity instanceof WorkerUnit workerUnit) {
+                        if (!queue) {
+                            Unit.fullResetBehaviours((Unit) entity);
+                        }
+                        workerUnit.getFogQueuedBuildings().add(newBuilding);
                     }
                 }
-
-                if (!canAffordPop && !fromCommand) {
-                    ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                actionFogQueuedBuildings();
+                return null;
+            } else {
+                String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, building, originPos, ownerName, isDiagonalBridge, isSandbox, true);
+                if (errorMsgKey != null) {
+                    HudClientboundPacket.showTempMessageI18n(ownerName, errorMsgKey);
+                    if (errorMsgKey.equals("building.reignofnether.build_centre_here")) {
+                        //OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50); // TODO: clientbound packet
+                    }
                     return null;
                 }
             }
+            return placeBuilding(newBuilding, originPos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, fromCommand);
+        }
+        return null;
+    }
 
-            if (fromCommand || newBuilding.canAfford(ownerName)) {
-                if (fromCommand ||
+    private static BuildingPlacement placeBuilding(
+        BuildingPlacement newBuilding,
+        BlockPos originPos,
+        Rotation rotation,
+        String ownerName,
+        int[] builderUnitIds,
+        boolean queue, // shift-queue the building for assigned workers
+        boolean isDiagonalBridge,
+        boolean fromCommand // ignore resources, terrain or any other restrictions and self-build
+    ) {
+        // Handle special building (Iron Golem)
+        if (newBuilding.getBuilding() instanceof IronGolemBuilding) {
+            int currentPop = UnitServerEvents.getCurrentPopulation(ownerName);
+            int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
+
+            boolean canAffordPop = false;
+            for (Resources resources : ResourcesServerEvents.resourcesList) {
+                if (resources.ownerName.equals(ownerName)
+                        && (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply) {
+                    canAffordPop = true;
+                    break;
+                }
+            }
+            if (!canAffordPop && !fromCommand) {
+                ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                return null;
+            }
+        }
+
+        if (fromCommand || newBuilding.canAfford(ownerName)) {
+            if (fromCommand ||
                     (serverLevel.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get() &&
-                    !(newBuilding.getBuilding() instanceof AbstractBridge))) {
-                    BuildingUtils.clearBuildingArea(newBuilding);
+                            !(newBuilding.getBuilding() instanceof AbstractBridge))) {
+                BuildingUtils.clearBuildingArea(newBuilding);
+            }
+            buildings.add(newBuilding);
+            newBuilding.forceChunk(true);
+            int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
+
+            if (!(newBuilding.getBuilding() instanceof AbstractBridge))
+                for (BuildingBlock block : newBuilding.blocks)
+                    if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
+                        placeScaffoldingUnder(block, newBuilding);
+
+            boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(ownerName, "warpten");
+            if (SandboxServer.isAnyoneASandboxPlayer() && hasFastBuildCheat) {
+                newBuilding.maxBlocksPerTick = 4;
+                newBuilding.queueAllBlocks(serverLevel);
+            } else {
+                // speed up first capitol
+                if (newBuilding.isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0) {
+                    newBuilding.blocksPerBuild = 2;
+                    newBuilding.maxBlocksPerTick = 2;
                 }
-                buildings.add(newBuilding);
-                newBuilding.forceChunk(true);
-                int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
-
-                if (!(newBuilding.getBuilding() instanceof AbstractBridge))
-                    for (BuildingBlock block : newBuilding.blocks)
-                        if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
-                            placeScaffoldingUnder(block, newBuilding);
-
-                boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(ownerName, "warpten");
-                if (SandboxServer.isAnyoneASandboxPlayer() && hasFastBuildCheat) {
-                    newBuilding.maxBlocksPerTick = 4;
-                    newBuilding.queueAllBlocks(serverLevel);
-                } else {
-                    // speed up first capitol
-                    if (newBuilding.isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0) {
-                        newBuilding.blocksPerBuild = 2;
-                        newBuilding.maxBlocksPerTick = 2;
-                    }
-                    for (BuildingBlock block : newBuilding.blocks) {
-                        if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
-                                && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
-                            newBuilding.addToBlockPlaceQueue(block);
-                        }
+                for (BuildingBlock block : newBuilding.blocks) {
+                    if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
+                            && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
+                        newBuilding.addToBlockPlaceQueue(block);
                     }
                 }
+            }
 
-                BuildingClientboundPacket.placeBuilding(pos,
-                    building,
+            BuildingClientboundPacket.placeBuilding(originPos,
+                    newBuilding.getBuilding(),
                     rotation,
                     newBuilding.getBuilding() instanceof AbstractBridge ? "" : ownerName,
                     -1,
@@ -388,41 +411,40 @@ public class BuildingServerEvents {
                     0,
                     false,
                     PortalPlacement.PortalType.BASIC,
-                    pos,
+                    originPos,
                     false
-                );
-                if (!fromCommand) {
-                    ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
-                            -newBuilding.getBuilding().cost.food,
-                            -newBuilding.getBuilding().cost.wood,
-                            -newBuilding.getBuilding().cost.ore
-                    ));
-                }
+            );
+            if (!fromCommand) {
+                ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
+                        -newBuilding.getBuilding().cost.food,
+                        -newBuilding.getBuilding().cost.wood,
+                        -newBuilding.getBuilding().cost.ore
+                ));
+            }
 
-                if (SandboxServer.isAnyoneASandboxPlayer() && (ownerName.isEmpty() || ownerName.equals("Enemy")))
-                    newBuilding.selfBuilding = true;
+            if (SandboxServer.isAnyoneASandboxPlayer() && (ownerName.isEmpty() || ownerName.equals("Enemy")))
+                newBuilding.selfBuilding = true;
 
-                assignBuilderUnits(builderUnitIds, queue, newBuilding);
+            assignBuilderUnits(builderUnitIds, queue, newBuilding);
 
-                for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
-                    if (entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
+            for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
+                if (entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
                         newBuilding.isPosInsideBuilding(entity.getOnPos().above().above()) &&
                         (unit.getMoveGoal().getMoveTarget() == null ||
-                         newBuilding.isPosInsideBuilding(unit.getMoveGoal().getMoveTarget()))) {
-                        moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
-                    }
+                                newBuilding.isPosInsideBuilding(unit.getMoveGoal().getMoveTarget()))) {
+                    moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
                 }
-                if (newBuilding.getBuilding() instanceof AbstractBridge)
-                    newBuilding.ownerName = "";
-
-            } else if (!PlayerServerEvents.isBot(ownerName)) {
-                warnInsufficientResources(newBuilding);
             }
-            if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
-                newBuilding.getBuilding().shouldDestroyOnReset = false;
-                saveBuildings(serverLevel);
-            }
+            if (newBuilding.getBuilding() instanceof AbstractBridge)
+                newBuilding.ownerName = "";
             return newBuilding;
+
+        } else if (!PlayerServerEvents.isBot(ownerName)) {
+            warnInsufficientResources(newBuilding);
+        }
+        if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
+            newBuilding.getBuilding().shouldDestroyOnReset = false;
+            saveBuildings(serverLevel);
         }
         return null;
     }
@@ -737,6 +759,32 @@ public class BuildingServerEvents {
                     if (popSupply > currentPop)
                         gy.releaseNextUnit();
                 }
+            }
+        }
+
+        if (serverLevel.getServer().getTickCount() % 10 == 0) {
+            actionFogQueuedBuildings();
+        }
+    }
+
+    private static void actionFogQueuedBuildings() {
+        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+            ArrayList<BuildingPlacement> placedBpls = new ArrayList<>();
+            if (le instanceof WorkerUnit workerUnit) {
+                Unit unit = (Unit) workerUnit;
+                if (!workerUnit.getFogQueuedBuildings().isEmpty()) {
+                    BuildingPlacement bpl = workerUnit.getFogQueuedBuildings().get(0);
+                    if (FogOfWarServerEvents.isBlockVisibleFor(unit.getOwnerName(), bpl.centrePos.getX(), bpl.centrePos.getZ())) {
+                        BuildingPlacement placedBpl = placeBuilding(bpl, bpl.originPos, bpl.rotation, bpl.ownerName, new int[] {le.getId()}, false, bpl.isDiagonalBridge, false);
+                        if (placedBpl != null) {
+                            placedBpls.add(placedBpl);
+                            assignBuilderUnits(new int[] {le.getId()}, true, bpl);
+                        }
+                    } else if (unit.isIdle()) {
+                        unit.getMoveGoal().setMoveTarget(bpl.centrePos);
+                    }
+                }
+                workerUnit.getFogQueuedBuildings().removeAll(placedBpls);
             }
         }
     }

@@ -7,13 +7,11 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
-import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
-import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
@@ -22,20 +20,17 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -57,8 +52,6 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -68,10 +61,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getBuildingOriginPos;
 import static com.solegendary.reignofnether.building.BuildingUtils.isBridge;
 import static com.solegendary.reignofnether.hud.HudClientEvents.*;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
@@ -105,8 +98,6 @@ public class BuildingClientEvents {
 
     private static long lastLeftClickTime = 0; // to track double clicks
     private static final long DOUBLE_CLICK_TIME_MS = 500;
-
-
 
     // can only be one preselected building as you can't box-select them like units
     public static BuildingPlacement  getPreselectedBuilding() {
@@ -202,6 +193,10 @@ public class BuildingClientEvents {
             }
             lastBuildingToPlace = buildingToPlace; // avoid loading the same data twice unnecessarily
         }
+        if (buildingToPlace == null) {
+            blocksToDraw.clear();
+            lastBuildingToPlace = null;
+        }
     }
 
     public static Building getBuildingToPlace() {
@@ -245,8 +240,8 @@ public class BuildingClientEvents {
         if (buildingToPlace == null)
             return;
 
-        boolean valid = BuildingValidators.isBuildingPlacementValid(
-                MC.level, buildingToPlace, originPos, MC.player.getName().getString(), buildingRotation, buildingDimensions,
+        boolean valid = BuildingValidators.isPlacementValid(
+                MC.level, buildingToPlace, originPos, MC.player.getName().getString(),
                 isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
         );
 
@@ -273,7 +268,7 @@ public class BuildingClientEvents {
             matrix.pushPose();
             Entity cam = MC.cameraEntity;
             matrix.translate( // bp is center of block whereas render is corner, so offset by 0.5
-                bp.getX() - cam.getX(), bp.getY() - cam.getY() - 0.6, bp.getZ() - cam.getZ());
+                    bp.getX() - cam.getX(), bp.getY() - cam.getY() - 0.6, bp.getZ() - cam.getZ());
 
             int overlayColour = valid ? OverlayTexture.pack(0, 0) : OverlayTexture.pack(0, 3);
             if (forceColour == 1) {
@@ -282,14 +277,14 @@ public class BuildingClientEvents {
                 overlayColour = OverlayTexture.pack(0, 3);
             }
             renderer.renderSingleBlock(bs,
-                matrix,
-                MC.renderBuffers().crumblingBufferSource(),
-                // don't render over other stuff
-                15728880,
-                // red if invalid, else green
-                overlayColour,
-                net.minecraftforge.client.model.data.ModelData.EMPTY,
-                null
+                    matrix,
+                    MC.renderBuffers().crumblingBufferSource(),
+                    // don't render over other stuff
+                    15728880,
+                    // red if invalid, else green
+                    overlayColour,
+                    net.minecraftforge.client.model.data.ModelData.EMPTY,
+                    null
             );
 
             matrix.popPose();
@@ -345,6 +340,69 @@ public class BuildingClientEvents {
         MyRenderer.drawLineBox(matrix, aabb2, r, g, 0, 0.25f);
     }
 
+    public static void drawBuilding(List<BuildingBlock> blocks, PoseStack matrix, BlockPos originPos, int forceColour) {
+        int minX = 999999;
+        int minY = 999999;
+        int minZ = 999999;
+        int maxX = -999999;
+        int maxY = -999999;
+        int maxZ = -999999;
+
+        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
+
+        for (BuildingBlock block : blocks) {
+            BlockRenderDispatcher renderer = MC.getBlockRenderer();
+            BlockState bs = block.getBlockState();
+            BlockPos bp = block.getBlockPos().offset(originPos);
+            matrix.pushPose();
+            Entity cam = MC.cameraEntity;
+            matrix.translate( // bp is center of block whereas render is corner, so offset by 0.5
+                    bp.getX() - cam.getX(), bp.getY() - cam.getY() - 0.6, bp.getZ() - cam.getZ());
+
+            renderer.renderSingleBlock(bs,
+                    matrix,
+                    MC.renderBuffers().crumblingBufferSource(),
+                    // don't render over other stuff
+                    15728880,
+                    OverlayTexture.pack(0, 0),
+                    net.minecraftforge.client.model.data.ModelData.EMPTY,
+                    null
+            );
+            matrix.popPose();
+        }
+
+
+        // draw placement outline below
+        maxX += 1;
+        minY += 1.05f;
+        maxZ += 1;
+
+        float r = 0;
+        float g = 1.0f;
+        // highlight yellow if we are placing a portal on overworld terrain
+        if (buildingToPlace instanceof PortalBasic &&
+                !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos)) {
+            r = 0.5f;
+            g = 0.5f;
+        }
+        if (forceColour == 1) {
+            r = 0;
+            g = 1;
+        } else if (forceColour == 2) {
+            r = 1;
+            g = 0;
+        }
+        if (minY < 0) {
+            minY -= 1;
+        }
+        AABB aabb = new AABB(minX, minY, minZ, maxX, minY, maxZ);
+        MyRenderer.drawLineBox(matrix, aabb, r, g, 0, 0.5f);
+        MyRenderer.drawSolidBox(matrix, vertexConsumer, aabb, Direction.UP, r, g, 0, 0.5f, rl);
+        AABB aabb2 = new AABB(minX, -64, minZ, maxX, minY, maxZ);
+        MyRenderer.drawLineBox(matrix, aabb2, r, g, 0, 0.25f);
+    }
+
     /*
     @SubscribeEvent
     public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
@@ -372,6 +430,20 @@ public class BuildingClientEvents {
                 BuildingUtils.getBuildingOriginPos(CursorClientEvents.getPreselectedBlockPos(), isBridge(buildingToPlace), buildingRotation, buildingDimensions),
                 0
         );
+
+        Map<BlockPos, List<BuildingBlock>> fogBlocksToDraw = new HashMap<>();
+        for (LivingEntity le : UnitClientEvents.getAllUnits()) {
+            if (le instanceof Unit unit && le instanceof WorkerUnit workerUnit &&
+                MC.player != null && unit.getOwnerName().equals(MC.player.getName().getString()))
+            {
+                workerUnit.getFogQueuedBlocksToDraw().keySet().removeIf(bp -> buildings.stream().map(b -> b.originPos).toList().contains(bp));
+                for (BlockPos pos : workerUnit.getFogQueuedBlocksToDraw().keySet())
+                    fogBlocksToDraw.put(pos, workerUnit.getFogQueuedBlocksToDraw().get(pos));
+            }
+        }
+        for (BlockPos pos : fogBlocksToDraw.keySet()) {
+            drawBuilding(fogBlocksToDraw.get(pos), evt.getPoseStack(), pos, 1);
+        }
 
         BuildingPlacement preselectedBuilding = getPreselectedBuilding();
 
@@ -495,7 +567,7 @@ public class BuildingClientEvents {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled()) {
+        if (!OrthoviewClientEvents.isEnabled() || MC.level == null || MC.player == null) {
             return;
         }
 
@@ -505,16 +577,17 @@ public class BuildingClientEvents {
             return;
         }
 
-        BlockPos pos = BuildingUtils.getBuildingOriginPos(CursorClientEvents.getPreselectedBlockPos(), isBridge(buildingToPlace), buildingRotation, buildingDimensions);
+        BlockPos preSelPos = CursorClientEvents.getPreselectedBlockPos();
+        BlockPos originPos = BuildingUtils.getBuildingOriginPos(preSelPos, isBridge(buildingToPlace), buildingRotation, buildingDimensions);
 
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             BuildingPlacement preSelBuilding = getPreselectedBuilding();
 
-            String errorMsgKey = BuildingValidators.getBuildingPlacementValidityError(
-                    MC.level, buildingToPlace, CursorClientEvents.getPreselectedBlockPos(), MC.player.getName().getString(),
-                    buildingRotation, buildingDimensions, isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
+            String errorMsgKey = BuildingValidators.getPlacementValidityError(
+                    MC.level, buildingToPlace, originPos, MC.player.getName().getString(), isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
             );
             boolean valid = errorMsgKey == null;
+            boolean inFog = !BuildingValidators.isInBrightChunk(MC.level, preSelPos, MC.player.getName().getString());
 
             // place a new building
             if (buildingToPlace != null && valid && MC.player != null) {
@@ -522,8 +595,10 @@ public class BuildingClientEvents {
 
                 ArrayList<Integer> builderIds = new ArrayList<>();
                 for (LivingEntity builderEntity : getSelectedUnits())
-                    if (builderEntity instanceof WorkerUnit) {
+                    if (builderEntity instanceof WorkerUnit workerUnit) {
                         builderIds.add(builderEntity.getId());
+                        if (inFog)
+                            workerUnit.getFogQueuedBlocksToDraw().put(originPos, blocksToDraw);
                     }
                 var ids = new int[builderIds.size()];
                 for (int i = 0; i < ids.length; i++) {
@@ -537,7 +612,7 @@ public class BuildingClientEvents {
                         ownerName = "Enemy";
 
                     BuildingServerboundPacket.placeAndQueueBuilding(building,
-                        BuildingUtils.isBridge(buildingToPlace) && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
+                        BuildingUtils.isBridge(buildingToPlace) && bridgePlaceState == 2 ? originPos.offset(-5, 0, -5) : originPos,
                         buildingRotation,
                         hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : ownerName,
                         ids,
@@ -548,8 +623,8 @@ public class BuildingClientEvents {
                         if (entity instanceof Unit unit) {
                             unit.getCheckpoints().removeIf(c -> !c.isForEntity() && (c.bp == null || !BuildingUtils.isPosInsideAnyBuilding(true, c.bp)));
                             MiscUtil.addUnitCheckpoint(unit,
-                                CursorClientEvents.getPreselectedBlockPos().above(),
-                                false
+                                preSelPos.above(),
+                                true
                             );
                             if (unit instanceof WorkerUnit workerUnit) {
                                 workerUnit.getBuildRepairGoal().ignoreNextCheckpoint = true;
@@ -577,7 +652,7 @@ public class BuildingClientEvents {
                         builderArray[i] = builderIds.get(i);
                     }
                     BuildingServerboundPacket.placeBuilding(buildingToPlace,
-                        isBridge(buildingToPlace) && bridgePlaceState == 2 ? pos.offset(-5, 0, -5) : pos,
+                        isBridge(buildingToPlace) && bridgePlaceState == 2 ? originPos.offset(-5, 0, -5) : originPos,
                         buildingRotation,
                         hudSelectedEntity instanceof Unit unit ? unit.getOwnerName() : ownerName,
                         builderArray,
@@ -588,7 +663,7 @@ public class BuildingClientEvents {
                     if (hasSelectedWorkers) {
                         for (LivingEntity entity : getSelectedUnits()) {
                             if (entity instanceof Unit unit) {
-                                MiscUtil.addUnitCheckpoint(unit, CursorClientEvents.getPreselectedBlockPos().above(), true);
+                                MiscUtil.addUnitCheckpoint(unit, preSelPos.above(), true);
                                 if (unit instanceof WorkerUnit workerUnit) {
                                     workerUnit.getBuildRepairGoal().ignoreNextCheckpoint = true;
                                 }

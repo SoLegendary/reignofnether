@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,7 +22,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.solegendary.reignofnether.building.BuildingUtils.getBuildingOriginPos;
 import static com.solegendary.reignofnether.building.BuildingUtils.isBridge;
 
 public class BuildingValidators {
@@ -36,14 +34,14 @@ public class BuildingValidators {
     private static final float MIN_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.20f; // at least 20% of covered blocks must be liquid
     private static final float MAX_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.95f; // at least 5% of covered blocks must be solid
 
-    public static boolean isBuildingPlacementValid(Level level, Building building, BlockPos placementPos, String ownerName, Rotation rotation,
-                                                   Vec3i dimensions, boolean isDiagonalBridge, boolean isSandbox, boolean ignoreFog) {
-        return getBuildingPlacementValidityError(level, building, placementPos, ownerName, rotation, dimensions, isDiagonalBridge, isSandbox, ignoreFog) == null;
+    public static boolean isPlacementValid(Level level, Building building, BlockPos placementPos, String ownerName,
+                                           boolean isDiagonalBridge, boolean isSandbox, boolean ignoreFog) {
+        return getPlacementValidityError(level, building, placementPos, ownerName, isDiagonalBridge, isSandbox, ignoreFog) == null;
     }
 
     @Nullable
-    public static String getBuildingPlacementValidityError(Level level, Building building, BlockPos placementPos, String ownerName, Rotation rotation,
-                                                           Vec3i dimensions, boolean isDiagonalBridge, boolean isSandbox, boolean ignoreFog) {
+    public static String getPlacementValidityError(Level level, Building building, BlockPos originPos, String ownerName,
+                                                   boolean isDiagonalBridge, boolean isSandbox, boolean ignoreFog) {
         if (level == null || building == null)
             return "Unknown error";
 
@@ -52,8 +50,6 @@ public class BuildingValidators {
             blocks = bridge.getRelativeBlockData(level, isDiagonalBridge);
         else
             blocks = building.getRelativeBlockData(level);
-
-        BlockPos originPos = getBuildingOriginPos(placementPos, isBridge(building), rotation, dimensions);
 
         if (isBuildingPlacementInAirOrOnIllegalBlocks(level, building, originPos, blocks)) {
             return "building.reignofnether.ground_not_flat";
@@ -65,13 +61,12 @@ public class BuildingValidators {
             return "building.reignofnether.must_be_nether";
         } else if (!isNonBridgeOrValidBridge(level, building, originPos, blocks)) {
             return "building.reignofnether.must_be_liquid";
-        } else if (!isInBrightChunk(level, originPos, ownerName) && !isSandbox && !ignoreFog) {
+        } else if (!isInBrightChunk(level, originPos, blocks, ownerName) && !isSandbox && !ignoreFog) {
             return "building.reignofnether.unexplored";
-        } else if (!isBuildingPlacementWithinWorldBorder(level, building, placementPos, blocks)) {
+        } else if (!isBuildingPlacementWithinWorldBorder(level, building, originPos, blocks)) {
             return "building.reignofnether.outside_map";
         } else if (!isNotTutorialOrNearValidCapitolPosition(level, building, originPos)) {
             return "building.reignofnether.build_centre_here";
-            //OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50); // TODO: do in server events
         }
         return null;
     }
@@ -185,7 +180,7 @@ public class BuildingValidators {
         return ((float) solidBlocksBelow / (float) blocksBelow) < MIN_SUPPORTED_BLOCKS_PERCENT;
     }
 
-    private static boolean isBuildingPlacementWithinWorldBorder(Level level, Building building, BlockPos placementPos, List<BuildingBlock> blocks) {
+    private static boolean isBuildingPlacementWithinWorldBorder(Level level, Building building, BlockPos originPos, List<BuildingBlock> blocks) {
         if (level == null || building == null)
             return false;
         if (level.getGameRules().getRule(GameRuleRegistrar.BUILDINGS_OUTSIDE_BORDER).get())
@@ -210,9 +205,13 @@ public class BuildingValidators {
                 maxZ = bp.getZ();
             }
         }
-        int buildingRadius = Math.max(maxZ - minZ, maxX - minX) / 2;
+        BlockPos minPos = BuildingUtils.getMinCorner(blocks).offset(originPos);
+        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks).offset(originPos);
 
-        return level.getWorldBorder().getDistanceToBorder(placementPos.getX(), placementPos.getZ()) > buildingRadius;
+        return level.getWorldBorder().isWithinBounds(minPos.getX(), minPos.getZ()) &&
+                level.getWorldBorder().isWithinBounds(maxPos.getX(), maxPos.getZ()) &&
+                level.getWorldBorder().isWithinBounds(maxPos.getX(), minPos.getZ()) &&
+                level.getWorldBorder().isWithinBounds(minPos.getX(), maxPos.getZ());
     }
 
 
@@ -276,12 +275,18 @@ public class BuildingValidators {
         return TutorialClientEvents.BUILD_CAPITOL_POS.distSqr(originPos) < 625; // 25 block range
     }
 
-    // TODO: make it centrePos
-    private static boolean isInBrightChunk(Level level, BlockPos originPos, String ownerName) {
+    public static boolean isInBrightChunk(Level level, BlockPos originPos, List<BuildingBlock> blocks, String ownerName) {
+        BlockPos minPos = BuildingUtils.getMinCorner(blocks).offset(originPos);
+        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks).offset(originPos);
+        BlockPos centrePos = new BlockPos((minPos.getX() + maxPos.getX()) / 2, (minPos.getY() + maxPos.getY()) / 2, (minPos.getZ() + maxPos.getZ()) / 2);
+        return isInBrightChunk(level, centrePos, ownerName);
+    }
+
+    public static boolean isInBrightChunk(Level level, BlockPos centrePos, String ownerName) {
         if (level.isClientSide()) {
-            return FogOfWarClientEvents.isInBrightChunk(originPos);
+            return FogOfWarClientEvents.isInBrightChunk(centrePos);
         } else {
-            return FogOfWarServerEvents.isBlockVisibleFor(ownerName, originPos.getX(), originPos.getZ());
+            return FogOfWarServerEvents.isBlockVisibleFor(ownerName, centrePos.getX(), centrePos.getZ());
         }
     }
 }

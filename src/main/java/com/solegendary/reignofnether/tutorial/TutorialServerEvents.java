@@ -242,7 +242,9 @@ public class TutorialServerEvents {
                 TUTORIAL_ENEMY_NAME,
                 ArrayUtil.livingEntityListToIdArray(builderUnitIds),
                 false,
-                false
+                false,
+                true,
+                true
             );
         }
     }
@@ -258,7 +260,9 @@ public class TutorialServerEvents {
                         TUTORIAL_ENEMY_NAME,
                         new int[] { unit.getId() },
                         false,
-                        false
+                        false,
+                        true,
+                        true
                 );
                 case 1 -> BuildingServerEvents.placeBuilding(Buildings.PUMPKIN_FARM,
                         new BlockPos(FARM_POS_2),
@@ -266,7 +270,9 @@ public class TutorialServerEvents {
                         TUTORIAL_ENEMY_NAME,
                         new int[] { unit.getId() },
                         false,
-                        false
+                        false,
+                        true,
+                        true
                 );
             }
             index++;
@@ -284,7 +290,9 @@ public class TutorialServerEvents {
                         TUTORIAL_ENEMY_NAME,
                         new int[] { unit.getId() },
                         false,
-                        false
+                        false,
+                        true,
+                        true
                 );
                 case 1 -> BuildingServerEvents.placeBuilding(Buildings.DARK_WATCHTOWER,
                         new BlockPos(TOWER_POS),
@@ -292,7 +300,9 @@ public class TutorialServerEvents {
                         TUTORIAL_ENEMY_NAME,
                         new int[] { unit.getId() },
                         false,
-                        false
+                        false,
+                        true,
+                        true
                 );
                 case 2 -> BuildingServerEvents.placeBuilding(Buildings.SPIDER_LAIR,
                         new BlockPos(SPIDER_LAIR_POS),
@@ -300,7 +310,9 @@ public class TutorialServerEvents {
                         TUTORIAL_ENEMY_NAME,
                         new int[] { unit.getId() },
                         false,
-                        false
+                        false,
+                        true,
+                        true
                 );
                 case 3 -> {
                     return;
