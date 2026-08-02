@@ -99,11 +99,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
     Ability autocast;
 
-    private final ArrayList<BuildingPlacement> fogQueuedBuildings = new ArrayList<>();
-    public ArrayList<BuildingPlacement> getFogQueuedBuildings() { return fogQueuedBuildings; }
-    private final Map<BlockPos, List<BuildingBlock>> fogQueuedBlocksToDraw = new HashMap<>();
-    public Map<BlockPos, List<BuildingBlock>> getFogQueuedBlocksToDraw() { return fogQueuedBlocksToDraw; }
-
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
     public int getEatingTicksLeft() { return eatingTicksLeft; }
@@ -130,6 +125,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
     public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
+    public ExploreBuildLocationGoal getExploreBuildLocationGoal() {return exploreBuildLocationGoal;}
     public int getMaxResources() {return maxResources;}
 
     private MoveToTargetBlockGoal moveGoal;
@@ -137,6 +133,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public BuildRepairGoal buildRepairGoal;
     public GatherResourcesGoal gatherResourcesGoal;
     private ReturnResourcesGoal returnResourcesGoal;
+    private ExploreBuildLocationGoal exploreBuildLocationGoal;
     private AbstractMeleeAttackUnitGoal attackGoal;
     public CallToArmsGoal callToArmsGoal;
 
@@ -484,6 +481,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         this.buildRepairGoal = new BuildRepairGoal(this);
         this.gatherResourcesGoal = new GatherResourcesGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
+        this.exploreBuildLocationGoal = new ExploreBuildLocationGoal(this);
         this.callToArmsGoal = new CallToArmsGoal(this);
     }
 
@@ -494,6 +492,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, exploreBuildLocationGoal);
         this.goalSelector.addGoal(2, buildRepairGoal);
         this.goalSelector.addGoal(2, gatherResourcesGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);

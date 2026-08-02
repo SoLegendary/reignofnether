@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.goals.BuildRepairGoal;
+import com.solegendary.reignofnether.unit.goals.ExploreBuildLocationGoal;
 import com.solegendary.reignofnether.unit.goals.GatherResourcesGoal;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
@@ -28,12 +29,9 @@ public interface WorkerUnit {
 
     public BuildRepairGoal getBuildRepairGoal();
     public GatherResourcesGoal getGatherResourceGoal();
-    public BlockState getReplantBlockState();
+    public ExploreBuildLocationGoal getExploreBuildLocationGoal(); // serverside only
 
-    // buildings which are due to be placed but currently can't due to fog, will be placed once discovered
-    public ArrayList<BuildingPlacement> getFogQueuedBuildings(); // serverside only
-    // drawn with green highlight blocks until placed
-    public Map<BlockPos, List<BuildingBlock>> getFogQueuedBlocksToDraw(); // clientside rendering only
+    public BlockState getReplantBlockState();
 
     public static void tick(WorkerUnit unit) {
         BuildRepairGoal buildRepairGoal = unit.getBuildRepairGoal();
@@ -109,8 +107,12 @@ public interface WorkerUnit {
     public static void resetBehaviours(WorkerUnit unit) {
         unit.getBuildRepairGoal().stopBuilding();
         unit.getGatherResourceGoal().stopGathering();
-        unit.getFogQueuedBuildings().clear();
-        unit.getFogQueuedBlocksToDraw().clear();
+        unit.getExploreBuildLocationGoal().reset();
+    }
+
+    public static void resetBehavioursExceptExploreBuild(WorkerUnit unit) {
+        unit.getBuildRepairGoal().stopBuilding();
+        unit.getGatherResourceGoal().stopGathering();
     }
 
     // only properly works serverside - clientside requires packet updates

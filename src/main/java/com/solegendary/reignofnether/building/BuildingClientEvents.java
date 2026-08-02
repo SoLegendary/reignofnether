@@ -237,14 +237,22 @@ public class BuildingClientEvents {
     // location should be 1 space above the selected spot
     // forceColour == 0 (none), 1 (green), 2 (red)
     public static void drawBuildingToPlace(PoseStack matrix, BlockPos originPos, int forceColour) {
-        if (buildingToPlace == null)
+        if (buildingToPlace == null || MC.player == null)
             return;
 
         boolean valid = BuildingValidators.isPlacementValid(
                 MC.level, buildingToPlace, originPos, MC.player.getName().getString(),
                 isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
         );
+        boolean yellowUnderline = buildingToPlace instanceof PortalBasic && !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos);
+        drawBuilding(blocksToDraw, matrix, originPos, forceColour, valid, yellowUnderline);
+    }
 
+    public static void drawBuilding(List<BuildingBlock> blocks, PoseStack matrix, BlockPos originPos, int forceColour) {
+        drawBuilding(blocks, matrix, originPos, forceColour, true, false);
+    }
+
+    public static void drawBuilding(List<BuildingBlock> blocks, PoseStack matrix, BlockPos originPos, int forceColour, boolean isGreen, boolean yellowUnderline) {
         int minX = 999999;
         int minY = 999999;
         int minZ = 999999;
@@ -253,12 +261,11 @@ public class BuildingClientEvents {
         int maxZ = -999999;
         ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
         var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
-        for (BuildingBlock block : blocksToDraw) {
+        for (BuildingBlock block : blocks) {
             if (isBridge(buildingToPlace)
                     && MC.level != null && AbstractBridge.shouldCullBlock(originPos.offset(0, 1, 0), block, MC.level)) {
                 continue;
             }
-
             BlockRenderDispatcher renderer = MC.getBlockRenderer();
             BlockState bs = block.getBlockState();
             BlockPos bp = block.getBlockPos().offset(originPos);
@@ -270,7 +277,7 @@ public class BuildingClientEvents {
             matrix.translate( // bp is center of block whereas render is corner, so offset by 0.5
                     bp.getX() - cam.getX(), bp.getY() - cam.getY() - 0.6, bp.getZ() - cam.getZ());
 
-            int overlayColour = valid ? OverlayTexture.pack(0, 0) : OverlayTexture.pack(0, 3);
+            int overlayColour = isGreen ? OverlayTexture.pack(0, 0) : OverlayTexture.pack(0, 3);
             if (forceColour == 1) {
                 overlayColour = OverlayTexture.pack(0, 0);
             } else if (forceColour == 2) {
@@ -313,78 +320,14 @@ public class BuildingClientEvents {
         minY += 1.05f;
         maxZ += 1;
 
-        float r = valid ? 0 : 1.0f;
-        float g = valid ? 1.0f : 0;
+        float r = isGreen ? 0 : 1.0f;
+        float g = isGreen ? 1.0f : 0;
         // highlight yellow if we are placing a portal on overworld terrain
-        if (valid) {
-            if (buildingToPlace instanceof PortalBasic &&
-                    !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos)) {
+        if (isGreen) {
+            if (yellowUnderline) {
                 r = 0.5f;
                 g = 0.5f;
             }
-        }
-        if (forceColour == 1) {
-            r = 0;
-            g = 1;
-        } else if (forceColour == 2) {
-            r = 1;
-            g = 0;
-        }
-        if (minY < 0) {
-            minY -= 1;
-        }
-        AABB aabb = new AABB(minX, minY, minZ, maxX, minY, maxZ);
-        MyRenderer.drawLineBox(matrix, aabb, r, g, 0, 0.5f);
-        MyRenderer.drawSolidBox(matrix, vertexConsumer, aabb, Direction.UP, r, g, 0, 0.5f, rl);
-        AABB aabb2 = new AABB(minX, -64, minZ, maxX, minY, maxZ);
-        MyRenderer.drawLineBox(matrix, aabb2, r, g, 0, 0.25f);
-    }
-
-    public static void drawBuilding(List<BuildingBlock> blocks, PoseStack matrix, BlockPos originPos, int forceColour) {
-        int minX = 999999;
-        int minY = 999999;
-        int minZ = 999999;
-        int maxX = -999999;
-        int maxY = -999999;
-        int maxZ = -999999;
-
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
-        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
-
-        for (BuildingBlock block : blocks) {
-            BlockRenderDispatcher renderer = MC.getBlockRenderer();
-            BlockState bs = block.getBlockState();
-            BlockPos bp = block.getBlockPos().offset(originPos);
-            matrix.pushPose();
-            Entity cam = MC.cameraEntity;
-            matrix.translate( // bp is center of block whereas render is corner, so offset by 0.5
-                    bp.getX() - cam.getX(), bp.getY() - cam.getY() - 0.6, bp.getZ() - cam.getZ());
-
-            renderer.renderSingleBlock(bs,
-                    matrix,
-                    MC.renderBuffers().crumblingBufferSource(),
-                    // don't render over other stuff
-                    15728880,
-                    OverlayTexture.pack(0, 0),
-                    net.minecraftforge.client.model.data.ModelData.EMPTY,
-                    null
-            );
-            matrix.popPose();
-        }
-
-
-        // draw placement outline below
-        maxX += 1;
-        minY += 1.05f;
-        maxZ += 1;
-
-        float r = 0;
-        float g = 1.0f;
-        // highlight yellow if we are placing a portal on overworld terrain
-        if (buildingToPlace instanceof PortalBasic &&
-                !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos)) {
-            r = 0.5f;
-            g = 0.5f;
         }
         if (forceColour == 1) {
             r = 0;
@@ -436,9 +379,10 @@ public class BuildingClientEvents {
             if (le instanceof Unit unit && le instanceof WorkerUnit workerUnit &&
                 MC.player != null && unit.getOwnerName().equals(MC.player.getName().getString()))
             {
-                workerUnit.getFogQueuedBlocksToDraw().keySet().removeIf(bp -> buildings.stream().map(b -> b.originPos).toList().contains(bp));
-                for (BlockPos pos : workerUnit.getFogQueuedBlocksToDraw().keySet())
-                    fogBlocksToDraw.put(pos, workerUnit.getFogQueuedBlocksToDraw().get(pos));
+                Map<BlockPos, List<BuildingBlock>> fogBlocks = workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw();
+                fogBlocks.keySet().removeIf(bp -> buildings.stream().map(b -> b.originPos).toList().contains(bp));
+                for (BlockPos pos : fogBlocks.keySet())
+                    fogBlocksToDraw.put(pos, fogBlocks.get(pos));
             }
         }
         for (BlockPos pos : fogBlocksToDraw.keySet()) {
@@ -598,7 +542,7 @@ public class BuildingClientEvents {
                     if (builderEntity instanceof WorkerUnit workerUnit) {
                         builderIds.add(builderEntity.getId());
                         if (inFog)
-                            workerUnit.getFogQueuedBlocksToDraw().put(originPos, blocksToDraw);
+                            workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw().put(originPos, new ArrayList<>(blocksToDraw));
                     }
                 var ids = new int[builderIds.size()];
                 for (int i = 0; i < ids.length; i++) {

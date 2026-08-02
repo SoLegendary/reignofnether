@@ -319,10 +319,9 @@ public class BuildingServerEvents {
                         if (!queue) {
                             Unit.fullResetBehaviours((Unit) entity);
                         }
-                        workerUnit.getFogQueuedBuildings().add(newBuilding);
+                        workerUnit.getExploreBuildLocationGoal().getFogQueuedBuildings().add(newBuilding);
                     }
                 }
-                actionFogQueuedBuildings();
                 return null;
             } else {
                 String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, building, originPos, ownerName, isDiagonalBridge, isSandbox, true);
@@ -339,7 +338,7 @@ public class BuildingServerEvents {
         return null;
     }
 
-    private static BuildingPlacement placeBuilding(
+    public static BuildingPlacement placeBuilding(
         BuildingPlacement newBuilding,
         BlockPos originPos,
         Rotation rotation,
@@ -486,7 +485,7 @@ public class BuildingServerEvents {
                 if (queue) {
                     if (workerUnit.getBuildRepairGoal().queuedBuildings.isEmpty()) {
                         ((Unit) entity).resetBehaviours();
-                        WorkerUnit.resetBehaviours(workerUnit);
+                        WorkerUnit.resetBehavioursExceptExploreBuild(workerUnit);
                     }
                     workerUnit.getBuildRepairGoal().queuedBuildings.add(newBuilding);
                     if (workerUnit.getBuildRepairGoal().getBuildingTarget() == null) {
@@ -494,7 +493,7 @@ public class BuildingServerEvents {
                     }
                 } else {
                     ((Unit) entity).resetBehaviours();
-                    WorkerUnit.resetBehaviours(workerUnit);
+                    WorkerUnit.resetBehavioursExceptExploreBuild(workerUnit);
                     workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
                 }
             }
@@ -759,32 +758,6 @@ public class BuildingServerEvents {
                     if (popSupply > currentPop)
                         gy.releaseNextUnit();
                 }
-            }
-        }
-
-        if (serverLevel.getServer().getTickCount() % 10 == 0) {
-            actionFogQueuedBuildings();
-        }
-    }
-
-    private static void actionFogQueuedBuildings() {
-        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
-            ArrayList<BuildingPlacement> placedBpls = new ArrayList<>();
-            if (le instanceof WorkerUnit workerUnit) {
-                Unit unit = (Unit) workerUnit;
-                if (!workerUnit.getFogQueuedBuildings().isEmpty()) {
-                    BuildingPlacement bpl = workerUnit.getFogQueuedBuildings().get(0);
-                    if (FogOfWarServerEvents.isBlockVisibleFor(unit.getOwnerName(), bpl.centrePos.getX(), bpl.centrePos.getZ())) {
-                        BuildingPlacement placedBpl = placeBuilding(bpl, bpl.originPos, bpl.rotation, bpl.ownerName, new int[] {le.getId()}, false, bpl.isDiagonalBridge, false);
-                        if (placedBpl != null) {
-                            placedBpls.add(placedBpl);
-                            assignBuilderUnits(new int[] {le.getId()}, true, bpl);
-                        }
-                    } else if (unit.isIdle()) {
-                        unit.getMoveGoal().setMoveTarget(bpl.centrePos);
-                    }
-                }
-                workerUnit.getFogQueuedBuildings().removeAll(placedBpls);
             }
         }
     }
