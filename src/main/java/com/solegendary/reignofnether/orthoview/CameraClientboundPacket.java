@@ -1,6 +1,7 @@
-package com.solegendary.reignofnether.hud;
+package com.solegendary.reignofnether.orthoview;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,31 +14,20 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class HudClientboundPacket {
+public class CameraClientboundPacket {
 
-    // ticks < 0 means "use HudClientEvents' default duration"
-    private static final int DEFAULT_TICKS = -1;
-
-    private final String msgKey;
+    private final BlockPos pos;
     private final int ticks;
 
-    public static void showTempMessageI18n(ServerPlayer player, String msgKey) {
-        showTempMessageI18n(player, msgKey, DEFAULT_TICKS);
-    }
-
-    public static void showTempMessageI18n(ServerPlayer player, String msgKey, int ticks) {
+    public static void forceMoveCam(ServerPlayer player, BlockPos pos, int ticks) {
         if (player == null)
             return;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
-                new HudClientboundPacket(msgKey, ticks)
+                new CameraClientboundPacket(pos, ticks)
         );
     }
 
-    public static void showTempMessageI18n(String playerName, String msgKey) {
-        showTempMessageI18n(playerName, msgKey, DEFAULT_TICKS);
-    }
-
-    public static void showTempMessageI18n(String playerName, String msgKey, int ticks) {
+    public static void forceMoveCam(String playerName, BlockPos pos, int ticks) {
         if (playerName == null || playerName.isBlank())
             return;
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
@@ -45,21 +35,22 @@ public class HudClientboundPacket {
             return;
         ServerPlayer sp = server.getPlayerList().getPlayerByName(playerName);
         if (sp != null)
-            showTempMessageI18n(sp, msgKey, ticks);
+            forceMoveCam(sp, pos, ticks);
     }
 
-    public HudClientboundPacket(String message, int ticks) {
-        this.msgKey = message;
+
+    public CameraClientboundPacket(BlockPos pos, int ticks) {
+        this.pos = pos;
         this.ticks = ticks;
     }
 
-    public HudClientboundPacket(FriendlyByteBuf buffer) {
-        this.msgKey = buffer.readUtf();
+    public CameraClientboundPacket(FriendlyByteBuf buffer) {
+        this.pos = buffer.readBlockPos();
         this.ticks = buffer.readInt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeUtf(this.msgKey);
+        buffer.writeBlockPos(this.pos);
         buffer.writeInt(this.ticks);
     }
 
@@ -69,10 +60,7 @@ public class HudClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
-                        if (this.ticks < 0)
-                            HudClientEvents.showTempMessageI18n(this.msgKey);
-                        else
-                            HudClientEvents.showTempMessageI18n(this.msgKey, this.ticks);
+                        OrthoviewClientEvents.forceMoveCam(this.pos, ticks);
                         success.set(true);
                     });
         });

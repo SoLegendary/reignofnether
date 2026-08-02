@@ -21,6 +21,7 @@ import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
+import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -37,6 +38,7 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -311,7 +313,7 @@ public class BuildingServerEvents {
         }
         if (newBuilding != null && !buildingExists) {
 
-            boolean isSandbox = false;// SandboxServer.isAnyoneASandboxPlayer();
+            boolean isSandbox = SandboxServer.isAnyoneASandboxPlayer();
             if (!fromCommand && !isSandbox && !BuildingValidators.isInBrightChunk(serverLevel, newBuilding.centrePos, ownerName) && !ignoreFog) {
                 for (int id : builderUnitIds) {
                     Entity entity = serverLevel.getEntity(id);
@@ -328,7 +330,7 @@ public class BuildingServerEvents {
                 if (errorMsgKey != null) {
                     HudClientboundPacket.showTempMessageI18n(ownerName, errorMsgKey);
                     if (errorMsgKey.equals("building.reignofnether.build_centre_here")) {
-                        //OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50); // TODO: clientbound packet
+                        CameraClientboundPacket.forceMoveCam(ownerName, new BlockPos(-2954, 0, -1190), 50);
                     }
                     return null;
                 }

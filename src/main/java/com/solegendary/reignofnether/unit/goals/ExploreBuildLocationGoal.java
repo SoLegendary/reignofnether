@@ -18,10 +18,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.Nullable;
+import java.util.*;
 
 // used to move a worker over to the location of a place to build in fog before transferring control over to BuildRepairGoal
 public class ExploreBuildLocationGoal extends MoveToTargetBlockGoal {
@@ -71,6 +69,20 @@ public class ExploreBuildLocationGoal extends MoveToTargetBlockGoal {
                 setMoveTarget(bpl.centrePos);
             }
         }
+    }
+
+    // don't override checkpoints
+    @Override
+    public void setMoveTarget(@Nullable BlockPos bp) {
+        boolean changed = !Objects.equals(bp, this.moveTarget);
+        if (changed) {
+            resetRecalcBackoff();
+            recalcCooldown = 0;
+        }
+        this.moveTarget = bp;
+
+        if (changed && !this.mob.level().isClientSide())
+            this.start();
     }
 
     // if we override stop() it for some reason is called after start() and we can never begin this goal...
