@@ -1008,6 +1008,7 @@ public class UnitClientEvents {
 
                 MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, r, g, b, 0.5f);
             }
+            MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack());
 
             // render items in front of face for eating units
             for (LivingEntity entity : getAllUnits()) {

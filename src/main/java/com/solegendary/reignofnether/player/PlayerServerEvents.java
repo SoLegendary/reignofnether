@@ -438,8 +438,12 @@ public class PlayerServerEvents {
                 default -> null;
             };
             // first RTS join into a fresh game: snapshot the playable area for late joiners
-            if (rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel))
+            if (rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
                 FogChunkSnapshot.captureFogChunks((ServerLevel) serverPlayer.level());
+            }
+            if (rtsPlayers.isEmpty()) {
+                FogOfWarServerEvents.captureNeutralFogUnits();
+            }
             rtsPlayers.add(RTSPlayer.getNewPlayer(
                     serverPlayer.getName().getString(),
                     faction,

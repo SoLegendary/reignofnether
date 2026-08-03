@@ -271,7 +271,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             if (!BLOCK_CONDITION.test(this.data.gatherTarget))
                 removeGatherTarget();
             else // keep persistently moving towards the target
-                super.setMoveTarget(data.gatherTarget);
+                setMoveTarget(data.gatherTarget);
 
             if (isGathering()) {
                 ticksIdle = 0;
@@ -499,11 +499,20 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (bp != null) {
             MiscUtil.addUnitCheckpoint((Unit) mob, bp, true);
         }
-        super.setMoveTarget(bp);
+        // if assigned to a farm and not on that farm, keep retrying movement to avoid getting stuck
+        if (getTargetFarm() != null && !getTargetFarm().isPosInsideBuilding(mob.getOnPos())) {
+            this.moveReachRange = 2;
+            super.setMoveTarget(getTargetFarm().centrePos);
+            super.start();
+        } else {
+            this.moveReachRange = REACH_RANGE - 1;
+            super.setMoveTarget(bp);
+        }
         if (BLOCK_CONDITION.test(bp)) {
             this.data.gatherTarget = bp;
             this.data.targetResourceSource = ResourceSources.getFromBlockPos(data.gatherTarget, this.mob.level());
         }
+
     }
 
     public boolean isFarming() {

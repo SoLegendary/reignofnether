@@ -744,9 +744,9 @@ public class UnitServerEvents {
             UnitIdleWorkerClientBoundPacket.sendIdleWorkerPacket();
 
             for (LivingEntity entity : allUnits) {
-                if (entity instanceof Unit unit) {
+                if (entity instanceof Unit unit && evt.level.getServer() != null) {
                     UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
-                    UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
+                    UnitSyncClientboundPacket.sendSyncStatsPacket(evt.level.getServer().getPlayerList().getPlayers(), entity);
 
                     if (unit.getAnchor() != null)
                         UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
@@ -970,8 +970,9 @@ public class UnitServerEvents {
             }
         }
 
-        if (evt.getEntity().getAbsorptionAmount() > 0)
-            UnitSyncClientboundPacket.sendSyncStatsPacket(evt.getEntity());
+        MinecraftServer server = evt.getEntity().level().getServer();
+        if (evt.getEntity().getAbsorptionAmount() > 0 && server != null)
+            UnitSyncClientboundPacket.sendSyncStatsPacket(server.getPlayerList().getPlayers(), evt.getEntity());
 
         if (evt.getSource().getEntity() instanceof HeadhunterUnit headhunterUnit &&
                 headhunterUnit.hasFlameTrident() &&

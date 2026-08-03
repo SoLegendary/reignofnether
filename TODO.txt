@@ -69,5 +69,7 @@ Bugfixes
 [✔] Moving workers on non-farm farmland and soulsand blocks no longer makes them gather food
 [✔] Fixed bridges not saving correctly again
 
+[❌] Enemy buildings not being revealed on surrender with fog
+
 Languages
 ---------

@@ -38,6 +38,7 @@ import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.util.ArrayUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
@@ -50,6 +51,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -57,7 +59,9 @@ import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -65,8 +69,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,6 +133,9 @@ public class MinimapClientEvents {
     public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
     public static final ArrayList<MapMarker> mapMarkers = new ArrayList<>();
 
+    // last known position of neutral units in fog
+    public static ArrayList<MinimapUnit> neutralFogUnits = new ArrayList<>();
+
     private static final float DARK = 0.40f;
     private static final float EXTRA_DARK = 0.10f;
 
@@ -137,8 +146,38 @@ public class MinimapClientEvents {
         return highlightAnimals;
     }
 
+    public static void addNeutralFogUnit(int id, Vector3f vec3fMin, Vector3f vec3fMax) {
+        Vec3 vec3Min = new Vec3(vec3fMin.x, vec3fMin.y, vec3fMin.z);
+        Vec3 vec3Max = new Vec3(vec3fMax.x, vec3fMax.y, vec3fMax.z);
+        minimapUnits.removeIf(mu -> mu.id == id);
+        neutralFogUnits.removeIf(mu -> mu.id == id);
+        neutralFogUnits.add(new MinimapUnit(id, new AABB(vec3Min, vec3Max)));
+    }
+
+    public static void removeNeutralFogUnit(int id) {
+        neutralFogUnits.removeIf(minimapUnit -> minimapUnit.id == id);
+    }
+
+    public static void highlightNeutralFogUnits(PoseStack pose) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
+        for (MinimapUnit mu : neutralFogUnits) {
+            if (MC.level != null) {
+                Entity entity = MC.level.getEntity(mu.id);
+                if (!FogOfWarClientEvents.isBlockVisible(mu.pos) && (entity == null || !FogOfWarClientEvents.isBlockVisible(entity.getOnPos()))) {
+                    Color color = new Color(PlayerColors.getPlayerDisplayColorHex(""));
+                    float r = color.getRed() / 255.0f;
+                    float g = color.getGreen() / 255.0f;
+                    float b = color.getBlue() / 255.0f;
+                    MyRenderer.drawBoxBottom(pose, mu.aabb, r, g, b, 0.5f);
+                }
+            }
+        }
+    }
+
     public static void clearMinimapUnits() {
         minimapUnits.clear();
+        neutralFogUnits.clear();
     }
 
     // for tracking serverside Units that don't yet exist on clientside
@@ -146,11 +185,20 @@ public class MinimapClientEvents {
         public BlockPos pos;
         public final int id;
         public final String ownerName;
+        public final AABB aabb;
 
         public MinimapUnit(BlockPos pos, int id, String ownerName) {
             this.pos = pos;
             this.id = id;
             this.ownerName = ownerName;
+            this.aabb = null;
+        }
+
+        public MinimapUnit(int id, AABB aabb) { // neutral unit
+            this.pos = new BlockPos((int) aabb.getCenter().x, (int) aabb.minY, (int) aabb.getCenter().z);
+            this.id = id;
+            this.ownerName = "";
+            this.aabb = aabb;
         }
     }
 
@@ -787,13 +835,23 @@ public class MinimapClientEvents {
         for (MinimapUnit minimapUnit : minimapUnits) {
             if (!FogOfWarClientEvents.isInBrightChunk(minimapUnit.pos) || MC.player == null)
                 continue;
-
             String unitOwnerName = minimapUnit.ownerName;
             var colorHex = PlayerColors.getPlayerDisplayColorHex(unitOwnerName);
-
             drawUnitOnMap(
                     minimapUnit.pos.getX(),
                     minimapUnit.pos.getZ(),
+                    colorHex
+            );
+        }
+        for (MinimapUnit neutralFogUnit : neutralFogUnits) {
+            Entity entity = MC.level.getEntity(neutralFogUnit.id);
+            if (FogOfWarClientEvents.isInBrightChunk(neutralFogUnit.pos) || MC.player == null ||
+                (entity != null && FogOfWarClientEvents.isInBrightChunk(entity)))
+                continue;
+            var colorHex = PlayerColors.getPlayerDisplayColorHex("");
+            drawUnitOnMap(
+                    neutralFogUnit.pos.getX(),
+                    neutralFogUnit.pos.getZ(),
                     colorHex
             );
         }

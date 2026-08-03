@@ -371,5 +371,11 @@ public final class PacketHandler {
                 .decoder(CameraClientboundPacket::new)
                 .consumerMainThread(CameraClientboundPacket::handle)
                 .add();
+
+        INSTANCE.messageBuilder(FogNeutralUnitClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FogNeutralUnitClientboundPacket::encode)
+                .decoder(FogNeutralUnitClientboundPacket::new)
+                .consumerMainThread(FogNeutralUnitClientboundPacket::handle)
+                .add();
     }
 }

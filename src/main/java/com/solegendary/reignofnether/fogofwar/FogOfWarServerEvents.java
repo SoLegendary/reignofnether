@@ -22,6 +22,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
@@ -66,6 +68,19 @@ public class FogOfWarServerEvents {
     // A unit that attacks out of the fog is revealed to the player it attacked
     // capped at REVEALED_ATTACKER_SIGHT_BLOCKS
     private static final Map<Integer, Map<String, Long>> revealedUnitExpiryTick = new ConcurrentHashMap<>();
+
+    // snapshot of neutral unit starting positions
+    public static final Map<Integer, AABB> neutralFogUnits = new HashMap<>();
+
+    public static void captureNeutralFogUnits() {
+        neutralFogUnits.clear();
+        for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+            if (le instanceof Unit unit && unit.getOwnerName().isEmpty() && Unit.hasAnchor(unit)) {
+                neutralFogUnits.put(le.getId(), le.getBoundingBox());
+                FogNeutralUnitClientboundPacket.sendNeutralFogUnitToAll(le.getId(), le.getBoundingBox());
+            }
+        }
+    }
 
     public static void setPlayerRevealed(String playerName, boolean reveal) {
         if (reveal) revealedPlayerNames.add(playerName);
@@ -238,6 +253,9 @@ public class FogOfWarServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         syncClientFog();
+        if (evt.getEntity() instanceof ServerPlayer sp)
+            for (int id : neutralFogUnits.keySet())
+                FogNeutralUnitClientboundPacket.sendNeutralFogUnit(sp, id, neutralFogUnits.get(id));
     }
 
     // On an RTS map, adopt any snapshot left on disk by a prior session so a mid-match server restart keeps
@@ -323,10 +341,19 @@ public class FogOfWarServerEvents {
             ticksUntilUpdate--;
             return;
         }
+
         ticksUntilUpdate = UPDATE_TICKS;
         updatePlayerBrightChunks();
-        for (ServerPlayer p : PlayerServerEvents.orthoviewPlayers)
+        for (ServerPlayer p : PlayerServerEvents.orthoviewPlayers) {
+            // TODO: on server restart (or singleplayer map relog) unit ids change so fog units always get removed as soon as they're explored
             PlayerChunksClientboundPacket.send(p, playerLiveChunks, playerEdgeChunks);
+            for (int id : neutralFogUnits.keySet()) {
+                Vec3 center = neutralFogUnits.get(id).getCenter();
+                if (isBlockVisibleFor(p, (int) center.x, (int) center.z) && serverLevel.getEntity(id) == null) {
+                    FogNeutralUnitClientboundPacket.removeNeutralFogUnit(p, id);
+                }
+            }
+        }
     }
 
     private static void updatePlayerBrightChunks() {
