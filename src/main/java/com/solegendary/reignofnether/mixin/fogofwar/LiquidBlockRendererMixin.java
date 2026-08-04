@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.worldborder.WorldBorderClientEvents;
 import net.minecraft.client.renderer.block.LiquidBlockRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -23,14 +24,21 @@ public abstract class LiquidBlockRendererMixin {
     )
     private int ron_fogTintLiquid(IClientFluidTypeExtensions self, FluidState state, BlockAndTintGetter level, BlockPos pos) {
         int original = self.getTintColor(state, level, pos);
-        if (!FogOfWarClientEvents.isEnabled()) return original;
-        if (FogOfWarClientEvents.isBlockVisible(pos)) return original;
+        if (pos == null) return original;
 
-        int fog = FogOfWarClientEvents.FOG_TINT_RGB;
+        int tint = 0;
+        if (WorldBorderClientEvents.isOutsideWorldBorder(pos)) {
+            tint = WorldBorderClientEvents.OUTSIDE_WORLD_BORDER_TINT;
+        }
+        else if (FogOfWarClientEvents.isEnabled() && !FogOfWarClientEvents.isBlockVisible(pos)) {
+            tint = FogOfWarClientEvents.FOG_TINT_RGB;
+        }
+        if (tint == 0) return original;
+
         int a = (original >>> 24) & 0xFF;
-        int r = (((original >> 16) & 0xFF) * ((fog >> 16) & 0xFF)) / 255;
-        int g = (((original >> 8)  & 0xFF) * ((fog >> 8)  & 0xFF)) / 255;
-        int b = (( original        & 0xFF) * ( fog        & 0xFF)) / 255;
+        int r = (((original >> 16) & 0xFF) * ((tint >> 16) & 0xFF)) / 255;
+        int g = (((original >> 8)  & 0xFF) * ((tint >> 8)  & 0xFF)) / 255;
+        int b = (( original        & 0xFF) * ( tint        & 0xFF)) / 255;
         return (a << 24) | (r << 16) | (g << 8) | b;
     }
 }
