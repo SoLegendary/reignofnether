@@ -9,9 +9,6 @@
 
 Fog of war
 ----------
-[❌] Show neutral units and buildings on minimap
-    - Last known position only
-
 [❌] Update night circle vision separate from buildings
     - If entered clientside, verify from server whether it's really that size or even still there
     - If entered serverside, sent to client the new range
@@ -21,6 +18,7 @@ Fog of war
 [❌] Sparta's crash
 
 [❌] Add commands for revealing in fog, temporarily or permanently
+[❌] Add commands for force-moving camera
 [❌] Scout units from capitol + 1 free on match start
     - wolves for villagers, zombie horse for monsters, striders for piglins
 
@@ -65,7 +63,6 @@ Bugfixes
 [✔] Moving workers on non-farm farmland and soulsand blocks no longer makes them gather food
 [✔] Fixed bridges not saving correctly again
 
-[❌] World border not rendering
 
 Languages
 ---------
