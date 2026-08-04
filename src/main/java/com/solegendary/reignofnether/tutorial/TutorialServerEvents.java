@@ -322,7 +322,7 @@ public class TutorialServerEvents {
         }
     }
 
-        public static void spawnMonsterBaseArmy() {
+    public static void spawnMonsterBaseArmy() {
         spawnMobs(EntityRegistrar.ZOMBIE_UNIT.get(), getServerLevel(), GRAVEYARD_ZOMBIE_POS, 3, TUTORIAL_ENEMY_NAME);
         spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), GROUND_SKELETON_POS_1, 1, TUTORIAL_ENEMY_NAME);
         spawnMobs(EntityRegistrar.SKELETON_UNIT.get(), getServerLevel(), GROUND_SKELETON_POS_2, 1, TUTORIAL_ENEMY_NAME);

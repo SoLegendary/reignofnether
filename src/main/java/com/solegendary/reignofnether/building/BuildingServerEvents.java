@@ -371,9 +371,6 @@ public class BuildingServerEvents {
                 String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, newBuilding.getBuilding(), originPos, ownerName, isDiagonalBridge, isSandbox, true);
                 if (errorMsgKey != null) {
                     HudClientboundPacket.showTempMessageI18n(ownerName, errorMsgKey);
-                    if (errorMsgKey.equals("building.reignofnether.build_centre_here")) {
-                        CameraClientboundPacket.forceMoveCam(ownerName, new BlockPos(-2954, 0, -1190), 50);
-                    }
                     FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
                     return null;
                 }

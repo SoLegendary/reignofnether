@@ -51,7 +51,7 @@ public class VillagerMarket extends AbstractMarket {
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/emerald_block.png"),
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
-                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
+                TutorialClientEvents::isEnabled,
                 () -> BuildingClientEvents.numFinishedBuildings(Buildings.VILLAGER_HOUSE) >= 6 ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
