@@ -298,23 +298,21 @@ public class FogOfWarServerEvents {
         syncClientFog();
 
         // vanilla only diffs tracking on movement; force a resync for stale chunks
-        if (wasEnabled && !enabled && serverLevel != null) {
-            resendAllTrackedChunks();
-        }
+        if (wasEnabled && !enabled && serverLevel != null)
+            for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers())
+                resendAllTrackedChunks(sp);
     }
 
-    private static void resendAllTrackedChunks() {
+    public static void resendAllTrackedChunks(ServerPlayer sp) {
         int viewDist = serverLevel.getServer().getPlayerList().getViewDistance();
-        for (ServerPlayer sp : serverLevel.getServer().getPlayerList().getPlayers()) {
-            ChunkPos center = sp.chunkPosition();
-            ServerLevel level = sp.serverLevel();
-            for (int dx = -viewDist; dx <= viewDist; dx++) {
-                for (int dz = -viewDist; dz <= viewDist; dz++) {
-                    LevelChunk chunk = level.getChunkSource().getChunk(center.x + dx, center.z + dz, false);
-                    if (chunk == null) continue;
-                    sp.connection.send(new ClientboundLevelChunkWithLightPacket(
-                            chunk, level.getLightEngine(), null, null));
-                }
+        ChunkPos center = sp.chunkPosition();
+        ServerLevel level = sp.serverLevel();
+        for (int dx = -viewDist; dx <= viewDist; dx++) {
+            for (int dz = -viewDist; dz <= viewDist; dz++) {
+                LevelChunk chunk = level.getChunkSource().getChunk(center.x + dx, center.z + dz, false);
+                if (chunk == null) continue;
+                sp.connection.send(new ClientboundLevelChunkWithLightPacket(
+                        chunk, level.getLightEngine(), null, null));
             }
         }
     }

@@ -1014,6 +1014,16 @@ public class PlayerServerEvents {
         synchronized (rtsPlayers) {
             // Remove the defeated player from the list
             FogOfWarServerEvents.invalidateRtsCache();
+
+            CompletableFuture.delayedExecutor(3000, TimeUnit.MILLISECONDS).execute(() -> {
+                for (ServerPlayer sp : players) {
+                    if (sp.getName().getString().equals(playerName)) {
+                        FogOfWarServerEvents.resendAllTrackedChunks(sp);
+                        break;
+                    }
+                }
+            });
+
             rtsPlayers.removeIf(rtsPlayer -> {
                 if (rtsPlayer.name.equals(playerName)) {
                     sendMessageToAllPlayers("server.reignofnether.is_defeated", true, playerName, reason);
