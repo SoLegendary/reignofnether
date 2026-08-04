@@ -25,7 +25,7 @@ Fog of war
     - wolves for villagers, zombie horse for monsters, striders for piglins
 
 
-[❌] Fog building queueing:
+[✔] Fog building queueing:
     - if the placement is in fog, then instead of attempting to place it immediately:
         1. Persist the blocks to draw
         2. Move the worker to the position
@@ -34,10 +34,6 @@ Fog of war
             - Error if no resources available or otherwise is invalid
         4. Allow shift-queueing
     - save as list<BlockPos, Building> in workers
-
-    [🟡] tutorial move cam command and enemy base build
-    [🟡] Test all validity conditions in and out of fog
-    [🟡] run out of resources before exploring
 
 
 Slime rolling
@@ -69,7 +65,7 @@ Bugfixes
 [✔] Moving workers on non-farm farmland and soulsand blocks no longer makes them gather food
 [✔] Fixed bridges not saving correctly again
 
-[❌] Enemy buildings not being revealed on surrender with fog
+[❌] World border not rendering
 
 Languages
 ---------

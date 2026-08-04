@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 
 public class CameraClientboundPacket {
 
+    private final String playerName;
     private final BlockPos pos;
     private final int ticks;
 
@@ -23,33 +24,31 @@ public class CameraClientboundPacket {
         if (player == null)
             return;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
-                new CameraClientboundPacket(pos, ticks)
+                new CameraClientboundPacket(player.getName().getString(), pos, ticks)
         );
     }
 
     public static void forceMoveCam(String playerName, BlockPos pos, int ticks) {
-        if (playerName == null || playerName.isBlank())
-            return;
-        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        if (server == null)
-            return;
-        ServerPlayer sp = server.getPlayerList().getPlayerByName(playerName);
-        if (sp != null)
-            forceMoveCam(sp, pos, ticks);
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new CameraClientboundPacket(playerName, pos, ticks)
+        );
     }
 
 
-    public CameraClientboundPacket(BlockPos pos, int ticks) {
+    public CameraClientboundPacket(String playerName, BlockPos pos, int ticks) {
+        this.playerName = playerName;
         this.pos = pos;
         this.ticks = ticks;
     }
 
     public CameraClientboundPacket(FriendlyByteBuf buffer) {
+        this.playerName = buffer.readUtf();
         this.pos = buffer.readBlockPos();
         this.ticks = buffer.readInt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
+        buffer.writeUtf(this.playerName);
         buffer.writeBlockPos(this.pos);
         buffer.writeInt(this.ticks);
     }
@@ -60,7 +59,7 @@ public class CameraClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
-                        OrthoviewClientEvents.forceMoveCam(this.pos, ticks);
+                        OrthoviewClientEvents.forceMoveCam(this.playerName, this.pos, ticks);
                         success.set(true);
                     });
         });
