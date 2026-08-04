@@ -272,6 +272,7 @@ public class ScenarioMenu {
         // TODO:
         // Scenario Name
         // Scenario opening message
+        // Scenario starting time
 
         Button factionButton = new Button(
             "Toggle Faction",

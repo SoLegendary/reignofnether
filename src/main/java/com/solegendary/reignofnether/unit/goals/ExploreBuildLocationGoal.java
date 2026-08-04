@@ -3,20 +3,11 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
-import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
-import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.sounds.SoundAction;
-import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.util.LanguageUtil;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -58,7 +49,10 @@ public class ExploreBuildLocationGoal extends MoveToTargetBlockGoal {
 
             // not placed and is explored -> place
             if (!isPlaced && FogOfWarServerEvents.isBlockVisibleFor(((Unit) mob).getOwnerName(), bpl.centrePos.getX(), bpl.centrePos.getZ())) {
-                BuildingServerEvents.placeBuilding(bpl, bpl.originPos, bpl.rotation, bpl.ownerName, new int[]{}, false, bpl.isDiagonalBridge, false);
+                BuildingPlacement newBuilding = BuildingServerEvents.placeBuilding(bpl, bpl.originPos, bpl.rotation, bpl.ownerName, new int[]{}, false, bpl.isDiagonalBridge, false, true);
+                if (newBuilding == null) { // failed to place due to obstacles in fog or some other reason
+                    fogQueuedBuildings.remove(bpl);
+                }
                 super.stopMoving();
             } else if (isPlaced) { // is placed - >start building
                 super.stopMoving();

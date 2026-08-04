@@ -49,7 +49,7 @@ public class BuildingValidators {
         if (building instanceof AbstractBridge bridge)
             blocks = bridge.getRelativeBlockData(level, isDiagonalBridge);
         else
-            blocks = building.getRelativeBlockData(level);
+            blocks = building.getRelativeBlockData(level); // TODO: is lack of rotation here a problem?
 
         if (isBuildingPlacementInAirOrOnIllegalBlocks(level, building, originPos, blocks)) {
             return "building.reignofnether.ground_not_flat";

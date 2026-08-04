@@ -16,7 +16,7 @@ public class RTSMapInfoClientEvents {
 
     public static ArrayList<String> modeNames = new ArrayList<>();
     public static String selectedMode = "";
-    public static String mapName = ""; // TODO: render at top of start menu
+    public static String mapName = "";
     public static String description = "";
     public static Set<String> authors = new HashSet<>();
     public static String version = "";

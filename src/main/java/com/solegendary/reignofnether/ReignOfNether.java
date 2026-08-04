@@ -230,7 +230,6 @@ public class ReignOfNether {
             }
             
             ((DownloadPackSourceAccessor)Minecraft.getInstance().getDownloadedPackSource()).setServerPack(serverPack);
-            //Minecraft.getInstance().setCurrentServer(serverData); TODO find out why, almost impossible to reproduce
         });
         
         logger.debug(RESETMARKER, "Waiting for clear to complete");

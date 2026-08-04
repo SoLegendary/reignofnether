@@ -304,6 +304,21 @@ public class BuildingServerEvents {
             ownerName,
             isDiagonalBridge
         );
+        placeBuilding(newBuilding, originPos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, fromCommand, ignoreFog);
+        return null;
+    }
+
+    public static BuildingPlacement placeBuilding(
+        BuildingPlacement newBuilding,
+        BlockPos originPos,
+        Rotation rotation,
+        String ownerName,
+        int[] builderUnitIds,
+        boolean queue, // shift-queue the building for assigned workers
+        boolean isDiagonalBridge,
+        boolean fromCommand, // ignore resources, terrain or any other restrictions and self-build
+        boolean ignoreFog
+    ) {
         boolean buildingExists = false;
         for (BuildingPlacement placement : buildings) {
             if (placement.originPos.equals(originPos)) {
@@ -311,7 +326,34 @@ public class BuildingServerEvents {
                 break;
             }
         }
-        if (newBuilding != null && !buildingExists) {
+        if (newBuilding != null && !buildingExists && serverLevel != null) {
+
+            // Handle special building (Iron Golem)
+            if (newBuilding.getBuilding() instanceof IronGolemBuilding) {
+                int currentPop = UnitServerEvents.getCurrentPopulation(ownerName);
+                int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
+
+                boolean canAffordPop = false;
+                for (Resources resources : ResourcesServerEvents.resourcesList) {
+                    if (resources.ownerName.equals(ownerName)
+                            && (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply) {
+                        canAffordPop = true;
+                        break;
+                    }
+                }
+                if (!canAffordPop && !fromCommand) {
+                    ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                    FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
+                    return null;
+                }
+            }
+
+            boolean canAfford = fromCommand || newBuilding.canAfford(ownerName);
+            if (!canAfford) {
+                warnInsufficientResources(newBuilding);
+                FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
+                return null;
+            }
 
             boolean isSandbox = SandboxServer.isAnyoneASandboxPlayer();
             if (!fromCommand && !isSandbox && !BuildingValidators.isInBrightChunk(serverLevel, newBuilding.centrePos, ownerName) && !ignoreFog) {
@@ -326,50 +368,17 @@ public class BuildingServerEvents {
                 }
                 return null;
             } else {
-                String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, building, originPos, ownerName, isDiagonalBridge, isSandbox, true);
+                String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, newBuilding.getBuilding(), originPos, ownerName, isDiagonalBridge, isSandbox, true);
                 if (errorMsgKey != null) {
                     HudClientboundPacket.showTempMessageI18n(ownerName, errorMsgKey);
                     if (errorMsgKey.equals("building.reignofnether.build_centre_here")) {
                         CameraClientboundPacket.forceMoveCam(ownerName, new BlockPos(-2954, 0, -1190), 50);
                     }
+                    FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
                     return null;
                 }
             }
-            return placeBuilding(newBuilding, originPos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, fromCommand);
-        }
-        return null;
-    }
 
-    public static BuildingPlacement placeBuilding(
-        BuildingPlacement newBuilding,
-        BlockPos originPos,
-        Rotation rotation,
-        String ownerName,
-        int[] builderUnitIds,
-        boolean queue, // shift-queue the building for assigned workers
-        boolean isDiagonalBridge,
-        boolean fromCommand // ignore resources, terrain or any other restrictions and self-build
-    ) {
-        // Handle special building (Iron Golem)
-        if (newBuilding.getBuilding() instanceof IronGolemBuilding) {
-            int currentPop = UnitServerEvents.getCurrentPopulation(ownerName);
-            int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
-
-            boolean canAffordPop = false;
-            for (Resources resources : ResourcesServerEvents.resourcesList) {
-                if (resources.ownerName.equals(ownerName)
-                        && (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply) {
-                    canAffordPop = true;
-                    break;
-                }
-            }
-            if (!canAffordPop && !fromCommand) {
-                ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
-                return null;
-            }
-        }
-
-        if (fromCommand || newBuilding.canAfford(ownerName)) {
             if (fromCommand ||
                     (serverLevel.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get() &&
                             !(newBuilding.getBuilding() instanceof AbstractBridge))) {
@@ -438,14 +447,12 @@ public class BuildingServerEvents {
             }
             if (newBuilding.getBuilding() instanceof AbstractBridge)
                 newBuilding.ownerName = "";
-            return newBuilding;
 
-        } else if (!PlayerServerEvents.isBot(ownerName)) {
-            warnInsufficientResources(newBuilding);
-        }
-        if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
-            newBuilding.getBuilding().shouldDestroyOnReset = false;
-            saveBuildings(serverLevel);
+            if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
+                newBuilding.getBuilding().shouldDestroyOnReset = false;
+                saveBuildings(serverLevel);
+            }
+            return newBuilding;
         }
         return null;
     }

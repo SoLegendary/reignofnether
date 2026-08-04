@@ -990,4 +990,13 @@ public class BuildingClientEvents {
         buildings.removeIf(b -> b.originPos.equals(bp));
         BuildingClientEvents.clearSelectedBuildings();
     }
+
+    public static void removeFogQueuedBuilding(BlockPos bp) {
+        for (LivingEntity le : UnitClientEvents.getAllUnits()) {
+            if (le instanceof WorkerUnit workerUnit) {
+                workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw().remove(bp);
+                workerUnit.getExploreBuildLocationGoal().getFogQueuedBuildings().removeIf(bpl -> bpl.isPosInsideBuilding(bp));
+            }
+        }
+    }
 }

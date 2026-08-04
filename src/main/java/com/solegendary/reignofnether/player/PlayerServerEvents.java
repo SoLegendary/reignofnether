@@ -492,7 +492,7 @@ public class PlayerServerEvents {
             } else {
                 enableAllCheats(playerName);
             }
-            ResourcesServerEvents.resetResources(playerName);
+            ResourcesServerEvents.resetResources(playerName, readiedStart);
 
             if (readiedStart) {
                 Building building = null;
@@ -596,7 +596,7 @@ public class PlayerServerEvents {
             if (faction == Faction.MONSTERS) {
                 level.setDayTime(MONSTER_START_TIME_OF_DAY);
             }
-            ResourcesServerEvents.resetResources(bot.name);
+            ResourcesServerEvents.resetResources(bot.name, false);
 
             if (!TutorialServerEvents.isEnabled()) {
                 sendMessageToAllPlayers("server.reignofnether.bot_added", true, bot.name);

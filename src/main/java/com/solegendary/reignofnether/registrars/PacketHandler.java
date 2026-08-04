@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.alliance.*;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
+import com.solegendary.reignofnether.building.FogBuildingClientboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerboundPacket;
 import com.solegendary.reignofnether.config.ClientboundSyncResourceCostPacket;
@@ -376,6 +377,12 @@ public final class PacketHandler {
                 .encoder(FogNeutralUnitClientboundPacket::encode)
                 .decoder(FogNeutralUnitClientboundPacket::new)
                 .consumerMainThread(FogNeutralUnitClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(FogBuildingClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FogBuildingClientboundPacket::encode)
+                .decoder(FogBuildingClientboundPacket::new)
+                .consumerMainThread(FogBuildingClientboundPacket::handle)
                 .add();
     }
 }
