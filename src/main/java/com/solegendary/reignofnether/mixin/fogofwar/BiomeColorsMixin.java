@@ -36,7 +36,7 @@ public abstract class BiomeColorsMixin {
         if (WorldBorderClientEvents.isOutsideWorldBorder(pos)) {
             tint = WorldBorderClientEvents.OUTSIDE_WORLD_BORDER_TINT;
         }
-        else if (!FogOfWarClientEvents.isEnabled()) {
+        else if (FogOfWarClientEvents.isEnabled()) {
             // The average-color sample straddles the block's W/N edges (and Embeddium samples 4 positions per
             // vertex). Test block-level visibility at all four touched corners and tint if any is fogged, so the
             // block-granular fog edge has no bright seam.
