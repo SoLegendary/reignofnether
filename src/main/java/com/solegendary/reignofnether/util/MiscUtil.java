@@ -17,12 +17,15 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.blocks.NightCircleMode;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
@@ -89,7 +92,9 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.resources.BlockUtils.isLeafBlock;
@@ -393,6 +398,10 @@ public class MiscUtil {
                     targetUnit.getOwnerName().equals(BloodMoon.ENEMY_NAME) &&
                     unitMob instanceof GhastUnit)
                 return false;
+
+            // don't target vanilla units of the same faction
+            if (!(targetEntity instanceof Unit) && NonUnitServerEvents.getNonUnitFaction(targetEntity) == ((Unit) unitMob).getFaction())
+                return false;
         }
 
         if (targetEntity instanceof Player player && (player.isCreative() || player.isSpectator()))
@@ -411,6 +420,8 @@ public class MiscUtil {
         }
         boolean isPassiveNonUnit = !(targetEntity instanceof Unit) &&
                 (targetEntity instanceof Animal || targetEntity instanceof AbstractFish || targetEntity instanceof Villager);
+
+
 
         // Checks if neutral units can be attacked based on neutralAggro flag and other conditions
         boolean canAttackNeutral =

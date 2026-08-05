@@ -35,6 +35,7 @@ import java.util.List;
 
 public interface HeroUnit extends Unit {
 
+    int DEFAULT_SIGHT_RANGE = 24;
     float EXP_REQ_MULTIPLIER = 1.6f;
 
     static void tick(HeroUnit heroUnit) {

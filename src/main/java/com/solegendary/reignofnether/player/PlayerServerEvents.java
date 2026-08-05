@@ -17,7 +17,6 @@ import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
@@ -42,6 +41,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
@@ -438,8 +438,12 @@ public class PlayerServerEvents {
                 default -> null;
             };
             // first RTS join into a fresh game: snapshot the playable area for late joiners
-            if (!readiedStart && rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny())
-                FogChunkSnapshot.captureWorldBorder((ServerLevel) serverPlayer.level());
+            if (rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
+                FogChunkSnapshot.captureFogChunks((ServerLevel) serverPlayer.level());
+            }
+            if (rtsPlayers.isEmpty()) {
+                FogOfWarServerEvents.captureNeutralFogUnits();
+            }
             rtsPlayers.add(RTSPlayer.getNewPlayer(
                     serverPlayer.getName().getString(),
                     faction,
@@ -488,7 +492,7 @@ public class PlayerServerEvents {
             } else {
                 enableAllCheats(playerName);
             }
-            ResourcesServerEvents.resetResources(playerName);
+            ResourcesServerEvents.resetResources(playerName, readiedStart);
 
             if (readiedStart) {
                 Building building = null;
@@ -518,7 +522,7 @@ public class PlayerServerEvents {
                     for (int i = 0; i < workers.size(); i++) {
                         workerIds[i] = workers.get(i).getId();
                     }
-                    BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, playerName, workerIds, false, false);
+                    BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, playerName, workerIds, false, false, true, true);
                     PlayerClientboundPacket.teleport(playerName, BlockPos.containing(pos));
                 }
                 for (RTSPlayer rtsPlayer : rtsPlayers) {
@@ -592,7 +596,7 @@ public class PlayerServerEvents {
             if (faction == Faction.MONSTERS) {
                 level.setDayTime(MONSTER_START_TIME_OF_DAY);
             }
-            ResourcesServerEvents.resetResources(bot.name);
+            ResourcesServerEvents.resetResources(bot.name, false);
 
             if (!TutorialServerEvents.isEnabled()) {
                 sendMessageToAllPlayers("server.reignofnether.bot_added", true, bot.name);
@@ -1010,6 +1014,16 @@ public class PlayerServerEvents {
         synchronized (rtsPlayers) {
             // Remove the defeated player from the list
             FogOfWarServerEvents.invalidateRtsCache();
+
+            CompletableFuture.delayedExecutor(3000, TimeUnit.MILLISECONDS).execute(() -> {
+                for (ServerPlayer sp : players) {
+                    if (sp.getName().getString().equals(playerName)) {
+                        FogOfWarServerEvents.resendAllTrackedChunks(sp);
+                        break;
+                    }
+                }
+            });
+
             rtsPlayers.removeIf(rtsPlayer -> {
                 if (rtsPlayer.name.equals(playerName)) {
                     sendMessageToAllPlayers("server.reignofnether.is_defeated", true, playerName, reason);

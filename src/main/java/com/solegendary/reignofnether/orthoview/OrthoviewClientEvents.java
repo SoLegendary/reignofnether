@@ -279,6 +279,12 @@ public class OrthoviewClientEvents {
         }
     }
 
+    public static void forceMoveCam(String playerName, Vec3i pos, int cameraLockTicks) {
+        if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
+            forceMoveCam(pos.getX(), pos.getZ(), cameraLockTicks);
+        }
+    }
+
     public static void forceMoveCam(Vec3i pos, int cameraLockTicks) {
         forceMoveCam(pos.getX(), pos.getZ(), cameraLockTicks);
     }

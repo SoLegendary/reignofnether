@@ -49,16 +49,13 @@ public class BuildingClientboundPacket {
     public boolean forPlayerLoggingIn; // is this placement for someone logging in currently joined?
     public double partialBlocksDestroyed = 0;
 
-    // send only to players whose fog reveals at least one chunk of this building's footprint
+    // send only to players whose fog reveals at least one corner of this building
     private static void sendFiltered(BlockPos buildingPos, BuildingClientboundPacket packet) {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
         BuildingPlacement b = findBuilding(false, buildingPos);
-        Set<ChunkPos> chunks = b != null
-            ? FogOfWarServerEvents.getBuildingChunks(b)
-            : Set.of(new ChunkPos(buildingPos));
         for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
-            if (FogOfWarServerEvents.canPlayerSeeChunks(sp, chunks)) {
+            if (b != null && FogOfWarServerEvents.canPlayerSeeBuilding(sp, b)) {
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
             }
         }

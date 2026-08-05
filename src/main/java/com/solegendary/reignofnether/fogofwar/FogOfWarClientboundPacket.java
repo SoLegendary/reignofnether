@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -27,8 +28,7 @@ public class FogOfWarClientboundPacket {
 
     // reveal a ranged unit briefly to the player it's attacking
     public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
-        FogOfWarServerEvents.revealRangedUnit(unitId,
-                com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
+        FogOfWarServerEvents.revealRangedUnit(unitId, playerBeingAttacked, RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new FogOfWarClientboundPacket(true, playerBeingAttacked, unitId));
     }

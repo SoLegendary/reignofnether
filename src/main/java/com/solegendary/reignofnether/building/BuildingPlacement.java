@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
@@ -37,6 +38,7 @@ import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
@@ -203,6 +205,15 @@ public class BuildingPlacement {
         if (targetStand == null)
             createArmourStandTarget();
         return targetStand;
+    }
+
+    public int getSightRange() {
+        if (isCapitol)
+            return Building.CAPITOL_SIGHT_RANGE;
+        else if (getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class) &&
+                GarrisonableBuildingAddon.getNumOccupants(this) > 0 && isBuilt)
+            return Building.DEFAULT_SIGHT_RANGE + Building.GARRISONED_BONUS_SIGHT_RANGE;
+        return Building.DEFAULT_SIGHT_RANGE;
     }
 
     private EntityType<? extends Animal> lastAnimalType = null;
@@ -693,7 +704,7 @@ public class BuildingPlacement {
                         break;
                     }
                 }
-                if (!flag && FogOfWarServerEvents.isEnabled()) {
+                if (!flag && FogOfWarServerEvents.isEnabled() && !ScenarioUtils.isScenarioNpc(false, scenarioRoleIndex)) {
                     sendMessageToAllPlayers("server.reignofnether.lost_capitol",
                         false,
                         this.ownerName,
@@ -968,7 +979,7 @@ public class BuildingPlacement {
                     msPerBuild *= building.repairTimeModifier;
                 }
 
-                if (getBuilding() instanceof PortalBasic && !BuildingServerEvents.isOnNetherBlocks(blocks, originPos, serverLevel)
+                if (getBuilding() instanceof PortalBasic && !BuildingValidators.isOnNetherBlocks(serverLevel, blocks, originPos)
                     && !ResearchServerEvents.playerHasResearch(ownerName, ProductionItems.RESEARCH_ADVANCED_PORTALS)) {
                     msPerBuild *= PortalPlacement.NON_NETHER_BUILD_TIME_MODIFIER;
                 }

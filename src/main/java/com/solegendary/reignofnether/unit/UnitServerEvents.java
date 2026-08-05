@@ -172,6 +172,10 @@ public class UnitServerEvents {
         }
     }
 
+    public static void addUnitPoofs(Level level, Entity entity) {
+        MiscUtil.addParticleExplosion(ParticleTypes.POOF, 35, level, entity.position());
+    }
+
     public static void saveFallenHeroUnits(ServerLevel level) {
         HeroUnitSaveData data = HeroUnitSaveData.getInstance(level);
         data.heroUnits.clear();
@@ -375,6 +379,10 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof LivingEntity le &&
+                (ResourceSources.isHuntableAnimal(le) || le instanceof PhantomSummon || le instanceof Unit))
+            addUnitPoofs(evt.getLevel(), le);
+
         if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof Mob mob) {
             mob.setBaby(false);
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
@@ -642,6 +650,8 @@ public class UnitServerEvents {
                 }
             }
         }
+
+        //worker drops
     }
 
     // prevent onDropItem firing twice if the same animal is killed by two workers on the same tick
@@ -668,6 +678,7 @@ public class UnitServerEvents {
                 }
 
                 // insert a drop-off command without disrupting other queued commands
+                /*
                 if (Unit.atThresholdResources(unit)) {
                     int unitId = ((Mob) unit).getId();
                     boolean hasDropOffCommandQueued = false;
@@ -690,6 +701,8 @@ public class UnitServerEvents {
                         ));
                     }
                 }
+
+                 */
             } else {
                 lastHuntedAnimalId = evt.getEntity().getId();
             }
@@ -731,9 +744,9 @@ public class UnitServerEvents {
             UnitIdleWorkerClientBoundPacket.sendIdleWorkerPacket();
 
             for (LivingEntity entity : allUnits) {
-                if (entity instanceof Unit unit) {
+                if (entity instanceof Unit unit && evt.level.getServer() != null) {
                     UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
-                    UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
+                    UnitSyncClientboundPacket.sendSyncStatsPacket(evt.level.getServer().getPlayerList().getPlayers(), entity);
 
                     if (unit.getAnchor() != null)
                         UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
@@ -957,8 +970,9 @@ public class UnitServerEvents {
             }
         }
 
-        if (evt.getEntity().getAbsorptionAmount() > 0)
-            UnitSyncClientboundPacket.sendSyncStatsPacket(evt.getEntity());
+        MinecraftServer server = evt.getEntity().level().getServer();
+        if (evt.getEntity().getAbsorptionAmount() > 0 && server != null)
+            UnitSyncClientboundPacket.sendSyncStatsPacket(server.getPlayerList().getPlayers(), evt.getEntity());
 
         if (evt.getSource().getEntity() instanceof HeadhunterUnit headhunterUnit &&
                 headhunterUnit.hasFlameTrident() &&

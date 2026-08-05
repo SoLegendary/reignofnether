@@ -393,6 +393,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), 2)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
     }
@@ -531,11 +532,14 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
             setDeltaMovement(new Vec3(0, 0.25, 0));
 
         if (onGround()) {
-            boolean inAttackRange = isInRangeOfAttackTarget();
-            if (inAttackRange && !(getMoveControl() instanceof SlimeJumpMoveControl)) {
-                this.moveControl = jumpMoveControl;
-                this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed * SlimeJumpMoveControl.MOVESPEED_MULTIPLIER);
-            } else if (!inAttackRange && !(getMoveControl() instanceof SlimeRollMoveControl)) {
+            boolean shouldJump = this.getPersistentData().getBoolean("forceJumping") || isInRangeOfAttackTarget();
+            if (shouldJump) {
+                if (!(getMoveControl() instanceof SlimeJumpMoveControl)) {
+                    this.moveControl = jumpMoveControl;
+                    this.getAttribute(Attributes.MOVEMENT_SPEED)
+                            .setBaseValue(movementSpeed * SlimeJumpMoveControl.MOVESPEED_MULTIPLIER);
+                }
+            } else if (!(getMoveControl() instanceof SlimeRollMoveControl)) {
                 this.moveControl = rollMoveControl;
                 this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
             }

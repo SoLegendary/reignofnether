@@ -198,6 +198,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }

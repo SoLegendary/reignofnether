@@ -2,7 +2,9 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
@@ -50,7 +52,9 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, AttackerUnit, ArmSwingingUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -68,7 +72,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -96,6 +99,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
     public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
+    public ExploreBuildLocationGoal getExploreBuildLocationGoal() {return exploreBuildLocationGoal;}
     public int getMaxResources() {return maxResources;}
 
     private MoveToTargetBlockGoal moveGoal;
@@ -103,6 +107,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     public BuildRepairGoal buildRepairGoal;
     public GatherResourcesGoal gatherResourcesGoal;
     private ReturnResourcesGoal returnResourcesGoal;
+    private ExploreBuildLocationGoal exploreBuildLocationGoal;
     private AbstractMeleeAttackUnitGoal attackGoal;
 
     public LivingEntity getFollowTarget() { return followTarget; }
@@ -232,6 +237,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
@@ -293,6 +299,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         this.buildRepairGoal = new BuildRepairGoal(this);
         this.gatherResourcesGoal = new GatherResourcesGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
+        this.exploreBuildLocationGoal = new ExploreBuildLocationGoal(this);
     }
 
     @Override
@@ -302,6 +309,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, exploreBuildLocationGoal);
         this.goalSelector.addGoal(2, buildRepairGoal);
         this.goalSelector.addGoal(2, gatherResourcesGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);

@@ -56,6 +56,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -84,6 +85,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public interface Unit {
 
+    int DEFAULT_SIGHT_RANGE = 16;
     int ANCHOR_RETREAT_RANGE = 30;
 
     int PIGLIN_HEALING_TICKS = 8 * ResourceCost.TICKS_PER_SECOND;
@@ -160,6 +162,10 @@ public interface Unit {
         }
         AttributeInstance attr = ((LivingEntity) this).getAttribute(Attributes.MAX_HEALTH);
         return (float) (attr != null ?  attr.getValue() : Attributes.MAX_HEALTH.getDefaultValue()) + bonus;
+    }
+    public default int getSightRange() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.SIGHT_RANGE.get());
+        return (int) Math.round(attr != null ?  attr.getValue() : AttributeRegistrar.SIGHT_RANGE.get().getDefaultValue());
     }
 
     public ResourceCost getCost();
@@ -679,6 +685,12 @@ public interface Unit {
         if (this instanceof WorkerUnit)
             idleWorker = WorkerUnit.isIdle((WorkerUnit) this);
 
+        for (Goal goal : ((Mob) this).goalSelector.getAvailableGoals()) {
+            if (goal instanceof GenericUntargetedSpellGoal spellGoal && spellGoal.isCasting())
+                return false;
+            if (goal instanceof GenericTargetedSpellGoal spellGoal && spellGoal.isCasting())
+                return false;
+        }
         // some larger mobs like bears get stuck near their movetarget so nav won't be done but it also won't be null
         boolean stationaryNearMoveTarget = false;
         if (this.getMoveGoal().getMoveTarget() != null) {

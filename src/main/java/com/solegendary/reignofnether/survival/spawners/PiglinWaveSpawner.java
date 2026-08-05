@@ -161,7 +161,9 @@ public class PiglinWaveSpawner {
                         ENEMY_OWNER_NAME,
                         new int[] {},
                         false,
-                        false
+                        false,
+                        true,
+                        true
                 );
                 if (building != null)
                     for (BuildingBlock bb : building.getBlocks())

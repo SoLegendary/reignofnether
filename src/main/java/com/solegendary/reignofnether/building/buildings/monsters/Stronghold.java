@@ -160,7 +160,7 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
 
     @Override
     public int getRange(BuildingPlacement placement) {
-        return (/*//TODO fix bug that isBuiltServerside wont be set in some cases  placement.isBuiltServerside &&*/ placement.isBuilt) ? nightRange : 0;
+        return placement.isBuilt ? nightRange : 0;
     }
 
     @Override

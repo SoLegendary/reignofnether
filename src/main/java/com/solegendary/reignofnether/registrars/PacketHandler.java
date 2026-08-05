@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.alliance.*;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
+import com.solegendary.reignofnether.building.FogBuildingClientboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerboundPacket;
 import com.solegendary.reignofnether.config.ClientboundSyncResourceCostPacket;
@@ -21,8 +22,10 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hero.FallenHeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerServerboundPacket;
+import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
 import com.solegendary.reignofnether.player.MatchStatsClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -356,6 +359,30 @@ public final class PacketHandler {
                 .encoder(PlayerChunksClientboundPacket::encode)
                 .decoder(PlayerChunksClientboundPacket::new)
                 .consumerMainThread(PlayerChunksClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(HudClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(HudClientboundPacket::encode)
+                .decoder(HudClientboundPacket::new)
+                .consumerMainThread(HudClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(CameraClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CameraClientboundPacket::encode)
+                .decoder(CameraClientboundPacket::new)
+                .consumerMainThread(CameraClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(FogNeutralUnitClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FogNeutralUnitClientboundPacket::encode)
+                .decoder(FogNeutralUnitClientboundPacket::new)
+                .consumerMainThread(FogNeutralUnitClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(FogBuildingClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FogBuildingClientboundPacket::encode)
+                .decoder(FogBuildingClientboundPacket::new)
+                .consumerMainThread(FogBuildingClientboundPacket::handle)
                 .add();
     }
 }

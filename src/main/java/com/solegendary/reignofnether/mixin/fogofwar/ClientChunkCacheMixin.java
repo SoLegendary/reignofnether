@@ -126,6 +126,8 @@ public abstract class ClientChunkCacheMixin {
         if (mask == null) return; // fog off or fully visible: apply the packet untouched
 
         LevelChunk old = ((ClientChunkCache) (Object) this).getChunk(x, z, ChunkStatus.FULL, false);
+        FogOfWarClientEvents.setChunkFreshlyLoaded(x, z, old == null);
+
         // Still cached -> snapshot it live. Not cached -> fall back to what we stored when it was dropped.
         // Peek rather than remove: replaceWithPacketData can still bail out (out of view range) and we
         // would rather keep the memory than lose it. The entry is dropped in the RETURN hook on success.

@@ -6,7 +6,10 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CallToArmsUnit;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
@@ -71,6 +74,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession.*;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -94,7 +98,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -122,6 +125,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
     public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
+    public ExploreBuildLocationGoal getExploreBuildLocationGoal() {return exploreBuildLocationGoal;}
     public int getMaxResources() {return maxResources;}
 
     private MoveToTargetBlockGoal moveGoal;
@@ -129,6 +133,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public BuildRepairGoal buildRepairGoal;
     public GatherResourcesGoal gatherResourcesGoal;
     private ReturnResourcesGoal returnResourcesGoal;
+    private ExploreBuildLocationGoal exploreBuildLocationGoal;
     private AbstractMeleeAttackUnitGoal attackGoal;
     public CallToArmsGoal callToArmsGoal;
 
@@ -356,6 +361,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
@@ -475,6 +481,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         this.buildRepairGoal = new BuildRepairGoal(this);
         this.gatherResourcesGoal = new GatherResourcesGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
+        this.exploreBuildLocationGoal = new ExploreBuildLocationGoal(this);
         this.callToArmsGoal = new CallToArmsGoal(this);
     }
 
@@ -485,6 +492,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, exploreBuildLocationGoal);
         this.goalSelector.addGoal(2, buildRepairGoal);
         this.goalSelector.addGoal(2, gatherResourcesGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);

@@ -211,6 +211,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
@@ -272,7 +273,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     }
 
     public void startToRoar() {
-        this.playSound(SoundEvents.RAVAGER_ROAR, 3.0F, 1.0F);
+        this.playSound(SoundEvents.RAVAGER_ROAR, 1.5F, 1.0F);
         this.roarTick = 40;
     }
 

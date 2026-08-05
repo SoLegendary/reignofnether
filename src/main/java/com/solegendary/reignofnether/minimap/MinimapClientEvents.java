@@ -38,6 +38,7 @@ import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.util.ArrayUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
@@ -50,6 +51,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -57,15 +59,20 @@ import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -126,6 +133,9 @@ public class MinimapClientEvents {
     public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
     public static final ArrayList<MapMarker> mapMarkers = new ArrayList<>();
 
+    // last known position of neutral units in fog
+    public static ArrayList<MinimapUnit> neutralFogUnits = new ArrayList<>();
+
     private static final float DARK = 0.40f;
     private static final float EXTRA_DARK = 0.10f;
 
@@ -136,8 +146,38 @@ public class MinimapClientEvents {
         return highlightAnimals;
     }
 
+    public static void addNeutralFogUnit(int id, Vector3f vec3fMin, Vector3f vec3fMax) {
+        Vec3 vec3Min = new Vec3(vec3fMin.x, vec3fMin.y, vec3fMin.z);
+        Vec3 vec3Max = new Vec3(vec3fMax.x, vec3fMax.y, vec3fMax.z);
+        minimapUnits.removeIf(mu -> mu.id == id);
+        neutralFogUnits.removeIf(mu -> mu.id == id);
+        neutralFogUnits.add(new MinimapUnit(id, new AABB(vec3Min, vec3Max)));
+    }
+
+    public static void removeNeutralFogUnit(int id) {
+        neutralFogUnits.removeIf(minimapUnit -> minimapUnit.id == id);
+    }
+
+    public static void highlightNeutralFogUnits(PoseStack pose) {
+        if (!FogOfWarClientEvents.isEnabled())
+            return;
+        for (MinimapUnit mu : neutralFogUnits) {
+            if (MC.level != null) {
+                Entity entity = MC.level.getEntity(mu.id);
+                if (!FogOfWarClientEvents.isBlockVisible(mu.pos) && (entity == null || !FogOfWarClientEvents.isBlockVisible(entity.getOnPos()))) {
+                    Color color = new Color(PlayerColors.getPlayerDisplayColorHex(""));
+                    float r = color.getRed() / 255.0f;
+                    float g = color.getGreen() / 255.0f;
+                    float b = color.getBlue() / 255.0f;
+                    MyRenderer.drawBoxBottom(pose, mu.aabb, r, g, b, 0.5f);
+                }
+            }
+        }
+    }
+
     public static void clearMinimapUnits() {
         minimapUnits.clear();
+        neutralFogUnits.clear();
     }
 
     // for tracking serverside Units that don't yet exist on clientside
@@ -145,11 +185,20 @@ public class MinimapClientEvents {
         public BlockPos pos;
         public final int id;
         public final String ownerName;
+        public final AABB aabb;
 
         public MinimapUnit(BlockPos pos, int id, String ownerName) {
             this.pos = pos;
             this.id = id;
             this.ownerName = ownerName;
+            this.aabb = null;
+        }
+
+        public MinimapUnit(int id, AABB aabb) { // neutral unit
+            this.pos = new BlockPos((int) aabb.getCenter().x, (int) aabb.minY, (int) aabb.getCenter().z);
+            this.id = id;
+            this.ownerName = "";
+            this.aabb = aabb;
         }
     }
 
@@ -240,17 +289,17 @@ public class MinimapClientEvents {
         g.blit(mapTexLoc, x, y, w, h, 0, 0, tex, tex, tex, tex);
     }
 
-    public static org.joml.Vector2f worldToRect(int worldX, int worldZ,
+    public static Vector2f worldToRect(int worldX, int worldZ,
                                                 int rectX, int rectY, int rectW, int rectH) {
         int centreX = xc_world;
         int centreZ = zc_world;
         int span = worldRadius * 2;
         float u = (worldX - (centreX - worldRadius)) / (float) span;
         float v = (worldZ - (centreZ - worldRadius)) / (float) span;
-        return new org.joml.Vector2f(rectX + u * rectW, rectY + v * rectH);
+        return new Vector2f(rectX + u * rectW, rectY + v * rectH);
     }
 
-    public static net.minecraft.core.BlockPos rectToWorld(int sx, int sy,
+    public static BlockPos rectToWorld(int sx, int sy,
                                                           int rectX, int rectY, int rectW, int rectH) {
         float u = (sx - rectX) / (float) Math.max(1, rectW);
         float v = (sy - rectY) / (float) Math.max(1, rectH);
@@ -258,11 +307,10 @@ public class MinimapClientEvents {
         int wx = (int) (xc_world - worldRadius + u * span);
         int wz = (int) (zc_world - worldRadius + v * span);
         int y = 64;
-        net.minecraft.client.Minecraft mc = Minecraft.getInstance();
-        if (mc.level != null) {
-            y = mc.level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, wx, wz);
+        if (MC.level != null) {
+            y = MC.level.getHeight(Heightmap.Types.MOTION_BLOCKING, wx, wz);
         }
-        return new net.minecraft.core.BlockPos(wx, y, wz);
+        return new BlockPos(wx, y, wz);
     }
 
     public static void setLargeMap(boolean large) {
@@ -531,7 +579,15 @@ public class MinimapClientEvents {
         int xMin = xc_world - worldRadius;
         int xMax = xc_world + worldRadius;
 
-        Set<ChunkPos> brightChunks = FogOfWarClientEvents.brightChunks;
+        // sampled once per pass rather than per column: cheaper, and stops a mid-loop fog toggle
+        // from producing a half-shaded map
+        final boolean fogEnabled = FogOfWarClientEvents.isEnabled();
+        final BlockPos.MutableBlockPos borderPos = new BlockPos.MutableBlockPos();
+
+        // fog state for the chunk the scan is currently inside; refreshed only on chunk boundaries
+        long cachedChunkKey = ChunkPos.INVALID_CHUNK_POS;
+        boolean chunkBright = true;
+        long[] edgeMask = null;
 
         // draw terrain blocks
         for (int z = zMin; z < zMax; z++) {
@@ -558,20 +614,28 @@ public class MinimapClientEvents {
                 }
             }
 
+            final int chunkZ = z >> 4;
+
             for (int x = xMin; x < xMax; x++) {
 
-                boolean isBright = false;
-                if (FogOfWarClientEvents.isEnabled()) {
-                    // apply a much slower update rate to dark chunks
-                    for (ChunkPos chunkPos : brightChunks) {
-                        if (x >= chunkPos.getMinBlockX() && x <= chunkPos.getMaxBlockX() && z >= chunkPos.getMinBlockZ()
-                            && z <= chunkPos.getMaxBlockZ()) {
-                            isBright = true;
-                            break;
-                        }
+                boolean columnVisible = true;
+                if (fogEnabled) {
+                    int chunkX = x >> 4;
+                    long chunkKey = ChunkPos.asLong(chunkX, chunkZ);
+                    if (chunkKey != cachedChunkKey) { // ~once per 16 columns
+                        cachedChunkKey = chunkKey;
+                        chunkBright = FogOfWarClientEvents.brightChunks.contains(new ChunkPos(chunkX, chunkZ));
+                        edgeMask = chunkBright ? FogOfWarClientEvents.getEdgeMask(chunkX, chunkZ) : null;
                     }
-                    if (!isBright && skipDarkPartition) {
+                    // apply a much slower update rate to dark chunks
+                    if (skipDarkPartition && !chunkBright) {
                         continue;
+                    }
+                    if (!chunkBright) {
+                        columnVisible = false;
+                    } else if (edgeMask != null) {
+                        int i = ((x & 15) << 4) | (z & 15);
+                        columnVisible = (edgeMask[i >> 6] & (1L << (i & 63))) != 0;
                     }
                 }
 
@@ -592,7 +656,7 @@ public class MinimapClientEvents {
                 } while (true);
 
                 int yNorth = MC.level.getChunkAt(new BlockPos(x, 0, z - 1))
-                    .getHeight(Heightmap.Types.WORLD_SURFACE, x, z - 1);
+                        .getHeight(Heightmap.Types.WORLD_SURFACE, x, z - 1);
                 BlockState bsNorth;
                 do {
                     bsNorth = MC.level.getBlockState(new BlockPos(x, yNorth, z - 1));
@@ -640,13 +704,12 @@ public class MinimapClientEvents {
                 int x0 = x - xc_world + worldRadius;
                 int z0 = z - zc_world + worldRadius;
 
-                BlockPos pos = new BlockPos(x, 0, z);
-                if (!MC.level.getWorldBorder().isWithinBounds(pos)) {
+                borderPos.set(x, 0, z);
+                if (!MC.level.getWorldBorder().isWithinBounds(borderPos)) {
                     rgb = MiscUtil.shadeHexRGB(rgb, EXTRA_DARK);
-                } else if (!FogOfWarClientEvents.isInBrightChunk(pos)) {
+                } else if (!columnVisible) {
                     rgb = MiscUtil.shadeHexRGB(rgb, DARK);
                 }
-
 
                 // append 0xFF to include 100% alpha (<< 4 shifts by 1 hex digit)
                 mapColoursTerrain[x0][z0] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
@@ -655,59 +718,7 @@ public class MinimapClientEvents {
         forceUpdateAllPartitions = false;
     }
 
-    private static void updateMapViewQuad() {
-        if (MC.level == null || MC.player == null || suppressViewQuad) {
-            return;
-        }
 
-        // get world position of corners of the screen
-        int yOffset = 0;//(int) (MC.player.getY() - 100) * 5;
-
-        Vector3d tl = MiscUtil.screenPosToWorldPos(MC, 0, -yOffset);
-        Vector3d bl = MiscUtil.screenPosToWorldPos(MC, 0, MC.getWindow().getGuiScaledHeight() - yOffset);
-        Vector3d br = MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), MC.getWindow().getGuiScaledHeight() - yOffset);
-        Vector3d tr = MiscUtil.screenPosToWorldPos(MC, MC.getWindow().getGuiScaledWidth(), -yOffset);
-
-        Vector3d[] corners = new Vector3d[] { tl, bl, br, tr };
-        // adjust corners according to camera angle
-        Vector3d lookVector = MiscUtil.getPlayerLookVector(MC);
-        corners[0] = MyMath.addVector3d(corners[0], lookVector, 90 - OrthoviewClientEvents.getCamRotY());
-        corners[1] = MyMath.addVector3d(corners[1], lookVector, 75 - OrthoviewClientEvents.getCamRotY());
-        corners[2] = MyMath.addVector3d(corners[2], lookVector, 75 - OrthoviewClientEvents.getCamRotY());
-        corners[3] = MyMath.addVector3d(corners[3], lookVector, 90 - OrthoviewClientEvents.getCamRotY());
-
-        int zMin = zc_world - worldRadius;
-        int zMax = zc_world + worldRadius;
-        int xMin = xc_world - worldRadius;
-        int xMax = xc_world + worldRadius;
-
-        // draw terrain blocks
-        for (int z = zMin; z < zMax; z++) {
-            xLoop:
-            for (int x = xMin; x < xMax; x++) {
-
-                // draw view quad
-                for (int i = 0; i < corners.length; i++) {
-                    int j = i + 1;
-                    if (j >= corners.length) {
-                        j = 0;
-                    }
-
-                    if (MyMath.isPointOnLine(new Vec2((float) corners[i].x, (float) corners[i].z),
-                        new Vec2((float) corners[j].x, (float) corners[j].z),
-                        new Vec2(x, z),
-                        OrthoviewClientEvents.getZoom() * 2
-                        // larger = thicker line
-                    )) {
-                        int x0 = x - xc_world + worldRadius;
-                        int z0 = z - zc_world + worldRadius;
-                        mapColoursOverlays[x0][z0] = 0xFFFFFFFF;
-                        continue xLoop;
-                    }
-                }
-            }
-        }
-    }
 
     private static void updateNightCircles() {
 
@@ -824,13 +835,23 @@ public class MinimapClientEvents {
         for (MinimapUnit minimapUnit : minimapUnits) {
             if (!FogOfWarClientEvents.isInBrightChunk(minimapUnit.pos) || MC.player == null)
                 continue;
-
             String unitOwnerName = minimapUnit.ownerName;
             var colorHex = PlayerColors.getPlayerDisplayColorHex(unitOwnerName);
-
             drawUnitOnMap(
                     minimapUnit.pos.getX(),
                     minimapUnit.pos.getZ(),
+                    colorHex
+            );
+        }
+        for (MinimapUnit neutralFogUnit : neutralFogUnits) {
+            Entity entity = MC.level.getEntity(neutralFogUnit.id);
+            if (FogOfWarClientEvents.isInBrightChunk(neutralFogUnit.pos) || MC.player == null ||
+                (entity != null && FogOfWarClientEvents.isInBrightChunk(entity)))
+                continue;
+            var colorHex = PlayerColors.getPlayerDisplayColorHex("");
+            drawUnitOnMap(
+                    neutralFogUnit.pos.getX(),
+                    neutralFogUnit.pos.getZ(),
                     colorHex
             );
         }
@@ -1351,8 +1372,10 @@ public class MinimapClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
+        if (evt.phase != TickEvent.Phase.END || !OrthoviewClientEvents.isEnabled())
             return;
+
+        long t0 = System.nanoTime();
 
         updateMapTerrain(terrainPartition, darkTerrainPartition);
         mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
@@ -1363,7 +1386,8 @@ public class MinimapClientEvents {
         mapMarkers.removeIf(MapMarker::tick);
 
         updateMapUnitsAndBuildings();
-        updateMapViewQuad();
+        if (!suppressViewQuad)
+            mapColoursOverlays = MinimapViewQuadRenderer.updateMapViewQuad(mapColoursOverlays);
 
         // as the map area increases, decrease refresh rate to maintain FPS
         terrainPartition += 1;
@@ -1375,7 +1399,6 @@ public class MinimapClientEvents {
                 darkTerrainPartition = 1;
             }
         }
-
         updateMapTexture();
     }
 }

@@ -877,6 +877,7 @@ public class CommandsServerEvents {
 			new int[0],
 			false,
 			false,
+			true,
 			true
 		);
 		if (placement == null) {

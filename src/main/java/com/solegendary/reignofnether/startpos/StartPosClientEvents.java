@@ -1,8 +1,7 @@
 package com.solegendary.reignofnether.startpos;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
@@ -11,9 +10,11 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -22,6 +23,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.isBridge;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class StartPosClientEvents {
@@ -175,16 +177,21 @@ public class StartPosClientEvents {
 
         for (StartPos startPos : startPoses) {
             if (startPos.faction != Faction.NONE) {
+                Building capitolBuilding = null;
                 switch (startPos.faction) {
-                    case VILLAGERS -> BuildingClientEvents.setBuildingToPlace(Buildings.TOWN_CENTRE);
-                    case MONSTERS -> BuildingClientEvents.setBuildingToPlace(Buildings.MAUSOLEUM);
-                    case PIGLINS -> BuildingClientEvents.setBuildingToPlace(Buildings.CENTRAL_PORTAL);
+                    case VILLAGERS -> capitolBuilding = Buildings.TOWN_CENTRE;
+                    case MONSTERS -> capitolBuilding = Buildings.MAUSOLEUM;
+                    case PIGLINS -> capitolBuilding = Buildings.CENTRAL_PORTAL;
                 }
                 int forceColour = 2;
                 if (startPos.playerName.equals(MC.player.getName().getString()))
                     forceColour = 1;
-                BuildingClientEvents.drawBuildingToPlace(evt.getPoseStack(), BuildingClientEvents.getBuildingOriginPos(startPos.pos), forceColour);
-                BuildingClientEvents.setBuildingToPlace(null);
+                if (capitolBuilding != null) {
+                    ArrayList<BuildingBlock> blocksToDraw = capitolBuilding.getRelativeBlockData(MC.level);
+                    Vec3i dimensions = BuildingUtils.getBuildingSize(blocksToDraw);
+                    BlockPos bp = BuildingUtils.getBuildingOriginPos(startPos.pos, false, Rotation.NONE, dimensions);
+                    BuildingClientEvents.drawBuilding(capitolBuilding.getRelativeBlockData(MC.level), evt.getPoseStack(), bp, forceColour);
+                }
             }
         }
     }

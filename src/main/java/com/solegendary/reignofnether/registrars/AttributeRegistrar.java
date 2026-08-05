@@ -53,6 +53,12 @@ public class AttributeRegistrar {
                             .setSyncable(true)
             );
 
+    public static final RegistryObject<Attribute> SIGHT_RANGE =
+            ATTRIBUTES.register("sight_range",
+                    () -> new RangedAttribute("attribute.reignofnether.sight_range", 16, 4, 64)
+                            .setSyncable(true)
+            );
+
     public static final RegistryObject<Attribute> BASE_MAX_HEALTH =
             ATTRIBUTES.register("base_max_health",
                     () -> new RangedAttribute("attribute.reignofnether.base_max_health", 100, 1, 999999)

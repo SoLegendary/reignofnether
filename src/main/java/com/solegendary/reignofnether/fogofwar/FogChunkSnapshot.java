@@ -47,7 +47,7 @@ public class FogChunkSnapshot {
 
     private static Path dir = null;
 
-    public static void captureWorldBorder(ServerLevel level) {
+    public static void captureFogChunks(ServerLevel level) {
         clear();
         dir = resolveDir(level);
         deleteDir(); // wipe stale files left on disk by a prior server session before recapturing

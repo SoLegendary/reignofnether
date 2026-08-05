@@ -53,6 +53,7 @@
     "attribute.reignofnether.ranged_damage_resist": "Ranged Damage Resist",
     "attribute.reignofnether.magic_damage_resist": "Magic Damage Resist",
     "attribute.reignofnether.evasion_chance": "Evasion Chance",
+    "attribute.reignofnether.sight_range": "Sight Range",
 
     "attribute.reignofnether.base_max_health": "Base Max Health",
     "attribute.reignofnether.base_max_mana": "Base Max Mana",
@@ -798,6 +799,7 @@
     "hud.helperbuttons.reignofnether.select_all_military_units": "Select all military units",
     "hud.helperbuttons.reignofnether.select_all_military_units_shift": "(Shift-click to select only on screen)",
     "hud.helperbuttons.reignofnether.cancel": "Cancel",
+    "hud.helperbuttons.reignofnether.cancel.error": "Cannot delete this building",
 
     "hud.helperbuttons.reignofnether.beacon.beacon_level_title": "Beacon Level: %d/%d",
     "hud.helperbuttons.reignofnether.beacon.no_controller": "No one controls the beacon",
@@ -1349,7 +1351,7 @@
     "entity.reignofnether.spider_unit": "Spider",
     "entity.reignofnether.spider_unit.tooltip1": "A giant spider that is nimble but frail.",
     "entity.reignofnether.spider_unit.tooltip2": "Can be upgraded to allow skeletons to ride them.",
-    "entity.reignofnether.spider_unit.tooltip3": "Spiders move much more slowly under sunlight.",
+    "entity.reignofnether.spider_unit.tooltip3": "Spiders are slow under sunlight but gain bonus vision at night.",
     "entity.reignofnether.stray_unit": "Stray",
     "entity.reignofnether.stray_unit.tooltip1": "A chilling variant of the skeleton that fires slowing arrows.",
     "entity.reignofnether.stray_unit.tooltip2": "Strays will burn under sunlight.",

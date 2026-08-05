@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -59,6 +61,9 @@ public class ResourceSources {
         BlockState bs = level.getBlockState(bp);
         Block block = bs.getBlock();
 
+        if ((block == Blocks.FARMLAND || block == Blocks.SOUL_SAND) && !BuildingUtils.isPosInsideFarm(level.isClientSide, bp))
+            return null;
+
         for (List<ResourceSource> resourceSources : RESOURCE_BLOCK_LISTS)
             for (ResourceSource resourceSource : resourceSources)
                 if (resourceSource.validBlocks.contains(block))
@@ -114,7 +119,7 @@ public class ResourceSources {
     // return a list of food items that a worker gets when killing a huntable animal to make it more consistent
     public static List<ItemStack> getFoodItemsFromAnimal(Animal animal) {
         if (animal instanceof MushroomCow) {
-            return List.of(new ItemStack(Items.BROWN_MUSHROOM, 3), new ItemStack(Items.RED_MUSHROOM, 4)); // 175 food / 10hp
+            return List.of(new ItemStack(Items.BROWN_MUSHROOM, 3), new ItemStack(Items.RED_MUSHROOM, 3)); // 150 food / 10hp
         } else if (animal instanceof Cow) {
             return List.of(new ItemStack(Items.BEEF, 2), new ItemStack(Items.LEATHER, 2)); // 150 food / 10hp
         } else if (animal instanceof Pig) {

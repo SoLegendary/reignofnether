@@ -290,6 +290,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
@@ -324,7 +325,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
                         (b) -> b.isBuilt && b.ownerName.equals(getOwnerName()) && b.getBuilding() instanceof TownCentre);
 
                 int range = TownCentre.MILITIA_RANGE;
-                if (building != null &&
+                if (building == null ||
                     distanceToSqr(building.centrePos.getX(), building.centrePos.getY(), building.centrePos.getZ()) > range * range) {
                     convertToVillager();
                 }

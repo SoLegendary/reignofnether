@@ -70,6 +70,7 @@
         "fogofwar.BiomeColorsMixin",
         "fogofwar.BlockColorsAccessor",
         "fogofwar.ClientChunkCacheMixin",
+        "fogofwar.ClientPacketListenerLightMixin",
         "fogofwar.CompiledChunkMixin",
         "fogofwar.EntityRenderDispatcherMixin",
         "fogofwar.EntityShadowMixin",

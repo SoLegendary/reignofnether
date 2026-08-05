@@ -32,6 +32,43 @@ public class BuildingUtils {
 
     public static List<Keybinding> keybindings = Arrays.asList();
 
+    public static boolean isBridge(Building building) {
+        return building instanceof AbstractBridge;
+    }
+
+    // gets the cursor position rotated according to the preselected building
+    public static BlockPos getBuildingOriginPos(BlockPos cursorBp, boolean isBridge, Rotation buildingRotation, Vec3i buildingDimensions) {
+        int xAdj = 0;
+        int zAdj = 0;
+        int xRadius = buildingDimensions.getX() / 2;
+        int zRadius = buildingDimensions.getZ() / 2;
+
+        switch (buildingRotation) {
+            case NONE -> {
+                xAdj = -xRadius;
+                zAdj = -zRadius;
+            }
+            case CLOCKWISE_90 -> {
+                xAdj = xRadius;
+                zAdj = -zRadius;
+            }
+            case CLOCKWISE_180 -> {
+                xAdj = xRadius;
+                zAdj = zRadius;
+            }
+            case COUNTERCLOCKWISE_90 -> {
+                xAdj = -xRadius;
+                zAdj = zRadius;
+            }
+        }
+        if (isBridge) {
+            cursorBp = cursorBp.offset(0, -1, 0);
+        }
+
+        return cursorBp.offset(xAdj, 0, zAdj);
+    }
+
+
     public static int getTotalCompletedBuildingsOwned(boolean isClientSide, String ownerName) {
         List<BuildingPlacement> buildings;
         if (isClientSide)
@@ -140,17 +177,17 @@ public class BuildingUtils {
 
     // functions for corners/centrePos given only blocks
     // if you have access to the Building itself, you should use .minCorner, .maxCorner and .centrePos
-    public static BlockPos getMinCorner(ArrayList<BuildingBlock> blocks) {
+    public static BlockPos getMinCorner(List<BuildingBlock> blocks) {
         MinMaxValues minMax = calculateMinMax(blocks);
         return new BlockPos(minMax.minX, minMax.minY, minMax.minZ);
     }
 
-    public static BlockPos getMaxCorner(ArrayList<BuildingBlock> blocks) {
+    public static BlockPos getMaxCorner(List<BuildingBlock> blocks) {
         MinMaxValues minMax = calculateMinMax(blocks);
         return new BlockPos(minMax.maxX, minMax.maxY, minMax.maxZ);
     }
 
-    public static BlockPos getCentrePos(ArrayList<BuildingBlock> blocks) {
+    public static BlockPos getCentrePos(List<BuildingBlock> blocks) {
         MinMaxValues minMax = calculateMinMax(blocks);
         return new BlockPos(
                 (minMax.minX + minMax.maxX) / 2,
@@ -159,7 +196,7 @@ public class BuildingUtils {
         );
     }
 
-    private static MinMaxValues calculateMinMax(ArrayList<BuildingBlock> blocks) {
+    private static MinMaxValues calculateMinMax(List<BuildingBlock> blocks) {
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
         int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
 
@@ -332,7 +369,7 @@ public class BuildingUtils {
     }
 
     // Helper method to get the buildings list based on client or server side.
-    private static List<BuildingPlacement> getBuildingsList(boolean isClientSide) {
+    public static List<BuildingPlacement> getBuildingsList(boolean isClientSide) {
         return isClientSide
                 ? BuildingClientEvents.getBuildings()
                 : BuildingServerEvents.getBuildings();

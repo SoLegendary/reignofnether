@@ -22,6 +22,7 @@ import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
 import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
@@ -97,23 +98,24 @@ public class NonUnitServerEvents {
         }
     }
 
+    public static Faction getNonUnitFaction(LivingEntity le) {
+        if (le instanceof IronGolem || le instanceof AbstractIllager || le instanceof AbstractVillager)
+            return Faction.VILLAGERS;
+        else if (le instanceof AbstractPiglin || le instanceof Hoglin || le instanceof Ghast || le instanceof Blaze || le instanceof WitherSkeleton)
+            return Faction.PIGLINS;
+        else if (le instanceof AbstractSkeleton || le instanceof Zombie || le instanceof Creeper || le instanceof Spider || le instanceof Slime || le instanceof Warden)
+            return Faction.MONSTERS;
+        return Faction.NONE;
+    }
+
     @SubscribeEvent
     public static void onChangeTarget(LivingChangeTargetEvent evt) {
         LivingEntity le = evt.getEntity();
 
         // prevent vanilla mobs attacking their RoN faction equivalents
-        if (!(le instanceof Unit) && evt.getNewTarget() instanceof Unit unit) {
-            if ((le instanceof IronGolem || le instanceof AbstractIllager) &&
-                    unit.getFaction() == Faction.VILLAGERS) {
+        if (!(le instanceof Unit) && evt.getNewTarget() instanceof Unit unit)
+            if (unit.getFaction() == getNonUnitFaction(le))
                 evt.setCanceled(true);
-            } else if ((le instanceof AbstractSkeleton || le instanceof Zombie || le instanceof Creeper || le instanceof Spider || le instanceof Slime || le instanceof Warden) &&
-                    unit.getFaction() == Faction.MONSTERS) {
-                evt.setCanceled(true);
-            } else if ((le instanceof AbstractPiglin || le instanceof Hoglin || le instanceof Ghast || le instanceof Blaze || le instanceof WitherSkeleton) &&
-                    unit.getFaction() == Faction.PIGLINS) {
-                evt.setCanceled(true);
-            }
-        }
     }
 
     private static boolean shouldMobBeAggressive(Mob mob) {

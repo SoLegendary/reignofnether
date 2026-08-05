@@ -200,16 +200,16 @@ public class BuildingServerboundPacket {
             ReignOfNether.LOGGER.info("[Building] {} performed {} for {} (itemName: {}, pos: {})", player.getName(), this.action, this.ownerName, this.itemName, this.buildingPos);
             switch (this.action) {
                 case PLACE -> {
-                    BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge);
+                    BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge, false, false);
                 }
                 case PLACE_AND_QUEUE -> {
-                    BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge);
+                    BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge, false, false);
                 }
                 case PLACE_CUSTOM -> {
-                    BuildingServerEvents.placeBuilding(CustomBuildingServerEvents.getCustomBuilding(this.itemName), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge);
+                    BuildingServerEvents.placeBuilding(CustomBuildingServerEvents.getCustomBuilding(this.itemName), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge, false, false);
                 }
                 case PLACE_AND_QUEUE_CUSTOM -> {
-                    BuildingServerEvents.placeBuilding(CustomBuildingServerEvents.getCustomBuilding(this.itemName), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge);
+                    BuildingServerEvents.placeBuilding(CustomBuildingServerEvents.getCustomBuilding(this.itemName), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge, false, false);
                 }
                 case DESTROY -> {
                     BuildingServerEvents.cancelBuilding(building, this.ownerName);

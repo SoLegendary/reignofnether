@@ -606,15 +606,11 @@ public class UnitClientEvents {
             unit.initialiseGoals(); // for clientside data tracking - server automatically does this via registerGoals();
             unit.setupEquipmentAndUpgradesClient();
 
-            addUnitPoofs(evt.getLevel(), entity);
-
             UnitSyncServerboundPacket.requestSyncAbilities(entity.getId());
 
             if (entity instanceof HeroUnit)
                 HeroServerboundPacket.requestHeroSync(entity.getId());
         }
-        if (entity instanceof LivingEntity le && (ResourceSources.isHuntableAnimal(le) || le instanceof PhantomSummon))
-            addUnitPoofs(evt.getLevel(), entity);
         markSelectedUnitsChanged();
     }
 
@@ -728,7 +724,6 @@ public class UnitClientEvents {
                             e.getId() == MC.player.getId()
                 );
             }
-            BuildingClientEvents.isBuilt = false;
             lastLeftClickTime = System.currentTimeMillis();
         }
         else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
@@ -1013,6 +1008,7 @@ public class UnitClientEvents {
 
                 MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, r, g, b, 0.5f);
             }
+            MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack());
 
             // render items in front of face for eating units
             for (LivingEntity entity : getAllUnits()) {
@@ -1389,10 +1385,6 @@ public class UnitClientEvents {
                     UnitClientEvents.idleWorkerIds.add(id);
             }
         }
-    }
-
-    public static void addUnitPoofs(Level level, Entity entity) {
-        MiscUtil.addParticleExplosion(ParticleTypes.POOF, 35, level, entity.position());
     }
 
     public static void makeVillagerVeteran(int unitId) {

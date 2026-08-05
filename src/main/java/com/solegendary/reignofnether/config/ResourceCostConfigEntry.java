@@ -21,7 +21,6 @@ public class ResourceCostConfigEntry {
     private final int default_seconds;
     private final int default_population;
     public final String id;
-    //TODO: Use translateable component, add to lang file
     private final String comment;
 
     private ResourceCostConfigEntry(int food, int wood, int ore, int seconds, int population, ResourceCost associatedCost, String comment) {

@@ -414,6 +414,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
@@ -739,20 +740,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public boolean isIdle() {
-        boolean idleAttacker = getAttackMoveTarget() == null &&
-                !hasLivingTarget() &&
-                !AttackerUnit.isAttackingBuilding(this);
-
-        // some larger mobs like bears get stuck near their movetarget so nav won't be done but it also won't be null
-        boolean stationaryNearMoveTarget = false;
-        if (this.getMoveGoal().getMoveTarget() != null) {
-            double distToMoveTarget = this.distanceToSqr(this.getMoveGoal().getMoveTarget().getCenter());
-            boolean stationary = this.getDeltaMovement().x == 0 || this.getDeltaMovement().z == 0;
-            stationaryNearMoveTarget = stationary && distToMoveTarget < 4;
-        }
-        return (this.getMoveGoal().getMoveTarget() == null || stationaryNearMoveTarget) &&
-                this.getFollowTarget() == null &&
-                idleAttacker &&
+        return HeroUnit.super.isIdle() &&
                 !isBlizzardInProgress() &&
                 !isFrostBlinkInProgress();
     }

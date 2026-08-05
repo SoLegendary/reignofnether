@@ -44,6 +44,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -196,6 +197,8 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     final static public float movementSpeedFlying = 0.30f;
     final static public float attackRange = 12.0F;
     final static public float attackRangeFlying = 14.0F;
+    final static public float sightRange = 16.0F;
+    final static public float sightRangeFlying = 24.0F;
     final static public float aggroRange = 12;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
@@ -298,6 +301,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
             this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeedFlying);
             this.getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get()).setBaseValue(attacksPerSecondFlying);
             this.getAttribute(AttributeRegistrar.ATTACK_RANGE.get()).setBaseValue(attackRangeFlying + (hasLongshot() ? LONGSHOT_BONUS_RANGE : 0));
+            this.getAttribute(AttributeRegistrar.SIGHT_RANGE.get()).setBaseValue(sightRangeFlying);
 
             if (!level().isClientSide() && doAnimationAndSound) {
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.CHARGE_SPELL, this);
@@ -315,6 +319,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
             this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
             this.getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get()).setBaseValue(attacksPerSecond);
             this.getAttribute(AttributeRegistrar.ATTACK_RANGE.get()).setBaseValue(attackRange + (hasLongshot() ? LONGSHOT_BONUS_RANGE : 0));
+            this.getAttribute(AttributeRegistrar.SIGHT_RANGE.get()).setBaseValue(sightRange);
 
             if (!level().isClientSide() && doAnimationAndSound)
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.STOP, this);
@@ -406,6 +411,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), sightRange)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0);
     }
 

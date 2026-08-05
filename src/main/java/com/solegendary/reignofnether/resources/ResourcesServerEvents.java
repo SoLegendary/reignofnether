@@ -63,6 +63,9 @@ public class ResourcesServerEvents {
     public static final int STARTING_FOOD = 150;
     public static final int STARTING_WOOD = 500;
     public static final int STARTING_ORE = 250;
+    public static final int STARTING_FOOD_READIED = 150;
+    public static final int STARTING_WOOD_READIED = 150;
+    public static final int STARTING_ORE_READIED = 50;
 
     public static final float UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL = 0.25f;
     public static final float NEUTRAL_UNIT_BOUNTY_PERCENT = 0.25f;
@@ -150,7 +153,7 @@ public class ResourcesServerEvents {
         }
     }
 
-    public static void resetResources(String playerName) {
+    public static void resetResources(String playerName, boolean readiedStart) {
         for (Resources resources : resourcesList) {
             if (resources.ownerName.equals(playerName)) {
                 if (TutorialServerEvents.isEnabled()) {
@@ -161,6 +164,10 @@ public class ResourcesServerEvents {
                     resources.food = STARTING_FOOD_SANDBOX;
                     resources.wood = STARTING_WOOD_SANDBOX;
                     resources.ore = STARTING_ORE_SANDBOX;
+                } else if (readiedStart) {
+                    resources.food = STARTING_FOOD_READIED;
+                    resources.wood = STARTING_WOOD_READIED;
+                    resources.ore = STARTING_ORE_READIED;
                 } else {
                     resources.food = STARTING_FOOD;
                     resources.wood = STARTING_WOOD;

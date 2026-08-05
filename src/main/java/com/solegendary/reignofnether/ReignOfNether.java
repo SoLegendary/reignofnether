@@ -70,7 +70,7 @@ import java.util.function.Supplier;
 public class ReignOfNether {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final String MOD_ID = "reignofnether";
-    public static final String VERSION_STRING = "1.3.8g-beta-1";
+    public static final String VERSION_STRING = "1.4.0";
 
     // Fields from ClientReset
     public static final Field handshakeField;
@@ -230,7 +230,6 @@ public class ReignOfNether {
             }
             
             ((DownloadPackSourceAccessor)Minecraft.getInstance().getDownloadedPackSource()).setServerPack(serverPack);
-            //Minecraft.getInstance().setCurrentServer(serverData); TODO find out why, almost impossible to reproduce
         });
         
         logger.debug(RESETMARKER, "Waiting for clear to complete");

@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -35,6 +36,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -176,6 +178,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     final static public float movementSpeed = 0.34f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
+    final static public int bonusNightSightRange = 4;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
@@ -233,8 +236,15 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+    }
+
+    @Override
+    public int getSightRange() {
+        boolean isNight = !level().isDay() || NightUtils.isInRangeOfNightSource(getEyePosition(), level().isClientSide);
+        return Unit.super.getSightRange() + (isNight ? bonusNightSightRange : 0);
     }
 
     // for some reason this.getNavigation().stop(); doesn't stop spider units from moving
@@ -263,6 +273,10 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
             }
             lastOnPos = getOnPos();
         }
+
+        if (this.isVehicle())
+            if (this.getMoveGoal().canUse())
+                this.getMoveGoal().canContinueToUse();
     }
 
     private Set<BlockPos> highlightBps = new HashSet<>();

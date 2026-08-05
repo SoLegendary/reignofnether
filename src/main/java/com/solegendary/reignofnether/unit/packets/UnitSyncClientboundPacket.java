@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.packets;
 
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
@@ -8,6 +9,7 @@ import com.solegendary.reignofnether.unit.UnitSyncAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -15,6 +17,7 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -54,22 +57,23 @@ public class UnitSyncClientboundPacket {
         );
     }
 
-    public static void sendSyncStatsPacket(LivingEntity entity) {
-        boolean isBuilding = false;
-        ResourceName gatherTarget = ResourceName.NONE;
-
+    public static void sendSyncStatsPacket(List<ServerPlayer> players, LivingEntity entity) {
         String owner = "";
         if (entity instanceof Unit unit)
             owner = unit.getOwnerName();
 
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
-                entity.getId(), 0,
-                entity.getHealth(),
-                entity.getAbsorptionAmount(),
-                entity.getX(), entity.getY(), entity.getZ(),
-                0,0,0, owner)
-        );
+        for (ServerPlayer player : players) {
+            if (FogOfWarServerEvents.isBlockVisibleFor(player, entity.getOnPos().getX(), entity.getOnPos().getZ())) {
+                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
+                        new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
+                                entity.getId(), 0,
+                                entity.getHealth(),
+                                entity.getAbsorptionAmount(),
+                                entity.getX(), entity.getY(), entity.getZ(),
+                                0,0,0, owner)
+                );
+            }
+        }
     }
 
     public static void sendSyncResourcesPacket(Unit unit) {

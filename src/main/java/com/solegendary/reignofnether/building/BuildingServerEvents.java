@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.ability.EquipAbility;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
@@ -17,8 +18,10 @@ import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuild
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
-import com.solegendary.reignofnether.nether.NetherBlocks;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
+import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -35,6 +38,7 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -54,13 +58,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.TntBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.event.entity.item.ItemEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -282,46 +284,50 @@ public class BuildingServerEvents {
 
     @Nullable
     public static BuildingPlacement placeBuilding(
-            Building building,
-            BlockPos pos,
-            Rotation rotation,
-            String ownerName,
-            int[] builderUnitIds,
-            boolean queue,
-            boolean isDiagonalBridge
-    ) {
-        return placeBuilding(building, pos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, false);
-    }
-
-    @Nullable
-    public static BuildingPlacement placeBuilding(
         Building building,
-        BlockPos pos,
+        BlockPos originPos,
         Rotation rotation,
         String ownerName,
         int[] builderUnitIds,
-        boolean queue,
+        boolean queue, // shift-queue the building for assigned workers
         boolean isDiagonalBridge,
-        boolean fromCommand // ignore resources, terrain or any other restrictions and self-build
+        boolean fromCommand, // ignore resources, terrain or any other restrictions and self-build
+        boolean ignoreFog
     ) {
         if (serverLevel == null)
             return null;
 
         BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
             serverLevel,
-            pos,
+            originPos,
             rotation,
             ownerName,
             isDiagonalBridge
         );
+        placeBuilding(newBuilding, originPos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, fromCommand, ignoreFog);
+        return null;
+    }
+
+    public static BuildingPlacement placeBuilding(
+        BuildingPlacement newBuilding,
+        BlockPos originPos,
+        Rotation rotation,
+        String ownerName,
+        int[] builderUnitIds,
+        boolean queue, // shift-queue the building for assigned workers
+        boolean isDiagonalBridge,
+        boolean fromCommand, // ignore resources, terrain or any other restrictions and self-build
+        boolean ignoreFog
+    ) {
         boolean buildingExists = false;
         for (BuildingPlacement placement : buildings) {
-            if (placement.originPos.equals(pos)) {
+            if (placement.originPos.equals(originPos)) {
                 buildingExists = true;
                 break;
             }
         }
-        if (newBuilding != null && !buildingExists) {
+        if (newBuilding != null && !buildingExists && serverLevel != null) {
+
             // Handle special building (Iron Golem)
             if (newBuilding.getBuilding() instanceof IronGolemBuilding) {
                 int currentPop = UnitServerEvents.getCurrentPopulation(ownerName);
@@ -330,53 +336,80 @@ public class BuildingServerEvents {
                 boolean canAffordPop = false;
                 for (Resources resources : ResourcesServerEvents.resourcesList) {
                     if (resources.ownerName.equals(ownerName)
-                         && (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply) {
+                            && (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply) {
                         canAffordPop = true;
                         break;
                     }
                 }
-
                 if (!canAffordPop && !fromCommand) {
                     ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                    FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
                     return null;
                 }
             }
 
-            if (fromCommand || newBuilding.canAfford(ownerName)) {
-                if (fromCommand ||
-                    (serverLevel.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get() &&
-                    !(newBuilding.getBuilding() instanceof AbstractBridge))) {
-                    BuildingUtils.clearBuildingArea(newBuilding);
-                }
-                buildings.add(newBuilding);
-                newBuilding.forceChunk(true);
-                int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
+            boolean canAfford = fromCommand || newBuilding.canAfford(ownerName);
+            if (!canAfford) {
+                warnInsufficientResources(newBuilding);
+                FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
+                return null;
+            }
 
-                if (!(newBuilding.getBuilding() instanceof AbstractBridge))
-                    for (BuildingBlock block : newBuilding.blocks)
-                        if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
-                            placeScaffoldingUnder(block, newBuilding);
-
-                boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(ownerName, "warpten");
-                if (SandboxServer.isAnyoneASandboxPlayer() && hasFastBuildCheat) {
-                    newBuilding.maxBlocksPerTick = 4;
-                    newBuilding.queueAllBlocks(serverLevel);
-                } else {
-                    // speed up first capitol
-                    if (newBuilding.isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0) {
-                        newBuilding.blocksPerBuild = 2;
-                        newBuilding.maxBlocksPerTick = 2;
-                    }
-                    for (BuildingBlock block : newBuilding.blocks) {
-                        if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
-                                && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
-                            newBuilding.addToBlockPlaceQueue(block);
+            boolean isSandbox = SandboxServer.isAnyoneASandboxPlayer();
+            if (!fromCommand && !isSandbox && !BuildingValidators.isInBrightChunk(serverLevel, newBuilding.centrePos, ownerName) && !ignoreFog) {
+                for (int id : builderUnitIds) {
+                    Entity entity = serverLevel.getEntity(id);
+                    if (entity instanceof WorkerUnit workerUnit) {
+                        if (!queue) {
+                            Unit.fullResetBehaviours((Unit) entity);
                         }
+                        workerUnit.getExploreBuildLocationGoal().getFogQueuedBuildings().add(newBuilding);
                     }
                 }
+                return null;
+            } else {
+                String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, newBuilding.getBuilding(), originPos, ownerName, isDiagonalBridge, isSandbox, true);
+                if (errorMsgKey != null) {
+                    HudClientboundPacket.showTempMessageI18n(ownerName, errorMsgKey);
+                    FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
+                    return null;
+                }
+            }
 
-                BuildingClientboundPacket.placeBuilding(pos,
-                    building,
+            if (fromCommand ||
+                    (serverLevel.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get() &&
+                            !(newBuilding.getBuilding() instanceof AbstractBridge))) {
+                BuildingUtils.clearBuildingArea(newBuilding);
+            }
+            buildings.add(newBuilding);
+            newBuilding.forceChunk(true);
+            int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
+
+            if (!(newBuilding.getBuilding() instanceof AbstractBridge))
+                for (BuildingBlock block : newBuilding.blocks)
+                    if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
+                        placeScaffoldingUnder(block, newBuilding);
+
+            boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(ownerName, "warpten");
+            if (SandboxServer.isAnyoneASandboxPlayer() && hasFastBuildCheat) {
+                newBuilding.maxBlocksPerTick = 4;
+                newBuilding.queueAllBlocks(serverLevel);
+            } else {
+                // speed up first capitol
+                if (newBuilding.isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0) {
+                    newBuilding.blocksPerBuild = 2;
+                    newBuilding.maxBlocksPerTick = 2;
+                }
+                for (BuildingBlock block : newBuilding.blocks) {
+                    if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
+                            && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
+                        newBuilding.addToBlockPlaceQueue(block);
+                    }
+                }
+            }
+
+            BuildingClientboundPacket.placeBuilding(originPos,
+                    newBuilding.getBuilding(),
                     rotation,
                     newBuilding.getBuilding() instanceof AbstractBridge ? "" : ownerName,
                     -1,
@@ -385,36 +418,33 @@ public class BuildingServerEvents {
                     0,
                     false,
                     PortalPlacement.PortalType.BASIC,
-                    pos,
+                    originPos,
                     false
-                );
-                if (!fromCommand) {
-                    ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
-                            -newBuilding.getBuilding().cost.food,
-                            -newBuilding.getBuilding().cost.wood,
-                            -newBuilding.getBuilding().cost.ore
-                    ));
-                }
+            );
+            if (!fromCommand) {
+                ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
+                        -newBuilding.getBuilding().cost.food,
+                        -newBuilding.getBuilding().cost.wood,
+                        -newBuilding.getBuilding().cost.ore
+                ));
+            }
 
-                if (SandboxServer.isAnyoneASandboxPlayer() && (ownerName.isEmpty() || ownerName.equals("Enemy")))
-                    newBuilding.selfBuilding = true;
+            if (SandboxServer.isAnyoneASandboxPlayer() && (ownerName.isEmpty() || ownerName.equals("Enemy")))
+                newBuilding.selfBuilding = true;
 
-                assignBuilderUnits(builderUnitIds, queue, newBuilding);
+            assignBuilderUnits(builderUnitIds, queue, newBuilding);
 
-                for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
-                    if (entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
+            for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
+                if (entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
                         newBuilding.isPosInsideBuilding(entity.getOnPos().above().above()) &&
                         (unit.getMoveGoal().getMoveTarget() == null ||
-                         newBuilding.isPosInsideBuilding(unit.getMoveGoal().getMoveTarget()))) {
-                        moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
-                    }
+                                newBuilding.isPosInsideBuilding(unit.getMoveGoal().getMoveTarget()))) {
+                    moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
                 }
-                if (newBuilding.getBuilding() instanceof AbstractBridge)
-                    newBuilding.ownerName = "";
-
-            } else if (!PlayerServerEvents.isBot(ownerName)) {
-                warnInsufficientResources(newBuilding);
             }
+            if (newBuilding.getBuilding() instanceof AbstractBridge)
+                newBuilding.ownerName = "";
+
             if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
                 newBuilding.getBuilding().shouldDestroyOnReset = false;
                 saveBuildings(serverLevel);
@@ -461,7 +491,7 @@ public class BuildingServerEvents {
                 if (queue) {
                     if (workerUnit.getBuildRepairGoal().queuedBuildings.isEmpty()) {
                         ((Unit) entity).resetBehaviours();
-                        WorkerUnit.resetBehaviours(workerUnit);
+                        WorkerUnit.resetBehavioursExceptExploreBuild(workerUnit);
                     }
                     workerUnit.getBuildRepairGoal().queuedBuildings.add(newBuilding);
                     if (workerUnit.getBuildRepairGoal().getBuildingTarget() == null) {
@@ -469,7 +499,7 @@ public class BuildingServerEvents {
                     }
                 } else {
                     ((Unit) entity).resetBehaviours();
-                    WorkerUnit.resetBehaviours(workerUnit);
+                    WorkerUnit.resetBehavioursExceptExploreBuild(workerUnit);
                     workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
                 }
             }
@@ -509,10 +539,19 @@ public class BuildingServerEvents {
         if (building == null)
             return;
         if (building.isBuilt && !SandboxServer.isSandboxPlayer(playerName) &&
-            BuildingUtils.getTotalCompletedBuildingsOwned(false, building.ownerName) == 1)
+            BuildingUtils.getTotalCompletedBuildingsOwned(false, building.ownerName) == 1) {
+            HudClientboundPacket.showTempMessageI18n(playerName,"hud.helperbuttons.reignofnether.cancel.error");
             return;
-        if (building.getBuilding().capturable && !SandboxServer.isAnyoneASandboxPlayer())
+        }
+        if (building.getBuilding().capturable && !SandboxServer.isAnyoneASandboxPlayer()) {
+            HudClientboundPacket.showTempMessageI18n(playerName,"hud.helperbuttons.reignofnether.cancel.error");
             return;
+        }
+        NightSourceAddon nsa = building.getBuilding().getActiveAddon(NightSourceAddon.class);
+        if (nsa != null && nsa.getNightRange(building) > 0 && building.isBuilt && !SandboxServer.isAnyoneASandboxPlayer()) {
+            HudClientboundPacket.showTempMessageI18n(playerName,"hud.helperbuttons.reignofnether.cancel.error");
+            return;
+        }
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
@@ -883,29 +922,5 @@ public class BuildingServerEvents {
                 return;
             }
         }
-    }
-
-    private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f;
-
-    public static boolean isOnNetherBlocks(List<BuildingBlock> blocks, BlockPos originPos, ServerLevel level) {
-        int netherBlocksBelow = 0;
-        int blocksBelow = 0;
-        for (BuildingBlock block : blocks) {
-            if (block.getBlockPos().getY() == originPos.getY() + 1 && level != null) {
-                BlockPos bp = block.getBlockPos();
-                BlockState bs = block.getBlockState(); // building block
-
-                if (bs.isSolid()) {
-                    blocksBelow += 1;
-                    if (NetherBlocks.isNetherBlock(level, bp.below())) {
-                        netherBlocksBelow += 1;
-                    }
-                }
-            }
-        }
-        if (blocksBelow <= 0) {
-            return false; // avoid division by 0
-        }
-        return ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
     }
 }

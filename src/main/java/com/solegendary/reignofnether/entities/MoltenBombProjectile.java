@@ -33,6 +33,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.isSolidBlocking;
 public class MoltenBombProjectile extends Fireball {
 
     private int maxTicks = 200;
+    private int explosionRadius = MoltenBomb.RADIUS_RANK_1;
 
     public MoltenBombProjectile(EntityType<? extends Fireball> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -40,6 +41,10 @@ public class MoltenBombProjectile extends Fireball {
 
     public MoltenBombProjectile(Level pLevel, LivingEntity pShooter, double offsetX, double offsetY, double offsetZ) {
         super(EntityRegistrar.MOLTEN_BOMB_PROJECTILE.get(), pShooter, offsetX, offsetY, offsetZ, pLevel);
+        if (!(getOwner() instanceof WildfireUnit))
+            return;
+        MoltenBomb moltenBomb = ((WildfireUnit) getOwner()).getMoltenBomb();
+        this.explosionRadius = (int) moltenBomb.radius;
     }
 
     public void setMaxTicks(int ticks) {
@@ -74,18 +79,12 @@ public class MoltenBombProjectile extends Fireball {
 
         HashMap<BlockPos, Double> bpAndDists = new HashMap<>();
 
-        if (!(getOwner() instanceof WildfireUnit))
-            return;
-
-        MoltenBomb moltenBomb = ((WildfireUnit) getOwner()).getMoltenBomb();
-        int radius = (int) moltenBomb.radius;
-
-        for (int x = -radius; x < radius; x++)
-            for (int y = -radius; y < radius; y++)
-                for (int z = -radius; z < radius; z++) {
+        for (int x = -explosionRadius; x < explosionRadius; x++)
+            for (int y = -explosionRadius; y < explosionRadius; y++)
+                for (int z = -explosionRadius; z < explosionRadius; z++) {
                     BlockPos bp = blockPosition().offset(x, y, z);
                     double distSqr = bp.distSqr(blockPosition());
-                    double radiusSqr = moltenBomb.radius * moltenBomb.radius;
+                    double radiusSqr = explosionRadius * explosionRadius;
                     if (distSqr <= radiusSqr && level().getBlockState(bp).isSolid())
                         bpAndDists.put(bp, distSqr / radiusSqr);
                 }
@@ -107,7 +106,7 @@ public class MoltenBombProjectile extends Fireball {
                 );
             }
         }
-        List<Mob> mobs = MiscUtil.getEntitiesWithinRange(position(), moltenBomb.radius, Mob.class, level());
+        List<Mob> mobs = MiscUtil.getEntitiesWithinRange(position(), explosionRadius, Mob.class, level());
         for (Mob mob : mobs) {
             mob.hurt(damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), 0.5f);
             if (random.nextBoolean())
@@ -116,7 +115,7 @@ public class MoltenBombProjectile extends Fireball {
                 mob.addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), 120, 0, false, false));
             }
         }
-        MiscUtil.addParticleExplosion(ParticleTypes.LAVA, (int) (moltenBomb.radius * 3), level(), position());
+        MiscUtil.addParticleExplosion(ParticleTypes.LAVA, explosionRadius * 3, level(), position());
         discard();
     }
 

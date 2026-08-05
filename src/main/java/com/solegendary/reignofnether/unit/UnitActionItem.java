@@ -24,6 +24,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
@@ -306,6 +307,26 @@ public class UnitActionItem {
                             }
                         } else {
                             attackerUnit.setUnitAttackTargetForced(le);
+                            // insert a drop-off command without disrupting other queued commands
+                            boolean hasDropOffCommandQueued = false;
+                            for (UnitActionItem uai : UnitServerEvents.getUnitActionSlowQueue()) {
+                                for (int id : uai.getUnitIds()) {
+                                    if (id == le.getId() && (
+                                            uai.getAction() == UnitAction.RETURN_RESOURCES_TO_CLOSEST ||
+                                            uai.getAction() == UnitAction.RETURN_RESOURCES)) {
+                                        hasDropOffCommandQueued = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!hasDropOffCommandQueued) {
+                                UnitServerEvents.getUnitActionSlowQueue().add(0, new UnitActionItem(
+                                        unit.getOwnerName(),
+                                        UnitAction.RETURN_RESOURCES_TO_CLOSEST,
+                                        -1,
+                                        new int[]{((Entity) unit).getId()}
+                                ));
+                            }
                         }
                     } else { // if the unit can't actually attack just treat this as a follow action
                         unit.setFollowTarget(le);

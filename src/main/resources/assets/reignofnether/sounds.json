@@ -23,6 +23,14 @@
         "subtitle": "sounds.reignofnether.enemy",
         "sounds": [ "reignofnether:enemy" ]
     },
+    "dawn_rooster": {
+        "subtitle": "sounds.reignofnether.dawn_rooster",
+        "sounds": [ "reignofnether:dawn_rooster" ]
+    },
+    "dusk_wolf": {
+        "subtitle": "sounds.reignofnether.dusk_wolf",
+        "sounds": [ "reignofnether:dusk_wolf" ]
+    },
     "main_menu": {
         "subtitle": "sounds.reignofnether.main_menu",
         "sounds": [ "reignofnether:main_menu" ]
