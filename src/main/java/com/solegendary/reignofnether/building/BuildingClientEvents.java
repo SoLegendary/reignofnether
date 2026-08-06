@@ -246,7 +246,7 @@ public class BuildingClientEvents {
                 MC.level, buildingToPlace, originPos, MC.player.getName().getString(),
                 isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
         );
-        boolean yellowUnderline = buildingToPlace instanceof PortalBasic && !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos);
+        boolean yellowUnderline = buildingToPlace instanceof PortalBasic && !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos, false);
         drawBuilding(blocksToDraw, matrix, originPos, forceColour, valid, yellowUnderline);
     }
 
@@ -547,8 +547,11 @@ public class BuildingClientEvents {
                 for (LivingEntity builderEntity : getSelectedUnits())
                     if (builderEntity instanceof WorkerUnit workerUnit) {
                         builderIds.add(builderEntity.getId());
-                        if (inFog)
+                        if (inFog) {
+                            if (!Keybindings.shiftMod.isDown())
+                                workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw().clear();
                             workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw().put(originPos, new ArrayList<>(blocksToDraw));
+                        }
                     }
                 var ids = new int[builderIds.size()];
                 for (int i = 0; i < ids.length; i++) {
