@@ -1,5 +1,5 @@
 
-1.20.1-1.4.0
+1.20.1-1.4.0a
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -23,45 +23,19 @@ Fog of war
     - wolves for villagers, zombie horse for monsters, striders for piglins
 
 
-[✔] Fog building queueing:
-    - if the placement is in fog, then instead of attempting to place it immediately:
-        1. Persist the blocks to draw
-        2. Move the worker to the position
-        3. Once the original preselectedPos is visible, place the building
-            - Only enforce validity on serverside for this
-            - Error if no resources available or otherwise is invalid
-        4. Allow shift-queueing
-    - save as list<BlockPos, Building> in workers
-
-
-Slime rolling
--------------
-[✔] Slimes and magma cubes now roll to move instead of jumping, meaning they can now use the new rtsPathfinding!
-[✔] When close to an attack target (unit or building) they will revert back to jumping motions for attacks
-[✔] Movement speed has been reduced from 27 to 25, but they now glide up stairs smoothly
-[✔] You can set the 'forceJumping' flag in data to make them follow the old behaviour, eg:
-    /summon reignofnether:slime_unit ~ ~ ~ {ForgeData:{forceJumping:1b}}
 
 Balance
 -------
-[✔] Mooshroom food value reduced from 175 to 150
-[✔] You can no longer delete buildings that produce a night radius
+
 
 Quality of Life
 ---------------
-[✔] RTS units no longer aggro onto vanilla units of the same faction, regardless of /gamerule neutralAggro
-[✔] Players in RTS cam can no longer go beyond the worldborder
-[✔] During matches, a sound effect and message is now played at dusk and dawn
+
 
 Bugfixes
 --------
-[✔] Switching singleplayer worlds no longer retains research and cheats
-[✔] Fixed spider jockeys not moving long distances
-[✔] Destroying your capitol no longer grants unlimited militia range
-[✔] Fixed the Wildfire Molten bomb going crazy if the Wildfire died before it detonated
-[✔] Wraiths no longer retaliate with auto-attacks while channeling possession
-[✔] Moving workers on non-farm farmland and soulsand blocks no longer makes them gather food
-[✔] Fixed bridges not saving correctly again
+[✔] Fixed buildings built in fog showing as being queued even if shift wasn't held
+[✔] Fixed portals building at half speed on all terrain
 
 
 Languages

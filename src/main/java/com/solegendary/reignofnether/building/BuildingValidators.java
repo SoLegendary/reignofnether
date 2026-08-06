@@ -124,15 +124,18 @@ public class BuildingValidators {
         if (building instanceof PortalBasic) {
             return true;
         }
-        return isOnNetherBlocks(level, blocks, originPos);
+        return isOnNetherBlocks(level, blocks, originPos, false);
     }
 
-    public static boolean isOnNetherBlocks(Level level, List<BuildingBlock> blocks, BlockPos originPos) {
+    public static boolean isOnNetherBlocks(Level level, List<BuildingBlock> blocks, BlockPos originPos, boolean absolutePos) {
         int netherBlocksBelow = 0;
         int blocksBelow = 0;
+        int minY = BuildingUtils.getMinCorner(blocks).getY();
         for (BuildingBlock block : blocks) {
-            if (block.getBlockPos().getY() == 0 && level != null) {
-                BlockPos bp = block.getBlockPos().offset(originPos).offset(0, 1, 0);
+            if (block.getBlockPos().getY() == minY && level != null) {
+                BlockPos bp = block.getBlockPos();
+                if (!absolutePos)
+                    bp = bp.offset(originPos).offset(0, 1, 0);
                 BlockState bs = block.getBlockState(); // building block
                 if (bs.isSolid()) {
                     blocksBelow += 1;
