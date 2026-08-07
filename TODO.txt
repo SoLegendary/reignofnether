@@ -1,5 +1,5 @@
 
-1.20.1-1.4.0a
+1.20.1-1.4.0b
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -20,7 +20,7 @@ Fog of war
 [❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Add commands for force-moving camera
 [❌] Scout units from capitol + 1 free on match start
-    - wolves for villagers, zombie horse for monsters, striders for piglins
+    - scout dog (reskinned wolf) for villagers, baby husk for monsters, striders for piglins
 
 
 
@@ -30,13 +30,13 @@ Balance
 
 Quality of Life
 ---------------
-
+[✔] Added a militia spawn button to sandbox
+[✔] Militia no longer convert into villagers when out of town centre range in sandbox mode
 
 Bugfixes
 --------
-[✔] Fixed buildings built in fog showing as being queued even if shift wasn't held
-[✔] Fixed portals building at half speed on all terrain
-
+[🟡] Fixed a crash related to targeted attack commands
+[✔] Neutral and scenario NPC militia no longer convert into villagers when out of town centre range
 
 Languages
 ---------

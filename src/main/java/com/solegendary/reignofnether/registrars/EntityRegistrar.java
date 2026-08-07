@@ -435,6 +435,7 @@ public class EntityRegistrar {
             case WolfProd.itemName -> EntityRegistrar.WOLF_UNIT.get();
             case LlamaProd.itemName -> EntityRegistrar.LLAMA_UNIT.get();
             case "Killer Rabbit" -> EntityRegistrar.KILLER_RABBIT_UNIT.get();
+            case "Militia" -> EntityRegistrar.MILITIA_UNIT.get();
             default -> null;
         };
     }
