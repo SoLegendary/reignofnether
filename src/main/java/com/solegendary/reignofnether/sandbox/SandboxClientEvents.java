@@ -117,6 +117,7 @@ public class SandboxClientEvents {
         return switch (faction) {
             case VILLAGERS -> List.of(
                 ProductionItems.VILLAGER.getPlaceButton(),
+                ProductionItems.VILLAGER.getMilitiaPlaceButton(),
                 ProductionItems.VINDICATOR.getPlaceButton(),
                 ProductionItems.PILLAGER.getPlaceButton(),
                 ProductionItems.IRON_GOLEM.getPlaceButton(),

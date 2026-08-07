@@ -185,13 +185,17 @@ public class UnitActionItem {
             if (action == UnitAction.TOGGLE_GATHER_TARGET) {
                 if (unit instanceof WorkerUnit workerUnit) {
                     GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
-                    ResourceName targetResourceName = goal.getTargetResourceName();
-                    Unit.fullResetBehaviours(unit);
-                    switch (targetResourceName) {
-                        case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
-                        case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
-                        case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
-                        case ORE -> goal.setTargetResourceName(ResourceName.NONE);
+                    if (goal != null) {
+                        ResourceName targetResourceName = goal.getTargetResourceName();
+                        Unit.fullResetBehaviours(unit);
+                        if (targetResourceName != null) {
+                            switch (targetResourceName) {
+                                case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
+                                case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
+                                case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
+                                case ORE -> goal.setTargetResourceName(ResourceName.NONE);
+                            }
+                        }
                     }
                 }
             } else {
@@ -231,7 +235,7 @@ public class UnitActionItem {
                     unit.setHoldPosition(true);
                 }
                 case GARRISON -> {
-                    if (unit.canGarrison()) {
+                    if (unit.canGarrison() && unit.getGarrisonGoal() != null) {
                         unit.getGarrisonGoal().setBuildingTarget(preselectedBlockPos);
                     }
                 }
@@ -252,13 +256,15 @@ public class UnitActionItem {
                     if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE
                         && (buildingAtPos == null || buildingAtPos.getBuilding() instanceof AbstractBridge)) {
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
-                        goal.setTargetResourceName(resName);
-                        goal.setMoveTarget(preselectedBlockPos);
-                        if (Unit.atMaxResources((Unit) workerUnit)) {
-                            if (level.isClientSide()) {
-                                HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.worker_inv_full"));
+                        if (goal != null) {
+                            goal.setTargetResourceName(resName);
+                            goal.setMoveTarget(preselectedBlockPos);
+                            if (Unit.atMaxResources((Unit) workerUnit)) {
+                                if (level.isClientSide()) {
+                                    HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.worker_inv_full"));
+                                }
+                                goal.saveAndReturnResources();
                             }
-                            goal.saveAndReturnResources();
                         }
                     } else if (buildingAtPos instanceof PortalPlacement portal
                         && portal.getPortalType() == PortalPlacement.PortalType.TRANSPORT && unit.canUsePortal()) {
@@ -305,7 +311,7 @@ public class UnitActionItem {
                                         unitIds
                                 ));
                             }
-                        } else {
+                        } else if (le != null) {
                             attackerUnit.setUnitAttackTargetForced(le);
                             // insert a drop-off command without disrupting other queued commands
                             boolean hasDropOffCommandQueued = false;
@@ -360,7 +366,7 @@ public class UnitActionItem {
                 }
                 case ENABLE_AUTOCAST_BUILD_REPAIR, DISABLE_AUTOCAST_BUILD_REPAIR -> {
                     // if the unit can't actually build/repair just treat this as a move action
-                    if (unit instanceof WorkerUnit workerUnit) {
+                    if (unit instanceof WorkerUnit workerUnit && workerUnit.getBuildRepairGoal() != null) {
                         workerUnit.getBuildRepairGoal().autocastRepair =
                                 action == UnitAction.ENABLE_AUTOCAST_BUILD_REPAIR;
                     }
@@ -389,7 +395,7 @@ public class UnitActionItem {
                     if (unit instanceof WorkerUnit workerUnit) { // if we manually did this, ignore automated return
                         // to gather
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
-                        if (goal != null) {
+                        if (goal != null && goal.saveData != null) {
                             goal.saveData.delete();
                         }
                     }
@@ -471,7 +477,9 @@ public class UnitActionItem {
             // were just ordered away from (the "team move-away snaps back to attacking" bug).
             if (level.isClientSide() || UnitServerEvents.rtsPathfinding || filtered.size() <= 20) {
                 for (Pair<LivingEntity, BlockPos> pair : filtered) {
-                    ((Unit) pair.getFirst()).getMoveGoal().setMoveTarget(pair.getSecond());
+                    if (pair.getFirst() instanceof Unit unit) {
+                        unit.getMoveGoal().setMoveTarget(pair.getSecond());
+                    }
                 }
             } else {
                 UnitServerEvents.queueFormationMove(filtered);

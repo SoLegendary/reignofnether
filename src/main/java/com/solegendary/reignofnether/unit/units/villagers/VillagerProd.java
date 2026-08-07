@@ -50,6 +50,16 @@ public class VillagerProd extends ProductionItem {
         );
     }
 
+    public UnitSpawnButton getMilitiaPlaceButton() {
+        return new UnitSpawnButton(
+                "Militia",
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/militia.png"),
+                List.of(
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.militia_unit"), Style.EMPTY.withBold(true))
+                )
+        );
+    }
+
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(
             VillagerProd.itemName,

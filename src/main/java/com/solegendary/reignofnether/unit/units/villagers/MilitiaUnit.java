@@ -12,10 +12,16 @@ import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.TargetResourcesSave;
@@ -319,7 +325,8 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
             this.isCaptain = getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem;
 
             if (!this.isCaptain && this.tickCount > 100 && this.tickCount % 10 == 0 && !converted &&
-                !level().isClientSide() && !getOwnerName().equals(ENEMY_OWNER_NAME)) {
+                !level().isClientSide() && !getOwnerName().equals(ENEMY_OWNER_NAME) && hasRtsPlayerOwner() && !hasScenarioNpcOwner() &&
+                !SandboxServer.isAnyoneASandboxPlayer()) {
 
                 BuildingPlacement building = BuildingUtils.findClosestBuilding(level().isClientSide(), this.getEyePosition(),
                         (b) -> b.isBuilt && b.ownerName.equals(getOwnerName()) && b.getBuilding() instanceof TownCentre);
