@@ -1,5 +1,5 @@
 
-1.20.1-1.4.0b
+1.20.1-1.4.0c
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -30,13 +30,12 @@ Balance
 
 Quality of Life
 ---------------
-[✔] Added a militia spawn button to sandbox
-[✔] Militia no longer convert into villagers when out of town centre range in sandbox mode
+
 
 Bugfixes
 --------
-[🟡] Fixed a crash related to targeted attack commands
-[✔] Neutral and scenario NPC militia no longer convert into villagers when out of town centre range
+[🟡] Fixed
+
 
 Languages
 ---------
