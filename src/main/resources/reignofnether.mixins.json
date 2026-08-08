@@ -67,6 +67,7 @@
         "SplashRendererAccessor",
         "TitleScreenMixin",
         "TopdownGuiMixin",
+        "RenderChunkRegionMixin",
         "fogofwar.BiomeColorsMixin",
         "fogofwar.BlockColorsAccessor",
         "fogofwar.ClientChunkCacheMixin",
