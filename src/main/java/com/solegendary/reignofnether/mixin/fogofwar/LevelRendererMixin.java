@@ -3,8 +3,12 @@ package com.solegendary.reignofnether.mixin.fogofwar;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -29,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -127,6 +133,53 @@ public abstract class LevelRendererMixin {
             }
         } else {
             cir.setReturnValue(null);
+        }
+    }
+
+    @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
+    private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
+
+    @Inject(
+            method = "compileChunks(Lnet/minecraft/client/Camera;)V",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void compileChunks(Camera pCamera, CallbackInfo ci) {
+
+        // hiding leaves around cursor
+        if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR &&
+                OrthoviewClientEvents.isEnabled()) {
+            UnitClientEvents.windowUpdateTicks -= 1;
+            if (UnitClientEvents.windowUpdateTicks <= 0) {
+                UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
+                for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
+                    BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset((int) 8.5d, (int) 8.5d, (int) 8.5d);
+
+                    List<Pair<BlockPos, Integer>> newChunksToReDirty = new ArrayList<>();
+
+                    // rerender each chunk a second time so we can unhide leaves as they go out of range
+                    synchronized (UnitClientEvents.windowPositions) {
+                        for (Pair<BlockPos, Integer> pair : chunksToReDirty) {
+                            int times = pair.getSecond();
+                            if (pair.getFirst().equals(chunkInfo.chunk.getOrigin())) {
+                                chunkInfo.chunk.setDirty(true);
+                                times -= 1;
+                            }
+                            if (times > 0)
+                                newChunksToReDirty.add(new Pair<>(pair.getFirst(), times));
+                        }
+                        chunksToReDirty.clear();
+                        chunksToReDirty.addAll(newChunksToReDirty);
+
+                        UnitClientEvents.windowPositions.forEach(bp -> {
+                            if (chunkCentreBp.distSqr(bp) < 625) {
+                                chunkInfo.chunk.setDirty(true);
+                                chunksToReDirty.add(new Pair<>(chunkInfo.chunk.getOrigin(), 10));
+                            }
+                        });
+                    }
+                }
+            }
         }
     }
 }

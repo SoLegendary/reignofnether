@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.EnchantAbility;
 import com.solegendary.reignofnether.ability.BuildingAbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.EquipAbility;
+import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
@@ -18,10 +19,8 @@ import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuild
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
-import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
-import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -38,7 +37,6 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -46,7 +44,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.projectile.LargeFireball;
@@ -59,6 +59,7 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.TntBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
@@ -304,8 +305,7 @@ public class BuildingServerEvents {
             ownerName,
             isDiagonalBridge
         );
-        placeBuilding(newBuilding, originPos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, fromCommand, ignoreFog);
-        return null;
+        return placeBuilding(newBuilding, originPos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, fromCommand, ignoreFog);
     }
 
     public static BuildingPlacement placeBuilding(
@@ -367,7 +367,7 @@ public class BuildingServerEvents {
                     }
                 }
                 return null;
-            } else {
+            } else if (!fromCommand) {
                 String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, newBuilding.getBuilding(), originPos, ownerName, isDiagonalBridge, isSandbox, true);
                 if (errorMsgKey != null) {
                     HudClientboundPacket.showTempMessageI18n(ownerName, errorMsgKey);
@@ -442,6 +442,8 @@ public class BuildingServerEvents {
                     moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
                 }
             }
+            moveAnimalsAwayFromBuildingFoundations(newBuilding);
+
             if (newBuilding.getBuilding() instanceof AbstractBridge)
                 newBuilding.ownerName = "";
 
@@ -529,9 +531,20 @@ public class BuildingServerEvents {
                 UnitAction.MOVE,
                 -1,
                 new int[] { entity.getId() },
-                newBuilding.getClosestGroundPos(entity.getOnPos(), 2),
+                newBuilding.getClosestGroundPos(entity.getOnPos(), 3, true),
                 new BlockPos(0, 0, 0)
             );
+        }
+    }
+
+    private static void moveAnimalsAwayFromBuildingFoundations(BuildingPlacement newBuilding) {
+        List<Mob> mobs = MiscUtil.getEntitiesWithinRange(newBuilding.centrePos.getCenter(), 10, Mob.class, newBuilding.level);
+        for (Mob mob : mobs) {
+            if (ResourceSources.isHuntableAnimal(mob)) {
+                BlockPos bp = newBuilding.getClosestGroundPos(mob.getOnPos(), 3, true);
+                Path path = mob.getNavigation().createPath(bp.getX(), bp.getY(), bp.getZ(), 0);
+                mob.getNavigation().moveTo(path, 1);
+            }
         }
     }
 
