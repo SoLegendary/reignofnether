@@ -30,11 +30,14 @@ Balance
 
 Quality of Life
 ---------------
-
+[✔] Make animals move away from building foundations (also don't move onto any other building adjacent)
 
 Bugfixes
 --------
-[🟡] Fixed
+[✔] Fixed hiding leaves feature not working
+[✔] Fixed buildings placed via commands sometimes not working
+
+[❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
 
 
 Languages

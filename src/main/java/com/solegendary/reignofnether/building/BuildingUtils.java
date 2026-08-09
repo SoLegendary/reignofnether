@@ -150,7 +150,7 @@ public class BuildingUtils {
     }
 
     public static BuildingPlacement getNewBuildingPlacement(Building building, Level level, BlockPos pos, Rotation rotation, String ownerName, boolean isDiagonalBridge) {
-        BuildingPlacement buildingPlacement = null;
+        BuildingPlacement buildingPlacement;
         if (building instanceof AbstractBridge bridge) {
             buildingPlacement = bridge.createBuildingPlacement(level, pos, rotation, ownerName, isDiagonalBridge);
         } else {
