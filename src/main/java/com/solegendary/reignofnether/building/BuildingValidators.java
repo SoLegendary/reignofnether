@@ -34,36 +34,38 @@ public class BuildingValidators {
     private static final float MIN_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.20f; // at least 20% of covered blocks must be liquid
     private static final float MAX_BRIDGE_LIQUID_BLOCKS_PERCENT = 0.95f; // at least 5% of covered blocks must be solid
 
-    public static boolean isPlacementValid(Level level, Building building, BlockPos placementPos, String ownerName,
+    public static boolean isPlacementValid(Level level, Building building, BlockPos placementPos, String ownerName, Rotation rotation,
                                            boolean isDiagonalBridge, boolean isSandbox, boolean ignoreFog) {
-        return getPlacementValidityError(level, building, placementPos, ownerName, isDiagonalBridge, isSandbox, ignoreFog) == null;
+        return getPlacementValidityError(level, building, placementPos, ownerName, rotation, isDiagonalBridge, isSandbox, ignoreFog) == null;
     }
 
     @Nullable
-    public static String getPlacementValidityError(Level level, Building building, BlockPos originPos, String ownerName,
+    public static String getPlacementValidityError(Level level, Building building, BlockPos originPos, String ownerName, Rotation rotation,
                                                    boolean isDiagonalBridge, boolean isSandbox, boolean ignoreFog) {
         if (level == null || building == null)
             return "Unknown error";
 
-        ArrayList<BuildingBlock> blocks;
+        ArrayList<BuildingBlock> relativeBlocks;
         if (building instanceof AbstractBridge bridge)
-            blocks = bridge.getRelativeBlockData(level, isDiagonalBridge);
+            relativeBlocks = bridge.getRelativeBlockData(level, isDiagonalBridge);
         else
-            blocks = building.getRelativeBlockData(level); // TODO: is lack of rotation here a problem?
+            relativeBlocks = building.getRelativeBlockData(level);
 
-        if (isBuildingPlacementInAirOrOnIllegalBlocks(level, building, originPos, blocks)) {
+        ArrayList<BuildingBlock> absoluteBlocks = BuildingUtils.getAbsoluteBlockData(relativeBlocks, level, originPos, rotation);
+
+        if (isBuildingPlacementInAirOrOnIllegalBlocks(level, building, originPos, absoluteBlocks)) {
             return "building.reignofnether.ground_not_flat";
-        } else if (isBuildingPlacementClipping(level, building, originPos, blocks)) {
+        } else if (isBuildingPlacementClipping(level, building, originPos, absoluteBlocks)) {
             return "building.reignofnether.ground_not_flat";
-        } else if (isOverlappingAnyOtherBuilding(level, building, originPos, blocks) && !isSandbox) {
+        } else if (isOverlappingAnyOtherBuilding(level, building, originPos, absoluteBlocks) && !isSandbox) {
             return "building.reignofnether.too_close";
-        } else if (!isNonPiglinOrOnNetherBlocks(level, building, originPos, blocks)) {
+        } else if (!isNonPiglinOrOnNetherBlocks(level, building, originPos, absoluteBlocks)) {
             return "building.reignofnether.must_be_nether";
-        } else if (!isNonBridgeOrValidBridge(level, building, originPos, blocks)) {
+        } else if (!isNonBridgeOrValidBridge(level, building, originPos, absoluteBlocks)) {
             return "building.reignofnether.must_be_liquid";
-        } else if (!isInBrightChunk(level, originPos, blocks, ownerName) && !isSandbox && !ignoreFog) {
+        } else if (!isInBrightChunk(level, absoluteBlocks, ownerName) && !isSandbox && !ignoreFog) {
             return "building.reignofnether.unexplored";
-        } else if (!isBuildingPlacementWithinWorldBorder(level, building, originPos, blocks)) {
+        } else if (!isBuildingPlacementWithinWorldBorder(level, building, originPos, absoluteBlocks)) {
             return "building.reignofnether.outside_map";
         } else if (!isNotTutorialOrNearValidCapitolPosition(level, building, originPos)) {
             return "building.reignofnether.build_centre_here";
@@ -81,7 +83,7 @@ public class BuildingValidators {
         }
 
         for (BuildingBlock block : blocks) {
-            BlockPos bp = block.getBlockPos().offset(originPos).offset(0, 1, 0);
+            BlockPos bp = block.getBlockPos().offset(0, 1, 0);
             if ((level.getBlockState(bp).isSolid() || !level.getBlockState(bp).getFluidState().isEmpty()) && (block.getBlockState().isSolid() || !block.getBlockState().getFluidState().isEmpty())) {
                 return true;
             }
@@ -95,8 +97,8 @@ public class BuildingValidators {
     private static boolean isOverlappingAnyOtherBuilding(Level level, Building building, BlockPos originPos, List<BuildingBlock> blocks) {
         List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(level.isClientSide());
 
-        BlockPos minPos = BuildingUtils.getMinCorner(blocks).offset(originPos);//.offset(-1, -1, -1);
-        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks).offset(originPos);//.offset(1, 1, 1);
+        BlockPos minPos = BuildingUtils.getMinCorner(blocks);//.offset(-1, -1, -1);
+        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks);//.offset(1, 1, 1);
 
         for (BuildingPlacement bpl : buildings) {
             for (BuildingBlock block : bpl.blocks) {
@@ -124,7 +126,7 @@ public class BuildingValidators {
         if (building instanceof PortalBasic) {
             return true;
         }
-        return isOnNetherBlocks(level, blocks, originPos, false);
+        return isOnNetherBlocks(level, blocks, originPos, true);
     }
 
     public static boolean isOnNetherBlocks(Level level, List<BuildingBlock> blocks, BlockPos originPos, boolean absolutePos) {
@@ -162,7 +164,7 @@ public class BuildingValidators {
         int blocksBelow = 0;
         for (BuildingBlock block : blocks) {
             if (block.getBlockPos().getY() == 0 && level != null) {
-                BlockPos bp = block.getBlockPos().offset(originPos).offset(0, 1, 0);
+                BlockPos bp = block.getBlockPos().offset(0, 1, 0);
                 BlockState bs = block.getBlockState(); // building block
                 BlockState bsBelow = level.getBlockState(bp.below()); // world block
 
@@ -208,8 +210,8 @@ public class BuildingValidators {
                 maxZ = bp.getZ();
             }
         }
-        BlockPos minPos = BuildingUtils.getMinCorner(blocks).offset(originPos);
-        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks).offset(originPos);
+        BlockPos minPos = BuildingUtils.getMinCorner(blocks);
+        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks);
 
         return level.getWorldBorder().isWithinBounds(minPos.getX(), minPos.getZ()) &&
                 level.getWorldBorder().isWithinBounds(maxPos.getX(), maxPos.getZ()) &&
@@ -241,7 +243,7 @@ public class BuildingValidators {
                 continue;
             }
             if (level != null) {
-                BlockPos bp = block.getBlockPos().offset(originPos).offset(0, 1, 0);
+                BlockPos bp = block.getBlockPos().offset(0, 1, 0);
                 BlockState bs = block.getBlockState(); // building block
                 BlockState bsWorld = level.getBlockState(bp); // world block
 
@@ -278,9 +280,9 @@ public class BuildingValidators {
         return TutorialClientEvents.BUILD_CAPITOL_POS.distSqr(originPos) < 625; // 25 block range
     }
 
-    public static boolean isInBrightChunk(Level level, BlockPos originPos, List<BuildingBlock> blocks, String ownerName) {
-        BlockPos minPos = BuildingUtils.getMinCorner(blocks).offset(originPos);
-        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks).offset(originPos);
+    public static boolean isInBrightChunk(Level level, List<BuildingBlock> blocks, String ownerName) {
+        BlockPos minPos = BuildingUtils.getMinCorner(blocks);
+        BlockPos maxPos = BuildingUtils.getMaxCorner(blocks);
         BlockPos centrePos = new BlockPos((minPos.getX() + maxPos.getX()) / 2, (minPos.getY() + maxPos.getY()) / 2, (minPos.getZ() + maxPos.getZ()) / 2);
         return isInBrightChunk(level, centrePos, ownerName);
     }

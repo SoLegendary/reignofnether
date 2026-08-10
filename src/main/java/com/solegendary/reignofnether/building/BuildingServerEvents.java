@@ -368,7 +368,7 @@ public class BuildingServerEvents {
                 }
                 return null;
             } else if (!fromCommand) {
-                String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, newBuilding.getBuilding(), originPos, ownerName, isDiagonalBridge, isSandbox, true);
+                String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, newBuilding.getBuilding(), originPos, ownerName, rotation, isDiagonalBridge, isSandbox, true);
                 if (errorMsgKey != null) {
                     HudClientboundPacket.showTempMessageI18n(ownerName, errorMsgKey);
                     FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);

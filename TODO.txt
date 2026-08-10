@@ -20,7 +20,7 @@ Fog of war
 [❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Add commands for force-moving camera
 [❌] Scout units from capitol + 1 free on match start
-    - scout dog (reskinned wolf) for villagers, baby husk for monsters, striders for piglins
+    - scout dog (reskinned wolf) for villagers, bat for monsters, striders for piglins
 
 
 
@@ -30,14 +30,12 @@ Balance
 
 Quality of Life
 ---------------
-[✔] Make animals move away from building foundations (also don't move onto any other building adjacent)
+
 
 Bugfixes
 --------
-[✔] Fixed hiding leaves feature not working
-[✔] Fixed buildings placed via commands sometimes not working
-
 [❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
+[🟡] Fixed building rotations sometimes causing placement errors
 
 
 Languages
