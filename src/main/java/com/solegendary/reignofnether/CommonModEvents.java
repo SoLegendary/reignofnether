@@ -47,6 +47,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.POISON_SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
         evt.put(EntityRegistrar.WRAITH_UNIT.get(), WraithUnit.createAttributes().build());
         evt.put(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnit.createAttributes().build());
+        evt.put(EntityRegistrar.SCOUT_DOG_UNIT.get(), ScoutDogUnit.createAttributes().build());
         evt.put(EntityRegistrar.MILITIA_UNIT.get(), MilitiaUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), ZombieVillagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.PILLAGER_UNIT.get(), PillagerUnit.createAttributes().build());

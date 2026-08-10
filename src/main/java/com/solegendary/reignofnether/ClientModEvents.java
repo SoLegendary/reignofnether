@@ -19,6 +19,7 @@ import com.solegendary.reignofnether.particles.LevelUpParticle;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.unit.modelling.models.*;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -119,6 +120,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.POISON_SPIDER_UNIT.get(), PoisonSpiderUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WRAITH_UNIT.get(), WraithRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.SCOUT_DOG_UNIT.get(), DogUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MILITIA_UNIT.get(), VillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), ZombieVillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.PILLAGER_UNIT.get(), PillagerUnitRenderer::new);
