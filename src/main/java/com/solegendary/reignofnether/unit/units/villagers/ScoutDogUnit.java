@@ -111,7 +111,7 @@ public class ScoutDogUnit extends Wolf implements Unit {
     public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
-    public ResourceCost getCost() {return ResourceCosts.VILLAGER;}
+    public ResourceCost getCost() {return ResourceCosts.SCOUT_DOG;}
 
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -119,15 +119,29 @@ public class ScoutDogUnit extends Wolf implements Unit {
 
     final static public float maxHealth = 20.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.25f;
+    final static public float movementSpeed = 0.30f;
+
+    private long ticksStationary = 0;
+    private static final long TICKS_TO_SIT = 100;
 
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
     public ScoutDogUnit(EntityType<? extends Wolf> entityType, Level level) {
         super(entityType, level);
-
         updateAbilityButtons();
+        this.setTame(true);
+    }
+
+    @Override
+    protected float getWaterSlowDown() {
+        return 0.96F;
+    }
+
+    @Override
+    public void resetBehaviours() {
+        this.setInSittingPose(false);
+        ticksStationary = 0;
     }
 
     @Override
@@ -150,6 +164,11 @@ public class ScoutDogUnit extends Wolf implements Unit {
         super.tick();
         Unit.tick(this);
         PromoteIllager.checkAndApplyBuff(this);
+
+        if (ticksStationary >= TICKS_TO_SIT && !isInSittingPose())
+            setInSittingPose(true);
+        else if (getDeltaMovement().length() <= 0)
+            ticksStationary += 1;
     }
 
     @Override
@@ -175,7 +194,6 @@ public class ScoutDogUnit extends Wolf implements Unit {
     protected void registerGoals() {
         initialiseGoals();
         this.goalSelector.addGoal(2, usePortalGoal);
-
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
