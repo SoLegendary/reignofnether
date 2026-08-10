@@ -30,6 +30,12 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie_villager_unit").toString()));
 
+    public static final RegistryObject<EntityType<BatUnit>> BAT_UNIT = ENTITIES.register("bat_unit",
+            () -> EntityType.Builder.of(BatUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.BAT.getWidth(), EntityType.BAT.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bat_unit").toString()));
+
     public static final RegistryObject<EntityType<ZombieUnit>> ZOMBIE_UNIT = ENTITIES.register("zombie_unit",
             // can add other attributes here like sized() for hitbox, no summon, fire immunity, etc.
             () -> EntityType.Builder.of(ZombieUnit::new, MobCategory.CREATURE)
@@ -186,6 +192,12 @@ public class EntityRegistrar {
                     .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "grunt_unit").toString()));
+
+    public static final RegistryObject<EntityType<StriderUnit>> STRIDER_UNIT = ENTITIES.register("strider_unit",
+            () -> EntityType.Builder.of(StriderUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.STRIDER.getWidth(), EntityType.STRIDER.getHeight())
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "strider_unit").toString()));
 
     public static final RegistryObject<EntityType<BruteUnit>> BRUTE_UNIT = ENTITIES.register("brute_unit",
             () -> EntityType.Builder.of(BruteUnit::new, MobCategory.CREATURE)

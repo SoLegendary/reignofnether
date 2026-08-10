@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.unit.units.villagers;
+package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
@@ -19,23 +19,23 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ScoutDogProd extends ProductionItem {
+public class StriderProd extends ProductionItem {
 
-    public final static String itemName = "Scout Dog";
-    public final static ResourceCost cost = ResourceCosts.SCOUT_DOG;
+    public final static String itemName = "Strider";
+    public final static ResourceCost cost = ResourceCosts.STRIDER;
 
-    private final static ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/scout_dog.png");
+    private final static ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/strider.png");
 
-    public ScoutDogProd() {
+    public StriderProd() {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide())
-                placement.produceUnit((ServerLevel) level, EntityRegistrar.SCOUT_DOG_UNIT.get(), placement.ownerName, true);
+                placement.produceUnit((ServerLevel) level, EntityRegistrar.STRIDER_UNIT.get(), placement.ownerName, true);
         };
     }
 
     public String getItemName() {
-        return ScoutDogProd.itemName;
+        return StriderProd.itemName;
     }
 
     public UnitSpawnButton getPlaceButton() {
@@ -43,28 +43,28 @@ public class ScoutDogProd extends ProductionItem {
                 itemName,
                 TEXTURE_LOCATION,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(
-            ScoutDogProd.itemName,
+            StriderProd.itemName,
             TEXTURE_LOCATION,
             hotkey,
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip2"), Style.EMPTY)
             ),
             this
         );
@@ -72,7 +72,7 @@ public class ScoutDogProd extends ProductionItem {
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         return new StopProductionButton(
-            ScoutDogProd.itemName,
+            StriderProd.itemName,
             TEXTURE_LOCATION,
             prodBuilding,
             this,

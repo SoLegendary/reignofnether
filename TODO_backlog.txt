@@ -54,8 +54,8 @@ Bugfixes
 --------
 [❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
 [❌] Players logging in messes up the observer menu (and freezes resources?)
-[❌] bridge scroll bug (up and down vs left/right?)
 [❌] Fix day/night time when /gamerule doDaylightCycle false
+[❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
 
 Quality of Life Features
 ------------------------

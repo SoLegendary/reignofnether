@@ -1,12 +1,14 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RoyalGuardUnit;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.horse.*;
 import net.minecraft.world.entity.monster.*;
@@ -123,6 +125,12 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof MarauderUnit) {
             yOffset = -34;
             scale = -22;
+        } else if (entity instanceof Strider) {
+            yOffset = -24;
+            scale = -16;
+        } else if (entity instanceof Bat) {
+            yOffset = UnitClientEvents.yOffset;
+            scale = UnitClientEvents.scale;
         }
 
         return new Pair<>(yOffset, scale);

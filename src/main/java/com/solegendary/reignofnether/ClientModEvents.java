@@ -123,6 +123,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.SCOUT_DOG_UNIT.get(), DogUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MILITIA_UNIT.get(), VillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), ZombieVillagerUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.BAT_UNIT.get(), BatUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.PILLAGER_UNIT.get(), PillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.VINDICATOR_UNIT.get(), VindicatorUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WINDCALLER_UNIT.get(), WindcallerRenderer::new);
@@ -134,6 +135,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.RAVAGER_UNIT.get(), RavagerRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.GRUNT_UNIT.get(), PiglinUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.STRIDER_UNIT.get(), StriderRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.BRUTE_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.HEADHUNTER_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MARAUDER_UNIT.get(), MarauderRenderer::new);

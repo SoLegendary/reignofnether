@@ -34,9 +34,9 @@ Quality of Life
 
 Bugfixes
 --------
-[❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
-[🟡] Fixed building rotations sometimes causing placement errors
 
+[🟡] Fixed building rotations sometimes causing placement errors
+[❌] Phantoms cannot
 
 Languages
 ---------

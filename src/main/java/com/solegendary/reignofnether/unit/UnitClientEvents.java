@@ -1493,7 +1493,6 @@ public class UnitClientEvents {
     }
      */
 
-    /*
     public static int yOffset = 0;
     public static int scale = 0;
 
@@ -1516,7 +1515,6 @@ public class UnitClientEvents {
                 "scale: " + scale,
         });
     }
-     */
 
 
     /*
