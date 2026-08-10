@@ -129,8 +129,8 @@ public class PortraitRendererModifiers {
             yOffset = -24;
             scale = -16;
         } else if (entity instanceof Bat) {
-            yOffset = UnitClientEvents.yOffset;
-            scale = UnitClientEvents.scale;
+            yOffset = 27;
+            scale = 21;
         }
 
         return new Pair<>(yOffset, scale);
