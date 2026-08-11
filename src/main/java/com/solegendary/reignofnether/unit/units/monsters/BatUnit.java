@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.controls.FlyingUnitMoveControl;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -15,23 +16,29 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.navigation.FlyingPathNavigation;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BatUnit extends Bat implements Unit {
+public class BatUnit extends Mob implements Unit {
     public static final Abilities ABILITIES = new Abilities();
 
     //region
@@ -67,7 +74,7 @@ public class BatUnit extends Bat implements Unit {
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
+    public Faction getFaction() {return Faction.MONSTERS;}
     public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
@@ -124,10 +131,104 @@ public class BatUnit extends Bat implements Unit {
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public BatUnit(EntityType<? extends Bat> entityType, Level level) {
+    public BatUnit(EntityType<? extends Mob> entityType, Level level) {
         super(entityType, level);
         updateAbilityButtons();
+        this.moveControl = new FlyingUnitMoveControl(this);
+        this.navigation = new FlyingPathNavigation(this, level());
     }
+
+    @Override
+    public SunlightEffect getSunlightEffect() {
+        return SunlightEffect.SLOWNESS_I;
+    }
+
+    @Override
+    public void travel(Vec3 pTravelVector) {
+        if (this.isControlledByLocalInstance()) {
+            if (this.isInWater()) {
+                this.moveRelative(0.02F, pTravelVector);
+                this.move(MoverType.SELF, this.getDeltaMovement());
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.800000011920929));
+            } else if (this.isInLava()) {
+                this.moveRelative(0.02F, pTravelVector);
+                this.move(MoverType.SELF, this.getDeltaMovement());
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
+            } else {
+                BlockPos ground = this.getBlockPosBelowThatAffectsMyMovement();
+                float f = 0.91F;
+                if (this.onGround()) {
+                    f = this.level().getBlockState(ground).getFriction(this.level(), ground, this) * 0.91F;
+                }
+
+                float f1 = 0.16277137F / (f * f * f);
+                f = 0.91F;
+                if (this.onGround()) {
+                    f = this.level().getBlockState(ground).getFriction(this.level(), ground, this) * 0.91F;
+                }
+
+                this.moveRelative(this.onGround() ? 0.1F * f1 : 0.02F, pTravelVector);
+                this.move(MoverType.SELF, this.getDeltaMovement());
+                this.setDeltaMovement(this.getDeltaMovement().scale((double)f));
+            }
+        }
+        this.calculateEntityAnimation(false);
+    }
+
+    public void updateRotation() {
+        LivingEntity target = this.getTarget();
+        Vec3 dMove = this.getDeltaMovement();
+        double x = 0;
+        double z = 0;
+
+        if (target != null) {
+            x = target.getX() - this.getX();
+            z = target.getZ() - this.getZ();
+        } else if (dMove.distanceTo(new Vec3(0,0,0)) > 0) {
+            x = dMove.x();
+            z = dMove.z();
+        }
+
+        if (Math.abs(x) > 0.05f || Math.abs(z) > 0.05f) {
+            this.setYRot(-((float) Mth.atan2(x, z)) * 57.295776F);
+            this.yBodyRot = this.getYRot();
+        }
+    }
+
+    public boolean isFlapping() {
+        return this.tickCount % 3 == 0;
+    }
+
+    protected float getSoundVolume() {
+        return 0.2F;
+    }
+
+    public float getVoicePitch() {
+        return super.getVoicePitch() * 0.95F;
+    }
+
+    public SoundEvent getAmbientSound() {
+        return SoundEvents.BAT_AMBIENT;
+    }
+
+    protected SoundEvent getHurtSound(DamageSource pDamageSource) {
+        return SoundEvents.BAT_HURT;
+    }
+
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.BAT_DEATH;
+    }
+
+    public boolean isPushable() {
+        return false;
+    }
+
+    protected void doPush(Entity pEntity) {
+    }
+
+    protected void pushEntities() {
+    }
+
 
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
@@ -147,6 +248,7 @@ public class BatUnit extends Bat implements Unit {
         this.setCanPickUpLoot(false);
         super.tick();
         Unit.tick(this);
+        updateRotation();
     }
 
     @Override
@@ -163,7 +265,7 @@ public class BatUnit extends Bat implements Unit {
 
     public void initialiseGoals() {
         this.usePortalGoal = new UsePortalGoal(this);
-        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
+        this.moveGoal = new FlyingMoveToTargetGoal(this, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
     }

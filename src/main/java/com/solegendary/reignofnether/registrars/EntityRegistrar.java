@@ -419,7 +419,9 @@ public class EntityRegistrar {
             case PoisonSpiderProd.itemName -> EntityRegistrar.POISON_SPIDER_UNIT.get();
             case WraithProd.itemName -> EntityRegistrar.WRAITH_UNIT.get();
             case VillagerProd.itemName -> EntityRegistrar.VILLAGER_UNIT.get();
+            case ScoutDogProd.itemName -> EntityRegistrar.SCOUT_DOG_UNIT.get();
             case ZombieVillagerProd.itemName -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
+            case BatProd.itemName -> EntityRegistrar.BAT_UNIT.get();
             case VindicatorProd.itemName -> EntityRegistrar.VINDICATOR_UNIT.get();
             case PillagerProd.itemName -> EntityRegistrar.PILLAGER_UNIT.get();
             case WindcallerProd.itemName -> EntityRegistrar.WINDCALLER_UNIT.get();
@@ -430,6 +432,7 @@ public class EntityRegistrar {
             case WardenProd.itemName -> EntityRegistrar.WARDEN_UNIT.get();
             case RavagerProd.itemName -> EntityRegistrar.RAVAGER_UNIT.get();
             case GruntProd.itemName -> EntityRegistrar.GRUNT_UNIT.get();
+            case StriderProd.itemName -> EntityRegistrar.STRIDER_UNIT.get();
             case BruteProd.itemName -> EntityRegistrar.BRUTE_UNIT.get();
             case HeadhunterProd.itemName -> EntityRegistrar.HEADHUNTER_UNIT.get();
             case MarauderProd.itemName -> EntityRegistrar.MARAUDER_UNIT.get();

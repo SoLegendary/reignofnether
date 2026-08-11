@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.hud;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -128,9 +129,9 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof Strider) {
             yOffset = -24;
             scale = -16;
-        } else if (entity instanceof Bat) {
-            yOffset = 27;
-            scale = 21;
+        } else if (entity instanceof BatUnit) {
+            yOffset = -2;
+            scale = -10;
         }
 
         return new Pair<>(yOffset, scale);
