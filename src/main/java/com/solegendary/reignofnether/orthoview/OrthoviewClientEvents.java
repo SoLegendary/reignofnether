@@ -452,7 +452,7 @@ public class OrthoviewClientEvents {
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
-        // Prevent repeated key actions
+        // Prevent repeated key left_click_actions
         if (evt.getAction() == GLFW.GLFW_PRESS) {
 
             if (evt.getKey() == Keybindings.getFnum(12).getKey()) {

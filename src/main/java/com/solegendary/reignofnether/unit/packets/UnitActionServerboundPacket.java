@@ -21,7 +21,7 @@ public class UnitActionServerboundPacket {
     private final int[] unitIds; // units to be controlled
     private final BlockPos preselectedBlockPos;
     private final BlockPos selectedBuildingPos; // for building abilities
-    private final boolean shiftQueue; // shift queue actions
+    private final boolean shiftQueue; // shift queue left_click_actions
 
     // packet-handler functions
     public UnitActionServerboundPacket(

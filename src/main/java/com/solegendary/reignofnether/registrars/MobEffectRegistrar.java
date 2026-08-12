@@ -17,7 +17,7 @@ public class MobEffectRegistrar {
 
     public static final DeferredRegister<MobEffect> MOB_EFFECTS = DeferredRegister.create(ForgeRegistries.MOB_EFFECTS, ReignOfNether.MOD_ID);
 
-    // Prevents any actions or movement from happening
+    // Prevents any left_click_actions or movement from happening
     public static final RegistryObject<MobEffect> STUN = MOB_EFFECTS.register("stun",  () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0xFFFFFF)
             .addAttributeModifier(Attributes.MOVEMENT_SPEED, "3fd2b186-9aab-4018-88a9-c150d2f6862c", -1.0f, AttributeModifier.Operation.MULTIPLY_TOTAL)
             .addAttributeModifier(Attributes.ATTACK_SPEED, "126163a9-2ae8-4aff-96f2-2b15c9c0fb55", -1.0f, AttributeModifier.Operation.MULTIPLY_TOTAL));

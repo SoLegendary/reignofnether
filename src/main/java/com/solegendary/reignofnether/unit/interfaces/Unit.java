@@ -17,9 +17,6 @@ import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -27,7 +24,6 @@ import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
-import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -80,7 +76,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static com.ibm.icu.impl.ValidIdentifiers.Datatype.unit;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // Defines method bodies for Units
@@ -184,6 +179,9 @@ public interface Unit {
 
     int getScenarioRoleIndex(); // if -1, no role
     void setScenarioRoleIndex(int index);
+    
+    String getOnDeathCommand();
+    void setOnDeathCommand(String command);
 
     default double getDamageTakenIncrease() {
         MobEffectInstance mei = ((LivingEntity) this).getEffect(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get());
@@ -530,6 +528,7 @@ public interface Unit {
             if (itemStack.getItem() != Items.AIR)
                 pCompound.put(slot.name() + "Item", itemStack.serializeNBT());
         }
+        pCompound.putString("onDeathCommand", getOnDeathCommand());
     }
 
     // call from readAdditionalSaveData
@@ -556,6 +555,7 @@ public interface Unit {
                 }
             }
         }
+        setOnDeathCommand(pCompound.getString("onDeathCommand"));
     }
 
     public enum SunlightEffect {
@@ -888,16 +888,5 @@ public interface Unit {
             return;
         if (isIdle() && !AlliancesServerEvents.isAlliedOrOwned(this.getOwnerName(), aggroTarget.getOwnerName()))
             this.getTargetGoal().setTarget((LivingEntity) aggroTarget);
-    }
-
-    public default boolean hasRtsPlayerOwner() {
-        RTSPlayer rtsPlayer = ((Entity) this).level().isClientSide() ?
-                PlayerClientEvents.getRTSPlayer(getOwnerName()) :
-                PlayerServerEvents.getRTSPlayer(getOwnerName());
-        return rtsPlayer != null;
-    }
-
-    public default boolean hasScenarioNpcOwner() {
-        return ScenarioUtils.isScenarioNpc(((Entity) this).level().isClientSide(), this.getOwnerName());
     }
 }

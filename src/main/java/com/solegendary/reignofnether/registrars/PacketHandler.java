@@ -23,6 +23,8 @@ import com.solegendary.reignofnether.hero.FallenHeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonActionServerboundPacket;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerServerboundPacket;
 import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
@@ -383,6 +385,17 @@ public final class PacketHandler {
                 .encoder(FogBuildingClientboundPacket::encode)
                 .decoder(FogBuildingClientboundPacket::new)
                 .consumerMainThread(FogBuildingClientboundPacket::handle)
+                .add();
+        
+        INSTANCE.messageBuilder(CustomButtonActionServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(CustomButtonActionServerboundPacket::encode)
+                .decoder(CustomButtonActionServerboundPacket::decode)
+                .consumerMainThread(CustomButtonActionServerboundPacket::handle)
+                .add();
+        INSTANCE.messageBuilder(CustomButtonClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CustomButtonClientboundPacket::encode)
+                .decoder(CustomButtonClientboundPacket::decode)
+                .consumerMainThread(CustomButtonClientboundPacket::handle)
                 .add();
     }
 }

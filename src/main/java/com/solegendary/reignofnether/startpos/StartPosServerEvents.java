@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// manages start block and readied start (startRTSEveryone) actions
+// manages start block and readied start (startRTSEveryone) left_click_actions
 
 public class StartPosServerEvents {
 

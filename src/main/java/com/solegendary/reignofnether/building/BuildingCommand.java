@@ -1,10 +1,9 @@
-package com.solegendary.reignofnether.building.custombuilding;
+package com.solegendary.reignofnether.building;
 
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
-import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
@@ -19,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CustomBuildingCommand {
+public class BuildingCommand {
 
     public enum TriggerCondition {
         ON_BUILD_COMPLETE,
@@ -52,10 +51,17 @@ public class CustomBuildingCommand {
     public Map<? extends CommandNode<?>, CommandSyntaxException> exceptions = new HashMap<>();
     public int triggerCount = 0;
 
-    public CustomBuildingCommand() { }
+    public BuildingCommand() { }
+    
+    public BuildingCommand(int tickCooldown, int tickCooldownMax, String commandStr, String condition) {
+        this.tickCooldown = tickCooldown;
+        this.tickCooldownMax = tickCooldownMax;
+        this.commandStr = commandStr;
+        this.condition = TriggerCondition.valueOf(condition);
+    }
 
-    public static CustomBuildingCommand getFromNbt(CompoundTag tag) {
-        CustomBuildingCommand command = new CustomBuildingCommand();
+    public static BuildingCommand getFromNbt(CompoundTag tag) {
+        BuildingCommand command = new BuildingCommand();
         command.tickCooldown = tag.getInt("tickCooldown");
         command.tickCooldownMax = tag.getInt("tickCooldownMax");
         command.commandStr = tag.getString("commandStr");

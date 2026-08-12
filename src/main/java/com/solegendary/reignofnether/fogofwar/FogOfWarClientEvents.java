@@ -176,7 +176,7 @@ public class FogOfWarClientEvents {
     @SubscribeEvent
     // can't use ScreenEvent.KeyboardKeyPressedEvent as that only happens when a screen is up
     public static void onInput(InputEvent.Key evt) {
-        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key actions
+        if (evt.getAction() == GLFW.GLFW_PRESS) { // prevent repeated key left_click_actions
             if (MC.player == null)
                 return;
             if (!MC.player.hasPermissions(4))

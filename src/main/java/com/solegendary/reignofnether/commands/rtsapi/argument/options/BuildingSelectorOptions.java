@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.commands.argument.options;
+package com.solegendary.reignofnether.commands.rtsapi.argument.options;
 
 import com.google.common.collect.Maps;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -11,13 +11,14 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
-import com.solegendary.reignofnether.commands.argument.BuildingSelector;
-import com.solegendary.reignofnether.commands.argument.BuildingSelectorParser;
+import com.solegendary.reignofnether.commands.rtsapi.argument.BuildingSelector;
+import com.solegendary.reignofnether.commands.rtsapi.argument.BuildingSelectorParser;
 
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +43,7 @@ public class BuildingSelectorOptions {
 	private static final Map<String, BuildingSelectorOptions.Option> OPTIONS = Maps.newHashMap();
 	private static final SimpleCommandExceptionType UNKNOWN_BUILDING =
 		new SimpleCommandExceptionType(Component.translatable("commands.reignofnether.error.unknown_building"));
+	private static final SimpleCommandExceptionType ERROR_HEALTH_NEGATIVE = new SimpleCommandExceptionType(Component.translatable("abab")); //TODO: also translation
 	
 	public static void register(String pId, BuildingSelectorOptions.Modifier pHandler, Predicate<BuildingSelectorParser> pPredicate, Component pTooltip) {
 		OPTIONS.put(pId, new BuildingSelectorOptions.Option(pHandler, pPredicate, pTooltip));
@@ -49,7 +51,6 @@ public class BuildingSelectorOptions {
 	
 	public static void bootStrap() {
 		if (OPTIONS.isEmpty()) {
-			
 			register("distance", (p_121421_) -> {
 				int i = p_121421_.getReader().getCursor();
 				MinMaxBounds.Doubles minmaxbounds$doubles = MinMaxBounds.Doubles.fromReader(p_121421_.getReader());
@@ -60,7 +61,6 @@ public class BuildingSelectorOptions {
 					throw ERROR_RANGE_NEGATIVE.createWithContext(p_121421_.getReader());
 				}
 			}, (p_121419_) -> p_121419_.getDistance().isAny(), Component.translatable("argument.reignofnether.building.options.distance.description"));
-			register("rotation", (selector) -> selector.setRotation(selector.getReader().readString()), (p_121411_) -> p_121411_.getRotation() == null, Component.translatable("argument.reignofnether.building.options.rotation.description"));
 			register("x", (p_121413_) -> p_121413_.setX(p_121413_.getReader().readDouble()), (p_121411_) -> p_121411_.getX() == null, Component.translatable("argument.reignofnether.building.options.x.description"));
 			register("y", (p_121409_) -> p_121409_.setY(p_121409_.getReader().readDouble()), (p_121407_) -> p_121407_.getY() == null, Component.translatable("argument.reignofnether.building.options.y.description"));
 			register("z", (p_121405_) -> p_121405_.setZ(p_121405_.getReader().readDouble()), (p_121403_) -> p_121403_.getZ() == null, Component.translatable("argument.reignofnether.building.options.z.description"));
@@ -120,8 +120,39 @@ public class BuildingSelectorOptions {
 				}
 				p_121534_.limitToType(building.name);
 			}, (p_121532_) -> !p_121532_.isTypeLimited(), Component.translatable("argument.reignofnether.building.options.type.description"));
+			register("tag", (p_121530_) -> {
+				boolean flag = p_121530_.shouldInvertValue();
+				String s = p_121530_.getReader().readUnquotedString();
+				p_121530_.addPredicate((p_175166_) -> {
+					if ("".equals(s)) {
+						return p_175166_.getTags().isEmpty() != flag;
+					} else {
+						return p_175166_.getTags().contains(s) != flag;
+					}
+				});
+			}, (p_121528_) -> true, Component.translatable("argument.entity.options.tag.description"));
+			register("rotation", (p_121530_) -> {
+				String s = p_121530_.getReader().readUnquotedString();
+				p_121530_.addPredicate((p_175166_) -> {
+					try {
+						return p_175166_.rotation.equals(parseRotation(s));
+					} catch (CommandSyntaxException ignored) {
+						return false;
+					}
+				});
+			}, (p_121528_) -> true, Component.translatable("argument.entity.options.tag.description"));
+			register("health", (p_121417_) -> {
+				int i = p_121417_.getReader().getCursor();
+				MinMaxBounds.Ints minmaxbounds$ints = MinMaxBounds.Ints.fromReader(p_121417_.getReader());
+				if ((minmaxbounds$ints.getMin() == null || minmaxbounds$ints.getMin() >= 0) && (minmaxbounds$ints.getMax() == null || minmaxbounds$ints.getMax() >= 0)) {
+					p_121417_.setHealth(minmaxbounds$ints);
+				} else {
+					p_121417_.getReader().setCursor(i);
+					throw ERROR_HEALTH_NEGATIVE.createWithContext(p_121417_.getReader());
+				}
+			}, (p_121415_) -> p_121415_.getHealth().isAny(), Component.translatable("argument.entity.options.level.description"));
 		}
-	}
+	} // TODO: translation (entity -> building)
 	
 	private static Building resolveBuilding(String input) {
 		ResourceLocation location;
@@ -142,6 +173,19 @@ public class BuildingSelectorOptions {
 		}
 		return building;
 	}
+	
+	
+	private static Rotation parseRotation(String input) throws CommandSyntaxException {
+		return switch (input) {
+			case "0" -> Rotation.NONE;
+			case "90" -> Rotation.CLOCKWISE_90;
+			case "180" -> Rotation.CLOCKWISE_180;
+			case "270" -> Rotation.COUNTERCLOCKWISE_90;
+			default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
+				.create("Invalid rotation: " + input);
+		};
+	}
+	
 	
 	public static BuildingSelectorOptions.Modifier get(BuildingSelectorParser pParser, String pId, int pCursor) throws CommandSyntaxException {
 		BuildingSelectorOptions.Option buildingselectoroptions$option = OPTIONS.get(pId);

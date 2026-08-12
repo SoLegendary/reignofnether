@@ -352,7 +352,7 @@ public class TutorialClientEvents {
 
     // Whenever doing anything that could be a tutorial action like enabling orthoview or building your first building,
     // check here to progress the tutorial and give updates to the player.
-    // This theoretically should be able to be called at any time but will only actually progress if actions are done
+    // This theoretically should be able to be called at any time but will only actually progress if left_click_actions are done
     // This should be called in specific clientside events like
     public static void updateStage() {
         if (!isEnabled() || blockUpdateStage) {

@@ -168,7 +168,7 @@ public class CursorClientEvents {
         if (MC.player == null || MC.level == null) return;
 
         // ************************************
-        // Manage cursor icons based on actions
+        // Manage cursor icons based on left_click_actions
         // ************************************
 
         // hides default cursor and locks it to the window to allow edge panning
@@ -288,7 +288,7 @@ public class CursorClientEvents {
             if (entity.getId() == MC.player.getId())
                 continue;
 
-            // inflate by set amount to improve click accuracy
+            // inflate by set points to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {

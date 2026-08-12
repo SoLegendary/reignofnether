@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.commands.rtsapi.ResourceObjectiveCriteria;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
@@ -91,8 +92,11 @@ import java.util.function.Predicate;
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
 import static com.solegendary.reignofnether.cursor.CursorClientEvents.getPreselectedBlockPos;
 import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
+import static com.solegendary.reignofnether.player.PlayerServerEvents.serverLevel;
 import static com.solegendary.reignofnether.unit.Checkpoint.CHECKPOINT_TICKS_FADE;
 import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_ENTITIES;
+
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 
 
 public class UnitClientEvents {
@@ -105,7 +109,7 @@ public class UnitClientEvents {
     public static final List<ArrayList<Vec3>> unitWindowVecs = Collections.synchronizedList(new ArrayList<>());
     public static final List<BlockPos> windowPositions = Collections.synchronizedList(new ArrayList<>());
     public static int windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
-
+    
     // list of ids that correspond to idle workers - should only be updated from server side
     public static final ArrayList<Integer> idleWorkerIds = new ArrayList<>();
 
@@ -808,7 +812,7 @@ public class UnitClientEvents {
                     resolveMoveActionDeferred();
             }
         }
-        // clear all cursor actions
+        // clear all cursor left_click_actions
         CursorClientEvents.setLeftClickAction(null);
         markSelectedUnitsChanged();
     }

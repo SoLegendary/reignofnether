@@ -38,6 +38,7 @@ import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.EnchantmentUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
@@ -95,7 +96,7 @@ public class UnitServerEvents {
 
     private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;
-
+	
     // max possible pop you can have regardless of buildings, adjustable via /gamerule maxPopulation
     public static int maxPopulation = ResourceCosts.DEFAULT_MAX_POPULATION;
 
@@ -275,7 +276,7 @@ public class UnitServerEvents {
         return currentPopulation;
     }
 
-    // manually provide all the variables required to do unit actions
+    // manually provide all the variables required to do unit left_click_actions
     public static void addActionItem(
         String ownerName,
         UnitAction action,
@@ -730,9 +731,9 @@ public class UnitServerEvents {
         }
     }
 
-    // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns
+    // for some reason we have to use the level in the same tick as the unit left_click_actions or else level.getEntity returns
     // null
-    // remember to always reset targets so that users' actions always overwrite any existing action
+    // remember to always reset targets so that users' left_click_actions always overwrite any existing action
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD) {

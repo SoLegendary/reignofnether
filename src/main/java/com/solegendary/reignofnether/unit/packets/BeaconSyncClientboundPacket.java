@@ -11,7 +11,7 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-// allow the server to force unit actions as though it was sent by the client so it is recorded on both sides
+// allow the server to force unit left_click_actions as though it was sent by the client so it is recorded on both sides
 public class BeaconSyncClientboundPacket {
 
     private final UnitAction action;

@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.commands.argument;
+package com.solegendary.reignofnether.commands.rtsapi.argument;
 
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.ForgeHooks;
@@ -17,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -31,20 +31,20 @@ public class BuildingSelector {
 	private final AABB aabb;
 	private final BiConsumer<Vec3, List<? extends BuildingPlacement>> order;
 	@Nullable
-	private String ownerName;
-	@Nullable
 	private final String buildingName;
 	private final boolean usesSelector;
-	private final String rotation;
+	private final Predicate<BuildingPlacement> predicate;
+	@Nullable
+	private String ownerName;
 	
-	public BuildingSelector(int pMaxResults, Function<Vec3, Vec3> pPositions, @Nullable AABB pAabb, BiConsumer<Vec3, List<? extends BuildingPlacement>> pOrder, @Nullable String pType, boolean pUsesSelector, String rotation) {
+	public BuildingSelector(int pMaxResults, Function<Vec3, Vec3> pPositions, @Nullable AABB pAabb, BiConsumer<Vec3, List<? extends BuildingPlacement>> pOrder, @Nullable String pType, boolean pUsesSelector, Predicate<BuildingPlacement> pPredicate) {
 		this.maxResults = pMaxResults;
 		this.position = pPositions;
 		this.aabb = pAabb;
 		this.order = pOrder;
 		this.buildingName = pType;
 		this.usesSelector = pUsesSelector;
-		this.rotation = rotation;
+		this.predicate = pPredicate;
 	}
 	
 	private static boolean intersects(BuildingPlacement placement, AABB aabb) {
@@ -53,17 +53,6 @@ public class BuildingSelector {
 		return !(bMax.getX() < aabb.minX || bMin.getX() > aabb.maxX
 			|| bMax.getY() < aabb.minY || bMin.getY() > aabb.maxY
 			|| bMax.getZ() < aabb.minZ || bMin.getZ() > aabb.maxZ);
-	}
-	
-	private static Rotation parseRotation(String input) throws CommandSyntaxException {
-		return switch (input) {
-			case "0" -> Rotation.NONE;
-			case "90" -> Rotation.CLOCKWISE_90;
-			case "180" -> Rotation.CLOCKWISE_180;
-			case "270" -> Rotation.COUNTERCLOCKWISE_90;
-			default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
-				.create("Invalid rotation: " + input);
-		};
 	}
 	
 	public int getMaxResults() {
@@ -120,14 +109,14 @@ public class BuildingSelector {
 		}
 	}
 	
-	private boolean checkOwnerNameAndRotation(BuildingPlacement building) throws CommandSyntaxException {
-		return (ownerName == null || Objects.equals(ownerName, building.ownerName)) && ((rotation == null || Objects.equals(parseRotation(rotation), building.rotation)));
+	private boolean checkOwnerName(BuildingPlacement building) {
+		return (ownerName == null || Objects.equals(ownerName, building.ownerName));
 	}
 	
-	public void getBuildings(String pBuildingName, AABB pBounds, List<BuildingPlacement> pOutput, int pMaxResults) throws CommandSyntaxException {
+	public void getBuildings(String pBuildingName, AABB pBounds, List<BuildingPlacement> pOutput, int pMaxResults) {
 		
 		for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
-			if (intersects(building, pBounds) && (pBuildingName == null || Objects.equals(building.getBuilding().name, pBuildingName)) && checkOwnerNameAndRotation(building)) {
+			if (intersects(building, pBounds) && (pBuildingName == null || Objects.equals(building.getBuilding().name, pBuildingName)) && predicate.test(building) && checkOwnerName(building)) {
 				pOutput.add(building);
 				if (pOutput.size() >= pMaxResults) {
 					return;
@@ -136,10 +125,10 @@ public class BuildingSelector {
 		}
 	}
 	
-	public void getBuildings(String pBuildingName, List<BuildingPlacement> pOutput, int pMaxResults) throws CommandSyntaxException {
+	public void getBuildings(String pBuildingName, List<BuildingPlacement> pOutput, int pMaxResults) {
 		
 		for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
-			if ((pBuildingName == null || Objects.equals(building.getBuilding().name, pBuildingName)) && checkOwnerNameAndRotation(building)) {
+			if ((pBuildingName == null || Objects.equals(building.getBuilding().name, pBuildingName)) && checkOwnerName(building) && predicate.test(building)) {
 				pOutput.add(building);
 				if (pOutput.size() >= pMaxResults) {
 					return;
