@@ -485,6 +485,7 @@ public class PlayerServerEvents {
                     startingWorkers.add(entity);
                 }
             }
+            boolean isBat = scoutEntityType == EntityRegistrar.BAT_UNIT.get();
             if (FogOfWarServerEvents.isEnabled()) {
                 BlockPos nonReadiedScoutBp = new BlockPos((int) pos.x - 1, 0,(int) pos.z - 1);
                 Entity scoutEntity = scoutEntityType != null ? scoutEntityType.create(level) : null;
@@ -493,7 +494,7 @@ public class PlayerServerEvents {
                             .above()
                             .above();
                     ((Unit) scoutEntity).setOwnerName(playerName);
-                    scoutEntity.moveTo(bp, 0, 0);
+                    scoutEntity.moveTo(bp, isBat ? 2 : 0, 0);
                     if (!readiedStart)
                         level.addFreshEntity(scoutEntity);
                     startingScout = scoutEntity;
@@ -540,7 +541,7 @@ public class PlayerServerEvents {
                         level.addFreshEntity(startingWorkers.get(i));
                     }
                     if (startingScout != null) {
-                        startingScout.moveTo(bp.offset(-1, 1, 2), 0, 0);
+                        startingScout.moveTo(bp.offset(0,  isBat ? 3 : 1, 2), 0, 0);
                         level.addFreshEntity(startingScout);
                     }
                     var workerIds = new int[startingWorkers.size()];
