@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -29,8 +30,15 @@ public class BatProd extends ProductionItem {
     public BatProd() {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (!level.isClientSide())
-                placement.produceUnit((ServerLevel) level, EntityRegistrar.BAT_UNIT.get(), placement.ownerName, true);
+            if (!level.isClientSide()) {
+                placement.produceUnit(
+                        (ServerLevel) level,
+                        EntityRegistrar.BAT_UNIT.get(),
+                        placement.ownerName,
+                        false,
+                        new Vec3i(0,10,0)
+                );
+            }
         };
     }
 

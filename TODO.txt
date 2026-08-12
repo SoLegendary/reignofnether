@@ -19,9 +19,14 @@ Fog of war
 
 [❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Add commands for force-moving camera
+
+
+
+
 [❌] Scout units from capitol + 1 free on match start
     - scout dog (reskinned wolf) for villagers, bat for monsters, striders for piglins
-
+    - Let striders swim, but take slow damage over time
+    - Test strider lava pathfinding
 
 
 Balance
@@ -30,13 +35,16 @@ Balance
 
 Quality of Life
 ---------------
+[❌] Huntable animals now move directly away from attackers instead of in random paths
 
 
 Bugfixes
 --------
 
 [🟡] Fixed building rotations sometimes causing placement errors
-[❌] Phantoms cannot
+    - Buildings can be stacked on top of each other?
+[❌] Phantoms don't damage buildings
+[❌] Phantoms die instantly upon summoning
 
 Languages
 ---------

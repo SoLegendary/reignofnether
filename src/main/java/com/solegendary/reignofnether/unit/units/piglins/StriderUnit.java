@@ -5,20 +5,24 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -26,11 +30,13 @@ import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.Strider;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class StriderUnit extends Strider implements Unit {
     public static final Abilities ABILITIES = new Abilities();
@@ -118,9 +124,9 @@ public class StriderUnit extends Strider implements Unit {
 
     // endregion
 
-    final static public float maxHealth = 20.0f;
+    final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.30f;
+    final static public float movementSpeed = 0.33f;
 
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
@@ -153,6 +159,32 @@ public class StriderUnit extends Strider implements Unit {
         this.setCanPickUpLoot(false);
         super.tick();
         Unit.tick(this);
+
+        if (!onGround() || MiscUtil.isOnNetherTerrain(this)) {
+            setSuffocating(false);
+        } else {
+            setSuffocating(true);
+        }
+
+        if (isSuffocating()) {
+            this.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), 15, 1));
+        }
+    }
+
+    private static final UUID SUFFOCATING_MODIFIER_UUID = UUID.fromString("9e362924-01de-4ddd-a2b2-d0f7a405a175");
+    private static final AttributeModifier SUFFOCATING_MODIFIER = new AttributeModifier(SUFFOCATING_MODIFIER_UUID,
+            "Strider Unit suffocating modifier", -0.10, AttributeModifier.Operation.MULTIPLY_BASE);
+
+    @Override
+    public void setSuffocating(boolean pSuffocating) {
+        this.entityData.set(DATA_SUFFOCATING, pSuffocating);
+        AttributeInstance $$1 = this.getAttribute(Attributes.MOVEMENT_SPEED);
+        if ($$1 != null) {
+            $$1.removeModifier(SUFFOCATING_MODIFIER_UUID);
+            if (pSuffocating) {
+                $$1.addTransientModifier(SUFFOCATING_MODIFIER);
+            }
+        }
     }
 
     @Override
@@ -183,5 +215,12 @@ public class StriderUnit extends Strider implements Unit {
         this.goalSelector.addGoal(2, garrisonGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
+    }
+
+    // prevent spawning baby zombie
+    @Override
+    @Nullable
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        return pSpawnData;
     }
 }

@@ -333,14 +333,21 @@ public interface Unit {
             checkAndRetreatToAnchor(unit);
 
         if (unit.getSunlightEffect() == SunlightEffect.SLOWNESS_II ||
-            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I) {
+            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ||
+            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_MINOR) {
             // apply slowness during daytime for a short time repeatedly
             if (unitMob.tickCount % 10 == 0 && !unitMob.level().isClientSide() && unitMob.level().isDay() &&
                     !NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), false) &&
-                    !ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap"))
-                unitMob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15,
-                        unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ? 0 : 1
-                ));
+                    !ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap")) {
+
+                if (unit.getSunlightEffect() == SunlightEffect.SLOWNESS_MINOR) {
+                    unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), 15, 1));
+                } else {
+                    unitMob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15,
+                            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ? 0 : 1
+                    ));
+                }
+            }
         }
 
         if (unitMob.tickCount % 20 == 0) {
@@ -562,6 +569,7 @@ public interface Unit {
         NONE,
         SLOWNESS_II,
         SLOWNESS_I,
+        SLOWNESS_MINOR,
         FIRE
     }
 

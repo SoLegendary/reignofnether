@@ -126,7 +126,7 @@ public class BatUnit extends Mob implements Unit {
 
     final static public float maxHealth = 15.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.30f;
+    final static public float movementSpeed = 0.33f;
 
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
@@ -149,27 +149,28 @@ public class BatUnit extends Mob implements Unit {
             if (this.isInWater()) {
                 this.moveRelative(0.02F, pTravelVector);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                this.setDeltaMovement(this.getDeltaMovement().scale(0.800000011920929));
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.8));
             } else if (this.isInLava()) {
                 this.moveRelative(0.02F, pTravelVector);
                 this.move(MoverType.SELF, this.getDeltaMovement());
                 this.setDeltaMovement(this.getDeltaMovement().scale(0.5));
             } else {
                 BlockPos ground = this.getBlockPosBelowThatAffectsMyMovement();
-                float f = 0.91F;
+                final float f0 = 0.91f;
+                float f = f0;
                 if (this.onGround()) {
-                    f = this.level().getBlockState(ground).getFriction(this.level(), ground, this) * 0.91F;
+                    f = this.level().getBlockState(ground).getFriction(this.level(), ground, this) * f0;
                 }
 
                 float f1 = 0.16277137F / (f * f * f);
-                f = 0.91F;
+                f = f0;
                 if (this.onGround()) {
-                    f = this.level().getBlockState(ground).getFriction(this.level(), ground, this) * 0.91F;
+                    f = this.level().getBlockState(ground).getFriction(this.level(), ground, this) * f0;
                 }
 
                 this.moveRelative(this.onGround() ? 0.1F * f1 : 0.02F, pTravelVector);
                 this.move(MoverType.SELF, this.getDeltaMovement());
-                this.setDeltaMovement(this.getDeltaMovement().scale((double)f));
+                this.setDeltaMovement(this.getDeltaMovement().scale(f));
             }
         }
         this.calculateEntityAnimation(false);
@@ -193,10 +194,6 @@ public class BatUnit extends Mob implements Unit {
             this.setYRot(-((float) Mth.atan2(x, z)) * 57.295776F);
             this.yBodyRot = this.getYRot();
         }
-    }
-
-    public boolean isFlapping() {
-        return this.tickCount % 3 == 0;
     }
 
     protected float getSoundVolume() {
@@ -239,7 +236,7 @@ public class BatUnit extends Mob implements Unit {
                 .add(Attributes.MAX_HEALTH, BatUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, BatUnit.armorValue)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), 20)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), 16)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
