@@ -34,11 +34,13 @@ import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
@@ -173,6 +175,11 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
             SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.STRING);
 
     public int getAvatarTicksLeft() { return this.entityData.get(avatarTicksLeftAccessor); }
     public void setAvatarTicksLeft(int value) { this.entityData.set(avatarTicksLeftAccessor, value); }
@@ -194,6 +201,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
         this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
         this.entityData.define(avatarTicksLeftAccessor, 0);
         this.entityData.define(avatarScalingStartedAccessor, false);
         this.entityData.define(avatarScaleTicksAccessor, 0);
@@ -475,6 +483,24 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
             float f = (float) (Mth.atan2(z0, x0) * 57.2957763671875) - 90.0F;
             this.setYRot(this.rotlerp(this.getYRot(), f, 10f));
         }
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     private float rotlerp(float pAngle, float pTargetAngle, float pMaxIncrease) {

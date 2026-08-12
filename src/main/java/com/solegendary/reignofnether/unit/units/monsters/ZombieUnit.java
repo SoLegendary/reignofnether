@@ -16,12 +16,17 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -120,6 +125,12 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     // which scenario role does this unit use?
     public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
     public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
+    
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor = SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.INT);
 
     public boolean isSummoned() { return this.entityData.get(isSummonedAccessor); }
@@ -224,6 +235,24 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
                 }
             }
         }
+    }
+    
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+        if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override

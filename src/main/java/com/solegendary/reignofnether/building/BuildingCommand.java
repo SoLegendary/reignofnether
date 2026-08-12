@@ -5,8 +5,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.commands.CommandSourceStack;
@@ -19,151 +19,152 @@ import java.util.List;
 import java.util.Map;
 
 public class BuildingCommand {
-	
-	public int tickCooldown = 100;
-	public int tickCooldownMax = 100;
-	public String commandStr = "";
-	public TriggerCondition condition = TriggerCondition.NONE;
-	public boolean isValid = true; // updated whenever commandStr is updated
-	public Map<? extends CommandNode<?>, CommandSyntaxException> exceptions = new HashMap<>();
-	public int triggerCount = 0;
-	public BuildingCommand() {
-	}
-	public BuildingCommand(int tickCooldown, int tickCooldownMax, String commandStr, String condition) {
-		this.tickCooldown = tickCooldown;
-		this.tickCooldownMax = tickCooldownMax;
-		this.commandStr = commandStr;
-		this.condition = TriggerCondition.valueOf(condition);
-	}
-	
-	public static BuildingCommand getFromNbt(CompoundTag tag) {
-		BuildingCommand command = new BuildingCommand();
-		command.tickCooldown = tag.getInt("tickCooldown");
-		command.tickCooldownMax = tag.getInt("tickCooldownMax");
-		command.commandStr = tag.getString("commandStr");
-		command.condition = TriggerCondition.valueOf(tag.getString("condition"));
-		if (tag.contains("triggerCount"))
-			command.triggerCount = tag.getInt("triggerCount");
-		return command;
-	}
-	
-	public boolean hasCooldownCondition() {
-		return List.of(
-			TriggerCondition.ON_CAPTURE,
-			TriggerCondition.ON_DAMAGE_TAKEN,
-			TriggerCondition.OFF_COOLDOWN_IF_COMPLETE,
-			TriggerCondition.OFF_COOLDOWN_IF_GARRISONED,
-			TriggerCondition.OFF_COOLDOWN_IF_CAPTURED,
-			TriggerCondition.ON_SCENARIO_START
-		).contains(condition);
-	}
-	
-	public boolean isValid() {
-		return isValid;
-	}
-	
-	public Map<? extends CommandNode<?>, CommandSyntaxException> getExceptions() {
-		return exceptions;
-	}
-	
-	public void updateValidityAndExceptions() {
-		Minecraft client = Minecraft.getInstance();
-		ClientPacketListener handler = client.getConnection();
-		this.exceptions.clear();
-		
-		if (handler == null) {
-			this.isValid = false;
-			return;
-		}
-		String stripped = commandStr.startsWith("/") ? commandStr.substring(1) : commandStr;
-		ParseResults<?> parsed = handler.getCommands()
-			.parse(new StringReader(stripped), handler.getSuggestionsProvider());
-		
-		if (!parsed.getExceptions().isEmpty() || parsed.getReader().canRead()) {
-			this.isValid = false;
-			this.exceptions = parsed.getExceptions();
-			return;
-		}
-		this.isValid = true;
-	}
-	
-	public boolean isOffCooldown() {
-		return tickCooldown <= 0;
-	}
-	
-	public void setCooldownToMax() {
-		tickCooldown = tickCooldownMax;
-	}
-	
-	public void tick(BuildingPlacement bpl) {
-		if (!hasCooldownCondition())
-			return;
-		
-		boolean scenarioStarted = ScenarioServerEvents.isScenarioStarted((ServerLevel) bpl.level);
-		if (condition == TriggerCondition.ON_SCENARIO_START && !scenarioStarted)
-			return;
-		
-		if (tickCooldown > 0)
-			tickCooldown -= 1;
-		if (tickCooldown <= 0 && checkTickingCondition(bpl, scenarioStarted)) {
-			run(bpl);
-		}
-	}
-	
-	public boolean checkTickingCondition(BuildingPlacement bpl, boolean scenarioStarted) {
-		GarrisonableBuildingAddon gba;
-		return switch (condition) {
-			case OFF_COOLDOWN_IF_COMPLETE -> bpl.isBuilt;
-			case OFF_COOLDOWN_IF_GARRISONED -> (gba = bpl.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null && !gba.getOccupants(bpl).isEmpty();
-			case OFF_COOLDOWN_IF_CAPTURED -> !bpl.ownerName.isBlank();
-			case ON_SCENARIO_START -> scenarioStarted && triggerCount <= 0;
-			case ON_CAPTURE -> !bpl.ownerName.isBlank() && triggerCount <= 0;
-			default -> false;
-		};
-	}
-	
-	public void run(BuildingPlacement bpl) {
-		if (bpl.level instanceof ServerLevel level) {
-			ServerPlayer player = level.getServer().getPlayerList().getPlayerByName(bpl.ownerName);
-			
-			CommandSourceStack source;
-			if (player != null) {
-				source = player
-					.createCommandSourceStack()
-					.withPosition(bpl.minCorner.offset(-1, 0, -1).getCenter())
-					.withLevel(level)
-					.withSuppressedOutput()
-					.withPermission(2)
-					.withSource(player);
-			} else {
-				source = level.getServer()
-					.createCommandSourceStack()
-					.withPosition(bpl.minCorner.offset(-1, 0, -1).getCenter())
-					.withLevel(level)
-					.withPermission(2)
-					.withSuppressedOutput();
-			}
-			level.getServer().getCommands().performPrefixedCommand(source, commandStr);
-			
-			setCooldownToMax();
-			triggerCount += 1;
-		}
-	}
-	
-	public void reset() {
-		triggerCount = 0;
-		setCooldownToMax();
-	}
-	
-	public enum TriggerCondition {
-		ON_BUILD_COMPLETE,
-		ON_DESTROY,
-		ON_DAMAGE_TAKEN,
-		ON_CAPTURE,
-		OFF_COOLDOWN_IF_COMPLETE,
-		OFF_COOLDOWN_IF_GARRISONED,
-		OFF_COOLDOWN_IF_CAPTURED,
-		ON_SCENARIO_START,
-		NONE
-	}
+
+    public enum TriggerCondition {
+        ON_BUILD_COMPLETE,
+        ON_DESTROY,
+        ON_DAMAGE_TAKEN,
+        ON_CAPTURE,
+        OFF_COOLDOWN_IF_COMPLETE,
+        OFF_COOLDOWN_IF_GARRISONED,
+        OFF_COOLDOWN_IF_CAPTURED,
+        ON_SCENARIO_START,
+        NONE
+    }
+
+    public boolean hasCooldownCondition() {
+        return List.of(
+            TriggerCondition.ON_CAPTURE,
+            TriggerCondition.ON_DAMAGE_TAKEN,
+            TriggerCondition.OFF_COOLDOWN_IF_COMPLETE,
+            TriggerCondition.OFF_COOLDOWN_IF_GARRISONED,
+            TriggerCondition.OFF_COOLDOWN_IF_CAPTURED,
+            TriggerCondition.ON_SCENARIO_START
+        ).contains(condition);
+    }
+
+    public int tickCooldown = 100;
+    public int tickCooldownMax = 100;
+    public String commandStr = "";
+    public TriggerCondition condition = TriggerCondition.NONE;
+    public boolean isValid = true; // updated whenever commandStr is updated
+    public Map<? extends CommandNode<?>, CommandSyntaxException> exceptions = new HashMap<>();
+    public int triggerCount = 0;
+
+    public BuildingCommand() { }
+    
+    public BuildingCommand(int tickCooldown, int tickCooldownMax, String commandStr, String condition) {
+        this.tickCooldown = tickCooldown;
+        this.tickCooldownMax = tickCooldownMax;
+        this.commandStr = commandStr;
+        this.condition = TriggerCondition.valueOf(condition);
+    }
+
+    public static BuildingCommand getFromNbt(CompoundTag tag) {
+        BuildingCommand command = new BuildingCommand();
+        command.tickCooldown = tag.getInt("tickCooldown");
+        command.tickCooldownMax = tag.getInt("tickCooldownMax");
+        command.commandStr = tag.getString("commandStr");
+        command.condition = TriggerCondition.valueOf(tag.getString("condition"));
+        if (tag.contains("triggerCount"))
+            command.triggerCount = tag.getInt("triggerCount");
+        return command;
+    }
+
+    public boolean isValid() {
+        return isValid;
+    }
+
+    public Map<? extends CommandNode<?>, CommandSyntaxException> getExceptions() {
+        return exceptions;
+    }
+
+    public void updateValidityAndExceptions() {
+        Minecraft client = Minecraft.getInstance();
+        ClientPacketListener handler = client.getConnection();
+        this.exceptions.clear();
+
+        if (handler == null) {
+            this.isValid = false;
+            return;
+        }
+        String stripped = commandStr.startsWith("/") ? commandStr.substring(1) : commandStr;
+        ParseResults<?> parsed = handler.getCommands()
+                .parse(new StringReader(stripped), handler.getSuggestionsProvider());
+
+        if (!parsed.getExceptions().isEmpty() || parsed.getReader().canRead()) {
+            this.isValid = false;
+            this.exceptions = parsed.getExceptions();
+            return;
+        }
+        this.isValid = true;
+    }
+
+    public boolean isOffCooldown() {
+        return tickCooldown <= 0;
+    }
+
+    public void setCooldownToMax() {
+        tickCooldown = tickCooldownMax;
+    }
+
+    public void tick(BuildingPlacement bpl) {
+        if (!hasCooldownCondition())
+            return;
+
+        boolean scenarioStarted = ScenarioServerEvents.isScenarioStarted((ServerLevel) bpl.level);
+        if (condition == TriggerCondition.ON_SCENARIO_START && !scenarioStarted)
+            return;
+
+        if (tickCooldown > 0)
+            tickCooldown -= 1;
+        if (tickCooldown <= 0 && checkTickingCondition(bpl, scenarioStarted)) {
+            run(bpl);
+        }
+    }
+
+    public boolean checkTickingCondition(BuildingPlacement bpl, boolean scenarioStarted) {
+        GarrisonableBuildingAddon gba;
+        return switch (condition) {
+            case OFF_COOLDOWN_IF_COMPLETE -> bpl.isBuilt;
+            case OFF_COOLDOWN_IF_GARRISONED -> (gba = bpl.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null && !gba.getOccupants(bpl).isEmpty();
+            case OFF_COOLDOWN_IF_CAPTURED -> !bpl.ownerName.isBlank();
+            case ON_SCENARIO_START -> scenarioStarted && triggerCount <= 0;
+            case ON_CAPTURE -> !bpl.ownerName.isBlank() && triggerCount <= 0;
+            default -> false;
+        };
+    }
+
+    public void run(BuildingPlacement bpl) {
+        if (bpl.level instanceof ServerLevel level) {
+            ServerPlayer player = level.getServer().getPlayerList().getPlayerByName(bpl.ownerName);
+
+            CommandSourceStack source;
+            if (player != null) {
+                source = player
+                        .createCommandSourceStack()
+                        .withPosition(bpl.minCorner.offset(-1, 0, -1).getCenter())
+                        .withLevel(level)
+                        .withSuppressedOutput()
+                        .withPermission(2)
+                        .withSource(player);
+            } else {
+                source = level.getServer()
+                        .createCommandSourceStack()
+                        .withPosition(bpl.minCorner.offset(-1, 0, -1).getCenter())
+                        .withLevel(level)
+                        .withPermission(2)
+                        .withSuppressedOutput();
+            }
+            level.getServer().getCommands().performPrefixedCommand(source, commandStr);
+
+            setCooldownToMax();
+            triggerCount += 1;
+        }
+    }
+
+    public void reset() {
+        triggerCount = 0;
+        setCooldownToMax();
+    }
 }
