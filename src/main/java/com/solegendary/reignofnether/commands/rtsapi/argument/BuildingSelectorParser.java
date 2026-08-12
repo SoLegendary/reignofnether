@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.commands.argument;
+package com.solegendary.reignofnether.commands.rtsapi.argument;
 
 import com.google.common.primitives.Doubles;
 import com.mojang.brigadier.StringReader;
@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.commands.argument.options.BuildingSelectorOptions;
+import com.solegendary.reignofnether.commands.rtsapi.argument.options.BuildingSelectorOptions;
 
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.network.chat.Component;
@@ -22,6 +22,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -47,8 +48,8 @@ public class BuildingSelectorParser {
 	private static final char SELECTOR_BUILDING = 'b';
 	private final StringReader reader;
 	private int maxResults;
-	private String rotation;
 	private MinMaxBounds.Doubles distance = MinMaxBounds.Doubles.ANY;
+	private MinMaxBounds.Ints health = MinMaxBounds.Ints.ANY;
 	@Nullable
 	private Double x;
 	@Nullable
@@ -61,6 +62,7 @@ public class BuildingSelectorParser {
 	private Double deltaY;
 	@Nullable
 	private Double deltaZ;
+	private Predicate<BuildingPlacement> predicate = (p_121321_) -> true;
 	private BiConsumer<Vec3, List<? extends BuildingPlacement>> order = BuildingSelector.ORDER_ARBITRARY;
 	private BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> suggestions = SUGGEST_NOTHING;
 	private boolean isLimited;
@@ -101,7 +103,18 @@ public class BuildingSelectorParser {
 			function = (p_121258_) -> new Vec3(this.x == null ? p_121258_.x : this.x, this.y == null ? p_121258_.y : this.y, this.z == null ? p_121258_.z : this.z);
 		}
 		
-		return new BuildingSelector(this.maxResults, function, aabb, this.order, this.buildingName, this.usesSelectors, rotation);
+		return new BuildingSelector(this.maxResults, function, aabb, this.order, this.buildingName, this.usesSelectors, this.predicate);
+	}
+	
+	public boolean shouldInvertValue() {
+		this.reader.skipWhitespace();
+		if (this.reader.canRead() && this.reader.peek() == '!') {
+			this.reader.skip();
+			this.reader.skipWhitespace();
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	private AABB createAabb(double pSizeX, double pSizeY, double pSizeZ) {
@@ -131,6 +144,10 @@ public class BuildingSelectorParser {
 			} else if (c0 == 'r') {
 				this.maxResults = 1;
 				this.order = ORDER_RANDOM;
+			} else if (c0 == 's') {
+				this.distance = MinMaxBounds.Doubles.atMost(1);
+				this.maxResults = 1;
+				this.order = ORDER_NEAREST;
 			} else {
 				if (c0 != 'b') {
 					this.reader.setCursor(i);
@@ -278,6 +295,9 @@ public class BuildingSelectorParser {
 			this.reader.skip();
 			this.parseSelector();
 		}
+		if (!this.health.isAny()) {
+			this.predicate = this.predicate.and((p_287322_) -> this.health.matches(p_287322_.getHealth()));
+		}
 		return this.getSelector();
 	}
 	
@@ -286,6 +306,7 @@ public class BuildingSelectorParser {
 		p_121287_.suggest("@b", Component.translatable("argument.reignofnether.buildingPlacement.selector.allPlayer"));
 		p_121287_.suggest("@r", Component.translatable("argument.reignofnether.buildingPlacement.selector.randomPlayer"));
 		p_121287_.suggest("@p", Component.translatable("argument.reignofnether.buildingPlacement.selector.nearestPlayer"));
+		p_121287_.suggest("@s", Component.translatable("argument.reignofnether.buildingPlacement.selector.nearestPlayer"));
 		return p_121287_.buildFuture();
 	}
 	
@@ -295,6 +316,7 @@ public class BuildingSelectorParser {
 		suggestionsbuilder.suggest("@b", Component.translatable("argument.reignofnether.buildingPlacement.selector.allPlayer"));
 		suggestionsbuilder.suggest("@r", Component.translatable("argument.reignofnether.buildingPlacement.selector.randomPlayer"));
 		suggestionsbuilder.suggest("@p", Component.translatable("argument.reignofnether.buildingPlacement.selector.nearestPlayer"));
+		suggestionsbuilder.suggest("@s", Component.translatable("argument.reignofnether.buildingPlacement.selector.hereBUilding")); //TODO: player?
 		p_121323_.add(suggestionsbuilder);
 		return p_121323_.buildFuture();
 	}
@@ -355,11 +377,15 @@ public class BuildingSelectorParser {
 		return this.buildingName != null;
 	}
 	
-	public String getRotation() {
-		return rotation;
+	public void addPredicate(Predicate<BuildingPlacement> pPredicate) {
+		this.predicate = this.predicate.and(pPredicate);
 	}
 	
-	public void setRotation(String rotation) {
-		this.rotation = rotation;
+	public MinMaxBounds.Ints getHealth() {
+		return this.health;
+	}
+	
+	public void setHealth(MinMaxBounds.Ints pLevel) {
+		this.health = pLevel;
 	}
 }

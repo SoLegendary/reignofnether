@@ -22,6 +22,9 @@ import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
+import com.solegendary.reignofnether.hud.custombutton.CustomButton;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientEvents;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonServerEvents;
 import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -292,10 +295,10 @@ public class HudClientEvents {
         if (MC.level == null) {
             return;
         }
-
+        
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
-
+        
         // where to start drawing the centre hud (from left to right: portrait, stats, unit icon buttons)
         int hudStartingXPos = Button.DEFAULT_ICON_FRAME_SIZE * 6 + (Button.DEFAULT_ICON_FRAME_SIZE / 2);
 
@@ -1591,7 +1594,7 @@ public class HudClientEvents {
                         }
                         if (!StartButtons.monsterStartButton.isHidden.get()) {
                             StartButtons.monsterStartButton.render(evt.getGuiGraphics(),
-                                    (int) (screenWidth - (StartButtons.ICON_SIZE * 6)),
+                                    (int) (screenWidth - (StartButtons.ICON_SIZE * 4f)),
                                     StartButtons.ICON_SIZE / 2,
                                     mouseX,
                                     mouseY
@@ -1600,7 +1603,7 @@ public class HudClientEvents {
                         }
                         if (!StartButtons.piglinStartButton.isHidden.get()) {
                             StartButtons.piglinStartButton.render(evt.getGuiGraphics(),
-                                    screenWidth - (StartButtons.ICON_SIZE * 4),
+                                    screenWidth - (StartButtons.ICON_SIZE * 2),
                                     StartButtons.ICON_SIZE / 2,
                                     mouseX,
                                     mouseY
@@ -1675,10 +1678,10 @@ public class HudClientEvents {
             if (!beaconButton.isHidden.get()) {
                 beaconButton.tooltipOffsetY = 15;
                 beaconButton.render(evt.getGuiGraphics(),
-                        xi,
-                        40,
-                        mouseX,
-                        mouseY
+                    xi,
+                    40,
+                    mouseX,
+                    mouseY
                 );
                 renderedButtons.add(beaconButton);
             }
@@ -1787,6 +1790,36 @@ public class HudClientEvents {
                     button.render(evt.getGuiGraphics(), btnX, btnY, HudClientEvents.mouseX, HudClientEvents.mouseY);
                     renderedButtons.add(button);
                 }
+            }
+        }
+        
+        if (hudSelectedEntity != null) {
+            ArrayList<ResourceLocation> buttons = CustomButtonClientEvents.entityMappings.get(hudSelectedEntity.getType());
+            if (buttons != null)
+                for (ResourceLocation rl : buttons) {
+                    CustomButton button = CustomButtonClientEvents.getButton(rl);
+                        button.render(evt.getGuiGraphics(), screenWidth - (button.iconSize * 2) - button.OffsetX, button.OffsetY, mouseX, mouseY);
+                        renderedButtons.add(button);
+                }
+        }
+
+        if (hudSelectedPlacement != null) {
+            ArrayList<ResourceLocation> buttons = CustomButtonClientEvents.buildingMappings.get(hudSelectedPlacement.getBuilding());
+            if (buttons != null) 
+                for (ResourceLocation rl : buttons) {
+                    CustomButton button = CustomButtonClientEvents.getButton(rl);
+                    if (!button.isHidden.get()) {
+                        button.render(evt.getGuiGraphics(), screenWidth - (button.iconSize * 2) - button.OffsetX, button.OffsetY, mouseX, mouseY);
+                        renderedButtons.add(button);
+                    }
+                }
+        }
+
+        for (ResourceLocation rl : CustomButtonClientEvents.alwaysRenderButtons) {
+            CustomButton button = CustomButtonClientEvents.getButton(rl);
+            if (!button.isHidden.get()) {
+                button.render(evt.getGuiGraphics(), screenWidth - (button.iconSize * 2) - button.OffsetX, button.OffsetY, mouseX, mouseY);
+                renderedButtons.add(button);
             }
         }
 

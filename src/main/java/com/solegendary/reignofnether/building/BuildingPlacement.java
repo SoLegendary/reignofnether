@@ -1,5 +1,14 @@
 package com.solegendary.reignofnether.building;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+import static com.solegendary.reignofnether.building.BuildingUtils.getMaxCorner;
+import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
+import static com.solegendary.reignofnether.building.BuildingUtils.getTotalCompletedBuildingsOwned;
+import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
+import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
+import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_BUILDING_BOUNTY_PERCENT;
+
+import com.google.common.collect.Sets;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
@@ -35,7 +44,13 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
-import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.resources.BlockUtils;
+import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.scenario.ScenarioUtils;
@@ -55,7 +70,7 @@ import com.solegendary.reignofnether.unit.units.monsters.SilverfishUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import com.solegendary.reignofnether.util.MiscUtil;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -86,6 +101,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.world.ForgeChunkManager;
+
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 
@@ -100,13 +116,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
-import static com.solegendary.reignofnether.building.BuildingUtils.getMaxCorner;
-import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
-import static com.solegendary.reignofnether.building.BuildingUtils.getTotalCompletedBuildingsOwned;
-import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
-import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessageToAllPlayers;
-import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_BUILDING_BOUNTY_PERCENT;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 public class BuildingPlacement {
     private Building building;
@@ -122,12 +132,12 @@ public class BuildingPlacement {
 
     public boolean isBuilt; // set true when blocksPercent reaches 100% the first time; the building can then be used
 
-    private final static int BASE_MS_PER_BUILD = 500; // time taken to build each block with 1 villager assigned;
-    public float msToNextBuild = BASE_MS_PER_BUILD; // 5ms per tick
+    public int baseMsPerBuild = 500; // time taken to build each block with 1 villager assigned;
+    public float msToNextBuild = baseMsPerBuild; // 5ms per tick
     public int blocksPerBuild = 1; // number of blocks built per build action
 
     // building collapses at a certain % blocks remaining so players don't have to destroy every single block
-    public final float MIN_BLOCKS_PERCENT = 0.5f;
+    public float minBlocksPercent = 0.5f;
 
     protected int highestBlockCountReached = 2; // used for calculating max health of the building
 
@@ -147,13 +157,13 @@ public class BuildingPlacement {
     private int totalBlocksEverBroken = 0;
 
     private long ticksToExtinguish = 0;
-    private final long TICKS_TO_EXTINGUISH = 100;
+    public long ticksToExtinguishMax = 100;
 
-    private final long TICKS_TO_SPAWN_ANIMALS_MAX = 1800; // how often we attempt to spawn animals around each
+    public long ticksToSpawnAnimalsMax = 1800; // how often we attempt to spawn animals around each
     private long ticksToSpawnAnimals = 0; // spawn once soon after placement
-    private final int MAX_ANIMALS = 8;
-    private final int ANIMAL_SPAWN_BLOCK_RANGE = 70; // block range to check and spawn animals in
-    private final int ANIMAL_SPAWN_RANGE_MIN = 15;
+    public int maxAnimals = 8;
+    public int animalSpawnBlockRange = 70; // block range to check and spawn animals in
+    public int animalSpawnRangeMin = 15;
 
     protected long tickAgeAfterBuilt = 0; // not saved
     public long tickAge = 0; // not saved
@@ -170,11 +180,13 @@ public class BuildingPlacement {
     protected List<AbilityButton> abilityButtons = new ArrayList<>();
     protected List<Ability> abilities = new ArrayList<>();
 
-    Object2ObjectArrayMap<Ability, Float> cooldowns = new Object2ObjectArrayMap<>();
-    Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
+    public Object2ObjectArrayMap<Ability, Float> cooldowns = new Object2ObjectArrayMap<>();
+    public Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
 
     DataStorage dataStorage = new DataStorage();
-
+    public Set<String> tags = Sets.newHashSet();
+    public ArrayList<BuildingCommand> commands = new ArrayList<>();
+    
     public List<AbilityButton> getAbilityButtons() {
         return abilityButtons;
     }
@@ -477,12 +489,12 @@ public class BuildingPlacement {
 
     // health and maxHealth are normalised to 0 being point of destruction
     public int getHealth() {
-        return (int) Math.round((((getBlocksPlaced() - (partialBlocksDestroyed) / 2) / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
+        return (int) Math.round((((getBlocksPlaced() - partialBlocksDestroyed) / minBlocksPercent) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 
     public int getMaxHealth() {
         return (int) Math.round(getBuilding().isUsingSetHealth(this) ? getBuilding().getMaxHealth(this) :
-                    ((getHighestBlockCountReached() / MIN_BLOCKS_PERCENT) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
+                    ((getHighestBlockCountReached() / minBlocksPercent) - (getHighestBlockCountReached())) * (getHealthPerBlock() / 2));
     }
 
     public void queueAllBlocks(ServerLevel level) {
@@ -512,7 +524,7 @@ public class BuildingPlacement {
 
         ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>();
         for (BuildingBlock block : blocks) {
-            if (!block.isPlaced(getLevel()) && !block.getBlockState().isAir()) unplacedBlocks.add(block);
+            if (!blockPlaceQueue.contains(block) && !block.isPlaced(getLevel()) && !block.getBlockState().isAir()) unplacedBlocks.add(block);
         }
 
         int minY = getMinCorner(unplacedBlocks).getY();
@@ -645,11 +657,11 @@ public class BuildingPlacement {
             return true;
         }
         if (isBuilt) {
-            return getBlocksPlacedPercent() <= this.MIN_BLOCKS_PERCENT;
+            return getBlocksPlacedPercent() <= this.minBlocksPercent;
         } else // if the building is still under construction, we instead use the highest health we've ever reached as
         // the effective max health
         {
-            return totalBlocksEverBroken > 0 && getUnbuiltBlocksPlacedPercent() <= this.MIN_BLOCKS_PERCENT;
+            return totalBlocksEverBroken > 0 && getUnbuiltBlocksPlacedPercent() <= this.minBlocksPercent;
         }
     }
 
@@ -722,8 +734,11 @@ public class BuildingPlacement {
         placedBlockPosSet.clear();
 
         getBuilding().destroy(serverLevel, this);
+        for (BuildingCommand command : commands)
+            if (command.condition == BuildingCommand.TriggerCondition.ON_DESTROY)
+                command.run(this);
     }
-
+    
     private void awardBounty() {
         if (lastAttacker instanceof Unit unit && !unit.getOwnerName().isEmpty()) {
             ResourceCost cost = building.cost;
@@ -771,6 +786,9 @@ public class BuildingPlacement {
             }
         }
         placedBlockPosSet.remove(pos);
+        for (BuildingCommand command : commands)
+            if (command.condition == BuildingCommand.TriggerCondition.ON_DAMAGE_TAKEN && command.isOffCooldown())
+                command.run(this);
     }
 
     private void randomSilverfishSpawn(BlockPos pos) {
@@ -850,7 +868,7 @@ public class BuildingPlacement {
             FrozenChunkClientboundPacket.setBuildingBuiltServerside(this.originPos);
             if (isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) <= 1) {
                 for (int i = 0; i < 3; i++)
-                    spawnHuntableAnimalsNearby(ANIMAL_SPAWN_BLOCK_RANGE / 2);
+                    spawnHuntableAnimalsNearby(animalSpawnBlockRange / 2);
             }
             RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(ownerName);
             if (rtsPlayer != null)
@@ -869,6 +887,10 @@ public class BuildingPlacement {
                     this.level.setBlockAndUpdate(bb.getBlockPos(), Blocks.AIR.defaultBlockState());
 
         getBuilding().onBuilt(this);
+        if (!this.level.isClientSide())
+            for (BuildingCommand command : commands)
+                if (command.condition == BuildingCommand.TriggerCondition.ON_BUILD_COMPLETE)
+                    command.run(this);
     }
 
     public void onBlockBuilt(BlockPos bp, BlockState bs) {
@@ -916,9 +938,9 @@ public class BuildingPlacement {
         // check and do animal spawns around capitols for consistent hunting sources
         if (isCapitol && isBuilt) {
             ticksToSpawnAnimals += 1;
-            if (ticksToSpawnAnimals >= TICKS_TO_SPAWN_ANIMALS_MAX) {
+            if (ticksToSpawnAnimals >= ticksToSpawnAnimalsMax) {
                 ticksToSpawnAnimals = 0;
-                spawnHuntableAnimalsNearby(ANIMAL_SPAWN_BLOCK_RANGE);
+                spawnHuntableAnimalsNearby(animalSpawnBlockRange);
             }
         }
         if (isBuilt) {
@@ -927,6 +949,9 @@ public class BuildingPlacement {
         tickAge += 1;
 
         getBuilding().tick(tickLevel, this);
+        if (!tickLevel.isClientSide())
+            for (BuildingCommand command : commands)
+                command.tick(this);
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -952,13 +977,13 @@ public class BuildingPlacement {
                 builderCount += 1;
         }
 
-        boolean hasFastBuildCheat =  ResearchServerEvents.playerHasCheat(this.ownerName, "warpten");
+        boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(this.ownerName, "warpten");
 
         // place a block if the tick has run down
         if (blocksPlaced < blocksTotal) {
             if (builderCount > 0) {
                 this.ticksToExtinguish += 1;
-                if (ticksToExtinguish >= TICKS_TO_EXTINGUISH) {
+                if (ticksToExtinguish >= ticksToExtinguishMax) {
                     if (!(getBuilding() instanceof FlameSanctuary) && !(getBuilding() instanceof Fortress)) {
                         extinguishFires(serverLevel);
                     }
@@ -970,7 +995,7 @@ public class BuildingPlacement {
                 // 3 builders - 3/5 (60%)
                 // 4 builders - 3/6 (50%)
                 // 5 builders - 3/7 (43%)
-                float msPerBuild = (float) (3 * BASE_MS_PER_BUILD) / (builderCount + 2);
+                float msPerBuild = (float) (3 * baseMsPerBuild) / (builderCount + 2);
                 if (!isBuilt) {
                     msPerBuild *= building.buildTimeModifier;
                     if (isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) > 0)
@@ -1100,7 +1125,7 @@ public class BuildingPlacement {
             ), range, Chicken.class, level)
             .size();
 
-        if (numNearbyAnimals - (numNearbyChickens / 2) >= MAX_ANIMALS) {
+        if (numNearbyAnimals - (numNearbyChickens / 2) >= maxAnimals) {
             return;
         }
 
@@ -1140,7 +1165,7 @@ public class BuildingPlacement {
                  || spawnBs.getBlock() == Blocks.BARRIER
                  || spawnBs.is(BlockTags.PLANKS)
                  || ResourceSources.getBlockResourceName(spawnBp, level) != ResourceName.NONE
-                 || spawnBp.distSqr(centrePos) < ANIMAL_SPAWN_RANGE_MIN * ANIMAL_SPAWN_RANGE_MIN
+                 || spawnBp.distSqr(centrePos) < animalSpawnRangeMin * animalSpawnRangeMin
                  || spawnBp.distSqr(centrePos) > range * range
                  || Math.abs(spawnBp.getY() - minCorner.below().getY()) > animalSpawnYDiff
                  || BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), spawnBp)
@@ -1276,6 +1301,10 @@ public class BuildingPlacement {
                             rabg.stop();
                     }
                 }
+                if (!capturedByAlly) 
+                    for (BuildingCommand command : commands)
+                        if (command.condition == BuildingCommand.TriggerCondition.ON_CAPTURE && command.isOffCooldown())
+                            command.run(this);
                 return !capturedByAlly;
             }
         }
@@ -1378,5 +1407,63 @@ public class BuildingPlacement {
 
     public boolean isAttackable() {
         return !isOutsideWorldBorder() && !building.invulnerable;
+    }
+    
+    public Set<String> getTags() {
+        return this.tags;
+    }
+    
+    public void addTag(String pTag) {
+        if (this.tags.size() < 1024) {
+            this.tags.add(pTag);
+        }
+    }
+    
+    public void removeTag(String pTag) {
+        this.tags.remove(pTag);
+    }
+    
+    public void addCommand(String command, String action, int cooldownTicks, int cooldownTicksMax) {
+        this.commands.add(new BuildingCommand(cooldownTicks, cooldownTicksMax, command, action));
+    }
+    
+    public void removeCommand(int index) {
+        try {
+            this.commands.remove(index);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("IndexOutOfBoundsException in deleteCommand");
+        }
+    }
+    
+    public void setCommandText(int index, String text) {
+        try {
+            this.commands.get(index).commandStr = text;
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("IndexOutOfBoundsException in setCommandText");
+        }
+    }
+    
+    public void setCommandCooldownTicks(int index, int cooldownTicks) {
+        try {
+            this.commands.get(index).tickCooldownMax = cooldownTicks;
+            this.commands.get(index).tickCooldown = cooldownTicks;
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("IndexOutOfBoundsException in setCommandCooldown");
+        }
+    }
+    
+    public void setCommandTrigger(int index, String triggerStr) {
+        BuildingCommand.TriggerCondition triggerCond;
+        try {
+            triggerCond = BuildingCommand.TriggerCondition.valueOf(triggerStr);
+        } catch (IllegalArgumentException e) {
+            System.out.println("IllegalArgumentException in setCommandTrigger");
+            return;
+        }
+        try {
+            this.commands.get(index).condition = triggerCond;
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("IndexOutOfBoundsException in setCommandTrigger");
+        }
     }
 }

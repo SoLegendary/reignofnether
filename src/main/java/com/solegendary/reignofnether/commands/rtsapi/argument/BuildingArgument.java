@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.commands.argument;
+package com.solegendary.reignofnether.commands.rtsapi.argument;
 
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
@@ -27,11 +27,7 @@ import java.util.concurrent.CompletableFuture;
 public class BuildingArgument implements ArgumentType<BuildingSelector> {
 	
 	public static final SimpleCommandExceptionType ERROR_NOT_SINGLE_BUILDING = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.toomany.error"));
-	public static final SimpleCommandExceptionType ERROR_NOT_SINGLE_PLAYER = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.player.toomany.error"));
-	public static final SimpleCommandExceptionType ERROR_ONLY_PLAYERS_ALLOWED = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.player.buildings.error"));
 	public static final SimpleCommandExceptionType NO_BUILDINGS_FOUND = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.notfound.building.error"));
-	public static final SimpleCommandExceptionType NO_PLAYERS_FOUND = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.notfound.player.error"));
-	public static final SimpleCommandExceptionType ERROR_SELECTORS_NOT_ALLOWED = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.selector.not_allowed.error"));
 	private static final Collection<String> EXAMPLES = Arrays.asList("@b", "@b[type=foo]");
 	final boolean single;
 	
@@ -43,8 +39,10 @@ public class BuildingArgument implements ArgumentType<BuildingSelector> {
 		return new BuildingArgument(true);
 	}
 	
-	public static BuildingPlacement getBuilding(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
-		return pContext.getArgument(pName, BuildingSelector.class).findSingleBuilding(pContext.getSource());
+	public static BuildingPlacement getBuilding(CommandContext<CommandSourceStack> pContext, String pName, String pOwner) throws CommandSyntaxException {
+		BuildingSelector selector = pContext.getArgument(pName, BuildingSelector.class);
+		selector.setOwnerName(pOwner);
+		return selector.findSingleBuilding(pContext.getSource());
 	}
 	
 	public static BuildingArgument buildings() {
@@ -120,7 +118,7 @@ public class BuildingArgument implements ArgumentType<BuildingSelector> {
 		
 		@Override
 		public void serializeToJson(Template pTemplate, JsonObject pJson) {
-			pJson.addProperty("amount", pTemplate.single ? "single" : "multiple");
+			pJson.addProperty("points", pTemplate.single ? "single" : "multiple");
 			// 不需要 type 字段
 		}
 		
