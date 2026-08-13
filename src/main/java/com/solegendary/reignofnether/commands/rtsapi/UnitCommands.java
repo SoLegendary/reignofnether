@@ -264,7 +264,7 @@ public class UnitCommands {
 						)
 					)
 				)
-				.then(Commands.literal("find")
+				.then(Commands.literal("enemysearch")
 					.then(Commands.argument("selectFrom", BlockPosArgument.blockPos())
 						.then(Commands.argument("selectTo", BlockPosArgument.blockPos())
 							.then(Commands.argument("ownerName", PlayerNameArgument.player())

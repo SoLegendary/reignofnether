@@ -151,8 +151,8 @@ public class BuildingCommands {
 						)
 					)
 					.then(Commands.argument("targets", BuildingArgument.buildings())
-						.executes((ctx) -> withBuildings(BuildingArgument.getBuildings(ctx, "targets", null), b -> b.ownerName = "", ctx, Component.literal("Destroy %d building(s) successfully")))
-						.then(Commands.argument("ownerName", PlayerNameArgument.player())
+						.executes((ctx) -> withBuildings(BuildingArgument.getBuildings(ctx, "targets", null), b -> b.ownerName = "", ctx, Component.literal("Change the owner of %d building(s) successfully")))
+						.then(Commands.argument("ownerName", PlayerNameArgument.players())
 							.then(Commands.argument("newOwnerName", PlayerNameArgument.player())
 								.executes((ctx) -> withBuildings(
 									b -> {
@@ -162,7 +162,7 @@ public class BuildingCommands {
 										}
 									},
 									ctx,
-									Component.literal("Destroy %d building(s) successfully")
+									Component.literal("Change the owner of %d building(s) successfully")
 								)))
 						)
 					)
