@@ -37,10 +37,9 @@ Quality of Life
 ---------------
 [❌] Huntable animals now move directly away from attackers instead of in random paths
 
-
 Bugfixes
 --------
-
+[✔] Fixed crash when a building command placed another building
 [🟡] Fixed building rotations sometimes causing placement errors
     - Buildings can be stacked on top of each other?
 [❌] Phantoms don't damage buildings

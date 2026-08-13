@@ -53,11 +53,11 @@ public class BuildingValidators {
 
         ArrayList<BuildingBlock> absoluteBlocks = BuildingUtils.getAbsoluteBlockData(relativeBlocks, level, originPos, rotation);
 
-        if (isBuildingPlacementInAirOrOnIllegalBlocks(level, building, originPos, absoluteBlocks)) {
+        if (isBuildingPlacementInAirOrOnIllegalBlocks(level, building, absoluteBlocks)) {
             return "building.reignofnether.ground_not_flat";
-        } else if (isBuildingPlacementClipping(level, building, originPos, absoluteBlocks)) {
+        } else if (isBuildingPlacementClipping(level, building, absoluteBlocks)) {
             return "building.reignofnether.ground_not_flat";
-        } else if (isOverlappingAnyOtherBuilding(level, building, originPos, absoluteBlocks) && !isSandbox) {
+        } else if (isOverlappingAnyOtherBuilding(level, building, absoluteBlocks) && !isSandbox) {
             return "building.reignofnether.too_close";
         } else if (!isNonPiglinOrOnNetherBlocks(level, building, originPos, absoluteBlocks)) {
             return "building.reignofnether.must_be_nether";
@@ -65,7 +65,7 @@ public class BuildingValidators {
             return "building.reignofnether.must_be_liquid";
         } else if (!isInBrightChunk(level, absoluteBlocks, ownerName) && !isSandbox && !ignoreFog) {
             return "building.reignofnether.unexplored";
-        } else if (!isBuildingPlacementWithinWorldBorder(level, building, originPos, absoluteBlocks)) {
+        } else if (!isBuildingPlacementWithinWorldBorder(level, building, absoluteBlocks)) {
             return "building.reignofnether.outside_map";
         } else if (!isNotTutorialOrNearValidCapitolPosition(level, building, originPos)) {
             return "building.reignofnether.build_centre_here";
@@ -74,7 +74,7 @@ public class BuildingValidators {
     }
 
     // disallow any building block from clipping into any other existing blocks
-    private static boolean isBuildingPlacementClipping(Level level, Building building, BlockPos originPos, List<BuildingBlock> blocks) {
+    private static boolean isBuildingPlacementClipping(Level level, Building building, List<BuildingBlock> blocks) {
         if (level == null) {
             return false;
         }
@@ -83,7 +83,7 @@ public class BuildingValidators {
         }
 
         for (BuildingBlock block : blocks) {
-            BlockPos bp = block.getBlockPos().offset(0, 1, 0);
+            BlockPos bp = block.getBlockPos();
             if ((level.getBlockState(bp).isSolid() || !level.getBlockState(bp).getFluidState().isEmpty()) && (block.getBlockState().isSolid() || !block.getBlockState().getFluidState().isEmpty())) {
                 return true;
             }
@@ -94,7 +94,7 @@ public class BuildingValidators {
     // disallow the building borders from overlapping any other's, even if they don't collide physical blocks
     // also allow for a 1 block gap between buildings so units can spawn and stairs don't have their blockstates
     // messed up
-    private static boolean isOverlappingAnyOtherBuilding(Level level, Building building, BlockPos originPos, List<BuildingBlock> blocks) {
+    private static boolean isOverlappingAnyOtherBuilding(Level level, Building building, List<BuildingBlock> blocks) {
         List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(level.isClientSide());
 
         BlockPos minPos = BuildingUtils.getMinCorner(blocks);//.offset(-1, -1, -1);
@@ -106,8 +106,9 @@ public class BuildingValidators {
                     continue;
                 }
                 BlockPos bp = block.getBlockPos();
-                if (bp.getX() >= minPos.getX() && bp.getX() <= maxPos.getX() && bp.getY() >= minPos.getY()
-                        && bp.getY() <= maxPos.getY() && bp.getZ() >= minPos.getZ() && bp.getZ() <= maxPos.getZ()) {
+                if (bp.getX() >= minPos.getX() && bp.getX() <= maxPos.getX() &&
+                    bp.getY() >= minPos.getY() && bp.getY() <= maxPos.getY() &&
+                    bp.getZ() >= minPos.getZ() && bp.getZ() <= maxPos.getZ()) {
                     return true;
                 }
             }
@@ -137,7 +138,7 @@ public class BuildingValidators {
             if (block.getBlockPos().getY() == minY && level != null) {
                 BlockPos bp = block.getBlockPos();
                 if (!absolutePos)
-                    bp = bp.offset(originPos).offset(0, 1, 0);
+                    bp = bp.offset(originPos);
                 BlockState bs = block.getBlockState(); // building block
                 if (bs.isSolid()) {
                     blocksBelow += 1;
@@ -156,15 +157,16 @@ public class BuildingValidators {
 
     // 90% all solid blocks at the base of the building must be on top of solid non-barrier blocks to be placeable
     // excluding those under blocks which aren't solid anyway
-    private static boolean isBuildingPlacementInAirOrOnIllegalBlocks(Level level, Building building, BlockPos originPos, List<BuildingBlock> blocks) {
+    private static boolean isBuildingPlacementInAirOrOnIllegalBlocks(Level level, Building building, List<BuildingBlock> blocks) {
         if (isBridge(building) || level.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get()) {
             return false;
         }
+        BlockPos minPos = BuildingUtils.getMinCorner(blocks);
         int solidBlocksBelow = 0;
         int blocksBelow = 0;
         for (BuildingBlock block : blocks) {
-            if (block.getBlockPos().getY() == 0 && level != null) {
-                BlockPos bp = block.getBlockPos().offset(0, 1, 0);
+            if (block.getBlockPos().getY() == minPos.getY()) {
+                BlockPos bp = block.getBlockPos();
                 BlockState bs = block.getBlockState(); // building block
                 BlockState bsBelow = level.getBlockState(bp.below()); // world block
 
@@ -185,7 +187,7 @@ public class BuildingValidators {
         return ((float) solidBlocksBelow / (float) blocksBelow) < MIN_SUPPORTED_BLOCKS_PERCENT;
     }
 
-    private static boolean isBuildingPlacementWithinWorldBorder(Level level, Building building, BlockPos originPos, List<BuildingBlock> blocks) {
+    private static boolean isBuildingPlacementWithinWorldBorder(Level level, Building building, List<BuildingBlock> blocks) {
         if (level == null || building == null)
             return false;
         if (level.getGameRules().getRule(GameRuleRegistrar.BUILDINGS_OUTSIDE_BORDER).get())
@@ -225,7 +227,7 @@ public class BuildingValidators {
         if (!isBridge(building)) {
             return true;
         }
-
+        BlockPos minPos = BuildingUtils.getMinCorner(blocks);
         int placeableBlocks = 0;
         for (BuildingBlock block : blocks)
             if (!AbstractBridge.shouldCullBlock(originPos.offset(0, 1, 0), block, level) && !block.getBlockState()
@@ -242,24 +244,22 @@ public class BuildingValidators {
             if (block.getBlockState().isAir()) {
                 continue;
             }
-            if (level != null) {
-                BlockPos bp = block.getBlockPos().offset(0, 1, 0);
-                BlockState bs = block.getBlockState(); // building block
-                BlockState bsWorld = level.getBlockState(bp); // world block
+            BlockPos bp = block.getBlockPos();
+            BlockState bs = block.getBlockState(); // building block
+            BlockState bsWorld = level.getBlockState(bp); // world block
 
-                // top y level should not be touching any water at all
-                if (block.getBlockPos().getY() == 1) {
-                    if ((bs.getBlock() instanceof FenceBlock) && !bsWorld.getFluidState().isEmpty()) {
-                        return false;
-                    }
+            // top y level should not be touching any water at all
+            if (block.getBlockPos().getY() == minPos.getY() + 1) {
+                if ((bs.getBlock() instanceof FenceBlock) && !bsWorld.getFluidState().isEmpty()) {
+                    return false;
                 }
+            }
 
-                if (block.getBlockPos().getY() == 0) {
-                    bridgeBlocks += 1;
-                    if (!bsWorld.getFluidState().isEmpty() || bsWorld.getBlock() instanceof SeagrassBlock
-                            || bsWorld.getBlock() instanceof KelpBlock) {
-                        waterBlocksClipping += 1;
-                    }
+            if (block.getBlockPos().getY() == minPos.getY()) {
+                bridgeBlocks += 1;
+                if (!bsWorld.getFluidState().isEmpty() || bsWorld.getBlock() instanceof SeagrassBlock
+                        || bsWorld.getBlock() instanceof KelpBlock) {
+                    waterBlocksClipping += 1;
                 }
             }
         }
