@@ -144,6 +144,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
         this.entityData.define(ownerDataAccessor, "");
         this.entityData.define(scenarioRoleDataAccessor, -1);
         this.entityData.define(isSummonedAccessor, false);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
