@@ -711,4 +711,14 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public float getBonusMeleeRangeForAttackers() {
         return 0.3f * (Math.max(2, getSize()) - 2);
     }
+
+    @Override
+    public AABB getInflatedSelectionBox() {
+        if (isTiny()) {
+            AABB aabb = this.getBoundingBox().inflate(0.2f, 0, 0.2f);
+            aabb.setMaxY(aabb.maxY + 0.2f);
+            return aabb;
+        }
+        return this.getBoundingBox();
+    }
 }

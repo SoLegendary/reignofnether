@@ -27,7 +27,6 @@ Fog of war
     - scout dog (reskinned wolf) for villagers, bat for monsters, striders for piglins
     - Let striders swim, but take slow damage over time
     - Test strider lava pathfinding
-[❌] Deprioritise targeting scouts
 
 Balance
 -------
@@ -36,14 +35,16 @@ Balance
 Quality of Life
 ---------------
 [❌] Huntable animals now move directly away from attackers instead of in random paths
+[❌] Buildings, phantoms and scouts are de-prioritised for targeting when other enemy units are nearby
+[🟡] Buildings are now captured 5 blocks away from the edge of the building, instead of 20 blocks from the building centre
+[✔] Improved the click box accuracy for many units, and expanded the click box for chickens
 
 Bugfixes
 --------
 [✔] Fixed crash when a building command placed another building
 [✔] Fixed building rotations sometimes causing placement errors
-
-[❌] Phantoms don't damage buildings
-[❌] Phantoms die instantly upon summoning
+[✔] Fixed units returning home after killing their target
+[✔] Fixed Phantoms not damaging buildings
 
 Languages
 ---------

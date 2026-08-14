@@ -25,6 +25,7 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -199,5 +200,12 @@ public class ScoutDogUnit extends Wolf implements Unit {
         this.goalSelector.addGoal(2, garrisonGoal);
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
+    }
+
+    @Override
+    public AABB getInflatedSelectionBox() {
+        AABB aabb = this.getBoundingBox().inflate(0.2f, 0, 0.2f);
+        aabb.setMaxY(aabb.maxY + 0.4f);
+        return aabb;
     }
 }

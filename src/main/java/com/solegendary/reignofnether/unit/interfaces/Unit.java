@@ -33,9 +33,12 @@ import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
@@ -907,5 +910,9 @@ public interface Unit {
 
     public default boolean hasScenarioNpcOwner() {
         return ScenarioUtils.isScenarioNpc(((Entity) this).level().isClientSide(), this.getOwnerName());
+    }
+
+    public default boolean isScout() {
+        return this instanceof ScoutDogUnit || this instanceof BatUnit || this instanceof StriderUnit;
     }
 }

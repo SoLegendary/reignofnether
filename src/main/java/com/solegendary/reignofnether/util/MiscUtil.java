@@ -514,6 +514,21 @@ public class MiscUtil {
             return new ArrayList<>();
     }
 
+    public static <T extends Entity> List<T> getEntitiesWithinAABB(AABB aabb, Class<T> entityType, Level level) {
+        if (level != null) {
+            List<T> entities = level.getEntitiesOfClass(entityType, aabb);
+            List<T> entitiesInRange = new ArrayList<>();
+
+            for (Entity entity : entities)
+                if (entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()))
+                    entitiesInRange.add((T) entity);
+
+            return entitiesInRange;
+        } else
+            return new ArrayList<>();
+    }
+
+
     // accepts a list of strings to draw at the top left to track debug data
     //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
     //});

@@ -34,6 +34,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.LeavesBlock;
@@ -290,6 +291,12 @@ public class CursorClientEvents {
 
             // inflate by set amount to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
+            if (entity instanceof Unit unit) {
+                entityaabb = unit.getInflatedSelectionBox();
+            } else if (entity instanceof Chicken) {
+                entityaabb = entityaabb.inflate(0.2f, 0, 0.2f);
+                entityaabb.setMaxY(entityaabb.maxY + 0.6f);
+            }
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
                 UnitClientEvents.addPreselectedUnit(entity);

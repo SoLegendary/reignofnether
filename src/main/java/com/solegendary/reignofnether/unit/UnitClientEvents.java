@@ -64,6 +64,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -950,6 +951,9 @@ public class UnitClientEvents {
                     AABB entityAABB = entity.getBoundingBox();
                     if (entity instanceof Unit unit) {
                         entityAABB = unit.getInflatedSelectionBox();
+                    } else if (entity instanceof Chicken) {
+                        entityAABB = entityAABB.inflate(0.2f, 0, 0.2f);
+                        entityAABB.setMaxY(entityAABB.maxY + 0.6f);
                     }
 
                     boolean isPreselected = preselectedUnits.contains(entity);
