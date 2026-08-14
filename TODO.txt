@@ -15,8 +15,6 @@ Fog of war
 
 [❌] Reveal owners of explosive entities to nearby players in fog
 [❌] Allow spectators to see fog, but with vision of all players
-[❌] Sparta's crash
-
 [❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Add commands for force-moving camera
 
@@ -35,13 +33,15 @@ Balance
 Quality of Life
 ---------------
 [❌] Huntable animals now move directly away from attackers instead of in random paths
-[❌] Buildings, phantoms and scouts are de-prioritised for targeting when other enemy units are nearby
-[🟡] Buildings are now captured 5 blocks away from the edge of the building, instead of 20 blocks from the building centre
+[🟡] Buildings, phantoms, scouts and flying units (when melee) are de-prioritised for targeting when idle or attack-moving
+[✔] Units attacking a building on idle or attack-move will now switch to nearby units if available
+[✔] Buildings are now captured 5 blocks away from the edge of the building, instead of 20 blocks from the building centre
 [✔] Improved the click box accuracy for many units, and expanded the click box for chickens
 
 Bugfixes
 --------
-[✔] Fixed crash when a building command placed another building
+[✔] Fixed a crash related to hiding leaves
+[✔] Fixed a crash when a building command placed another building
 [✔] Fixed building rotations sometimes causing placement errors
 [✔] Fixed units returning home after killing their target
 [✔] Fixed Phantoms not damaging buildings

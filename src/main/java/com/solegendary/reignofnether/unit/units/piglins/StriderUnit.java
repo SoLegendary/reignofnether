@@ -124,7 +124,7 @@ public class StriderUnit extends Strider implements Unit {
 
     // endregion
 
-    final static public float maxHealth = 40.0f;
+    final static public float maxHealth = 30.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.33f;
 

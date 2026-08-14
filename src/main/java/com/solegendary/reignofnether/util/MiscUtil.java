@@ -348,8 +348,15 @@ public class MiscUtil {
                 unitPosition.z + range
         );
         var entities = level.getEntitiesOfClass(LivingEntity.class, aabb);
+        boolean isMelee = unitMob instanceof AttackerUnit aUnit && aUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal;
         entities.sort(Comparator.comparingDouble(
-                it -> it.position().distanceTo(pos)
+            e -> {
+                double dist = e.position().distanceTo(pos); // deprioritise over actual enemy units
+                boolean isMeleeAgainstFlyer = isMelee && e instanceof Unit unit && unit.isFlyingUnit();
+                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer)
+                    dist += 100;
+                return dist;
+            }
         ));
 
         // Determine priority effect filter for specific unit types

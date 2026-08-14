@@ -36,6 +36,7 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
     protected static final int MELEE_RECALC_COOLDOWN_CAP = 100; // 5s — attacks should respond faster than generic move
     protected int currentMeleeRecalcCooldown = RECALC_COOLDOWN_MAX;
     protected int recalcCooldown = 0; // limit start() used by tick()
+    public boolean forced = false;
 
     public MeleeAttackBuildingGoal(Mob mob) {
         super(mob, true, 0);
@@ -161,5 +162,6 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
     public void stopAttacking() {
         buildingTarget = null;
         super.stopMoving();
+        forced = false;
     }
 }
