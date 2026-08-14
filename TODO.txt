@@ -27,7 +27,7 @@ Fog of war
     - scout dog (reskinned wolf) for villagers, bat for monsters, striders for piglins
     - Let striders swim, but take slow damage over time
     - Test strider lava pathfinding
-
+[❌] Deprioritise targeting scouts
 
 Balance
 -------
@@ -40,8 +40,8 @@ Quality of Life
 Bugfixes
 --------
 [✔] Fixed crash when a building command placed another building
-[🟡] Fixed building rotations sometimes causing placement errors
-    - Buildings can be stacked on top of each other?
+[✔] Fixed building rotations sometimes causing placement errors
+
 [❌] Phantoms don't damage buildings
 [❌] Phantoms die instantly upon summoning
 
