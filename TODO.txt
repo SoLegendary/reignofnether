@@ -45,7 +45,11 @@ Bugfixes
 [✔] Fixed building rotations sometimes causing placement errors
 [✔] Fixed units returning home after killing their target
 [✔] Fixed Phantoms not damaging buildings
+[✔] Obsidian is now considered nether terrain
 [❌] Fixed headhunters garrisoned in bastions having inaccurate tridents
+
+
+
 
 Languages
 ---------

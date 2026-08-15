@@ -59,6 +59,9 @@ public class NetherBlocks {
     public static boolean isNetherBlock(Level level, BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
 
+        if (bs.getBlock() == Blocks.OBSIDIAN)
+            return true;
+
         if (bs.getBlock().getName().getContents() instanceof TranslatableContents contents &&
             (contents.getKey().contains("blackstone") ||
             contents.getKey().contains("nylium") ||
