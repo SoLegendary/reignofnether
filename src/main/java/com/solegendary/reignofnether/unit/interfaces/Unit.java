@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
@@ -914,5 +915,13 @@ public interface Unit {
 
     public default boolean isScout() {
         return this instanceof ScoutDogUnit || this instanceof BatUnit || this instanceof StriderUnit;
+    }
+
+    public default boolean isGarrisoned() {
+        return getGarrison() != null;
+    }
+
+    public default BuildingPlacement getGarrison() {
+        return GarrisonableBuildingAddon.getGarrison(this);
     }
 }

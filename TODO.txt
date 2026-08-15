@@ -45,6 +45,7 @@ Bugfixes
 [✔] Fixed building rotations sometimes causing placement errors
 [✔] Fixed units returning home after killing their target
 [✔] Fixed Phantoms not damaging buildings
+[❌] Fixed headhunters garrisoned in bastions having inaccurate tridents
 
 Languages
 ---------
