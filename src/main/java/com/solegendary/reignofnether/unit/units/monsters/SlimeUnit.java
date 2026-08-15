@@ -709,13 +709,15 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         return 0.3f * (Math.max(2, getSize()) - 2);
     }
 
-    @Override
-    public AABB getInflatedSelectionBox() {
+    public float getModelHeight() {
+        return super.getDimensions(Pose.STANDING).height;
+    }
+
+    // increase tiny slime hitbox
+    public EntityDimensions getDimensions(Pose pPose) {
         if (isTiny()) {
-            AABB aabb = this.getBoundingBox().inflate(0.2f, 0, 0.2f);
-            aabb.setMaxY(aabb.maxY + 0.2f);
-            return aabb;
+            return super.getDimensions(pPose).scale(1.5f);
         }
-        return this.getBoundingBox();
+        return super.getDimensions(pPose);
     }
 }
