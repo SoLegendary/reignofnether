@@ -195,6 +195,7 @@ public class EntityRegistrar {
 
     public static final RegistryObject<EntityType<StriderUnit>> STRIDER_UNIT = ENTITIES.register("strider_unit",
             () -> EntityType.Builder.of(StriderUnit::new, MobCategory.CREATURE)
+                    .fireImmune()
                     .sized(EntityType.STRIDER.getWidth(), EntityType.STRIDER.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "strider_unit").toString()));

@@ -509,7 +509,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             msInt *= ToggleShield.MOVESPEED_MULTIPLIER;
         }
         int msColour = WHITE;
-        double msAttr = ((Mob) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
+        double msAttr = ((LivingEntity) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
         if (msAttr < unit.getMovementSpeed() || (unit instanceof BruteUnit bruteUnit && bruteUnit.isHoldingUpShield())) {
             msColour = GREEN;
         } else if (msAttr > unit.getMovementSpeed()) {

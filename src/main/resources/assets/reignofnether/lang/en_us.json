@@ -1413,6 +1413,7 @@
     "entity.reignofnether.strider_unit": "Strider",
     "entity.reignofnether.strider_unit.tooltip1": "A strange animal native to the nether, adapted for overworld scouting.",
     "entity.reignofnether.strider_unit.tooltip2": "Can walk over lava but moves slower off of nether terrain.",
+    "entity.reignofnether.strider_unit.tooltip3": "Can also swim but takes damage while in water.",
     "entity.reignofnether.headhunter_unit": "Headhunter",
     "entity.reignofnether.headhunter_unit.tooltip1": "A piglin that throws tridents in battle.",
     "entity.reignofnether.headhunter_unit.tooltip2": "Requires a Bastion.",

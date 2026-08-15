@@ -46,7 +46,8 @@ public class StriderProd extends ProductionItem {
                         FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip3"), Style.EMPTY)
                 )
         );
     }
@@ -64,7 +65,8 @@ public class StriderProd extends ProductionItem {
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip3"), Style.EMPTY)
             ),
             this
         );

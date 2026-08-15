@@ -76,7 +76,7 @@ public class StriderUnit extends Strider implements Unit {
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
+    public Faction getFaction() {return Faction.PIGLINS;}
     public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
@@ -128,7 +128,7 @@ public class StriderUnit extends Strider implements Unit {
 
     final static public float maxHealth = 30.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.33f;
+    final static public float movementSpeed = 0.30f;
 
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
@@ -164,17 +164,13 @@ public class StriderUnit extends Strider implements Unit {
         super.tick();
         Unit.tick(this);
 
-        if (!onGround() || MiscUtil.isOnNetherTerrain(this)) {
-            setSuffocating(false);
-        } else {
-            setSuffocating(true);
-        }
+        setSuffocating(!hasEffectWithDuration(MobEffectRegistrar.WARM.get()));
 
-        if (isSuffocating()) {
-            if (isInWater())
-                this.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), 15, 1));
-            else
-                this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 0));
+        if (MiscUtil.isOnNetherTerrain(this))
+            this.addEffect(new MobEffectInstance(MobEffectRegistrar.WARM.get(), 15, 1, true, false));
+
+        if (isSuffocating() && isInWater()) {
+            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 1));
         }
         if (isInWater()) {
             ticksInWater += 1;

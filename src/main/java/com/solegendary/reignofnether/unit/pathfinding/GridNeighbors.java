@@ -47,7 +47,7 @@ public final class GridNeighbors {
     // with enough headroom for its full height.
     public static boolean cellStandable(WalkabilityView view, MobilityClass mob, int cx, int cz, int y, int clearance, float fireCost) {
         for (int fy = y - 1; fy <= y + 1; fy++) {
-            if (Float.isInfinite(mob.costFor(view.kindAt(cx, fy, cz), fireCost))) continue;
+            if (Float.isInfinite(mob.costFor(mob, view.kindAt(cx, fy, cz), fireCost))) continue;
             if (headClear(view, cx, fy, cz, clearance)) return true;
         }
         return false;
@@ -170,8 +170,8 @@ public final class GridNeighbors {
     // A diagonal XZ move is legal only if both flanking orthogonal cells are passable (no corner cutting).
     public static boolean diagonalBlocked(WalkabilityView view, MobilityClass mob, int fromX, int toY, int fromZ, int dx, int dz) {
         if (dx == 0 || dz == 0) return false;
-        if (Float.isInfinite(mob.costFor(view.kindAt(fromX + dx, toY, fromZ)))) return true;
-        if (Float.isInfinite(mob.costFor(view.kindAt(fromX, toY, fromZ + dz)))) return true;
+        if (Float.isInfinite(mob.costFor(mob, view.kindAt(fromX + dx, toY, fromZ)))) return true;
+        if (Float.isInfinite(mob.costFor(mob, view.kindAt(fromX, toY, fromZ + dz)))) return true;
         return false;
     }
 }

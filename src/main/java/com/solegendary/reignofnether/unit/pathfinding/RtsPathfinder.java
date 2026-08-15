@@ -91,7 +91,7 @@ public final class RtsPathfinder {
         // uncaptured (BLOCKED) edge cell. canClimb=false: a goal must snap to ground, never a wall-cling cell.
         ChunkSnapshot view = ChunkSnapshot.capture(level, bp, bp, radius + footprintRadius + 1,
                 mobility, clearanceCells, footprintRadius, fireCost, false);
-        if (standable(view, bp.getX(), bp.getY(), bp.getZ())) return bp;
+        if (standable(mobility, view, bp.getX(), bp.getY(), bp.getZ())) return bp;
         int bestDistSq = Integer.MAX_VALUE;
         BlockPos best = null;
         for (int dz = -radius; dz <= radius; dz++) {
@@ -100,7 +100,7 @@ public final class RtsPathfinder {
                     int nx = bp.getX() + dx;
                     int ny = bp.getY() + dy;
                     int nz = bp.getZ() + dz;
-                    if (!standable(view, nx, ny, nz)) continue;
+                    if (!standable(mobility, view, nx, ny, nz)) continue;
                     int distSq = dx * dx + dy * dy + dz * dz;
                     if (distSq < bestDistSq) { bestDistSq = distSq; best = new BlockPos(nx, ny, nz); }
                 }
@@ -117,8 +117,8 @@ public final class RtsPathfinder {
     }
 
     // The unit can stand (and its whole footprint fits) at this cell - the same gate A* applies to a node.
-    private static boolean standable(WalkabilityView view, int x, int y, int z) {
-        if (Float.isInfinite(view.mobility().costFor(view.kindAt(x, y, z), view.fireCost()))) return false;
+    private static boolean standable(MobilityClass mob, WalkabilityView view, int x, int y, int z) {
+        if (Float.isInfinite(view.mobility().costFor(mob, view.kindAt(x, y, z), view.fireCost()))) return false;
         return GridNeighbors.wideFits(view, x, y, z);
     }
 
