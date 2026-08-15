@@ -31,6 +31,7 @@ Balance
 [✔] Monster units now gain +10% movespeed in night circles
 [✔] The Royal Guard's ultimate now also grants Strength II (+40% damage)
 [✔] Food cost of Vindicators, Pillagers, Windcallers and Evokers reduced by 10
+[🟡] Blood moon can no longer target previously-explored buildings
 
 Quality of Life
 ---------------
@@ -53,6 +54,7 @@ Bugfixes
 [✔] Fixed Ghasts fireballs having no direct impact damage
 [✔] Fixed Sculk catalysts showing as having too much health with nearby sculk (actual health is unchanged)
 [❌] Fixed headhunters garrisoned in bastions having inaccurate tridents
+
 
 [❌] Heroes having ults on cooldown on levelup?
 

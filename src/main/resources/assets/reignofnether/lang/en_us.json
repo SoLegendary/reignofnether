@@ -264,6 +264,7 @@
     "abilities.reignofnether.blood_moon.end": "The blood moon fades.",
     "abilities.reignofnether.blood_moon.error": "Must target an enemy building",
     "abilities.reignofnether.blood_moon.already_active": "A blood moon is already active",
+    "abilities.reignofnether.blood_moon.not_explored": "Can't see target location",
     "abilities.reignofnether.blood_moon.clock_warning1": "A blood moon has risen",
     "abilities.reignofnether.blood_moon.clock_warning2": "Time remaining: %s",
     "abilities.reignofnether.blood_moon.clock_warning3": "(Right-click to go to location)",
