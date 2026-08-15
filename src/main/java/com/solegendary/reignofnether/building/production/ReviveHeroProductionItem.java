@@ -61,7 +61,8 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                         HeroAbility ulti = newHero.getHeroAbilities().get(3);
                         ulti.setRank(newHero, oldHero.ability4Rank);
                         HeroClientboundPacket.setAbilityRank(entity.getId(), oldHero.ability4Rank, 3);
-                        ulti.setCooldown(ulti.cooldownMax / 2, newHero);
+                        if (oldHero.ability4Rank >= 1)
+                            ulti.setCooldown(ulti.cooldownMax / 2, newHero);
                     }
                     for (HeroAbility abl : newHero.getHeroAbilities())
                         abl.updateStatsForRank(newHero);

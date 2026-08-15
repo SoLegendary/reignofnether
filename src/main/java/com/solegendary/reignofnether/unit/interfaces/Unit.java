@@ -404,6 +404,11 @@ public interface Unit {
             MiscUtil.isOnNetherTerrain(unitMob)) {
             unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
         }
+        if (unitMob.tickCount % 10 == 0 &&
+            unit.getFaction() == Faction.MONSTERS &&
+            NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), unitMob.level().isClientSide)) {
+            unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
+        }
 
         if (unitMob.tickCount % 80 == 0) {
             int fortifyingLevel = unitMob.getItemBySlot(EquipmentSlot.CHEST).getEnchantmentLevel(EnchantmentRegistrar.FORTYIFYING.get());

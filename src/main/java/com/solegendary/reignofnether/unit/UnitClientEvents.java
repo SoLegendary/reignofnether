@@ -631,6 +631,10 @@ public class UnitClientEvents {
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
 
+            if (preselectedUnits.size() == 1 && preselectedUnits.get(0) instanceof ScoutDogUnit &&
+                getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutDogUnit dogUnit)
+                dogUnit.pet();
+
             if (!selectedUnits.isEmpty() && isLeftClickAttack()) {
                 // A + left click -> force attack single unit (even if friendly)
                 if (preselectedUnits.size() == 1 && !targetingSelf()) {

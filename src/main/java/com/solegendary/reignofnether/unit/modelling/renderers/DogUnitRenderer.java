@@ -6,6 +6,7 @@
 package com.solegendary.reignofnether.unit.modelling.renderers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import net.minecraft.client.model.WolfModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -14,6 +15,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.WolfCollarLayer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -49,6 +51,19 @@ public class DogUnitRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
         if (pEntity.isWet()) {
             this.model.setColor(1.0F, 1.0F, 1.0F);
         }
+    }
+
+    @Override
+    protected void scale(Wolf wolf, PoseStack pPoseStack, float pPartialTickTime) {
+        if (wolf instanceof ScoutDogUnit dogUnit) {
+            pPoseStack.scale(0.999F, 0.999F, 0.999F);
+            pPoseStack.translate(0.0F, 0.001F, 0.0F);
+            float $$5 = Mth.lerp(pPartialTickTime, dogUnit.oSquish, dogUnit.squish) / (0.5F + 1.0F);
+            float $$6 = 1.0F / ($$5 + 1.0F);
+            pPoseStack.scale($$6, 1.0F / $$6, $$6);
+        }
+        else
+            super.scale(wolf, pPoseStack, pPartialTickTime);
     }
 
     private ResourceLocation getDogTexture(ScoutDogUnit scoutDogUnit) {

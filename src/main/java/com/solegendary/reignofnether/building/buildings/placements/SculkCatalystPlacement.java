@@ -85,7 +85,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
     @Override
     public int getHealth() {
         return (int) ((((getBlocksPlaced() - (partialBlocksDestroyed / 2)) / MIN_BLOCKS_PERCENT) - getHighestBlockCountReached() +
-                (sculkBps.size() * HP_PER_SCULK)) * (getHealthPerBlock() / 2));
+                (sculkBps.size() * (HP_PER_SCULK/ 2))) * (getHealthPerBlock() / 2));
     }
 
     public void updateSculkBps() {

@@ -19,7 +19,6 @@ import com.solegendary.reignofnether.particles.LevelUpParticle;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.unit.modelling.models.*;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
-import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.gui.screens.MenuScreens;
@@ -278,6 +277,5 @@ public class ClientModEvents {
                 LevelUpParticle.Provider::new
         );
     }
-
 }
 

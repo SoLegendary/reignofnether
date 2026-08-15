@@ -1,5 +1,5 @@
 
-1.20.1-1.4.1-beta-2
+1.20.1-1.4.1-beta-3
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -21,16 +21,16 @@ Fog of war
 
 
 
-Scout units from capitol
-    [❌] Pet dogs by clicking them a lot (creates hearts and squishes like slimes)
 
 Balance
 -------
 [✔] Slimes and Magma Cubes no longer gain armour with size
 [✔] Wretched wraith base attack damage increased by 1.5
 [✔] Wraith snow can now generate on stair blocks
-
-
+[✔] Nether wood value reduced from 18 to 17
+[✔] Monster units now gain +10% movespeed in night circles
+[✔] The Royal Guard's ultimate now also grants Strength II (+40% damage)
+[✔] Food cost of Vindicators, Pillagers, Windcallers and Evokers reduced by 10
 
 Quality of Life
 ---------------
@@ -49,11 +49,12 @@ Bugfixes
 [✔] Fixed building rotations sometimes causing placement errors
 [✔] Fixed units returning home after killing their target
 [✔] Fixed Phantoms not damaging buildings
-[✔] Obsidian is now considered nether terrain
+[✔] Obsidian and nether wood is now considered nether terrain
 [✔] Fixed Ghasts fireballs having no direct impact damage
+[✔] Fixed Sculk catalysts showing as having too much health with nearby sculk (actual health is unchanged)
 [❌] Fixed headhunters garrisoned in bastions having inaccurate tridents
 
-
+[❌] Heroes having ults on cooldown on levelup?
 
 Languages
 ---------
