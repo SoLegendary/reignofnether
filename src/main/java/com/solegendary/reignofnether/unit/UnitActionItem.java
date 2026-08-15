@@ -313,7 +313,7 @@ public class UnitActionItem {
                             }
                         } else if (le != null) {
                             attackerUnit.setUnitAttackTargetForced(le);
-                            if (le instanceof WorkerUnit && ResourceSources.isHuntableAnimal(le)) {
+                            if (unit instanceof WorkerUnit && ResourceSources.isHuntableAnimal(le)) {
                                 // insert a drop-off command without disrupting other queued commands
                                 boolean hasDropOffCommandQueued = false;
                                 for (UnitActionItem uai : UnitServerEvents.getUnitActionSlowQueue()) {

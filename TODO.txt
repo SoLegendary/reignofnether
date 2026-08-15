@@ -21,13 +21,15 @@ Fog of war
 
 
 
-[❌] Scout units from capitol + 1 free on match start
-    - scout dog (reskinned wolf) for villagers, bat for monsters, striders for piglins
-    - Let striders swim, but take slow damage over time
-    - Test strider lava pathfinding
+Scout units from capitol
+    [❌] Pet dogs by clicking them a lot (creates hearts and squishes like slimes)
 
 Balance
 -------
+[✔] Slimes and Magma Cubes no longer gain armour with size
+[✔] Wretched wraith base attack damage increased by 1.5
+[✔] Wraith snow can now generate on stair blocks
+
 
 
 Quality of Life
@@ -37,6 +39,8 @@ Quality of Life
 [✔] Units attacking a building on idle or attack-move will now switch to nearby units if available
 [✔] Buildings are now captured 5 blocks away from the edge of the building, instead of 20 blocks from the building centre
 [✔] Improved the click box accuracy for many units, and expanded the click box for chickens
+[✔] All concrete blocks now convert to netherrack
+
 
 Bugfixes
 --------
@@ -46,8 +50,8 @@ Bugfixes
 [✔] Fixed units returning home after killing their target
 [✔] Fixed Phantoms not damaging buildings
 [✔] Obsidian is now considered nether terrain
+[✔] Fixed Ghasts fireballs having no direct impact damage
 [❌] Fixed headhunters garrisoned in bastions having inaccurate tridents
-
 
 
 

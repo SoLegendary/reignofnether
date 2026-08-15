@@ -90,7 +90,6 @@ public class BlockUtils {
         return !MiscUtil.isSolidBlocking(level, pos) &&
                 MiscUtil.isSolidBlocking(level, pos.below()) &&
                 !isBottomSlab(bsBelow) &&
-                !(bsBelow.getBlock() instanceof StairBlock) &&
                 !(bsBelow.getBlock() instanceof FenceBlock) &&
                 !(bsBelow.getBlock() instanceof WallBlock) &&
                 !(bsBelow.getBlock() instanceof TrapDoorBlock) &&

@@ -1426,10 +1426,13 @@ public class UnitClientEvents {
         ArrayList<LivingEntity> units = new ArrayList<>();
         for (LivingEntity entity : MiscUtil.getEntitiesWithinRange(CursorClientEvents.getCursorWorldPos(), 100, LivingEntity.class, MC.level)) {
             if (MyMath.isPointInsideRect3d(uvwpFull, entity.getBoundingBox().getCenter()) &&
+                    MC.player != null &&
                     entity.getId() != MC.player.getId() &&
+                    entity instanceof Unit unit &&
                     !(entity instanceof WorkerUnit) &&
                     entity instanceof AttackerUnit &&
-                    GarrisonableBuildingAddon.getGarrison((Unit) entity) == null &&
+                    !unit.isScout() &&
+                    GarrisonableBuildingAddon.getGarrison(unit) == null &&
                     getPlayerToEntityRelationship(entity) == Relationship.OWNED
             )
                 units.add(entity);

@@ -36,6 +36,8 @@ public class NetherBlocks {
             String descId = overworldBs.getBlock().getDescriptionId();
             if (descId.contains("concrete_powder"))
                 return Blocks.SOUL_SOIL.defaultBlockState();
+            else if (descId.contains("concrete"))
+                return Blocks.NETHERRACK.defaultBlockState();
             else if (descId.contains("terracotta") && !descId.contains("glazed_terracotta"))
                 return Blocks.NETHERRACK.defaultBlockState();
         }

@@ -127,7 +127,7 @@ public class BatUnit extends Mob implements Unit {
 
     final static public float maxHealth = 15.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.33f;
+    final static public float movementSpeed = 0.28f;
 
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();

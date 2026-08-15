@@ -221,7 +221,7 @@ public class StriderUnit extends Strider implements Unit {
     protected void registerGoals() {
         initialiseGoals();
         this.goalSelector.addGoal(2, usePortalGoal);
-        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new StriderFloatGoal(this));
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
         this.goalSelector.addGoal(3, moveGoal);

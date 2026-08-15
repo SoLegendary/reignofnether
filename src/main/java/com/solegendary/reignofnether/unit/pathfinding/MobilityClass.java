@@ -20,6 +20,8 @@ public enum MobilityClass {
     }
 
     public float costFor(MobilityClass mob, byte kind) {
+        if (kind == WalkabilityBuilder.KIND_LAVA && mob == FIRE_IMMUNE)
+            return 1.0f;
         switch (kind) {
             case WalkabilityBuilder.KIND_LAND: return 1.0f;
             case WalkabilityBuilder.KIND_WATER:
@@ -34,6 +36,8 @@ public enum MobilityClass {
     // Land/water cost is the same for every unit of a class, but fire cost is per-unit (depends on fire immunity
     // + the unit's DAMAGE_FIRE malus), so A* injects it per request.
     public float costFor(MobilityClass mob, byte kind, float fireCost) {
+        if (kind == WalkabilityBuilder.KIND_LAVA && mob == FIRE_IMMUNE)
+            return 1.0f;
         if (kind == WalkabilityBuilder.KIND_FIRE) {
             if (mob == FIRE_IMMUNE)
                 return 1.0f;
