@@ -186,6 +186,10 @@ public class ItemRegistrar {
             ITEMS.register("scout_dog_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.SCOUT_DOG_UNIT,
                     0x665232, 0xccbda5, new Item.Properties()));
 
+    public static final RegistryObject<ForgeSpawnEggItem> SCOUT_CAT_UNIT_SPAWN_EGG =
+            ITEMS.register("scout_cat_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.SCOUT_CAT_UNIT,
+                    0xcead7b, 0x755a44, new Item.Properties()));
+
     public static final RegistryObject<ForgeSpawnEggItem> STRIDER_UNIT_SPAWN_EGG =
             ITEMS.register("strider_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.STRIDER_UNIT,
                     0x8b2f31, 0x353535, new Item.Properties()));

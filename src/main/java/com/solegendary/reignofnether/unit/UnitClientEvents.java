@@ -632,10 +632,12 @@ public class UnitClientEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
 
             if (preselectedUnits.size() == 1 && preselectedUnits.get(0) instanceof ScoutDogUnit &&
-                getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutDogUnit dogUnit)
+                getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutDogUnit dogUnit &&
+                getPlayerToEntityRelationship(dogUnit) == Relationship.OWNED)
                 dogUnit.pet();
             if (preselectedUnits.size() == 1 && preselectedUnits.get(0) instanceof ScoutCatUnit &&
-                getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutCatUnit catUnit)
+                getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutCatUnit catUnit &&
+                getPlayerToEntityRelationship(catUnit) == Relationship.OWNED)
                 catUnit.pet();
 
             if (!selectedUnits.isEmpty() && isLeftClickAttack()) {

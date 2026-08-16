@@ -140,6 +140,7 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.GRIZZLY_BEAR_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.POLAR_BEAR_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.SCOUT_DOG_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.SCOUT_CAT_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.STRIDER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.BAT_UNIT_SPAWN_EGG);
         }

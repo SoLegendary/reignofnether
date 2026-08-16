@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.buildings.placements.TownCentrePla
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -57,7 +58,7 @@ public class ScoutCatProd extends ProductionItem {
             ScoutCatProd.itemName,
             TEXTURE_LOCATION,
             hotkey,
-            () -> prodBuilding instanceof TownCentrePlacement tcp && tcp.trainsDogs,
+            () -> !FogOfWarClientEvents.isEnabled() || prodBuilding instanceof TownCentrePlacement tcp && tcp.trainsDogs,
             () -> true,
             List.of(
                 FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit"), Style.EMPTY.withBold(true)),
