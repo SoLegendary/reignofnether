@@ -56,6 +56,7 @@ Bugfixes
 [✔] Fixed Ghasts fireballs having no direct impact damage
 [✔] Fixed Sculk catalysts showing as having too much health with nearby sculk (actual health is unchanged)
 [✔] Fixed headhunters garrisoned in bastions having inaccurate tridents
+[✔] Fixed enemy piglins in wave survival not attacking players
 
 [❌] Heroes having ults on cooldown on levelup?
 
