@@ -121,6 +121,12 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "scout_dog_unit").toString()));
 
+    public static final RegistryObject<EntityType<ScoutCatUnit>> SCOUT_CAT_UNIT = ENTITIES.register("scout_cat_unit",
+            () -> EntityType.Builder.of(ScoutCatUnit::new, MobCategory.CREATURE)
+                    .sized(EntityType.WOLF.getWidth(), EntityType.WOLF.getHeight()) // must be the same size for balance
+                    .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
+                    .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "scout_cat_unit").toString()));
+
     public static final RegistryObject<EntityType<MilitiaUnit>> MILITIA_UNIT = ENTITIES.register("militia_unit",
             () -> EntityType.Builder.of(MilitiaUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.VILLAGER.getWidth(), EntityType.VILLAGER.getHeight())
@@ -421,6 +427,7 @@ public class EntityRegistrar {
             case WraithProd.itemName -> EntityRegistrar.WRAITH_UNIT.get();
             case VillagerProd.itemName -> EntityRegistrar.VILLAGER_UNIT.get();
             case ScoutDogProd.itemName -> EntityRegistrar.SCOUT_DOG_UNIT.get();
+            case ScoutCatProd.itemName -> EntityRegistrar.SCOUT_CAT_UNIT.get();
             case ZombieVillagerProd.itemName -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
             case BatProd.itemName -> EntityRegistrar.BAT_UNIT.get();
             case VindicatorProd.itemName -> EntityRegistrar.VINDICATOR_UNIT.get();

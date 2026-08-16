@@ -224,7 +224,6 @@ public class StriderUnit extends Strider implements Unit {
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
-    // prevent spawning baby zombie
     @Override
     @Nullable
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {

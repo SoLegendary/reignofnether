@@ -20,23 +20,23 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ScoutDogProd extends ProductionItem {
+public class ScoutCatProd extends ProductionItem {
 
-    public final static String itemName = "Scout Dog";
-    public final static ResourceCost cost = ResourceCosts.SCOUT_DOG;
+    public final static String itemName = "Scout Cat";
+    public final static ResourceCost cost = ResourceCosts.SCOUT_CAT;
 
-    private final static ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/scout_dog.png");
+    private final static ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/scout_cat.png");
 
-    public ScoutDogProd() {
+    public ScoutCatProd() {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide())
-                placement.produceUnit((ServerLevel) level, EntityRegistrar.SCOUT_DOG_UNIT.get(), placement.ownerName, true);
+                placement.produceUnit((ServerLevel) level, EntityRegistrar.SCOUT_CAT_UNIT.get(), placement.ownerName, true);
         };
     }
 
     public String getItemName() {
-        return ScoutDogProd.itemName;
+        return ScoutCatProd.itemName;
     }
 
     public UnitSpawnButton getPlaceButton() {
@@ -44,31 +44,31 @@ public class ScoutDogProd extends ProductionItem {
                 itemName,
                 TEXTURE_LOCATION,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        boolean isHidden = prodBuilding instanceof TownCentrePlacement tcp && !tcp.trainsDogs;
+        boolean isHidden = prodBuilding instanceof TownCentrePlacement tcp && tcp.trainsDogs;
         StartProductionButton button = new StartProductionButton(
-                ScoutDogProd.itemName,
-                TEXTURE_LOCATION,
-                hotkey,
-                () -> isHidden,
-                () -> true,
-                List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit"), Style.EMPTY.withBold(true)),
-                        ResourceCosts.getFormattedCost(cost),
-                        ResourceCosts.getFormattedPopAndTime(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_dog_unit.tooltip2"), Style.EMPTY)
-                ),
-                this
+            ScoutCatProd.itemName,
+            TEXTURE_LOCATION,
+            hotkey,
+            () -> isHidden,
+            () -> true,
+            List.of(
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit"), Style.EMPTY.withBold(true)),
+                ResourceCosts.getFormattedCost(cost),
+                ResourceCosts.getFormattedPopAndTime(cost),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit.tooltip2"), Style.EMPTY)
+            ),
+            this
         );
         button.onRightClick = () -> {
             if (prodBuilding instanceof TownCentrePlacement tcp) {
@@ -81,7 +81,7 @@ public class ScoutDogProd extends ProductionItem {
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         return new StopProductionButton(
-            ScoutDogProd.itemName,
+            ScoutCatProd.itemName,
             TEXTURE_LOCATION,
             prodBuilding,
             this,

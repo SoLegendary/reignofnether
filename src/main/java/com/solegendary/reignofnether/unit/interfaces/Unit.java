@@ -39,6 +39,7 @@ import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -924,7 +925,7 @@ public interface Unit {
     }
 
     public default boolean isScout() {
-        return this instanceof ScoutDogUnit || this instanceof BatUnit || this instanceof StriderUnit;
+        return this instanceof ScoutDogUnit || this instanceof ScoutCatUnit || this instanceof BatUnit || this instanceof StriderUnit;
     }
 
     public default boolean isGarrisoned() {

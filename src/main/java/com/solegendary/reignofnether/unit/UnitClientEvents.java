@@ -634,6 +634,9 @@ public class UnitClientEvents {
             if (preselectedUnits.size() == 1 && preselectedUnits.get(0) instanceof ScoutDogUnit &&
                 getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutDogUnit dogUnit)
                 dogUnit.pet();
+            if (preselectedUnits.size() == 1 && preselectedUnits.get(0) instanceof ScoutCatUnit &&
+                getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutCatUnit catUnit)
+                catUnit.pet();
 
             if (!selectedUnits.isEmpty() && isLeftClickAttack()) {
                 // A + left click -> force attack single unit (even if friendly)

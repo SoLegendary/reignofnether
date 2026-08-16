@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RoyalGuardUnit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutCatProd;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.animal.*;
@@ -64,6 +66,9 @@ public class PortraitRendererModifiers {
             scale = -5;
         } else if (entity instanceof Donkey || entity instanceof Mule) {
             scale = -5;
+        }  else if (entity instanceof ScoutCatUnit) {
+            yOffset = 22;
+            scale = -2;
         } else if (entity instanceof Ocelot || entity instanceof Cat) {
             yOffset = 7;
         } else if (entity instanceof Fox) {

@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
+import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.TownCentrePlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -17,11 +19,13 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
 
@@ -57,8 +61,14 @@ public class TownCentre extends ProductionBuilding implements RangeIndicatorAddo
 
         this.productions.add(ProductionItems.VILLAGER, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.SCOUT_DOG, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.SCOUT_CAT, Keybindings.abilitySlot2);
 
         setActiveAddon(RangeIndicatorAddon.class, this, true);
+    }
+
+    @Override
+    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
+        return new TownCentrePlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation));
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}

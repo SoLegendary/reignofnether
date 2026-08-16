@@ -2,14 +2,14 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.abilities.*;
+import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
@@ -18,13 +18,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -36,7 +35,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScoutDogUnit extends Wolf implements Unit {
+public class ScoutCatUnit extends Cat implements Unit {
     public static final Abilities ABILITIES = new Abilities();
 
     //region
@@ -96,13 +95,13 @@ public class ScoutDogUnit extends Wolf implements Unit {
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(ScoutDogUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(ScoutCatUnit.class, EntityDataSerializers.STRING);
 
     // which scenario role does this unit use?
     public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
     public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
-            SynchedEntityData.defineId(ScoutDogUnit.class, EntityDataSerializers.INT);
+            SynchedEntityData.defineId(ScoutCatUnit.class, EntityDataSerializers.INT);
 
     @Override
     protected void defineSynchedData() {
@@ -112,7 +111,7 @@ public class ScoutDogUnit extends Wolf implements Unit {
     }
 
     @Nullable
-    public ResourceCost getCost() {return ResourceCosts.SCOUT_DOG;}
+    public ResourceCost getCost() {return ResourceCosts.SCOUT_CAT;}
 
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
@@ -133,7 +132,7 @@ public class ScoutDogUnit extends Wolf implements Unit {
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
-    public ScoutDogUnit(EntityType<? extends Wolf> entityType, Level level) {
+    public ScoutCatUnit(EntityType<? extends Cat> entityType, Level level) {
         super(entityType, level);
         updateAbilityButtons();
         this.setTame(true);
@@ -155,14 +154,14 @@ public class ScoutDogUnit extends Wolf implements Unit {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
-                .add(Attributes.MOVEMENT_SPEED, ScoutDogUnit.movementSpeed)
-                .add(Attributes.MAX_HEALTH, ScoutDogUnit.maxHealth)
+                .add(Attributes.MOVEMENT_SPEED, ScoutCatUnit.movementSpeed)
+                .add(Attributes.MAX_HEALTH, ScoutCatUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, ScoutDogUnit.armorValue)
+                .add(Attributes.ARMOR, ScoutCatUnit.armorValue)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), 20)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
-                .add(Attributes.ATTACK_DAMAGE, 0); // for compatibility with Wolf only
+                .add(Attributes.ATTACK_DAMAGE, 0);
     }
 
     public void tick() {

@@ -37,6 +37,7 @@ public class ProductionPlacement extends BuildingPlacement {
     public final List<ActiveProduction> productionQueue = new ArrayList<>();
     public boolean attackRally = false;
     public ResourceName rallyResourceName = ResourceName.NONE; // used to set worker resource targets
+    public boolean makesDogs = true;
 
     public ProductionPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);

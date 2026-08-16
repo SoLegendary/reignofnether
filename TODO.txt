@@ -20,6 +20,8 @@ Fog of war
 
 
 
+[❌] Make phantoms not scared of cats
+
 
 
 Balance

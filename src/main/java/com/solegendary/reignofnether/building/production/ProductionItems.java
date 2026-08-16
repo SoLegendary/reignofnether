@@ -23,6 +23,7 @@ public class ProductionItems {
     public static final PoisonSpiderProd POISON_SPIDER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "poison_spider"), new PoisonSpiderProd());
     public static final VillagerProd VILLAGER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "villager"), new VillagerProd());
     public static final ScoutDogProd SCOUT_DOG = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "scout_dog"), new ScoutDogProd());
+    public static final ScoutCatProd SCOUT_CAT = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "scout_cat"), new ScoutCatProd());
     public static final ZombieVillagerProd ZOMBIE_VILLAGER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie_villager"), new ZombieVillagerProd());
     public static final BatProd BAT = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bat"), new BatProd());
     public static final VindicatorProd VINDICATOR = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "vindicator"), new VindicatorProd());

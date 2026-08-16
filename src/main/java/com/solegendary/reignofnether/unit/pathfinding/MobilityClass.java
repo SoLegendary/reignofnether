@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.pathfinding;
 
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.WaterAnimal;
@@ -13,7 +14,7 @@ public enum MobilityClass {
     public static MobilityClass of(Unit unit) {
         if (unit instanceof StriderUnit) return FIRE_IMMUNE;
         if (!(unit instanceof Mob mob)) return HUMANOID;
-        if (mob instanceof Drowned || mob instanceof ScoutDogUnit || mob instanceof WaterAnimal) return AQUATIC;
+        if (mob instanceof Drowned || mob instanceof ScoutDogUnit || mob instanceof ScoutCatUnit || mob instanceof WaterAnimal) return AQUATIC;
         // Wider than a full block spans multiple cells and needs a multi-cell footprint; narrower fits one cell.
         if (mob.getBbWidth() > 1.0f) return LARGE;
         return HUMANOID;
