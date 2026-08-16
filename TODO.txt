@@ -1,5 +1,5 @@
 
-1.20.1-1.4.1-beta-3
+1.20.1-1.4.1
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -18,9 +18,6 @@ Fog of war
 [❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Add commands for force-moving camera
 
-
-
-[❌] Make phantoms not scared of cats
 
 
 

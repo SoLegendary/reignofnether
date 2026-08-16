@@ -53,12 +53,11 @@ public class ScoutCatProd extends ProductionItem {
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
-        boolean isHidden = prodBuilding instanceof TownCentrePlacement tcp && tcp.trainsDogs;
         StartProductionButton button = new StartProductionButton(
             ScoutCatProd.itemName,
             TEXTURE_LOCATION,
             hotkey,
-            () -> isHidden,
+            () -> prodBuilding instanceof TownCentrePlacement tcp && tcp.trainsDogs,
             () -> true,
             List.of(
                 FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit"), Style.EMPTY.withBold(true)),
@@ -66,13 +65,15 @@ public class ScoutCatProd extends ProductionItem {
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.scout_cat_unit.tooltip3"), Style.EMPTY)
             ),
             this
         );
         button.onRightClick = () -> {
             if (prodBuilding instanceof TownCentrePlacement tcp) {
-                tcp.makesDogs = !tcp.makesDogs;
+                tcp.trainsDogs = !tcp.trainsDogs;
                 tcp.updateButtons();
             }
         };
