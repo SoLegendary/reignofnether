@@ -115,10 +115,6 @@ public class StriderUnit extends Strider implements Unit {
         this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
-
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.STRIDER;}
 
@@ -141,8 +137,8 @@ public class StriderUnit extends Strider implements Unit {
     }
 
     @Override
-    protected float getWaterSlowDown() {
-        return 0.96F;
+    public float getWaterSlowDown() {
+        return 0.94F;
     }
 
     @Override
@@ -170,14 +166,14 @@ public class StriderUnit extends Strider implements Unit {
             this.addEffect(new MobEffectInstance(MobEffectRegistrar.WARM.get(), 15, 1, true, false));
 
         if (isSuffocating() && isInWater()) {
-            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 1));
+            this.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), 15, 1));
         }
         if (isInWater()) {
             ticksInWater += 1;
         } else if (ticksInWater > 0) {
             ticksInWater -= 1;
         }
-        if (isInWater() && ticksInWater > 0 && ticksInWater % 40 == 0) {
+        if (isInWater() && ticksInWater > 0 && ticksInWater % 60 == 0) {
             hurt(damageSources().freeze(), 1);
         }
     }

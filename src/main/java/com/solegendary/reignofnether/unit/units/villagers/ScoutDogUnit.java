@@ -111,10 +111,6 @@ public class ScoutDogUnit extends Wolf implements Unit {
         this.entityData.define(scenarioRoleDataAccessor, -1);
     }
 
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
-
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.SCOUT_DOG;}
 
@@ -144,8 +140,8 @@ public class ScoutDogUnit extends Wolf implements Unit {
     }
 
     @Override
-    protected float getWaterSlowDown() {
-        return 0.96F;
+    public float getWaterSlowDown() {
+        return 0.94F;
     }
 
     @Override

@@ -28,11 +28,15 @@ Balance
 [✔] Tiny slimes and magma cubes now have a larger hitbox
 [✔] Wretched wraith base attack damage increased by 1.5
 [✔] Wraith snow can now generate on stair blocks
+[✔] Monster non-worker units now gain +10% movespeed in night circles
+[✔] Blood moon can no longer target previously-explored buildings
+
 [✔] Nether wood value reduced from 18 to 17
-[✔] Monster units now gain +10% movespeed in night circles
+[✔] Piglin workers no longer gain +10% movespeed on nether terrain
+
 [✔] The Royal Guard's ultimate now also grants Strength II (+40% damage)
 [✔] Food cost of Vindicators, Pillagers, Windcallers and Evokers reduced by 10
-[✔] Blood moon can no longer target previously-explored buildings
+
 
 Quality of Life
 ---------------
@@ -41,7 +45,6 @@ Quality of Life
 [✔] Buildings are now captured 5 blocks away from the edge of the building, instead of 20 blocks from the building centre
 [✔] Improved the click box accuracy for many units, and expanded the click box for chickens
 [✔] All concrete blocks now convert to netherrack
-
 
 Bugfixes
 --------
@@ -55,8 +58,8 @@ Bugfixes
 [✔] Fixed Sculk catalysts showing as having too much health with nearby sculk (actual health is unchanged)
 [✔] Fixed headhunters garrisoned in bastions having inaccurate tridents
 
-
 [❌] Heroes having ults on cooldown on levelup?
 
 Languages
 ---------
+

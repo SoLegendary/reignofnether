@@ -162,7 +162,10 @@ public interface Unit {
     }
     public default float getMovementSpeed() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(Attributes.MOVEMENT_SPEED);
-        return (float) (attr != null ?  attr.getValue() : Attributes.MOVEMENT_SPEED.getDefaultValue());
+        float ms = (float) (attr != null ?  attr.getValue() : Attributes.MOVEMENT_SPEED.getDefaultValue());
+        boolean isInWater = ((LivingEntity) this).isInWater();
+        float waterSlowdown = ((LivingEntity) this).getWaterSlowDown() * ((LivingEntity) this).getWaterSlowDown();
+        return ms * (isInWater ? waterSlowdown : 1f);
     }
     public default float getUnitMaxHealth() {
         float bonus = 0;
@@ -400,11 +403,13 @@ public interface Unit {
             unitMob.removeEffect(MobEffects.ABSORPTION);
 
         if (unitMob.tickCount % 10 == 0 &&
+            !(unit instanceof WorkerUnit) &&
             unit.getFaction() == Faction.PIGLINS &&
             MiscUtil.isOnNetherTerrain(unitMob)) {
             unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
         }
         if (unitMob.tickCount % 10 == 0 &&
+            !(unit instanceof WorkerUnit) &&
             unit.getFaction() == Faction.MONSTERS &&
             NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), unitMob.level().isClientSide)) {
             unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));

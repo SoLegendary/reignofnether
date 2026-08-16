@@ -25,7 +25,7 @@ public enum MobilityClass {
         switch (kind) {
             case WalkabilityBuilder.KIND_LAND: return 1.0f;
             case WalkabilityBuilder.KIND_WATER:
-                if (this == AQUATIC) return 5.0f;
+                if (this == AQUATIC) return 3.0f;
                 return 25.0f;
             case WalkabilityBuilder.KIND_FIRE: return mob == FIRE_IMMUNE ? 1.0f : PathfinderConfig.FIRE_AVOID_COST;
             case WalkabilityBuilder.KIND_SLIME: return PathfinderConfig.SLIME_AVOID_COST;
