@@ -106,11 +106,17 @@ public class ScoutCatUnit extends Cat implements Unit {
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
             SynchedEntityData.defineId(ScoutCatUnit.class, EntityDataSerializers.INT);
 
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+            SynchedEntityData.defineId(ScoutCatUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
         this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable

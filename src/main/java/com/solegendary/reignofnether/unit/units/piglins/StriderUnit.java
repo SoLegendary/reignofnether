@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
@@ -108,11 +109,17 @@ public class StriderUnit extends Strider implements Unit {
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
             SynchedEntityData.defineId(StriderUnit.class, EntityDataSerializers.INT);
 
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+            SynchedEntityData.defineId(StriderUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
         this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable

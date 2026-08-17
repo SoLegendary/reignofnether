@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.controls.FlyingUnitMoveControl;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -107,11 +108,17 @@ public class BatUnit extends Mob implements Unit {
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
             SynchedEntityData.defineId(BatUnit.class, EntityDataSerializers.INT);
 
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+            SynchedEntityData.defineId(BatUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
         this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable
