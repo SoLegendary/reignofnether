@@ -150,8 +150,10 @@ public class HelperButtons {
                         militaryUnits.addAll(UnitClientEvents.getMilitaryUnitsOnScreen());
                     } else {
                         for (LivingEntity u : UnitClientEvents.getAllUnits()) {
-                            if (!(u instanceof WorkerUnit) &&
-                                GarrisonableBuildingAddon.getGarrison((Unit) u) == null &&
+                            if (u instanceof Unit unit &&
+                                !(u instanceof WorkerUnit) &&
+                                !(unit.isScout()) &&
+                                GarrisonableBuildingAddon.getGarrison(unit) == null &&
                                 getPlayerToEntityRelationship(u) == Relationship.OWNED) {
                                 militaryUnits.add(u);
                             }

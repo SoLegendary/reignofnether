@@ -12,6 +12,7 @@ public class ResourceCosts {
     private static final String ID = ReignOfNether.MOD_ID;
 
     public static final ResourceCost ZOMBIE_VILLAGER = new ResourceCost(ID, "ZOMBIE_VILLAGER");
+    public static final ResourceCost BAT = new ResourceCost(ID, "BAT");
     public static final ResourceCost CREEPER = new ResourceCost(ID, "CREEPER");
     public static final ResourceCost ZOMBIE = new ResourceCost(ID, "ZOMBIE");
     public static final ResourceCost SKELETON = new ResourceCost(ID, "SKELETON");
@@ -27,6 +28,8 @@ public class ResourceCosts {
     public static final ResourceCost ZOMBIE_PIGLIN = new ResourceCost(ID, "ZOMBIE_PIGLIN");
     public static final ResourceCost ZOGLIN = new ResourceCost(ID, "ZOGLIN");
     public static final ResourceCost VILLAGER = new ResourceCost(ID, "VILLAGER");
+    public static final ResourceCost SCOUT_DOG = new ResourceCost(ID, "SCOUT_DOG");
+    public static final ResourceCost SCOUT_CAT = new ResourceCost(ID, "SCOUT_CAT");
     public static final ResourceCost MILITIA = new ResourceCost(ID, "MILITIA");
     public static final ResourceCost IRON_GOLEM = new ResourceCost(ID, "IRON_GOLEM");
     public static final ResourceCost PILLAGER = new ResourceCost(ID, "PILLAGER");
@@ -36,6 +39,7 @@ public class ResourceCosts {
     public static final ResourceCost EVOKER = new ResourceCost(ID, "EVOKER");
     public static final ResourceCost RAVAGER = new ResourceCost(ID, "RAVAGER");
     public static final ResourceCost GRUNT = new ResourceCost(ID, "GRUNT");
+    public static final ResourceCost STRIDER = new ResourceCost(ID, "STRIDER");
     public static final ResourceCost BRUTE = new ResourceCost(ID, "BRUTE");
     public static final ResourceCost HEADHUNTER = new ResourceCost(ID, "HEADHUNTER");
     public static final ResourceCost MARAUDER = new ResourceCost(ID, "MARAUDER");
@@ -214,6 +218,7 @@ public class ResourceCosts {
         CREEPER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.CREEPER);
         ZOMBIE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOMBIE);
         ZOMBIE_VILLAGER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOMBIE_VILLAGER);
+        BAT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BAT);
         SKELETON.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SKELETON);
         STRAY.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.STRAY);
         BOGGED.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BOGGED);
@@ -230,6 +235,8 @@ public class ResourceCosts {
         ZOGLIN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOGLIN);
         // Villagers
         VILLAGER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.VILLAGER);
+        SCOUT_DOG.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SCOUT_DOG);
+        SCOUT_CAT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SCOUT_CAT);
         MILITIA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.MILITIA);
         IRON_GOLEM.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.IRON_GOLEM);
         PILLAGER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PILLAGER);
@@ -242,6 +249,7 @@ public class ResourceCosts {
         ENCHANTER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ENCHANTER);
         // Piglins
         GRUNT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.GRUNT);
+        STRIDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.STRIDER);
         BRUTE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BRUTE);
         HEADHUNTER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HEADHUNTER);
         MARAUDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.MARAUDER);

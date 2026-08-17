@@ -92,7 +92,7 @@ public final class GridAStar {
                 if (ddx * ddx + ddz * ddz > radiusSq) continue;
 
                 byte kind = view.kindAt(nx, ny, nz);
-                float costMult = mob.costFor(kind, fireCost);
+                float costMult = mob.costFor(mob, kind, fireCost);
                 if (Float.isInfinite(costMult)) continue;
 
                 if (footprintRadius > 0) {
@@ -141,7 +141,7 @@ public final class GridAStar {
 
                 for (int fy = cur.y - 2; fy >= cur.y - PathfinderConfig.MAX_FALL_DROP; fy--) {
                     if (view.solidAt(nx, fy, nz)) break; // hit ground/obstacle before an open landing
-                    float lmult = mob.costFor(view.kindAt(nx, fy, nz), fireCost);
+                    float lmult = mob.costFor(mob, view.kindAt(nx, fy, nz), fireCost);
                     if (Float.isInfinite(lmult)) continue; // still mid-air - keep falling
                     if (footprintRadius > 0 ? !GridNeighbors.wideFits(view, nx, fy, nz)
                                             : headBlocked(view, nx, fy, nz, clearance)) continue;
@@ -200,7 +200,7 @@ public final class GridAStar {
     // neighbour loop uses, so the fall pass agrees with it on what counts as a landing.
     private static boolean standable(WalkabilityView view, MobilityClass mob, int x, int y, int z,
                                      int clearance, int footprintRadius, float fireCost) {
-        if (Float.isInfinite(mob.costFor(view.kindAt(x, y, z), fireCost))) return false;
+        if (Float.isInfinite(mob.costFor(mob, view.kindAt(x, y, z), fireCost))) return false;
         return footprintRadius > 0 ? GridNeighbors.wideFits(view, x, y, z)
                                    : !headBlocked(view, x, y, z, clearance);
     }

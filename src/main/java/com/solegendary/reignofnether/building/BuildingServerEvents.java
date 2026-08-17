@@ -440,7 +440,7 @@ public class BuildingServerEvents {
                 }
                 return null;
             } else if (!fromCommand) {
-                String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, newBuilding.getBuilding(), originPos, ownerName, isDiagonalBridge, isSandbox, true);
+                String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, newBuilding.getBuilding(), originPos, ownerName, rotation, isDiagonalBridge, isSandbox, true);
                 if (errorMsgKey != null) {
                     HudClientboundPacket.showTempMessageI18n(ownerName, errorMsgKey);
                     FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
@@ -828,7 +828,8 @@ public class BuildingServerEvents {
         for (BuildingPlacement building : buildingsToDestroy)
             building.destroy(serverLevel);
 
-        for (BuildingPlacement building : buildings)
+        ArrayList<BuildingPlacement> bpls = new ArrayList<>(buildings);
+        for (BuildingPlacement building : bpls)
             building.tick(serverLevel);
 
         for (NetherZone netherConversionZone : netherZones)

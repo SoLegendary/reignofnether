@@ -196,10 +196,10 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         }
     }
     @Override
-    public void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
-        AttackerUnit.super.setAttackBuildingTarget(preselectedBlockPos);
+    public void setAttackBuildingTarget(BlockPos preselectedBlockPos, boolean forced) {
+        AttackerUnit.super.setAttackBuildingTarget(preselectedBlockPos, forced);
         if (!this.level().isClientSide())
-             UnitAnimationClientboundPacket.sendBlockPosPacket(UnitAnimationAction.NON_KEYFRAME_START, this, preselectedBlockPos);
+            UnitAnimationClientboundPacket.sendBlockPosPacket(UnitAnimationAction.NON_KEYFRAME_START, this, preselectedBlockPos);
     }
     @Override
     public void resetBehaviours() {

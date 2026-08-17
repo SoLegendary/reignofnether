@@ -1,0 +1,244 @@
+package com.solegendary.reignofnether.unit.units.piglins;
+
+import com.solegendary.reignofnether.ability.Abilities;
+import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.resources.ResourceCost;
+import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.goals.*;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.monster.Strider;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class StriderUnit extends Strider implements Unit {
+    public static final Abilities ABILITIES = new Abilities();
+
+    //region
+    @Override
+    public void updateAbilityButtons() {
+        abilities = ABILITIES.clone();
+    }
+    Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
+    Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
+    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public boolean hasAutocast(Ability ability) { return autocast == ability; }
+    @Override public void setAutocast(Ability autocast) { this.autocast = autocast; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+
+    Ability autocast;
+
+    //
+    private int eatingTicksLeft = 0;
+    public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
+    public int getEatingTicksLeft() { return eatingTicksLeft; }
+    private BlockPos anchorPos = new BlockPos(0,0,0);
+    public void setAnchor(BlockPos bp) { anchorPos = bp; }
+    public BlockPos getAnchor() { return anchorPos; }
+
+    private final ArrayList<Checkpoint> checkpoints = new ArrayList<>();
+    public ArrayList<Checkpoint> getCheckpoints() { return checkpoints; }
+
+    GarrisonGoal garrisonGoal;
+    public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
+    public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UsePortalGoal usePortalGoal;
+    public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
+    public boolean canUsePortal() { return getUsePortalGoal() != null; }
+
+    public Faction getFaction() {return Faction.PIGLINS;}
+    public Abilities getAbilities() {return abilities;}
+    public List<ItemStack> getItems() {return items;}
+    public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
+    public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
+    public ReturnResourcesGoal getReturnResourcesGoal() {return null;}
+    public int getMaxResources() {return 0;}
+
+    private MoveToTargetBlockGoal moveGoal;
+    private SelectedTargetGoal<? extends LivingEntity> targetGoal;
+
+    public LivingEntity getFollowTarget() { return followTarget; }
+    public boolean getHoldPosition() { return holdPosition; }
+    public void setHoldPosition(boolean holdPosition) { this.holdPosition = holdPosition; }
+
+    // if true causes moveGoal and attackGoal to work together to allow attack moving
+    // moves to a block but will chase/attack nearby monsters in range up to a certain distance away
+    private LivingEntity followTarget = null; // if nonnull, continuously moves to the target
+    private boolean holdPosition = false;
+
+    // which player owns this unit? this format ensures its synched to client without having to use packets
+    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
+    public static final EntityDataAccessor<String> ownerDataAccessor =
+            SynchedEntityData.defineId(StriderUnit.class, EntityDataSerializers.STRING);
+
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(StriderUnit.class, EntityDataSerializers.INT);
+
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+            SynchedEntityData.defineId(StriderUnit.class, EntityDataSerializers.STRING);
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
+    }
+
+    @Nullable
+    public ResourceCost getCost() {return ResourceCosts.STRIDER;}
+
+    public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
+
+    // endregion
+
+    final static public float maxHealth = 30.0f;
+    final static public float armorValue = 0.0f;
+    final static public float movementSpeed = 0.30f;
+
+    private Abilities abilities = ABILITIES.clone();
+    private final List<ItemStack> items = new ArrayList<>();
+
+    private long ticksInWater = 0;
+
+    public StriderUnit(EntityType<? extends Strider> entityType, Level level) {
+        super(entityType, level);
+        updateAbilityButtons();
+    }
+
+    @Override
+    public float getWaterSlowDown() {
+        return 0.94F;
+    }
+
+    @Override
+    public boolean removeWhenFarAway(double d) { return false; }
+
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createMobAttributes()
+                .add(Attributes.MOVEMENT_SPEED, StriderUnit.movementSpeed)
+                .add(Attributes.MAX_HEALTH, StriderUnit.maxHealth)
+                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
+                .add(Attributes.ARMOR, StriderUnit.armorValue)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), 20)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+    }
+
+    public void tick() {
+        this.setCanPickUpLoot(false);
+        super.tick();
+        Unit.tick(this);
+
+        setSuffocating(!hasEffectWithDuration(MobEffectRegistrar.WARM.get()));
+
+        if (MiscUtil.isOnNetherTerrain(this))
+            this.addEffect(new MobEffectInstance(MobEffectRegistrar.WARM.get(), 15, 1, true, false));
+
+        if (isSuffocating() && isInWater()) {
+            this.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), 15, 1));
+        }
+        if (isInWater()) {
+            ticksInWater += 1;
+        } else if (ticksInWater > 0) {
+            ticksInWater -= 1;
+        }
+        if (isInWater() && ticksInWater > 0 && ticksInWater % 60 == 0) {
+            hurt(damageSources().freeze(), 1);
+        }
+    }
+
+    private static final UUID SUFFOCATING_MODIFIER_UUID = UUID.fromString("9e362924-01de-4ddd-a2b2-d0f7a405a175");
+    private static final AttributeModifier SUFFOCATING_MODIFIER = new AttributeModifier(SUFFOCATING_MODIFIER_UUID,
+            "Strider Unit suffocating modifier", -0.10, AttributeModifier.Operation.MULTIPLY_BASE);
+
+    @Override
+    public void setSuffocating(boolean pSuffocating) {
+        this.entityData.set(DATA_SUFFOCATING, pSuffocating);
+        AttributeInstance $$1 = this.getAttribute(Attributes.MOVEMENT_SPEED);
+        if ($$1 != null) {
+            $$1.removeModifier(SUFFOCATING_MODIFIER_UUID);
+            if (pSuffocating) {
+                $$1.addTransientModifier(SUFFOCATING_MODIFIER);
+            }
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.addUnitSaveData(pCompound);
+    }
+
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.readUnitSaveData(pCompound);
+    }
+
+    public void initialiseGoals() {
+        this.usePortalGoal = new UsePortalGoal(this);
+        this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
+        this.targetGoal = new SelectedTargetGoal<>(this, true, true);
+        this.garrisonGoal = new GarrisonGoal(this);
+    }
+
+    @Override
+    protected void registerGoals() {
+        initialiseGoals();
+        this.goalSelector.addGoal(2, usePortalGoal);
+        this.goalSelector.addGoal(1, new StriderFloatGoal(this));
+        this.targetSelector.addGoal(2, targetGoal);
+        this.goalSelector.addGoal(2, garrisonGoal);
+        this.goalSelector.addGoal(3, moveGoal);
+        this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
+    }
+
+    @Override
+    @Nullable
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        return pSpawnData;
+    }
+
+    @Override
+    public boolean isSensitiveToWater() {
+        return false;
+    }
+}

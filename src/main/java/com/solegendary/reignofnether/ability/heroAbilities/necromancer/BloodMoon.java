@@ -11,6 +11,8 @@ import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -114,6 +116,12 @@ public class BloodMoon extends HeroAbility {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
+        if (level.isClientSide() && !FogOfWarClientEvents.isBlockVisible(targetBp)) {
+            HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.blood_moon.not_explored"));
+            return;
+        } else if (!level.isClientSide() && !FogOfWarServerEvents.isBlockVisibleFor(unitUsing.getOwnerName(), targetBp.getX(), targetBp.getZ())){
+            return;
+        }
         BuildingPlacement bpl = BuildingUtils.findBuilding(level.isClientSide(), targetBp);
 
         if (bpl != null && !bpl.ownerName.isBlank() && !bpl.ownerName.equals(unitUsing.getOwnerName()))

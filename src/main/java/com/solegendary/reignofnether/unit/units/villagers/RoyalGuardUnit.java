@@ -758,6 +758,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public void enableAvatar() {
         setAvatarTicksLeft(Avatar.DURATION);
         addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, getAvatarTicksLeft(), 0));
+        addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, getAvatarTicksLeft(), 1));
         updateKnockbackResistance();
         setStatsForLevel();
         heal(Avatar.BONUS_HEALTH);

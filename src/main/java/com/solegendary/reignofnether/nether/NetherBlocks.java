@@ -1,5 +1,9 @@
 package com.solegendary.reignofnether.nether;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -36,6 +40,8 @@ public class NetherBlocks {
             String descId = overworldBs.getBlock().getDescriptionId();
             if (descId.contains("concrete_powder"))
                 return Blocks.SOUL_SOIL.defaultBlockState();
+            else if (descId.contains("concrete"))
+                return Blocks.NETHERRACK.defaultBlockState();
             else if (descId.contains("terracotta") && !descId.contains("glazed_terracotta"))
                 return Blocks.NETHERRACK.defaultBlockState();
         }
@@ -59,9 +65,14 @@ public class NetherBlocks {
     public static boolean isNetherBlock(Level level, BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
 
+        if (bs.getBlock() == Blocks.OBSIDIAN)
+            return true;
+
         if (bs.getBlock().getName().getContents() instanceof TranslatableContents contents &&
             (contents.getKey().contains("blackstone") ||
             contents.getKey().contains("nylium") ||
+            contents.getKey().contains("warped") ||
+            contents.getKey().contains("crimson") ||
             contents.getKey().contains("nether_brick"))) {
             return true;
         }

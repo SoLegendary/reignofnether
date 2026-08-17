@@ -118,6 +118,8 @@ public class SandboxClientEvents {
             case VILLAGERS -> List.of(
                 ProductionItems.VILLAGER.getPlaceButton(),
                 ProductionItems.VILLAGER.getMilitiaPlaceButton(),
+                ProductionItems.SCOUT_DOG.getPlaceButton(),
+                ProductionItems.SCOUT_CAT.getPlaceButton(),
                 ProductionItems.VINDICATOR.getPlaceButton(),
                 ProductionItems.PILLAGER.getPlaceButton(),
                 ProductionItems.IRON_GOLEM.getPlaceButton(),
@@ -130,6 +132,7 @@ public class SandboxClientEvents {
             );
             case MONSTERS -> List.of(
                 ProductionItems.ZOMBIE_VILLAGER.getPlaceButton(),
+                ProductionItems.BAT.getPlaceButton(),
                 ProductionItems.ZOMBIE.getPlaceButton(),
                 ProductionItems.DROWNED.getPlaceButton(),
                 ProductionItems.HUSK.getPlaceButton(),
@@ -149,6 +152,7 @@ public class SandboxClientEvents {
             );
             case PIGLINS -> List.of(
                 ProductionItems.GRUNT.getPlaceButton(),
+                ProductionItems.STRIDER.getPlaceButton(),
                 ProductionItems.BRUTE.getPlaceButton(),
                 ProductionItems.HEADHUNTER.getPlaceButton(),
                 ProductionItems.MARAUDER.getPlaceButton(),

@@ -64,6 +64,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -630,6 +631,15 @@ public class UnitClientEvents {
         // and consume in onWorldTick; we also can't add entities directly as they will not have goals populated
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
 
+            if (preselectedUnits.size() == 1 && preselectedUnits.get(0) instanceof ScoutDogUnit &&
+                getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutDogUnit dogUnit &&
+                getPlayerToEntityRelationship(dogUnit) == Relationship.OWNED)
+                dogUnit.pet();
+            if (preselectedUnits.size() == 1 && preselectedUnits.get(0) instanceof ScoutCatUnit &&
+                getSelectedUnits().size() == 1 && getSelectedUnits().get(0) instanceof ScoutCatUnit catUnit &&
+                getPlayerToEntityRelationship(catUnit) == Relationship.OWNED)
+                catUnit.pet();
+
             if (!selectedUnits.isEmpty() && isLeftClickAttack()) {
                 // A + left click -> force attack single unit (even if friendly)
                 if (preselectedUnits.size() == 1 && !targetingSelf()) {
@@ -950,6 +960,9 @@ public class UnitClientEvents {
                     AABB entityAABB = entity.getBoundingBox();
                     if (entity instanceof Unit unit) {
                         entityAABB = unit.getInflatedSelectionBox();
+                    } else if (entity instanceof Chicken) {
+                        entityAABB = entityAABB.inflate(0.2f, 0, 0.2f);
+                        entityAABB.setMaxY(entityAABB.maxY + 0.6f);
                     }
 
                     boolean isPreselected = preselectedUnits.contains(entity);
@@ -1422,10 +1435,13 @@ public class UnitClientEvents {
         ArrayList<LivingEntity> units = new ArrayList<>();
         for (LivingEntity entity : MiscUtil.getEntitiesWithinRange(CursorClientEvents.getCursorWorldPos(), 100, LivingEntity.class, MC.level)) {
             if (MyMath.isPointInsideRect3d(uvwpFull, entity.getBoundingBox().getCenter()) &&
+                    MC.player != null &&
                     entity.getId() != MC.player.getId() &&
+                    entity instanceof Unit unit &&
                     !(entity instanceof WorkerUnit) &&
                     entity instanceof AttackerUnit &&
-                    GarrisonableBuildingAddon.getGarrison((Unit) entity) == null &&
+                    !unit.isScout() &&
+                    GarrisonableBuildingAddon.getGarrison(unit) == null &&
                     getPlayerToEntityRelationship(entity) == Relationship.OWNED
             )
                 units.add(entity);

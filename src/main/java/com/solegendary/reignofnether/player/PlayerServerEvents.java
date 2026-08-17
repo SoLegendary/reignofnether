@@ -431,10 +431,16 @@ public class PlayerServerEvents {
                 return;
             }
 
-            EntityType<? extends Unit> entityType = switch (faction) {
+            EntityType<? extends Unit> workerEntityType = switch (faction) {
                 case VILLAGERS -> EntityRegistrar.VILLAGER_UNIT.get();
                 case MONSTERS -> EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
                 case PIGLINS -> EntityRegistrar.GRUNT_UNIT.get();
+                default -> null;
+            };
+            EntityType<? extends Unit> scoutEntityType = switch (faction) {
+                case VILLAGERS -> EntityRegistrar.SCOUT_DOG_UNIT.get();
+                case MONSTERS -> EntityRegistrar.BAT_UNIT.get();
+                case PIGLINS -> EntityRegistrar.STRIDER_UNIT.get();
                 default -> null;
             };
             // first RTS join into a fresh game: snapshot the playable area for late joiners
@@ -456,17 +462,18 @@ public class PlayerServerEvents {
             PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId);
 
             ServerLevel level = (ServerLevel) serverPlayer.level();
-            ArrayList<Entity> workers = new ArrayList<>();
+            ArrayList<Entity> startingWorkers = new ArrayList<>();
+            Entity startingScout = null;
 
-            List<BlockPos> bp0s = List.of(
+            List<BlockPos> nonReadiedWorkerBps = List.of(
                     new BlockPos((int) pos.x,0,(int) pos.z),
                     new BlockPos((int) pos.x+1,0,(int) pos.z),
                     new BlockPos((int) pos.x,0,(int) pos.z+1),
                     new BlockPos((int) pos.x-1,0,(int) pos.z),
                     new BlockPos((int) pos.x,0,(int) pos.z-1)
             );
-            for (BlockPos bp0 : bp0s) {
-                Entity entity = entityType != null ? entityType.create(level) : null;
+            for (BlockPos bp0 : nonReadiedWorkerBps) {
+                Entity entity = workerEntityType != null ? workerEntityType.create(level) : null;
                 if (entity != null) {
                     BlockPos bp = MiscUtil.getHighestNonAirBlock(level, bp0)
                             .above()
@@ -475,7 +482,22 @@ public class PlayerServerEvents {
                     entity.moveTo(bp, 0, 0);
                     if (!readiedStart)
                         level.addFreshEntity(entity);
-                    workers.add(entity);
+                    startingWorkers.add(entity);
+                }
+            }
+            boolean isBat = scoutEntityType == EntityRegistrar.BAT_UNIT.get();
+            if (FogOfWarServerEvents.isEnabled()) {
+                BlockPos nonReadiedScoutBp = new BlockPos((int) pos.x - 1, 0,(int) pos.z - 1);
+                Entity scoutEntity = scoutEntityType != null ? scoutEntityType.create(level) : null;
+                if (scoutEntity != null) {
+                    BlockPos bp = MiscUtil.getHighestNonAirBlock(level, nonReadiedScoutBp)
+                            .above()
+                            .above();
+                    ((Unit) scoutEntity).setOwnerName(playerName);
+                    scoutEntity.moveTo(bp, isBat ? 2 : 0, 0);
+                    if (!readiedStart)
+                        level.addFreshEntity(scoutEntity);
+                    startingScout = scoutEntity;
                 }
             }
 
@@ -514,13 +536,17 @@ public class PlayerServerEvents {
                 };
                 if (building != null) {
                     BlockPos bp = getBuildingOriginPos(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), blocks);
-                    for (int i = 0; i < workers.size(); i++) {
-                        workers.get(i).moveTo(bp.offset(-1, 1, i), 0, 0);
-                        level.addFreshEntity(workers.get(i));
+                    for (int i = 0; i < startingWorkers.size(); i++) {
+                        startingWorkers.get(i).moveTo(bp.offset(-1, 1, i), 0, 0);
+                        level.addFreshEntity(startingWorkers.get(i));
                     }
-                    var workerIds = new int[workers.size()];
-                    for (int i = 0; i < workers.size(); i++) {
-                        workerIds[i] = workers.get(i).getId();
+                    if (startingScout != null) {
+                        startingScout.moveTo(bp.offset(0,  isBat ? 3 : 1, 2), 0, 0);
+                        level.addFreshEntity(startingScout);
+                    }
+                    var workerIds = new int[startingWorkers.size()];
+                    for (int i = 0; i < startingWorkers.size(); i++) {
+                        workerIds[i] = startingWorkers.get(i).getId();
                     }
                     BuildingServerEvents.placeBuilding(building, bp, Rotation.NONE, playerName, workerIds, false, false, true, true);
                     PlayerClientboundPacket.teleport(playerName, BlockPos.containing(pos));
