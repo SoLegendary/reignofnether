@@ -60,6 +60,7 @@ import static net.minecraft.util.Mth.sign;
  */
 public class OrthoviewClientEvents {
 
+    public static final int CHAT_Y_OFFSET = -55; // shift chat up by this much when in RTS cam to make room for the
 
     public enum LeafHideMethod {
         NONE, AROUND_UNITS_AND_CURSOR, // requires threaded video option
