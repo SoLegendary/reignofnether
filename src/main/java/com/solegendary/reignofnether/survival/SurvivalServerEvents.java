@@ -255,12 +255,12 @@ public class SurvivalServerEvents {
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
         if (evt.getEntity() instanceof Unit unit &&
-                evt.getEntity() instanceof LivingEntity entity &&
+                evt.getEntity() instanceof LivingEntity &&
                 !evt.getLevel().isClientSide &&
                 isEnabled() &&
                 ENEMY_OWNER_NAME.equals(unit.getOwnerName())) {
 
-            enemies.add(new WaveEnemy(unit));
+            enemies.add(new WaveEnemy(unit)); // does not include piglins spawned from WavePortals (that's added there)
         }
     }
 

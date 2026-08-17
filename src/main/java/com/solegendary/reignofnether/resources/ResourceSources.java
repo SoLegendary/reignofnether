@@ -364,7 +364,7 @@ public class ResourceSources {
                     ),
                     List.of(Items.CRIMSON_STEM, Items.WARPED_STEM, Items.CRIMSON_HYPHAE, Items.WARPED_HYPHAE),
                     TICKS_PER_SECOND * 12,
-                    18,
+                    17,
                     ResourceName.WOOD
             ),
             new ResourceSource("Leaves",

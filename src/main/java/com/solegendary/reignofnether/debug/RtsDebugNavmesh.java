@@ -78,7 +78,7 @@ public class RtsDebugNavmesh {
                 // separate floors above/below the unit all show, not just the surface nearest its feet.
                 for (int dy = NAVMESH_UP; dy >= -NAVMESH_DOWN; dy--) {
                     int y = center.getY() + dy;
-                    float base = mobility.costFor(view.kindAt(x, y, z), 1.0f);
+                    float base = mobility.costFor(mobility, view.kindAt(x, y, z), 1.0f);
                     if (Float.isInfinite(base)) continue;
                     float r, g, b, score;
                     boolean noFit = false;

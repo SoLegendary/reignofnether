@@ -243,7 +243,7 @@ public class BuildingClientEvents {
             return;
 
         boolean valid = BuildingValidators.isPlacementValid(
-                MC.level, buildingToPlace, originPos, MC.player.getName().getString(),
+                MC.level, buildingToPlace, originPos, MC.player.getName().getString(), buildingRotation,
                 isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
         );
         boolean yellowUnderline = buildingToPlace instanceof PortalBasic && !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos, false);
@@ -530,7 +530,7 @@ public class BuildingClientEvents {
             BuildingPlacement preSelBuilding = getPreselectedBuilding();
 
             String errorMsgKey = BuildingValidators.getPlacementValidityError(
-                    MC.level, buildingToPlace, originPos, MC.player.getName().getString(), isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
+                    MC.level, buildingToPlace, originPos, MC.player.getName().getString(), buildingRotation, isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
             );
             boolean valid = errorMsgKey == null;
             boolean inFog = !BuildingValidators.isInBrightChunk(MC.level, preSelPos, MC.player.getName().getString());

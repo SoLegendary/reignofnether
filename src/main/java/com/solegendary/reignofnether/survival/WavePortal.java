@@ -3,7 +3,9 @@ package com.solegendary.reignofnether.survival;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.survival.spawners.PiglinWaveSpawner;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
@@ -75,6 +77,7 @@ public class WavePortal {
 
         // produceUnit spawns them before applying the ownerName, meaning they aren't registered as WaveEnemies automatically
         Entity entity = portal.produceUnit(level, mobType, ENEMY_OWNER_NAME, true);
+        SurvivalServerEvents.getCurrentEnemies().add(new WaveEnemy((Unit) entity));
 
         if (entity instanceof GhastUnit ghastUnit)
             ghastUnit.move(MoverType.SELF, new Vec3(0,10,0));

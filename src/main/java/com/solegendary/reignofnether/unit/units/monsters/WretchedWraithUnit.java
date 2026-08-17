@@ -230,7 +230,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         return regen + (bonusManaRegenPerSnowLayer * layers);
     }
 
-    final static public float attackDamage = 5.0f;
+    final static public float attackDamage = 6.5f;
     final static public float attackBonusPerLevel = 0.5f;
     final static public float attacksPerSecond = 0.4f;
     final static public float maxHealth = 140.0f;

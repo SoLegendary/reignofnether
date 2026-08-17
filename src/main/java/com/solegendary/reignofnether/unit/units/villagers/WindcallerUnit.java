@@ -526,7 +526,6 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         double horizDist = Math.sqrt(attackerPos.distanceToSqr(ghastPos));
         double vertiDist = Math.max(0, this.getY() - attacker.getY());
 
-        // if we're directly under the ghast, just allow anything to attack it
         if (horizDist < 4)
             return (int) (vertiDist * 0.5f);
         else

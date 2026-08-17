@@ -47,8 +47,11 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.POISON_SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
         evt.put(EntityRegistrar.WRAITH_UNIT.get(), WraithUnit.createAttributes().build());
         evt.put(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnit.createAttributes().build());
+        evt.put(EntityRegistrar.SCOUT_DOG_UNIT.get(), ScoutDogUnit.createAttributes().build());
+        evt.put(EntityRegistrar.SCOUT_CAT_UNIT.get(), ScoutCatUnit.createAttributes().build());
         evt.put(EntityRegistrar.MILITIA_UNIT.get(), MilitiaUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), ZombieVillagerUnit.createAttributes().build());
+        evt.put(EntityRegistrar.BAT_UNIT.get(), BatUnit.createAttributes().build());
         evt.put(EntityRegistrar.PILLAGER_UNIT.get(), PillagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.VINDICATOR_UNIT.get(), VindicatorUnit.createAttributes().build());
         evt.put(EntityRegistrar.WINDCALLER_UNIT.get(), WindcallerUnit.createAttributes().build());
@@ -60,6 +63,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.RAVAGER_UNIT.get(), RavagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishUnit.createAttributes().build());
         evt.put(EntityRegistrar.GRUNT_UNIT.get(), GruntUnit.createAttributes().build());
+        evt.put(EntityRegistrar.STRIDER_UNIT.get(), StriderUnit.createAttributes().build());
         evt.put(EntityRegistrar.HEADHUNTER_UNIT.get(), HeadhunterUnit.createAttributes().build());
         evt.put(EntityRegistrar.MARAUDER_UNIT.get(), MarauderUnit.createAttributes().build());
         evt.put(EntityRegistrar.BRUTE_UNIT.get(), BruteUnit.createAttributes().build());
@@ -135,6 +139,10 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.PANDA_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.GRIZZLY_BEAR_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.POLAR_BEAR_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.SCOUT_DOG_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.SCOUT_CAT_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.STRIDER_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.BAT_UNIT_SPAWN_EGG);
         }
         if(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab())==CreativeModeTabs.TOOLS_AND_UTILITIES.location()){
             event.accept(ItemRegistrar.THROWABLE_TNT);

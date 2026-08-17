@@ -1025,7 +1025,7 @@ public class UnitServerEvents {
         }
 
         if (evt.getSource().getDirectEntity() instanceof GhastUnitFireball) {
-            evt.setAmount(0); // flying units hit only, explosion will do enough damage anyway
+            evt.setAmount(evt.getAmount() / 2);
         }
     }
 
@@ -1046,8 +1046,8 @@ public class UnitServerEvents {
             hit = ((EntityHitResult) evt.getRayTraceResult()).getEntity();
         }
 
-        // prevent fireballs actually directly hitting anything, except other ghasts
-        //  instead just relying on splash damage and fire creation
+        // prevent fireballs actually directly hitting anything, except other flying units
+        // instead just relying on splash damage and fire creation
         if (owner instanceof GhastUnit && hit != null) {
             if (!(hit instanceof Unit unit && unit.isFlyingUnit())) {
                 evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);

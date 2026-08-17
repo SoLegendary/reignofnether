@@ -348,8 +348,15 @@ public class MiscUtil {
                 unitPosition.z + range
         );
         var entities = level.getEntitiesOfClass(LivingEntity.class, aabb);
+        boolean isMelee = unitMob instanceof AttackerUnit aUnit && aUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal;
         entities.sort(Comparator.comparingDouble(
-                it -> it.position().distanceTo(pos)
+            e -> {
+                double dist = e.position().distanceTo(pos); // deprioritise over actual enemy units
+                boolean isMeleeAgainstFlyer = isMelee && e instanceof Unit unit && unit.isFlyingUnit();
+                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer)
+                    dist += 100;
+                return dist;
+            }
         ));
 
         // Determine priority effect filter for specific unit types
@@ -379,7 +386,8 @@ public class MiscUtil {
             for (LivingEntity entity : entities) {
                 if (filter.test(entity) &&
                         isIdleOrMoveAttackable(unitMob, entity, neutralAggro) &&
-                        hasLineOfSightForAttacks(unitMob, entity)) {
+                        hasLineOfSightForAttacks(unitMob, entity) &&
+                        !(entity instanceof Unit unit && unit.isGarrisoned())) {
                     return entity;
                 }
             }
@@ -513,6 +521,21 @@ public class MiscUtil {
         } else
             return new ArrayList<>();
     }
+
+    public static <T extends Entity> List<T> getEntitiesWithinAABB(AABB aabb, Class<T> entityType, Level level) {
+        if (level != null) {
+            List<T> entities = level.getEntitiesOfClass(entityType, aabb);
+            List<T> entitiesInRange = new ArrayList<>();
+
+            for (Entity entity : entities)
+                if (entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()))
+                    entitiesInRange.add((T) entity);
+
+            return entitiesInRange;
+        } else
+            return new ArrayList<>();
+    }
+
 
     // accepts a list of strings to draw at the top left to track debug data
     //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {

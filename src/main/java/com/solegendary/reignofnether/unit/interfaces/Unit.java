@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
@@ -33,9 +34,13 @@ import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
@@ -158,7 +163,10 @@ public interface Unit {
     }
     public default float getMovementSpeed() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(Attributes.MOVEMENT_SPEED);
-        return (float) (attr != null ?  attr.getValue() : Attributes.MOVEMENT_SPEED.getDefaultValue());
+        float ms = (float) (attr != null ?  attr.getValue() : Attributes.MOVEMENT_SPEED.getDefaultValue());
+        boolean isInWater = ((LivingEntity) this).isInWater();
+        float waterSlowdown = ((LivingEntity) this).getWaterSlowDown() * ((LivingEntity) this).getWaterSlowDown();
+        return ms * (isInWater ? waterSlowdown : 1f);
     }
     public default float getUnitMaxHealth() {
         float bonus = 0;
@@ -333,14 +341,21 @@ public interface Unit {
             checkAndRetreatToAnchor(unit);
 
         if (unit.getSunlightEffect() == SunlightEffect.SLOWNESS_II ||
-            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I) {
+            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ||
+            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_MINOR) {
             // apply slowness during daytime for a short time repeatedly
             if (unitMob.tickCount % 10 == 0 && !unitMob.level().isClientSide() && unitMob.level().isDay() &&
                     !NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), false) &&
-                    !ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap"))
-                unitMob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15,
-                        unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ? 0 : 1
-                ));
+                    !ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap")) {
+
+                if (unit.getSunlightEffect() == SunlightEffect.SLOWNESS_MINOR) {
+                    unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), 15, 1));
+                } else {
+                    unitMob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15,
+                            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ? 0 : 1
+                    ));
+                }
+            }
         }
 
         if (unitMob.tickCount % 20 == 0) {
@@ -389,8 +404,15 @@ public interface Unit {
             unitMob.removeEffect(MobEffects.ABSORPTION);
 
         if (unitMob.tickCount % 10 == 0 &&
+            !(unit instanceof WorkerUnit) &&
             unit.getFaction() == Faction.PIGLINS &&
             MiscUtil.isOnNetherTerrain(unitMob)) {
+            unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
+        }
+        if (unitMob.tickCount % 10 == 0 &&
+            !(unit instanceof WorkerUnit) &&
+            unit.getFaction() == Faction.MONSTERS &&
+            NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), unitMob.level().isClientSide)) {
             unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
         }
 
@@ -562,6 +584,7 @@ public interface Unit {
         NONE,
         SLOWNESS_II,
         SLOWNESS_I,
+        SLOWNESS_MINOR,
         FIRE
     }
 
@@ -899,5 +922,17 @@ public interface Unit {
 
     public default boolean hasScenarioNpcOwner() {
         return ScenarioUtils.isScenarioNpc(((Entity) this).level().isClientSide(), this.getOwnerName());
+    }
+
+    public default boolean isScout() {
+        return this instanceof ScoutDogUnit || this instanceof ScoutCatUnit || this instanceof BatUnit || this instanceof StriderUnit;
+    }
+
+    public default boolean isGarrisoned() {
+        return getGarrison() != null;
+    }
+
+    public default BuildingPlacement getGarrison() {
+        return GarrisonableBuildingAddon.getGarrison(this);
     }
 }

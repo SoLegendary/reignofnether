@@ -176,7 +176,6 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     final static public float attackDamagePerSize = 2.0f;
     final static public float attacksPerSecond = 0.5f;
-    final static public float armorPerSize = 1.2f;
     final static public float movementSpeed = 0.25f;
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -311,7 +310,6 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0);
         this.getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get()).setBaseValue(0);
         this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(getKnockbackResistance());
-        this.getAttribute(Attributes.ARMOR).setBaseValue(pSize == 1 ? 0 : armorPerSize * pSize);
 
         if (pResetHealth)
             this.setHealth(this.getMaxHealth());
@@ -386,7 +384,6 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MOVEMENT_SPEED, SlimeUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, SlimeUnit.attackDamagePerSize)
-                .add(Attributes.ARMOR, SlimeUnit.armorPerSize)
                 .add(Attributes.MAX_HEALTH, 10)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamagePerSize)
@@ -710,5 +707,17 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     @Override
     public float getBonusMeleeRangeForAttackers() {
         return 0.3f * (Math.max(2, getSize()) - 2);
+    }
+
+    public float getModelHeight() {
+        return super.getDimensions(Pose.STANDING).height;
+    }
+
+    // increase tiny slime hitbox
+    public EntityDimensions getDimensions(Pose pPose) {
+        if (isTiny()) {
+            return super.getDimensions(pPose).scale(1.5f);
+        }
+        return super.getDimensions(pPose);
     }
 }

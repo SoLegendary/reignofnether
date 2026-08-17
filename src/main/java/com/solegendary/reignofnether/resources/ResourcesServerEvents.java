@@ -62,7 +62,7 @@ public class ResourcesServerEvents {
     public static final int STARTING_ORE_SANDBOX = 999999;
     public static final int STARTING_FOOD = 150;
     public static final int STARTING_WOOD = 500;
-    public static final int STARTING_ORE = 250;
+    public static final int STARTING_ORE = 300;
     public static final int STARTING_FOOD_READIED = 150;
     public static final int STARTING_WOOD_READIED = 150;
     public static final int STARTING_ORE_READIED = 50;

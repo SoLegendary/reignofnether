@@ -365,7 +365,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         }
     }
 
-    public RectZone renderStats(GuiGraphics guiGraphics, String name, int x, int y, int mouseX, int mouseY, Unit unit) {
+    public RectZone renderStats(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, Unit unit) {
         int statsHeightPlus = 0;
         if (unit instanceof HeroUnit) {
             y -= HERO_Y_OFFSET;
@@ -500,28 +500,31 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                 armourColor,
                 armourStr.startsWith("~") || armourStr.startsWith("-") ? -4 : 0
         ));
-        AttributeInstance ms = ((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED);
-        int msInt = ms != null ? (int) (ms.getValue() * 101) : 0;
-        if (unit instanceof SlimeUnit slimeUnit && slimeUnit.isUsingJumpingMovement()) {
-            msInt /= SlimeJumpMoveControl.MOVESPEED_MULTIPLIER;
+
+        if (((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED) != null) {
+            float ms = unit.getMovementSpeed();
+            int msInt = (int) (ms * 101);
+            if (unit instanceof SlimeUnit slimeUnit && slimeUnit.isUsingJumpingMovement()) {
+                msInt /= SlimeJumpMoveControl.MOVESPEED_MULTIPLIER;
+            }
+            if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield()) {
+                msInt *= ToggleShield.MOVESPEED_MULTIPLIER;
+            }
+            int msColour = WHITE;
+            double msAttr = ((LivingEntity) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
+            if (msAttr < unit.getMovementSpeed()) {
+                msColour = GREEN;
+            } else if (msAttr > unit.getMovementSpeed()) {
+                msColour = RED;
+            }
+            renderedStats.add(new RenderedStat(
+                    ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/boots.png"),
+                    String.valueOf(msInt),
+                    UnitStatType.MOVEMENT_SPEED,
+                    msColour,
+                    0
+            ));
         }
-        if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield()) {
-            msInt *= ToggleShield.MOVESPEED_MULTIPLIER;
-        }
-        int msColour = WHITE;
-        double msAttr = ((Mob) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
-        if (msAttr < unit.getMovementSpeed() || (unit instanceof BruteUnit bruteUnit && bruteUnit.isHoldingUpShield())) {
-            msColour = GREEN;
-        } else if (msAttr > unit.getMovementSpeed()) {
-            msColour = RED;
-        }
-        renderedStats.add(new RenderedStat(
-                ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/boots.png"),
-                String.valueOf(msInt),
-                UnitStatType.MOVEMENT_SPEED,
-                msColour,
-                0
-        ));
 
         if (unit instanceof HeroUnit heroUnit) {
             int heroLvl = heroUnit.getHeroLevel();
