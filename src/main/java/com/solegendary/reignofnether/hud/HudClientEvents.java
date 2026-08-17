@@ -655,6 +655,7 @@ public class HudClientEvents {
                 }
             }
             blitX += portraitRendererUnit.frameWidth;
+            boolean renderedItemsOrResources = false;
 
             if (hudSelectedEntity instanceof Unit unit) {
                 hudZones.add(portraitRendererUnit.renderStats(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY, unit));
@@ -663,39 +664,44 @@ public class HudClientEvents {
 
                 int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
-                if (hudSelectedEntity instanceof Mob mob && mob.canPickUpLoot() && totalRes > 0) {
+
+                if (UnitInventoryRenderer.shouldRender(unit)) {
+                    hudZones.add(UnitInventoryRenderer.render(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, unit));
+                    renderedItemsOrResources = true;
+                }
+                else if (hudSelectedEntity instanceof Mob mob && mob.canPickUpLoot() && totalRes > 0) {
                     hudZones.add(portraitRendererUnit.renderResourcesHeld(evt.getGuiGraphics(), blitX, blitY, unit));
 
                     // return button
                     if (getPlayerToEntityRelationship(hudSelectedEntity) == Relationship.OWNED ||
-                        AlliancesClient.canControlAlly(hudSelectedEntity)) {
+                            AlliancesClient.canControlAlly(hudSelectedEntity)) {
                         Button returnButton = new Button("Return resources",
-                            Button.itemIconSize,
-                            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
-                            Keybindings.hotkey5,
-                            () -> unit.getReturnResourcesGoal().getBuildingTarget() != null,
-                            () -> false,
-                            () -> true,
-                            () -> sendUnitCommand(UnitAction.RETURN_RESOURCES_TO_CLOSEST),
-                            null,
-                            List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.drop_off_resources"),
-                                Style.EMPTY
-                            ))
+                                Button.itemIconSize,
+                                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
+                                Keybindings.hotkey5,
+                                () -> unit.getReturnResourcesGoal().getBuildingTarget() != null,
+                                () -> false,
+                                () -> true,
+                                () -> sendUnitCommand(UnitAction.RETURN_RESOURCES_TO_CLOSEST),
+                                null,
+                                List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.drop_off_resources"),
+                                        Style.EMPTY
+                                ))
                         );
                         returnButton.render(evt.getGuiGraphics(), blitX + 10, blitY + 38, mouseX, mouseY);
                         renderedButtons.add(returnButton);
                     }
+                    renderedItemsOrResources = true;
                 }
             } else if (ResourceSources.isHuntableAnimal(hudSelectedEntity)) {
                 hudZones.add(portraitRendererUnit.renderResourcesHeld(evt.getGuiGraphics(), blitX, blitY, (Animal) hudSelectedEntity));
                 blitX += portraitRendererUnit.statsWidth;
             }
 
-            if (hudSelectedEntity instanceof Unit unit
-                && Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0) {
-                blitX += portraitRendererUnit.statsWidth + 5;
+            if (renderedItemsOrResources) {
+                blitX += portraitRendererUnit.statsWidth + 4;
             } else {
-                blitX += 15;
+                blitX += 14;
             }
         }
 

@@ -29,6 +29,8 @@ Unit Items
     - Should have tooltips shown even on the ground
     - Requires right-click to pick up, will not auto-pickup
 
+[❌] can't summon militia
+[❌] blocks didn't update with fog disabled on login
 
 
 Balance

@@ -66,6 +66,9 @@ public abstract class UnitItem {
     public Button getButton() {
         return new ButtonBuilder("button_" + item.getDescriptionId())
                 .tooltipLines(getTooltip())
+                .bgColor(0x3c000000)
+                .iconItem(new ItemStack(item))
+                .stretchIconToBorders()
                 .build();
     }
 

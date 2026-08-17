@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -58,6 +59,8 @@ public class ButtonBuilder {
     private boolean stretchIconToBorders = false;
     private int tooltipOffsetY = 0;
     private String playerNameForHeadIcon = "";
+    private int bgColour = 0x64000000;
+    private ItemStack iconItem = null;
 
     /**
      * Creates a new builder with the two required fields.
@@ -190,6 +193,16 @@ public class ButtonBuilder {
         return this;
     }
 
+    public ButtonBuilder bgColor(int bgColour) {
+        this.bgColour = bgColour;
+        return this;
+    }
+
+    public ButtonBuilder iconItem(ItemStack iconItem) {
+        this.iconItem = iconItem;
+        return this;
+    }
+
     // -------------------------------------------------------------------------
     // Build
     // -------------------------------------------------------------------------
@@ -236,6 +249,8 @@ public class ButtonBuilder {
         button.lightUpOnHover = lightUpOnHover;
         button.imageSize = imageSize;
         button.playerNameForHeadIcon = playerNameForHeadIcon;
+        button.bgColour = bgColour;
+        button.iconItem = iconItem;
 
         return button;
     }

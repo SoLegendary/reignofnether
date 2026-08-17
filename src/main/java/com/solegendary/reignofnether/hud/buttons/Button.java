@@ -40,6 +40,7 @@ public class Button {
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
     public boolean stretchIconToBorders = false;
     public String playerNameForHeadIcon = "";
+    public int bgColour = 0x64000000;
 
     public ResourceLocation iconResource;
     public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
@@ -150,7 +151,7 @@ public class Button {
 
         if (this.frameResource != null) {
             guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource, x + xyDiff, y + xyDiff, iconFrameSize, 0x64000000);
+            MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource, x + xyDiff, y + xyDiff, iconFrameSize, bgColour);
         }
 
         if (!playerNameForHeadIcon.isBlank()) {
