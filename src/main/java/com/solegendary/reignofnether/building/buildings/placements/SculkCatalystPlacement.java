@@ -81,12 +81,12 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         if (tickAgeAfterBuilt % 10 == 0)
             updateButtons();
     }
-
-    @Override
-    public int getHealth() {
-        return (int) ((((getBlocksPlaced() - (partialBlocksDestroyed / 2)) / MIN_BLOCKS_PERCENT) - getHighestBlockCountReached() +
-                (sculkBps.size() * (HP_PER_SCULK/ 2))) * (getHealthPerBlock() / 2));
-    }
+	
+	@Override
+	public int getHealth() {
+		return (int) ((((getBlocksPlaced() - (partialBlocksDestroyed / 2)) / minBlocksPercent) - getHighestBlockCountReached() +
+			(sculkBps.size() * HP_PER_SCULK)) * (getHealthPerBlock() / 2));
+	}
 
     public void updateSculkBps() {
         sculkBps.clear();

@@ -12,11 +12,14 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -117,12 +120,18 @@ public class HuskUnit extends Husk implements Unit, AttackerUnit {
     public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
             SynchedEntityData.defineId(HuskUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(HuskUnit.class, EntityDataSerializers.STRING);
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
         this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -189,6 +198,24 @@ public class HuskUnit extends Husk implements Unit, AttackerUnit {
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override

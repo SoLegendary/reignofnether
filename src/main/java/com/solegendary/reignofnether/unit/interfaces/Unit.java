@@ -192,6 +192,9 @@ public interface Unit {
 
     int getScenarioRoleIndex(); // if -1, no role
     void setScenarioRoleIndex(int index);
+    
+    String getOnDeathCommand();
+    void setOnDeathCommand(String command);
 
     default double getDamageTakenIncrease() {
         MobEffectInstance mei = ((LivingEntity) this).getEffect(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get());
@@ -552,6 +555,7 @@ public interface Unit {
             if (itemStack.getItem() != Items.AIR)
                 pCompound.put(slot.name() + "Item", itemStack.serializeNBT());
         }
+        pCompound.putString("onDeathCommand", getOnDeathCommand());
     }
 
     // call from readAdditionalSaveData
@@ -578,6 +582,7 @@ public interface Unit {
                 }
             }
         }
+        setOnDeathCommand(pCompound.getString("onDeathCommand"));
     }
 
     public enum SunlightEffect {

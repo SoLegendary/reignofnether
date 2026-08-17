@@ -22,7 +22,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -70,7 +69,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     public int numGarrisonZones = 0;
     public int numGarrisonEntries = 0;
     public int numGarrisonExits = 0;
-    public ArrayList<CustomBuildingCommand> commands = new ArrayList<>(List.of(new CustomBuildingCommand()));
+    public ArrayList<BuildingCommand> commands = new ArrayList<>(List.of(new BuildingCommand()));
     private final Random random = new Random();
 
     public CustomBuilding(String structureName, Vec3i structureSize, Block portraitBlock, CompoundTag structureNbt) {
@@ -161,35 +160,34 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         attributesNbt.putInt("garrisonCapacity", this.garrisonCapacity);
         attributesNbt.putInt("garrisonRange", this.garrisonRange);
         attributesNbt.putInt("maxHealth", (int) this.maxHealth);
-        attributesNbt.putBoolean("drawAggro", this.drawAggro);
     }
-
-    private void unpackAttributesNbt() {
-        this.setIconAndPortrait(attributesNbt.getString("portraitBlockRegistryKey"));
-        this.capturable = attributesNbt.getBoolean("capturable");
-        this.invulnerable = attributesNbt.getBoolean("invulnerable");
-        this.repairable = attributesNbt.getBoolean("repairable");
-        this.shouldDestroyOnReset = attributesNbt.getBoolean("shouldDestroyOnReset");
-        this.nightRadius = attributesNbt.getInt("nightRadius");
-        this.netherRadius = attributesNbt.getInt("netherRadius");
-        this.buildableByVillagers = attributesNbt.getBoolean("buildableByVillagers");
-        this.buildableByMonsters = attributesNbt.getBoolean("buildableByMonsters");
-        this.buildableByPiglins = attributesNbt.getBoolean("buildableByPiglins");
-        this.netherTerrainOnly = attributesNbt.getBoolean("netherTerrainOnly");
-        this.cost.food = attributesNbt.getInt("foodCost");
-        this.cost.wood = attributesNbt.getInt("woodCost");
-        this.cost.ore = attributesNbt.getInt("oreCost");
-        this.garrisonCapacity = attributesNbt.getInt("garrisonCapacity");
-        this.garrisonRange = attributesNbt.getInt("garrisonRange");
-        if (attributesNbt.contains("maxHealth"))
-            this.maxHealth = attributesNbt.getInt("maxHealth");
-        if (attributesNbt.contains("drawAggro"))
-            this.drawAggro = attributesNbt.getBoolean("drawAggro");
-    }
+	
+	private void unpackAttributesNbt() {
+		this.setIconAndPortrait(attributesNbt.getString("portraitBlockRegistryKey"));
+		this.capturable = attributesNbt.getBoolean("capturable");
+		this.invulnerable = attributesNbt.getBoolean("invulnerable");
+		this.repairable = attributesNbt.getBoolean("repairable");
+		this.shouldDestroyOnReset = attributesNbt.getBoolean("shouldDestroyOnReset");
+		this.nightRadius = attributesNbt.getInt("nightRadius");
+		this.netherRadius = attributesNbt.getInt("netherRadius");
+		this.buildableByVillagers = attributesNbt.getBoolean("buildableByVillagers");
+		this.buildableByMonsters = attributesNbt.getBoolean("buildableByMonsters");
+		this.buildableByPiglins = attributesNbt.getBoolean("buildableByPiglins");
+		this.netherTerrainOnly = attributesNbt.getBoolean("netherTerrainOnly");
+		this.cost.food = attributesNbt.getInt("foodCost");
+		this.cost.wood = attributesNbt.getInt("woodCost");
+		this.cost.ore = attributesNbt.getInt("oreCost");
+		this.garrisonCapacity = attributesNbt.getInt("garrisonCapacity");
+		this.garrisonRange = attributesNbt.getInt("garrisonRange");
+		if (attributesNbt.contains("maxHealth"))
+			this.maxHealth = attributesNbt.getInt("maxHealth");
+		if (attributesNbt.contains("drawAggro"))
+			this.drawAggro = attributesNbt.getBoolean("drawAggro");
+	}
 
     public void packCommandsNbt() {
         this.commandsNbt.clear();
-        for (CustomBuildingCommand command : commands) {
+        for (BuildingCommand command : commands) {
             CompoundTag ctag = new CompoundTag();
             ctag.putInt("tickCooldown", command.tickCooldown);
             ctag.putInt("tickCooldownMax", command.tickCooldownMax);
@@ -203,7 +201,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     private void unpackCommandsNbt() {
         this.commands.clear();
         for (Tag tag : this.commandsNbt) {
-            this.commands.add(CustomBuildingCommand.getFromNbt((CompoundTag) tag));
+            this.commands.add(BuildingCommand.getFromNbt((CompoundTag) tag));
         }
     }
 
@@ -310,7 +308,7 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     }
 
     public void addCommand() {
-        this.commands.add(new CustomBuildingCommand());
+        this.commands.add(new BuildingCommand());
     }
 
     public void deleteCommand(int index) {
@@ -346,9 +344,9 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     }
 
     public void setCommandTrigger(int index, String triggerStr) {
-        CustomBuildingCommand.TriggerCondition triggerCond;
+        BuildingCommand.TriggerCondition triggerCond;
         try {
-            triggerCond = CustomBuildingCommand.TriggerCondition.valueOf(triggerStr);
+            triggerCond = BuildingCommand.TriggerCondition.valueOf(triggerStr);
         } catch (IllegalArgumentException e) {
             System.out.println("IllegalArgumentException in setCommandTrigger");
             return;

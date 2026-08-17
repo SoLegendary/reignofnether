@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.gamemode.GameModeServerEvents;
 import com.solegendary.reignofnether.gamerules.GameruleServerEvents;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -65,5 +66,6 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(CommandsServerEvents.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
         vanillaEventBus.register(WorldBorderServerEvents.class);
+        vanillaEventBus.register(CustomButtonServerEvents.class);
     }
 }

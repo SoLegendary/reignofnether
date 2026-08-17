@@ -8,8 +8,6 @@ import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
@@ -17,7 +15,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
-import com.solegendary.reignofnether.commands.argument.BuildingArgument;
+import com.solegendary.reignofnether.commands.rtsapi.RTSApiCommands;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
@@ -63,27 +61,9 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CommandsServerEvents {
 	
-	public static final SuggestionProvider<CommandSourceStack> BUILDINGS = (ctx, builder) ->
-		SharedSuggestionProvider.suggestResource(
-			Stream.concat(
-				ReignOfNetherRegistries.BUILDING.stream(),
-				CustomBuildingServerEvents.customBuildings.stream()
-			).collect(Collectors.toList()),
-			builder,
-			building -> {
-				ResourceLocation id = ReignOfNetherRegistries.BUILDING.getKey(building);
-				return id != null ? id : ResourceLocation.fromNamespaceAndPath(
-					"custom",
-					building.structureName.toLowerCase().replace(' ', '_'));
-			},
-			building -> Component.literal(building.name)
-		);
 	private static final SimpleCommandExceptionType UNKNOWN_BUILDING =
 		new SimpleCommandExceptionType(Component.translatable("commands.reignofnether.error.unknown_building"));
 	private static final SimpleCommandExceptionType UNKNOWN_RESOURCE =
@@ -94,105 +74,7 @@ public class CommandsServerEvents {
 	@SubscribeEvent
 	public static void onRegisterCommands(RegisterCommandsEvent event) {
 		CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-		
-		LiteralCommandNode<CommandSourceStack> literalcommandnode = dispatcher.register(Commands.literal("reignofnether")
-			.requires(source -> source.hasPermission(2))
-			.then(Commands.literal("building")
-				.then(Commands.literal("place")
-					.then(Commands.argument("buildingName", ResourceLocationArgument.id())
-						.suggests(BUILDINGS)
-						.then(placeBuilding(ctx -> ""))
-						.then(Commands.argument("ownerName", StringArgumentType.string())
-							.executes(ctx -> placeBuilding(
-								ctx,
-								ResourceLocationArgument.getId(ctx, "buildingName").toString(),
-								StringArgumentType.getString(ctx, "ownerName"),
-								false,
-								Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
-								Rotation.NONE))
-							.then(placeBuilding(ctx -> StringArgumentType.getString(ctx, "ownerName")))
-						)
-						.then(Commands.argument("ownerSelector", EntityArgument.player())
-							.executes(ctx -> placeBuilding(
-								ctx,
-								ResourceLocationArgument.getId(ctx, "buildingName").toString(),
-								getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
-								false,
-								Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
-								Rotation.NONE))
-							.then(placeBuilding(ctx -> getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
-						)
-						.executes(ctx -> placeBuilding(
-							ctx,
-							ResourceLocationArgument.getId(ctx, "buildingName").toString(),
-							"",
-							false,
-							Objects.requireNonNull(ctx.getSource().getEntity()).blockPosition(),
-							Rotation.NONE))
-					)
-				)
-				.then(Commands.literal("destroy")
-					.then(Commands.argument("pos", BlockPosArgument.blockPos())
-						.executes(ctx -> destroyBuildingsAt(BlockPosArgument.getLoadedBlockPos(ctx, "pos"), ctx.getSource()))
-					)
-					.then(Commands.argument("targets", BuildingArgument.buildings())
-						.executes((ctx) -> destroyBuildings(ctx.getSource(), BuildingArgument.getBuildings(ctx, "targets", null)))
-						.then(Commands.argument("ownerName", StringArgumentType.string())
-							.executes((ctx) -> destroyBuildings(ctx.getSource(), BuildingArgument.getBuildings(ctx, "targets", StringArgumentType.getString(ctx, "ownerName"))))
-						)
-						.then(Commands.argument("ownerSelector", EntityArgument.player())
-							.executes((ctx) -> destroyBuildings(ctx.getSource(), BuildingArgument.getBuildings(ctx, "targets", getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))))
-							)
-						)
-					)
-				)
-				.then(Commands.literal("owner")
-					.then(Commands.argument("from", BlockPosArgument.blockPos())
-						.then(Commands.argument("to", BlockPosArgument.blockPos())
-							.executes(ctx -> setBuildingOwner(
-								ctx,
-								"",
-								BlockPosArgument.getLoadedBlockPos(ctx, "from"),
-								BlockPosArgument.getLoadedBlockPos(ctx, "to")
-							))
-							.then(Commands.argument("ownerName", StringArgumentType.string())
-								.executes(ctx -> setBuildingOwner(
-									ctx,
-									StringArgumentType.getString(ctx, "ownerName"),
-									BlockPosArgument.getLoadedBlockPos(ctx, "from"),
-									BlockPosArgument.getLoadedBlockPos(ctx, "to")
-								))
-							)
-							.then(Commands.argument("ownerSelector", EntityArgument.player())
-								.executes(ctx -> setBuildingOwner(
-									ctx,
-									getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector")),
-									BlockPosArgument.getLoadedBlockPos(ctx, "from"),
-									BlockPosArgument.getLoadedBlockPos(ctx, "to")
-								))
-							)
-						))
-					.then(Commands.argument("targets", BuildingArgument.buildings())
-						.executes(ctx -> setBuildingsOwner("", BuildingArgument.getBuildings(ctx, "targets", null), ctx))
-						.then(Commands.argument("newOwnerName", StringArgumentType.string())
-							.executes((ctx) -> setBuildingsOwner(StringArgumentType.getString(ctx, "newOwnerName"), BuildingArgument.getBuildings(ctx, "targets", null), ctx))
-							.then(Commands.argument("ownerName", StringArgumentType.string())
-								.executes((ctx) -> setBuildingsOwner(StringArgumentType.getString(ctx, "newOwnerName"), BuildingArgument.getBuildings(ctx, "targets", StringArgumentType.getString(ctx, "ownerName")), ctx))
-							)
-						)
-						.then(Commands.argument("newOwnerSelector", EntityArgument.player())
-							.executes((ctx) -> setBuildingsOwner(getPlayerName(EntityArgument.getPlayer(ctx, "newOwnerSelector")), BuildingArgument.getBuildings(ctx, "targets", null), ctx))
-							.then(Commands.argument("ownerSelector", EntityArgument.player())
-								.executes((ctx) -> setBuildingsOwner(getPlayerName(EntityArgument.getPlayer(ctx, "newOwnerSelector")), BuildingArgument.getBuildings(ctx, "targets", getPlayerName(EntityArgument.getPlayer(ctx, "ownerSelector"))), ctx)
-								)
-							)
-						)
-					)
-				)
-			)
-		);
-		dispatcher.register(Commands.literal("ron").requires((p_139013_) -> p_139013_.hasPermission(2)).redirect(literalcommandnode));
-		dispatcher.register(Commands.literal("rtsapi").requires((p_139013_) -> p_139013_.hasPermission(2)).redirect(literalcommandnode));
+		RTSApiCommands.register(dispatcher);
 		
 		dispatcher.register(Commands.literal("rtsapi-place-building")
 			.requires(source -> source.hasPermission(2))
@@ -292,12 +174,12 @@ public class CommandsServerEvents {
 		dispatcher.register(Commands.literal("rtsapi-change-resources")
 			.requires(source -> source.hasPermission(2))
 			.then(Commands.argument("resource", StringArgumentType.string())
-				.then(Commands.argument("amount", IntegerArgumentType.integer())
+				.then(Commands.argument("points", IntegerArgumentType.integer())
 					.then(Commands.argument("playerName", StringArgumentType.string())
 						.executes(ctx -> changeResources(
 							ctx,
 							StringArgumentType.getString(ctx, "resource"),
-							IntegerArgumentType.getInteger(ctx, "amount"),
+							IntegerArgumentType.getInteger(ctx, "points"),
 							StringArgumentType.getString(ctx, "playerName")
 						))
 					)
@@ -305,7 +187,7 @@ public class CommandsServerEvents {
 						.executes(ctx -> changeResources(
 							ctx,
 							StringArgumentType.getString(ctx, "resource"),
-							IntegerArgumentType.getInteger(ctx, "amount"),
+							IntegerArgumentType.getInteger(ctx, "points"),
 							getPlayerName(EntityArgument.getPlayer(ctx, "playerSelector"))
 						))
 					)
@@ -554,43 +436,7 @@ public class CommandsServerEvents {
 			);
 	}
 	
-	private static ArgumentBuilder<CommandSourceStack, ?> placeBuilding(NameResolver ownerResolver) {
-		return Commands.argument("pos", BlockPosArgument.blockPos())
-			.executes(ctx -> placeBuilding(
-				ctx,
-				ResourceLocationArgument.getId(ctx, "buildingName").toString(),
-				ownerResolver.resolve(ctx),
-				false,
-				BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
-				Rotation.NONE))
-			.then(Commands.argument("autoBuild", BoolArgumentType.bool())
-				.executes(ctx -> placeBuilding(
-					ctx,
-					ResourceLocationArgument.getId(ctx, "buildingName").toString(),
-					ownerResolver.resolve(ctx),
-					false,
-					BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
-					parseRotation(StringArgumentType.getString(ctx, "rotation"))
-				))
-				// with rotation
-				.then(Commands.argument("rotation", StringArgumentType.word())
-					.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-						List.of("0", "90", "180", "270"),
-						builder
-					))
-					.executes(ctx -> placeBuilding(
-						ctx,
-						ResourceLocationArgument.getId(ctx, "buildingName").toString(),
-						ownerResolver.resolve(ctx),
-						BoolArgumentType.getBool(ctx, "autoBuild"),
-						BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
-						parseRotation(StringArgumentType.getString(ctx, "rotation"))
-					))
-				)
-			);
-	}
-	
-	private static ArgumentBuilder<CommandSourceStack, ?> unitActionTail(NameResolver ownerResolver) {
+	public static ArgumentBuilder<CommandSourceStack, ?> unitActionTail(NameResolver ownerResolver) {
 		return Commands.argument("selectFrom", BlockPosArgument.blockPos())
 			.then(Commands.argument("selectTo", BlockPosArgument.blockPos())
 				.then(Commands.argument("action", StringArgumentType.word())
@@ -656,7 +502,7 @@ public class CommandsServerEvents {
 			);
 	}
 	
-	private static ArgumentBuilder<CommandSourceStack, ?> searchBehaviourTail(NameResolver ownerResolver) {
+	public static ArgumentBuilder<CommandSourceStack, ?> searchBehaviourTail(NameResolver ownerResolver) {
 		return Commands.argument("selectFrom", BlockPosArgument.blockPos())
 			.then(Commands.argument("selectTo", BlockPosArgument.blockPos())
 				.then(Commands.argument("behaviour", StringArgumentType.word())
@@ -689,7 +535,7 @@ public class CommandsServerEvents {
 	 * @param targetFrom targeted pos (or start of target selection range if targetTo is non-null)
 	 * @param targetTo   end of target selection range
 	 */
-	private static int issueUnitAction(
+	public static int issueUnitAction(
 		CommandContext<CommandSourceStack> ctx,
 		String ownerName,
 		BlockPos selectFrom,
@@ -741,7 +587,7 @@ public class CommandsServerEvents {
 		return unitIds.length;
 	}
 	
-	private static int victoryPlayer(
+	public static int victoryPlayer(
 		String ownerName,
 		String reason
 	) {
@@ -760,7 +606,7 @@ public class CommandsServerEvents {
 		return playersDefeated;
 	}
 	
-	private static int defeatPlayer(
+	public static int defeatPlayer(
 		String ownerName,
 		String reason
 	) {
@@ -773,7 +619,7 @@ public class CommandsServerEvents {
 		return 0;
 	}
 	
-	private static int summonEntity(
+	public static int summonEntity(
 		CommandContext<CommandSourceStack> ctx,
 		String ownerName,
 		ResourceLocation entityId,
@@ -808,7 +654,7 @@ public class CommandsServerEvents {
 		return 1;
 	}
 	
-	private static Rotation parseRotation(String input) throws CommandSyntaxException {
+	public static Rotation parseRotation(String input) throws CommandSyntaxException {
 		return switch (input.toLowerCase()) {
 			case "0" -> Rotation.NONE;
 			case "90" -> Rotation.CLOCKWISE_90;
@@ -823,7 +669,7 @@ public class CommandsServerEvents {
 		return setUnitOwnerTail(null, ownerResolver);
 	}
 	
-	private static ArgumentBuilder<CommandSourceStack, ?> setUnitOwnerTail(NameResolver currentOwnerResolver, NameResolver newOwnerResolver) {
+	public static ArgumentBuilder<CommandSourceStack, ?> setUnitOwnerTail(NameResolver currentOwnerResolver, NameResolver newOwnerResolver) {
 		return Commands.argument("from", BlockPosArgument.blockPos())
 			.then(Commands.argument("to", BlockPosArgument.blockPos())
 				.executes(ctx -> setUnitOwner(
@@ -849,11 +695,11 @@ public class CommandsServerEvents {
 	}
 	
 	
-	private static String getPlayerName(ServerPlayer player) {
+	public static String getPlayerName(ServerPlayer player) {
 		return player.getName().getString();
 	}
 	
-	private static int placeBuilding(
+	public static int placeBuilding(
 		CommandContext<CommandSourceStack> ctx,
 		String buildingName,
 		String ownerName,
@@ -892,7 +738,7 @@ public class CommandsServerEvents {
 		return 1;
 	}
 	
-	private static int destroyBuildingsAt(BlockPos pos, CommandSourceStack source) {
+	public static int destroyBuildingsAt(BlockPos pos, CommandSourceStack source) {
 		int removed = 0;
 		for (BuildingPlacement placement : BuildingServerEvents.getBuildings()) {
 			if (!placement.isPosInsideBuilding(pos))
@@ -913,14 +759,7 @@ public class CommandsServerEvents {
 		return removed;
 	}
 	
-	private static int destroyBuildings(CommandSourceStack source, List<? extends BuildingPlacement> buildingPlacement) {
-		for (BuildingPlacement building : buildingPlacement) {
-			building.destroy(source.getLevel());
-		}
-		return buildingPlacement.size();
-	}
-	
-	private static int setUnitOwner(
+	public static int setUnitOwner(
 		CommandContext<CommandSourceStack> ctx,
 		String currentOwnerName,
 		String ownerName,
@@ -950,7 +789,7 @@ public class CommandsServerEvents {
 		return ids.size();
 	}
 	
-	private static int setBuildingOwner(
+	public static int setBuildingOwner(
 		CommandContext<CommandSourceStack> ctx,
 		String ownerName,
 		BlockPos from,
@@ -977,18 +816,7 @@ public class CommandsServerEvents {
 		return changed;
 	}
 	
-	private static int setBuildingsOwner(String ownerName, List<? extends BuildingPlacement> buildingPlacement, CommandContext<CommandSourceStack> ctx) {
-		for (BuildingPlacement building : buildingPlacement) {
-			building.ownerName = ownerName;
-		}
-		ctx.getSource().sendSuccess(
-			() -> Component.translatable("Updated owner for " + buildingPlacement.size() + " building(s)"),
-			true
-		);
-		return buildingPlacement.size();
-	}
-	
-	private static int setAnchor(
+	public static int setAnchor(
 		CommandContext<CommandSourceStack> ctx,
 		BlockPos from,
 		BlockPos to,
@@ -1003,7 +831,7 @@ public class CommandsServerEvents {
 		return ids.length;
 	}
 	
-	private static int removeAnchor(
+	public static int removeAnchor(
 		CommandContext<CommandSourceStack> ctx,
 		BlockPos from,
 		BlockPos to
@@ -1064,7 +892,7 @@ public class CommandsServerEvents {
 		return 1;
 	}
 	
-	private static int setUnitSearchBehaviour(
+	public static int setUnitSearchBehaviour(
 		CommandContext<CommandSourceStack> ctx,
 		String ownerName,
 		BlockPos from,
@@ -1147,10 +975,10 @@ public class CommandsServerEvents {
 		}
 		return building;
 	}
-
-	private static int setStartingTeamsMode(
-			CommandContext<CommandSourceStack> ctx,
-			String mode
+	
+	public static int setStartingTeamsMode(
+		CommandContext<CommandSourceStack> ctx,
+		String mode
 	) {
 		if (StartPosServerEvents.isStartingGame()) {
 			return 0;
@@ -1166,18 +994,18 @@ public class CommandsServerEvents {
 		RTSMapInfoServerEvents.rtsMapInfo.setDefaultMode(mode);
 		RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MODE, RTSMapInfoServerEvents.rtsMapInfo.getDefaultMode());
 		ctx.getSource().sendSuccess(
-				() -> Component.literal("Set starting teams mode to '" + mode + "'"),
-				true
+			() -> Component.literal("Set starting teams mode to '" + mode + "'"),
+			true
 		);
 		StartPosServerEvents.loadPositionsFromMapInfo();
 		return 1;
 	}
 
-	private static int setAlliance(
-			CommandContext<CommandSourceStack> ctx,
-			boolean value,
-			String playerName1,
-			String playerName2
+	public static int setAlliance(
+		CommandContext<CommandSourceStack> ctx,
+		boolean value,
+		String playerName1,
+		String playerName2
 	) {
 		if (playerName1.equals(playerName2)) {
 			ctx.getSource().sendFailure(Component.literal("Cannot ally a player with themselves"));
@@ -1262,7 +1090,7 @@ public class CommandsServerEvents {
 	}
 	
 	@FunctionalInterface
-	private interface NameResolver {
+	public interface NameResolver {
 		String resolve(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException;
 	}
 }

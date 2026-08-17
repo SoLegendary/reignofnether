@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.building.buildings.placements;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
-import com.solegendary.reignofnether.building.custombuilding.CustomBuildingCommand;
+import com.solegendary.reignofnether.building.BuildingCommand;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class CustomBuildingPlacement extends BuildingPlacement {
     public final ArrayList<BlockPos> garrisonEntries = new ArrayList<>();
     public final ArrayList<BlockPos> garrisonExits = new ArrayList<>();
-    public final ArrayList<CustomBuildingCommand> commands = new ArrayList<>();
+    public final ArrayList<BuildingCommand> commands = new ArrayList<>();
     public ListTag commandsNbt = new ListTag();
 
     public CustomBuildingPlacement(CustomBuilding customBuilding, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
@@ -31,8 +31,8 @@ public class CustomBuildingPlacement extends BuildingPlacement {
                 garrisonExits.add(bb.getBlockPos());
             }
         }
-        for (CustomBuildingCommand command : customBuilding.commands) {
-            CustomBuildingCommand newCommand = new CustomBuildingCommand();
+        for (BuildingCommand command : customBuilding.commands) {
+            BuildingCommand newCommand = new BuildingCommand();
             newCommand.tickCooldown = command.tickCooldown;
             newCommand.tickCooldownMax = command.tickCooldownMax;
             newCommand.commandStr = command.commandStr;
@@ -43,7 +43,7 @@ public class CustomBuildingPlacement extends BuildingPlacement {
 
     public void packCommandsNbt() {
         this.commandsNbt.clear();
-        for (CustomBuildingCommand command : commands) {
+        for (BuildingCommand command : commands) {
             CompoundTag ctag = new CompoundTag();
             ctag.putInt("tickCooldown", command.tickCooldown);
             ctag.putInt("tickCooldownMax", command.tickCooldownMax);
@@ -60,7 +60,7 @@ public class CustomBuildingPlacement extends BuildingPlacement {
         this.commands.clear();
         this.commandsNbt = nbt;
         for (Tag tag : this.commandsNbt) {
-            this.commands.add(CustomBuildingCommand.getFromNbt((CompoundTag) tag));
+            this.commands.add(BuildingCommand.getFromNbt((CompoundTag) tag));
         }
     }
 
@@ -68,16 +68,16 @@ public class CustomBuildingPlacement extends BuildingPlacement {
     public void onBuilt() {
         super.onBuilt();
         if (!this.level.isClientSide())
-            for (CustomBuildingCommand command : commands)
-                if (command.condition == CustomBuildingCommand.TriggerCondition.ON_BUILD_COMPLETE)
+            for (BuildingCommand command : commands)
+                if (command.condition == BuildingCommand.TriggerCondition.ON_BUILD_COMPLETE)
                     command.run(this);
     }
 
     @Override
     public void destroy(ServerLevel serverLevel) {
         super.destroy(serverLevel);
-        for (CustomBuildingCommand command : commands)
-            if (command.condition == CustomBuildingCommand.TriggerCondition.ON_DESTROY)
+        for (BuildingCommand command : commands)
+            if (command.condition == BuildingCommand.TriggerCondition.ON_DESTROY)
                 command.run(this);
     }
 
@@ -85,9 +85,9 @@ public class CustomBuildingPlacement extends BuildingPlacement {
     protected boolean checkIfCaptured(ServerLevel serverLevel) {
         boolean captured = super.checkIfCaptured(serverLevel);
         if (captured) {
-            for (CustomBuildingCommand command : commands) {
-                if (command.condition == CustomBuildingCommand.TriggerCondition.ON_CAPTURE ||
-                    command.condition == CustomBuildingCommand.TriggerCondition.OFF_COOLDOWN_IF_CAPTURED) {
+            for (BuildingCommand command : commands) {
+                if (command.condition == BuildingCommand.TriggerCondition.ON_CAPTURE ||
+                    command.condition == BuildingCommand.TriggerCondition.OFF_COOLDOWN_IF_CAPTURED) {
                     command.triggerCount = 0; // allow retrigger after the cooldown is done
                     command.setCooldownToMax();
                 }
@@ -99,8 +99,8 @@ public class CustomBuildingPlacement extends BuildingPlacement {
     @Override
     public void onBlockBreak(ServerLevel level, BlockPos pos, boolean breakBlocks) {
         super.onBlockBreak(level, pos, breakBlocks);
-        for (CustomBuildingCommand command : commands)
-            if (command.condition == CustomBuildingCommand.TriggerCondition.ON_DAMAGE_TAKEN && command.isOffCooldown())
+        for (BuildingCommand command : commands)
+            if (command.condition == BuildingCommand.TriggerCondition.ON_DAMAGE_TAKEN && command.isOffCooldown())
                 command.run(this);
     }
 
@@ -108,12 +108,12 @@ public class CustomBuildingPlacement extends BuildingPlacement {
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
         if (!tickLevel.isClientSide())
-            for (CustomBuildingCommand command : commands)
+            for (BuildingCommand command : commands)
                 command.tick(this);
     }
 
     public void resetAllCommands() {
-        for (CustomBuildingCommand command : commands) {
+        for (BuildingCommand command : commands) {
             command.reset();
         }
     }

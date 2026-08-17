@@ -2,10 +2,17 @@ package com.solegendary.reignofnether;
 
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.commands.argument.BuildingArgument;
-import com.solegendary.reignofnether.commands.argument.options.BuildingSelectorOptions;
+import com.solegendary.reignofnether.commands.rtsapi.ResourceObjectiveCriteria;
+import com.solegendary.reignofnether.commands.rtsapi.argument.BuildingArgument;
+import com.solegendary.reignofnether.commands.rtsapi.argument.PlayerNameArgument;
+import com.solegendary.reignofnether.commands.rtsapi.argument.UnitArgument;
+import com.solegendary.reignofnether.commands.rtsapi.argument.options.BuildingSelectorOptions;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
 import com.solegendary.reignofnether.faction.FactionRegistries;
+import com.solegendary.reignofnether.hud.custombutton.CustomButton;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonActions;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonMappingManager;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonServerEvents;
 import com.solegendary.reignofnether.mixin.DownloadPackSourceAccessor;
 import com.solegendary.reignofnether.network.S2CReset;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -35,6 +42,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -51,6 +60,7 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.minecraftforge.registries.GameData;
 
 import org.apache.logging.log4j.LogManager;
@@ -98,7 +108,9 @@ public class ReignOfNether {
         MobEffectRegistrar.init(mlctx);
         ParticleRegistrar.init(mlctx);
         CommandArgumentRegistrar.init(mlctx);
+        CustomButtonActions.init(mlctx);
         BuildingSelectorOptions.bootStrap();
+        ResourceObjectiveCriteria.init();
         
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);
@@ -109,6 +121,8 @@ public class ReignOfNether {
         // Registering ClientReset's init
         IEventBus bus = mlctx.getModEventBus();
         bus.addListener(ReignOfNether::init);
+        bus.addListener(ReignOfNether::loadDatapacks);
+        MinecraftForge.EVENT_BUS.addListener(ReignOfNether::reloadListener);
         mlctx.registerConfig(ModConfig.Type.COMMON, ReignOfNetherCommonConfigs.SPEC, "reignofnether-common-" + VERSION_STRING + ".toml");
         // client-only config
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {  //workaround to prevent Unsafe Referent usage; See DistExecutor.validateSafeReferent
@@ -152,7 +166,9 @@ public class ReignOfNether {
         }
         ResourceCosts.deferredLoadResourceCosts();
         event.enqueueWork(() -> {
-            ArgumentTypeInfos.registerByClass(BuildingArgument.class, CommandArgumentRegistrar.BUILDING_ARG.get());
+            ArgumentTypeInfos.registerByClass(BuildingArgument.class, CommandArgumentRegistrar.BUILDING_ARGUMENT.get());
+            ArgumentTypeInfos.registerByClass(PlayerNameArgument.class, CommandArgumentRegistrar.PLAYER_NAME_ARGUMENT.get());
+            ArgumentTypeInfos.registerByClass(UnitArgument.class, CommandArgumentRegistrar.UNIT_ARGUMENT.get());
         });
     }
     
@@ -270,5 +286,18 @@ public class ReignOfNether {
     static {
         handshakeField = fetchHandshakeChannel();
         contextConstructor = fetchNetworkEventContext();
+    }
+    
+    @SubscribeEvent
+    public static void loadDatapacks(DataPackRegistryEvent.NewRegistry evt) {
+        evt.dataPackRegistry(
+            CustomButtonServerEvents.CUSTOM_BUTTON_REGISTRY_KEY,
+            CustomButton.CODEC,
+            CustomButton.CODEC
+        );
+    }
+    
+    public static void reloadListener(AddReloadListenerEvent evt) {
+        evt.addListener(new CustomButtonMappingManager());
     }
 }

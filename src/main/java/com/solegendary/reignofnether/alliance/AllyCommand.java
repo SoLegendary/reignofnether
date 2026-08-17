@@ -11,10 +11,15 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -76,6 +81,22 @@ public class AllyCommand {
         context.getSource().sendSuccess(()->Component.translatable("alliance.reignofnether.sent_request", allyPlayerName), false);
         SoundClientboundPacket.playSoundForPlayer(SoundAction.CHAT, allyPlayerName);
         allyPlayer.sendSystemMessage(Component.translatable("alliance.reignofnether.ally_confirm", playerName, playerName));
+        if (PlayerServerEvents.isRTSPlayer(allyPlayerName))
+            allyPlayer.sendSystemMessage(Component
+                .translatable("alliance.reignofnether.accept") // [CLick to accept]
+                .withStyle(Style.EMPTY
+                    .withColor(ChatFormatting.GREEN)
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/allyconfirm " + playerName))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("alliance.reignofnether.accept"))))
+                .append(Component
+                    .translatable("alliance.reignofnether.cancel") // [Click to cancel]
+                    .withStyle(Style.EMPTY
+                        .withColor(ChatFormatting.RED)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/allycancelrequest " + playerName))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("alliance.reignofnether.cancel")))
+                    )
+                )
+        );
         SoundClientboundPacket.playSoundForPlayer(SoundAction.CHAT, playerName);
 
         return Command.SINGLE_SUCCESS;
