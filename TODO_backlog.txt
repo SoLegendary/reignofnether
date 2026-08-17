@@ -2,26 +2,17 @@
 Features
 --------
 
-Hero Items
+Fog of war
 ----------
-Emerald Resource
-    - Obtainable by killing neutrals, selling items or selling resources
-    - Used to buy resources now instead of direct exchange
-    - Used to buy items from shops
-    - Only shown if you have any
-    - Neutrals now give emerald bounties
-    - Update diplomacy menu resource exchange
-    - Update all other commands related to resources
-    - Resources class constructors should assume emeralds = 0
+[❌] Update night circle vision separate from buildings
+    - If entered clientside, verify from server whether it's really that size or even still there
+    - If entered serverside, sent to client the new range
 
-Hero Items
-    - Hero inventory GUI
-        - Click to use, can have charges and/or cooldown
-        - Drag to move slots, drop on ground, transfer to another hero or sell
-    - While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
-        - Should be visible to all players
-    - Should have tooltips shown even on the ground
-    - Requires right-click to pick up, will not auto-pickup
+[❌] Reveal owners of explosive entities to nearby players in fog
+[❌] Allow spectators to see fog, but with vision of all players
+[❌] Add commands for revealing in fog, temporarily or permanently
+[❌] Add commands for force-moving camera
+
 
 [❌] Camera hotkeys (see starcraft example)
 
