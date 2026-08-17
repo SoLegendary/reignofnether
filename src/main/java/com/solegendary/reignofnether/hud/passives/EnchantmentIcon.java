@@ -31,5 +31,6 @@ public class EnchantmentIcon extends Button {
         this.iconItem = iconItem;
         this.enchantment = enchantment;
         this.slot = slot;
+        this.iconItemScale = 0.75f;
     }
 }

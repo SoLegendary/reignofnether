@@ -68,7 +68,6 @@ public abstract class UnitItem {
                 .tooltipLines(getTooltip())
                 .bgColor(0x3c000000)
                 .iconItem(new ItemStack(item))
-                .stretchIconToBorders()
                 .build();
     }
 

@@ -521,7 +521,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     }
 
     static {
-        VILLAGER_DATA = SynchedEntityData.defineId(Villager.class, EntityDataSerializers.VILLAGER_DATA);
+        VILLAGER_DATA = SynchedEntityData.defineId(MilitiaUnit.class, EntityDataSerializers.VILLAGER_DATA);
     }
 
     public int getSharpnessLevel() {

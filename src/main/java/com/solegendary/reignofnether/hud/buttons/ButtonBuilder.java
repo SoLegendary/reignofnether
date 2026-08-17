@@ -61,6 +61,7 @@ public class ButtonBuilder {
     private String playerNameForHeadIcon = "";
     private int bgColour = 0x64000000;
     private ItemStack iconItem = null;
+    private float iconItemScale = 1.0f;
 
     /**
      * Creates a new builder with the two required fields.
@@ -203,6 +204,11 @@ public class ButtonBuilder {
         return this;
     }
 
+    public ButtonBuilder iconItemScale(float iconItemScale) {
+        this.iconItemScale = iconItemScale;
+        return this;
+    }
+
     // -------------------------------------------------------------------------
     // Build
     // -------------------------------------------------------------------------
@@ -251,6 +257,7 @@ public class ButtonBuilder {
         button.playerNameForHeadIcon = playerNameForHeadIcon;
         button.bgColour = bgColour;
         button.iconItem = iconItem;
+        button.iconItemScale = iconItemScale;
 
         return button;
     }

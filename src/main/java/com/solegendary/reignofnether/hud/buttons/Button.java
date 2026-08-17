@@ -47,6 +47,7 @@ public class Button {
     public ResourceLocation frameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
 
     public ItemStack iconItem = null;
+    public float iconItemScale = 1.0f;
 
     public Keybinding hotkey = null; // for action/ability buttons
     public LivingEntity entity = null; // for selected unit buttons
@@ -196,7 +197,8 @@ public class Button {
         }
         if (iconItem != null) {
             guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderItem(guiGraphics, iconItem, x+4 + (7 - xyDiff - iconSize/2), y+4 + (7 - xyDiff - iconSize/2), 0.75f);
+            int offset = 2 + Math.round((1.0f - iconItemScale) * 8f);
+            MyRenderer.renderItem(guiGraphics, iconItem, x+offset + (7 - xyDiff - iconSize/2), y+offset + (7 - xyDiff - iconSize/2), iconItemScale);
         }
 
         renderHotkey(guiGraphics, x, y);
