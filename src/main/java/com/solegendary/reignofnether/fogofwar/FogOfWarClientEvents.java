@@ -310,4 +310,5 @@ public class FogOfWarClientEvents {
                 if (entity.getId() == unitId && entity instanceof RangedAttackerUnit unit)
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
     }
+
 }

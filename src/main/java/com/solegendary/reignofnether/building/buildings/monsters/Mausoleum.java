@@ -53,6 +53,7 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
 
         this.productions.add(ProductionItems.ZOMBIE_VILLAGER, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.BAT, Keybindings.abilitySlot2);
 
         setActiveAddon(RangeIndicatorAddon.class, this, true);
         setActiveAddon(NightSourceAddon.class, this, true);

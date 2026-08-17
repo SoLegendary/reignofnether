@@ -53,7 +53,7 @@ public class SlimeUnitRenderer extends MobRenderer<SlimeUnit, SlimeModel<SlimeUn
 
         float rollDegrees = Mth.lerp(partialTicks, entity.oRollAngle, entity.rollAngle);
 
-        float halfHeight = entity.getBbHeight() / 2.0F;
+        float halfHeight = entity.getModelHeight() / 2.0F;
         poseStack.translate(0.0, halfHeight, 0.0);
         poseStack.mulPose(Axis.XN.rotationDegrees(rollDegrees));
         poseStack.translate(0.0, -halfHeight, 0.0);

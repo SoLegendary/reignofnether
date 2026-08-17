@@ -5,6 +5,7 @@
     "refmap": "reignofnether.refmap.json",
     "mixins": [
         "AbstractArrowMixin",
+        "ArmorStandMixin",
         "BaseSpawnerMixin",
         "BeaconBlockEntityMixin",
         "BlazeMixin",
@@ -52,7 +53,6 @@
     ],
     "minVersion": "0.8",
     "client": [
-        "ArmorStandMixin",
         "CameraMixin",
         "ClientLevelMixin",
         "ClientPacketMixin",

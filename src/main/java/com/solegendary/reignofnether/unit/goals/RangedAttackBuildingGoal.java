@@ -25,6 +25,7 @@ public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
     private UnitBowAttackGoal<?> bowAttackGoal = null;
     private UnitCrossbowAttackGoal<?> cbowAttackGoal = null;
     private BuildingPlacement buildingTarget = null;
+    public boolean forced = false;
 
     // Cached on first use — Unit's moveGoal is stable across the goal's lifetime
     private boolean moveGoalResolved = false;
@@ -125,6 +126,7 @@ public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
         blockTarget = null;
         buildingTarget = null;
         this.mob.setAggressive(false);
+        forced = false;
     }
 
     public void tick() {

@@ -288,8 +288,8 @@ public class DrownedUnit extends Drowned implements Unit, AttackerUnit {
     }
 
     @Override
-    protected float getWaterSlowDown() {
-        return 0.96F;
+    public float getWaterSlowDown() {
+        return 0.94F;
     }
 
     // prevent spawning baby zombie

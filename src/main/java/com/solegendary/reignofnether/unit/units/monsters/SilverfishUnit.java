@@ -30,6 +30,7 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -254,7 +255,10 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
-
-
-
+    @Override
+    public AABB getInflatedSelectionBox() {
+        AABB aabb = this.getBoundingBox().inflate(0.1f, 0, 0.1f);
+        aabb.setMaxY(aabb.maxY + 0.2f);
+        return aabb;
+    }
 }

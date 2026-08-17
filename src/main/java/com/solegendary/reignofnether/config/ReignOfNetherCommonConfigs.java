@@ -20,6 +20,7 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.CREEPER.define(BUILDER);
         UnitCosts.ZOMBIE.define(BUILDER);
         UnitCosts.ZOMBIE_VILLAGER.define(BUILDER);
+        UnitCosts.BAT.define(BUILDER);
         UnitCosts.SKELETON.define(BUILDER);
         UnitCosts.STRAY.define(BUILDER);
         UnitCosts.BOGGED.define(BUILDER);
@@ -37,6 +38,8 @@ public class ReignOfNetherCommonConfigs {
         //Villagers
         BUILDER.comment("Villagers");
         UnitCosts.VILLAGER.define(BUILDER);
+        UnitCosts.SCOUT_DOG.define(BUILDER);
+        UnitCosts.SCOUT_CAT.define(BUILDER);
         UnitCosts.MILITIA.define(BUILDER);
         UnitCosts.IRON_GOLEM.define(BUILDER);
         UnitCosts.PILLAGER.define(BUILDER);
@@ -50,6 +53,7 @@ public class ReignOfNetherCommonConfigs {
         //Piglins
         BUILDER.comment("Piglins");
         UnitCosts.GRUNT.define(BUILDER);
+        UnitCosts.STRIDER.define(BUILDER);
         UnitCosts.BRUTE.define(BUILDER);
         UnitCosts.HEADHUNTER.define(BUILDER);
         UnitCosts.MARAUDER.define(BUILDER);
@@ -192,6 +196,7 @@ public class ReignOfNetherCommonConfigs {
     public static class UnitCosts implements Costs {
         //Monsters
         public static final ResourceCostConfigEntry CREEPER = ResourceCostConfigEntry.Unit(50, 0, 100, 35, 2, ResourceCosts.CREEPER, "Creeper Config");
+        public static final ResourceCostConfigEntry BAT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.BAT, "Bat Config");
         public static final ResourceCostConfigEntry ZOMBIE = ResourceCostConfigEntry.Unit(75, 0, 0, 18, 1, ResourceCosts.ZOMBIE, "Zombie Config");
         public static final ResourceCostConfigEntry ZOMBIE_VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.ZOMBIE_VILLAGER, "Zombie Villager Config");
         public static final ResourceCostConfigEntry SKELETON = ResourceCostConfigEntry.Unit(50,45,0,18,1, ResourceCosts.SKELETON, "Skeleton Config");
@@ -212,19 +217,22 @@ public class ReignOfNetherCommonConfigs {
 
         // Villagers
         public static final ResourceCostConfigEntry VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.VILLAGER, "Villager Config");
+        public static final ResourceCostConfigEntry SCOUT_DOG = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.SCOUT_DOG, "Scout Dog Config");
+        public static final ResourceCostConfigEntry SCOUT_CAT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.SCOUT_CAT, "Scout Cat Config");
         public static final ResourceCostConfigEntry MILITIA = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.MILITIA, "Militia Config");
         public static final ResourceCostConfigEntry IRON_GOLEM = ResourceCostConfigEntry.Unit(0,50,250,45,4, ResourceCosts.IRON_GOLEM, "Iron Golem Config");
-        public static final ResourceCostConfigEntry PILLAGER = ResourceCostConfigEntry.Unit(120,80,0,32,3, ResourceCosts.PILLAGER, "Pillager Config");
-        public static final ResourceCostConfigEntry WINDCALLER = ResourceCostConfigEntry.Unit(150,60,60,35,3, ResourceCosts.WINDCALLER, "Windcaller Config");
-        public static final ResourceCostConfigEntry VINDICATOR = ResourceCostConfigEntry.Unit(170,0,0,32,3, ResourceCosts.VINDICATOR, "Vindicator Config");
+        public static final ResourceCostConfigEntry PILLAGER = ResourceCostConfigEntry.Unit(110,80,0,32,3, ResourceCosts.PILLAGER, "Pillager Config");
+        public static final ResourceCostConfigEntry WINDCALLER = ResourceCostConfigEntry.Unit(140,60,60,35,3, ResourceCosts.WINDCALLER, "Windcaller Config");
+        public static final ResourceCostConfigEntry VINDICATOR = ResourceCostConfigEntry.Unit(160,0,0,32,3, ResourceCosts.VINDICATOR, "Vindicator Config");
         public static final ResourceCostConfigEntry WITCH = ResourceCostConfigEntry.Unit(90,90,90,35,3, ResourceCosts.WITCH, "Witch Config");
-        public static final ResourceCostConfigEntry EVOKER = ResourceCostConfigEntry.Unit(150,0,120,35,3, ResourceCosts.EVOKER, "Evoker Config");
+        public static final ResourceCostConfigEntry EVOKER = ResourceCostConfigEntry.Unit(140,0,120,35,3, ResourceCosts.EVOKER, "Evoker Config");
         public static final ResourceCostConfigEntry RAVAGER = ResourceCostConfigEntry.Unit(400,50,150,60,7, ResourceCosts.RAVAGER, "Ravager Config");
         public static final ResourceCostConfigEntry ROYAL_GUARD = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.ROYAL_GUARD, "Royal Guard Config");
         public static final ResourceCostConfigEntry ENCHANTER = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.ENCHANTER, "Enchanter Config");
 
         // Piglins
         public static final ResourceCostConfigEntry GRUNT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.GRUNT, "Grunt Config");
+        public static final ResourceCostConfigEntry STRIDER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.STRIDER, "Strider Config");
         public static final ResourceCostConfigEntry BRUTE = ResourceCostConfigEntry.Unit(120,0,0,25,2, ResourceCosts.BRUTE, "Brute Config");
         public static final ResourceCostConfigEntry HEADHUNTER = ResourceCostConfigEntry.Unit(90,60,0,25,2, ResourceCosts.HEADHUNTER, "Headhunter Config");
         public static final ResourceCostConfigEntry MARAUDER = ResourceCostConfigEntry.Unit(175,75,75,40,4, ResourceCosts.MARAUDER, "Marauder Config");

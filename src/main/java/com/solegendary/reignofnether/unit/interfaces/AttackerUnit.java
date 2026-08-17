@@ -101,6 +101,11 @@ public interface AttackerUnit {
     public default void setUnitAttackTarget(@Nullable LivingEntity target) {
         if (target != null) {
             MiscUtil.addUnitCheckpoint(((Unit) this), target.getId(), false);
+            Goal attackBuildingGoal = this.getAttackBuildingGoal();
+            if (attackBuildingGoal instanceof RangedAttackBuildingGoal<?> rabg)
+                rabg.stop();
+            else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
+                mabg.stopAttacking();
         }
         ((Unit) this).getTargetGoal().setTarget(target);
     }
@@ -108,18 +113,31 @@ public interface AttackerUnit {
     // chase and attack the target ignoring all else until it is dead or out of sight
     public default void setUnitAttackTargetForced(@Nullable LivingEntity target) {
         setUnitAttackTarget(target);
-        if (target != null)
+        if (target != null) {
+            Goal attackBuildingGoal = this.getAttackBuildingGoal();
+            if (attackBuildingGoal instanceof RangedAttackBuildingGoal<?> rabg)
+                rabg.stop();
+            else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
+                mabg.stopAttacking();
             ((Unit) this).getTargetGoal().forced = true;
+        }
+    }
+
+    public default void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
+        setAttackBuildingTarget(preselectedBlockPos, true);
     }
 
     // move to a building and start attacking it
-    public default void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
+    public default void setAttackBuildingTarget(BlockPos preselectedBlockPos, boolean forced) {
         if (this.canAttackBuildings()) {
             Goal attackBuildingGoal = this.getAttackBuildingGoal();
-            if (attackBuildingGoal instanceof RangedAttackBuildingGoal<?> rabg)
+            if (attackBuildingGoal instanceof RangedAttackBuildingGoal<?> rabg) {
                 rabg.setBuildingTarget(preselectedBlockPos);
-            else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg)
+                rabg.forced = forced;
+            } else if (attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg) {
                 mabg.setBuildingTarget(preselectedBlockPos);
+                mabg.forced = forced;
+            }
         } else {
             Level level = ((LivingEntity) this).level();
             BuildingPlacement building = BuildingUtils.findBuilding(level.isClientSide(), preselectedBlockPos);
@@ -220,12 +238,17 @@ public interface AttackerUnit {
             }
 
             boolean isCasting = unit.isCasting();
+            boolean forced1 = ((Unit) attackerUnit).getTargetGoal().forced;
+            Goal attackBuildingGoal = attackerUnit.getAttackBuildingGoal();
+            boolean forced2 = attackBuildingGoal instanceof RangedAttackBuildingGoal<?> rabg && rabg.forced;
+            boolean forced3 = attackBuildingGoal instanceof MeleeAttackBuildingGoal mabg && mabg.forced;
+            boolean forced = forced1 || forced2 || forced3;
 
             // retaliate against a mob that damaged us UNLESS already on another command
             if (unitMob.getLastDamageSource() != null &&
                     attackerUnit.getWillRetaliate() &&
                     unit.getTargetGoal().getTarget() == null &&
-                    !isCasting && unit.isIdle()) {
+                    !isCasting && (unit.isIdle() || (isAttackingBuilding && !forced))) {
 
                 Entity lastDSEntity = unitMob.getLastDamageSource().getEntity();
 
@@ -244,6 +267,7 @@ public interface AttackerUnit {
                     lastDSEntity instanceof LivingEntity &&
                     !(lastDSEntity instanceof Player player && player.isCreative()) &&
                     (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
+
                     attackerUnit.setUnitAttackTarget((LivingEntity) lastDSEntity);
                 }
             }
@@ -251,9 +275,8 @@ public interface AttackerUnit {
             if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle())
                 attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level());
 
-            // if attacking another unit as melee, retarget the closest unit periodically
-            // unless targeting a building or targeting a specific unit
-            if (!isAttackingBuilding && !((Unit) attackerUnit).getTargetGoal().forced) {
+            // if attacking another unit as melee, retarget the closest unit periodically unless forced on a target
+            if (!forced) {
                 attackerUnit.retargetToClosestUnit((ServerLevel) unitMob.level());
             }
         }
@@ -286,12 +309,13 @@ public interface AttackerUnit {
         if (garr != null) {
             aggroRange = garr.getAttackRange();
         }
+        boolean isAttackingBuilding = isAttackingBuilding(this);
         LivingEntity currentTarget = ((Mob) this).getTarget();
-        if (currentTarget == null) return;
+        if (currentTarget == null && !isAttackingBuilding) return;
         LivingEntity closestTarget = MiscUtil.findClosestAttackableEntity((Mob) this, aggroRange, level);
         if (closestTarget == null) return;
         double distClosestTarget =  ((Mob) this).distanceToSqr(closestTarget.position());
-        double distCurrentTarget =  ((Mob) this).distanceToSqr(currentTarget.position());
+        double distCurrentTarget = isAttackingBuilding ? (aggroRange / 2) : ((Mob) this).distanceToSqr(currentTarget.position());
 
         if (distClosestTarget < distCurrentTarget) {
             if (!((LivingEntity) this).isPassenger())
@@ -321,7 +345,7 @@ public interface AttackerUnit {
             if (closestBuilding != null) {
                 if (!((LivingEntity) this).isPassenger())
                     ((Unit) this).getMoveGoal().stopMoving();
-                setAttackBuildingTarget(closestBuilding.originPos);
+                setAttackBuildingTarget(closestBuilding.originPos, false);
             }
         }
     }

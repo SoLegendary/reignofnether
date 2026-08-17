@@ -155,6 +155,7 @@ public class BuildingPlacement {
     public int scenarioRoleIndex = -1;  // if -1, no role
     public int serverBlocksPlaced = 1;
     private int totalBlocksEverBroken = 0;
+    public int captureDistFromEdge = 5;
 
     private long ticksToExtinguish = 0;
     public long ticksToExtinguishMax = 100;
@@ -217,6 +218,11 @@ public class BuildingPlacement {
         if (targetStand == null)
             createArmourStandTarget();
         return targetStand;
+    }
+
+    public AABB getAABB() {
+        return new AABB(minCorner.getX(), minCorner.getY(), minCorner.getZ(),
+                        maxCorner.getX(), maxCorner.getY(), maxCorner.getZ());
     }
 
     public int getSightRange() {
@@ -1248,14 +1254,12 @@ public class BuildingPlacement {
         if (PlayerServerEvents.rtsPlayers.isEmpty())
             return false;
 
-        List<Mob> nearbyUnits = MiscUtil.getEntitiesWithinRange(
-                new Vector3d(centrePos.getX(), minCorner.getY(), centrePos.getZ()),
-                getBuilding().captureRange, Mob.class, serverLevel);
+        List<Mob> nearbyUnits = MiscUtil.getEntitiesWithinAABB(getAABB().inflate(captureDistFromEdge), Mob.class, serverLevel);
 
         Map<String, Integer> playerPopCounts = new HashMap<>();
         boolean ownerHasUnit = false;
         for (Mob mob : nearbyUnits) {
-            if (mob instanceof Unit unit && !(mob instanceof WorkerUnit)) {
+            if (mob instanceof Unit unit && !(mob instanceof WorkerUnit) && !unit.isScout()) {
                 String uOwner = unit.getOwnerName();
                 if (uOwner.equals(ownerName) && !ownerName.isEmpty()) {
                     ownerHasUnit = true;
@@ -1338,10 +1342,7 @@ public class BuildingPlacement {
             return;
 
         // find any existing stands
-        List<ArmorStand> entities = level.getEntitiesOfClass(ArmorStand.class,
-            new AABB(minCorner.getX(), minCorner.getY(), minCorner.getZ(),
-                maxCorner.getX(), maxCorner.getY(), maxCorner.getZ())
-        );
+        List<ArmorStand> entities = level.getEntitiesOfClass(ArmorStand.class, getAABB());
         if (!entities.isEmpty()) {
             this.targetStand = entities.get(0);
         } else if (!level.isClientSide()) {

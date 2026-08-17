@@ -1,12 +1,17 @@
 package com.solegendary.reignofnether.hud;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RoyalGuardUnit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutCatProd;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ambient.Bat;
 import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.horse.*;
 import net.minecraft.world.entity.monster.*;
@@ -61,6 +66,9 @@ public class PortraitRendererModifiers {
             scale = -5;
         } else if (entity instanceof Donkey || entity instanceof Mule) {
             scale = -5;
+        }  else if (entity instanceof ScoutCatUnit) {
+            yOffset = 22;
+            scale = -2;
         } else if (entity instanceof Ocelot || entity instanceof Cat) {
             yOffset = 7;
         } else if (entity instanceof Fox) {
@@ -123,6 +131,12 @@ public class PortraitRendererModifiers {
         } else if (entity instanceof MarauderUnit) {
             yOffset = -34;
             scale = -22;
+        } else if (entity instanceof Strider) {
+            yOffset = -24;
+            scale = -16;
+        } else if (entity instanceof BatUnit) {
+            yOffset = -2;
+            scale = -10;
         }
 
         return new Pair<>(yOffset, scale);
