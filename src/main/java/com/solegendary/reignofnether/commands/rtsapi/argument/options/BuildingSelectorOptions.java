@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -164,7 +164,7 @@ public class BuildingSelectorOptions {
 		Building building = location == null ? null : ReignOfNetherRegistries.BUILDING.get(location);
 		if (building == null) {
 			building = CustomBuildingServerEvents.getCustomBuilding(
-				StringUtils.capitalize(
+				WordUtils.capitalize(
 					input
 						.replace("custom:", "")
 						.replace("_", " ")
