@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -61,7 +62,7 @@ public class ItemClientEvents {
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
         isRenderingTooltip = false;
-        if (OrthoviewClientEvents.isEnabled()) {
+        if (OrthoviewClientEvents.isEnabled() && MC.screen instanceof TopdownGui) {
             for (ItemEntity itemEntity : preselectedItems) {
                 UnitItem unitItem = ItemUtil.getUnitItem(itemEntity.getItem().getItem());
                 if (unitItem != null) {

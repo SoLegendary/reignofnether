@@ -23,11 +23,11 @@ public class UnitInventoryRenderer {
 
     public static RectZone render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, Unit unit) {
 
-        UnitItems.MERCHANT_CHESTPLATE.button.render(guiGraphics, x, y, mouseX, mouseY);
-        UnitItems.MERCHANT_TRIDENT.button.render(guiGraphics, x + BUTTON_WIDTH, y, mouseX, mouseY);
-        UnitItems.MERCHANT_GOLDEN_APPLE.button.render(guiGraphics, x, y+ BUTTON_WIDTH, mouseX, mouseY);
-        UnitItems.MERCHANT_SWORD.button.render(guiGraphics, x + BUTTON_WIDTH, y+ BUTTON_WIDTH, mouseX, mouseY);
-        UnitItems.MERCHANT_CHESTPLATE.button.render(guiGraphics, x, y+INV_WIDTH, mouseX, mouseY);
+        UnitItems.MERCHANT_CHESTPLATE.getButton().render(guiGraphics, x, y, mouseX, mouseY);
+        UnitItems.MERCHANT_TRIDENT.getButton().render(guiGraphics, x + BUTTON_WIDTH, y, mouseX, mouseY);
+        UnitItems.MERCHANT_GOLDEN_APPLE.getButton().render(guiGraphics, x, y+ BUTTON_WIDTH, mouseX, mouseY);
+        UnitItems.MERCHANT_SWORD.getButton().render(guiGraphics, x + BUTTON_WIDTH, y+ BUTTON_WIDTH, mouseX, mouseY);
+        UnitItems.MERCHANT_CHESTPLATE.getButton().render(guiGraphics, x, y+INV_WIDTH, mouseX, mouseY);
         EMPTY_SLOT_BUTTON.render(guiGraphics, x + BUTTON_WIDTH, y + INV_WIDTH, mouseX, mouseY);
 
         return RectZone.getZoneByLW(x, y, INV_WIDTH, INV_HEIGHT);

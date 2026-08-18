@@ -1,18 +1,35 @@
 package com.solegendary.reignofnether.items;
 
-import com.solegendary.reignofnether.items.unititems.MerchantChestplate;
-import com.solegendary.reignofnether.items.unititems.MerchantGoldenApple;
-import com.solegendary.reignofnether.items.unititems.MerchantSword;
-import com.solegendary.reignofnether.items.unititems.MerchantTrident;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.List;
 
 public class UnitItems {
 
-    public static final MerchantTrident MERCHANT_TRIDENT = new MerchantTrident();
-    public static final MerchantSword MERCHANT_SWORD = new MerchantSword();
-    public static final MerchantGoldenApple MERCHANT_GOLDEN_APPLE = new MerchantGoldenApple();
-    public static final MerchantChestplate MERCHANT_CHESTPLATE = new MerchantChestplate();
+    public static final UnitItem MERCHANT_TRIDENT = UnitItemBuilder.of(Items.TRIDENT)
+            .type(UnitItemType.UNIT_UPGRADE)
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/trident.png"))
+            .enchant(Enchantments.FLAMING_ARROWS, 1)
+            .enchant(Enchantments.MOB_LOOTING, 1)
+            .build();
+
+    public static final UnitItem MERCHANT_SWORD = UnitItemBuilder.of(Items.NETHERITE_SWORD)
+            .type(UnitItemType.UNIT_UPGRADE)
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_sword.png"))
+            .enchant(Enchantments.FIRE_ASPECT, 1)
+            .build();
+
+    public static final UnitItem MERCHANT_GOLDEN_APPLE = UnitItemBuilder.of(Items.ENCHANTED_GOLDEN_APPLE)
+            .type(UnitItemType.CONSUMABLE)
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/golden_apple.png"))
+            .build();
+
+    public static final UnitItem MERCHANT_CHESTPLATE = UnitItemBuilder.of(Items.NETHERITE_CHESTPLATE)
+            .type(UnitItemType.UNIT_UPGRADE)
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_chestplate.png"))
+            .build();
 
     public static final List<UnitItem> ITEMS = List.of(
         MERCHANT_TRIDENT,

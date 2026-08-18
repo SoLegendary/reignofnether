@@ -2,6 +2,9 @@ package com.solegendary.reignofnether.items.unititems;
 
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.UnitItemBuilder;
+import com.solegendary.reignofnether.items.UnitItemType;
+import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.Item;
 
@@ -12,8 +15,9 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class EdibleFoodItem extends UnitItem {
     public EdibleFoodItem(Item item, int qty) {
-        super(item, null);
-        this.stackQty = qty;
+         super(UnitItemBuilder.of(item)
+            .type(UnitItemType.CONSUMABLE)
+            .stackQty(qty));
     }
 
     @Override
