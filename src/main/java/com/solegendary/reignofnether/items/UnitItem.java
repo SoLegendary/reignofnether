@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.items;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
+import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -28,16 +29,19 @@ public abstract class UnitItem {
     public final ResourceLocation iconRl;
     protected int stackQty = 1;
     List<Pair<Enchantment, Integer>> enchantments = List.of();
+    public UnitItemButton button;
 
     public UnitItem(Item item, ResourceLocation iconRl) {
         this.item = item;
         this.iconRl = iconRl;
+        this.button = new UnitItemButton(this);
     }
 
     public UnitItem(Item item, ResourceLocation iconRl, List<Pair<Enchantment, Integer>> enchantments) {
         this.item = item;
         this.iconRl = iconRl;
         this.enchantments = enchantments;
+        this.button = new UnitItemButton(this);
     }
 
     public UnitItem(Item item, ResourceLocation iconRl, int stackQty) {
@@ -63,14 +67,6 @@ public abstract class UnitItem {
         return stack;
     }
 
-    public Button getButton() {
-        return new ButtonBuilder("button_" + item.getDescriptionId())
-                .tooltipLines(getTooltip())
-                .bgColor(0x3c000000)
-                .iconItem(new ItemStack(item))
-                .build();
-    }
-
     public boolean canUnitPickup() {
         return true;
     }
@@ -79,4 +75,12 @@ public abstract class UnitItem {
     public boolean canUnitAutopickup() {
         return false;
     }
+
+    // TODO:
+    // - stackCount tooltip (bottom left)
+    // - hotkey tooltip (bottom right)
+    // - consume()
+    // - onUse() // (on left click release)
+    // - drop()
+    // - applyAttributeModifiers()
 }
