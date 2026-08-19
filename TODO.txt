@@ -38,7 +38,8 @@ Balance
 
 Quality of Life
 ---------------
-
+[❌] Make current militia unit permanent
+[❌] Add new militia unit for temporary militia
 
 Bugfixes
 --------

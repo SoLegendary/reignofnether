@@ -37,7 +37,7 @@ public abstract class UnitItem {
     public final Keybinding hotkey;
 
     protected final List<Pair<Enchantment, Integer>> enchantments;
-    protected final List<String> bonusKeys;
+    protected final List<String> pointKeys;
 
     private final boolean canUnitPickup;
     private final boolean canUnitAutopickup;
@@ -55,7 +55,7 @@ public abstract class UnitItem {
         this.descKey = builder.descKey;
         this.hotkey = builder.hotkey;
         this.enchantments = List.copyOf(builder.enchantments);
-        this.bonusKeys = List.copyOf(builder.bonusKeys);
+        this.pointKeys = List.copyOf(builder.pointKeys);
         this.canUnitPickup = builder.canUnitPickup;
         this.canUnitAutopickup = builder.canUnitAutopickup;
     }
@@ -76,9 +76,9 @@ public abstract class UnitItem {
     }
 
     /** One string per bullet in the tooltip's passive stat list. */
-    public List<String> getBonusLines() {
+    public List<String> getPointLines() {
         List<String> lines = new ArrayList<>();
-        for (String key : bonusKeys)
+        for (String key : pointKeys)
             lines.add(I18n.get(key));
         return lines;
     }

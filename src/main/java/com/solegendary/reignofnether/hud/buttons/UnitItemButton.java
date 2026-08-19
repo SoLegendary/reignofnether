@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.items.UnitItem;
-import com.solegendary.reignofnether.items.UnitItemType;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,7 +16,7 @@ import java.util.List;
 
 public class UnitItemButton extends Button {
 
-    private static final float SMALL_SCALE = 0.75f; // type label, description, bonus bullets
+    private static final float SMALL_SCALE = 0.75f; // type label, description, dot points
     private static final int MAX_TEXT_WIDTH = 170; // on-screen wrap width, post-scale
     private static final int LINE_HEIGHT = 10; // full-size line
     private static final int SMALL_LINE_HEIGHT = 8; // scaled line
@@ -28,7 +27,7 @@ public class UnitItemButton extends Button {
     private static final Style QTY_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xB4B2A9));
     private static final Style TYPE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFAC775));
     private static final Style DESC_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD3D1C7));
-    private static final Style BONUS_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x97C459));
+    private static final Style POINTS_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x97C459));
     private static final Style SELL_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x5DCAA5));
     private static final Style HOTKEY_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xB4B2A9));
 
@@ -123,14 +122,14 @@ public class UnitItemButton extends Button {
         FormattedCharSequence typeSeq = Component.literal(unitItem.type.getLabel())
                 .withStyle(TYPE_STYLE).getVisualOrderText();
 
-        // ---- band 2: description + bonus bullets (all small) ----
+        // ---- band 2: description + dot points (all small) ----
         List<FormattedCharSequence> bodyLines = new ArrayList<>();
         String desc = unitItem.getDescription();
         if (desc != null)
             bodyLines.addAll(font.split(Component.literal(desc).withStyle(DESC_STYLE), smallWrapWidth));
-        for (String bonus : unitItem.getBonusLines())
+        for (String point : unitItem.getPointLines())
             bodyLines.addAll(font.split(
-                    Component.literal("\u2022 " + bonus).withStyle(BONUS_STYLE), smallWrapWidth));
+                    Component.literal("\u2022 " + point).withStyle(POINTS_STYLE), smallWrapWidth));
 
         // ---- band 3: sell value | hotkey ----
         FormattedCharSequence sellSeq = null;
@@ -153,7 +152,7 @@ public class UnitItemButton extends Button {
         for (FormattedCharSequence line : bodyLines)
             width = Math.max(width, MyRenderer.scaledWidth(font, line, SMALL_SCALE));
         if (hasFooter)
-            width = Math.max(width, rowWidth(font, sellSeq, 1.0f, hotkeySeq, 1.0f));
+            width = Math.max(width, rowWidth(font, sellSeq, SMALL_SCALE, hotkeySeq, 1.0f));
 
         int height = LINE_HEIGHT;
         if (hasBody)
@@ -194,7 +193,7 @@ public class UnitItemButton extends Button {
         if (hasFooter) {
             MyRenderer.renderTooltipDivider(guiGraphics, x, lineY, width);
             lineY += DIVIDER_HEIGHT;
-            MyRenderer.renderJustifiedRow(guiGraphics, sellSeq, 1.0f, hotkeySeq, 1.0f, x, lineY, width);
+            MyRenderer.renderJustifiedRow(guiGraphics, sellSeq, SMALL_SCALE, hotkeySeq, 1.0f, x, lineY, width);
         }
 
         guiGraphics.pose().popPose();

@@ -55,9 +55,9 @@
 
     "item.reignofnether.throwable_tnt": "Throwable TNT",
     "item.reignofnether.thrown_hero_experience_bottle": "Bottle O'Hero Experience",
-    "item.reignofnether.hero_experience_bottle.desc": "Drink to instantly grant experience to this hero.",
-    "item.reignofnether.hero_experience_bottle.bonus1": "+100 hero experience",
-    "item.reignofnether.hero_experience_bottle.bonus2": "Consumed on use",
+    "item.reignofnether.hero_experience_bottle.desc": "Drink to instantly grant 100 experience to this hero.",
+    "item.reignofnether.diamond_sword.desc": "An iconic weapon forged from diamond",
+    "item.reignofnether.diamond_sword.point1": "+5 attack damage",
 
     "attribute.reignofnether.attack_damage": "Attack Damage",
     "attribute.reignofnether.attacks_per_second": "Attacks per Second",

@@ -17,10 +17,6 @@ public class HeroExperienceBottle extends UnitItem {
                 .icon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,
                         "textures/item/hero_experience_bottle.png"))
                 .descKey("item.reignofnether.hero_experience_bottle.desc")
-                .bonuses(
-                        "item.reignofnether.hero_experience_bottle.bonus1",
-                        "item.reignofnether.hero_experience_bottle.bonus2"
-                )
                 .canUnitPickup(true)
                 .canUnitAutopickup(false)
         );

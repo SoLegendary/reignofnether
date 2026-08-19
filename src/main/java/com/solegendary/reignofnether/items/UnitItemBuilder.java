@@ -47,7 +47,7 @@ public class UnitItemBuilder {
     boolean canUnitPickup = true;
     boolean canUnitAutopickup = false;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
-    final List<String> bonusKeys = new ArrayList<>();
+    final List<String> pointKeys = new ArrayList<>();
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -92,15 +92,15 @@ public class UnitItemBuilder {
     }
 
     /** Adds one bullet to the passive stat list; call once per bullet, in display order. */
-    public UnitItemBuilder bonus(String i18nKey) {
+    public UnitItemBuilder pointKey(String i18nKey) {
         if (i18nKey != null && !i18nKey.isBlank())
-            this.bonusKeys.add(i18nKey);
+            this.pointKeys.add(i18nKey);
         return this;
     }
 
-    public UnitItemBuilder bonuses(String... i18nKeys) {
+    public UnitItemBuilder pointKeys(String... i18nKeys) {
         for (String key : i18nKeys)
-            bonus(key);
+            pointKey(key);
         return this;
     }
 

@@ -2,9 +2,8 @@ package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
-import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
-import com.solegendary.reignofnether.items.HeroExperienceBottleItem;
 import com.solegendary.reignofnether.items.UnitItems;
+import com.solegendary.reignofnether.items.unititems.DiamondSword;
 import com.solegendary.reignofnether.items.unititems.HeroExperienceBottle;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -30,11 +29,11 @@ public class UnitInventoryRenderer {
 
     public static RectZone render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, Unit unit) {
         renderedButtons.clear();
-        renderedButtons.add(new HeroExperienceBottle().getButton());
-        renderedButtons.add(UnitItems.MERCHANT_TRIDENT.getButton());
-        renderedButtons.add(UnitItems.MERCHANT_GOLDEN_APPLE.getButton());
-        renderedButtons.add(UnitItems.MERCHANT_SWORD.getButton());
-        renderedButtons.add(UnitItems.MERCHANT_CHESTPLATE.getButton());
+        renderedButtons.add(new DiamondSword().getButton());
+        renderedButtons.add(EMPTY_SLOT_BUTTON);
+        renderedButtons.add(EMPTY_SLOT_BUTTON);
+        renderedButtons.add(EMPTY_SLOT_BUTTON);
+        renderedButtons.add(EMPTY_SLOT_BUTTON);
         renderedButtons.add(EMPTY_SLOT_BUTTON);
 
         int i = 0;
