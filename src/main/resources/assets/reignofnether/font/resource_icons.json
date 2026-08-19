@@ -72,6 +72,13 @@
         },
         {
             "type": "bitmap",
+            "file": "reignofnether:icons/items/emerald.png",
+            "ascent": 9,
+            "height": 9,
+            "chars": ["\uE010"]
+        },
+        {
+            "type": "bitmap",
             "file": "minecraft:font/ascii.png",
             "ascent": 7,
             "chars": [
