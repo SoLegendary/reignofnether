@@ -8,6 +8,8 @@ import java.util.List;
 
 public class UnitItems {
 
+    // TODO: make an actual Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
+
     public static final UnitItem MERCHANT_TRIDENT = UnitItemBuilder.of(Items.TRIDENT)
             .type(UnitItemType.UPGRADE)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/trident.png"))

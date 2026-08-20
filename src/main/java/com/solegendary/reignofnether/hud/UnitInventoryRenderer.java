@@ -2,9 +2,7 @@ package com.solegendary.reignofnether.hud;
 
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
-import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.items.unititems.DiamondSword;
-import com.solegendary.reignofnether.items.unititems.HeroExperienceBottle;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,7 +12,7 @@ import java.util.ArrayList;
 public class UnitInventoryRenderer {
 
     public static boolean shouldRender(Unit unit) {
-        return unit instanceof HeroUnit;
+        return false;//unit instanceof HeroUnit;
     }
 
     private static final Button EMPTY_SLOT_BUTTON = new ButtonBuilder("Empty inventory slot")
@@ -28,7 +26,7 @@ public class UnitInventoryRenderer {
     private static final ArrayList<Button> renderedButtons = new ArrayList<>();
 
     public static RectZone render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, Unit unit) {
-        renderedButtons.clear();
+        renderedButtons.clear(); // TODO: read from unit's actual inventory
         renderedButtons.add(new DiamondSword().getButton());
         renderedButtons.add(EMPTY_SLOT_BUTTON);
         renderedButtons.add(EMPTY_SLOT_BUTTON);
