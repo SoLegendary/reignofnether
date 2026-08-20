@@ -1824,6 +1824,7 @@
     "alliances.reignofnether.tooltip.send_food": "Send Food",
     "alliances.reignofnether.tooltip.send_wood": "Send Wood",
     "alliances.reignofnether.tooltip.send_ore": "Send Ore",
+    "alliances.reignofnether.tooltip.send_emerald": "Send Emerald",
     "alliances.reignofnether.tooltip.confirm_send_resources": "Confirm",
     "alliances.reignofnether.tooltip.cancel_send_resources": "Cancel",
     "alliances.reignofnether.tooltip.request_alliance": "Request Alliance",
