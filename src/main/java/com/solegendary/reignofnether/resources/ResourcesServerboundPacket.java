@@ -17,6 +17,7 @@ public class ResourcesServerboundPacket {
     public int food;
     public int wood;
     public int ore;
+    public int emerald;
 
     public static void sendResources(Resources resources, String senderName) {
         PacketHandler.INSTANCE.sendToServer(new ResourcesServerboundPacket(
@@ -25,17 +26,19 @@ public class ResourcesServerboundPacket {
                 resources.ownerName,
                 resources.food,
                 resources.wood,
-                resources.ore
+                resources.ore,
+                resources.emerald
         ));
     }
 
-    public ResourcesServerboundPacket(ResourcesAction action, String senderName, String receiverName, int food, int wood, int ore) {
+    public ResourcesServerboundPacket(ResourcesAction action, String senderName, String receiverName, int food, int wood, int ore, int emerald) {
         this.action = action;
         this.senderName = senderName;
         this.receiverName = receiverName;
         this.food = food;
         this.wood = wood;
         this.ore = ore;
+        this.emerald = emerald;
     }
 
     public ResourcesServerboundPacket(FriendlyByteBuf buffer) {
@@ -45,6 +48,7 @@ public class ResourcesServerboundPacket {
         this.food = buffer.readInt();
         this.wood = buffer.readInt();
         this.ore = buffer.readInt();
+        this.emerald = buffer.readInt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -54,6 +58,7 @@ public class ResourcesServerboundPacket {
         buffer.writeInt(this.food);
         buffer.writeInt(this.wood);
         buffer.writeInt(this.ore);
+        buffer.writeInt(this.emerald);
     }
 
     // server-side packet-consuming functions
@@ -73,8 +78,9 @@ public class ResourcesServerboundPacket {
                 return;
             }
             if (action == ResourcesAction.SEND_RESOURCES) {
-                ReignOfNether.LOGGER.info("[Resources] {} sent resources to {} (food: {}, wood: {}, ore: {})", senderName, this.receiverName, this.food, this.wood, this.ore);
-                ResourcesServerEvents.trySendingAnyResources(this.receiverName, new Resources(this.senderName, this.food, this.wood, this.ore));
+                ReignOfNether.LOGGER.info("[Resources] {} sent resources to {} (food: {}, wood: {}, ore: {}, emerald: {})",
+                        senderName, this.receiverName, this.food, this.wood, this.ore, this.emerald);
+                ResourcesServerEvents.trySendingAnyResources(this.receiverName, new Resources(this.senderName, this.food, this.wood, this.ore, this.emerald));
             }
             success.set(true);
         });

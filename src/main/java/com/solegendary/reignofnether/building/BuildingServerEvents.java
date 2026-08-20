@@ -584,7 +584,8 @@ public class BuildingServerEvents {
         ResourcesClientboundPacket.warnInsufficientResources(newBuilding.ownerName,
             ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.FOOD, newBuilding.getBuilding().cost.food),
             ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.WOOD, newBuilding.getBuilding().cost.wood),
-            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.getBuilding().cost.ore)
+            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.getBuilding().cost.ore),
+            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.EMERALD, newBuilding.getBuilding().cost.emerald)
         );
     }
 

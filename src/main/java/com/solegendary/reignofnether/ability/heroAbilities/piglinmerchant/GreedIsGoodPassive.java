@@ -126,7 +126,7 @@ public class GreedIsGoodPassive extends HeroAbility {
             for (Resources resources : resourcesList) {
                 if (resources.ownerName.equals(ownerName)) {
                     for (int i = 0; i < getRank(hero); i++) {
-                        Resources resToSpend = new Resources(hero.getOwnerName(), 0, 0, 0);
+                        Resources resToSpend = new Resources(hero.getOwnerName(), 0, 0, 0, 0);
                         if (resName == ResourceName.FOOD && resources.food >= resourceSpendChunk) {
                             resToSpend.food -= resourceSpendChunk;
                             totalSpent += resourceSpendChunk;
@@ -135,6 +135,9 @@ public class GreedIsGoodPassive extends HeroAbility {
                             totalSpent += resourceSpendChunk;
                         } else if (resName == ResourceName.ORE && resources.ore >= resourceSpendChunk) {
                             resToSpend.ore -= resourceSpendChunk;
+                            totalSpent += resourceSpendChunk;
+                        } else if (resName == ResourceName.EMERALD && resources.emerald >= resourceSpendChunk) {
+                            resToSpend.emerald -= resourceSpendChunk;
                             totalSpent += resourceSpendChunk;
                         }
                         if (!isClientSide) {

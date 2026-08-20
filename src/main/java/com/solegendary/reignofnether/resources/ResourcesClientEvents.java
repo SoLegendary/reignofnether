@@ -81,6 +81,7 @@ public class ResourcesClientEvents {
                     case FOOD -> "\uE000  " + (res.resourceValue * itemCount);
                     case WOOD -> "\uE001  " + (res.resourceValue * itemCount);
                     case ORE -> "\uE002  " + (res.resourceValue * itemCount);
+                    case EMERALD -> "\uE010  " + (res.resourceValue * itemCount);
                     case NONE -> "";
                 };
                 MyRenderer.renderTooltip(evt.getGuiGraphics(),
@@ -100,14 +101,14 @@ public class ResourcesClientEvents {
     public static void addSubtractResources(Resources serverResources) {
         for (Resources resources : resourcesList)
             if (resources.ownerName.equals(serverResources.ownerName)) {
-                resources.changeOverTime(serverResources.food, serverResources.wood, serverResources.ore);
+                resources.changeOverTime(serverResources.food, serverResources.wood, serverResources.ore, serverResources.emerald);
             }
     }
 
     public static void addSubtractResourcesInstantly(Resources serverResources) {
         for (Resources resources : resourcesList)
             if (resources.ownerName.equals(serverResources.ownerName)) {
-                resources.changeInstantly(serverResources.food, serverResources.wood, serverResources.ore);
+                resources.changeInstantly(serverResources.food, serverResources.wood, serverResources.ore, serverResources.emerald);
             }
     }
 

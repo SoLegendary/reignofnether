@@ -433,6 +433,13 @@
     "abilities.reignofnether.trade_ore_food": "Trade   %d   \uE002   for   %d   \uE000",
     "abilities.reignofnether.trade_ore_wood": "Trade   %d   \uE002   for   %d   \uE001",
 
+    "abilities.reignofnether.sell_food": "Sell   %d   \uE000   for  %d   \uE010",
+    "abilities.reignofnether.sell_wood": "Sell   %d   \uE001   for   %d   \uE010",
+    "abilities.reignofnether.sell_ore": "Sell   %d   \uE002   for   %d   \uE010",
+    "abilities.reignofnether.buy_food": "Buy   %d   \uE000   for  %d   \uE010",
+    "abilities.reignofnether.buy_wood": "Buy   %d   \uE001   for   %d   \uE010",
+    "abilities.reignofnether.buy_ore": "Buy   %d   \uE002   for   %d   \uE010",
+
     "ability.reignofnether.enchant.error1": "Can only enchant your own units",
     "ability.reignofnether.enchant.error2": "Unit is out of range",
     "ability.reignofnether.enchant.error3": "Wrong unit or equipment type",
@@ -990,6 +997,7 @@
     "server.resources.reignofnether.not_enough_food": "You don't have enough food",
     "server.resources.reignofnether.not_enough_wood": "You don't have enough wood",
     "server.resources.reignofnether.not_enough_ore": "You don't have enough ore",
+    "server.resources.reignofnether.not_enough_emerald": "You don't have enough emeralds",
     "server.resources.reignofnether.not_enough_pop": "You don't have enough population supply",
     "server.resources.reignofnether.max_pop": "You have reached the maximum population",
     "server.resources.reignofnether.full_graveyard": "This graveyard is too full",
@@ -1000,6 +1008,8 @@
     "server.resources.reignofnether.received_wood": "You received %d wood from %s!",
     "server.resources.reignofnether.sent_ore": "You gave %d ore to %s!",
     "server.resources.reignofnether.received_ore": "You received %d ore from %s!",
+    "server.resources.reignofnether.sent_emerald": "You gave %d emerald to %s!",
+    "server.resources.reignofnether.received_emerald": "You received %d emerald from %s!",
     "server.resources.reignofnether.not_allies": "You can only send resources to allies",
     "server.resources.reignofnether.not_rts_player": "That player isn't an RTS player",
     "server.resources.reignofnether.sending_to_self": "You can't send resources to yourself",
@@ -1156,6 +1166,7 @@
     "resources.reignofnether.food": "Food",
     "resources.reignofnether.wood": "Wood",
     "resources.reignofnether.ore": "Ore",
+    "resources.reignofnether.emerald": "Emerald",
     "resources.reignofnether.population": "Population",
     "resources.reignofnether.none": "None",
 

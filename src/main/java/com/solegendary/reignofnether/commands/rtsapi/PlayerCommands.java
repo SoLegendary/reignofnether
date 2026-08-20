@@ -34,7 +34,7 @@ import java.util.function.Consumer;
 
 public class PlayerCommands {
 	
-	private static final List<String> RESOURCE_NAMES = List.of("food", "wood", "ore");
+	private static final List<String> RESOURCE_NAMES = List.of("food", "wood", "ore", "emerald");
 	
 	public static void register(final LiteralArgumentBuilder<CommandSourceStack> commandBuilder) {
 		commandBuilder
@@ -326,7 +326,7 @@ public class PlayerCommands {
 		try {
 			resource = ResourceName.valueOf(resourceName.trim().toUpperCase());
 		} catch (IllegalArgumentException ex) {
-			ctx.getSource().sendFailure(Component.literal("Unknown resource '" + resourceName + "'. Valid values: food, wood, ore"));
+			ctx.getSource().sendFailure(Component.literal("Unknown resource '" + resourceName + "'. Valid values: food, wood, ore, emerald"));
 			return 0;
 		}
 		if (!PlayerServerEvents.isRTSPlayer(playerName)) {
@@ -341,6 +341,7 @@ public class PlayerCommands {
 						case FOOD -> r.food = amount;
 						case WOOD -> r.wood = amount;
 						case ORE -> r.ore = amount;
+						case EMERALD -> r.emerald = amount;
 					}
 					ResourcesClientboundPacket.syncResources(ResourcesServerEvents.resourcesList);
 					ctx.getSource().sendSuccess(
@@ -354,7 +355,8 @@ public class PlayerCommands {
 			int food = resource == ResourceName.FOOD ? amount : 0;
 			int wood = resource == ResourceName.WOOD ? amount : 0;
 			int ore = resource == ResourceName.ORE ? amount : 0;
-			ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore));
+			int emerald = resource == ResourceName.EMERALD ? amount : 0;
+			ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore, emerald));
 			ctx.getSource().sendSuccess(
 				() -> Component.literal("Changed " + resource.name().toLowerCase() + " by " + amount + " for " + playerName),
 				true
@@ -375,7 +377,11 @@ public class PlayerCommands {
 		for (Resources r : ResourcesServerEvents.resourcesList) {
 			if (r.ownerName.equals(playerName)) {
 				ctx.getSource().sendSuccess(
-					() -> Component.literal(playerName + " resources - Food: " + r.food + ", Wood: " + r.wood + ", Ore: " + r.ore),
+					() -> Component.literal(playerName + " resources - " +
+							"Food: " + r.food +
+							", Wood: " + r.wood +
+							", Ore: " + r.ore +
+							", Emerald: " + r.emerald),
 					false
 				);
 				return 1;

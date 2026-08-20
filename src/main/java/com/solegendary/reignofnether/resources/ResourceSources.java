@@ -386,6 +386,13 @@ public class ResourceSources {
     );
 
     public static final List<ResourceSource> ORE_BLOCKS = List.of(
+            new ResourceSource("Emerald", // item only
+                    List.of(),
+                    List.of(Items.EMERALD),
+                    0,
+                    1,
+                    ResourceName.EMERALD
+            ),
             new ResourceSource("Stone", // item only
                     List.of(),
                     List.of(Items.STONE),

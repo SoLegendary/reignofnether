@@ -481,6 +481,7 @@ public class UnitClientEvents {
                     unit.getItems().add(new ItemStack(Items.SUGAR, res.food));
                     unit.getItems().add(new ItemStack(Items.STICK, res.wood));
                     unit.getItems().add(new ItemStack(Items.STONE, res.ore));
+                    unit.getItems().add(new ItemStack(Items.EMERALD, res.emerald));
                 }
             }
         }

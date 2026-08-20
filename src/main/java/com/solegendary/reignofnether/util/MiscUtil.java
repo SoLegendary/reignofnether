@@ -17,8 +17,6 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.player.PlayerClientEvents;
-import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
@@ -42,9 +40,7 @@ import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -92,13 +88,12 @@ import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static com.solegendary.reignofnether.resources.BlockUtils.isLeafBlock;
-import static com.solegendary.reignofnether.resources.BlockUtils.isLogBlock;
+import static com.solegendary.reignofnether.blocks.BlockUtils.isLeafBlock;
+import static com.solegendary.reignofnether.blocks.BlockUtils.isLogBlock;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
 

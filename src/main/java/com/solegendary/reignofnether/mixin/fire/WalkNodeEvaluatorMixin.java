@@ -1,12 +1,11 @@
 package com.solegendary.reignofnether.mixin.fire;
 
-import com.solegendary.reignofnether.resources.BlockUtils;
+import com.solegendary.reignofnether.blocks.BlockUtils;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.NodeEvaluator;
