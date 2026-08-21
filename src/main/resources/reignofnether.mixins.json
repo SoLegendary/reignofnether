@@ -33,6 +33,7 @@
         "ServerLevelMixin",
         "ThrownPotionMixin",
         "ThrownTridentMixin",
+        "UnitInventoryMobMixin",
         "VanillaPacketFilterAccessor",
         "VexMixin",
         "WebBlockMixin",

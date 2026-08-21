@@ -24,9 +24,10 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.custombutton.CustomButton;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientEvents;
-import com.solegendary.reignofnether.hud.custombutton.CustomButtonServerEvents;
 import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
+import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitInventoryRenderer;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -65,7 +66,6 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.resources.language.I18n;
@@ -665,8 +665,8 @@ public class HudClientEvents {
                 int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
 
-                if (UnitInventoryRenderer.shouldRender(unit)) {
-                    hudZones.add(UnitInventoryRenderer.render(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, unit));
+                if (unit instanceof UnitInventory inv && UnitInventoryRenderer.shouldRender(unit)) {
+                    hudZones.add(UnitInventoryRenderer.render(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, inv));
                     renderedItemsOrResources = true;
                 }
                 else if (hudSelectedEntity instanceof Mob mob && mob.canPickUpLoot() && totalRes > 0) {
@@ -1887,6 +1887,8 @@ public class HudClientEvents {
         }
     }
 
+
+
     // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
@@ -1899,8 +1901,6 @@ public class HudClientEvents {
         for (Button button : renderedButtons)
             button.checkPressed(evt.getKeyCode());
     }
-
-
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {

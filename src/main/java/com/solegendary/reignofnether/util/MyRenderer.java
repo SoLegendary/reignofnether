@@ -522,7 +522,7 @@ public class MyRenderer {
     }
 
     public static void renderItemEntityTooltip(GuiGraphics guiGraphics, UnitItem unitItem, int mouseX, int mouseY) {
-        if (unitItem == null || MC.screen == null)
+        if (unitItem == null || MC.screen == null || !unitItem.enableTooltip)
             return;
 
         final int iconSize = 16;

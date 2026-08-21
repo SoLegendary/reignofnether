@@ -58,6 +58,8 @@
     "item.reignofnether.hero_experience_bottle.desc": "Drink to instantly grant 100 experience to this hero.",
     "item.reignofnether.diamond_sword.desc": "An iconic weapon forged from diamond",
     "item.reignofnether.diamond_sword.point1": "+5 attack damage",
+    "item.reignofnether.totem_of_undying.desc": "A mystical totem that protects its bearer from death",
+    "item.reignofnether.totem_of_undying.point1": "Restores 50%% of HP on death",
 
     "attribute.reignofnether.attack_damage": "Attack Damage",
     "attribute.reignofnether.attacks_per_second": "Attacks per Second",

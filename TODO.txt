@@ -41,9 +41,12 @@ Quality of Life
 [❌] Make current militia unit permanent
 [❌] Add new militia unit for temporary militia
 
+[❌] Don't allow world border changes with fog enabled
+[❌] Force move camera command
+
 Bugfixes
 --------
-[❌] Heroes having ults on cooldown on levelup?
+
 
 
 Languages

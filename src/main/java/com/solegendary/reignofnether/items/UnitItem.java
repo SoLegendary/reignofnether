@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.items;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -31,10 +32,11 @@ public abstract class UnitItem {
     protected final Item item;
     public final ResourceLocation iconRl;
     public final UnitItemType type;
-    public final int stackQty;
+    public final int stackQty; // TODO: remove and use itemStack instead?
     public final int sellValue;
     public final String descKey;
     public final Keybinding hotkey;
+    public boolean enableTooltip = true;
 
     protected final List<Pair<Enchantment, Integer>> enchantments;
     protected final List<String> pointKeys;
@@ -58,11 +60,12 @@ public abstract class UnitItem {
         this.pointKeys = List.copyOf(builder.pointKeys);
         this.canUnitPickup = builder.canUnitPickup;
         this.canUnitAutopickup = builder.canUnitAutopickup;
+        this.enableTooltip = builder.enableTooltip;
     }
 
-    public UnitItemButton getButton() {
+    public UnitItemButton getButton(int index, Unit unit) {
         if (button == null)
-            button = new UnitItemButton(this);
+            button = new UnitItemButton(index, this, unit);
         return button;
     }
 

@@ -64,6 +64,7 @@ public class Button {
     public Supplier<Boolean> isEnabled; // is the button allowed to be used right now? (eg. off cooldown)
     public Runnable onLeftClick;
     public Runnable onRightClick;
+    public Runnable onLeftClickRelease = null;
     public List<FormattedCharSequence> tooltipLines;
     public boolean lightUpOnHover = true;
 
@@ -279,6 +280,18 @@ public class Button {
             else if (!leftClick && this.onRightClick != null) {
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
                 this.onRightClick.run();
+            }
+        }
+    }
+
+    // must be done from mouse press event
+    public void checkClickedReleased(int mouseX, int mouseY, boolean leftClick) {
+        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
+            return;
+
+        if (isMouseOver(mouseX, mouseY) && MC.player != null) {
+            if (leftClick && this.onLeftClickRelease != null) {
+                this.onLeftClickRelease.run();
             }
         }
     }

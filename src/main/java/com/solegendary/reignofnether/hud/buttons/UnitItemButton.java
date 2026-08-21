@@ -1,14 +1,19 @@
 package com.solegendary.reignofnether.hud.buttons;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -34,8 +39,9 @@ public class UnitItemButton extends Button {
     private static final String EMERALD_ICON = "\uE010";
 
     private UnitItem unitItem;
+    public int invIndex = 0;
 
-    public UnitItemButton(UnitItem unitItem) {
+    public UnitItemButton(int invIndex, UnitItem unitItem, Unit unit) {
         super(
                 "button_" + unitItem.getItemStack().getItem().getDescriptionId(),
                 Button.DEFAULT_ICON_SIZE,
@@ -44,70 +50,101 @@ public class UnitItemButton extends Button {
                 () -> false, // todo: if cursor action is on sell/drop/give
                 () -> false,
                 () -> true,
-                () -> { }, // todo: left click use and drag to enable targeting for sell/drop/give
-                () -> { }, // todo: right click to toggle targeting for sell/drop/give
+                () -> {
+                    ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableInvIndex = invIndex;
+                },
+                () -> {
+                    ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableInvIndex = invIndex;
+                },
                 List.of()
         );
+        this.onLeftClickRelease = () -> {
+            if (ItemClientEvents.actionableUnitItem == null) {
+                // todo: actual item usage
+            }
+        };
         this.iconItem = new ItemStack(unitItem.getItemStack().getItem());
         this.unitItem = unitItem;
+        this.invIndex = invIndex;
     }
 
+    private static final float GHOST_ALPHA = 0.45f;
+
+    // TODO: remove alpha and rename to remove 'ghost', just move the actual button away when dragging
     // render a translucent version of this button
-    public void renderGhost(GuiGraphics guiGraphics, int x, int y) {
+    public void renderGhost(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        int x = mouseX - (DEFAULT_ICON_SIZE / 2);
+        int y = mouseY - (DEFAULT_ICON_SIZE / 2);
         int xyDiff = (DEFAULT_ICON_SIZE - iconSize) / 2;
+        float alpha = Mth.clamp(GHOST_ALPHA, 0.0f, 1.0f);
 
+        guiGraphics.pose().pushPose(); // contain the z-translates below
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, alpha);
+
+        // frame + bg: shader colour fades the texture, but the bg is a solid
+        // fill inside renderIconFrameWithBg, so fade its alpha channel manually
         if (this.frameResource != null) {
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource, x + xyDiff, y + xyDiff, iconFrameSize, bgColour);
+            int a = Math.round(((bgColour >>> 24) & 0xFF) * alpha);
+            int bgCol = (a << 24) | (bgColour & 0x00FFFFFF);
+            guiGraphics.pose().translate(0, 0, 1);
+            MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource,
+                    x + xyDiff, y + xyDiff, iconFrameSize, bgCol);
         }
-
         if (bgIconResource != null) {
-            guiGraphics.pose().translate(0,0,1);
-            int iconX = x+4 + (7 - xyDiff - iconSize/2);
-            int iconY = y+4 + (7 - xyDiff - iconSize/2);
-            if (stretchIconToBorders) {
-                iconX -= 1;
-                iconY -= 1;
-            }
-            iconX += (DEFAULT_ICON_SIZE - imageSize) / 2;
-            iconY += (DEFAULT_ICON_SIZE - imageSize) / 2;
-            MyRenderer.renderIcon(
-                    guiGraphics,
-                    bgIconResource,
-                    iconX,
-                    iconY,
-                    stretchIconToBorders ? imageSize + 2 : imageSize
-            );
+            guiGraphics.pose().translate(0, 0, 1);
+            MyRenderer.renderIcon(guiGraphics, bgIconResource,
+                    ghostIconX(x, xyDiff), ghostIconY(y, xyDiff),
+                    stretchIconToBorders ? imageSize + 2 : imageSize);
+        }
+        if (iconResource != null) {
+            guiGraphics.pose().translate(0, 0, 1);
+            MyRenderer.renderIcon(guiGraphics, iconResource,
+                    ghostIconX(x, xyDiff), ghostIconY(y, xyDiff),
+                    stretchIconToBorders ? imageSize + 2 : imageSize);
         }
 
-        // item/unit icon
-        if (iconResource != null) {
-            int iconX = x+4 + (7 - xyDiff - iconSize/2);
-            int iconY = y+4 + (7 - xyDiff - iconSize/2);
-            if (stretchIconToBorders) {
-                iconX -= 1;
-                iconY -= 1;
-            }
-            iconX += (DEFAULT_ICON_SIZE - imageSize) / 2;
-            iconY += (DEFAULT_ICON_SIZE - imageSize) / 2;
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderIcon(
-                    guiGraphics,
-                    iconResource,
-                    iconX, iconY,
-                    stretchIconToBorders ? imageSize + 2 : imageSize
-            );
-        }
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+        // item models ignore shader colour, so draw normally then wash out on top
         if (iconItem != null) {
-            guiGraphics.pose().translate(0,0,1);
             int offset = 2 + Math.round((1.0f - iconItemScale) * 8f);
-            MyRenderer.renderItem(guiGraphics, iconItem, x+offset + (7 - xyDiff - iconSize/2), y+offset + (7 - xyDiff - iconSize/2), iconItemScale);
+            int itemX = x + offset + (7 - xyDiff - iconSize / 2);
+            int itemY = y + offset + (7 - xyDiff - iconSize / 2);
+            int itemPx = Math.round(16 * iconItemScale);
+
+            guiGraphics.pose().translate(0, 0, 1);
+            MyRenderer.renderItem(guiGraphics, iconItem, itemX, itemY, iconItemScale);
+
+            guiGraphics.pose().translate(0, 0, 1);
+            int washAlpha = Math.round((1.0f - alpha) * 0xC0);
+            guiGraphics.fill(RenderType.guiGhostRecipeOverlay(),
+                    itemX, itemY, itemX + itemPx, itemY + itemPx,
+                    (washAlpha << 24) | 0xFFFFFF);
         }
+        RenderSystem.disableBlend();
+        guiGraphics.pose().popPose();
+    }
+
+    private int ghostIconX(int x, int xyDiff) {
+        int iconX = x + 4 + (7 - xyDiff - iconSize / 2);
+        if (stretchIconToBorders) iconX -= 1;
+        return iconX + (DEFAULT_ICON_SIZE - imageSize) / 2;
+    }
+
+    private int ghostIconY(int y, int xyDiff) {
+        int iconY = y + 4 + (7 - xyDiff - iconSize / 2);
+        if (stretchIconToBorders) iconY -= 1;
+        return iconY + (DEFAULT_ICON_SIZE - imageSize) / 2;
     }
 
     @Override
     public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        if (MC.screen == null)
+        if (MC.screen == null || !unitItem.enableTooltip)
             return;
 
         Font font = MC.font;

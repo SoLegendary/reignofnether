@@ -44,8 +44,9 @@ public class UnitItemBuilder {
     int sellValue = 0;
     String descKey = "";
     Keybinding hotkey = null;
-    boolean canUnitPickup = true;
+    boolean canUnitPickup = false;
     boolean canUnitAutopickup = false;
+    boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     final List<String> pointKeys = new ArrayList<>();
 
@@ -101,6 +102,11 @@ public class UnitItemBuilder {
     public UnitItemBuilder pointKeys(String... i18nKeys) {
         for (String key : i18nKeys)
             pointKey(key);
+        return this;
+    }
+
+    public UnitItemBuilder enableTooltip(boolean enable) {
+        this.enableTooltip = enable;
         return this;
     }
 
