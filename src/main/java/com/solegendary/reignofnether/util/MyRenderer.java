@@ -521,7 +521,7 @@ public class MyRenderer {
         }
     }
 
-    public static void renderItemEntityTooltip(GuiGraphics guiGraphics, UnitItem unitItem, int mouseX, int mouseY) {
+    public static void renderItemEntityTooltip(GuiGraphics guiGraphics, UnitItem unitItem, ItemStack itemStack, int mouseX, int mouseY) {
         if (unitItem == null || MC.screen == null || !unitItem.enableTooltip)
             return;
 
@@ -530,7 +530,7 @@ public class MyRenderer {
         int paddingChars = iconSize / Math.max(spaceWidth, 1);
         String pad = " ".repeat(paddingChars);
         Component name = unitItem.iconRl != null ? Component.literal(pad).append(unitItem.getName()) : unitItem.getName();
-        List<FormattedCharSequence> lore = unitItem.getTooltip();
+        List<FormattedCharSequence> lore = unitItem.getTooltip(itemStack);
 
         List<FormattedCharSequence> lines = new ArrayList<>();
         lines.add(name.getVisualOrderText());

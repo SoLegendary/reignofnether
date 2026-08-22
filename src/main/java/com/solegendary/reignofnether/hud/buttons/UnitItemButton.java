@@ -39,11 +39,12 @@ public class UnitItemButton extends Button {
     private static final String EMERALD_ICON = "\uE010";
 
     private UnitItem unitItem;
+    private ItemStack itemStack;
     public int invIndex = 0;
 
-    public UnitItemButton(int invIndex, UnitItem unitItem, Unit unit) {
+    public UnitItemButton(int invIndex, UnitItem unitItem, ItemStack itemStack, Unit unit) {
         super(
-                "button_" + unitItem.getItemStack().getItem().getDescriptionId(),
+                "button_" + itemStack.getItem().getDescriptionId(),
                 Button.DEFAULT_ICON_SIZE,
                 null,
                 null,
@@ -65,8 +66,9 @@ public class UnitItemButton extends Button {
                 // todo: actual item usage
             }
         };
-        this.iconItem = new ItemStack(unitItem.getItemStack().getItem());
+        this.iconItem = new ItemStack(itemStack.getItem());
         this.unitItem = unitItem;
+        this.itemStack = itemStack;
         this.invIndex = invIndex;
     }
 
@@ -153,8 +155,8 @@ public class UnitItemButton extends Button {
 
         // ---- band 1: name (+qty) | type ----
         MutableComponent nameComp = unitItem.getName().copy().withStyle(NAME_STYLE);
-        if (unitItem.stackQty > 1)
-            nameComp.append(Component.literal(" (" + unitItem.stackQty + ")").withStyle(QTY_STYLE));
+        if (itemStack.getCount() > 1)
+            nameComp.append(Component.literal(" (" + itemStack.getCount() + ")").withStyle(QTY_STYLE));
         FormattedCharSequence nameSeq = nameComp.getVisualOrderText();
         FormattedCharSequence typeSeq = Component.literal(unitItem.type.getLabel())
                 .withStyle(TYPE_STYLE).getVisualOrderText();

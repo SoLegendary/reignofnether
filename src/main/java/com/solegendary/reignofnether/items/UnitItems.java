@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -12,12 +13,7 @@ public class UnitItems {
 
     // TODO: make an actual Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
-    public static final UnitItem EMPTY = UnitItemBuilder.of(Items.AIR) // empty inventory slots
-            .type(UnitItemType.NONE)
-            .canUnitPickup(false)
-            .canUnitAutopickup(false)
-            .enableTooltip(false)
-            .build();
+    public static final UnitItem EMPTY = new EmptyUnitItem();
 
     public static final UnitItem MERCHANT_TRIDENT = UnitItemBuilder.of(Items.TRIDENT)
             .type(UnitItemType.UPGRADE)
@@ -52,7 +48,6 @@ public class UnitItems {
 
     public static final UnitItem HERO_EXPERIENCE_BOTTLE = UnitItemBuilder.of(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get())
             .type(UnitItemType.CONSUMABLE)
-            .stackQty(1)
             .sellValue(10)
             .icon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,"textures/item/hero_experience_bottle.png"))
             .descKey("item.reignofnether.hero_experience_bottle.desc")

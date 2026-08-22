@@ -26,8 +26,8 @@ import com.solegendary.reignofnether.hud.custombutton.CustomButton;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientEvents;
 import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
-import com.solegendary.reignofnether.items.UnitInventoryRenderer;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -665,8 +665,8 @@ public class HudClientEvents {
                 int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
 
-                if (unit instanceof UnitInventory inv && UnitInventoryRenderer.shouldRender(unit)) {
-                    hudZones.add(UnitInventoryRenderer.render(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, inv));
+                if (unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(unit)) {
+                    hudZones.add(ItemClientEvents.renderUnitInventory(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, inv));
                     renderedItemsOrResources = true;
                 }
                 else if (hudSelectedEntity instanceof Mob mob && mob.canPickUpLoot() && totalRes > 0) {

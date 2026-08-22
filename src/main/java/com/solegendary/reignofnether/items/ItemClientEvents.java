@@ -7,9 +7,11 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
+import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
@@ -21,6 +23,7 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -66,6 +69,43 @@ public class ItemClientEvents {
         return preselectedItems;
     }
 
+    public static boolean shouldRenderUnitInventory(Unit unit) {
+        return unit instanceof UnitInventory inv &&
+                (unit instanceof HeroUnit ||
+                        !inv.getAllItems().isEmpty());
+    }
+
+    private static final int BUTTON_WIDTH = 22;
+    public static final int INV_WIDTH = BUTTON_WIDTH * 2;
+    public static final int INV_HEIGHT = BUTTON_WIDTH * 3;
+
+    public static RectZone renderUnitInventory(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, UnitInventory inv) {
+        ItemClientEvents.renderedButtons.clear();
+        for (int i = 0; i < inv.getAllItems().size(); i++) {
+            ItemStack itemStack = inv.getAllItems().get(i);
+            UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
+            if (unitItem instanceof EmptyUnitItem emptyItem) {
+                ItemClientEvents.renderedButtons.add(emptyItem.getEmptySlotButton(i, actionableUnitItem != null, (Unit) inv));
+            } else if (unitItem != null) {
+                ItemClientEvents.renderedButtons.add(unitItem.getButton(i, itemStack, (Unit) inv));
+            }
+        }
+        int i = 0;
+        for (Button button : ItemClientEvents.renderedButtons) {
+            int xi = i % 2 == 0 ? x : x + BUTTON_WIDTH;
+            int yi = y + ((i / 2) * BUTTON_WIDTH);
+            button.render(guiGraphics, xi, yi, mouseX, mouseY);
+            i += 1;
+        }
+
+        for (Button button : ItemClientEvents.renderedButtons)
+            if (button.isMouseOver(mouseX, mouseY))
+                button.renderTooltip(guiGraphics, mouseX, mouseY);
+
+        return RectZone.getZoneByLW(x, y, INV_WIDTH, INV_HEIGHT);
+    }
+
+
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
@@ -88,7 +128,6 @@ public class ItemClientEvents {
                 button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
             }
         }
-
         if (!UnitClientEvents.getSelectedUnits().isEmpty() && actionableUnitItem != null &&
             UnitClientEvents.getSelectedUnits().get(0) instanceof UnitInventory inv) {
             if (getMousedOverButton() instanceof UnitItemButton uiButton) {
@@ -104,6 +143,7 @@ public class ItemClientEvents {
                         le instanceof UnitInventory inv2 &&
                         (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED)) {
                         // todo: wire to move goal and enforce range
+                        // todo: drop on selected-group button to also give
                         inv.giveTo(actionableInvIndex, inv2);
                     }
                 } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
@@ -152,18 +192,23 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
+        lastMouseX = mouseX;
+        lastMouseY = mouseY;
+        mouseX = evt.getMouseX();
+        mouseY = evt.getMouseY();
+
         isRenderingGroundItemTooltip = false;
         if (OrthoviewClientEvents.isEnabled() && MC.screen instanceof TopdownGui) {
             for (ItemEntity itemEntity : preselectedItems) {
                 UnitItem unitItem = ItemUtil.getUnitItem(itemEntity.getItem().getItem());
                 if (unitItem != null && unitItem.enableTooltip) {
-                    MyRenderer.renderItemEntityTooltip(evt.getGuiGraphics(), unitItem, evt.getMouseX(), evt.getMouseY());
+                    MyRenderer.renderItemEntityTooltip(evt.getGuiGraphics(), unitItem, itemEntity.getItem(), evt.getMouseX(), evt.getMouseY());
                     isRenderingGroundItemTooltip = true;
                     break;
                 } else if (ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
-                    UnitItem foodUnitItem = new EdibleFoodItem(itemEntity.getItem().getItem(), itemEntity.getItem().getCount());
+                    UnitItem foodUnitItem = new EdibleFoodItem(itemEntity.getItem().getItem());
                     if (foodUnitItem.enableTooltip) {
-                        MyRenderer.renderTooltip(evt.getGuiGraphics(), foodUnitItem.getTooltip(), evt.getMouseX(), evt.getMouseY());
+                        MyRenderer.renderTooltip(evt.getGuiGraphics(), foodUnitItem.getTooltip(itemEntity.getItem()), evt.getMouseX(), evt.getMouseY());
                         isRenderingGroundItemTooltip = true;
                     }
                     break;
@@ -171,7 +216,7 @@ public class ItemClientEvents {
             }
             if (actionableUnitItem != null && !UnitClientEvents.getSelectedUnits().isEmpty() &&
                     UnitClientEvents.getSelectedUnits().get(0) instanceof Unit unit) {
-                actionableUnitItem.getButton(0, unit).renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
+                actionableUnitItem.getButton(0, new ItemStack(actionableUnitItem.item), unit).renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
             }
         }
     }

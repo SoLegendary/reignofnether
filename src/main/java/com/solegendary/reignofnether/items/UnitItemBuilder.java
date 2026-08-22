@@ -30,7 +30,6 @@ import java.util.List;
  *          public ManaPotion() {
  *              super(UnitItemBuilder.of(ItemRegistrar.MANA_POTION.get())
  *                  .type(UnitItemType.CONSUMABLE)
- *                  .stackQty(3)
  *                  .sellValue(10));
  *          }
  *      }
@@ -40,7 +39,6 @@ public class UnitItemBuilder {
     final Item item;
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
-    int stackQty = 1;
     int sellValue = 0;
     String descKey = "";
     Keybinding hotkey = null;
@@ -68,13 +66,6 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder type(UnitItemType type) {
         this.type = type;
-        return this;
-    }
-
-    public UnitItemBuilder stackQty(int stackQty) {
-        if (stackQty < 1)
-            throw new IllegalArgumentException("stackQty must be >= 1, was " + stackQty);
-        this.stackQty = stackQty;
         return this;
     }
 

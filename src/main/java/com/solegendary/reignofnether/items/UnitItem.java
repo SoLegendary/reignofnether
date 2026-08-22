@@ -32,11 +32,10 @@ public abstract class UnitItem {
     protected final Item item;
     public final ResourceLocation iconRl;
     public final UnitItemType type;
-    public final int stackQty; // TODO: remove and use itemStack instead?
     public final int sellValue;
     public final String descKey;
     public final Keybinding hotkey;
-    public boolean enableTooltip = true;
+    public boolean enableTooltip;
 
     protected final List<Pair<Enchantment, Integer>> enchantments;
     protected final List<String> pointKeys;
@@ -44,15 +43,10 @@ public abstract class UnitItem {
     private final boolean canUnitPickup;
     private final boolean canUnitAutopickup;
 
-    // created lazily: building it in the constructor would leak a partially
-    // constructed 'this' to UnitItemButton, which calls back into getItemStack()
-    private UnitItemButton button = null;
-
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
         this.iconRl = builder.iconRl;
         this.type = builder.type;
-        this.stackQty = builder.stackQty;
         this.sellValue = builder.sellValue;
         this.descKey = builder.descKey;
         this.hotkey = builder.hotkey;
@@ -63,10 +57,12 @@ public abstract class UnitItem {
         this.enableTooltip = builder.enableTooltip;
     }
 
-    public UnitItemButton getButton(int index, Unit unit) {
-        if (button == null)
-            button = new UnitItemButton(index, this, unit);
-        return button;
+    public Item getItem() {
+        return item;
+    }
+
+    public UnitItemButton getButton(int index, ItemStack itemStack, Unit unit) {
+        return new UnitItemButton(index, this, itemStack, unit);
     }
 
     public Component getName() {
@@ -86,15 +82,6 @@ public abstract class UnitItem {
         return lines;
     }
 
-    public ItemStack getItemStack() {
-        ItemStack stack = new ItemStack(item);
-        for (Pair<Enchantment, Integer> pair : enchantments) {
-            stack.enchant(pair.getFirst(), pair.getSecond());
-        }
-        stack.setCount(stackQty);
-        return stack;
-    }
-
     public boolean canUnitPickup() {
         return canUnitPickup;
     }
@@ -105,7 +92,7 @@ public abstract class UnitItem {
     }
 
     // legacy flat tooltip; UnitItemButton renders the banded tooltip instead
-    public List<FormattedCharSequence> getTooltip() {
+    public List<FormattedCharSequence> getTooltip(ItemStack itemStack) {
         return List.of();
     }
 
