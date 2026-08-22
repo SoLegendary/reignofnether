@@ -22,6 +22,7 @@ public class TemporaryMilitiaUnit extends MilitiaUnit {
     // convert back to villager when out of range of a TC
     @Override
     public void tick() {
+        super.tick();
         if (!shouldDiscard()) {
             if (!this.isCaptain && this.tickCount > 100 && this.tickCount % 10 == 0 && !converted &&
                     !level().isClientSide()) {
@@ -37,7 +38,7 @@ public class TemporaryMilitiaUnit extends MilitiaUnit {
                     Vec3 tcCentre = new Vec3( // ignore vertical distance
                         building.centrePos.getCenter().x(),
                         this.getEyeY(),
-                        building.centrePos.getCenter().y()
+                        building.centrePos.getCenter().z()
                     );
                     if (this.getEyePosition().distanceToSqr(tcCentre) > range * range) {
                         convertToVillager();
