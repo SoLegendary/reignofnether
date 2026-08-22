@@ -48,17 +48,15 @@ public class UnitItemButton extends Button {
                 Button.DEFAULT_ICON_SIZE,
                 null,
                 null,
-                () -> false, // todo: if cursor action is on sell/drop/give
+                () -> ItemClientEvents.actionableUnitItem == unitItem &&
+                    ItemClientEvents.actionableInvIndex == invIndex,
                 () -> false,
                 () -> true,
                 () -> {
                     ItemClientEvents.actionableUnitItem = unitItem;
                     ItemClientEvents.actionableInvIndex = invIndex;
                 },
-                () -> {
-                    ItemClientEvents.actionableUnitItem = unitItem;
-                    ItemClientEvents.actionableInvIndex = invIndex;
-                },
+                null,
                 List.of()
         );
         this.onLeftClickRelease = () -> {

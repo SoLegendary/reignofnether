@@ -74,10 +74,30 @@ public class ItemClientEvents {
     }
 
     public static boolean shouldRenderUnitInventory(Unit unit) {
+        return false;
+        /*
         return unit instanceof UnitInventory inv &&
                 (unit instanceof HeroUnit ||
                         !inv.getAllItems().isEmpty());
+         */
     }
+
+    /*
+    @SubscribeEvent
+    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
+        if (evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
+            if (!UnitClientEvents.getSelectedUnits().isEmpty() &&
+                UnitClientEvents.getSelectedUnits().get(0) instanceof UnitInventory inv) {
+                if (Keybindings.shiftMod.isDown())
+                    inv.tryAdding(new ItemStack(Items.DIAMOND_SWORD));
+                else if (Keybindings.ctrlMod.isDown())
+                    inv.tryAdding(new ItemStack(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get()));
+                else
+                    inv.tryAdding(new ItemStack(Items.TOTEM_OF_UNDYING));
+            }
+        }
+    }
+     */
 
     private static final int BUTTON_WIDTH = 22;
     public static final int INV_WIDTH = BUTTON_WIDTH * 2;
@@ -109,22 +129,6 @@ public class ItemClientEvents {
         return RectZone.getZoneByLW(x, y, INV_WIDTH, INV_HEIGHT);
     }
 
-
-    @SubscribeEvent
-    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
-            if (!UnitClientEvents.getSelectedUnits().isEmpty() &&
-                UnitClientEvents.getSelectedUnits().get(0) instanceof UnitInventory inv) {
-                if (Keybindings.shiftMod.isDown())
-                    inv.tryAdding(new ItemStack(Items.DIAMOND_SWORD));
-                else if (Keybindings.ctrlMod.isDown())
-                    inv.tryAdding(new ItemStack(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get()));
-                else
-                    inv.tryAdding(new ItemStack(Items.TOTEM_OF_UNDYING));
-            }
-        }
-    }
-
     @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
         for (Button button : renderedButtons) {
@@ -134,9 +138,6 @@ public class ItemClientEvents {
         }
         if (!UnitClientEvents.getSelectedUnits().isEmpty() && hasActionableItem() &&
             UnitClientEvents.getSelectedUnits().get(0) instanceof UnitInventory inv) {
-
-            mouseLeftDownX = 0;
-            mouseLeftDownY = 0;
 
             if (getMousedOverButton() instanceof UnitItemButton uiButton) {
                 inv.swapSlots(actionableInvIndex, uiButton.invIndex);
@@ -205,6 +206,11 @@ public class ItemClientEvents {
     public static void onDrawScreen(ScreenEvent.Render evt) {
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
+        // clear to avoid hiding ghost renders if the player happens to mouse back over this exact pixel
+        if (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) {
+            mouseLeftDownX = 0;
+            mouseLeftDownY = 0;
+        }
 
         isRenderingGroundItemTooltip = false;
         if (OrthoviewClientEvents.isEnabled() && MC.screen instanceof TopdownGui) {

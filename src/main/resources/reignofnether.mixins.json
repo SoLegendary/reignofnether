@@ -49,6 +49,7 @@
         "fogofwar.ChunkMapInitialSendMixin",
         "fogofwar.ChunkMapMixin",
         "fogofwar.TrackedEntityMixin",
+        "fogofwar.WorldBorderMixin",
         "goals.MobMixin",
         "goals.RandomStrollGoalMixin"
     ],

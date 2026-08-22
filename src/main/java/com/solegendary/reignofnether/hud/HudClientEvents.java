@@ -1600,7 +1600,7 @@ public class HudClientEvents {
                         }
                         if (!StartButtons.monsterStartButton.isHidden.get()) {
                             StartButtons.monsterStartButton.render(evt.getGuiGraphics(),
-                                    (int) (screenWidth - (StartButtons.ICON_SIZE * 4f)),
+                                    (int) (screenWidth - (StartButtons.ICON_SIZE * 6)),
                                     StartButtons.ICON_SIZE / 2,
                                     mouseX,
                                     mouseY
@@ -1609,7 +1609,7 @@ public class HudClientEvents {
                         }
                         if (!StartButtons.piglinStartButton.isHidden.get()) {
                             StartButtons.piglinStartButton.render(evt.getGuiGraphics(),
-                                    screenWidth - (StartButtons.ICON_SIZE * 2),
+                                    screenWidth - (StartButtons.ICON_SIZE * 4),
                                     StartButtons.ICON_SIZE / 2,
                                     mouseX,
                                     mouseY

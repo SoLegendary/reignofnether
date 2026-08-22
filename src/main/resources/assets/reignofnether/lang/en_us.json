@@ -1498,6 +1498,7 @@
     "entity.reignofnether.vindicator_unit.tooltip2": "Upgraded with diamond axes that deal +2 damage",
     "entity.reignofnether.witch_unit": "Witch",
     "entity.reignofnether.witch_unit.tooltip1": "A devious hag who can heal and harm with potions.",
+    "entity.reignofnether.temporary_militia_unit": "Militia",
     "entity.reignofnether.militia_unit": "Militia",
     "entity.reignofnether.militia_archer_unit": "Militia Archer",
     "entity.reignofnether.royal_guard_unit": "Royal Guard",

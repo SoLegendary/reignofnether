@@ -27,6 +27,9 @@ Fog of war
 [❌] Save control groups to world per player
 
 Scenario roles:
+    [❌] Use the new start menu for scenarios so we can have a readied start
+        - Need to make start blocks also have a scenario role index
+
     [❌] Use start menu colours for each role
     [❌] When role is cycled, move camera to the first found building (or unit if no building)
     [❌] Show different colours for each different assigned role

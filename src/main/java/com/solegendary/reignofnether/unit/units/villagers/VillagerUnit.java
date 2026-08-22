@@ -468,7 +468,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
     public void convertToMilitia() {
         if (!converted) {
-            LivingEntity newEntity = this.convertToUnit(EntityRegistrar.MILITIA_UNIT.get());
+            LivingEntity newEntity = this.convertToUnit(EntityRegistrar.TEMPORARY_MILITIA_UNIT.get());
             if (newEntity instanceof MilitiaUnit mUnit) {
                 mUnit.resourcesSaveData = this.gatherResourcesGoal.permSaveData;
                 mUnit.profession = this.getProfession();

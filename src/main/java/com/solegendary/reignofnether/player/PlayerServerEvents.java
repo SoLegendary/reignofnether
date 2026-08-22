@@ -224,6 +224,10 @@ public class PlayerServerEvents {
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         serverLevel = evt.getServer().getLevel(Level.OVERWORLD);
 
+        if (FogChunkSnapshot.shouldRecapture) {
+            FogChunkSnapshot.captureFogChunks(serverLevel);
+        }
+
         synchronized (rtsPlayers) {
             if (evt.phase == TickEvent.Phase.END) {
                 for (RTSPlayer rtsPlayer : rtsPlayers)

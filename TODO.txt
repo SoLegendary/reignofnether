@@ -29,7 +29,6 @@ Unit Items
     - Should have tooltips shown even on the ground
     - Requires right-click to pick up, will not auto-pickup
 
-[❌] blocks didn't update with fog disabled on login
 
 
 Balance
@@ -38,16 +37,19 @@ Balance
 
 Quality of Life
 ---------------
-[❌] Make current militia unit permanent
-[❌] Add new militia unit for temporary militia
+[🟡] All existing militia in saved maps can no longer be converted back into villagers
+[🟡] Villagers now convert into the `temporary_militia` entity which follow the normal rules for conversion
 
-[❌] Don't allow world border changes with fog enabled
 [❌] Force move camera command
+
+[❌] Allow fog to be kept on in between singleplayer relogs
 
 Bugfixes
 --------
-
-
+[🟡] Workers can no longer repair a building while garrisoned inside it
+[🟡] Fixed chunks disappearing if the worldborder was changed while fog of war was enabled
+    - Note this can still cause lag spikes on slower servers
+[🟡] Militia town centre range is now calculated only horizontally (so it better matches the circle radius)
 
 Languages
 ---------
