@@ -90,7 +90,7 @@ public class RtsDebugPathPreview {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        if (MC.level == null || MC.player == null || evt.getStage() != UnitClientEvents.stage
+        if (MC.level == null || MC.player == null || evt.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES
                 || RtsDebugClientEvents.displayMode != DebugDisplayMode.PATHFINDING
                 || !OrthoviewClientEvents.isEnabled())
             return;

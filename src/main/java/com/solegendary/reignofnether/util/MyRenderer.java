@@ -52,13 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 
-import static net.minecraft.client.renderer.RenderStateShard.COLOR_DEPTH_WRITE;
-import static net.minecraft.client.renderer.RenderStateShard.ITEM_ENTITY_TARGET;
-import static net.minecraft.client.renderer.RenderStateShard.NO_CULL;
-import static net.minecraft.client.renderer.RenderStateShard.NO_DEPTH_TEST;
-import static net.minecraft.client.renderer.RenderStateShard.RENDERTYPE_LINES_SHADER;
-import static net.minecraft.client.renderer.RenderStateShard.TRANSLUCENT_TRANSPARENCY;
-import static net.minecraft.client.renderer.RenderStateShard.VIEW_OFFSET_Z_LAYERING;
+import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class MyRenderer {
 
@@ -72,6 +66,20 @@ public class MyRenderer {
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .setOutputState(ITEM_ENTITY_TARGET)
                     .setWriteMaskState(COLOR_DEPTH_WRITE)
+                    .setCullState(NO_CULL)
+                    .setDepthTestState(NO_DEPTH_TEST)
+                    .createCompositeState(false)
+    );
+
+    // visible through terrain, but still occluded by entities (which draw later)
+    public static final RenderType LINES_UNDER_ENTITIES = RenderType.create(
+            ReignOfNether.MOD_ID + ":lines_under_entities",
+            DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
+            RenderType.CompositeState.builder().setShaderState(RENDERTYPE_LINES_SHADER)
+                    .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
+                    .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setWriteMaskState(COLOR_WRITE)
                     .setCullState(NO_CULL)
                     .setDepthTestState(NO_DEPTH_TEST)
                     .createCompositeState(false)
@@ -94,9 +102,26 @@ public class MyRenderer {
     }
 
     // like drawEntityOutline but only the bottom square
-    public static void drawBoxBottom(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
+    public static void drawBoxBottom(PoseStack matrixStack, AABB aabb,  float r, float g, float b, float a) {
         aabb = aabb.setMaxY(aabb.minY);
         drawLineBox(matrixStack, aabb, r, g, b, a);
+    }
+
+    public static void drawBoxBottom(PoseStack matrixStack, AABB aabb, VertexConsumer vertexConsumer, float r, float g, float b, float a) {
+        aabb = aabb.setMaxY(aabb.minY);
+        drawLineBox(matrixStack, aabb, vertexConsumer, r, g, b, a);
+    }
+
+    public static void drawLineBox(PoseStack matrixStack, AABB aabb, VertexConsumer vertexConsumer, float r, float g, float b, float a) {
+        Entity camEntity = MC.getCameraEntity();
+        double d0 = camEntity.getX();
+        double d1 = camEntity.getY() + camEntity.getEyeHeight();
+        double d2 = camEntity.getZ();
+
+        matrixStack.pushPose();
+        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, r, g, b, a);
+        matrixStack.popPose();
     }
 
     public static void drawLineBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {

@@ -93,6 +93,7 @@ import static com.solegendary.reignofnether.building.BuildingClientEvents.getPla
 import static com.solegendary.reignofnether.cursor.CursorClientEvents.getPreselectedBlockPos;
 import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
 import static com.solegendary.reignofnether.unit.Checkpoint.CHECKPOINT_TICKS_FADE;
+import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS;
 import static net.minecraftforge.client.event.RenderLevelStageEvent.Stage.AFTER_ENTITIES;
 
 
@@ -930,13 +931,13 @@ public class UnitClientEvents {
         }
     }
 
-    public static RenderLevelStageEvent.Stage stage = AFTER_ENTITIES;
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (MC.level == null)
             return;
-        if (evt.getStage() == stage) {
+        if (evt.getStage() == AFTER_CUTOUT_BLOCKS ||
+            evt.getStage() == AFTER_ENTITIES) {
             ArrayList<LivingEntity> selectedUnits = getSelectedUnits();
             ArrayList<LivingEntity> preselectedUnits = getPreselectedUnits();
 
@@ -944,85 +945,92 @@ public class UnitClientEvents {
             unitsToDraw.addAll(selectedUnits);
             unitsToDraw.addAll(preselectedUnits);
 
-            // draw outlines on all (pre)selected units but only draw once per unit based on conditions
-            // don't render preselection outlines if mousing over HUD
-            var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST);
-            if (OrthoviewClientEvents.isEnabled()) {
-                // evaluate conditions that will remain constant during the rendering stage
-                boolean isMouseOverAnyButtonOrHud = HudClientEvents.isMouseOverAnyButtonOrHud();
-                boolean isLeftClickAttack = isLeftClickAttack();
-                boolean targetingSelf = targetingSelf();
-                boolean isRightClickDown = MiscUtil.isRightClickDown(MC);
-                // render outline for each selected and preselected entities
-                for (Entity entity : unitsToDraw) {
-                    if (!FogOfWarClientEvents.isInBrightChunk(entity))
+            var vcNoDepthTest = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST);
+
+            if (evt.getStage() == AFTER_ENTITIES) {
+                // draw outlines on all (pre)selected units but only draw once per unit based on conditions
+                // don't render preselection outlines if mousing over HUD
+
+                if (OrthoviewClientEvents.isEnabled()) {
+                    // evaluate conditions that will remain constant during the rendering stage
+                    boolean isMouseOverAnyButtonOrHud = HudClientEvents.isMouseOverAnyButtonOrHud();
+                    boolean isLeftClickAttack = isLeftClickAttack();
+                    boolean targetingSelf = targetingSelf();
+                    boolean isRightClickDown = MiscUtil.isRightClickDown(MC);
+                    // render outline for each selected and preselected entities
+                    for (Entity entity : unitsToDraw) {
+                        if (!FogOfWarClientEvents.isInBrightChunk(entity))
+                            continue;
+
+                        AABB entityAABB = entity.getBoundingBox();
+                        if (entity instanceof Unit unit) {
+                            entityAABB = unit.getInflatedSelectionBox();
+                        } else if (entity instanceof Chicken) {
+                            entityAABB = entityAABB.inflate(0.2f, 0, 0.2f);
+                            entityAABB.setMaxY(entityAABB.maxY + 0.6f);
+                        }
+
+                        boolean isPreselected = preselectedUnits.contains(entity);
+                        boolean isSelected = selectedUnits.contains(entity);
+
+                        if (isPreselected && isLeftClickAttack && !targetingSelf && !isMouseOverAnyButtonOrHud)
+                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
+                        else if (isSelected)
+                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
+                        else if (isPreselected && !isMouseOverAnyButtonOrHud)
+                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
+                    }
+                }
+            } else if (evt.getStage() == AFTER_CUTOUT_BLOCKS) {
+                var selectedEntityIds = new HashSet<>();
+                for (LivingEntity selectedUnit : selectedUnits) {
+                    Integer id = selectedUnit.getId();
+                    selectedEntityIds.add(id);
+                }
+                var vc = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_UNDER_ENTITIES);
+
+                for (LivingEntity entity : allUnits) {
+                    if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
+                            entity.isPassenger())
                         continue;
 
+                    float alpha = 0.5f;
+                    if (selectedEntityIds.contains(entity.getId()))
+                        alpha = 1.0f;
+
+                    // draw only the bottom of the outline boxes
                     AABB entityAABB = entity.getBoundingBox();
                     if (entity instanceof Unit unit) {
                         entityAABB = unit.getInflatedSelectionBox();
-                    } else if (entity instanceof Chicken) {
-                        entityAABB = entityAABB.inflate(0.2f, 0, 0.2f);
-                        entityAABB.setMaxY(entityAABB.maxY + 0.6f);
                     }
+                    entityAABB = entityAABB.setMaxY(entityAABB.minY);
+                    boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
 
-                    boolean isPreselected = preselectedUnits.contains(entity);
-                    boolean isSelected = selectedUnits.contains(entity);
-
-                    if (isPreselected && isLeftClickAttack && !targetingSelf && !isMouseOverAnyButtonOrHud)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumer, entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
-                    else if (isSelected)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumer, entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
-                    else if (isPreselected && !isMouseOverAnyButtonOrHud)
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumer, entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
-                }
-            }
-
-            var selectedEntityIds = new HashSet<>();
-            for (LivingEntity selectedUnit : selectedUnits) {
-                Integer id = selectedUnit.getId();
-                selectedEntityIds.add(id);
-            }
-            for (LivingEntity entity : allUnits) {
-                if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
-                        entity.isPassenger())
-                    continue;
-
-                float alpha = 0.5f;
-                if (selectedEntityIds.contains(entity.getId()))
-                    alpha = 1.0f;
-
-                // draw only the bottom of the outline boxes
-                AABB entityAABB = entity.getBoundingBox();
-                if (entity instanceof Unit unit) {
-                    entityAABB = unit.getInflatedSelectionBox();
-                }
-                entityAABB = entityAABB.setMaxY(entityAABB.minY);
-                boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
-
-                Color colorHex;
-                if (entity instanceof Unit unit) {
-                    if (PlayerClientEvents.isRTSPlayer(unit.getOwnerName())) {
-                        colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(unit.getOwnerName()));
+                    Color colorHex;
+                    if (entity instanceof Unit unit) {
+                        if (PlayerClientEvents.isRTSPlayer(unit.getOwnerName())) {
+                            colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(unit.getOwnerName()));
+                        } else {
+                            colorHex = new Color(PlayerColors.COLOR_GRAY.hexCode, false);
+                        }
                     } else {
-                        colorHex = new Color(PlayerColors.COLOR_GRAY.hexCode, false);
+                        colorHex = new Color(0xFFFFFF, false);
                     }
-                } else {
-                    colorHex = new Color(0xFFFFFF, false);
+
+                    float r = colorHex.getRed() / 255.0f;
+                    float g = colorHex.getGreen() / 255.0f;
+                    float b = colorHex.getBlue() / 255.0f;
+
+                    // always-shown highlights to indicate unit relationships
+                    if (OrthoviewClientEvents.isEnabled()) {
+                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
+                    }
+
+                    MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);
                 }
-
-                float r = colorHex.getRed() / 255.0f;
-                float g = colorHex.getGreen() / 255.0f;
-                float b = colorHex.getBlue() / 255.0f;
-
-                // always-shown highlights to indicate unit relationships
-                if (OrthoviewClientEvents.isEnabled()) {
-                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumer, entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
-                }
-
-                MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, r, g, b, 0.5f);
+                MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack(), vc);
+                MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
             }
-            MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack());
 
             // render items in front of face for eating units
             for (LivingEntity entity : getAllUnits()) {
@@ -1032,8 +1040,7 @@ public class UnitClientEvents {
             }
         }
 
-        // AFTER_CUTOUT_BLOCKS lets us see checkpoints through leaves
-        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == stage) {
+        if (OrthoviewClientEvents.isEnabled() && evt.getStage() == AFTER_ENTITIES) {
             VertexConsumer vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINE_STRIP);
             ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
             VertexConsumer vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
