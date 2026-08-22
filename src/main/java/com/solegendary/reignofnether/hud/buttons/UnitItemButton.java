@@ -62,7 +62,7 @@ public class UnitItemButton extends Button {
                 List.of()
         );
         this.onLeftClickRelease = () -> {
-            if (ItemClientEvents.actionableUnitItem == null) {
+            if (!ItemClientEvents.hasActionableItem()) {
                 // todo: actual item usage
             }
         };
@@ -74,7 +74,7 @@ public class UnitItemButton extends Button {
 
     private static final float GHOST_ALPHA = 0.45f;
 
-    // TODO: remove alpha and rename to remove 'ghost', just move the actual button away when dragging
+    // TODO: remove alpha, hide original button and render to move the actual button away when dragging
     // render a translucent version of this button
     public void renderGhost(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         int x = mouseX - (DEFAULT_ICON_SIZE / 2);

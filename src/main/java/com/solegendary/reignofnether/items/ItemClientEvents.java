@@ -49,8 +49,8 @@ public class ItemClientEvents {
 
     private static int mouseX = 0;
     private static int mouseY = 0;
-    private static int lastMouseX = 0;
-    private static int lastMouseY = 0;
+    private static int mouseLeftDownX = 0;
+    private static int mouseLeftDownY = 0;
 
     public static final ArrayList<Button> renderedButtons = new ArrayList<>();
 
@@ -69,6 +69,10 @@ public class ItemClientEvents {
         return preselectedItems;
     }
 
+    public static boolean hasActionableItem() {
+        return actionableUnitItem != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY);
+    }
+
     public static boolean shouldRenderUnitInventory(Unit unit) {
         return unit instanceof UnitInventory inv &&
                 (unit instanceof HeroUnit ||
@@ -85,7 +89,7 @@ public class ItemClientEvents {
             ItemStack itemStack = inv.getAllItems().get(i);
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
             if (unitItem instanceof EmptyUnitItem emptyItem) {
-                ItemClientEvents.renderedButtons.add(emptyItem.getEmptySlotButton(i, actionableUnitItem != null, (Unit) inv));
+                ItemClientEvents.renderedButtons.add(emptyItem.getEmptySlotButton(i, hasActionableItem(), (Unit) inv));
             } else if (unitItem != null) {
                 ItemClientEvents.renderedButtons.add(unitItem.getButton(i, itemStack, (Unit) inv));
             }
@@ -128,8 +132,12 @@ public class ItemClientEvents {
                 button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
             }
         }
-        if (!UnitClientEvents.getSelectedUnits().isEmpty() && actionableUnitItem != null &&
+        if (!UnitClientEvents.getSelectedUnits().isEmpty() && hasActionableItem() &&
             UnitClientEvents.getSelectedUnits().get(0) instanceof UnitInventory inv) {
+
+            mouseLeftDownX = 0;
+            mouseLeftDownY = 0;
+
             if (getMousedOverButton() instanceof UnitItemButton uiButton) {
                 inv.swapSlots(actionableInvIndex, uiButton.invIndex);
             } else if (!HudClientEvents.isMouseOverAnyButtonOrHud()) {
@@ -157,8 +165,11 @@ public class ItemClientEvents {
                 }
             }
         }
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1)
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             actionableUnitItem = null;
+            mouseLeftDownX = 0;
+            mouseLeftDownY = 0;
+        }
     }
 
     private static Button getMousedOverButton() {
@@ -192,8 +203,6 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
-        lastMouseX = mouseX;
-        lastMouseY = mouseY;
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
 
@@ -214,7 +223,7 @@ public class ItemClientEvents {
                     break;
                 }
             }
-            if (actionableUnitItem != null && !UnitClientEvents.getSelectedUnits().isEmpty() &&
+            if (hasActionableItem() && !UnitClientEvents.getSelectedUnits().isEmpty() &&
                     UnitClientEvents.getSelectedUnits().get(0) instanceof Unit unit) {
                 actionableUnitItem.getButton(0, new ItemStack(actionableUnitItem.item), unit).renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
             }
@@ -231,6 +240,10 @@ public class ItemClientEvents {
             } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
                 button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
             }
+        }
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            mouseLeftDownX = (int) evt.getMouseX();
+            mouseLeftDownY = (int) evt.getMouseY();
         }
     }
 }
