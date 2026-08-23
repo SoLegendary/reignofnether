@@ -40,7 +40,7 @@ public class ForgeGuiMixin extends Gui {
         CustomizeGuiOverlayEvent.Chat event = new CustomizeGuiOverlayEvent.Chat(window, guiGraphics, this.minecraft.getFrameTime(), 0, height - 40);
         MinecraftForge.EVENT_BUS.post(event);
         guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate((double)event.getPosX(), (double)(event.getPosY() - height - 15) / this.chat.getScale(), 0.0);
+        guiGraphics.pose().translate(event.getPosX(), (double)(event.getPosY() - height + 40 + OrthoviewClientEvents.CHAT_Y_OFFSET) / this.chat.getScale(), 0.0);
         int mouseX = Mth.floor(this.minecraft.mouseHandler.xpos() * (double)window.getGuiScaledWidth() / (double)window.getScreenWidth());
         int mouseY = Mth.floor(this.minecraft.mouseHandler.ypos() * (double)window.getGuiScaledHeight() / (double)window.getScreenHeight());
         this.chat.render(guiGraphics, this.tickCount, mouseX, mouseY);

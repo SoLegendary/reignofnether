@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.resources;
+package com.solegendary.reignofnether.blocks;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;

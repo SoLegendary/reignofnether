@@ -5,6 +5,7 @@ public enum ResourceName {
     FOOD,
     WOOD,
     ORE,
+    EMERALD,
     NONE;
 
     public String langKey() {

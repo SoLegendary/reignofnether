@@ -60,6 +60,7 @@ import static net.minecraft.util.Mth.sign;
  */
 public class OrthoviewClientEvents {
 
+    public static final int CHAT_Y_OFFSET = -55; // shift chat up by this much when in RTS cam to make room for the
 
     public enum LeafHideMethod {
         NONE, AROUND_UNITS_AND_CURSOR, // requires threaded video option
@@ -268,7 +269,7 @@ public class OrthoviewClientEvents {
 
     // lock the camera and move it towards a location, remain locked for cameraLockTicks
     public static void forceMoveCam(int x, int z, int cameraLockTicks) {
-        if (MC.player != null) {
+        if (MC.player != null && OrthoviewClientEvents.isEnabled()) {
             forcePanTicksLeft = FORCE_PAN_TICKS_MAX;
             forcePanTargetX = x;
             forcePanTargetZ = z;

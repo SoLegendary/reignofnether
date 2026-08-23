@@ -28,6 +28,7 @@ import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientboundPac
 import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerServerboundPacket;
 import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
+import com.solegendary.reignofnether.orthoview.CameraFadeClientboundPacket;
 import com.solegendary.reignofnether.player.MatchStatsClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -373,6 +374,12 @@ public final class PacketHandler {
                 .encoder(CameraClientboundPacket::encode)
                 .decoder(CameraClientboundPacket::new)
                 .consumerMainThread(CameraClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(CameraFadeClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CameraFadeClientboundPacket::encode)
+                .decoder(CameraFadeClientboundPacket::new)
+                .consumerMainThread(CameraFadeClientboundPacket::handle)
                 .add();
 
         INSTANCE.messageBuilder(FogNeutralUnitClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)

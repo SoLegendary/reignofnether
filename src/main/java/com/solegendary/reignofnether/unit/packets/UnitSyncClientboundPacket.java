@@ -34,26 +34,27 @@ public class UnitSyncClientboundPacket {
     private final int food;
     private final int wood;
     private final int ore;
+    private final int emerald;
     private final String ownerName;
 
     public static void sendLeavePacket(LivingEntity entity) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(UnitSyncAction.LEAVE_LEVEL,
-                        entity.getId(),0,0,0,0,0,0,0,0,0, "")
+                        entity.getId(),0,0,0,0,0,0,0,0,0,0, "")
         );
     }
 
     public static void sendSyncOwnerNamePacket(Unit unit) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(UnitSyncAction.SYNC_OWNERNAME,
-                        ((LivingEntity) unit).getId(),0,0,0,0,0,0,0,0,0, unit.getOwnerName())
+                        ((LivingEntity) unit).getId(),0,0,0,0,0,0,0,0,0,0, unit.getOwnerName())
         );
     }
 
     public static void sendSyncScenarioRoleIndexPacket(Unit unit) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new UnitSyncClientboundPacket(UnitSyncAction.SYNC_SCENARIO_ROLE_INDEX,
-                        ((LivingEntity) unit).getId(), unit.getScenarioRoleIndex(),0,0,0,0,0,0,0,0, "")
+                        ((LivingEntity) unit).getId(), unit.getScenarioRoleIndex(),0,0,0,0,0,0,0,0,0, "")
         );
     }
 
@@ -70,7 +71,7 @@ public class UnitSyncClientboundPacket {
                                 entity.getHealth(),
                                 entity.getAbsorptionAmount(),
                                 entity.getX(), entity.getY(), entity.getZ(),
-                                0,0,0, owner)
+                                0,0,0,0, owner)
                 );
             }
         }
@@ -81,7 +82,7 @@ public class UnitSyncClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new UnitSyncClientboundPacket(UnitSyncAction.SYNC_RESOURCES,
                 ((LivingEntity) unit).getId(), 0,0,0,0,0,0,
-                res.food, res.wood, res.ore, "")
+                res.food, res.wood, res.ore, res.emerald, "")
         );
     }
 
@@ -90,7 +91,7 @@ public class UnitSyncClientboundPacket {
                 new UnitSyncClientboundPacket(
                         UnitSyncAction.MAKE_VILLAGER_VETERAN,
                         entity.getId(), 0,
-                        0, 0,0,0,0,0,0,0, "")
+                        0, 0,0,0,0,0,0,0,0, "")
         );
     }
 
@@ -99,7 +100,7 @@ public class UnitSyncClientboundPacket {
                 new UnitSyncClientboundPacket(
                         UnitSyncAction.SYNC_ANCHOR_POS,
                         entity.getId(), 0,0,
-                        0, bp.getX(), bp.getY(), bp.getZ(),0,0,0, "")
+                        0, bp.getX(), bp.getY(), bp.getZ(),0,0,0,0, "")
         );
     }
 
@@ -108,7 +109,7 @@ public class UnitSyncClientboundPacket {
                 new UnitSyncClientboundPacket(
                         UnitSyncAction.SYNC_ANCHOR_POS,
                         entity.getId(), 0,0,
-                        0,0,0,0,0,0,0, "")
+                        0,0,0,0,0,0,0,0, "")
         );
     }
 
@@ -125,6 +126,7 @@ public class UnitSyncClientboundPacket {
         int food,
         int wood,
         int ore,
+        int emerald,
         String ownerName
     ) {
         // filter out non-owned entities so we can't control them
@@ -138,6 +140,7 @@ public class UnitSyncClientboundPacket {
         this.posZ = posZ;
         this.food = food;
         this.wood = wood;
+        this.emerald = emerald;
         this.ore = ore;
         this.ownerName = ownerName;
     }
@@ -154,6 +157,7 @@ public class UnitSyncClientboundPacket {
         this.food = buffer.readInt();
         this.wood = buffer.readInt();
         this.ore = buffer.readInt();
+        this.emerald = buffer.readInt();
         this.ownerName = buffer.readUtf();
     }
 
@@ -169,6 +173,7 @@ public class UnitSyncClientboundPacket {
         buffer.writeInt(this.food);
         buffer.writeInt(this.wood);
         buffer.writeInt(this.ore);
+        buffer.writeInt(this.emerald);
         buffer.writeUtf(this.ownerName);
     }
 
@@ -192,7 +197,7 @@ public class UnitSyncClientboundPacket {
                         );
                         case SYNC_RESOURCES -> UnitClientEvents.syncUnitResources(
                                 this.entityId,
-                                new Resources("", this.food, this.wood, this.ore)
+                                new Resources("", this.food, this.wood, this.ore, this.emerald)
                         );
                         case MAKE_VILLAGER_VETERAN -> UnitClientEvents.makeVillagerVeteran(this.entityId);
                         case SYNC_ANCHOR_POS -> UnitClientEvents.syncAnchorPos(

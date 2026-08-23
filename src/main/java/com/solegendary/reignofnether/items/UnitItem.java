@@ -1,17 +1,19 @@
 package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
-import com.solegendary.reignofnether.hud.buttons.Button;
-import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
+import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.Enchantments;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 
 // items that can be held and used by RTS units, especially heroes
@@ -23,58 +25,82 @@ import java.util.List;
 //    - RoN mana potion ✔
 //    - Ron RTS Start Block ❌
 
+// construct via UnitItemBuilder, eg. UnitItemBuilder.of(Items.IRON_SWORD).sellValue(25).build()
+
 public abstract class UnitItem {
-    final Item item;
+
+    protected final Item item;
     public final ResourceLocation iconRl;
-    protected int stackQty = 1;
-    List<Pair<Enchantment, Integer>> enchantments = List.of();
+    public final UnitItemType type;
+    public final int sellValue;
+    public final String descKey;
+    public final Keybinding hotkey;
+    public boolean enableTooltip;
 
-    public UnitItem(Item item, ResourceLocation iconRl) {
-        this.item = item;
-        this.iconRl = iconRl;
+    protected final List<Pair<Enchantment, Integer>> enchantments;
+    protected final List<String> pointKeys;
+
+    private final boolean canUnitPickup;
+    private final boolean canUnitAutopickup;
+
+    protected UnitItem(UnitItemBuilder builder) {
+        this.item = builder.item;
+        this.iconRl = builder.iconRl;
+        this.type = builder.type;
+        this.sellValue = builder.sellValue;
+        this.descKey = builder.descKey;
+        this.hotkey = builder.hotkey;
+        this.enchantments = List.copyOf(builder.enchantments);
+        this.pointKeys = List.copyOf(builder.pointKeys);
+        this.canUnitPickup = builder.canUnitPickup;
+        this.canUnitAutopickup = builder.canUnitAutopickup;
+        this.enableTooltip = builder.enableTooltip;
     }
 
-    public UnitItem(Item item, ResourceLocation iconRl, List<Pair<Enchantment, Integer>> enchantments) {
-        this.item = item;
-        this.iconRl = iconRl;
-        this.enchantments = enchantments;
+    public Item getItem() {
+        return item;
     }
 
-    public UnitItem(Item item, ResourceLocation iconRl, int stackQty) {
-        this.item = item;
-        this.iconRl = iconRl;
-        this.stackQty = stackQty;
-    }
-
-    public List<FormattedCharSequence> getTooltip() {
-        return List.of();
+    public UnitItemButton getButton(int index, ItemStack itemStack, Unit unit) {
+        return new UnitItemButton(index, this, itemStack, unit);
     }
 
     public Component getName() {
         return new ItemStack(item).getHoverName();
     }
 
-    public ItemStack getItemStack() {
-        ItemStack stack = new ItemStack(item);
-        for (Pair<Enchantment, Integer> pair : enchantments) {
-            stack.enchant(pair.getFirst(), pair.getSecond());
-        }
-        stack.setCount(stackQty);
-        return stack;
+    @Nullable
+    public String getDescription() {
+        return descKey.isBlank() ? null : I18n.get(descKey);
     }
 
-    public Button getButton() {
-        return new ButtonBuilder("button_" + item.getDescriptionId())
-                .tooltipLines(getTooltip())
-                .build();
+    /** One string per bullet in the tooltip's passive stat list. */
+    public List<String> getPointLines() {
+        List<String> lines = new ArrayList<>();
+        for (String key : pointKeys)
+            lines.add(I18n.get(key));
+        return lines;
     }
 
     public boolean canUnitPickup() {
-        return true;
+        return canUnitPickup;
     }
 
     // usually for stuff like resources and piglin merchant loot
     public boolean canUnitAutopickup() {
-        return false;
+        return canUnitAutopickup;
     }
+
+    // legacy flat tooltip; UnitItemButton renders the banded tooltip instead
+    public List<FormattedCharSequence> getTooltip(ItemStack itemStack) {
+        return List.of();
+    }
+
+    // TODO:
+    // - consume()
+    // - onUse() // (on left click release)
+    // - drop()
+    // - applyAttributeModifiers()
+
+
 }

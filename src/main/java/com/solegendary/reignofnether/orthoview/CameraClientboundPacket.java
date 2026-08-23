@@ -34,7 +34,6 @@ public class CameraClientboundPacket {
         );
     }
 
-
     public CameraClientboundPacket(String playerName, BlockPos pos, int ticks) {
         this.playerName = playerName;
         this.pos = pos;

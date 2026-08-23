@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.blocks;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
-import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;

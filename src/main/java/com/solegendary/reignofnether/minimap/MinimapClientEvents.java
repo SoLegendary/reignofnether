@@ -158,7 +158,7 @@ public class MinimapClientEvents {
         neutralFogUnits.removeIf(minimapUnit -> minimapUnit.id == id);
     }
 
-    public static void highlightNeutralFogUnits(PoseStack pose) {
+    public static void highlightNeutralFogUnits(PoseStack pose, VertexConsumer vertexConsumer) {
         if (!FogOfWarClientEvents.isEnabled())
             return;
         for (MinimapUnit mu : neutralFogUnits) {
@@ -169,7 +169,7 @@ public class MinimapClientEvents {
                     float r = color.getRed() / 255.0f;
                     float g = color.getGreen() / 255.0f;
                     float b = color.getBlue() / 255.0f;
-                    MyRenderer.drawBoxBottom(pose, mu.aabb, r, g, b, 0.5f);
+                    MyRenderer.drawBoxBottom(pose, mu.aabb, vertexConsumer, r, g, b, 0.5f);
                 }
             }
         }

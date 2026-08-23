@@ -855,8 +855,9 @@ public class CommandsServerEvents {
 		int food = resource == ResourceName.FOOD ? amount : 0;
 		int wood = resource == ResourceName.WOOD ? amount : 0;
 		int ore = resource == ResourceName.ORE ? amount : 0;
+		int emerald = resource == ResourceName.EMERALD ? amount : 0;
 		
-		ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore));
+		ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore, emerald));
 		ctx.getSource().sendSuccess(
 			() -> Component.literal("Changed " + resource.name().toLowerCase() + " by " + amount + " for " + playerName),
 			true

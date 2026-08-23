@@ -47,17 +47,12 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 
-import static net.minecraft.client.renderer.RenderStateShard.COLOR_DEPTH_WRITE;
-import static net.minecraft.client.renderer.RenderStateShard.ITEM_ENTITY_TARGET;
-import static net.minecraft.client.renderer.RenderStateShard.NO_CULL;
-import static net.minecraft.client.renderer.RenderStateShard.NO_DEPTH_TEST;
-import static net.minecraft.client.renderer.RenderStateShard.RENDERTYPE_LINES_SHADER;
-import static net.minecraft.client.renderer.RenderStateShard.TRANSLUCENT_TRANSPARENCY;
-import static net.minecraft.client.renderer.RenderStateShard.VIEW_OFFSET_Z_LAYERING;
+import static net.minecraft.client.renderer.RenderStateShard.*;
 
 public class MyRenderer {
 
@@ -71,6 +66,20 @@ public class MyRenderer {
                     .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
                     .setOutputState(ITEM_ENTITY_TARGET)
                     .setWriteMaskState(COLOR_DEPTH_WRITE)
+                    .setCullState(NO_CULL)
+                    .setDepthTestState(NO_DEPTH_TEST)
+                    .createCompositeState(false)
+    );
+
+    // visible through terrain, but still occluded by entities (which draw later)
+    public static final RenderType LINES_UNDER_ENTITIES = RenderType.create(
+            ReignOfNether.MOD_ID + ":lines_under_entities",
+            DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 256, false, false,
+            RenderType.CompositeState.builder().setShaderState(RENDERTYPE_LINES_SHADER)
+                    .setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
+                    .setLayeringState(VIEW_OFFSET_Z_LAYERING)
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setWriteMaskState(COLOR_WRITE)
                     .setCullState(NO_CULL)
                     .setDepthTestState(NO_DEPTH_TEST)
                     .createCompositeState(false)
@@ -93,9 +102,26 @@ public class MyRenderer {
     }
 
     // like drawEntityOutline but only the bottom square
-    public static void drawBoxBottom(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
+    public static void drawBoxBottom(PoseStack matrixStack, AABB aabb,  float r, float g, float b, float a) {
         aabb = aabb.setMaxY(aabb.minY);
         drawLineBox(matrixStack, aabb, r, g, b, a);
+    }
+
+    public static void drawBoxBottom(PoseStack matrixStack, AABB aabb, VertexConsumer vertexConsumer, float r, float g, float b, float a) {
+        aabb = aabb.setMaxY(aabb.minY);
+        drawLineBox(matrixStack, aabb, vertexConsumer, r, g, b, a);
+    }
+
+    public static void drawLineBox(PoseStack matrixStack, AABB aabb, VertexConsumer vertexConsumer, float r, float g, float b, float a) {
+        Entity camEntity = MC.getCameraEntity();
+        double d0 = camEntity.getX();
+        double d1 = camEntity.getY() + camEntity.getEyeHeight();
+        double d2 = camEntity.getZ();
+
+        matrixStack.pushPose();
+        matrixStack.translate(-d0, -d1, -d2); // because we start at 0,0,0 relative to camera
+        LevelRenderer.renderLineBox(matrixStack, vertexConsumer, aabb, r, g, b, a);
+        matrixStack.popPose();
     }
 
     public static void drawLineBox(PoseStack matrixStack, AABB aabb, float r, float g, float b, float a) {
@@ -520,8 +546,8 @@ public class MyRenderer {
         }
     }
 
-    public static void renderItemEntityTooltip(GuiGraphics guiGraphics, UnitItem unitItem, int mouseX, int mouseY) {
-        if (unitItem == null || MC.screen == null)
+    public static void renderItemEntityTooltip(GuiGraphics guiGraphics, UnitItem unitItem, ItemStack itemStack, int mouseX, int mouseY) {
+        if (unitItem == null || MC.screen == null || !unitItem.enableTooltip)
             return;
 
         final int iconSize = 16;
@@ -529,7 +555,7 @@ public class MyRenderer {
         int paddingChars = iconSize / Math.max(spaceWidth, 1);
         String pad = " ".repeat(paddingChars);
         Component name = unitItem.iconRl != null ? Component.literal(pad).append(unitItem.getName()) : unitItem.getName();
-        List<FormattedCharSequence> lore = unitItem.getTooltip();
+        List<FormattedCharSequence> lore = unitItem.getTooltip(itemStack);
 
         List<FormattedCharSequence> lines = new ArrayList<>();
         lines.add(name.getVisualOrderText());
@@ -684,4 +710,84 @@ public class MyRenderer {
             MyRenderer.renderIcon(g, fallbackRl, x, y, iconSize);
         }
     }
+
+    // vanilla tooltip colours (TooltipRenderUtil)
+    public static final int TOOLTIP_BG = 0xF0100010;
+    public static final int TOOLTIP_BORDER_TOP = 0x505000FF;
+    public static final int TOOLTIP_BORDER_BOTTOM = 0x5028007F;
+    public static final int TOOLTIP_DIVIDER = 0x40FFFFFF;
+
+    /**
+     * Draws a vanilla-styled tooltip frame. x,y is the top-left of the *text* area;
+     * the frame extends 3-4px beyond it on each side, exactly as vanilla does.
+     * Reimplemented rather than calling TooltipRenderUtil so the signature can't
+     * break across MC versions.
+     */
+    public static void renderTooltipBackground(GuiGraphics g, int x, int y, int width, int height) {
+        int x1 = x - 3;
+        int y1 = y - 3;
+        int x2 = x + width + 3;
+        int y2 = y + height + 3;
+
+        g.fill(x1, y1 - 1, x2, y1, TOOLTIP_BG); // above
+        g.fill(x1, y2, x2, y2 + 1, TOOLTIP_BG); // below
+        g.fill(x1, y1, x2, y2, TOOLTIP_BG); // middle
+        g.fill(x1 - 1, y1, x1, y2, TOOLTIP_BG); // left
+        g.fill(x2, y1, x2 + 1, y2, TOOLTIP_BG); // right
+
+        g.fillGradient(x1, y1 + 1, x1 + 1, y2 - 1, TOOLTIP_BORDER_TOP, TOOLTIP_BORDER_BOTTOM);
+        g.fillGradient(x2 - 1, y1 + 1, x2, y2 - 1, TOOLTIP_BORDER_TOP, TOOLTIP_BORDER_BOTTOM);
+        g.fillGradient(x1, y1, x2, y1 + 1, TOOLTIP_BORDER_TOP, TOOLTIP_BORDER_TOP);
+        g.fillGradient(x1, y2 - 1, x2, y2, TOOLTIP_BORDER_BOTTOM, TOOLTIP_BORDER_BOTTOM);
+    }
+
+    /** Draws a FormattedCharSequence at an arbitrary scale, anchored at its top-left. */
+    public static void drawScaledString(GuiGraphics g, Font font, FormattedCharSequence text,
+                                        int x, int y, int colour, float scale) {
+        PoseStack poseStack = g.pose();
+        poseStack.pushPose();
+        poseStack.translate(x, y, 0);
+        poseStack.scale(scale, scale, 1.0f);
+        g.drawString(font, text, 0, 0, colour, true);
+        poseStack.popPose();
+    }
+
+    /** Width a scaled line will actually occupy on screen. */
+    public static int scaledWidth(Font font, FormattedCharSequence text, float scale) {
+        return Math.round(font.width(text) * scale);
+    }
+
+    /**
+     * Draws one line with left content flush left and right content flush right
+     * within the given width. Each side may be null and may use its own scale;
+     * the smaller side is centred vertically against the taller one.
+     */
+    public static void renderJustifiedRow(GuiGraphics g, @Nullable FormattedCharSequence left, float leftScale,
+                                          @Nullable FormattedCharSequence right, float rightScale,
+                                          int x, int y, int width) {
+        Font font = MC.font;
+        float tallest = Math.max(leftScale, rightScale);
+
+        if (left != null) {
+            int dy = Math.round((tallest - leftScale) * font.lineHeight / 2f);
+            drawScaledString(g, font, left, x, y + dy, 0xFFFFFF, leftScale);
+        }
+        if (right != null) {
+            int dy = Math.round((tallest - rightScale) * font.lineHeight / 2f);
+            int rightX = x + width - scaledWidth(font, right, rightScale);
+            drawScaledString(g, font, right, rightX, y + dy, 0xFFFFFF, rightScale);
+        }
+    }
+
+    public static void renderJustifiedRow(GuiGraphics g, @Nullable FormattedCharSequence left,
+                                          @Nullable FormattedCharSequence right, int x, int y, int width) {
+        renderJustifiedRow(g, left, 1.0f, right, 1.0f, x, y, width);
+    }
+
+    /** 1px horizontal rule spanning the tooltip's inner width, with 1px padding above. */
+    public static void renderTooltipDivider(GuiGraphics g, int x, int y, int width) {
+        g.fill(x - 1, y + 1, x + width + 1, y + 2, TOOLTIP_DIVIDER);
+    }
+
+
 }

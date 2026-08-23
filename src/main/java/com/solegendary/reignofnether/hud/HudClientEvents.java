@@ -24,9 +24,10 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.custombutton.CustomButton;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientEvents;
-import com.solegendary.reignofnether.hud.custombutton.CustomButtonServerEvents;
 import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -65,7 +66,6 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.resources.language.I18n;
@@ -655,6 +655,7 @@ public class HudClientEvents {
                 }
             }
             blitX += portraitRendererUnit.frameWidth;
+            boolean renderedItemsOrResources = false;
 
             if (hudSelectedEntity instanceof Unit unit) {
                 hudZones.add(portraitRendererUnit.renderStats(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY, unit));
@@ -663,39 +664,44 @@ public class HudClientEvents {
 
                 int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
-                if (hudSelectedEntity instanceof Mob mob && mob.canPickUpLoot() && totalRes > 0) {
+
+                if (unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(unit)) {
+                    hudZones.add(ItemClientEvents.renderUnitInventory(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, inv));
+                    renderedItemsOrResources = true;
+                }
+                else if (hudSelectedEntity instanceof Mob mob && mob.canPickUpLoot() && totalRes > 0) {
                     hudZones.add(portraitRendererUnit.renderResourcesHeld(evt.getGuiGraphics(), blitX, blitY, unit));
 
                     // return button
                     if (getPlayerToEntityRelationship(hudSelectedEntity) == Relationship.OWNED ||
-                        AlliancesClient.canControlAlly(hudSelectedEntity)) {
+                            AlliancesClient.canControlAlly(hudSelectedEntity)) {
                         Button returnButton = new Button("Return resources",
-                            Button.itemIconSize,
-                            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
-                            Keybindings.hotkey5,
-                            () -> unit.getReturnResourcesGoal().getBuildingTarget() != null,
-                            () -> false,
-                            () -> true,
-                            () -> sendUnitCommand(UnitAction.RETURN_RESOURCES_TO_CLOSEST),
-                            null,
-                            List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.drop_off_resources"),
-                                Style.EMPTY
-                            ))
+                                Button.itemIconSize,
+                                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"),
+                                Keybindings.hotkey5,
+                                () -> unit.getReturnResourcesGoal().getBuildingTarget() != null,
+                                () -> false,
+                                () -> true,
+                                () -> sendUnitCommand(UnitAction.RETURN_RESOURCES_TO_CLOSEST),
+                                null,
+                                List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.drop_off_resources"),
+                                        Style.EMPTY
+                                ))
                         );
                         returnButton.render(evt.getGuiGraphics(), blitX + 10, blitY + 38, mouseX, mouseY);
                         renderedButtons.add(returnButton);
                     }
+                    renderedItemsOrResources = true;
                 }
             } else if (ResourceSources.isHuntableAnimal(hudSelectedEntity)) {
                 hudZones.add(portraitRendererUnit.renderResourcesHeld(evt.getGuiGraphics(), blitX, blitY, (Animal) hudSelectedEntity));
                 blitX += portraitRendererUnit.statsWidth;
             }
 
-            if (hudSelectedEntity instanceof Unit unit
-                && Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0) {
-                blitX += portraitRendererUnit.statsWidth + 5;
+            if (renderedItemsOrResources) {
+                blitX += portraitRendererUnit.statsWidth + 4;
             } else {
-                blitX += 15;
+                blitX += 14;
             }
         }
 
@@ -1594,7 +1600,7 @@ public class HudClientEvents {
                         }
                         if (!StartButtons.monsterStartButton.isHidden.get()) {
                             StartButtons.monsterStartButton.render(evt.getGuiGraphics(),
-                                    (int) (screenWidth - (StartButtons.ICON_SIZE * 4f)),
+                                    (int) (screenWidth - (StartButtons.ICON_SIZE * 6)),
                                     StartButtons.ICON_SIZE / 2,
                                     mouseX,
                                     mouseY
@@ -1603,7 +1609,7 @@ public class HudClientEvents {
                         }
                         if (!StartButtons.piglinStartButton.isHidden.get()) {
                             StartButtons.piglinStartButton.render(evt.getGuiGraphics(),
-                                    screenWidth - (StartButtons.ICON_SIZE * 2),
+                                    screenWidth - (StartButtons.ICON_SIZE * 4),
                                     StartButtons.ICON_SIZE / 2,
                                     mouseX,
                                     mouseY
@@ -1881,6 +1887,8 @@ public class HudClientEvents {
         }
     }
 
+
+
     // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
@@ -1893,8 +1901,6 @@ public class HudClientEvents {
         for (Button button : renderedButtons)
             button.checkPressed(evt.getKeyCode());
     }
-
-
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {

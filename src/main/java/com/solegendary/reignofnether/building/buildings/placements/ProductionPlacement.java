@@ -241,7 +241,8 @@ public class ProductionPlacement extends BuildingPlacement {
                             ownerName,
                             -prodItem.getCost(level.isClientSide(), ownerName).food,
                             -prodItem.getCost(level.isClientSide(), ownerName).wood,
-                            -prodItem.getCost(level.isClientSide(), ownerName).ore
+                            -prodItem.getCost(level.isClientSide(), ownerName).ore,
+                            -prodItem.getCost(level.isClientSide(), ownerName).emerald
                     ));
                     success = true;
                 }
@@ -259,7 +260,8 @@ public class ProductionPlacement extends BuildingPlacement {
                         ResourcesClientboundPacket.warnInsufficientResources(ownerName,
                                 ResourcesServerEvents.canAfford(ownerName, ResourceName.FOOD, prodItem.getCost(level.isClientSide(), ownerName).food),
                                 ResourcesServerEvents.canAfford(ownerName, ResourceName.WOOD, prodItem.getCost(level.isClientSide(), ownerName).wood),
-                                ResourcesServerEvents.canAfford(ownerName, ResourceName.ORE, prodItem.getCost(level.isClientSide(), ownerName).ore)
+                                ResourcesServerEvents.canAfford(ownerName, ResourceName.ORE, prodItem.getCost(level.isClientSide(), ownerName).ore),
+                                ResourcesServerEvents.canAfford(ownerName, ResourceName.EMERALD, prodItem.getCost(level.isClientSide(), ownerName).emerald)
                         );
                 }
             }

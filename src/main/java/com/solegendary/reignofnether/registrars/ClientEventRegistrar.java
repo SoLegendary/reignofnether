@@ -34,6 +34,7 @@ import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.matchstart.MatchEndClientEvents;
 import com.solegendary.reignofnether.matchstart.MatchStartClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
+import com.solegendary.reignofnether.orthoview.CameraFadeClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -108,6 +109,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(RtsDebugNavmesh.class);
         vanillaEventBus.register(RtsDebugPathPreview.class);
         vanillaEventBus.register(PlayerChunksClientEvents.class);
+        vanillaEventBus.register(CameraFadeClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(GameruleServerEvents.class);

@@ -40,12 +40,14 @@ public class Button {
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
     public boolean stretchIconToBorders = false;
     public String playerNameForHeadIcon = "";
+    public int bgColour = 0x64000000;
 
     public ResourceLocation iconResource;
     public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
     public ResourceLocation frameResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
 
     public ItemStack iconItem = null;
+    public float iconItemScale = 1.0f;
 
     public Keybinding hotkey = null; // for action/ability buttons
     public LivingEntity entity = null; // for selected unit buttons
@@ -62,6 +64,7 @@ public class Button {
     public Supplier<Boolean> isEnabled; // is the button allowed to be used right now? (eg. off cooldown)
     public Runnable onLeftClick;
     public Runnable onRightClick;
+    public Runnable onLeftClickRelease = null;
     public List<FormattedCharSequence> tooltipLines;
     public boolean lightUpOnHover = true;
 
@@ -150,7 +153,7 @@ public class Button {
 
         if (this.frameResource != null) {
             guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource, x + xyDiff, y + xyDiff, iconFrameSize, 0x64000000);
+            MyRenderer.renderIconFrameWithBg(guiGraphics, this.frameResource, x + xyDiff, y + xyDiff, iconFrameSize, bgColour);
         }
 
         if (!playerNameForHeadIcon.isBlank()) {
@@ -195,7 +198,8 @@ public class Button {
         }
         if (iconItem != null) {
             guiGraphics.pose().translate(0,0,1);
-            MyRenderer.renderItem(guiGraphics, iconItem, x+4 + (7 - xyDiff - iconSize/2), y+4 + (7 - xyDiff - iconSize/2), 0.75f);
+            int offset = 2 + Math.round((1.0f - iconItemScale) * 8f);
+            MyRenderer.renderItem(guiGraphics, iconItem, x+offset + (7 - xyDiff - iconSize/2), y+offset + (7 - xyDiff - iconSize/2), iconItemScale);
         }
 
         renderHotkey(guiGraphics, x, y);
@@ -276,6 +280,18 @@ public class Button {
             else if (!leftClick && this.onRightClick != null) {
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
                 this.onRightClick.run();
+            }
+        }
+    }
+
+    // must be done from mouse press event
+    public void checkClickedReleased(int mouseX, int mouseY, boolean leftClick) {
+        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
+            return;
+
+        if (isMouseOver(mouseX, mouseY) && MC.player != null) {
+            if (leftClick && this.onLeftClickRelease != null) {
+                this.onLeftClickRelease.run();
             }
         }
     }

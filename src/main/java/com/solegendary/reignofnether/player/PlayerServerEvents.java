@@ -224,6 +224,10 @@ public class PlayerServerEvents {
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         serverLevel = evt.getServer().getLevel(Level.OVERWORLD);
 
+        if (FogChunkSnapshot.shouldRecapture) {
+            FogChunkSnapshot.captureFogChunks(serverLevel);
+        }
+
         synchronized (rtsPlayers) {
             if (evt.phase == TickEvent.Phase.END) {
                 for (RTSPlayer rtsPlayer : rtsPlayers)
@@ -778,11 +782,12 @@ public class PlayerServerEvents {
                 try {
                     if (words[0].equalsIgnoreCase("greedisgood")) {
                         int amount = Integer.parseInt(words[2]);
-                        if (amount > 0 && List.of("food", "wood", "ore").contains(words[1].toLowerCase())) {
+                        if (amount > 0 && List.of("food", "wood", "ore", "emerald").contains(words[1].toLowerCase())) {
                             switch (words[1].toLowerCase()) {
-                                case "food" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, 0, 0));
-                                case "wood" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, amount, 0));
-                                case "ore" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, 0, amount));
+                                case "food" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, amount, 0, 0,0));
+                                case "wood" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, amount, 0,0));
+                                case "ore" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, 0, amount,0));
+                                case "emerald" -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, 0,0, amount));
                             }
                             evt.setCanceled(true);
                             sendMessageToAllPlayers("server.reignofnether.used_cheat_amount",

@@ -12,6 +12,9 @@ import com.solegendary.reignofnether.commands.CommandsServerEvents;
 import com.solegendary.reignofnether.commands.rtsapi.argument.BuildingArgument;
 import com.solegendary.reignofnether.commands.rtsapi.argument.PlayerNameArgument;
 import com.solegendary.reignofnether.commands.rtsapi.argument.UnitArgument;
+import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
+import com.solegendary.reignofnether.orthoview.CameraFadeClientEvents;
+import com.solegendary.reignofnether.orthoview.CameraFadeClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -25,8 +28,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +40,7 @@ import java.util.function.Consumer;
 
 public class PlayerCommands {
 	
-	private static final List<String> RESOURCE_NAMES = List.of("food", "wood", "ore");
+	private static final List<String> RESOURCE_NAMES = List.of("food", "wood", "ore", "emerald");
 	
 	public static void register(final LiteralArgumentBuilder<CommandSourceStack> commandBuilder) {
 		commandBuilder
@@ -285,7 +291,60 @@ public class PlayerCommands {
 				)
 				
 				.then(Commands.literal("camera")
-					.then(Commands.argument("value", BoolArgumentType.bool())
+						.then(Commands.literal("move")
+								.then(Commands.argument("pos", BlockPosArgument.blockPos())
+										.then(Commands.argument("player", PlayerNameArgument.player())
+												.executes(ctx -> forceMoveCam(
+														ctx,
+														BlockPosArgument.getBlockPos(ctx, "pos"),
+														PlayerNameArgument.getPlayerName(ctx, "player"),
+														0
+												))
+												.then(Commands.argument("lockTicks", IntegerArgumentType.integer(0))
+														.executes(ctx -> forceMoveCam(
+																ctx,
+																BlockPosArgument.getBlockPos(ctx, "pos"),
+																PlayerNameArgument.getPlayerName(ctx, "player"),
+																IntegerArgumentType.getInteger(ctx, "lockTicks")
+														))
+												)
+										)
+								)
+						)
+						.then(Commands.literal("fade")
+								.then(Commands.argument("pos", BlockPosArgument.blockPos())
+										.then(Commands.argument("player", PlayerNameArgument.player())
+												.executes(ctx -> fadeMoveCam(
+														ctx,
+														BlockPosArgument.getBlockPos(ctx, "pos"),
+														PlayerNameArgument.getPlayerName(ctx, "player"),
+														CameraFadeClientEvents.DEFAULT_FADE_TICKS,
+														CameraFadeClientEvents.DEFAULT_HOLD_TICKS
+												))
+												.then(Commands.argument("fadeTicks", IntegerArgumentType.integer(0))
+														.executes(ctx -> fadeMoveCam(
+																ctx,
+																BlockPosArgument.getBlockPos(ctx, "pos"),
+																PlayerNameArgument.getPlayerName(ctx, "player"),
+																IntegerArgumentType.getInteger(ctx, "fadeTicks"),
+																CameraFadeClientEvents.DEFAULT_HOLD_TICKS
+														))
+														.then(Commands.argument("holdTicks", IntegerArgumentType.integer(0))
+																.executes(ctx -> fadeMoveCam(
+																		ctx,
+																		BlockPosArgument.getBlockPos(ctx, "pos"),
+																		PlayerNameArgument.getPlayerName(ctx, "player"),
+																		IntegerArgumentType.getInteger(ctx, "fadeTicks"),
+																		IntegerArgumentType.getInteger(ctx, "holdTicks")
+																))
+														)
+												)
+										)
+								)
+						)
+
+
+						.then(Commands.argument("value", BoolArgumentType.bool())
 						.then(Commands.argument("player", PlayerNameArgument.player())
 							.executes(ctx -> {
 								String playerName = PlayerNameArgument.getPlayerName(ctx, "player");
@@ -313,8 +372,48 @@ public class PlayerCommands {
 				)
 			);
 	}
-	
-	
+
+	private static int forceMoveCam(
+			CommandContext<CommandSourceStack> ctx,
+			BlockPos pos,
+			String playerName,
+			int lockTicks
+	) {
+		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
+		if (player == null) {
+			ctx.getSource().sendFailure(Component.literal("Player '" + playerName + "' is not online"));
+			return 0;
+		}
+		CameraClientboundPacket.forceMoveCam(player, pos, lockTicks);
+		ctx.getSource().sendSuccess(
+				() -> Component.literal("Moved camera of " + playerName + " to " + pos.getX() + ", " + pos.getZ() +
+						(lockTicks > 0 ? " (locked for " + lockTicks + " ticks)" : "")),
+				true
+		);
+		return 1;
+	}
+
+	private static int fadeMoveCam(
+			CommandContext<CommandSourceStack> ctx,
+			BlockPos pos,
+			String playerName,
+			int fadeTicks,
+			int holdTicks
+	) {
+		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
+		if (player == null) {
+			ctx.getSource().sendFailure(Component.literal("Player '" + playerName + "' is not online"));
+			return 0;
+		}
+		CameraFadeClientboundPacket.fadeMoveCam(player, pos, fadeTicks, holdTicks, fadeTicks);
+		ctx.getSource().sendSuccess(
+				() -> Component.literal("Faded camera of " + playerName + " to " + pos.getX() + ", " + pos.getZ()),
+				true
+		);
+		return 1;
+	}
+
+
 	private static int changeResources(
 		CommandContext<CommandSourceStack> ctx,
 		String resourceName,
@@ -326,7 +425,7 @@ public class PlayerCommands {
 		try {
 			resource = ResourceName.valueOf(resourceName.trim().toUpperCase());
 		} catch (IllegalArgumentException ex) {
-			ctx.getSource().sendFailure(Component.literal("Unknown resource '" + resourceName + "'. Valid values: food, wood, ore"));
+			ctx.getSource().sendFailure(Component.literal("Unknown resource '" + resourceName + "'. Valid values: food, wood, ore, emerald"));
 			return 0;
 		}
 		if (!PlayerServerEvents.isRTSPlayer(playerName)) {
@@ -341,6 +440,7 @@ public class PlayerCommands {
 						case FOOD -> r.food = amount;
 						case WOOD -> r.wood = amount;
 						case ORE -> r.ore = amount;
+						case EMERALD -> r.emerald = amount;
 					}
 					ResourcesClientboundPacket.syncResources(ResourcesServerEvents.resourcesList);
 					ctx.getSource().sendSuccess(
@@ -354,7 +454,8 @@ public class PlayerCommands {
 			int food = resource == ResourceName.FOOD ? amount : 0;
 			int wood = resource == ResourceName.WOOD ? amount : 0;
 			int ore = resource == ResourceName.ORE ? amount : 0;
-			ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore));
+			int emerald = resource == ResourceName.EMERALD ? amount : 0;
+			ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore, emerald));
 			ctx.getSource().sendSuccess(
 				() -> Component.literal("Changed " + resource.name().toLowerCase() + " by " + amount + " for " + playerName),
 				true
@@ -375,7 +476,11 @@ public class PlayerCommands {
 		for (Resources r : ResourcesServerEvents.resourcesList) {
 			if (r.ownerName.equals(playerName)) {
 				ctx.getSource().sendSuccess(
-					() -> Component.literal(playerName + " resources - Food: " + r.food + ", Wood: " + r.wood + ", Ore: " + r.ore),
+					() -> Component.literal(playerName + " resources - " +
+							"Food: " + r.food +
+							", Wood: " + r.wood +
+							", Ore: " + r.ore +
+							", Emerald: " + r.emerald),
 					false
 				);
 				return 1;
