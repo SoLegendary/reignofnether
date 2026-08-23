@@ -86,7 +86,7 @@ They also support options such as `"type" | "rotation" | "limit"`
 
 <details><summary>UnitArgument</summary>
 <p>
-The main difference from the EntityArgument is that it can select units from the entities. they are identical to the previous `/rts-*` commands.
+Like EntityArgument, but it can only select RoN Units
 </p>
 </details> 
 
