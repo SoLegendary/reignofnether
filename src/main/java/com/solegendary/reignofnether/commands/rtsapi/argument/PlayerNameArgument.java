@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.solegendary.reignofnether.mixin.EntitySelectorAccessor;
 
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -28,8 +29,8 @@ import java.util.concurrent.CompletableFuture;
 public class PlayerNameArgument implements ArgumentType<PlayerNameArgument.Result> {
 	
 	private static final Collection<String> EXAMPLES = Arrays.asList("@b", "@b[type=foo]", "name");
-	private static final SimpleCommandExceptionType ERROR_STAR_NOT_ALLOWED =
-		new SimpleCommandExceptionType(Component.translatable("argument.player.all_not_allowed"));
+	private static final SimpleCommandExceptionType ERROR_NOT_ALLOWED_ALL =
+		new SimpleCommandExceptionType(Component.translatable("argument.player.not_allowed_all"));
 	private static final SimpleCommandExceptionType ERROR_NOT_SINGLE_PLAYER =
 		new SimpleCommandExceptionType(Component.translatable("argument.player.toomany"));
 	private static final SimpleCommandExceptionType ERROR_ONLY_PLAYERS_ALLOWED =
@@ -49,7 +50,16 @@ public class PlayerNameArgument implements ArgumentType<PlayerNameArgument.Resul
 	}
 	
 	public static String getPlayerName(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
-		return pContext.getArgument(pName, Result.class).resolve(pContext.getSource());
+		try {
+			pContext.getArgument("rotation1", Integer.class);
+			EntitySelectorAccessor selector = ((EntitySelectorAccessor) pContext.getArgument(pName, Result.class).selector);
+			if (selector.getPlayerName() != null)
+				return selector.getPlayerName();
+			else
+				return pContext.getArgument(pName, Result.class).resolve(pContext.getSource());
+		} catch (Exception e) {
+			return pContext.getArgument(pName, Result.class).resolve(pContext.getSource());
+		}
 	}
 	
 	
@@ -60,7 +70,7 @@ public class PlayerNameArgument implements ArgumentType<PlayerNameArgument.Resul
 		
 		if (pReader.peek() == '*') {
 			if (!this.all) {
-				throw ERROR_STAR_NOT_ALLOWED.createWithContext(pReader);
+				throw ERROR_NOT_ALLOWED_ALL.createWithContext(pReader);
 			}
 			pReader.skip();
 			return new Result(null, null);
@@ -96,7 +106,8 @@ public class PlayerNameArgument implements ArgumentType<PlayerNameArgument.Resul
 			
 			return entityselectorparser.fillSuggestions(pBuilder, (p_91457_) -> {
 				Collection<String> collection = sharedsuggestionprovider.getOnlinePlayerNames();
-				if (all) collection.add("*");
+				if (all)
+					collection.add("*");
 				SharedSuggestionProvider.suggest(collection, p_91457_);
 			});
 		} else {
