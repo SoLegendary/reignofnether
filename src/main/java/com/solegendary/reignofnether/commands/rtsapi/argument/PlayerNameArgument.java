@@ -52,7 +52,11 @@ public class PlayerNameArgument implements ArgumentType<PlayerNameArgument.Resul
 	public static String getPlayerName(CommandContext<CommandSourceStack> pContext, String pName) throws CommandSyntaxException {
 		try {
 			pContext.getArgument("rotation1", Integer.class);
-			return ((EntitySelectorAccessor) pContext.getArgument(pName, Result.class).selector).getPlayerName();
+			EntitySelectorAccessor selector = ((EntitySelectorAccessor) pContext.getArgument(pName, Result.class).selector);
+			if (selector.getPlayerName() != null)
+				return selector.getPlayerName();
+			else
+				return pContext.getArgument(pName, Result.class).resolve(pContext.getSource());
 		} catch (Exception e) {
 			return pContext.getArgument(pName, Result.class).resolve(pContext.getSource());
 		}
