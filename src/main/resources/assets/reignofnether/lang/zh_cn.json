@@ -742,14 +742,14 @@
   "commands.reignofnether.building.destroy.at": "成功在 %2$s 摧毁了 %1$d 座建筑",
   "commands.reignofnether.building.selection.none": "没有选中任何建筑",
   "commands.reignofnether.building.owner.update": "为 %d 座建筑更新了所属方",
-  "commands.reignofnether.building.anchor.set.success": "成功设置了 %d 座建筑的锚点",
-  "commands.reignofnether.building.anchor.remove.success": "成功移除了 %d 座建筑的锚点",
+
 
   "commands.command.list.multiple.empty": "所选建筑不包含任何命令",
   "commands.command.list.multiple.success": "所选建筑包含的命令如下：",
 
   "commands.reignofnether.unit.owner.set.success": "成功设置了 %d 名单位的所属方",
   "commands.reignofnether.unit.owner.remove.success": "成功移除了 %d 名单位的所属方",
+  "commands.reignofnether.unit.anchor.set.success": "成功设置了 %d 名单位的锚点",
   "commands.reignofnether.unit.anchor.remove.success": "成功移除了 %d 名单位的锚点",
   "commands.reignofnether.unit.destroy.success": "成功摧毁了 %d 名单位",
   "commands.reignofnether.unit.action.execute.success": "成功为 %d 名单位施加了行动",

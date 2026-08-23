@@ -827,7 +827,7 @@ public class CommandsServerEvents {
 		int[] ids = collectUnitIds(from, to);
 		SandboxServer.setAnchor(ids, anchor);
 		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.building.anchor.set.success", ids.length),
+			() -> Component.translatable("commands.reignofnether.unit.anchor.set.success", ids.length),
 			true
 		);
 		return ids.length;
@@ -841,7 +841,7 @@ public class CommandsServerEvents {
 		int[] ids = collectUnitIds(from, to);
 		SandboxServer.removeAnchor(ids);
 		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.building.anchor.remove.success", ids.length),
+			() -> Component.translatable("commands.reignofnether.unit.anchor.remove.success", ids.length),
 			true
 		);
 		return ids.length;

@@ -107,7 +107,7 @@ public class BuildingCommands {
 								b -> b.destroy(ctx.getSource().getLevel()), ctx,
 								Component.translatable("commands.reignofnether.building.destroy.success")
 							)
-						)//TODO: replace with translation
+						)
 						.then(Commands.argument("ownerName", PlayerNameArgument.players())
 							.executes(
 								(ctx) -> withBuildings(

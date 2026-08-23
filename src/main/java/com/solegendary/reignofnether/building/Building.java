@@ -97,38 +97,6 @@ public abstract class Building {
         return new BuildingPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation), this.isCapitol);
     }
 
-
-
-    public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
-        BlockState bs = b.getBlockState();
-
-        boolean isFenceOrAir = b.getBlockState().getBlock() instanceof AirBlock ||
-                b.getBlockState().getBlock() instanceof FenceBlock;
-        BlockPos bp = b.getBlockPos().offset(originPos);
-
-        // if the block in the world matches this exactly, don't cull it, instead just consider it to be our block too
-        BlockState bsWorld = level.getBlockState(bp);
-
-        if (bsWorld.getBlock() == Blocks.OBSIDIAN)
-            return false;
-        if (bsWorld.equals(bs))
-            return false;
-        if ((bsWorld.isAir() || !bsWorld.getFluidState().isEmpty()) && !isFenceOrAir)
-            return false;
-
-        // cull if overlaps another bridge block that isn't built yet
-        if (BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bp))
-            return true;
-
-        // cull if fence is adjacent to another solid block (or a bridge block, even if air)
-        for (BlockPos bpAdj : List.of(bp.north(), bp.south(), bp.east(), bp.west())) {
-            BlockState bsWorldAdj = level.getBlockState(bpAdj);
-            if (isFenceOrAir && !bsWorldAdj.isAir() && BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bpAdj))
-                return true;
-        }
-        return level.getBlockState(bp).isSolid() || (isFenceOrAir && level.getBlockState(bp.below()).isSolid());
-    }
-
     public abstract Faction getFaction();
 
     public int getUpgradeLevel(BuildingPlacement placement) {

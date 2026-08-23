@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -33,17 +34,16 @@ public class BridgePlacement extends BuildingPlacement {
     }
 
     // todo: fix
-    /*
     @Override
     protected void setBlocks(ArrayList<BuildingBlock> blocks) {
+        super.setBlocks(blocks);
         this.blocks = getCulledBlocks(blocks);
     }
 
     private ArrayList<BuildingBlock> getCulledBlocks(ArrayList<BuildingBlock> blocks) {
-        blocks.removeIf((b) -> Building.shouldCullBlock(originPos, b, level));
+        blocks.removeIf((b) -> AbstractBridge.shouldCullBlock(originPos, b, level));
         return blocks;
     }
-     */
 
     public void replaceWithLiquidBelow( BlockPos bp, BlockState bs) {
         if (!(bs.getBlock() instanceof FenceBlock) && !level.isClientSide()) {
