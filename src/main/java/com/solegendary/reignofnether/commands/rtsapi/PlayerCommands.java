@@ -12,6 +12,9 @@ import com.solegendary.reignofnether.commands.CommandsServerEvents;
 import com.solegendary.reignofnether.commands.rtsapi.argument.BuildingArgument;
 import com.solegendary.reignofnether.commands.rtsapi.argument.PlayerNameArgument;
 import com.solegendary.reignofnether.commands.rtsapi.argument.UnitArgument;
+import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
+import com.solegendary.reignofnether.orthoview.CameraFadeClientEvents;
+import com.solegendary.reignofnether.orthoview.CameraFadeClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -25,8 +28,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -285,7 +291,60 @@ public class PlayerCommands {
 				)
 				
 				.then(Commands.literal("camera")
-					.then(Commands.argument("value", BoolArgumentType.bool())
+						.then(Commands.literal("move")
+								.then(Commands.argument("pos", BlockPosArgument.blockPos())
+										.then(Commands.argument("player", PlayerNameArgument.player())
+												.executes(ctx -> forceMoveCam(
+														ctx,
+														BlockPosArgument.getBlockPos(ctx, "pos"),
+														PlayerNameArgument.getPlayerName(ctx, "player"),
+														0
+												))
+												.then(Commands.argument("lockTicks", IntegerArgumentType.integer(0))
+														.executes(ctx -> forceMoveCam(
+																ctx,
+																BlockPosArgument.getBlockPos(ctx, "pos"),
+																PlayerNameArgument.getPlayerName(ctx, "player"),
+																IntegerArgumentType.getInteger(ctx, "lockTicks")
+														))
+												)
+										)
+								)
+						)
+						.then(Commands.literal("fade")
+								.then(Commands.argument("pos", BlockPosArgument.blockPos())
+										.then(Commands.argument("player", PlayerNameArgument.player())
+												.executes(ctx -> fadeMoveCam(
+														ctx,
+														BlockPosArgument.getBlockPos(ctx, "pos"),
+														PlayerNameArgument.getPlayerName(ctx, "player"),
+														CameraFadeClientEvents.DEFAULT_FADE_TICKS,
+														CameraFadeClientEvents.DEFAULT_HOLD_TICKS
+												))
+												.then(Commands.argument("fadeTicks", IntegerArgumentType.integer(0))
+														.executes(ctx -> fadeMoveCam(
+																ctx,
+																BlockPosArgument.getBlockPos(ctx, "pos"),
+																PlayerNameArgument.getPlayerName(ctx, "player"),
+																IntegerArgumentType.getInteger(ctx, "fadeTicks"),
+																CameraFadeClientEvents.DEFAULT_HOLD_TICKS
+														))
+														.then(Commands.argument("holdTicks", IntegerArgumentType.integer(0))
+																.executes(ctx -> fadeMoveCam(
+																		ctx,
+																		BlockPosArgument.getBlockPos(ctx, "pos"),
+																		PlayerNameArgument.getPlayerName(ctx, "player"),
+																		IntegerArgumentType.getInteger(ctx, "fadeTicks"),
+																		IntegerArgumentType.getInteger(ctx, "holdTicks")
+																))
+														)
+												)
+										)
+								)
+						)
+
+
+						.then(Commands.argument("value", BoolArgumentType.bool())
 						.then(Commands.argument("player", PlayerNameArgument.player())
 							.executes(ctx -> {
 								String playerName = PlayerNameArgument.getPlayerName(ctx, "player");
@@ -313,8 +372,48 @@ public class PlayerCommands {
 				)
 			);
 	}
-	
-	
+
+	private static int forceMoveCam(
+			CommandContext<CommandSourceStack> ctx,
+			BlockPos pos,
+			String playerName,
+			int lockTicks
+	) {
+		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
+		if (player == null) {
+			ctx.getSource().sendFailure(Component.literal("Player '" + playerName + "' is not online"));
+			return 0;
+		}
+		CameraClientboundPacket.forceMoveCam(player, pos, lockTicks);
+		ctx.getSource().sendSuccess(
+				() -> Component.literal("Moved camera of " + playerName + " to " + pos.getX() + ", " + pos.getZ() +
+						(lockTicks > 0 ? " (locked for " + lockTicks + " ticks)" : "")),
+				true
+		);
+		return 1;
+	}
+
+	private static int fadeMoveCam(
+			CommandContext<CommandSourceStack> ctx,
+			BlockPos pos,
+			String playerName,
+			int fadeTicks,
+			int holdTicks
+	) {
+		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
+		if (player == null) {
+			ctx.getSource().sendFailure(Component.literal("Player '" + playerName + "' is not online"));
+			return 0;
+		}
+		CameraFadeClientboundPacket.fadeMoveCam(player, pos, fadeTicks, holdTicks, fadeTicks);
+		ctx.getSource().sendSuccess(
+				() -> Component.literal("Faded camera of " + playerName + " to " + pos.getX() + ", " + pos.getZ()),
+				true
+		);
+		return 1;
+	}
+
+
 	private static int changeResources(
 		CommandContext<CommandSourceStack> ctx,
 		String resourceName,

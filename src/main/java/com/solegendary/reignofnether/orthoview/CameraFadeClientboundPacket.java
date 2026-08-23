@@ -3,53 +3,59 @@ package com.solegendary.reignofnether.orthoview;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class CameraClientboundPacket {
+public class CameraFadeClientboundPacket {
 
     private final String playerName;
     private final BlockPos pos;
-    private final int ticks;
+    private final int fadeOutTicks;
+    private final int holdTicks;
+    private final int fadeInTicks;
 
-    public static void forceMoveCam(ServerPlayer player, BlockPos pos, int ticks) {
+    public static void fadeMoveCam(ServerPlayer player, BlockPos pos, int fadeOutTicks, int holdTicks, int fadeInTicks) {
         if (player == null)
             return;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
-                new CameraClientboundPacket(player.getName().getString(), pos, ticks)
+                new CameraFadeClientboundPacket(player.getName().getString(), pos, fadeOutTicks, holdTicks, fadeInTicks)
         );
     }
 
-    public static void forceMoveCam(String playerName, BlockPos pos, int ticks) {
+    public static void fadeMoveCam(String playerName, BlockPos pos, int fadeOutTicks, int holdTicks, int fadeInTicks) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new CameraClientboundPacket(playerName, pos, ticks)
+                new CameraFadeClientboundPacket(playerName, pos, fadeOutTicks, holdTicks, fadeInTicks)
         );
     }
 
-    public CameraClientboundPacket(String playerName, BlockPos pos, int ticks) {
+    public CameraFadeClientboundPacket(String playerName, BlockPos pos, int fadeOutTicks, int holdTicks, int fadeInTicks) {
         this.playerName = playerName;
         this.pos = pos;
-        this.ticks = ticks;
+        this.fadeOutTicks = fadeOutTicks;
+        this.holdTicks = holdTicks;
+        this.fadeInTicks = fadeInTicks;
     }
 
-    public CameraClientboundPacket(FriendlyByteBuf buffer) {
+    public CameraFadeClientboundPacket(FriendlyByteBuf buffer) {
         this.playerName = buffer.readUtf();
         this.pos = buffer.readBlockPos();
-        this.ticks = buffer.readInt();
+        this.fadeOutTicks = buffer.readInt();
+        this.holdTicks = buffer.readInt();
+        this.fadeInTicks = buffer.readInt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeUtf(this.playerName);
         buffer.writeBlockPos(this.pos);
-        buffer.writeInt(this.ticks);
+        buffer.writeInt(this.fadeOutTicks);
+        buffer.writeInt(this.holdTicks);
+        buffer.writeInt(this.fadeInTicks);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
@@ -58,7 +64,8 @@ public class CameraClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
-                        OrthoviewClientEvents.forceMoveCam(this.playerName, this.pos, ticks);
+                        CameraFadeClientEvents.fadeMoveCam(this.playerName, this.pos,
+                                this.fadeOutTicks, this.holdTicks, this.fadeInTicks);
                         success.set(true);
                     });
         });

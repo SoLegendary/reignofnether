@@ -21,10 +21,8 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServe
 import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.commands.rtsapi.ResourceObjectiveCriteria;
 import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
-import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
-import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -42,7 +40,6 @@ import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;

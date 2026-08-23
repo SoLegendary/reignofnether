@@ -20,7 +20,6 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -66,7 +65,6 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-import static com.solegendary.reignofnether.building.BuildingUtils.getBuildingOriginPos;
 import static com.solegendary.reignofnether.building.BuildingUtils.isBridge;
 import static com.solegendary.reignofnether.hud.HudClientEvents.*;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
