@@ -142,7 +142,7 @@ public class RtsDebugNavmesh {
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        if (MC.level == null || evt.getStage() != UnitClientEvents.stage
+        if (MC.level == null || evt.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES
                 || RtsDebugClientEvents.displayMode != DebugDisplayMode.NAVMESH
                 || !OrthoviewClientEvents.isEnabled())
             return;

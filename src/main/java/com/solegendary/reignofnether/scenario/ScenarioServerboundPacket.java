@@ -55,7 +55,7 @@ public class ScenarioServerboundPacket {
             case FOOD -> ScenarioAction.SET_ROLE_STARTING_FOOD;
             case WOOD -> ScenarioAction.SET_ROLE_STARTING_WOOD;
             case ORE -> ScenarioAction.SET_ROLE_STARTING_ORE;
-            case NONE -> null;
+            default -> null;
         };
         if (scenarioAction != null)
             PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(scenarioAction, roleIndex, 0,0,0, false, amount, ""));

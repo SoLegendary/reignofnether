@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.pathfinding;
 
-import com.solegendary.reignofnether.resources.BlockUtils;
+import com.solegendary.reignofnether.blocks.BlockUtils;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;

@@ -44,7 +44,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchSilverfish;
-import com.solegendary.reignofnether.resources.BlockUtils;
+import com.solegendary.reignofnether.blocks.BlockUtils;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -521,7 +521,7 @@ public class BuildingPlacement {
         // if the building is already constructed then start subtracting resources for repairs
         if (isBuilt) {
             if (!ResourcesServerEvents.canAfford(builderName, ResourceName.WOOD, 1)) {
-                ResourcesClientboundPacket.warnInsufficientResources(builderName, true, false, true);
+                ResourcesClientboundPacket.warnInsufficientResources(builderName, true, false, true, true);
                 return;
             } else {
                 ResourcesServerEvents.addSubtractResources(new Resources(builderName, 0, -1, 0));

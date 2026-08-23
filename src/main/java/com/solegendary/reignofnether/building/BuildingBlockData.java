@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.resources.BlockUtils;
+import com.solegendary.reignofnether.blocks.BlockUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 // a class for static functions related to reading building NBT data (as created by Structure Blocks)

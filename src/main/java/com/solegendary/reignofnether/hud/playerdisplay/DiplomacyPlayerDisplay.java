@@ -141,7 +141,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                     case FOOD -> List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.send_food"), Style.EMPTY));
                     case WOOD -> List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.send_wood"), Style.EMPTY));
                     case ORE -> List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.send_ore"), Style.EMPTY));
-                    case NONE -> null;
+                    default -> null;
                 }
         );
         changeResourceButton.bgIconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, iconPath);

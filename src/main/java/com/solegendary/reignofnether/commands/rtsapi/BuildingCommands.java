@@ -32,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraftforge.server.command.EnumArgument;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -104,15 +105,15 @@ public class BuildingCommands {
 							(ctx) -> withBuildings(
 								BuildingArgument.getBuildings(ctx, "targets", null),
 								b -> b.destroy(ctx.getSource().getLevel()), ctx,
-								Component.literal("Destroy %d building(s) successfully")
+								Component.translatable("commands.reignofnether.building.destroy.success")
 							)
-						)//TODO: replace with translation
+						)
 						.then(Commands.argument("ownerName", PlayerNameArgument.players())
 							.executes(
 								(ctx) -> withBuildings(
 									b -> b.destroy(ctx.getSource().getLevel()),
 									ctx,
-									Component.literal("Destroy %d building(s) successfully")
+									Component.translatable("commands.reignofnether.building.destroy.success")
 								)
 							)
 							.then(Commands.argument("preserved", BoolArgumentType.bool())
@@ -120,7 +121,7 @@ public class BuildingCommands {
 									(ctx) -> withBuildings(
 										b -> SandboxServer.removeBuilding(b.originPos),
 										ctx,
-										Component.literal("Destroy %d building(s) without broke blocks successfully")
+										Component.translatable("commands.reignofnether.building.destroy_preserve.success")
 									)
 								)
 							)
@@ -162,7 +163,7 @@ public class BuildingCommands {
 										}
 									},
 									ctx,
-									Component.literal("Change the owner of %d building(s) successfully")
+									Component.translatable("commands.reignofnether.building.owner.change.success")
 								)))
 						)
 					)
@@ -175,7 +176,7 @@ public class BuildingCommands {
 									.executes(
 										(ctx) -> withBuildings(
 											b -> b.addTag(StringArgumentType.getString(ctx, "name")), ctx,
-											Component.literal("Add Tag to %d building(s) successfully"))
+											Component.translatable("commands.reignofnether.building.tag.add.success"))
 									)
 								)
 							)
@@ -193,7 +194,7 @@ public class BuildingCommands {
 										(ctx) -> withBuildings(
 											b -> b.removeTag(StringArgumentType.getString(ctx, "name")),
 											ctx,
-											Component.literal("Remove Tag to %d building(s) successfully")))
+											Component.translatable("commands.reignofnether.building.tag.remove.success")))
 								)
 							)
 							.then(Commands.literal("list")
@@ -209,7 +210,7 @@ public class BuildingCommands {
 								.executes((ctx) -> withBuildings(
 									b -> b.destroyRandomBlocks(IntegerArgumentType.getInteger(ctx, "points")),
 									ctx,
-									Component.literal("Hurt %d building(s) successfully"))
+									Component.translatable("commands.reignofnether.building.hurt.success"))
 								)
 							)
 						)
@@ -233,7 +234,7 @@ public class BuildingCommands {
 										
 									},
 									ctx,
-									Component.literal("Hurt %d building(s) successfully"))
+									Component.translatable("commands.reignofnether.building.hurt.success"))
 								)
 							)
 						)
@@ -254,7 +255,7 @@ public class BuildingCommands {
 														IntegerArgumentType.getInteger(ctx, "tickCooldownMax")
 													),
 													ctx,
-													Component.literal("Add Command to %d building(s) successfully")
+													Component.translatable("commands.reignofnether.building.command.add.success")
 												)
 											)
 											.then(Commands.argument("tickCooldown", IntegerArgumentType.integer(0))
@@ -266,7 +267,7 @@ public class BuildingCommands {
 															IntegerArgumentType.getInteger(ctx, "tickCooldownMax")
 														),
 														ctx,
-														Component.literal("Add Command to %d building(s) successfully")
+														Component.translatable("commands.reignofnether.building.command.add.success")
 													)
 												)
 											)
@@ -284,7 +285,7 @@ public class BuildingCommands {
 													100
 												),
 												ctx,
-												Component.literal("Add Command to %d building(s) successfully")
+												Component.translatable("commands.reignofnether.building.command.add.success")
 											)
 										)
 									)
@@ -313,17 +314,16 @@ public class BuildingCommands {
 											if (index <= building.commands.size()) {
 												building.removeCommand(index);
 												ctx.getSource().sendSuccess(
-													() -> Component.literal(String.format(
-															"Delete command (%d", index))
+													() -> Component.translatable("commands.reignofnether.building.command.remove.success_01", index)
 														.withStyle(Style.EMPTY.withBold(true))
-														.append(Component.literal(String.format(
-															" | %s | %s | %d) successfully",
+														.append(Component.translatable("commands.reignofnether.building.command.remove.success_02",
 															building.commands.get(index).commandStr,
 															building.commands.get(index).condition,
 															building.commands.get(index).tickCooldownMax
-															))
+															)
 															.withStyle(Style.EMPTY.withBold(false))
-														), true);
+														), true
+												);
 											}
 										}
 										return 1;
@@ -337,7 +337,7 @@ public class BuildingCommands {
 											}
 										},
 										ctx,
-										Component.literal("Delete all commands of %d buildings successfully")
+										Component.translatable("commands.reignofnether.building.command.remove_all.success")
 									))
 								)
 							)
@@ -433,10 +433,10 @@ public class BuildingCommands {
 	private static int listCommands(CommandSourceStack pSource, Collection<? extends BuildingPlacement> pBuildings) {
 		
 		for (BuildingPlacement building : pBuildings) {
-			if (building.commands.isEmpty()) {
+			if (building.commands.isEmpty()) {//need translation
 				pSource.sendSuccess(() -> Component.translatable("commands.command.list.multiple.empty", pBuildings.size()), false);
 			} else {
-				pSource.sendSuccess(() -> Component.translatable("commands.tag.list.multiple.success", pBuildings.size(), building.commands.size()), false);
+				pSource.sendSuccess(() -> Component.translatable("commands.command.list.multiple.success", pBuildings.size(), building.commands.size()), false);
 				for (BuildingCommand command : building.commands) {
 					pSource.sendSuccess(
 					() -> Component.literal(String.format(
@@ -501,20 +501,29 @@ public class BuildingCommands {
 					BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
 					Rotation.NONE
 				))
-				// with rotation
-				.then(Commands.argument("rotation", StringArgumentType.word())
-					.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-						List.of("0", "90", "180", "270"),
-						builder
-					))
+				.then(Commands.argument("rotation", EnumArgument.enumArgument(Rotation.class))
 					.executes(ctx -> CommandsServerEvents.placeBuilding(
 						ctx,
 						ResourceLocationArgument.getId(ctx, "buildingName").toString(),
 						ownerResolver.resolve(ctx),
 						BoolArgumentType.getBool(ctx, "autoBuild"),
 						BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
-						CommandsServerEvents.parseRotation(StringArgumentType.getString(ctx, "rotation"))
+						ctx.getArgument("rotation", Rotation.class)
 					))
+				)
+				.then(Commands.argument("rotation1", IntegerArgumentType.integer())
+					.executes(ctx -> {
+						CommandsServerEvents.placeBuilding(
+							ctx,
+							ResourceLocationArgument.getId(ctx, "buildingName").toString(),
+							ownerResolver.resolve(ctx),
+							BoolArgumentType.getBool(ctx, "autoBuild"),
+							BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+							CommandsServerEvents.parseRotation(String.valueOf(IntegerArgumentType.getInteger(ctx, "rotation1")))
+						);
+						ctx.getSource().sendFailure(Component.literal("Deprecated Argument"));
+						return 0;
+					})
 				)
 			);
 	}

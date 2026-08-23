@@ -12,10 +12,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.AirBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
@@ -53,5 +56,37 @@ public abstract class AbstractBridge extends Building {
                         !(bb.getBlockState().getBlock() instanceof AirBlock))
                     bpl.replaceWithLiquidBelow(bb.getBlockPos(), bb.getBlockState());
         }
+    }
+
+    public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
+        BlockState bs = b.getBlockState();
+
+        boolean isFenceOrAir = b.getBlockState().getBlock() instanceof AirBlock ||
+                b.getBlockState().getBlock() instanceof FenceBlock;
+        BlockPos bp = b.getBlockPos();
+
+        if (level.isClientSide)
+            bp = bp.offset(originPos);
+
+        // if the block in the world matches this exactly, don't cull it, instead just consider it to be our block too
+        BlockState bsWorld = level.getBlockState(bp);
+
+        if (bsWorld.getBlock() == Blocks.OBSIDIAN)
+            return false;
+        if (bsWorld.equals(bs))
+            return false;
+        if ((bsWorld.isAir() || !bsWorld.getFluidState().isEmpty()) && !isFenceOrAir)
+            return false;
+
+        // cull if fence is adjacent to another solid block (or a bridge block, even if air)
+        for (BlockPos bpAdj : List.of(bp.north(), bp.south(), bp.east(), bp.west())) {
+            BlockState bsWorldAdj = level.getBlockState(bpAdj);
+            if (isFenceOrAir && !bsWorldAdj.isAir() && BuildingUtils.isPosInsideAnyBuilding(level.isClientSide, bpAdj))
+                return true;
+        }
+        boolean isSolid = level.getBlockState(bp).isSolid();
+        boolean belowIsSolid = level.getBlockState(bp.below()).isSolid();
+
+        return isSolid || (isFenceOrAir && belowIsSolid);
     }
 }

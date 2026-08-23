@@ -41,9 +41,7 @@ public class BuildingSelectorOptions {
 	public static final DynamicCommandExceptionType ERROR_SORT_UNKNOWN = new DynamicCommandExceptionType((p_121508_) -> Component.translatable("argument.reignofnether.building.options.sort.irreversible.error", p_121508_));
 	public static final DynamicCommandExceptionType ERROR_BUILDING_TYPE_INVALID = new DynamicCommandExceptionType((p_121452_) -> Component.translatable("argument.reignofnether.building.options.type.invalid.error", p_121452_));
 	private static final Map<String, BuildingSelectorOptions.Option> OPTIONS = Maps.newHashMap();
-	private static final SimpleCommandExceptionType UNKNOWN_BUILDING =
-		new SimpleCommandExceptionType(Component.translatable("commands.reignofnether.error.unknown_building"));
-	private static final SimpleCommandExceptionType ERROR_HEALTH_NEGATIVE = new SimpleCommandExceptionType(Component.translatable("abab")); //TODO: also translation
+	private static final SimpleCommandExceptionType ERROR_HEALTH_NEGATIVE = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.notfound.building.health.negative.error"));
 	
 	public static void register(String pId, BuildingSelectorOptions.Modifier pHandler, Predicate<BuildingSelectorParser> pPredicate, Component pTooltip) {
 		OPTIONS.put(pId, new BuildingSelectorOptions.Option(pHandler, pPredicate, pTooltip));
@@ -116,7 +114,7 @@ public class BuildingSelectorOptions {
 				ResourceLocation resourcelocation = ResourceLocation.read(p_121534_.getReader());
 				Building building = resolveBuilding(resourcelocation.toString());
 				if (building == null) {
-					throw UNKNOWN_BUILDING.create();
+					throw ERROR_BUILDING_TYPE_INVALID.createWithContext(p_121534_.getReader(), resourcelocation);
 				}
 				p_121534_.limitToType(building.name);
 			}, (p_121532_) -> !p_121532_.isTypeLimited(), Component.translatable("argument.reignofnether.building.options.type.description"));

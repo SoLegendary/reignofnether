@@ -137,6 +137,13 @@ public enum UnitAction {
     TRADE_ORE_FOR_FOOD,
     TRADE_ORE_FOR_WOOD,
 
+    SELL_FOOD,
+    SELL_WOOD,
+    SELL_ORE,
+    BUY_FOOD,
+    BUY_WOOD,
+    BUY_ORE,
+
     EQUIP_LEATHER_ARMOR,
     EQUIP_CHAINMAIL_ARMOR,
 

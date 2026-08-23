@@ -76,7 +76,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     public final int frameWidth = 60;
     public final int frameHeight = 60;
 
-    public final int statsWidth = 45;
+    public final int statsWidth = 44;
     public final int statsHeight = 60;
 
     private final int size = 46;
@@ -608,7 +608,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     }
 
     public RectZone renderResourcesHeld(GuiGraphics guiGraphics, int x, int y, Animal animal) {
-        Resources resources = new Resources("",0,0,0);
+        Resources resources = new Resources("",0,0,0,0);
         for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal(animal)) {
             ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
             if (res != null)

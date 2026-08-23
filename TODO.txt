@@ -1,5 +1,5 @@
 
-1.20.1-1.4.1
+1.20.1-1.4.2
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -7,58 +7,50 @@
 
 
 
-Fog of war
+
+Hero Items
 ----------
-[❌] Update night circle vision separate from buildings
-    - If entered clientside, verify from server whether it's really that size or even still there
-    - If entered serverside, sent to client the new range
+Emerald Resource
+    - Obtainable by killing neutrals, selling items or selling resources
+    - Used to buy resources now instead of direct exchange
+    - Used to buy items from shops
+    - Only shown if you have any
+    - Neutrals now give emerald bounties
+    - Update diplomacy menu resource exchange
+    - Update all other commands related to resources
+    - Resources class constructors should assume emeralds = 0
 
-[❌] Reveal owners of explosive entities to nearby players in fog
-[❌] Allow spectators to see fog, but with vision of all players
-[❌] Add commands for revealing in fog, temporarily or permanently
-[❌] Add commands for force-moving camera
-
+Unit Items
+    - Hero inventory GUI
+        - Click to use, can have charges and/or cooldown
+        - Drag to move slots, drop on ground, transfer to another hero or sell
+    - While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
+        - Should be visible to all players
+    - Should have tooltips shown even on the ground
+    - Requires right-click to pick up, will not auto-pickup
 
 
 
 Balance
 -------
-[✔] Slimes and Magma Cubes no longer gain armour with size
-[✔] Tiny slimes and magma cubes now have a larger hitbox
-[✔] Wretched wraith base attack damage increased by 1.5
-[✔] Wraith snow can now generate on stair blocks
-[✔] Monster non-worker units now gain +10% movespeed in night circles
-[✔] Blood moon can no longer target previously-explored buildings
-
-[✔] Nether wood value reduced from 18 to 17
-[✔] Piglin workers no longer gain +10% movespeed on nether terrain
-
-[✔] The Royal Guard's ultimate now also grants Strength II (+40% damage)
-[✔] Food cost of Vindicators, Pillagers, Windcallers and Evokers reduced by 10
 
 
 Quality of Life
 ---------------
-[✔] Buildings, phantoms, scouts and flying units (when melee) are de-prioritised for targeting when idle or attack-moving
-[✔] Units attacking a building on idle or attack-move will now switch to nearby units if available
-[✔] Buildings are now captured 5 blocks away from the edge of the building, instead of 20 blocks from the building centre
-[✔] Improved the click box accuracy for many units, and expanded the click box for chickens
-[✔] All concrete blocks now convert to netherrack
+[✔] All existing militia in saved maps can no longer be converted back into villagers
+[✔] Villagers now convert into the `temporary_militia` entity which follow the normal rules for conversion
+
+
 
 Bugfixes
 --------
-[✔] Fixed a crash related to hiding leaves
-[✔] Fixed a crash when a building command placed another building
-[✔] Fixed building rotations sometimes causing placement errors
-[✔] Fixed units returning home after killing their target
-[✔] Fixed Phantoms not damaging buildings
-[✔] Obsidian and nether wood is now considered nether terrain
-[✔] Fixed Ghasts fireballs having no direct impact damage
-[✔] Fixed Sculk catalysts showing as having too much health with nearby sculk (actual health is unchanged)
-[✔] Fixed headhunters garrisoned in bastions having inaccurate tridents
-[✔] Fixed enemy piglins in wave survival not attacking players
+[✔] Workers can no longer repair a building while garrisoned inside it
+[✔] Fixed chunks disappearing if the worldborder was changed while fog of war was enabled
+    - Note this can still cause lag spikes on slower servers
+[✔] Militia town centre range is now calculated only horizontally (so it better matches the circle radius)
+[✔] Unit underlines are now visible behind blocks
 
-[❌] Heroes having ults on cooldown on levelup?
+[❌] cat/dog at the start should also match the TC mode
 
 Languages
 ---------

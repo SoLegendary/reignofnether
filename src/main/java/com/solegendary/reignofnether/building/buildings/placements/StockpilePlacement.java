@@ -91,6 +91,7 @@ public class StockpilePlacement extends ProductionPlacement {
             int food = 0;
             int wood = 0;
             int ore = 0;
+            int emerald = 0;
 
             for (BuildingBlock block : getBlocks()) {
                 if (block.getBlockState().getBlock() == Blocks.CHEST) {
@@ -104,6 +105,7 @@ public class StockpilePlacement extends ProductionPlacement {
                                 food += resource.resourceName == ResourceName.FOOD ? resource.resourceValue * numItems: 0;
                                 wood += resource.resourceName == ResourceName.WOOD ? resource.resourceValue * numItems : 0;
                                 ore += resource.resourceName == ResourceName.ORE ? resource.resourceValue * numItems : 0;
+                                emerald += resource.resourceName == ResourceName.EMERALD ? resource.resourceValue * numItems : 0;
                                 chest.removeItem(i, numItems);
                                 textPos = block.getBlockPos().offset(0,-2,0);
                             }
@@ -111,8 +113,8 @@ public class StockpilePlacement extends ProductionPlacement {
                     }
                 }
             }
-            if (food > 0 || wood > 0 || ore > 0) {
-                Resources res = new Resources(ownerName, food, wood, ore);
+            if (food > 0 || wood > 0 || ore > 0 || emerald > 0) {
+                Resources res = new Resources(ownerName, food, wood, ore, emerald);
                 ResourcesServerEvents.addSubtractResources(res);
                 ResourcesClientboundPacket.showFloatingText(res, textPos);
             }

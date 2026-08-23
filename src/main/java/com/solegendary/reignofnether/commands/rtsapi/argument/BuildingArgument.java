@@ -26,8 +26,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class BuildingArgument implements ArgumentType<BuildingSelector> {
 	
-	public static final SimpleCommandExceptionType ERROR_NOT_SINGLE_BUILDING = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.toomany.error"));
-	public static final SimpleCommandExceptionType NO_BUILDINGS_FOUND = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.notfound.building.error"));
+	public static final SimpleCommandExceptionType ERROR_NOT_SINGLE_BUILDING = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.too_many.error"));
+	public static final SimpleCommandExceptionType NO_BUILDINGS_FOUND = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.not_found.building.error"));
 	private static final Collection<String> EXAMPLES = Arrays.asList("@b", "@b[type=foo]");
 	final boolean single;
 	

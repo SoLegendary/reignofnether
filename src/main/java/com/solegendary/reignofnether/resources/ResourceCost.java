@@ -15,6 +15,7 @@ public class ResourceCost {
     public int food;
     public int wood;
     public int ore;
+    public int emerald = 0;
     public int ticks;
     public int population; // for a building, indicates supply, for a unit, indicates usage
     public String id;
@@ -25,6 +26,15 @@ public class ResourceCost {
         this.ore = ore;
         this.ticks = seconds * TICKS_PER_SECOND;
         this.population = population;
+    }
+
+    private ResourceCost(int emeralds) { // units
+        this.food = 0;
+        this.wood = 0;
+        this.ore = 0;
+        this.ticks = 0;
+        this.population = 0;
+        this.emerald = emeralds;
     }
 
     public ResourceCost(String modid, String id) {
@@ -44,6 +54,9 @@ public class ResourceCost {
     }
     public static ResourceCost Enchantment(int food, int wood, int ore) { // buildings
         return new ResourceCost(food, wood, ore, 0, 0);
+    }
+    public static ResourceCost Emeralds(int emeralds) { // buildings
+        return new ResourceCost(0);
     }
     public void bakeValues(ResourceCostConfigEntry rcce) {
         this.food = rcce.getFood();

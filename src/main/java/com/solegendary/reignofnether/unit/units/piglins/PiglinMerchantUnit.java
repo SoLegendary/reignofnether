@@ -607,10 +607,10 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         ArrayList<LivingEntity> units = new ArrayList<>(list);
         Collections.shuffle(units);
 
-        ItemStack appleStack = UnitItems.MERCHANT_GOLDEN_APPLE.getItemStack();
-        ItemStack chestPlateStack = UnitItems.MERCHANT_CHESTPLATE.getItemStack();
-        ItemStack swordStack = UnitItems.MERCHANT_SWORD.getItemStack();
-        ItemStack tridentStack = UnitItems.MERCHANT_TRIDENT.getItemStack();
+        ItemStack appleStack = new ItemStack(UnitItems.MERCHANT_GOLDEN_APPLE.getItem());
+        ItemStack chestPlateStack = new ItemStack(UnitItems.MERCHANT_CHESTPLATE.getItem());
+        ItemStack swordStack = new ItemStack(UnitItems.MERCHANT_SWORD.getItem());
+        ItemStack tridentStack = new ItemStack(UnitItems.MERCHANT_TRIDENT.getItem());
 
         for (int n = 0; n < amount; n++) {
             if (units.size() > n) {

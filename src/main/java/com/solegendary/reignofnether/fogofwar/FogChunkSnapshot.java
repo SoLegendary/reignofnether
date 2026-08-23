@@ -36,6 +36,8 @@ public class FogChunkSnapshot {
     // which chunks have a file on disk; cheap membership test so get()/hasAny() never touch disk needlessly
     private static final Set<ChunkPos> index = ConcurrentHashMap.newKeySet();
 
+    public static boolean shouldRecapture = false;
+
     // bounded decode cache; accessOrder LRU, synchronised for the (rare) concurrent access
     private static final Map<ChunkPos, ClientboundLevelChunkWithLightPacket> lru =
             Collections.synchronizedMap(new LinkedHashMap<>(LRU_CAPACITY + 1, 0.75f, true) {
@@ -48,6 +50,7 @@ public class FogChunkSnapshot {
     private static Path dir = null;
 
     public static void captureFogChunks(ServerLevel level) {
+        shouldRecapture = false;
         clear();
         dir = resolveDir(level);
         deleteDir(); // wipe stale files left on disk by a prior server session before recapturing

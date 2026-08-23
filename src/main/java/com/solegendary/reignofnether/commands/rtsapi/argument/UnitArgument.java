@@ -19,7 +19,6 @@ import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -27,13 +26,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class UnitArgument implements ArgumentType<EntitySelector> {
 	
-	public static final SimpleCommandExceptionType ERROR_NOT_SINGLE_UNIT = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.unit.toomany.error"));
-	public static final SimpleCommandExceptionType NO_UNITS_FOUND = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.unit.notfound.error"));
+	public static final SimpleCommandExceptionType ERROR_NOT_SINGLE_UNIT = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.unit.too_many.error"));
+	public static final SimpleCommandExceptionType NO_UNITS_FOUND = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.unit.not_found.error"));
 	private static final Collection<String> EXAMPLES = Arrays.asList("@e", "@e[type=minecraft:zombie]", "Steve");
 	final boolean single;
 	private final EntityArgument entityArgument;
@@ -51,17 +49,17 @@ public class UnitArgument implements ArgumentType<EntitySelector> {
 		return new UnitArgument(false);
 	}
 	
-	public static Unit getUnit(CommandContext<CommandSourceStack> pContext, String pName, String pOwner) throws CommandSyntaxException {
-		EntitySelector selector = pContext.getArgument(pName, EntitySelector.class);
-		Entity entity = selector.findSingleEntity(pContext.getSource());
-		if (!(entity instanceof Unit unit) || entity instanceof Player) {
-			throw NO_UNITS_FOUND.create();
-		}
-		if (pOwner != null && !Objects.equals(unit.getOwnerName(), pOwner)) {
-			throw NO_UNITS_FOUND.create();
-		}
-		return unit;
-	}
+//	public static Unit getUnit(CommandContext<CommandSourceStack> pContext, String pName, String pOwner) throws CommandSyntaxException {
+//		EntitySelector selector = pContext.getArgument(pName, EntitySelector.class);
+//		Entity entity = selector.findSingleEntity(pContext.getSource());
+//		if (!(entity instanceof Unit unit) || entity instanceof Player) {
+//			throw NO_UNITS_FOUND.create();
+//		}
+//		if (pOwner != null && !Objects.equals(unit.getOwnerName(), pOwner)) {
+//			throw NO_UNITS_FOUND.create();
+//		}
+//		return unit;
+//	}
 	
 	public static List<Unit> getUnits(CommandContext<CommandSourceStack> pContext, String pName, String pOwner) throws CommandSyntaxException {
 		List<Unit> units = getOptionalUnits(pContext, pName, pOwner);

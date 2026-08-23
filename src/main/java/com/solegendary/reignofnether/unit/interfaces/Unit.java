@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
 import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;

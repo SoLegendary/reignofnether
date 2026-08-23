@@ -2,15 +2,9 @@ package com.solegendary.reignofnether.entities;
 
 import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.Blizzard;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.resources.BlockUtils;
-import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.Blaze;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;

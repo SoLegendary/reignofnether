@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.TargetResourcesSave;
@@ -32,8 +31,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static com.solegendary.reignofnether.resources.BlockUtils.isFallingLogBlock;
-import static com.solegendary.reignofnether.resources.BlockUtils.isLogBlock;
+import static com.solegendary.reignofnether.blocks.BlockUtils.isFallingLogBlock;
+import static com.solegendary.reignofnether.blocks.BlockUtils.isLogBlock;
 
 // Move towards the nearest open resource blocks and start gathering them
 // Can be toggled between food, wood and ore, and disabled by clicking

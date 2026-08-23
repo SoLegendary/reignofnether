@@ -329,22 +329,6 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
             Unit.tick(this);
             AttackerUnit.tick(this);
             PromoteIllager.checkAndApplyBuff(this);
-
-            this.isCaptain = getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem;
-
-            if (!this.isCaptain && this.tickCount > 100 && this.tickCount % 10 == 0 && !converted &&
-                !level().isClientSide() && !getOwnerName().equals(ENEMY_OWNER_NAME) && hasRtsPlayerOwner() && !hasScenarioNpcOwner() &&
-                !SandboxServer.isAnyoneASandboxPlayer()) {
-
-                BuildingPlacement building = BuildingUtils.findClosestBuilding(level().isClientSide(), this.getEyePosition(),
-                        (b) -> b.isBuilt && b.ownerName.equals(getOwnerName()) && b.getBuilding() instanceof TownCentre);
-
-                int range = TownCentre.MILITIA_RANGE;
-                if (building == null ||
-                    distanceToSqr(building.centrePos.getX(), building.centrePos.getY(), building.centrePos.getZ()) > range * range) {
-                    convertToVillager();
-                }
-            }
         }
     }
 
@@ -403,29 +387,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     }
 
     public void convertToVillager() {
-        if (!converted) {
-            LivingEntity newEntity = this.convertToUnit(EntityRegistrar.VILLAGER_UNIT.get());
-            if (newEntity instanceof VillagerUnit vUnit) {
-                if (resourcesSaveData != null) {
-                    vUnit.getGatherResourceGoal().saveData = resourcesSaveData;
-                    vUnit.getGatherResourceGoal().loadState();
-                }
-                vUnit.setProfession(this.profession);
-                vUnit.isVeteran = this.isVeteran;
-                vUnit.farmerExp = this.farmerExp;
-                vUnit.lumberjackExp = this.lumberjackExp;
-                vUnit.minerExp = this.minerExp;
-                vUnit.masonExp = this.masonExp;
-                vUnit.hunterExp = this.hunterExp;
-                vUnit.chestplate = this.getItemBySlot(EquipmentSlot.CHEST).getItem();
-                vUnit.chestplateEnchanted = this.getItemBySlot(EquipmentSlot.CHEST).isEnchanted();
-                vUnit.swordEnchanted = this.swordEnchanted;
-                vUnit.bowEnchanted = this.bowEnchanted;
-
-                UnitConvertClientboundPacket.syncConvertedUnits(getOwnerName(), List.of(getId()), List.of(newEntity.getId()));
-                converted = true;
-            }
-        }
+        // only used in TemporaryMilitiaUnit
     }
 
     public void initialiseGoals() {
@@ -521,7 +483,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     }
 
     static {
-        VILLAGER_DATA = SynchedEntityData.defineId(Villager.class, EntityDataSerializers.VILLAGER_DATA);
+        VILLAGER_DATA = SynchedEntityData.defineId(MilitiaUnit.class, EntityDataSerializers.VILLAGER_DATA);
     }
 
     public int getSharpnessLevel() {

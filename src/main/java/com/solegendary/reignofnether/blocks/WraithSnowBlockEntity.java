@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.blocks;
 import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.BitterFrostPassive;
 import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.Blizzard;
 import com.solegendary.reignofnether.registrars.BlockEntityRegistrar;
-import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

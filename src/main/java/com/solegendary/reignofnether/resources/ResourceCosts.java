@@ -188,6 +188,8 @@ public class ResourceCosts {
             str += "\uE001  " + resCost.wood + "     ";
         if (resCost.ore > 0)
             str += "\uE002  " + resCost.ore + "     ";
+        if (resCost.emerald > 0)
+            str += "\uE010  " + resCost.emerald + "     ";
 
         if (str.isEmpty())
             str += "\uE000  0     ";

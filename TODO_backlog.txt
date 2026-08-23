@@ -2,26 +2,24 @@
 Features
 --------
 
-Hero Items
-----------
-Emerald Resource
-    - Obtainable by killing neutrals, selling items or selling resources
-    - Used to buy resources now instead of direct exchange
-    - Used to buy items from shops
-    - Only shown if you have any
-    - Neutrals now give emerald bounties
-    - Update diplomacy menu resource exchange
-    - Update all other commands related to resources
-    - Resources class constructors should assume emeralds = 0
 
-Hero Items
-    - Hero inventory GUI
-        - Click to use, can have charges and/or cooldown
-        - Drag to move slots, drop on ground, transfer to another hero or sell
-    - While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
-        - Should be visible to all players
-    - Should have tooltips shown even on the ground
-    - Requires right-click to pick up, will not auto-pickup
+Custom building production
+--------------------------
+[❌] If a custom building has a spawn egg inside a chest, have it be able to produce that unit
+[❌] Same for hero items at a shop when that's finished
+
+
+Fog of war
+----------
+[❌] Update night circle vision separate from buildings
+    - If entered clientside, verify from server whether it's really that size or even still there
+    - If entered serverside, sent to client the new range
+
+[❌] Reveal owners of explosive entities to nearby players in fog
+[❌] Allow spectators to see fog, but with vision of all players
+[❌] Add commands for revealing in fog, temporarily or permanently
+[❌] Add commands for force-moving camera
+
 
 [❌] Camera hotkeys (see starcraft example)
 
@@ -36,6 +34,9 @@ Hero Items
 [❌] Save control groups to world per player
 
 Scenario roles:
+    [❌] Use the new start menu for scenarios so we can have a readied start
+        - Need to make start blocks also have a scenario role index
+
     [❌] Use start menu colours for each role
     [❌] When role is cycled, move camera to the first found building (or unit if no building)
     [❌] Show different colours for each different assigned role
@@ -56,6 +57,7 @@ Bugfixes
 [❌] Players logging in messes up the observer menu (and freezes resources?)
 [❌] Fix day/night time when /gamerule doDaylightCycle false
 [❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
+[❌] Allow fog to be kept on in between singleplayer relogs
 
 Quality of Life Features
 ------------------------

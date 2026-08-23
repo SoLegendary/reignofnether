@@ -18,39 +18,40 @@ public class CameraClientboundPacket {
 
     private final String playerName;
     private final BlockPos pos;
-    private final int ticks;
+    private final int cameraLockTicks;
+    private final int forcePanTicks;
+    private final int zoomLevel;
 
-    public static void forceMoveCam(ServerPlayer player, BlockPos pos, int ticks) {
+    public static void forceMoveCam(ServerPlayer player, BlockPos pos, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
         if (player == null)
             return;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
-                new CameraClientboundPacket(player.getName().getString(), pos, ticks)
+                new CameraClientboundPacket(player.getName().getString(), pos, cameraLockTicks, forcePanTicks, zoomLevel)
         );
     }
 
-    public static void forceMoveCam(String playerName, BlockPos pos, int ticks) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new CameraClientboundPacket(playerName, pos, ticks)
-        );
-    }
-
-
-    public CameraClientboundPacket(String playerName, BlockPos pos, int ticks) {
+    public CameraClientboundPacket(String playerName, BlockPos pos, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
         this.playerName = playerName;
         this.pos = pos;
-        this.ticks = ticks;
+        this.cameraLockTicks = cameraLockTicks;
+        this.forcePanTicks = forcePanTicks;
+        this.zoomLevel = zoomLevel;
     }
 
     public CameraClientboundPacket(FriendlyByteBuf buffer) {
         this.playerName = buffer.readUtf();
         this.pos = buffer.readBlockPos();
-        this.ticks = buffer.readInt();
+        this.cameraLockTicks = buffer.readInt();
+        this.forcePanTicks = buffer.readInt();
+        this.zoomLevel = buffer.readInt();
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeUtf(this.playerName);
         buffer.writeBlockPos(this.pos);
-        buffer.writeInt(this.ticks);
+        buffer.writeInt(this.cameraLockTicks);
+        buffer.writeInt(this.forcePanTicks);
+        buffer.writeInt(this.zoomLevel);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
@@ -59,7 +60,7 @@ public class CameraClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
-                        OrthoviewClientEvents.forceMoveCam(this.playerName, this.pos, ticks);
+                        OrthoviewClientEvents.forceMoveCam(this.playerName, this.pos, cameraLockTicks, forcePanTicks, zoomLevel);
                         success.set(true);
                     });
         });
