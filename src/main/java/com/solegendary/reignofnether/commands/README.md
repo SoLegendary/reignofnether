@@ -1,10 +1,10 @@
-# Command Update for Reign of Nether
+# Command Update for Reign of Nether (23 August 2026)
 
 ## 1. New /rtsapi commands:
 
 :warning: `All commands beginning with /rtsapi- (with a dash) exist for backwards compability, but are no longer updated, use /rtsapi (no dash) instead`
-TBA
-All commands are organized into three categories: **Building**, **Unit**, and **Player**.
+
+All commands are organised into three categories: **Building**, **Unit**, and **Player**.
 
 Custom command support has been added for normal buildings. It is similar to custom building comamnds, however, it takes effect on each individual building, rather than on each type of building.
 
@@ -63,7 +63,7 @@ Custom command support has been added for normal buildings. It is similar to cus
 
 ---
 ## 2.New ally output:
-Sending an ally request to an FPV player now shows clickable buttons in their chat window:
+Sending an ally request to an FPV player now shows clickable buttons in their chat window:\
 [Click to Confirm] | [Click to Cancel]
 
 ---
@@ -134,7 +134,7 @@ You can now use `/data get/merge/modify/remove building` on building data:
 
 ---
 ## 5.New Scoreboard Criteria
-You can now use RTS resources (food, wood, ore, population) in scoreboards, eg:
+You can now use RTS resources (food, wood, ore, population) in scoreboards, eg:\
 `/scoreboard objectives add myfood resources.food "food"`
 
 ---
