@@ -2,6 +2,13 @@
 Features
 --------
 
+
+Custom building production
+--------------------------
+[❌] If a custom building has a spawn egg inside a chest, have it be able to produce that unit
+[❌] Same for hero items at a shop when that's finished
+
+
 Fog of war
 ----------
 [❌] Update night circle vision separate from buildings
@@ -50,6 +57,7 @@ Bugfixes
 [❌] Players logging in messes up the observer menu (and freezes resources?)
 [❌] Fix day/night time when /gamerule doDaylightCycle false
 [❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
+
 
 Quality of Life Features
 ------------------------

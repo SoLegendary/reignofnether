@@ -17,28 +17,22 @@ public class CameraFadeClientboundPacket {
     private final String playerName;
     private final BlockPos pos;
     private final int fadeOutTicks;
-    private final int holdTicks;
+    private final int blackoutTicks;
     private final int fadeInTicks;
 
-    public static void fadeMoveCam(ServerPlayer player, BlockPos pos, int fadeOutTicks, int holdTicks, int fadeInTicks) {
+    public static void fadeMoveCam(ServerPlayer player, BlockPos pos, int fadeOutTicks, int blackoutTicks, int fadeInTicks) {
         if (player == null)
             return;
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
-                new CameraFadeClientboundPacket(player.getName().getString(), pos, fadeOutTicks, holdTicks, fadeInTicks)
+                new CameraFadeClientboundPacket(player.getName().getString(), pos, fadeOutTicks, blackoutTicks, fadeInTicks)
         );
     }
 
-    public static void fadeMoveCam(String playerName, BlockPos pos, int fadeOutTicks, int holdTicks, int fadeInTicks) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new CameraFadeClientboundPacket(playerName, pos, fadeOutTicks, holdTicks, fadeInTicks)
-        );
-    }
-
-    public CameraFadeClientboundPacket(String playerName, BlockPos pos, int fadeOutTicks, int holdTicks, int fadeInTicks) {
+    public CameraFadeClientboundPacket(String playerName, BlockPos pos, int fadeOutTicks, int blackoutTicks, int fadeInTicks) {
         this.playerName = playerName;
         this.pos = pos;
         this.fadeOutTicks = fadeOutTicks;
-        this.holdTicks = holdTicks;
+        this.blackoutTicks = blackoutTicks;
         this.fadeInTicks = fadeInTicks;
     }
 
@@ -46,7 +40,7 @@ public class CameraFadeClientboundPacket {
         this.playerName = buffer.readUtf();
         this.pos = buffer.readBlockPos();
         this.fadeOutTicks = buffer.readInt();
-        this.holdTicks = buffer.readInt();
+        this.blackoutTicks = buffer.readInt();
         this.fadeInTicks = buffer.readInt();
     }
 
@@ -54,7 +48,7 @@ public class CameraFadeClientboundPacket {
         buffer.writeUtf(this.playerName);
         buffer.writeBlockPos(this.pos);
         buffer.writeInt(this.fadeOutTicks);
-        buffer.writeInt(this.holdTicks);
+        buffer.writeInt(this.blackoutTicks);
         buffer.writeInt(this.fadeInTicks);
     }
 
@@ -65,7 +59,7 @@ public class CameraFadeClientboundPacket {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         CameraFadeClientEvents.fadeMoveCam(this.playerName, this.pos,
-                                this.fadeOutTicks, this.holdTicks, this.fadeInTicks);
+                                this.fadeOutTicks, this.blackoutTicks, this.fadeInTicks);
                         success.set(true);
                     });
         });

@@ -291,73 +291,96 @@ public class PlayerCommands {
 				)
 				
 				.then(Commands.literal("camera")
-						.then(Commands.literal("move")
-								.then(Commands.argument("pos", BlockPosArgument.blockPos())
-										.then(Commands.argument("player", PlayerNameArgument.player())
-												.executes(ctx -> forceMoveCam(
-														ctx,
-														BlockPosArgument.getBlockPos(ctx, "pos"),
-														PlayerNameArgument.getPlayerName(ctx, "player"),
-														0
-												))
-												.then(Commands.argument("lockTicks", IntegerArgumentType.integer(0))
-														.executes(ctx -> forceMoveCam(
-																ctx,
-																BlockPosArgument.getBlockPos(ctx, "pos"),
-																PlayerNameArgument.getPlayerName(ctx, "player"),
-																IntegerArgumentType.getInteger(ctx, "lockTicks")
-														))
-												)
+					.then(Commands.literal("move")
+						.then(Commands.argument("pos", BlockPosArgument.blockPos())
+							.then(Commands.argument("player", PlayerNameArgument.player())
+								.executes(ctx -> forceMoveCam(
+									ctx,
+									BlockPosArgument.getBlockPos(ctx, "pos"),
+									PlayerNameArgument.getPlayerName(ctx, "player"),
+									0,
+									20,
+									0
+								))
+								.then(Commands.argument("lockTicks", IntegerArgumentType.integer(0))
+									.executes(ctx -> forceMoveCam(
+										ctx,
+										BlockPosArgument.getBlockPos(ctx, "pos"),
+										PlayerNameArgument.getPlayerName(ctx, "player"),
+										IntegerArgumentType.getInteger(ctx, "lockTicks"),
+										20,
+										0
+									))
+									.then(Commands.argument("forcePanTicks", IntegerArgumentType.integer(1))
+										.executes(ctx -> forceMoveCam(
+											ctx,
+											BlockPosArgument.getBlockPos(ctx, "pos"),
+											PlayerNameArgument.getPlayerName(ctx, "player"),
+											IntegerArgumentType.getInteger(ctx, "lockTicks"),
+											IntegerArgumentType.getInteger(ctx, "forcePanTicks"),
+											0
+										))
+										.then(Commands.argument("zoom", IntegerArgumentType.integer(10, 90))
+											.executes(ctx -> forceMoveCam(
+												ctx,
+												BlockPosArgument.getBlockPos(ctx, "pos"),
+												PlayerNameArgument.getPlayerName(ctx, "player"),
+												IntegerArgumentType.getInteger(ctx, "lockTicks"),
+												IntegerArgumentType.getInteger(ctx, "forcePanTicks"),
+												IntegerArgumentType.getInteger(ctx, "zoom")
+											))
 										)
+									)
 								)
-						)
-						.then(Commands.literal("fade")
-								.then(Commands.argument("pos", BlockPosArgument.blockPos())
-										.then(Commands.argument("player", PlayerNameArgument.player())
-												.executes(ctx -> fadeMoveCam(
-														ctx,
-														BlockPosArgument.getBlockPos(ctx, "pos"),
-														PlayerNameArgument.getPlayerName(ctx, "player"),
-														CameraFadeClientEvents.DEFAULT_FADE_TICKS,
-														CameraFadeClientEvents.DEFAULT_HOLD_TICKS
-												))
-												.then(Commands.argument("fadeTicks", IntegerArgumentType.integer(0))
-														.executes(ctx -> fadeMoveCam(
-																ctx,
-																BlockPosArgument.getBlockPos(ctx, "pos"),
-																PlayerNameArgument.getPlayerName(ctx, "player"),
-																IntegerArgumentType.getInteger(ctx, "fadeTicks"),
-																CameraFadeClientEvents.DEFAULT_HOLD_TICKS
-														))
-														.then(Commands.argument("holdTicks", IntegerArgumentType.integer(0))
-																.executes(ctx -> fadeMoveCam(
-																		ctx,
-																		BlockPosArgument.getBlockPos(ctx, "pos"),
-																		PlayerNameArgument.getPlayerName(ctx, "player"),
-																		IntegerArgumentType.getInteger(ctx, "fadeTicks"),
-																		IntegerArgumentType.getInteger(ctx, "holdTicks")
-																))
-														)
-												)
-										)
-								)
-						)
-
-
-						.then(Commands.argument("value", BoolArgumentType.bool())
-						.then(Commands.argument("player", PlayerNameArgument.player())
-							.executes(ctx -> {
-								String playerName = PlayerNameArgument.getPlayerName(ctx, "player");
-								boolean value = BoolArgumentType.getBool(ctx, "value");
-								PlayerClientboundPacket.setRTSCamera(playerName, value);
-								ctx.getSource().sendSuccess(
-									() -> Component.literal("Set RTS camera to " + value + " for " + playerName),
-									true
-								);
-								return 1;
-							})
+							)
 						)
 					)
+					.then(Commands.literal("fade")
+						.then(Commands.argument("pos", BlockPosArgument.blockPos())
+							.then(Commands.argument("player", PlayerNameArgument.player())
+								.executes(ctx -> fadeMoveCam(
+									ctx,
+									BlockPosArgument.getBlockPos(ctx, "pos"),
+									PlayerNameArgument.getPlayerName(ctx, "player"),
+									CameraFadeClientEvents.DEFAULT_FADE_TICKS,
+									CameraFadeClientEvents.DEFAULT_BLACKOUT_TICKS
+								))
+								.then(Commands.argument("fadeTicks", IntegerArgumentType.integer(0))
+									.executes(ctx -> fadeMoveCam(
+										ctx,
+										BlockPosArgument.getBlockPos(ctx, "pos"),
+										PlayerNameArgument.getPlayerName(ctx, "player"),
+										IntegerArgumentType.getInteger(ctx, "fadeTicks"),
+										CameraFadeClientEvents.DEFAULT_BLACKOUT_TICKS
+									))
+									.then(Commands.argument("blackoutTicks", IntegerArgumentType.integer(0))
+										.executes(ctx -> fadeMoveCam(
+											ctx,
+											BlockPosArgument.getBlockPos(ctx, "pos"),
+											PlayerNameArgument.getPlayerName(ctx, "player"),
+											IntegerArgumentType.getInteger(ctx, "fadeTicks"),
+											IntegerArgumentType.getInteger(ctx, "blackoutTicks")
+										))
+									)
+								)
+							)
+						)
+					)
+
+
+					.then(Commands.argument("value", BoolArgumentType.bool())
+					.then(Commands.argument("player", PlayerNameArgument.player())
+						.executes(ctx -> {
+							String playerName = PlayerNameArgument.getPlayerName(ctx, "player");
+							boolean value = BoolArgumentType.getBool(ctx, "value");
+							PlayerClientboundPacket.setRTSCamera(playerName, value);
+							ctx.getSource().sendSuccess(
+								() -> Component.literal("Set RTS camera to " + value + " for " + playerName),
+								true
+							);
+							return 1;
+						})
+					))
 				)
 				
 				.then(Commands.literal("teammode")
@@ -377,14 +400,16 @@ public class PlayerCommands {
 			CommandContext<CommandSourceStack> ctx,
 			BlockPos pos,
 			String playerName,
-			int lockTicks
+			int lockTicks,
+			int forcePanTicks,
+			int zoomLevel
 	) {
 		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
 		if (player == null) {
 			ctx.getSource().sendFailure(Component.literal("Player '" + playerName + "' is not online"));
 			return 0;
 		}
-		CameraClientboundPacket.forceMoveCam(player, pos, lockTicks);
+		CameraClientboundPacket.forceMoveCam(player, pos, lockTicks, forcePanTicks, zoomLevel);
 		ctx.getSource().sendSuccess(
 				() -> Component.literal("Moved camera of " + playerName + " to " + pos.getX() + ", " + pos.getZ() +
 						(lockTicks > 0 ? " (locked for " + lockTicks + " ticks)" : "")),
@@ -398,14 +423,14 @@ public class PlayerCommands {
 			BlockPos pos,
 			String playerName,
 			int fadeTicks,
-			int holdTicks
+			int blackoutTicks
 	) {
 		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
 		if (player == null) {
 			ctx.getSource().sendFailure(Component.literal("Player '" + playerName + "' is not online"));
 			return 0;
 		}
-		CameraFadeClientboundPacket.fadeMoveCam(player, pos, fadeTicks, holdTicks, fadeTicks);
+		CameraFadeClientboundPacket.fadeMoveCam(player, pos, fadeTicks, blackoutTicks, fadeTicks);
 		ctx.getSource().sendSuccess(
 				() -> Component.literal("Faded camera of " + playerName + " to " + pos.getX() + ", " + pos.getZ()),
 				true

@@ -18,13 +18,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class CameraFadeClientEvents {
 
     public static final int DEFAULT_FADE_TICKS = 10;
-    public static final int DEFAULT_HOLD_TICKS = 5;
+    public static final int DEFAULT_BLACKOUT_TICKS = 5;
 
     private static final Minecraft MC = Minecraft.getInstance();
 
     private static boolean fading = false;
     private static int fadeOutTicks = 0;
-    private static int holdTicks = 0;
+    private static int blackoutTIcks = 0;
     private static int fadeInTicks = 0;
     private static int ticksElapsed = 0;
     private static boolean moved = false;
@@ -41,7 +41,7 @@ public class CameraFadeClientEvents {
         // a fade already in progress is replaced by the new one rather than queued
         targetPos = pos;
         fadeOutTicks = Math.max(0, fadeOut);
-        holdTicks = Math.max(0, hold);
+        blackoutTIcks = Math.max(0, hold);
         fadeInTicks = Math.max(0, fadeIn);
         ticksElapsed = 0;
         moved = false;
@@ -90,7 +90,7 @@ public class CameraFadeClientEvents {
         if (!moved && ticksElapsed >= fadeOutTicks) {
             doMove();
         }
-        if (ticksElapsed >= fadeOutTicks + holdTicks + fadeInTicks) {
+        if (ticksElapsed >= fadeOutTicks + blackoutTIcks + fadeInTicks) {
             stop();
         }
     }
@@ -106,10 +106,10 @@ public class CameraFadeClientEvents {
             return Mth.clamp(t / fadeOutTicks, 0, 1);
         }
         float held = t - fadeOutTicks;
-        if (held < holdTicks || fadeInTicks <= 0) {
+        if (held < blackoutTIcks || fadeInTicks <= 0) {
             return 1;
         }
-        return Mth.clamp(1 - ((held - holdTicks) / fadeInTicks), 0, 1);
+        return Mth.clamp(1 - ((held - blackoutTIcks) / fadeInTicks), 0, 1);
     }
 
     private static void drawFade(GuiGraphics guiGraphics, float partialTick) {

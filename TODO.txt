@@ -30,6 +30,8 @@ Unit Items
     - Requires right-click to pick up, will not auto-pickup
 
 
+[❌] test tutorial map
+
 
 Balance
 -------
@@ -40,7 +42,7 @@ Quality of Life
 [🟡] All existing militia in saved maps can no longer be converted back into villagers
 [🟡] Villagers now convert into the `temporary_militia` entity which follow the normal rules for conversion
 
-[🟡] Added a force move command
+[🟡] Added a force move camera command
 [❌] Allow fog to be kept on in between singleplayer relogs
 
 Bugfixes
