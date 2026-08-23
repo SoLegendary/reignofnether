@@ -32,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraftforge.server.command.EnumArgument;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -433,10 +434,10 @@ public class BuildingCommands {
 	private static int listCommands(CommandSourceStack pSource, Collection<? extends BuildingPlacement> pBuildings) {
 		
 		for (BuildingPlacement building : pBuildings) {
-			if (building.commands.isEmpty()) {
+			if (building.commands.isEmpty()) {//need translation
 				pSource.sendSuccess(() -> Component.translatable("commands.command.list.multiple.empty", pBuildings.size()), false);
 			} else {
-				pSource.sendSuccess(() -> Component.translatable("commands.tag.list.multiple.success", pBuildings.size(), building.commands.size()), false);
+				pSource.sendSuccess(() -> Component.translatable("commands.command.list.multiple.success", pBuildings.size(), building.commands.size()), false);
 				for (BuildingCommand command : building.commands) {
 					pSource.sendSuccess(
 					() -> Component.literal(String.format(
@@ -501,20 +502,29 @@ public class BuildingCommands {
 					BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
 					Rotation.NONE
 				))
-				// with rotation
-				.then(Commands.argument("rotation", StringArgumentType.word())
-					.suggests((ctx, builder) -> SharedSuggestionProvider.suggest(
-						List.of("0", "90", "180", "270"),
-						builder
-					))
+				.then(Commands.argument("rotation", EnumArgument.enumArgument(Rotation.class))
 					.executes(ctx -> CommandsServerEvents.placeBuilding(
 						ctx,
 						ResourceLocationArgument.getId(ctx, "buildingName").toString(),
 						ownerResolver.resolve(ctx),
 						BoolArgumentType.getBool(ctx, "autoBuild"),
 						BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
-						CommandsServerEvents.parseRotation(StringArgumentType.getString(ctx, "rotation"))
+						ctx.getArgument("rotation", Rotation.class)
 					))
+				)
+				.then(Commands.argument("rotation1", IntegerArgumentType.integer())
+					.executes(ctx -> {
+						CommandsServerEvents.placeBuilding(
+							ctx,
+							ResourceLocationArgument.getId(ctx, "buildingName").toString(),
+							ownerResolver.resolve(ctx),
+							BoolArgumentType.getBool(ctx, "autoBuild"),
+							BlockPosArgument.getLoadedBlockPos(ctx, "pos"),
+							CommandsServerEvents.parseRotation(String.valueOf(IntegerArgumentType.getInteger(ctx, "rotation1")))
+						);
+						ctx.getSource().sendFailure(Component.literal("Deprecated Argument"));
+						return 0;
+					})
 				)
 			);
 	}

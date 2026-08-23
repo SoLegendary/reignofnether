@@ -28,13 +28,7 @@ import javax.annotation.Nullable;
 
 public class BuildingSelectorParser {
 	
-	public static final char SYNTAX_SELECTOR_START = '@';
-	public static final char SYNTAX_OPTIONS_KEY_VALUE_SEPARATOR = '=';
-	public static final char SYNTAX_NOT = '!';
-	public static final char SYNTAX_TAG = '#';
-	public static final SimpleCommandExceptionType ERROR_INVALID_NAME_OR_UUID = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.buildingPlacement.invalid.error"));
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_SELECTOR_TYPE = new DynamicCommandExceptionType((p_121301_) -> Component.translatable("argument.reignofnether.buildingPlacement.selector.unknown.error", p_121301_));
-	public static final SimpleCommandExceptionType ERROR_SELECTORS_NOT_ALLOWED = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.buildingPlacement.selector.not_allowed.error"));
 	public static final SimpleCommandExceptionType ERROR_MISSING_SELECTOR_TYPE = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.buildingPlacement.selector.missing.error"));
 	public static final SimpleCommandExceptionType ERROR_EXPECTED_END_OF_OPTIONS = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.buildingPlacement.options.unterminated.error"));
 	public static final DynamicCommandExceptionType ERROR_EXPECTED_OPTION_VALUE = new DynamicCommandExceptionType((p_121267_) -> Component.translatable("argument.reignofnether.buildingPlacement.options.valueless.error", p_121267_));
@@ -42,10 +36,6 @@ public class BuildingSelectorParser {
 	public static final BiConsumer<Vec3, List<? extends BuildingPlacement>> ORDER_FURTHEST = (p_121298_, p_121299_) -> p_121299_.sort((p_175131_, p_175132_) -> Doubles.compare(distanceToSqr(p_175132_, p_121298_), distanceToSqr(p_175131_, p_121298_)));
 	public static final BiConsumer<Vec3, List<? extends BuildingPlacement>> ORDER_RANDOM = (p_121264_, p_121265_) -> Collections.shuffle(p_121265_);
 	public static final BiFunction<SuggestionsBuilder, Consumer<SuggestionsBuilder>, CompletableFuture<Suggestions>> SUGGEST_NOTHING = (p_121363_, p_121364_) -> p_121363_.buildFuture();
-	private static final char SYNTAX_OPTIONS_START = '[';
-	private static final char SYNTAX_OPTIONS_END = ']';
-	private static final char SYNTAX_OPTIONS_SEPARATOR = ',';
-	private static final char SELECTOR_BUILDING = 'b';
 	private final StringReader reader;
 	private int maxResults;
 	private MinMaxBounds.Doubles distance = MinMaxBounds.Doubles.ANY;
@@ -303,20 +293,20 @@ public class BuildingSelectorParser {
 	
 	private CompletableFuture<Suggestions> suggestNameOrSelector(SuggestionsBuilder p_121287_, Consumer<SuggestionsBuilder> p_121288_) {
 		p_121288_.accept(p_121287_);
-		p_121287_.suggest("@b", Component.translatable("argument.reignofnether.buildingPlacement.selector.allPlayer"));
-		p_121287_.suggest("@r", Component.translatable("argument.reignofnether.buildingPlacement.selector.randomPlayer"));
-		p_121287_.suggest("@p", Component.translatable("argument.reignofnether.buildingPlacement.selector.nearestPlayer"));
-		p_121287_.suggest("@s", Component.translatable("argument.reignofnether.buildingPlacement.selector.nearestPlayer"));
+		p_121287_.suggest("@b", Component.translatable("argument.reignofnether.buildingPlacement.selector.allBuilding"));
+		p_121287_.suggest("@r", Component.translatable("argument.reignofnether.buildingPlacement.selector.randomBuilding"));
+		p_121287_.suggest("@p", Component.translatable("argument.reignofnether.buildingPlacement.selector.nearestBuilding"));
+		p_121287_.suggest("@s", Component.translatable("argument.reignofnether.buildingPlacement.selector.currentLocationBuilding"));
 		return p_121287_.buildFuture();
 	}
 	
 	
 	private CompletableFuture<Suggestions> suggestSelector(SuggestionsBuilder p_121323_, Consumer<SuggestionsBuilder> p_121324_) {
 		SuggestionsBuilder suggestionsbuilder = p_121323_.createOffset(p_121323_.getStart() - 1);
-		suggestionsbuilder.suggest("@b", Component.translatable("argument.reignofnether.buildingPlacement.selector.allPlayer"));
-		suggestionsbuilder.suggest("@r", Component.translatable("argument.reignofnether.buildingPlacement.selector.randomPlayer"));
-		suggestionsbuilder.suggest("@p", Component.translatable("argument.reignofnether.buildingPlacement.selector.nearestPlayer"));
-		suggestionsbuilder.suggest("@s", Component.translatable("argument.reignofnether.buildingPlacement.selector.hereBUilding")); //TODO: player?
+		suggestionsbuilder.suggest("@b", Component.translatable("argument.reignofnether.buildingPlacement.selector.allBuilding"));
+		suggestionsbuilder.suggest("@r", Component.translatable("argument.reignofnether.buildingPlacement.selector.randomBuilding"));
+		suggestionsbuilder.suggest("@p", Component.translatable("argument.reignofnether.buildingPlacement.selector.nearestBuilding"));
+		suggestionsbuilder.suggest("@s", Component.translatable("argument.reignofnether.buildingPlacement.selector.currentLocationBuilding")); //TODO: player?
 		p_121323_.add(suggestionsbuilder);
 		return p_121323_.buildFuture();
 	}

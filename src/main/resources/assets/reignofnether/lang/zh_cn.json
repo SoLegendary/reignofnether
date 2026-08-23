@@ -732,10 +732,10 @@
   "argument.reignofnether.buildingPlacement.selector.missing.error": "选择器类型丢失",
   "argument.reignofnether.buildingPlacement.options.unterminated.error": "选项过多",
   "argument.reignofnether.buildingPlacement.options.valueless.error": "此处应为某个选项",
-  "argument.reignofnether.building.toomany.error": "仅限一个建筑",
+  "argument.reignofnether.building.too_many.error": "仅限一个建筑",
   "argument.reignofnether.player.toomany.error": "仅限一个玩家",
   "argument.reignofnether.player.buildings.error": "仅限玩家",
-  "argument.reignofnether.building.notfound.building.error": "未找到建筑",
+  "argument.reignofnether.building.not_found.building.error": "未找到建筑",
   "argument.reignofnether.building.notfound.player.error": "未找到玩家",
   "argument.reignofnether.building.selector.not_allowed.error": "选择器不可用",
 

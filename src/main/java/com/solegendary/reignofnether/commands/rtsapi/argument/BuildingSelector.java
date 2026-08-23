@@ -97,7 +97,7 @@ public class BuildingSelector {
 		return pBuildings.subList(0, Math.min(this.maxResults, pBuildings.size()));
 	}
 	
-	private void addBuildings(String pBuildingName, List<BuildingPlacement> pResult, Vec3 pPos) throws CommandSyntaxException {
+	private void addBuildings(String pBuildingName, List<BuildingPlacement> pResult, Vec3 pPos) {
 		int i = this.getResultLimit();
 		if (pResult.size() < i) {
 			if (this.aabb != null) {
