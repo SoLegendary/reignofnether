@@ -412,7 +412,10 @@ public class PlayerCommands {
 		CameraClientboundPacket.forceMoveCam(player, pos, lockTicks, forcePanTicks, zoomLevel);
 		ctx.getSource().sendSuccess(
 				() -> Component.literal("Moved camera of " + playerName + " to " + pos.getX() + ", " + pos.getZ() +
-						(lockTicks > 0 ? " (locked for " + lockTicks + " ticks)" : "")),
+						(forcePanTicks > 0 ? " (over " + forcePanTicks + " ticks)" : "") +
+						(lockTicks > 0 ? " (locked for " + lockTicks + " ticks)" : "") +
+						(zoomLevel > 0 ? " (zoom level " + zoomLevel + " ticks)" : "")
+				),
 				true
 		);
 		return 1;

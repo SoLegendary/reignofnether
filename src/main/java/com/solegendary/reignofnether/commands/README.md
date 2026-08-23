@@ -2,11 +2,11 @@
 
 ## 1. New /rtsapi commands:
 
-:warning: `All commands beginning with /rtsapi- (with a dash) exist for backwards compability, but are no longer updated, use /rtsapi (no dash) instead`
+:warning: **All commands beginning with /rtsapi- (with a dash) exist for backwards compability, but are no longer updated, use /rtsapi (no dash) instead**
 
 All commands are organised into three categories: **Building**, **Unit**, and **Player**.
 
-Custom command support has been added for normal buildings. It is similar to custom building comamnds, however, it takes effect on each individual building, rather than on each type of building.
+Custom command support has been added for normal buildings using `/rtsapi building command`. It is similar to custom building commands, however, it takes effect on each individual building, rather than on each type of building.
 
 <details><summary>All Commands</summary>
 <p>
@@ -54,7 +54,7 @@ Custom command support has been added for normal buildings. It is similar to cus
 - /rtsapi unit anchor remove &lt;from&gt; &lt;to&gt;
 - /rtsapi unit anchor remove &lt;targets&gt; [ownerName]
 - /rtsapi unit action &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;action&gt; [targetPos]
-- /rtsapi unit action &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;action&gt; &lt;targetFrom&gt; &lt;targetTo&gt;\
+- /rtsapi unit action &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;action&gt; &lt;targetFrom&gt; &lt;targetTo&gt;
 - /rtsapi unit action &lt;targets&gt; &lt;ownerName&gt; &lt;action&gt; [targetPos]
 - /rtsapi unit action &lt;targets&gt; &lt;ownerName&gt; &lt;action&gt; &lt;target&gt;
 - /rtsapi unit enemysearch &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;behaviour&gt;
@@ -64,12 +64,12 @@ Custom command support has been added for normal buildings. It is similar to cus
 </details> 
 
 ---
-## 2.New ally output:
+## 2. FPV-friendly Ally commands
 Sending an ally request to an FPV player now shows clickable buttons in their chat window:\
 `[Click to Confirm]` | `[Click to Cancel]`
 
 ---
-## 3.New command arguments
+## 3. New command arguments
 To support the new `/rtsapi` commands, several new argument types have been added:
 
 <details><summary>BuildingArgument</summary>
@@ -95,7 +95,7 @@ The main difference from the EntityArgument is that it can select units from the
 
 This combines the EntityArgument and the StringTypeArgument. You can use `@a` as an EntitySelector, or `"a"` as a fake player name. Four use cases:
 - `*` (optional) — all players (including fake players like "Enemy")
-- `@a` / `@p` / `@r` / ... — EntitySelector
+- `@a` / `@p` / `@r` / ... — EntitySelector (does not apply to offline or virtual players like scenario NPCs)
 - `a` / `b` / `c` / ... — an online player's name
 - `"a"` / `"b"` / `"c"` / ... — player name as a string (`""` is valid as neutral)
 
@@ -105,7 +105,7 @@ The result is a string representing the player's name. It is usually appended to
 </details> 
 
 ---
-## 4.New /data commands
+## 4. /data for buildings
 You can now use `/data get/merge/modify/remove building` on building data:
 
 <details><summary>Valid NBTs</summary>
@@ -136,7 +136,7 @@ You can now use `/data get/merge/modify/remove building` on building data:
 
 ---
 ## 5.New Scoreboard Criteria
-You can now use RTS resources (food, wood, ore, population) in scoreboards, eg:\
+You can now use RTS resources (food, wood, ore, population) in scoreboards, eg:
 - `/scoreboard objectives add myfood resources.food "food"`
 
 ---
@@ -168,6 +168,3 @@ All RoN units now have an NBT tag called `onDeathCommand`. You can set it by run
 `/data modify <EntitySelector> onDeathCommand set value "<String:command>"`
 
 For example, `/data modify @e[type=reignofnether:zombie_unit,limit=1] onDeathCommand set value "say I died!"` will cause that zombie to say "I died!" when it dies.
-
----
-
