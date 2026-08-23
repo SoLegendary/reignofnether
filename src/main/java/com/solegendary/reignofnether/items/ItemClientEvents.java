@@ -79,6 +79,7 @@ public class ItemClientEvents {
         return unit instanceof UnitInventory inv &&
                 (unit instanceof HeroUnit ||
                         !inv.getAllItems().isEmpty());
+
          */
     }
 
@@ -86,8 +87,7 @@ public class ItemClientEvents {
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
-            if (!UnitClientEvents.getSelectedUnits().isEmpty() &&
-                UnitClientEvents.getSelectedUnits().get(0) instanceof UnitInventory inv) {
+            if (HudClientEvents.hudSelectedEntity instanceof UnitInventory inv) {
                 if (Keybindings.shiftMod.isDown())
                     inv.tryAdding(new ItemStack(Items.DIAMOND_SWORD));
                 else if (Keybindings.ctrlMod.isDown())
@@ -136,11 +136,21 @@ public class ItemClientEvents {
                 button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
             }
         }
-        if (!UnitClientEvents.getSelectedUnits().isEmpty() && hasActionableItem() &&
-            UnitClientEvents.getSelectedUnits().get(0) instanceof UnitInventory inv) {
 
-            if (getMousedOverButton() instanceof UnitItemButton uiButton) {
+        if (hasActionableItem() && HudClientEvents.hudSelectedEntity instanceof UnitInventory inv) {
+            Button mousedOverButton = getMousedOverButton();
+            Button hudMousedOverButton = HudClientEvents.getMousedOverButton();
+            if (mousedOverButton instanceof UnitItemButton uiButton) {
                 inv.swapSlots(actionableInvIndex, uiButton.invIndex);
+            } else if (hudMousedOverButton != null &&
+                    hudMousedOverButton.entity instanceof HeroUnit &&
+                    hudMousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
+                    hudMousedOverButton.entity instanceof UnitInventory inv2) {
+                Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
+                if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED) {
+                    // todo: wire to move goal and enforce range
+                    inv.giveTo(actionableInvIndex, inv2);
+                }
             } else if (!HudClientEvents.isMouseOverAnyButtonOrHud()) {
                 BuildingPlacement bpl = BuildingClientEvents.getPreselectedBuilding();
                 Relationship rl = bpl != null ? BuildingClientEvents.getPlayerToBuildingRelationship(bpl) : null;
@@ -150,9 +160,9 @@ public class ItemClientEvents {
                     Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(le);
                     if (le instanceof HeroUnit &&
                         le instanceof UnitInventory inv2 &&
+                        le != HudClientEvents.hudSelectedEntity &&
                         (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED)) {
                         // todo: wire to move goal and enforce range
-                        // todo: drop on selected-group button to also give
                         inv.giveTo(actionableInvIndex, inv2);
                     }
                 } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
@@ -229,8 +239,7 @@ public class ItemClientEvents {
                     break;
                 }
             }
-            if (hasActionableItem() && !UnitClientEvents.getSelectedUnits().isEmpty() &&
-                    UnitClientEvents.getSelectedUnits().get(0) instanceof Unit unit) {
+            if (hasActionableItem() && HudClientEvents.hudSelectedEntity instanceof Unit unit) {
                 actionableUnitItem.getButton(0, new ItemStack(actionableUnitItem.item), unit).renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
             }
         }

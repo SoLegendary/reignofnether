@@ -1870,6 +1870,14 @@ public class HudClientEvents {
         return isMouseOverAnyButton();
     }
 
+    public static Button getMousedOverButton() {
+        for (Button button : renderedButtons)
+            if (button.isMouseOver(mouseX, mouseY)) {
+                return button;
+            }
+        return null;
+    }
+
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
         if (!(MC.screen instanceof TopdownGui))

@@ -846,6 +846,7 @@ public class MiscUtil {
     // eg. Zombie -> entity.reignofnether.zombie
     public static String getEntityIconName(Entity entity) {
         return entity.getType().getDescriptionId()
+                .replace("entity.minecraft.", "")
                 .replace("entity.reignofnether.", "")
                 .replace("_unit", "")
                 .toLowerCase();

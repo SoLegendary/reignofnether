@@ -57,7 +57,7 @@ Bugfixes
 [❌] Players logging in messes up the observer menu (and freezes resources?)
 [❌] Fix day/night time when /gamerule doDaylightCycle false
 [❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
-
+[❌] Allow fog to be kept on in between singleplayer relogs
 
 Quality of Life Features
 ------------------------
