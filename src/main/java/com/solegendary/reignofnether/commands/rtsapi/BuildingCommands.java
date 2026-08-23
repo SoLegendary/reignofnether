@@ -105,7 +105,7 @@ public class BuildingCommands {
 							(ctx) -> withBuildings(
 								BuildingArgument.getBuildings(ctx, "targets", null),
 								b -> b.destroy(ctx.getSource().getLevel()), ctx,
-								Component.literal("Destroy %d building(s) successfully")
+								Component.translatable("commands.reignofnether.building.destroy.success")
 							)
 						)//TODO: replace with translation
 						.then(Commands.argument("ownerName", PlayerNameArgument.players())
@@ -113,7 +113,7 @@ public class BuildingCommands {
 								(ctx) -> withBuildings(
 									b -> b.destroy(ctx.getSource().getLevel()),
 									ctx,
-									Component.literal("Destroy %d building(s) successfully")
+									Component.translatable("commands.reignofnether.building.destroy.success")
 								)
 							)
 							.then(Commands.argument("preserved", BoolArgumentType.bool())
@@ -121,7 +121,7 @@ public class BuildingCommands {
 									(ctx) -> withBuildings(
 										b -> SandboxServer.removeBuilding(b.originPos),
 										ctx,
-										Component.literal("Destroy %d building(s) without broke blocks successfully")
+										Component.translatable("commands.reignofnether.building.destroy_preserve.success")
 									)
 								)
 							)
@@ -163,7 +163,7 @@ public class BuildingCommands {
 										}
 									},
 									ctx,
-									Component.literal("Change the owner of %d building(s) successfully")
+									Component.translatable("commands.reignofnether.building.owner.change.success")
 								)))
 						)
 					)
@@ -176,7 +176,7 @@ public class BuildingCommands {
 									.executes(
 										(ctx) -> withBuildings(
 											b -> b.addTag(StringArgumentType.getString(ctx, "name")), ctx,
-											Component.literal("Add Tag to %d building(s) successfully"))
+											Component.translatable("commands.reignofnether.building.tag.add.success"))
 									)
 								)
 							)
@@ -194,7 +194,7 @@ public class BuildingCommands {
 										(ctx) -> withBuildings(
 											b -> b.removeTag(StringArgumentType.getString(ctx, "name")),
 											ctx,
-											Component.literal("Remove Tag to %d building(s) successfully")))
+											Component.translatable("commands.reignofnether.building.tag.remove.success")))
 								)
 							)
 							.then(Commands.literal("list")
@@ -210,7 +210,7 @@ public class BuildingCommands {
 								.executes((ctx) -> withBuildings(
 									b -> b.destroyRandomBlocks(IntegerArgumentType.getInteger(ctx, "points")),
 									ctx,
-									Component.literal("Hurt %d building(s) successfully"))
+									Component.translatable("commands.reignofnether.building.hurt.success"))
 								)
 							)
 						)
@@ -234,7 +234,7 @@ public class BuildingCommands {
 										
 									},
 									ctx,
-									Component.literal("Hurt %d building(s) successfully"))
+									Component.translatable("commands.reignofnether.building.hurt.success"))
 								)
 							)
 						)
@@ -255,7 +255,7 @@ public class BuildingCommands {
 														IntegerArgumentType.getInteger(ctx, "tickCooldownMax")
 													),
 													ctx,
-													Component.literal("Add Command to %d building(s) successfully")
+													Component.translatable("commands.reignofnether.building.command.add.success")
 												)
 											)
 											.then(Commands.argument("tickCooldown", IntegerArgumentType.integer(0))
@@ -267,7 +267,7 @@ public class BuildingCommands {
 															IntegerArgumentType.getInteger(ctx, "tickCooldownMax")
 														),
 														ctx,
-														Component.literal("Add Command to %d building(s) successfully")
+														Component.translatable("commands.reignofnether.building.command.add.success")
 													)
 												)
 											)
@@ -285,7 +285,7 @@ public class BuildingCommands {
 													100
 												),
 												ctx,
-												Component.literal("Add Command to %d building(s) successfully")
+												Component.translatable("commands.reignofnether.building.command.add.success")
 											)
 										)
 									)
@@ -314,17 +314,16 @@ public class BuildingCommands {
 											if (index <= building.commands.size()) {
 												building.removeCommand(index);
 												ctx.getSource().sendSuccess(
-													() -> Component.literal(String.format(
-															"Delete command (%d", index))
+													() -> Component.translatable("commands.reignofnether.building.command.remove.success_01", index)
 														.withStyle(Style.EMPTY.withBold(true))
-														.append(Component.literal(String.format(
-															" | %s | %s | %d) successfully",
+														.append(Component.translatable("commands.reignofnether.building.command.remove.success_02",
 															building.commands.get(index).commandStr,
 															building.commands.get(index).condition,
 															building.commands.get(index).tickCooldownMax
-															))
+															)
 															.withStyle(Style.EMPTY.withBold(false))
-														), true);
+														), true
+												);
 											}
 										}
 										return 1;
@@ -338,7 +337,7 @@ public class BuildingCommands {
 											}
 										},
 										ctx,
-										Component.literal("Delete all commands of %d buildings successfully")
+										Component.translatable("commands.reignofnether.building.command.remove_all.success")
 									))
 								)
 							)

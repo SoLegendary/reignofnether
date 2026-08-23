@@ -94,7 +94,12 @@ public class UnitCommands {
 				.then(Commands.literal("owner")
 					.then(setUnitOwnerTail())
 					.then(Commands.argument("targets", UnitArgument.units())
-						.executes((ctx) -> withUnits(UnitArgument.getUnits(ctx, "targets", null), u -> u.setOwnerName(""), ctx, Component.literal("Destroy %d building(s) successfully")))
+						.executes((ctx) -> withUnits(
+								UnitArgument.getUnits(ctx, "targets", null),
+								u -> u.setOwnerName(""),
+								ctx, Component.translatable("commands.reignofnether.unit.destroy.success")
+								)
+						)
 						.then(Commands.argument("ownerName", PlayerNameArgument.players())
 							.then(Commands.argument("newOwnerName", PlayerNameArgument.player())
 								.executes((ctx) -> withUnits(
@@ -105,7 +110,7 @@ public class UnitCommands {
 											}
 										},
 										ctx,
-										Component.literal("Set owner of %d unit(s) successfully")
+										Component.translatable("commands.reignofnether.unit.owner.set.success")
 									)
 								)
 							)
@@ -137,7 +142,7 @@ public class UnitCommands {
 											}
 										},
 										ctx,
-										Component.literal("Set owner of %d unit(s) successfully")
+										Component.translatable("commands.reignofnether.unit.owner.set.success")
 									))
 								)
 							)
@@ -158,7 +163,7 @@ public class UnitCommands {
 									int[] ids = units.stream().mapToInt(u -> ((LivingEntity) u).getId()).toArray();
 									SandboxServer.removeAnchor(ids);
 									ctx.getSource().sendSuccess(
-										() -> Component.literal("Removed anchor for " + ids.length + " unit(s)"), true);
+										() -> Component.translatable("commands.reignofnether.unit.anchor.remove.success", ids.length), true);
 									return ids.length;
 								})
 								.then(Commands.argument("ownerName", PlayerNameArgument.player())
@@ -167,7 +172,7 @@ public class UnitCommands {
 										int[] ids = units.stream().mapToInt(u -> ((LivingEntity) u).getId()).toArray();
 										SandboxServer.removeAnchor(ids);
 										ctx.getSource().sendSuccess(
-											() -> Component.literal("Removed anchor for " + ids.length + " unit(s)"), true);
+											() -> Component.translatable("commands.reignofnether.unit.anchor.remove.success", ids.length), true);
 										return ids.length;
 									})
 								)
@@ -304,7 +309,7 @@ public class UnitCommands {
 										attackers,
 										(unit) -> ((AttackerUnit) unit).setEnemySearchBehaviour(ctx.getArgument("behaviour", EnemySearchBehaviour.class)),
 										ctx,
-										Component.literal("Action executed on %d unit(s) successfully")
+										Component.translatable("commands.reignofnether.unit.action.execute.success")
 									);
 								})
 							)
@@ -350,7 +355,7 @@ public class UnitCommands {
 		try {
 			action = UnitAction.valueOf(actionName.trim().toUpperCase());
 		} catch (IllegalArgumentException ex) {
-			ctx.getSource().sendFailure(Component.literal("Unknown action '" + actionName + "'"));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.action.unknown", actionName));
 			return 0;
 		}
 		int[] unitIds = new int[units.size()];
@@ -367,7 +372,7 @@ public class UnitCommands {
 		);
 		item.action(ctx.getSource().getLevel());
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Issued " + action.name().toLowerCase() + " to " + unitIds.length + " unit(s)"),
+			() -> Component.translatable("commands.reignofnether.unit.action.issue.success", action.name().toLowerCase(), unitIds.length),  // TODO translatable action name
 			true);
 		return unitIds.length;
 	}
