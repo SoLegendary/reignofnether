@@ -32,6 +32,19 @@ public class BridgePlacement extends BuildingPlacement {
         }
     }
 
+    // todo: fix
+    /*
+    @Override
+    protected void setBlocks(ArrayList<BuildingBlock> blocks) {
+        this.blocks = getCulledBlocks(blocks);
+    }
+
+    private ArrayList<BuildingBlock> getCulledBlocks(ArrayList<BuildingBlock> blocks) {
+        blocks.removeIf((b) -> Building.shouldCullBlock(originPos, b, level));
+        return blocks;
+    }
+     */
+
     public void replaceWithLiquidBelow( BlockPos bp, BlockState bs) {
         if (!(bs.getBlock() instanceof FenceBlock) && !level.isClientSide()) {
             for (BlockPos bpAdj : List.of(bp.below(), bp.north(), bp.south(), bp.east(), bp.west())) {

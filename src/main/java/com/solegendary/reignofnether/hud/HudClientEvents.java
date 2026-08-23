@@ -1853,7 +1853,7 @@ public class HudClientEvents {
                 return button;
             }
         return null;
-    }N
+    }
 
     public static boolean isMouseOverAnyButtonOrHud() {
         for (RectZone hudZone : hudZones)

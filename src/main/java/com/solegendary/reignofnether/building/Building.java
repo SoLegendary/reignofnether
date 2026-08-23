@@ -97,10 +97,7 @@ public abstract class Building {
         return new BuildingPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation), this.isCapitol);
     }
 
-    protected static ArrayList<BuildingBlock> getCulledBlocks(ArrayList<BuildingBlock> blocks, Level level) {
-        blocks.removeIf((b) -> shouldCullBlock(new BlockPos(0, 0, 0), b, level));
-        return blocks;
-    }
+
 
     public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
         BlockState bs = b.getBlockState();
