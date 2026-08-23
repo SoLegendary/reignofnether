@@ -11,52 +11,54 @@ Custom command support has been added for normal buildings. It is similar to cus
 <details><summary>All Commands</summary>
 <p>
 
-/rtsapi building place &lt;buildingName&gt; [ownerName] [pos] [autoBuild] [rotation]
-/rtsapi building destroy &lt;pos&gt;
-/rtsapi building destroy &lt;targets&gt; [ownerName] [preserved]
-/rtsapi building owner &lt;from&gt; &lt;to&gt; [ownerName] [newOwnerName]
-/rtsapi building owner &lt;targets&gt; [ownerName] [newOwnerName]
-/rtsapi building tag &lt;targets&gt; &lt;ownerName&gt; add &lt;name&gt;
-/rtsapi building tag &lt;targets&gt; &lt;ownerName&gt; remove &lt;name&gt;
-/rtsapi building tag &lt;targets&gt; &lt;ownerName&gt; list
-/rtsapi building hurt &lt;targets&gt; &lt;ownerName&gt; &lt;points&gt;
-/rtsapi building heal &lt;targets&gt; &lt;ownerName&gt; &lt;points&gt;
-/rtsapi building command &lt;targets&gt; &lt;ownerName&gt; add &lt;commandStr&gt; &lt;condition&gt; [tickCooldownMax] [tickCooldown]
-/rtsapi building command &lt;targets&gt; &lt;ownerName&gt; remove &lt;index&gt;
-/rtsapi building command &lt;targets&gt; &lt;ownerName&gt; remove *
-/rtsapi building command &lt;targets&gt; &lt;ownerName&gt; set &lt;index&gt; command &lt;value&gt;
-/rtsapi building command &lt;targets&gt; &lt;ownerName&gt; set &lt;index&gt; cooldown &lt;value&gt;
-/rtsapi building command &lt;targets&gt; &lt;ownerName&gt; set &lt;index&gt; trigger &lt;value&gt;
-/rtsapi building command &lt;targets&gt; &lt;ownerName&gt; list
-/rtsapi player owner entity &lt;targets&gt; [players] [newOwnerName]
-/rtsapi player owner building &lt;targets&gt; [players] [newOwnerName]
-/rtsapi player ally set &lt;player1&gt; &lt;player2&gt;
-/rtsapi player ally cancel &lt;player1&gt; &lt;player2&gt;
-/rtsapi player resources add &lt;resource&gt; &lt;points&gt; &lt;player&gt;
-/rtsapi player resources remove &lt;resource&gt; &lt;points&gt; &lt;player&gt;
-/rtsapi player resources set &lt;resource&gt; &lt;points&gt; &lt;player&gt;
-/rtsapi player resources get &lt;player&gt;
-/rtsapi player victory &lt;player&gt; [reason]
-/rtsapi player defeat &lt;player&gt; [reason]
-/rtsapi player research add &lt;researchItem&gt; &lt;player&gt;
-/rtsapi player research remove &lt;researchItem&gt; &lt;player&gt;
-/rtsapi player research get &lt;player&gt;
-/rtsapi player camera &lt;value&gt; &lt;player&gt;
-/rtsapi player teammode &lt;mode&gt;
-/rtsapi player starting-teams-mode &lt;mode&gt;
-/rtsapi unit summon &lt;entity&gt; [ownerName] [pos] [nbt]
-/rtsapi unit owner &lt;from&gt; &lt;to&gt; [ownerName] [newOwnerName]
-/rtsapi unit owner &lt;targets&gt; [ownerName] [newOwnerName]
-/rtsapi unit anchor set &lt;from&gt; &lt;to&gt; &lt;anchor&gt;
-/rtsapi unit anchor set &lt;targets&gt; [ownerName] &lt;anchor&gt;
-/rtsapi unit anchor remove &lt;from&gt; &lt;to&gt;
-/rtsapi unit anchor remove &lt;targets&gt; [ownerName]
-/rtsapi unit action &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;action&gt; [targetPos]
-/rtsapi unit action &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;action&gt; &lt;targetFrom&gt; &lt;targetTo&gt;
-/rtsapi unit action &lt;targets&gt; &lt;ownerName&gt; &lt;action&gt; [targetPos]
-/rtsapi unit action &lt;targets&gt; &lt;ownerName&gt; &lt;action&gt; &lt;target&gt;
-/rtsapi unit enemysearch &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;behaviour&gt;
-/rtsapi unit enemysearch &lt;targets&gt; &lt;ownerName&gt; &lt;behaviour&gt;
+- /rtsapi building place &lt;buildingName&gt; [ownerName] [pos] [autoBuild] [rotation]
+- /rtsapi building destroy &lt;pos&gt;
+- /rtsapi building destroy &lt;targets&gt; [ownerName] [preserved]
+- /rtsapi building owner &lt;from&gt; &lt;to&gt; [ownerName] [newOwnerName]
+- /rtsapi building owner &lt;targets&gt; [ownerName] [newOwnerName]
+- /rtsapi building tag &lt;targets&gt; &lt;ownerName&gt; add &lt;name&gt;
+- /rtsapi building tag &lt;targets&gt; &lt;ownerName&gt; remove &lt;name&gt;
+- /rtsapi building tag &lt;targets&gt; &lt;ownerName&gt; list
+- /rtsapi building hurt &lt;targets&gt; &lt;ownerName&gt; &lt;points&gt;
+- /rtsapi building heal &lt;targets&gt; &lt;ownerName&gt; &lt;points&gt;
+- /rtsapi building command &lt;targets&gt; &lt;ownerName&gt; add &lt;commandStr&gt; &lt;condition&gt; [tickCooldownMax] [tickCooldown]
+- /rtsapi building command &lt;targets&gt; &lt;ownerName&gt; remove &lt;index&gt;
+- /rtsapi building command &lt;targets&gt; &lt;ownerName&gt; remove *
+- /rtsapi building command &lt;targets&gt; &lt;ownerName&gt; set &lt;index&gt; command &lt;value&gt;
+- /rtsapi building command &lt;targets&gt; &lt;ownerName&gt; set &lt;index&gt; cooldown &lt;value&gt;
+- /rtsapi building command &lt;targets&gt; &lt;ownerName&gt; set &lt;index&gt; trigger &lt;value&gt;
+- /rtsapi building command &lt;targets&gt; &lt;ownerName&gt; list
+- /rtsapi player owner entity &lt;targets&gt; [players] [newOwnerName]
+- /rtsapi player owner building &lt;targets&gt; [players] [newOwnerName]
+- /rtsapi player ally set &lt;player1&gt; &lt;player2&gt;
+- /rtsapi player ally cancel &lt;player1&gt; &lt;player2&gt;
+- /rtsapi player resources add &lt;resource&gt; &lt;points&gt; &lt;player&gt;
+- /rtsapi player resources remove &lt;resource&gt; &lt;points&gt; &lt;player&gt;
+- /rtsapi player resources set &lt;resource&gt; &lt;points&gt; &lt;player&gt;
+- /rtsapi player resources get &lt;player&gt;
+- /rtsapi player victory &lt;player&gt; [reason]
+- /rtsapi player defeat &lt;player&gt; [reason]
+- /rtsapi player research add &lt;researchItem&gt; &lt;player&gt;
+- /rtsapi player research remove &lt;researchItem&gt; &lt;player&gt;
+- /rtsapi player research get &lt;player&gt;
+- /rtsapi player teammode &lt;mode&gt;
+- /rtsapi player starting-teams-mode &lt;mode&gt;
+- /rtsapi player camera &lt;value&gt; &lt;player&gt;
+- /rtsapi player camera move &lt;pos&gt; &lt;player&gt; &lt;pos&gt; [lockTicks] [forcePanTicks] [zoom]
+- /rtsapi player camera fade &lt;pos&gt; &lt;player&gt; &lt;pos&gt; [fadeTicks] [blackoutTicks]
+- /rtsapi unit summon &lt;entity&gt; [ownerName] [pos] [nbt]
+- /rtsapi unit owner &lt;from&gt; &lt;to&gt; [ownerName] [newOwnerName]
+- /rtsapi unit owner &lt;targets&gt; [ownerName] [newOwnerName]
+- /rtsapi unit anchor set &lt;from&gt; &lt;to&gt; &lt;anchor&gt;
+- /rtsapi unit anchor set &lt;targets&gt; [ownerName] &lt;anchor&gt;
+- /rtsapi unit anchor remove &lt;from&gt; &lt;to&gt;
+- /rtsapi unit anchor remove &lt;targets&gt; [ownerName]
+- /rtsapi unit action &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;action&gt; [targetPos]
+- /rtsapi unit action &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;action&gt; &lt;targetFrom&gt; &lt;targetTo&gt;\
+- /rtsapi unit action &lt;targets&gt; &lt;ownerName&gt; &lt;action&gt; [targetPos]
+- /rtsapi unit action &lt;targets&gt; &lt;ownerName&gt; &lt;action&gt; &lt;target&gt;
+- /rtsapi unit enemysearch &lt;selectFrom&gt; &lt;selectTo&gt; &lt;ownerName&gt; &lt;behaviour&gt;
+- /rtsapi unit enemysearch &lt;targets&gt; &lt;ownerName&gt; &lt;behaviour&gt;
 
 </p>
 </details> 
@@ -64,7 +66,7 @@ Custom command support has been added for normal buildings. It is similar to cus
 ---
 ## 2.New ally output:
 Sending an ally request to an FPV player now shows clickable buttons in their chat window:\
-[Click to Confirm] | [Click to Cancel]
+`[Click to Confirm]` | `[Click to Cancel]`
 
 ---
 ## 3.New command arguments
@@ -74,10 +76,10 @@ To support the new `/rtsapi` commands, several new argument types have been adde
 <p>
 
 Similar to the vanilla entity argument, four type of building arguments have been added:
-`@b -- All buildings`
-`@p -- Nearest building`
-`@r -- Random building`
-`@s -- The building at your position.`
+- `@b -- All buildings`
+- `@p -- Nearest building`
+- `@r -- Random building`
+- `@s -- The building at your position.`
 They also support options such as `"type" | "rotation" | "limit"`
 </p>
 </details> 
@@ -135,7 +137,7 @@ You can now use `/data get/merge/modify/remove building` on building data:
 ---
 ## 5.New Scoreboard Criteria
 You can now use RTS resources (food, wood, ore, population) in scoreboards, eg:\
-`/scoreboard objectives add myfood resources.food "food"`
+- `/scoreboard objectives add myfood resources.food "food"`
 
 ---
 ## 6.New Execute Commands
@@ -146,16 +148,16 @@ A new child command category called `rts-related` has also been added. As the na
 <details><summary>Rts-related Child Commands</summary>
 <p>
 
-/execute rts-related owner building -- (needs building declaration former)
-/execute rts-related owner entity -- (needs building declaration former)
-/execute rts-related allies -- (needs player declaration former)
-/execute rts-related enemies
-/execute rts-related attacker entity
-/execute rts-related attacker building
-/execute rts-related target building
-/execute rts-related target entity
-/execute building <targets> <ownerName>
-/execute unit <targets> <ownerName>
+- /execute rts-related owner building -- (needs former building declaration)
+- /execute rts-related owner entity -- (needs former building declaration)
+- /execute rts-related allies -- (needs former player declaration)
+- /execute rts-related enemies
+- /execute rts-related attacker entity
+- /execute rts-related attacker building
+- /execute rts-related target building
+- /execute rts-related target entity
+- /execute building <targets> <ownerName>
+- /execute unit <targets> <ownerName>
 
 </p>
 </details> 
