@@ -74,11 +74,15 @@ public class ItemClientEvents {
     }
 
     public static boolean shouldRenderUnitInventory(Unit unit) {
+        return false;
+        /*
         return unit instanceof UnitInventory inv &&
                 (unit instanceof HeroUnit ||
                         !inv.getAllItems().isEmpty());
+         */
     }
 
+    /*
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
         if (evt.getKeyCode() == GLFW.GLFW_KEY_SPACE) {
@@ -93,6 +97,7 @@ public class ItemClientEvents {
             }
         }
     }
+     */
 
     private static final int BUTTON_WIDTH = 22;
     public static final int INV_WIDTH = BUTTON_WIDTH * 2;

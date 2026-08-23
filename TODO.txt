@@ -30,8 +30,6 @@ Unit Items
     - Requires right-click to pick up, will not auto-pickup
 
 
-[❌] test tutorial map
-
 
 Balance
 -------
@@ -52,6 +50,8 @@ Bugfixes
     - Note this can still cause lag spikes on slower servers
 [🟡] Militia town centre range is now calculated only horizontally (so it better matches the circle radius)
 [✔] Unit underlines are now visible behind blocks
+
+[❌] temp militia unit icon messed up
 
 [❌] cat/dog at the start should also match the TC mode
 

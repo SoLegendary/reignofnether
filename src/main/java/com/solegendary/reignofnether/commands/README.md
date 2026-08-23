@@ -95,8 +95,8 @@ The main difference from the EntityArgument is that it can select units from the
 
 This combines the EntityArgument and the StringTypeArgument. You can use `@a` as an EntitySelector, or `"a"` as a fake player name. Four use cases:
 - `*` (optional) — all players (including fake players like "Enemy")
-- `@a` / `@p` / `@r` / ... — EntitySelector (does not apply to offline or virtual players like scenario NPCs)
-- `a` / `b` / `c` / ... — an online player's name
+- `@a` / `@p` / `@r` / ... — EntitySelector **(excluding offline or virtual players like scenario NPCs)**
+- `a` / `b` / `c` / ... — an **online** player's name **(excluding offline or virtual players like scenario NPCs)**
 - `"a"` / `"b"` / `"c"` / ... — player name as a string (`""` is valid as neutral)
 
 The result is a string representing the player's name. It is usually appended to the BuildingArgument and UnitArgument as the `ownerName` selector.
