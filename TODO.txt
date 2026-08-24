@@ -37,20 +37,13 @@ Balance
 
 Quality of Life
 ---------------
-[✔] All existing militia in saved maps can no longer be converted back into villagers
-[✔] Villagers now convert into the `temporary_militia` entity which follow the normal rules for conversion
-
 
 
 Bugfixes
 --------
-[✔] Workers can no longer repair a building while garrisoned inside it
-[✔] Fixed chunks disappearing if the worldborder was changed while fog of war was enabled
-    - Note this can still cause lag spikes on slower servers
-[✔] Militia town centre range is now calculated only horizontally (so it better matches the circle radius)
-[✔] Unit underlines are now visible behind blocks
-
 [❌] cat/dog at the start should also match the TC mode
+
+[❌] Relogging doesn't sync buildings if a new structure is added
 
 Languages
 ---------

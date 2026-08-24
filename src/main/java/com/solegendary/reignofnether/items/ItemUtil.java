@@ -17,15 +17,15 @@ public class ItemUtil {
     public static final float HEAL_PER_NUTRITION = 2.5f;
 
     public static boolean isUnitItem(ItemStack itemStack) {
-        return isUnitItem(itemStack.getItem());
+        return itemStack != null && isUnitItem(itemStack.getItem());
     }
 
     public static boolean isUnitItem(ItemEntity entity) {
-        return isUnitItem(entity.getItem().getItem());
+        return entity != null && isUnitItem(entity.getItem().getItem());
     }
 
     public static boolean isUnitItem(Item item) {
-        return getUnitItem(item) != null;
+        return item != null && getUnitItem(item) != null;
     }
 
     @Nullable

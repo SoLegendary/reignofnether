@@ -145,11 +145,11 @@ public class ItemClientEvents {
             } else if (hudMousedOverButton != null &&
                     hudMousedOverButton.entity instanceof HeroUnit &&
                     hudMousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
-                    hudMousedOverButton.entity instanceof UnitInventory inv2) {
+                    hudMousedOverButton.entity instanceof UnitInventory) {
                 Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
                 if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED) {
                     // todo: wire to move goal and enforce range
-                    inv.giveTo(actionableInvIndex, inv2);
+
                 }
             } else if (!HudClientEvents.isMouseOverAnyButtonOrHud()) {
                 BuildingPlacement bpl = BuildingClientEvents.getPreselectedBuilding();
@@ -159,11 +159,11 @@ public class ItemClientEvents {
                     LivingEntity le = UnitClientEvents.getPreselectedUnits().get(0);
                     Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(le);
                     if (le instanceof HeroUnit &&
-                        le instanceof UnitInventory inv2 &&
+                        le instanceof UnitInventory &&
                         le != HudClientEvents.hudSelectedEntity &&
                         (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED)) {
                         // todo: wire to move goal and enforce range
-                        inv.giveTo(actionableInvIndex, inv2);
+
                     }
                 } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
                         (rl == Relationship.FRIENDLY || rl == Relationship.OWNED)) {
@@ -172,7 +172,7 @@ public class ItemClientEvents {
                 } else {
                     BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
                     // todo: wire to move goal and enforce range
-                    inv.dropSlot(actionableInvIndex, bp);
+
                 }
             }
         }

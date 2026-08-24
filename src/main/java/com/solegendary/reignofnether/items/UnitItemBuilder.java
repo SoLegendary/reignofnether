@@ -1,14 +1,19 @@
 package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Fluent builder for UnitItems.
@@ -47,6 +52,11 @@ public class UnitItemBuilder {
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     final List<String> pointKeys = new ArrayList<>();
+    final List<AttributeModifier> getAttributeModifiers = new ArrayList<>();
+    Consumer<BlockPos> onUseGround = blockPos -> {};
+    Consumer<LivingEntity> onUseEntity = entity -> {};
+    Consumer<BuildingPlacement> onUseBuilding = entity -> {};
+    Runnable onUse = () -> {};
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -120,6 +130,40 @@ public class UnitItemBuilder {
     /** Usually true for resources and piglin merchant loot. */
     public UnitItemBuilder canUnitAutopickup(boolean canUnitAutopickup) {
         this.canUnitAutopickup = canUnitAutopickup;
+        return this;
+    }
+
+    /** Adds one attribute modifier applied while the item is held; call once per modifier. */
+    public UnitItemBuilder attributeModifier(AttributeModifier modifier) {
+        if (modifier != null)
+            this.getAttributeModifiers.add(modifier);
+        return this;
+    }
+
+    public UnitItemBuilder attributeModifiers(AttributeModifier... modifiers) {
+        for (AttributeModifier modifier : modifiers)
+            attributeModifier(modifier);
+        return this;
+    }
+
+    public UnitItemBuilder onUseGround(Consumer<BlockPos> onUseGround) {
+        this.onUseGround = onUseGround;
+        return this;
+    }
+
+    public UnitItemBuilder onUseEntity(Consumer<LivingEntity> onUseEntity) {
+        this.onUseEntity = onUseEntity;
+        return this;
+    }
+
+    public UnitItemBuilder onUseBuilding(Consumer<BuildingPlacement> onUseBuilding) {
+        this.onUseBuilding = onUseBuilding;
+        return this;
+    }
+
+    /** Invoked for untargeted activation. */
+    public UnitItemBuilder onUse(Runnable onUse) {
+        this.onUse = onUse;
         return this;
     }
 

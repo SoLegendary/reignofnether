@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -22,8 +24,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @Mixin(Mob.class)
 public abstract class UnitInventoryMobMixin extends LivingEntity implements UnitInventory {
@@ -58,7 +62,33 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public void setSlot(int index, ItemStack stack) {
+    @Nullable
+    public ItemStack get(UUID uuid) {
+        for (ItemStack itemStack : this.unitItems) {
+            if (itemStack.getTag() != null &&
+                itemStack.getTag().hasUUID("uuid") &&
+                itemStack.getTag().getUUID("uuid").equals(uuid)) {
+                return itemStack;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void set(int index, ItemStack stack, UUID uuid) {
+        CompoundTag uuidTag = new CompoundTag();
+        uuidTag.putUUID("uuid", uuid);
+        if (stack != null)
+            stack.setTag(uuidTag);
+        this.unitItems.set(index, stack == null ? ItemStack.EMPTY : stack);
+    }
+
+    @Override
+    public void set(int index, ItemStack stack) {
+        CompoundTag uuidTag = new CompoundTag();
+        uuidTag.putUUID("uuid", UUID.randomUUID());
+        if (stack != null)
+            stack.setTag(uuidTag);
         this.unitItems.set(index, stack == null ? ItemStack.EMPTY : stack);
     }
 
@@ -73,15 +103,55 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public void dropSlot(int index, BlockPos bp) {
+    public boolean dropSlot(int index, BlockPos bp) {
         ItemStack stack = this.unitItems.get(index);
         if (!stack.isEmpty() && EnchantmentHelper.hasBindingCurse(stack)) {
-            return;
+            return false;
         }
         if (!stack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(stack)) {
             this.spawnAtLocation(stack);
         }
         this.unitItems.set(index, ItemStack.EMPTY);
+        return true;
+    }
+
+    @Override
+    public boolean dropUUID(UUID uuid, BlockPos bp) {
+        for (int i = 0; i < unitItems.size(); i++) {
+            ItemStack stack = get(i);
+            if (stack != null && stack.getTag() != null && stack.getItem() != Items.AIR) {
+                UUID stackuuid = stack.getTag().getUUID("uuid");
+                if (stackuuid.equals(uuid) && !stack.isEmpty()) {
+                    if (EnchantmentHelper.hasBindingCurse(stack)) {
+                        return false;
+                    }
+                    if (!EnchantmentHelper.hasVanishingCurse(stack)) {
+                        this.spawnAtLocation(stack);
+                    }
+                    this.unitItems.set(i, ItemStack.EMPTY);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteUUID(UUID uuid) {
+        for (int i = 0; i < unitItems.size(); i++) {
+            ItemStack stack = get(i);
+            if (stack != null && stack.getTag() != null && stack.getItem() != Items.AIR) {
+                UUID stackuuid = stack.getTag().getUUID("uuid");
+                if (stackuuid.equals(uuid) && !stack.isEmpty()) {
+                    if (EnchantmentHelper.hasBindingCurse(stack)) {
+                        return false;
+                    }
+                    this.unitItems.set(i, ItemStack.EMPTY);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -90,7 +160,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             return false;
         for (int i = 0; i < getAllItems().size(); i++) {
             if (getAllItems().get(i).getItem() == Items.AIR) {
-                setSlot(i, newItemStack);
+                set(i, newItemStack);
                 return true;
             }
         }
@@ -98,9 +168,57 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public void giveTo(int index, UnitInventory inv) {
-        if (inv.tryAdding(getAllItems().get(index)))
-            this.unitItems.set(index, ItemStack.EMPTY);
+    public void giveTo(UUID uuid, UnitInventory inv) {
+        if (inv.tryAdding(get(uuid)))
+            this.deleteUUID(uuid);
+    }
+
+    @Override
+    public void useOnGround(UUID uuid, BlockPos blockPos) {
+        ItemStack itemStack = get(uuid);
+        if (itemStack != null) {
+            UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
+            if (unitItem != null) {
+                unitItem.onUseGround.accept(blockPos);
+                this.deleteUUID(uuid);
+            }
+        }
+    }
+
+    @Override
+    public void useOnEntity(UUID uuid, LivingEntity entity) {
+        ItemStack itemStack = get(uuid);
+        if (itemStack != null) {
+            UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
+            if (unitItem != null && entity.isAlive()) {
+                unitItem.onUseEntity.accept(entity);
+                this.deleteUUID(uuid);
+            }
+        }
+    }
+
+    @Override
+    public void useOnBuilding(UUID uuid, BuildingPlacement building) {
+        ItemStack itemStack = get(uuid);
+        if (itemStack != null) {
+            UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
+            if (unitItem != null && !building.shouldBeDestroyed()) {
+                unitItem.onUseBuilding.accept(building);
+                this.deleteUUID(uuid);
+            }
+        }
+    }
+
+    @Override
+    public void use(UUID uuid) {
+        ItemStack itemStack = get(uuid);
+        if (itemStack != null) {
+            UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
+            if (unitItem != null) {
+                unitItem.onUse.run();
+                this.deleteUUID(uuid);
+            }
+        }
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
