@@ -5,16 +5,20 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
@@ -23,7 +27,7 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
     protected Ability ability; // used for syncing cooldown with clientside
     protected int channelTicks = 0; // how long have we spent trying to cast this spell
     public boolean isCasting() { return isCasting; }
-    protected final int channelTicksMax; // max time required to cast a spell
+    protected int channelTicksMax; // max time required to cast a spell
     protected boolean isCasting = false;
     protected BlockPos castTarget = null; // pos that the spell will be cast at
     public float range;
@@ -117,6 +121,23 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
     }
 
     @Override
+    public void setMoveTarget(@Nullable BlockPos bp) {
+        if (bp != null) {
+            MiscUtil.addUnitCheckpoint((Unit) mob, bp, true);
+        }
+        // bandaid fix for units sometimes not listening to unit targets from idle
+        boolean changed = !Objects.equals(bp, this.moveTarget) || (mob.tickCount % 10 == 0 && mob.getNavigation().isDone());
+        if (changed) {
+            resetRecalcBackoff();
+            recalcCooldown = 0;
+        }
+        this.moveTarget = bp;
+
+        if (changed && !this.mob.level().isClientSide())
+            this.start();
+    }
+
+    @Override
     public void tick() {
         // keep following the target
         if (this.targetEntity != null)
@@ -164,7 +185,7 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
                     mob.yHeadRotO = yaw;
                 }
                 channelTicks += 1;
-                if (channelTicks >= channelTicksMax) {
+                if (channelTicks >= getChannelTicksMax()) {
                     if (onEntityCast != null && targetEntity != null)
                         onEntityCast.accept(targetEntity);
                     else if (onGroundCast != null || onBuildingCast != null) {
@@ -213,7 +234,7 @@ public class GenericTargetedSpellGoal extends MoveToTargetBlockGoal {
         this.isCasting = false;
         this.channelTicks = 0;
         this.castTarget = null;
-        if (!this.mob.level().isClientSide() && channelTicks < channelTicksMax) {
+        if (!this.mob.level().isClientSide() && channelTicks < getChannelTicksMax()) {
             if (!hasKeyframeAnimations) {
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.NON_KEYFRAME_STOP, this.mob);
             } else {

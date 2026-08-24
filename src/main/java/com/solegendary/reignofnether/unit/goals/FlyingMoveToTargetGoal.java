@@ -23,6 +23,13 @@ public class FlyingMoveToTargetGoal extends MoveToTargetBlockGoal {
     }
 
     @Override
+    public boolean canUse() {
+        if (this.mob instanceof Unit unit && !unit.isFlyingUnit())
+            return false;
+        return moveTarget != null;
+    }
+
+    @Override
     public boolean canContinueToUse() {
         if (!isAtDestination() && moveTarget != null) {
             this.start();

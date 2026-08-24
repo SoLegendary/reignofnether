@@ -30,10 +30,13 @@ public class VillagerHouse extends Building {
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/oak_log.png");
 
         this.buildTimeModifier = 0.8f;
+        this.maxHealth = 175d;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.OAK_PLANKS);
         this.startingBlockTypes.add(Blocks.OAK_LOG);
+
+        this.maxHealth = 125;
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
@@ -50,11 +53,11 @@ public class VillagerHouse extends Building {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.villager_house"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.villager_house"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.villager_house.tooltip1"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.villager_house.tooltip1"), Style.EMPTY)
             ),
             this
         );

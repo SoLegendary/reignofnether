@@ -6,8 +6,10 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -28,15 +30,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.*;
@@ -50,6 +51,7 @@ import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -75,6 +77,10 @@ public class CursorClientEvents {
     // pos of cursor on screen for box selections
     private static Vec2 cursorLeftClickDownPos = new Vec2(-1, -1);
     private static Vec2 cursorLeftClickDragPos = new Vec2(-1, -1);
+    private static Vec2 cursorRightClickDownPos = new Vec2(-1, -1);
+    private static Vec2 cursorRightClickDragPos = new Vec2(-1, -1);
+    private static BlockPos rightClickStartBp = new BlockPos(0, 0, 0);
+    private static final int DRAG_THRESHOLD = 10;
     // action that is performed on the next left click
     private static UnitAction leftClickAction = null;
     private static SandboxAction leftClickSandboxAction = null;
@@ -95,6 +101,26 @@ public class CursorClientEvents {
         return leftClickSandboxAction;
     }
 
+    public static boolean isRightClickDown() {
+        return rightClickDown;
+    }
+
+    public static boolean isRightDragActive() {
+        return rightClickDown && cursorRightClickDownPos.distanceToSqr(cursorRightClickDragPos) > (DRAG_THRESHOLD * DRAG_THRESHOLD);
+    }
+
+    public static Vec2 getCursorRightClickDownPos() {
+        return cursorRightClickDownPos;
+    }
+
+    public static Vec2 getCursorRightClickDragPos() {
+        return cursorRightClickDragPos;
+    }
+
+    public static BlockPos getRightClickStartBp() {
+        return rightClickStartBp;
+    }
+
     public static void setLeftClickAction(UnitAction actionName) {
         if (actionName != null)
             leftClickSandboxAction = null;
@@ -109,10 +135,11 @@ public class CursorClientEvents {
         else if (actionName == null)
             leftClickAction = null;
 
+        RangeIndicatorAddon hudSelectedRIA;
         if (HudClientEvents.hudSelectedEntity instanceof RangeIndicator ri) {
             ri.updateHighlightBps();
-        } else if (HudClientEvents.hudSelectedPlacement instanceof RangeIndicator ri) {
-            ri.updateHighlightBps();
+        } else if (HudClientEvents.hudSelectedPlacement != null && (hudSelectedRIA = HudClientEvents.hudSelectedPlacement.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
+            hudSelectedRIA.updateHighlightBps(HudClientEvents.hudSelectedPlacement);
         }
     }
 
@@ -243,6 +270,17 @@ public class CursorClientEvents {
         // Find entity moused over and/or selected
         // ****************************************
         List<LivingEntity> nearbyEntities = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 30, LivingEntity.class, MC.level);
+        nearbyEntities.sort(Comparator.comparing((le) -> {
+            int priority = 0;
+            if (le instanceof HeroUnit)
+                priority += 5;
+            if (le instanceof Unit unit) {
+                priority += 1;
+                priority += unit.getAbilities().get().size();
+                priority += unit.getCost().population;
+            }
+            return -priority;
+        }));
 
         UnitClientEvents.clearPreselectedUnits();
 
@@ -253,11 +291,33 @@ public class CursorClientEvents {
 
             // inflate by set amount to improve click accuracy
             AABB entityaabb = entity.getBoundingBox().inflate(0.1);
+            if (entity instanceof Unit unit) {
+                entityaabb = unit.getInflatedSelectionBox();
+            } else if (entity instanceof Chicken) {
+                entityaabb = entityaabb.inflate(0.2f, 0, 0.2f);
+                entityaabb.setMaxY(entityaabb.maxY + 0.6f);
+            }
 
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
                 UnitClientEvents.addPreselectedUnit(entity);
                 if (UnitClientEvents.getPreselectedUnits().size() > 0)
                     break; // only allow one moused-over unit at a time
+            }
+        }
+
+        // **********************
+        // Find items moused over
+        // **********************
+        List<ItemEntity> nearbyItems = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 30, ItemEntity.class, MC.level);
+
+        ItemClientEvents.clearPreselectedItems();
+        for (ItemEntity itemEntity : nearbyItems) {
+            // inflate by set amount to improve click accuracy
+            AABB entityaabb = itemEntity.getBoundingBox().inflate(0.25);
+            entityaabb.setMaxY(entityaabb.maxY + 0.75d);
+
+            if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
+                ItemClientEvents.addPreselectedItem(itemEntity);
             }
         }
 
@@ -326,17 +386,23 @@ public class CursorClientEvents {
             leftClickDown = true;
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            cursorRightClickDownPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+            cursorRightClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+            rightClickStartBp = getPreselectedBlockPos();
             rightClickDown = true;
         }
     }
 
     @SubscribeEvent
     public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
-        if (!OrthoviewClientEvents.isEnabled() ||
-                (cursorLeftClickDownPos.x < 0 && cursorLeftClickDownPos.y < 0))
+        if (!OrthoviewClientEvents.isEnabled())
             return;
 
-        cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+        if (cursorLeftClickDownPos.x >= 0 || cursorLeftClickDownPos.y >= 0)
+            cursorLeftClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
+
+        if (rightClickDown)
+            cursorRightClickDragPos = new Vec2(floor(evt.getMouseX()), floor(evt.getMouseY()));
     }
 
     @SubscribeEvent
@@ -391,6 +457,8 @@ public class CursorClientEvents {
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             rightClickDown = false;
+            cursorRightClickDownPos = new Vec2(-1, -1);
+            cursorRightClickDragPos = new Vec2(-1, -1);
         }
     }
 
@@ -444,11 +512,12 @@ public class CursorClientEvents {
                     !leftClickDown && ownAnySelected &&
                     UnitClientEvents.getPreselectedUnits().size() == 0 &&
                     BuildingClientEvents.getPreselectedBuilding() == null &&
+                    ItemClientEvents.getPreselectedItems().isEmpty() &&
                     !buildingTargetedByWorker && !buildingTargetedByAttacker) || isLeftClickActionStartRTS || getLeftClickSandboxAction() != null) {
 
                 ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
                 var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
-                if (MC.level.getBlockState(getPreselectedBlockPos().offset(0, 1, 0)).getBlock() instanceof SnowLayerBlock) {
+                if (MiscUtil.isSnowLayerBlock(MC.level.getBlockState(getPreselectedBlockPos().offset(0, 1, 0)).getBlock())) {
                     AABB aabb = new AABB(preselectedBlockPos);
                     aabb = aabb.setMaxY(aabb.maxY + 0.13f);
                     MyRenderer.drawSolidBox(evt.getPoseStack(), vertexConsumer, aabb, null, 1, 1, 1, rightClickDown ? 0.3f : 0.15f, ResourceLocation.parse("forge:textures/white.png"));
@@ -499,7 +568,7 @@ public class CursorClientEvents {
                     result = null;
                 else if (!MiscUtil.isSolidBlocking(level, result.getBlockPos()) && bs.getFluidState().isEmpty())
                     result = null;
-                else if (bs.getBlock() instanceof SnowLayerBlock)
+                else if (MiscUtil.isSnowLayerBlock(bs.getBlock()))
                     result = null;
             }
             return result;
@@ -560,7 +629,7 @@ public class CursorClientEvents {
                 BlockState bs = MC.level.getBlockState(block);
                 if ((MiscUtil.isSolidBlocking(MC.level, block) || isBlockSelectableResource) &&
                         (!(bs.getBlock() instanceof LeavesBlock) || !OrthoviewClientEvents.shouldHideLeaves()) &&
-                        !(bs.getBlock() instanceof SnowLayerBlock) &&
+                        !(MiscUtil.isSnowLayerBlock(bs.getBlock())) &&
                         MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, lookVector, new AABB(block)) &&
                         dist < smallestDist) {
                     smallestDist = dist;

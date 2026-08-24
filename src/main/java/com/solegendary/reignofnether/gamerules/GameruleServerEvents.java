@@ -4,12 +4,10 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.pathfinding.PathfinderWorkerPool;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -44,18 +42,6 @@ public class GameruleServerEvents {
             if (args.containsKey("value")) {
                 double flyingMaxYLevel = ((Integer) args.get("value").getResult()).doubleValue();
                 GameruleClientboundPacket.setFlyingMaxYLevel((long) flyingMaxYLevel);
-            }
-        } else if (nodes.get(1).getNode().getName().equals("improvedPathfinding")) {
-            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
-            if (args.containsKey("value")) {
-                boolean value = (boolean) args.get("value").getResult();
-                for (LivingEntity le : UnitServerEvents.getAllUnits()) {
-                    UnitServerEvents.improvedPathfinding = value;
-                    AttributeInstance ai = le.getAttribute(Attributes.FOLLOW_RANGE);
-                    if (ai != null)
-                        ai.setBaseValue(Unit.getFollowRange());
-                }
-                GameruleClientboundPacket.setImprovedPathfinding(value);
             }
         } else if (nodes.get(1).getNode().getName().equals("neutralAggro")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
@@ -93,6 +79,55 @@ public class GameruleServerEvents {
                 double value = ((Integer) args.get("value").getResult()).doubleValue();
                 GameruleClientboundPacket.setAllowedHeroes((long) value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("lockAlliances")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setLockAlliances(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("scenarioMode")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setScenarioMode(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("coopMode")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setCoopMode(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("buildingsOutsideBorder")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setBuildingsOutsideBorder(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("rtsPathfinding")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                UnitServerEvents.rtsPathfinding = value;
+                GameruleClientboundPacket.setRtsPathfinding(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("pathfindingThreads")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                int value = (int) args.get("value").getResult();
+                PathfinderWorkerPool.requestResize(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("pathfindingChunkBuildsPerTick")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                int value = (int) args.get("value").getResult();
+                PathfinderWorkerPool.setChunkBuildsPerTick(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("animalSpawnYDiff")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                double animalSpawnYDiff = ((Integer) args.get("value").getResult()).doubleValue();
+                GameruleClientboundPacket.setAnimalSpawnYDiff((long) animalSpawnYDiff);
+            }
         }
     }
 
@@ -110,8 +145,6 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setUnitGriefing(unitGriefing);
             boolean playerGriefing = server.getGameRules().getRule(GameRuleRegistrar.DO_PLAYER_GRIEFING).get();
             GameruleClientboundPacket.setPlayerGriefing(playerGriefing);
-            boolean improvedPathfinding = server.getGameRules().getRule(GameRuleRegistrar.IMPROVED_PATHFINDING).get();
-            GameruleClientboundPacket.setImprovedPathfinding(improvedPathfinding);
             int groundYLevel = server.getGameRules().getRule(GameRuleRegistrar.GROUND_Y_LEVEL).get();
             GameruleClientboundPacket.setGroundYLevel(groundYLevel);
             int flyingMaxYLevel = server.getGameRules().getRule(GameRuleRegistrar.FLYING_MAX_Y_LEVEL).get();
@@ -126,6 +159,19 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setSlantedBuilding(slantedBuilding);
             int allowHeroes = server.getGameRules().getRule(GameRuleRegistrar.ALLOWED_HEROES).get();
             GameruleClientboundPacket.setAllowedHeroes(allowHeroes);
+            boolean lockAlliances = server.getGameRules().getRule(GameRuleRegistrar.LOCK_ALLIANCES).get();
+            GameruleClientboundPacket.setLockAlliances(lockAlliances);
+            boolean scenarioMode = server.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();
+            GameruleClientboundPacket.setScenarioMode(scenarioMode);
+            boolean coopMode = server.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get();
+            GameruleClientboundPacket.setCoopMode(coopMode);
+            boolean buildingsOutsideBorder = server.getGameRules().getRule(GameRuleRegistrar.BUILDINGS_OUTSIDE_BORDER).get();
+            GameruleClientboundPacket.setBuildingsOutsideBorder(buildingsOutsideBorder);
+            boolean rtsPathfinding = server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get();
+            UnitServerEvents.rtsPathfinding = rtsPathfinding;
+            GameruleClientboundPacket.setRtsPathfinding(rtsPathfinding);
+            int animalSpawnYDiff = server.getGameRules().getRule(GameRuleRegistrar.ANIMAL_SPAWN_Y_DIFF).get();
+            GameruleClientboundPacket.setAnimalSpawnYDiff(animalSpawnYDiff);
         }
     }
 }

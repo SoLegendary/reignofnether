@@ -36,9 +36,10 @@ public class SpiderLair extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.COBBLED_DEEPSLATE);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
-        this.productions.add(ProductionItems.SPIDER, Keybindings.keyQ);
-        this.productions.add(ProductionItems.POISON_SPIDER, Keybindings.keyW);
+        this.productions.add(ProductionItems.SPIDER, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.POISON_SPIDER, Keybindings.abilitySlot2);
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
@@ -55,12 +56,12 @@ public class SpiderLair extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spider_lair"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spider_lair"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spider_lair.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spider_lair.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.spider_lair.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spider_lair.tooltip2"), Style.EMPTY)
                 ),
                 this
         );

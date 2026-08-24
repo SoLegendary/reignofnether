@@ -63,6 +63,7 @@ public class AbilityServerboundPacket {
 
                     for (Ability ability : unit.getAbilities().get()) {
                         if (ability.action == this.unitAction && ability instanceof HeroAbility heroAbility && unit instanceof HeroUnit hero) {
+                            ReignOfNether.LOGGER.info("[Ability] {} ranked up ability {} on unit {}", player.getName(), this.unitAction, this.unitId);
                             heroAbility.rankUp(hero);
                         }
                     }

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.FarmPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.OakStockpile;
@@ -38,6 +39,15 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         super(mob, true, 0);
     }
 
+    // isBuilding() accepts the worker as arrived at range 2, but moveReachRange is 0 so the base recalc
+    // threshold is the 1.5-block settle distance. That leaves a 1.5-2 block band where a worker is building
+    // yet still "too far -> repath" - which loops it on the spot. Match the threshold to the build range so a
+    // worker in build range never triggers a recalc.
+    @Override
+    public double getMinDistToRecalculateSqr() {
+        return Math.max(super.getMinDistToRecalculateSqr(), 2.0 * 2.0);
+    }
+
     public void setIsBuildingServerside(boolean isBuilding) {
         this.isBuildingServerside = isBuilding;
     }
@@ -70,17 +80,9 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         }
         if (!BuildingUtils.isBuildingBuildable(this.mob.level().isClientSide(), buildingTarget)) {
             if (!startNextQueuedBuilding()) {
-                if (buildingTarget instanceof FarmPlacement && mob instanceof WorkerUnit workerUnit) {
+                if (buildingTarget instanceof FarmPlacement && mob instanceof WorkerUnit) {
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetResourceName(ResourceName.FOOD);
                     ((WorkerUnit) mob).getGatherResourceGoal().setTargetFarm(buildingTarget);
-                }
-                // look for the nearest resource to gather after completing a stockpile
-                else if (buildingTarget.getBuilding() instanceof OakStockpile stockpile &&
-                        !buildingTarget.isBuilt &&
-                        mob instanceof WorkerUnit workerUnit &&
-                        workerUnit.getBuildRepairGoal().isBuilding()) {
-                    ((Unit) mob).getReturnResourcesGoal().depositItems();
-                    workerUnit.getGatherResourceGoal().setTargetResourceName(stockpile.mostAbundantNearbyResource);
                 }
                 stopBuilding();
             }
@@ -95,14 +97,32 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
     }
 
     private void calcMoveTarget() {
-        if (this.buildingTarget != null)
-            this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1, true);
+        if (this.buildingTarget == null)
+            return;
+        // Hold ONE approach cell instead of recomputing the closest perimeter cell from the unit's CURRENT
+        // position every tick. That recompute made the target flip between two near-equidistant cells as the
+        // unit moved, so it oscillated around the boundary ("back and forth") instead of committing to a path.
+        // Like the gather goal holding a fixed block, keep the chosen cell until it's null or built over, then
+        // re-pick. setBuildingTarget nulls moveTarget so a NEW building still gets a fresh approach cell.
+        if (this.moveTarget != null && !isApproachInvalid(this.moveTarget))
+            return;
+        this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1, true);
+    }
+
+    // Re-pick the approach cell only if it got built over (non-bridge), mirroring getClosestGroundPos's own
+    // exclusion. Bridges have special over-water geometry, so their cell is held until the target changes.
+    private boolean isApproachInvalid(BlockPos bp) {
+        return !(buildingTarget.getBuilding() instanceof AbstractBridge)
+                && BuildingUtils.isPosInsideAnyBuilding(this.mob.level().isClientSide(), bp);
     }
 
     // only count as building if in range of the target - building is actioned in Building.tick()
     public boolean isBuilding() {
         if (this.mob.level().isClientSide())
             return isBuildingServerside;
+
+        if (GarrisonableBuildingAddon.getGarrison((Unit) this.mob) != null)
+            return false;
 
         if (buildingTarget != null && this.moveTarget != null)
             if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED ||
@@ -128,6 +148,7 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
             }
         }
         this.buildingTarget = target;
+        this.moveTarget = null; // force a fresh approach cell for the new target (calcMoveTarget then holds it)
         calcMoveTarget();
         this.start();
     }

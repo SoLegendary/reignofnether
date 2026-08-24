@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.ability;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
@@ -22,6 +23,7 @@ import net.minecraft.world.phys.Vec3;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class EquipAbility extends Ability {
@@ -63,7 +65,16 @@ public abstract class EquipAbility extends Ability {
     }
 
     public boolean isCorrectUnit(LivingEntity entity) {
-        return false;
+        return List.of(
+                EntityRegistrar.MILITIA_UNIT.get(),
+                EntityRegistrar.VINDICATOR_UNIT.get(),
+                EntityRegistrar.PILLAGER_UNIT.get(),
+                EntityRegistrar.EVOKER_UNIT.get()
+        ).contains(entity.getType());
+    }
+
+    public boolean isWindcaller(LivingEntity entity) {
+        return entity.getType() == EntityRegistrar.WINDCALLER_UNIT.get();
     }
 
     public boolean hasSameItem(LivingEntity entity) {
@@ -92,6 +103,7 @@ public abstract class EquipAbility extends Ability {
             te instanceof Unit unit &&
             unit.getOwnerName().equals(buildingUsing.ownerName) &&
             isCorrectUnit(te) &&
+            !isWindcaller(te) &&
             !hasSameItem(te) &&
             canAfford(buildingUsing) &&
             te.distanceToSqr(Vec3.atCenterOf(centreBottom)) < RANGE * RANGE) {
@@ -106,13 +118,15 @@ public abstract class EquipAbility extends Ability {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.equip.error1"));
             } else if (te.distanceToSqr(Vec3.atCenterOf(centreBottom)) >= RANGE * RANGE) {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.equip.error2"));
+            } else if (isWindcaller(te)) {
+                HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.equip.error6"));
             } else if (!isCorrectUnit(te)) {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.equip.error3"));
             } else if (hasSameItem(te)) {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.equip.error4"));
             } else if (!canAfford(buildingUsing)) {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.equip.error5"));
-            } else {
+            }else {
                 setToMaxCooldown(buildingUsing);
                 playSound(level, te);
             }

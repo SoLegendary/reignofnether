@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 
 import java.util.ArrayList;
@@ -18,12 +19,26 @@ import java.util.List;
 import java.util.Random;
 
 
-public class RangedAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
+public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
     private final T mob;
     private BlockPos blockTarget = null;
     private UnitBowAttackGoal<?> bowAttackGoal = null;
     private UnitCrossbowAttackGoal<?> cbowAttackGoal = null;
     private BuildingPlacement buildingTarget = null;
+    public boolean forced = false;
+
+    // Cached on first use — Unit's moveGoal is stable across the goal's lifetime
+    private boolean moveGoalResolved = false;
+    private FlyingMoveToTargetGoal cachedFlyingMoveGoal = null;
+
+    private FlyingMoveToTargetGoal getFlyingMoveGoal() {
+        if (!moveGoalResolved) {
+            moveGoalResolved = true;
+            if (((Unit) this.mob).getMoveGoal() instanceof FlyingMoveToTargetGoal fmg)
+                cachedFlyingMoveGoal = fmg;
+        }
+        return cachedFlyingMoveGoal;
+    }
 
     public RangedAttackBuildingGoal(T mob, UnitBowAttackGoal<?> bowAttackGoal) {
         this.mob = mob;
@@ -62,7 +77,7 @@ public class RangedAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> 
         if (blockPos != null) {
             if (this.mob.level().isClientSide()) {
                 BuildingPlacement b = BuildingUtils.findBuilding(this.mob.level().isClientSide(), blockPos);
-                if (b != null && !b.getBuilding().invulnerable) {
+                if (b != null && b.isAttackable()) {
                     this.buildingTarget = b;
                         MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
                                         buildingTarget.centrePos.getX(),
@@ -74,7 +89,7 @@ public class RangedAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> 
             }
             else {
                 BuildingPlacement b = BuildingUtils.findBuilding(this.mob.level().isClientSide(), blockPos);
-                if (b != null && !b.getBuilding().invulnerable) {
+                if (b != null && b.isAttackable()) {
                     this.buildingTarget = b;
                     setNextBlockTarget();
                 }
@@ -111,15 +126,16 @@ public class RangedAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> 
         blockTarget = null;
         buildingTarget = null;
         this.mob.setAggressive(false);
+        forced = false;
     }
 
     public void tick() {
         if (buildingTarget != null && buildingTarget.getBlocksPlaced() <= 0) {
             stop();
         }
-        if (blockTarget != null) {
+        if (blockTarget != null && buildingTarget != null) {
             float tx = blockTarget.getX() + 0.5f;
-            float ty = blockTarget.getY() + 0.5f;
+            float ty = blockTarget.getY() + 1.0f;
             float tz = blockTarget.getZ() + 0.5f;
 
             this.mob.getLookControl().setLookAt(tx, ty, tz);
@@ -159,25 +175,25 @@ public class RangedAttackBuildingGoal<T extends net.minecraft.world.entity.Mob> 
 
     // moveGoal controllers
     private boolean isDoneMoving() {
-        Unit unit = (Unit) this.mob;
-        if (unit.getMoveGoal() instanceof FlyingMoveToTargetGoal flyingMoveGoal)
-            return flyingMoveGoal.isAtDestination();
+        FlyingMoveToTargetGoal fmg = getFlyingMoveGoal();
+        if (fmg != null)
+            return fmg.isAtDestination();
         else
             return this.mob.getNavigation().isDone();
     }
 
     private void stopMoving() {
-        Unit unit = (Unit) this.mob;
-        if (unit.getMoveGoal() instanceof FlyingMoveToTargetGoal flyingMoveGoal)
-            flyingMoveGoal.stopMoving();
+        FlyingMoveToTargetGoal fmg = getFlyingMoveGoal();
+        if (fmg != null)
+            fmg.stopMoving();
         else
             this.mob.getNavigation().stop();
     }
 
     private void moveTo(BlockPos bp) {
-        Unit unit = (Unit) this.mob;
-        if (unit.getMoveGoal() instanceof FlyingMoveToTargetGoal flyingMoveGoal)
-            flyingMoveGoal.setMoveTarget(bp);
+        FlyingMoveToTargetGoal fmg = getFlyingMoveGoal();
+        if (fmg != null)
+            fmg.setMoveTarget(bp);
         else
             this.mob.getNavigation().moveTo(bp.getX(), bp.getY(), bp.getZ(), 1.0f);
     }

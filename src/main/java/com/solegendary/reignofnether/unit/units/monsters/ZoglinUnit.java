@@ -4,20 +4,25 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Eject;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -44,7 +49,7 @@ import java.util.List;
 public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new Eject(), Keybindings.keyQ);
+        ABILITIES.add(new Eject(), Keybindings.abilitySlot1);
     }
 
     //region
@@ -109,32 +114,39 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(ZoglinUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(ZoglinUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(ZoglinUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
-
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.ZOGLIN;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
     public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
+
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
 
     // endregion
 
@@ -195,7 +207,14 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
                 .add(Attributes.MOVEMENT_SPEED, ZoglinUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, ZoglinUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, ZoglinUnit.armorValue);
+                .add(Attributes.ARMOR, ZoglinUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override // prevent vanilla logic for picking up items
@@ -225,6 +244,24 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
 
         if (isSunBurnTick())
             this.setSecondsOnFire(8); // zoglins dont normally burn so do this manually
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override

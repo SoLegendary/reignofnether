@@ -4,7 +4,8 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AllianceAction;
 import com.solegendary.reignofnether.alliance.AllianceServerboundPacket;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.gamerules.GameruleClient;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -21,6 +22,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -47,9 +49,9 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     private static final int ALLIANCE_FRAME_WIDTH = (Button.DEFAULT_ICON_FRAME_SIZE * 5); // frame containing a resource value + icon
     public static final int DISPLAY_WIDTH = // total width of a player display
             PLAYER_FRAME_WIDTH +
-            RESOURCE_FRAME_WIDTH * 4 +
-            (int) (Button.DEFAULT_ICON_FRAME_SIZE * 2.5f) +
-            ALLIANCE_FRAME_WIDTH;
+                    RESOURCE_FRAME_WIDTH * 4 +
+                    (int) (Button.DEFAULT_ICON_FRAME_SIZE * 2.5f) +
+                    ALLIANCE_FRAME_WIDTH;
 
 
     private boolean isAllied() {
@@ -69,7 +71,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     }
 
     private Button renderTradeResources(GuiGraphics guiGraphics, ResourceName resourceName,
-                                      int x, int y, int mouseX, int mouseY) {
+                                        int x, int y, int mouseX, int mouseY) {
         String iconPath;
         String value;
         int color;
@@ -139,7 +141,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                     case FOOD -> List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.send_food"), Style.EMPTY));
                     case WOOD -> List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.send_wood"), Style.EMPTY));
                     case ORE -> List.of(FormattedCharSequence.forward(I18n.get("alliances.reignofnether.tooltip.send_ore"), Style.EMPTY));
-                    case NONE -> null;
+                    default -> null;
                 }
         );
         changeResourceButton.bgIconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, iconPath);
@@ -243,33 +245,29 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         String allianceStatusStr;
         int frameBgColour = 0xA0000000 | PlayerColors.getPlayerAllianceColorHex(playerName);
 
-        int frameWidth = 50;
-
         if (!isAllied() && !allianceRequested() && !allianceReceived()) {
-            allianceStatusStr = "Enemy";
+            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.enemy");
             allyRequestButton.render(guiGraphics, x, y, mouseX, mouseY);
             renderedButton = allyRequestButton;
-            frameWidth = 46;
         } else if (!isAllied() && allianceRequested()) {
-            allianceStatusStr = "Requested";
+            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.requested");
             allyCancelRequestButton.render(guiGraphics, x, y, mouseX, mouseY);
             renderedButton = allyCancelRequestButton;
-            frameWidth = 67;
         } else if (!isAllied() && allianceReceived()) {
-            allianceStatusStr = "Accept?";
+            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.accept");
             allyConfirmButton.render(guiGraphics, x, y, mouseX, mouseY);
             renderedButton = allyConfirmButton;
-            frameWidth = 55;
         } else {
-            allianceStatusStr = "Allied";
+            allianceStatusStr = I18n.get("alliances.reignofnether.tooltip.status.allied");
             disbandButton.render(guiGraphics, x, y, mouseX, mouseY);
             renderedButton = disbandButton;
-            frameWidth = 41;
             if (AlliancesClient.canControlAlly(playerName)) {
-                allianceStatusStr += " (s)";
-                frameWidth = 58;
+                allianceStatusStr += I18n.get("alliances.reignofnether.tooltip.status.allied.plural");
             }
         }
+
+        int drawStringStartOffset = Button.DEFAULT_ICON_FRAME_SIZE + (Button.DEFAULT_ICON_SIZE / 2) + 1;
+        int frameWidth = drawStringStartOffset + MC.font.width(allianceStatusStr);
         MyRenderer.renderFrameWithBg(
                 guiGraphics,
                 x + Button.DEFAULT_ICON_FRAME_SIZE,
@@ -281,7 +279,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         guiGraphics.drawString(
                 MC.font,
                 allianceStatusStr,
-                x + Button.DEFAULT_ICON_FRAME_SIZE + (Button.DEFAULT_ICON_SIZE / 2) + 1,
+                x + drawStringStartOffset,
                 y + (Button.DEFAULT_ICON_SIZE / 2) + 1,
                 0xFFFFFF
         );
@@ -290,7 +288,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
             guiGraphics.fill(
                     x + Button.DEFAULT_ICON_FRAME_SIZE,
                     y,
-                    x + (Button.DEFAULT_ICON_FRAME_SIZE * 2) + 4 + (allianceStatusStr.length() * 4),
+                    x + (Button.DEFAULT_ICON_FRAME_SIZE * 2) + 4 + MC.font.width(allianceStatusStr),
                     y + Button.DEFAULT_ICON_FRAME_SIZE,
                     0x99000000
             );
@@ -312,6 +310,14 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     }
 
     private void requestAlliance() {
+        if (GameruleClient.lockAlliances && MC.player != null) {
+            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+            return;
+        }
+        if (GameruleClient.coopMode && MC.player != null) {
+            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock_coop"));
+            return;
+        }
         AllianceServerboundPacket.doAllianceAction(AllianceAction.REQUEST, playerName);
         AlliancesClient.outboundPendingAlliances.add(playerName);
     }
@@ -326,6 +332,14 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     }
 
     private void disbandAlliance() {
+        if (GameruleClient.lockAlliances && MC.player != null) {
+            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+            return;
+        }
+        if (GameruleClient.coopMode && MC.player != null) {
+            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock_coop"));
+            return;
+        }
         AllianceServerboundPacket.doAllianceAction(AllianceAction.DISBAND, playerName);
     }
 

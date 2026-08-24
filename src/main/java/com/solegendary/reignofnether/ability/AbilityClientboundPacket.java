@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.ability;
 
-import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -8,11 +7,12 @@ import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.modelling.animations.EnchanterAnimations;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
+import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
@@ -52,6 +52,12 @@ public class AbilityClientboundPacket {
     public static void doAbility(int unitId, UnitAction unitAction, float value) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new AbilityClientboundPacket(unitId, false, unitAction, value, new BlockPos(0,0,0))
+        );
+    }
+
+    public static void doAbility(int unitId, UnitAction unitAction, boolean value) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new AbilityClientboundPacket(unitId, false, unitAction, value ? 1f : 0f, new BlockPos(0,0,0))
         );
     }
 
@@ -127,15 +133,14 @@ public class AbilityClientboundPacket {
                     } else if (this.unitAction == UnitAction.MARCH_OF_PROGRESS_SET) {
                         boolean enable = value == 1f;
                         if (unit instanceof EnchanterUnit enchanterUnit) {
-                            enchanterUnit.auraEnabled = enable;
+                            enchanterUnit.setAuraEnabled(enable);
                             if (enable) {
                                 enchanterUnit.playSingleAnimation(UnitAnimationAction.ULTIMATE);
                             }
                         }
                     } else if (this.unitAction == UnitAction.BLIZZARD) {
-                        if (unit instanceof WretchedWraithUnit wraithUnit) {
+                        if (unit instanceof WretchedWraithUnit wraithUnit)
                             wraithUnit.blizzard();
-                        }
                     }
                 });
         });

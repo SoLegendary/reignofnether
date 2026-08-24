@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -35,7 +37,7 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
     private int attackTime = -1;
     private int seeTime; // how long we have seen the target for
 
-    private static final int GARRISON_BONUS_RANGE_TO_GHASTS = 10;
+    private static final int GARRISON_BONUS_RANGE_TO_FLYING = 10;
 
     public UnitBowAttackGoal(T mob) {
         this.mob = mob;
@@ -106,11 +108,13 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
         if (target != null && target.isAlive()) {
             this.mob.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
 
-            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this.mob);
-            GarrisonableBuilding targetGarr = null;
+            BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this.mob);
+            BuildingPlacement targetGarrPlacement = null;
             if (target instanceof Unit unit)
-                targetGarr = GarrisonableBuilding.getGarrison(unit);
+                targetGarrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
 
+            GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+            GarrisonableBuildingAddon targetGarr = targetGarrPlacement != null ? targetGarrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
             boolean isGarrisoned = garr != null;
             boolean isTargetGarrisoned = targetGarr != null;
 
@@ -127,16 +131,19 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
 
             float attackRange = ((AttackerUnit) this.mob).getAttackRange();
 
-            if (!(this.mob instanceof GhastUnit)) {
+            Unit unit = (Unit) this.mob;
+            if (!unit.isFlyingUnit()) {
                 if (isGarrisoned) {
                     attackRange = garr.getAttackRange();
-                    if (target instanceof GhastUnit ghastUnit)
-                        attackRange += GARRISON_BONUS_RANGE_TO_GHASTS;
+                    if (target instanceof Unit targetUnit && targetUnit.isFlyingUnit())
+                        attackRange += GARRISON_BONUS_RANGE_TO_FLYING;
                 }
                 else if (isTargetGarrisoned)
                     attackRange += targetGarr.getExternalAttackRangeBonus();
                 else if (target instanceof GhastUnit ghastUnit)
                     attackRange += ghastUnit.getAttackerRangeBonus(this.mob);
+                else if (target instanceof WindcallerUnit windcallerUnit)
+                    attackRange += windcallerUnit.getAttackerRangeBonus(this.mob);
             }
 
             double distToTarget = this.mob.distanceTo(target);

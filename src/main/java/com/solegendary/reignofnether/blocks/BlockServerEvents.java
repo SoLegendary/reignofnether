@@ -3,9 +3,7 @@ package com.solegendary.reignofnether.blocks;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
-import com.solegendary.reignofnether.resources.BlockUtils;
 import com.solegendary.reignofnether.resources.ResourceSources;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
@@ -27,6 +25,9 @@ public class BlockServerEvents {
     private static final Random RANDOM = new Random();
 
     public static ArrayList<TemporaryBlock> tempBlocks = new ArrayList<>();
+
+    // if you want to place a block to replace a broken block, we can't do it in the same tick
+    public static Map<BlockPos, BlockState> blocksToPlace = new HashMap<>();
 
     public static void addTempBlock(ServerLevel level, BlockPos bp, BlockState bs, BlockState oldBs, int lifespan) {
         addTempBlock(level, bp, bs, oldBs, lifespan, false, null);
@@ -55,6 +56,12 @@ public class BlockServerEvents {
             return;
         }
         tempBlocks.removeIf(tb -> tb.tick((ServerLevel) evt.level));
+
+        for (BlockPos bp : blocksToPlace.keySet()) {
+            BlockState bs = blocksToPlace.get(bp);
+            evt.level.setBlockAndUpdate(bp, bs);
+        }
+        blocksToPlace.clear();
     }
 
     @SubscribeEvent
@@ -167,6 +174,10 @@ public class BlockServerEvents {
     }
 
     public static boolean placeWraithSnow(ServerLevel level, BlockPos pos, int ownerId) {
+        return placeWraithSnow(level, pos, ownerId, true);
+    }
+
+    public static boolean placeWraithSnow(ServerLevel level, BlockPos pos, int ownerId, boolean breakWithSound) {
         if (!BlockUtils.canPlaceSnow(level, pos))
             return false;
 
@@ -195,8 +206,10 @@ public class BlockServerEvents {
                 BlockState newLayer = targetBs.setValue(BlockStateProperties.LAYERS, targetLayers + 1);
                 level.setBlockAndUpdate(targetPos, newLayer);
             }
-            level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, targetPos, Block.getId(snowBs));
-            level.levelEvent(targetBs.getSoundType().getPlaceSound().hashCode(), targetPos, Block.getId(snowBs));
+            if (breakWithSound) {
+                level.levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, targetPos, Block.getId(snowBs));
+                level.levelEvent(targetBs.getSoundType().getPlaceSound().hashCode(), targetPos, Block.getId(snowBs));
+            }
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof WraithSnowBlockEntity snowBe) {
                 snowBe.setOwnerId(ownerId);

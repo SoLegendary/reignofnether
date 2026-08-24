@@ -3,13 +3,14 @@ package com.solegendary.reignofnether.orthoview;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -33,7 +34,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -57,6 +60,7 @@ import static net.minecraft.util.Mth.sign;
  */
 public class OrthoviewClientEvents {
 
+    public static final int CHAT_Y_OFFSET = -55; // shift chat up by this much when in RTS cam to make room for the
 
     public enum LeafHideMethod {
         NONE, AROUND_UNITS_AND_CURSOR, // requires threaded video option
@@ -85,13 +89,14 @@ public class OrthoviewClientEvents {
     private static final float CAMROTX_DEFAULT = 135;
     private static final float CAMROTY_DEFAULT = -45;
 
-    private static final int FORCE_PAN_TICKS_MAX = 20;
+    private static final int FORCE_PAN_TICKS_DEFAULT = 20;
     private static int forcePanTicksLeft = 0;
     private static float forcePanTargetX = 0;
     private static float forcePanTargetZ = 0;
     private static float forcePanOriginalX = 0;
     private static float forcePanOriginalZ = 0;
     private static float forcePanOriginalZoom = 0;
+    private static float forceZoom = 0;
 
     private static final int FORCE_ROT_FRAMES_MAX = 20;
     private static int forceRotFramesLeft = 0;
@@ -241,19 +246,49 @@ public class OrthoviewClientEvents {
         if (MC.player != null) {
             Vec2 XZRotated = MyMath.rotateCoords(x, z, -camRotX - camRotAdjX);
             MC.player.move(MoverType.SELF, new Vec3(XZRotated.x, y, XZRotated.y));
+            clampPlayerToWorldBorder();
         }
     }
 
-    // lock the camera and move it towards a location, remain locked for cameraLockTicks
+    // spectator skips vanilla border collision, so snap back inside on every move
+    private static void clampPlayerToWorldBorder() {
+        if (MC.player == null || MC.level == null) return;
+        WorldBorder border = MC.level.getWorldBorder();
+        double margin = 1.0D;
+        double minX = border.getMinX() + margin;
+        double maxX = border.getMaxX() - margin;
+        double minZ = border.getMinZ() + margin;
+        double maxZ = border.getMaxZ() - margin;
+        if (maxX <= minX || maxZ <= minZ) return;
+        double x = MC.player.getX();
+        double z = MC.player.getZ();
+        double cx = Mth.clamp(x, minX, maxX);
+        double cz = Mth.clamp(z, minZ, maxZ);
+        if (cx != x || cz != z)
+            MC.player.setPos(cx, MC.player.getY(), cz);
+    }
+
     public static void forceMoveCam(int x, int z, int cameraLockTicks) {
-        if (MC.player != null) {
-            forcePanTicksLeft = FORCE_PAN_TICKS_MAX;
+        forceMoveCam(x, z, cameraLockTicks, FORCE_PAN_TICKS_DEFAULT, (int) ZOOM_DEFAULT);
+    }
+
+    // lock the camera and move it towards a location, remain locked for cameraLockTicks
+    public static void forceMoveCam(int x, int z, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
+        if (MC.player != null && OrthoviewClientEvents.isEnabled()) {
+            forcePanTicksLeft = forcePanTicks;
             forcePanTargetX = x;
             forcePanTargetZ = z;
-            cameraLockTicksLeft = FORCE_PAN_TICKS_MAX + cameraLockTicks;
+            cameraLockTicksLeft = forcePanTicks + cameraLockTicks;
             forcePanOriginalX = MC.player.getOnPos().getX();
             forcePanOriginalZ = MC.player.getOnPos().getZ();
+            forceZoom = zoomLevel == 0 ? zoom : zoomLevel;
             forcePanOriginalZoom = zoom;
+        }
+    }
+
+    public static void forceMoveCam(String playerName, Vec3i pos, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
+        if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
+            forceMoveCam(pos.getX(), pos.getZ(), cameraLockTicks, forcePanTicks, zoomLevel);
         }
     }
 
@@ -265,6 +300,21 @@ public class OrthoviewClientEvents {
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END) {
             return;
+        }
+
+        long windowHandle = MC.getWindow().getWindow();
+        int cursorMode;
+
+        try {
+            cursorMode = GLFW.glfwGetInputMode(windowHandle, GLFW.GLFW_CURSOR);
+        } catch (NullPointerException | IllegalStateException e) {
+            cursorMode = GLFW.GLFW_CURSOR_NORMAL;
+        }
+        
+        boolean grabbed = cursorMode == GLFW.GLFW_CURSOR_DISABLED;
+        if (MC.screen == null && !grabbed && MC.isWindowActive()) {
+            MC.mouseHandler.releaseMouse();
+            MC.mouseHandler.grabMouse();
         }
 
         if (isEnabled() && MC.gameMode != null && (
@@ -292,11 +342,12 @@ public class OrthoviewClientEvents {
         }
 
         if (forcePanTicksLeft > 0) {
-            float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_MAX;
-            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / FORCE_PAN_TICKS_MAX;
-            float zoomDiff = (ZOOM_DEFAULT - forcePanOriginalZoom) / FORCE_PAN_TICKS_MAX;
+            float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_DEFAULT;
+            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / FORCE_PAN_TICKS_DEFAULT;
+            float zoomDiff = (forceZoom - forcePanOriginalZoom) / FORCE_PAN_TICKS_DEFAULT;
             zoom += zoomDiff;
             MC.player.move(MoverType.SELF, new Vec3(xDiff, 0, zDiff));
+            clampPlayerToWorldBorder();
             forcePanTicksLeft -= 1;
         }
         updateOrthoviewY();
@@ -324,9 +375,11 @@ public class OrthoviewClientEvents {
             return;
         }
 
-        for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-            if (building instanceof RangeIndicator ri)
-                ri.updateHighlightBps();
+        for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
+            RangeIndicatorAddon ria;
+            if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null)
+                ria.updateHighlightBps(building);
+        }
 
         enabled = !enabled;
 
@@ -351,6 +404,17 @@ public class OrthoviewClientEvents {
             }
         }
         TutorialClientEvents.updateStage();
+    }
+
+    public static void tryToSetCamera(String playerName, boolean value) {
+        if (MC.player != null && MC.player.getName().getString().equals(playerName) && value != enabled) {
+            tryToToggleEnable();
+        }
+    }
+
+    public static void centreCameraOnPosForPlayer(String playerName, BlockPos bp) {
+        if (MC.player != null && MC.player.getName().getString().equals(playerName))
+            centreCameraOnPos(new Vec3(bp.getX(), bp.getY(), bp.getZ()));
     }
 
     public static void centreCameraOnPos(BlockPos bp) {
@@ -398,10 +462,10 @@ public class OrthoviewClientEvents {
         // Prevent repeated key actions
         if (evt.getAction() == GLFW.GLFW_PRESS) {
 
-            if (evt.getKey() == Keybindings.getFnum(12).key) {
+            if (evt.getKey() == Keybindings.getFnum(12).getKey()) {
                 tryToToggleEnable();
             }
-            else if (evt.getKey() == Keybindings.reset.key) {
+            else if (evt.getKey() == Keybindings.reset.getKey()) {
                 reset();
             }
         }
@@ -567,7 +631,7 @@ public class OrthoviewClientEvents {
 
         float panKeyStep = 1.5f * (getZoom() / ZOOM_MAX);
 
-        if (!isCameraLocked() && !Keybindings.altMod.isDown()) {
+        if (!isCameraLocked() && !Keybindings.altMod.isDown() && !TextInputClientEvents.isAnyInputFocused()) {
             // pan camera with keys
             if (Keybindings.panPlusX.isDown()) {
                 panCam(getEdgeCamPanSensitivity(), 0, 0);
@@ -638,8 +702,14 @@ public class OrthoviewClientEvents {
             || evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_3) {
             cameraMovingByMouse = true;
 
-            float moveX = (float) evt.getDragX() * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult();
-            float moveZ = (float) evt.getDragY() * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult();
+            // Normalize drag delta by frame time to prevent drift when Vsync is off
+            float frameTimeNormalizer = Math.min((float) MC.getDeltaFrameTime(), 5.0f);
+            if (frameTimeNormalizer <= 0) frameTimeNormalizer = 1.0f;
+            float normalizedX = (float) evt.getDragX() / frameTimeNormalizer;
+            float normalizedZ = (float) evt.getDragY() / frameTimeNormalizer;
+
+            float moveX = normalizedX * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
+            float moveZ = normalizedZ * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
             panCam(moveX, 0, moveZ);
         } else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.goals;
 
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
@@ -21,6 +22,7 @@ import java.util.EnumSet;
 public class UnitRangedAttackGoal<T extends net.minecraft.world.entity.Mob> extends Goal {
 
     private final int VELOCITY = 20;
+    private static final int LOS_CHECK_INTERVAL = 5; // recompute raycast at most every N ticks
 
     private final T mob;
     private final int attackWindupTicksMax;
@@ -28,6 +30,8 @@ public class UnitRangedAttackGoal<T extends net.minecraft.world.entity.Mob> exte
     private int attackCooldown = 0; // time to wait between bow windups
     private int attackTime = -1;
     private int seeTime = 0; // how long we have seen the target for
+    private int losCheckCooldown = 0; // throttle for hasLineOfSight raycast
+    private boolean lastLineOfSight = false; // cached raycast result
 
     public UnitRangedAttackGoal(T mob, int attackWindupTime) {
         this.mob = mob;
@@ -72,6 +76,7 @@ public class UnitRangedAttackGoal<T extends net.minecraft.world.entity.Mob> exte
     public void start() {
         super.start();
         this.mob.setAggressive(true);
+        losCheckCooldown = 0; // force a fresh raycast for the new target
     }
 
     public void stop() {
@@ -88,15 +93,23 @@ public class UnitRangedAttackGoal<T extends net.minecraft.world.entity.Mob> exte
         if (target != null && target.isAlive()) {
             this.mob.getLookControl().setLookAt(target.getX(), target.getEyeY(), target.getZ());
 
-            GarrisonableBuilding garr = GarrisonableBuilding.getGarrison((Unit) this.mob);
-            GarrisonableBuilding targetGarr = null;
+            BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this.mob);
+            BuildingPlacement targetGarrPlacement = null;
             if (target instanceof Unit unit)
-                targetGarr = GarrisonableBuilding.getGarrison(unit);
+                targetGarrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
 
+            GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+            GarrisonableBuildingAddon targetGarr = targetGarrPlacement != null ? targetGarrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
             boolean isGarrisoned = garr != null;
             boolean isTargetGarrisoned = targetGarr != null;
 
-            boolean canSeeTarget = this.mob.getSensing().hasLineOfSight(target) || isGarrisoned || isTargetGarrisoned;
+            if (losCheckCooldown <= 0) {
+                lastLineOfSight = this.mob.getSensing().hasLineOfSight(target);
+                losCheckCooldown = LOS_CHECK_INTERVAL;
+            } else {
+                losCheckCooldown -= 1;
+            }
+            boolean canSeeTarget = lastLineOfSight || isGarrisoned || isTargetGarrisoned;
             boolean flag = this.seeTime > 0;
             if (canSeeTarget != flag) {
                 this.seeTime = 0;

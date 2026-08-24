@@ -1,23 +1,24 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProdDupeRule;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -34,6 +35,10 @@ public class ResearchHeavyTridents extends ProductionItem {
                 ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_HEAVY_TRIDENTS);
             } else {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_HEAVY_TRIDENTS);
+                for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+                    if (le instanceof HeadhunterUnit headhunterUnit)
+                        headhunterUnit.setupEquipmentAndUpgradesServer();
+                }
             }
         };
     }

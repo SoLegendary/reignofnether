@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.buildings.placements.PortalPlaceme
 import com.solegendary.reignofnether.building.buildings.villagers.*;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.building.data.DataStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -40,10 +41,10 @@ public class BuildingSaveData extends SavedData {
         }
         return server.overworld()
             .getDataStorage()
-            .computeIfAbsent(BuildingSaveData::load, BuildingSaveData::create, "saved-building-data");
+            .computeIfAbsent(tag -> BuildingSaveData.load(tag, server), BuildingSaveData::create, "saved-building-data");
     }
 
-    public static BuildingSaveData load(CompoundTag tag) {
+    public static BuildingSaveData load(CompoundTag tag, MinecraftServer server) {
         ReignOfNether.LOGGER.info("BuildingSaveData.load");
 
         BuildingSaveData data = create();
@@ -71,6 +72,15 @@ public class BuildingSaveData extends SavedData {
                 int upgradeLevel = btag.getInt("upgradeLevel");
                 PortalPlacement.PortalType portalType = PortalPlacement.PortalType.valueOf(btag.getString("portalType"));
                 BlockPos portalDestination = new BlockPos(btag.getInt("xp"), btag.getInt("yp"), btag.getInt("zp"));
+                int scenarioRoleIndex = btag.getInt("scenarioRoleIndex");
+                DataStorage dataStorage;
+                if (btag.contains("dataStorage", Tag.TAG_LIST)) {
+                    dataStorage = DataStorage.read(btag.getList("dataStorage", Tag.TAG_COMPOUND), server);
+                } else {
+                    dataStorage = new DataStorage();
+                }
+                double partialBlocksDestroyed = btag.contains("partialBlocksDestroyed") ? btag.getDouble("partialBlocksDestroyed") : 0d;
+                ListTag commandsNbt = btag.contains("commandsNbt") ? btag.getList("commandsNbt", Tag.TAG_COMPOUND) : new ListTag();
 
                 if (building != null) {
                     data.buildings.add(new BuildingSave(pos,
@@ -83,7 +93,11 @@ public class BuildingSaveData extends SavedData {
                             isBuilt,
                             upgradeLevel,
                             portalType,
-                            portalDestination
+                            portalDestination,
+                            scenarioRoleIndex,
+                            dataStorage,
+                            partialBlocksDestroyed,
+                            commandsNbt
                     ));
                     ReignOfNether.LOGGER.info("BuildingSaveData.load: " + ownerName + "|" + building.name);
                 }
@@ -100,7 +114,7 @@ public class BuildingSaveData extends SavedData {
         this.buildings.forEach(b -> {
             CompoundTag cTag = new CompoundTag();
             if (b.building instanceof CustomBuilding) {
-                cTag.putString("customStructureName", b.building.structureName);
+                cTag.putString("customStructureName", b.building.name);
             }
             if (!(b.building instanceof CustomBuilding)) {
                 cTag.putString("buildingKey", ReignOfNetherRegistries.BUILDING.getKey(b.building).toString());
@@ -120,6 +134,10 @@ public class BuildingSaveData extends SavedData {
             cTag.putInt("xp", b.portalDestination != null ? b.portalDestination.getX() : 0);
             cTag.putInt("yp", b.portalDestination != null ? b.portalDestination.getY() : 0);
             cTag.putInt("zp", b.portalDestination != null ? b.portalDestination.getZ() : 0);
+            cTag.putInt("scenarioRoleIndex", b.scenarioRoleIndex);
+            cTag.put("dataStorage", b.dataStorage.write());
+            cTag.putDouble("partialBlocksDestroyed", b.partialBlocksDestroyed);
+            cTag.put("commandsNbt", b.commandsNbt);
             list.add(cTag);
 
             //ReignOfNether.LOGGER.info("BuildingSaveData.save: " + b.ownerName + "|" + buildingName);
@@ -149,6 +167,7 @@ public class BuildingSaveData extends SavedData {
             case PumpkinFarm.buildingName -> building = Buildings.PUMPKIN_FARM;
             case HauntedHouse.buildingName -> building = Buildings.HAUNTED_HOUSE;
             case Blacksmith.buildingName -> building = Buildings.BLACKSMITH;
+            case WitchHut.buildingName -> building = Buildings.WITCH_HUT;
             case TownCentre.buildingName -> building = Buildings.TOWN_CENTRE;
             case IronGolemBuilding.buildingName -> building = Buildings.IRON_GOLEM_BUILDING;
             case Mausoleum.buildingName -> building = Buildings.MAUSOLEUM;

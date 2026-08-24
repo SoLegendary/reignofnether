@@ -9,12 +9,14 @@ import com.solegendary.reignofnether.building.buildings.placements.SculkCatalyst
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.research.researchItems.ResearchSculkAmplifiers;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -23,6 +25,8 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -57,7 +61,7 @@ import java.util.Set;
 public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new SonicBoom(), Keybindings.keyQ);
+        ABILITIES.add(new SonicBoom(), Keybindings.abilitySlot1);
     }
 
     //region
@@ -102,6 +106,10 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -123,23 +131,28 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(WardenUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(WardenUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(WardenUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.WARDEN;}
@@ -192,7 +205,14 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
                 .add(Attributes.MAX_HEALTH, WardenUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0)
-                .add(Attributes.ATTACK_KNOCKBACK, 1.5);
+                .add(Attributes.ATTACK_KNOCKBACK, 1.5)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), 12)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     // override new AI types and use unit goals instead
@@ -218,6 +238,24 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
             }
             lastOnPos = getOnPos();
         }
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     private Set<BlockPos> highlightBps = new HashSet<>();
@@ -334,8 +372,8 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
                 if (nearbyEnemies.size() > i)
                     doEntitySonicBoom(nearbyEnemies.get(i), Vec3.atCenterOf(targetBuilding.centrePos), ResearchSculkAmplifiers.SPLIT_BOOM_DAMAGE_MULT);
         }
-        else {
-            int damage = (int) ((SONIC_BOOM_DAMAGE / 2) * targetBuilding.getMagicDamageMult());
+        else if (!(targetBuilding instanceof SculkCatalystPlacement)) {
+            float damage = (SONIC_BOOM_DAMAGE * targetBuilding.getMagicDamageMult());
             targetBuilding.destroyRandomBlocks(damage);
         }
     }

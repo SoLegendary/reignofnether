@@ -50,11 +50,11 @@ public class NetherwartFarm extends AbstractFarm {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.CENTRAL_PORTAL) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.netherwart_farm"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.netherwart_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST), MyRenderer.iconStyle),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.netherwart_farm"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.netherwart_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST), MyRenderer.iconStyle),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.netherwart_farm.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.netherwart_farm.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.netherwart_farm.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.netherwart_farm.tooltip3"), Style.EMPTY)
                 ),
                 this
         );

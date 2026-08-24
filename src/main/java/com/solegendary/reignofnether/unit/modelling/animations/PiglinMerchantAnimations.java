@@ -691,7 +691,7 @@ public class PiglinMerchantAnimations {
 			))
 			.build();
 
-	public static final AnimationDefinition ATTACK = AnimationDefinition.Builder.withLength(3.0F).looping()
+	public static final AnimationDefinition ATTACK = AnimationDefinition.Builder.withLength(2.0F)
 			.addAnimation("head", new AnimationChannel(AnimationChannel.Targets.ROTATION,
 					new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.CATMULLROM),
 					new Keyframe(0.25F, KeyframeAnimations.degreeVec(-3.1285F, -6.4383F, 12.7185F), AnimationChannel.Interpolations.CATMULLROM),

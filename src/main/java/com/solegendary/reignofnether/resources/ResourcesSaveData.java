@@ -44,10 +44,11 @@ public class ResourcesSaveData extends SavedData {
                 int food = ptag.getInt("food");
                 int wood = ptag.getInt("wood");
                 int ore = ptag.getInt("ore");
+                int emerald = ptag.contains("emerald") ? ptag.getInt("emerald") : 0;
 
-                data.resources.add(new Resources(ownerName, food, wood, ore));
+                data.resources.add(new Resources(ownerName, food, wood, ore, emerald));
 
-                ReignOfNether.LOGGER.info("ResourcesSaveData.load: " + ownerName + "|" + food + "|" + wood + "|" + ore);
+                ReignOfNether.LOGGER.info("ResourcesSaveData.load: " + ownerName + "|" + food + "|" + wood + "|" + ore + "|" + emerald);
             }
         }
         return data;
@@ -64,10 +65,11 @@ public class ResourcesSaveData extends SavedData {
             cTag.putInt("food", r.food);
             cTag.putInt("wood", r.wood);
             cTag.putInt("ore", r.ore);
+            cTag.putInt("emerald", r.emerald);
             list.add(cTag);
 
             ReignOfNether.LOGGER.info(
-                "ResourcesSaveData.save: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
+                "ResourcesSaveData.save: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore + "|" + r.emerald);
         });
         tag.put("resources", list);
         return tag;

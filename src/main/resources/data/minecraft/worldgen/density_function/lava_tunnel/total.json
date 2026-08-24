@@ -1,0 +1,5 @@
+{
+  "": "Using `0` because it is being added as a constant to `final_density`",
+  "type": "minecraft:constant",
+  "argument": 0
+}

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -22,12 +23,12 @@ public class FogOfWarClientboundPacket {
     }
 
     public static void revealOrHidePlayer(boolean reveal, String playerName) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new FogOfWarClientboundPacket(reveal, playerName, 0));
+        FogOfWarServerEvents.setPlayerRevealed(playerName, reveal);
     }
 
-    // when a ranged unit attacks from within fog, reveal it to the player who is being attacked
+    // reveal a ranged unit briefly to the player it's attacking
     public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
+        FogOfWarServerEvents.revealRangedUnit(unitId, playerBeingAttacked, RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new FogOfWarClientboundPacket(true, playerBeingAttacked, unitId));
     }
@@ -61,8 +62,6 @@ public class FogOfWarClientboundPacket {
                         FogOfWarClientEvents.revealRangedUnit(playerName, unitId);
                     else if (playerName.isEmpty())
                         FogOfWarClientEvents.setEnabled(enable);
-                    else
-                        FogOfWarClientEvents.revealOrHidePlayer(enable, playerName);
                     success.set(true);
                 });
         });

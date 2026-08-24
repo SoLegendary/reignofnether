@@ -4,13 +4,14 @@ import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
-import com.solegendary.reignofnether.unit.controls.SlimeUnitMoveControl;
 import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -44,6 +45,11 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
     }
     @Override public Faction getFaction() {return Faction.PIGLINS;}
 
+    @Override
+    protected boolean isAffectedByFluids() {
+        return !isInLava();
+    }
+
     public MagmaCubeUnit(EntityType<? extends SlimeUnit> entityType, Level level) {
         super(entityType, level);
         this.shouldSpawnSlimes = false;
@@ -69,6 +75,12 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
 
     public void tick() {
         super.tick();
+
+        if (!onGround() && !isUsingJumpingMovement()) {
+            oSquish = 0;
+            squish = 0;
+        }
+
         if (!level().isClientSide()) {
             setFireTicks += 1;
             if (setFireTicks >= SET_FIRE_TICKS_MAX) {
@@ -76,6 +88,24 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
                 createMagma();
             }
         }
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override
@@ -116,6 +146,28 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
             return false;
 
         return super.hurt(pSource, pAmount);
+    }
+
+    @Override
+    protected void handleRoll() {
+        if (isUsingJumpingMovement()) { // roll towards 0 so the magma cube slinky animation doesn't render sideways or upsidedown
+            this.prevRollTrackX = this.getX();
+            this.prevRollTrackZ = this.getZ();
+            float target = (float) Math.round(this.rollAngle / 180.0) * 180.0F;
+            float diff = target - this.rollAngle;
+            float step = Math.signum(diff) * Math.min(Math.abs(diff), REST_SETTLE_DEGREES_PER_TICK);
+            this.oRollAngle = this.rollAngle;
+            this.rollAngle += step;
+            normaliseRollAngles();
+        } else {
+            super.handleRoll();
+        }
+    }
+
+    @Override
+    protected void onFinishedRoll() {
+        createMagma();
+        super.onFinishedRoll();
     }
 
 

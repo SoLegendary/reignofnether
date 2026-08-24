@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.building.buildings.neutral;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.EndPortalPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -17,7 +16,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
 
@@ -45,15 +43,10 @@ public class EndPortal extends ProductionBuilding {
 
         this.explodeChance = 0.2f;
 
-        this.productions.add(ProductionItems.ENDERMAN, Keybindings.keyQ);
+        this.productions.add(ProductionItems.ENDERMAN, Keybindings.abilitySlot1);
     }
 
     public Faction getFaction() {return Faction.NONE;}
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new EndPortalPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
-    }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         return new BuildingPlaceButton(
@@ -64,12 +57,29 @@ public class EndPortal extends ProductionBuilding {
                 () -> false,
                 () -> true,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.end_portal"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.end_portal"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.end_portal.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.end_portal.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.end_portal.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.end_portal.tooltip2"), Style.EMPTY)
                 ),
                 this
         );
+    }
+
+    @Override
+    public void onBuilt(BuildingPlacement placement) {
+        Level level = placement.level;
+        BlockPos centrePos = placement.centrePos;
+        if (!level.isClientSide()) {
+            level.setBlockAndUpdate(centrePos.above(), Blocks.END_PORTAL.defaultBlockState());
+            level.setBlockAndUpdate(centrePos.above().north(), Blocks.END_PORTAL.defaultBlockState());
+            level.setBlockAndUpdate(centrePos.above().south(), Blocks.END_PORTAL.defaultBlockState());
+            level.setBlockAndUpdate(centrePos.above().east(), Blocks.END_PORTAL.defaultBlockState());
+            level.setBlockAndUpdate(centrePos.above().west(), Blocks.END_PORTAL.defaultBlockState());
+            level.setBlockAndUpdate(centrePos.above().north().east(), Blocks.END_PORTAL.defaultBlockState());
+            level.setBlockAndUpdate(centrePos.above().north().west(), Blocks.END_PORTAL.defaultBlockState());
+            level.setBlockAndUpdate(centrePos.above().south().east(), Blocks.END_PORTAL.defaultBlockState());
+            level.setBlockAndUpdate(centrePos.above().south().west(), Blocks.END_PORTAL.defaultBlockState());
+        }
     }
 }

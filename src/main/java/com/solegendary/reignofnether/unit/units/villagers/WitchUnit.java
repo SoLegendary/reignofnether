@@ -3,22 +3,29 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -51,10 +58,10 @@ import java.util.Set;
 public class WitchUnit extends Witch implements Unit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new ThrowLingeringHarmingPotion(8), Keybindings.keyQ);
-        ABILITIES.add(new ThrowLingeringRegenPotion(8), Keybindings.keyW);
-        ABILITIES.add(new ThrowHealingPotion(8), Keybindings.keyE);
-        ABILITIES.add(new ThrowWaterPotion(8), Keybindings.keyR);
+        ABILITIES.add(new ThrowLingeringHarmingPotion(8), Keybindings.abilitySlot1);
+        ABILITIES.add(new ThrowLingeringRegenPotion(8), Keybindings.abilitySlot2);
+        ABILITIES.add(new ThrowHealingPotion(8), Keybindings.abilitySlot3);
+        ABILITIES.add(new ThrowWaterPotion(8), Keybindings.abilitySlot4);
     }
 
     //region
@@ -119,15 +126,24 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(WitchUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(WitchUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(WitchUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
-
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.WITCH;}
@@ -144,6 +160,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     final static public float maxHealth = 40.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
+    final static public double magicDamageResist = 0.6d;
     public int maxResources = 100;
 
     final static public int LINGERING_POTION_DURATION = 5 * ResourceCost.TICKS_PER_SECOND;
@@ -164,14 +181,14 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
         if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO)) {
             pDamage *= 2.67; // 0.4 (60% less damage) after super's * 0.15
         }
-        if (pSource.is(DamageTypes.ON_FIRE)) {
-            pDamage *= 0.4;
+        else if (MiscUtil.isMagicDamage(pSource)) {
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         }
         return pDamage;
     }
 
     public int getPotionThrowRange() {
-        if (GarrisonableBuilding.getGarrison(this) != null)
+        if (GarrisonableBuildingAddon.getGarrison(this) != null)
             return 16;
         return 8;
     }
@@ -203,7 +220,9 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
                 .add(Attributes.MOVEMENT_SPEED, WitchUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WitchUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, WitchUnit.armorValue);
+                .add(Attributes.ARMOR, WitchUnit.armorValue)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
     }
 
     public void tick() {
@@ -219,6 +238,24 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
             }
             lastOnPos = getOnPos();
         }
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     private Set<BlockPos> highlightBps = new HashSet<>();

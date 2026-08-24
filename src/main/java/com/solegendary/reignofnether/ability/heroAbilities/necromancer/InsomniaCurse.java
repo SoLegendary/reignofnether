@@ -4,8 +4,8 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -26,7 +26,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class InsomniaCurse extends HeroAbility {
 
-    public static final int RANGE = 12;
+    public static final int RANGE = 15;
     public static final float PHANTOM_DAMAGE = 6;
     public static final float PHANTOM_DAMAGE_BONUS_PER_SOUL_RANK = 2f;
     public static final int PHANTOM_MAX_ATTACKS = 6;

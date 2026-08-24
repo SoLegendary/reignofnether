@@ -1,10 +1,9 @@
 package com.solegendary.reignofnether.ability.heroAbilities.enchanter;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -13,6 +12,11 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
+import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
+import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
+import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -21,8 +25,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -147,6 +149,12 @@ public class MartialEnchantment extends AbstractEnchantment {
             return Enchantments.PIERCING;
         if (unit instanceof EvokerUnit)
             return EnchantmentRegistrar.ZEAL.get();
+        if (unit instanceof WindcallerUnit)
+            return EnchantmentRegistrar.LONGSHOT.get();
+        if (unit instanceof SkeletonUnit || unit instanceof StrayUnit || unit instanceof HeadhunterUnit)
+            return Enchantments.POWER_ARROWS;
+        if (unit instanceof BruteUnit || unit instanceof WitherSkeletonUnit)
+            return Enchantments.SHARPNESS;
         return null;
     }
 
@@ -156,7 +164,14 @@ public class MartialEnchantment extends AbstractEnchantment {
                 EntityRegistrar.MILITIA_UNIT.get(),
                 EntityRegistrar.VINDICATOR_UNIT.get(),
                 EntityRegistrar.PILLAGER_UNIT.get(),
-                EntityRegistrar.EVOKER_UNIT.get()
+                EntityRegistrar.EVOKER_UNIT.get(),
+                EntityRegistrar.SKELETON_UNIT.get(),
+                EntityRegistrar.STRAY_UNIT.get(),
+                EntityRegistrar.BOGGED_UNIT.get(),
+                EntityRegistrar.WITHER_SKELETON_UNIT.get(),
+                EntityRegistrar.HEADHUNTER_UNIT.get(),
+                EntityRegistrar.BRUTE_UNIT.get(),
+                EntityRegistrar.WINDCALLER_UNIT.get()
         );
     }
 

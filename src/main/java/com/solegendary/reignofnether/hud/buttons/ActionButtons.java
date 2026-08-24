@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -29,7 +28,6 @@ public class ActionButtons {
     public static Button attack;
     public static Button stop;
     public static Button hold;
-    public static Button move;
     public static Button garrison;
     public static Button ungarrison;
 
@@ -113,18 +111,6 @@ public class ActionButtons {
                 () -> sendUnitCommand(UnitAction.HOLD),
                 null,
                 List.of(FormattedCharSequence.forward(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.hold_position"), Style.EMPTY))
-        );
-        move = new Button(
-                "Move",
-                Button.itemIconSize,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/boots.png"),
-                Keybindings.move,
-                () -> CursorClientEvents.getLeftClickAction() == UnitAction.MOVE,
-                () -> false,
-                () -> true,
-                () -> CursorClientEvents.setLeftClickAction(UnitAction.MOVE),
-                null,
-                List.of(FormattedCharSequence.forward(LanguageUtil.getTranslation("hud.actionbuttons.reignofnether.move"), Style.EMPTY))
         );
         garrison = new Button(
                 "Garrison",

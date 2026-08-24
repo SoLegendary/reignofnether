@@ -16,24 +16,29 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.modelling.animations.NecromancerAnimations;
+import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
@@ -54,6 +59,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import oshi.util.tuples.Pair;
 
@@ -66,12 +72,16 @@ import java.util.Set;
 public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
         List.of(
-            new Pair<>(new RaiseDead(), Keybindings.keyQ),
-            new Pair<>(new InsomniaCurse(), Keybindings.keyW),
-            new Pair<>(new SoulSiphonPassive(), Keybindings.keyE),
-            new Pair<>(new BloodMoon(), Keybindings.keyR)
+            new Pair<>(new RaiseDead(), Keybindings.abilitySlot1),
+            new Pair<>(new InsomniaCurse(), Keybindings.abilitySlot2),
+            new Pair<>(new SoulSiphonPassive(), Keybindings.abilitySlot3),
+            new Pair<>(new BloodMoon(), Keybindings.abilitySlot4)
         )
     );
+
+    boolean needsStatSync = false;
+    @Override public boolean needsStatSync() { return needsStatSync; }
+    @Override public void setNeedsStatSync(boolean value) { needsStatSync = value; }
 
     @Override
     public Object2ObjectArrayMap<HeroAbility, Integer> getHeroAbilityRanks() {
@@ -123,6 +133,10 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public int getMaxResources() {return maxResources;}
     public MountGoal getMountGoal() {return mountGoal;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -158,23 +172,28 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(NecromancerUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(NecromancerUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(NecromancerUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage + (attackBonusPerLevel * getHeroLevel());}
-    public float getUnitMaxHealth() {return maxHealth + (maxHealthBonusPerLevel * getHeroLevel());}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.NECROMANCER;}
@@ -197,12 +216,11 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 150;
+    final static private float baseMaxMana = 150;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    private float manaRegenPerSecond = 1;
-    private float manaBonusPerLevel = 10;
-    @Override public float getBaseMaxMana() { return baseMaxMana; }
+    final static private float manaRegenPerSecond = 1;
+    final static private float manaBonusPerLevel = 10;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
         this.maxMana = amount;
@@ -215,8 +233,6 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         if (!level().isClientSide())
             HeroClientboundPacket.setMana(getId(), this.mana);
     }
-    @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
-    @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
     final static public float attackDamage = 4.0f;
     final static public float attackBonusPerLevel = 0.4f;
@@ -229,14 +245,10 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     final static public float aggroRange = 12;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
+    final static public double magicDamageResist = 0.3d;
     public int maxResources = 100;
 
     public int souls = 0;
-
-    @Override public float getHealthBonusPerLevel() { return maxHealthBonusPerLevel; };
-    @Override public float getAttackBonusPerLevel() { return attackBonusPerLevel; };
-    @Override public float getBaseHealth() { return maxHealth; };
-    @Override public float getBaseAttack() { return attackDamage; };
 
     public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
     public int getFogRevealDuration() { return fogRevealDuration; }
@@ -318,8 +330,8 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
-            pDamage *= 0.7F;
+        if (MiscUtil.isMagicDamage(pSource))
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
 
@@ -340,7 +352,20 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 .add(Attributes.MOVEMENT_SPEED, NecromancerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, NecromancerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, NecromancerUnit.armorValue);
+                .add(Attributes.ARMOR, NecromancerUnit.armorValue)
+                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), NecromancerUnit.maxHealth)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
+                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
+                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
+                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
+                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
+                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
     }
 
     public void tick() {
@@ -365,6 +390,24 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         }
     }
 
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
+    }
+
     private Set<BlockPos> highlightBps = new HashSet<>();
     private BlockPos lastOnPos = new BlockPos(0,0,0);
 
@@ -381,6 +424,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         this.readUnitSaveData(pCompound);
+        this.setNeedsStatSync(true);
     }
 
     public RaiseDead getRaiseDead() {
@@ -472,10 +516,24 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     // override to make inaccuracy 0
     @Override
     public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
+        if (pTarget == null)
+            return;
 
-        double x = pTarget.getX() - this.getX();
-        double y = pTarget.getY(0.5) - this.getY(0.5);
-        double z = pTarget.getZ() - this.getZ();
+        // Lead the shot by predicting where the target will be when the projectile arrives
+        Vec3 shooterPos = this.getEyePosition();
+        Vec3 targetPos = pTarget.getEyePosition().subtract(0,0.5,0);
+        Vec3 targetDelta = pTarget.getDeltaMovement();
+
+        if (pTarget.onGround())
+            targetDelta = targetDelta.multiply(1,0,1);
+
+        double distanceTicks = shooterPos.distanceTo(targetPos) * 1.5f;
+        Vec3 predictedPos = targetPos.add(targetDelta.multiply(distanceTicks * 1.5f, distanceTicks, distanceTicks * 1.5f));
+
+        double x = predictedPos.x() - shooterPos.x();
+        double y = predictedPos.y() - shooterPos.y();
+        double z = predictedPos.z() - shooterPos.z();
+
         NecromancerProjectile proj = new NecromancerProjectile(this.level(), this, x, y, z);
         proj.setPos(this.getEyePosition());
 
@@ -512,6 +570,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 zombieUnit.moveTo(blockpos, 0.0F, 0.0F);
                 zombieUnit.setOwnerName(this.getOwnerName());
                 this.level().addFreshEntity(zombieUnit);
+                zombieUnit.setIsSummoned(true);
 
                 ItemStack helmet = new ItemStack(Items.LEATHER_HELMET);
                 ItemStack chestPlate = new ItemStack(Items.LEATHER_CHESTPLATE);

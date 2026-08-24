@@ -9,15 +9,17 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -44,7 +46,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
 
-import static com.solegendary.reignofnether.resources.BlockUtils.isLogBlock;
+import static com.solegendary.reignofnether.blocks.BlockUtils.isLogBlock;
 
 public class ResourcesServerEvents {
 
@@ -57,10 +59,14 @@ public class ResourcesServerEvents {
     public static final int STARTING_FOOD_SANDBOX = 999999;
     public static final int STARTING_WOOD_SANDBOX = 999999;
     public static final int STARTING_ORE_SANDBOX = 999999;
-    public static final int STARTING_FOOD = 100;
-    public static final int STARTING_WOOD = 450;
-    public static final int STARTING_ORE = 250;
+    public static final int STARTING_FOOD = 150;
+    public static final int STARTING_WOOD = 500;
+    public static final int STARTING_ORE = 300;
+    public static final int STARTING_FOOD_READIED = 150;
+    public static final int STARTING_WOOD_READIED = 150;
+    public static final int STARTING_ORE_READIED = 50;
 
+    public static final float UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL = 0.25f;
     public static final float NEUTRAL_UNIT_BOUNTY_PERCENT = 0.25f;
     public static final float NEUTRAL_BUILDING_BOUNTY_PERCENT = 0.25f;
 
@@ -77,31 +83,36 @@ public class ResourcesServerEvents {
             int unitFood = 0;
             int unitWood = 0;
             int unitOre = 0;
+            int unitEmerald = 0;
             for (LivingEntity le : UnitServerEvents.getAllUnits()) {
                 if (le instanceof Unit u && u.getOwnerName().equals(r.ownerName)) {
                     Resources unitRes = Resources.getTotalResourcesFromItems(u.getItems());
                     unitFood += unitRes.food;
                     unitWood += unitRes.wood;
                     unitOre += unitRes.ore;
+                    unitEmerald += unitRes.emerald;
                 }
             }
             // add all production item costs since they will be cancelled on server shutdown
             int prodFood = 0;
             int prodWood = 0;
             int prodOre = 0;
+            int prodEmerald = 0;
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building instanceof ProductionPlacement pBuilding) {
                     for (ActiveProduction item : pBuilding.productionQueue) {
                         prodFood += item.item.getCost(false, pBuilding.ownerName).food;
                         prodWood += item.item.getCost(false, pBuilding.ownerName).wood;
                         prodOre += item.item.getCost(false, pBuilding.ownerName).ore;
+                        prodEmerald += item.item.getCost(false, pBuilding.ownerName).emerald;
                     }
                 }
             }
             data.resources.add(new Resources(r.ownerName,
                 r.food + r.foodToAdd + unitFood + prodFood,
                 r.wood + r.woodToAdd + unitWood + prodWood,
-                r.ore + r.oreToAdd + unitOre + prodOre
+                r.ore + r.oreToAdd + unitOre + prodOre,
+                r.emerald + r.emerald + unitEmerald + prodEmerald
             ));
             //ReignOfNether.LOGGER.info("saved resources in serverevents: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
         });
@@ -146,7 +157,7 @@ public class ResourcesServerEvents {
         }
     }
 
-    public static void resetResources(String playerName) {
+    public static void resetResources(String playerName, boolean readiedStart) {
         for (Resources resources : resourcesList) {
             if (resources.ownerName.equals(playerName)) {
                 if (TutorialServerEvents.isEnabled()) {
@@ -157,6 +168,10 @@ public class ResourcesServerEvents {
                     resources.food = STARTING_FOOD_SANDBOX;
                     resources.wood = STARTING_WOOD_SANDBOX;
                     resources.ore = STARTING_ORE_SANDBOX;
+                } else if (readiedStart) {
+                    resources.food = STARTING_FOOD_READIED;
+                    resources.wood = STARTING_WOOD_READIED;
+                    resources.ore = STARTING_ORE_READIED;
                 } else {
                     resources.food = STARTING_FOOD;
                     resources.wood = STARTING_WOOD;
@@ -172,12 +187,13 @@ public class ResourcesServerEvents {
         for (Resources resources : resourcesList) {
             if (resources.ownerName.equals(resourcesToAdd.ownerName)) {
                 // change serverside instantly
-                resources.changeInstantly(resourcesToAdd.food, resourcesToAdd.wood, resourcesToAdd.ore);
+                resources.changeInstantly(resourcesToAdd.food, resourcesToAdd.wood, resourcesToAdd.ore, resourcesToAdd.emerald);
                 // change clientside over time
                 ResourcesClientboundPacket.addSubtractResources(new Resources(resourcesToAdd.ownerName,
                     resourcesToAdd.food,
                     resourcesToAdd.wood,
-                    resourcesToAdd.ore
+                    resourcesToAdd.ore,
+                    resourcesToAdd.emerald
                 ));
             }
         }
@@ -199,6 +215,9 @@ public class ResourcesServerEvents {
                     case ORE -> {
                         return resources.ore >= cost;
                     }
+                    case EMERALD -> {
+                        return resources.emerald >= cost;
+                    }
                 }
             }
         return false;
@@ -215,13 +234,24 @@ public class ResourcesServerEvents {
         Resources resources;
         if (TutorialServerEvents.isEnabled()) {
             resources = new Resources(playerName,
-                STARTING_FOOD_TUTORIAL,
-                STARTING_WOOD_TUTORIAL,
-                STARTING_ORE_TUTORIAL
+                    STARTING_FOOD_TUTORIAL,
+                    STARTING_WOOD_TUTORIAL,
+                    STARTING_ORE_TUTORIAL
             );
         } else {
             resources = new Resources(playerName, STARTING_FOOD, STARTING_WOOD, STARTING_ORE);
         }
+        resourcesList.add(resources);
+        ResourcesClientboundPacket.syncResources(resourcesList);
+    }
+
+    public static void assignScenarioResources(RTSPlayer rtsPlayer) {
+        ScenarioRole role = ScenarioUtils.getScenarioRole(false, rtsPlayer.scenarioRoleIndex);
+        resourcesList.removeIf(r -> r.ownerName.equals(rtsPlayer.name));
+        Resources resources;
+        resources = role == null ?
+                new Resources(rtsPlayer.name, 0,0,0) :
+                new Resources(rtsPlayer.name, role.startingResources.food, role.startingResources.wood, role.startingResources.ore);
         resourcesList.add(resources);
         ResourcesClientboundPacket.syncResources(resourcesList);
     }
@@ -323,6 +353,11 @@ public class ResourcesServerEvents {
             .then(Commands.argument("player", EntityArgument.player())
             .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
             .executes((command) -> trySendingResources(command, ResourceName.ORE)))));
+
+        evt.getDispatcher().register(Commands.literal("sendemerald")
+            .then(Commands.argument("player", EntityArgument.player())
+            .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
+            .executes((command) -> trySendingResources(command, ResourceName.EMERALD)))));
     }
 
     public static int trySendingResources(CommandContext<CommandSourceStack> context, ResourceName resourceName) throws CommandSyntaxException {
@@ -354,6 +389,9 @@ public class ResourcesServerEvents {
             int oreAmount = Math.min(res.ore, sentResources.ore);
             if (oreAmount > 0)
                 trySendingResources(sentResources.ownerName,receivingPlayerName, ResourceName.ORE, oreAmount);
+            int emeraldAmount = Math.min(res.emerald, sentResources.emerald);
+            if (oreAmount > 0)
+                trySendingResources(sentResources.ownerName,receivingPlayerName, ResourceName.EMERALD, emeraldAmount);
 
             if (sentResources.getTotalValue() > 0)
                 SoundClientboundPacket.playSoundForPlayer(SoundAction.CHAT, receivingPlayerName);
@@ -378,19 +416,22 @@ public class ResourcesServerEvents {
             ResourcesClientboundPacket.warnInsufficientResources(sendingPlayerName,
                     resourceName == ResourceName.FOOD,
                     resourceName == ResourceName.WOOD,
-                    resourceName == ResourceName.ORE
+                    resourceName == ResourceName.ORE,
+                    resourceName == ResourceName.EMERALD
             );
             return 0;
         } else {
             addSubtractResources(new Resources(sendingPlayerName,
                     resourceName == ResourceName.FOOD ? -amount : 0,
                     resourceName == ResourceName.WOOD ? -amount : 0,
-                    resourceName == ResourceName.ORE ? -amount : 0
+                    resourceName == ResourceName.ORE ? -amount : 0,
+                    resourceName == ResourceName.EMERALD ? -amount : 0
             ));
             addSubtractResources(new Resources(receivingPlayerName,
                     resourceName == ResourceName.FOOD ? amount : 0,
                     resourceName == ResourceName.WOOD ? amount : 0,
-                    resourceName == ResourceName.ORE ? amount : 0
+                    resourceName == ResourceName.ORE ? amount : 0,
+                    resourceName == ResourceName.EMERALD ? amount : 0
             ));
             switch (resourceName) {
                 case FOOD -> {
@@ -404,6 +445,10 @@ public class ResourcesServerEvents {
                 case ORE -> {
                     PlayerServerEvents.sendMessageToPlayer(sendingPlayerName, "server.resources.reignofnether.sent_ore", false, amount, receivingPlayerName);
                     PlayerServerEvents.sendMessageToPlayer(receivingPlayerName, "server.resources.reignofnether.received_ore", false, amount, sendingPlayerName);
+                }
+                case EMERALD -> {
+                    PlayerServerEvents.sendMessageToPlayer(sendingPlayerName, "server.resources.reignofnether.sent_emerald", false, amount, receivingPlayerName);
+                    PlayerServerEvents.sendMessageToPlayer(receivingPlayerName, "server.resources.reignofnether.received_emerald", false, amount, sendingPlayerName);
                 }
             }
             return 1;

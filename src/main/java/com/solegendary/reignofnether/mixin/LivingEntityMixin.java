@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.mixin;
 
-import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
@@ -10,6 +9,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,6 +22,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -47,6 +48,16 @@ public abstract class LivingEntityMixin extends Entity {
 
     public LivingEntityMixin(EntityType<?> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+    }
+
+    @Inject(
+            method = "tick",
+            at = @At("TAIL")
+    )
+    public void tick(CallbackInfo ci) {
+        if (this.level().isClientSide())
+            if (this.hasEffect(MobEffects.LEVITATION))
+                MiscUtil.spawnFlyingCloudParticles(this);
     }
 
     @Inject(

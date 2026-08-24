@@ -45,12 +45,12 @@ public class WildfireProd extends HeroProductionItem {
                 iconRl,
                 List.of(
                         FormattedCharSequence.forward(
-                                I18n.get("units.piglins.reignofnether.wildfire") +
+                                I18n.get("entity.reignofnether.wildfire_unit") +
                                         " (" + I18n.get("hud.units.reignofnether.hero") + ")",
                                 Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wildfire.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wildfire.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wildfire_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wildfire_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
@@ -58,14 +58,14 @@ public class WildfireProd extends HeroProductionItem {
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         ArrayList<FormattedCharSequence> tooltips = new ArrayList<>(List.of(
                 FormattedCharSequence.forward(
-                        I18n.get("units.piglins.reignofnether.wildfire") +
+                        I18n.get("entity.reignofnether.wildfire_unit") +
                                 " (" + I18n.get("hud.units.reignofnether.hero") + ")",
                         Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wildfire.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.wildfire.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wildfire_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wildfire_unit.tooltip2"), Style.EMPTY)
         ));
         tooltips.addAll(getAdditionalHeroTooltips());
 

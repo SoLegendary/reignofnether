@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.ability.TradeAction;
+import com.solegendary.reignofnether.ability.abilities.TradeResources;
 import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -11,6 +13,8 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RTSPlayerSaveData extends SavedData {
 
@@ -47,8 +51,17 @@ public class RTSPlayerSaveData extends SavedData {
                 int beaconOwnerTicks = ptag.getInt("beaconOwnerTicks");
                 Faction faction = Faction.valueOf(ptag.getString("faction"));
                 int[] scores = ptag.contains("sources") ? ptag.getIntArray("scores") : new RTSPlayerScores().getScoreListAsArray();
+                int scenarioRoleIndex = ptag.getInt("scenarioRoleIndex");
 
-                data.rtsPlayers.add(RTSPlayer.getFromSave(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores));
+                Map<TradeAction, Integer> tradeRates = new HashMap<>();
+                tradeRates.put(TradeAction.FOOD_FOR_WOOD, ptag.contains("foodWoodRate") ? ptag.getInt("foodWoodRate") : TradeResources.START_RATE);
+                tradeRates.put(TradeAction.FOOD_FOR_ORE, ptag.contains("foodOreRate") ? ptag.getInt("foodOreRate") : TradeResources.START_RATE);
+                tradeRates.put(TradeAction.WOOD_FOR_FOOD, ptag.contains("woodFoodRate") ? ptag.getInt("woodFoodRate") : TradeResources.START_RATE);
+                tradeRates.put(TradeAction.WOOD_FOR_ORE, ptag.contains("woodOreRate") ? ptag.getInt("woodOreRate") : TradeResources.START_RATE);
+                tradeRates.put(TradeAction.ORE_FOR_FOOD, ptag.contains("oreFoodRate") ? ptag.getInt("oreFoodRate") : TradeResources.START_RATE);
+                tradeRates.put(TradeAction.ORE_FOR_WOOD, ptag.contains("oreWoodRate") ? ptag.getInt("oreWoodRate") : TradeResources.START_RATE);
+
+                data.rtsPlayers.add(RTSPlayer.getFromSave(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores, scenarioRoleIndex, tradeRates));
 
                 ReignOfNether.LOGGER.info("RTSPlayerSaveData.load: " + name + "|" + id + "|" + faction);
             }
@@ -69,6 +82,13 @@ public class RTSPlayerSaveData extends SavedData {
             cTag.putInt("beaconOwnerTicks", p.beaconOwnerTicks);
             cTag.putString("faction", p.faction.name());
             cTag.putIntArray("scores", p.scores.getScoreListAsArray());
+            cTag.putInt("scenarioRoleIndex", p.scenarioRoleIndex);
+            cTag.putInt("foodWoodRate", p.tradeRates.get(TradeAction.FOOD_FOR_WOOD));
+            cTag.putInt("foodOreRate", p.tradeRates.get(TradeAction.FOOD_FOR_ORE));
+            cTag.putInt("woodFoodRate", p.tradeRates.get(TradeAction.WOOD_FOR_FOOD));
+            cTag.putInt("woodOreRate", p.tradeRates.get(TradeAction.WOOD_FOR_ORE));
+            cTag.putInt("oreFoodRate", p.tradeRates.get(TradeAction.ORE_FOR_FOOD));
+            cTag.putInt("oreWoodRate", p.tradeRates.get(TradeAction.ORE_FOR_WOOD));
             list.add(cTag);
 
             //ReignOfNether.LOGGER.info("RTSPlayerSaveData.save: " + p.name + "|" + p.id + "|" + p.faction);

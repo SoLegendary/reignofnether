@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.hud.passives;
 
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -31,5 +31,6 @@ public class EnchantmentIcon extends Button {
         this.iconItem = iconItem;
         this.enchantment = enchantment;
         this.slot = slot;
+        this.iconItemScale = 0.75f;
     }
 }

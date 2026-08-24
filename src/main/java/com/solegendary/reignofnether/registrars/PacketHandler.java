@@ -3,18 +3,17 @@ package com.solegendary.reignofnether.registrars;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.AbilityServerboundPacket;
-import com.solegendary.reignofnether.ability.EnchantEquipAbilityServerboundPacket;
+import com.solegendary.reignofnether.ability.BuildingAbilityClientboundPacket;
+import com.solegendary.reignofnether.ability.BuildingAbilityServerboundPacket;
 import com.solegendary.reignofnether.alliance.*;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
+import com.solegendary.reignofnether.building.FogBuildingClientboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerboundPacket;
 import com.solegendary.reignofnether.config.ClientboundSyncResourceCostPacket;
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
-import com.solegendary.reignofnether.fogofwar.FogOfWarServerboundPacket;
-import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
-import com.solegendary.reignofnether.fogofwar.FrozenChunkServerboundPacket;
+import com.solegendary.reignofnether.fogofwar.*;
 import com.solegendary.reignofnether.gamemode.GameModeClientboundPacket;
 import com.solegendary.reignofnether.gamemode.GameModeServerboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
@@ -23,24 +22,35 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hero.FallenHeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonActionServerboundPacket;
+import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerServerboundPacket;
+import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
+import com.solegendary.reignofnether.orthoview.CameraFadeClientboundPacket;
+import com.solegendary.reignofnether.player.MatchStatsClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServerboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerboundPacket;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientboundPacket;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerboundPacket;
 import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
+import com.solegendary.reignofnether.scenario.ScenarioClientboundPacket;
+import com.solegendary.reignofnether.scenario.ScenarioServerboundPacket;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosClientboundPacket;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalClientboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalServerboundPacket;
-import com.solegendary.reignofnether.tps.TPSClientBoundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.*;
+import com.solegendary.reignofnether.debug.RtsDebugChunksClientboundPacket;
+import com.solegendary.reignofnether.debug.RtsDebugStatsClientboundPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
@@ -97,6 +107,20 @@ public final class PacketHandler {
                 .encoder(UnitAnimationClientboundPacket::encode).decoder(UnitAnimationClientboundPacket::new)
                 .consumerMainThread(UnitAnimationClientboundPacket::handle).add();
 
+        INSTANCE.messageBuilder(UnitPathClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(UnitPathClientboundPacket::encode).decoder(UnitPathClientboundPacket::new)
+                .consumerMainThread(UnitPathClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(RtsDebugStatsClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RtsDebugStatsClientboundPacket::encode)
+                .decoder(RtsDebugStatsClientboundPacket::new)
+                .consumerMainThread(RtsDebugStatsClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(RtsDebugChunksClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RtsDebugChunksClientboundPacket::encode)
+                .decoder(RtsDebugChunksClientboundPacket::new)
+                .consumerMainThread(RtsDebugChunksClientboundPacket::handle).add();
+
         INSTANCE.messageBuilder(UnitIdleWorkerClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(UnitIdleWorkerClientBoundPacket::encode).decoder(UnitIdleWorkerClientBoundPacket::new)
                 .consumerMainThread(UnitIdleWorkerClientBoundPacket::handle).add();
@@ -121,13 +145,13 @@ public final class PacketHandler {
                 .encoder(FogOfWarClientboundPacket::encode).decoder(FogOfWarClientboundPacket::new)
                 .consumerMainThread(FogOfWarClientboundPacket::handle).add();
 
+        INSTANCE.messageBuilder(FogChunksClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FogChunksClientboundPacket::encode).decoder(FogChunksClientboundPacket::new)
+                .consumerMainThread(FogChunksClientboundPacket::handle).add();
+
         INSTANCE.messageBuilder(FogOfWarServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(FogOfWarServerboundPacket::encode).decoder(FogOfWarServerboundPacket::new)
                 .consumerMainThread(FogOfWarServerboundPacket::handle).add();
-
-        INSTANCE.messageBuilder(FrozenChunkServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(FrozenChunkServerboundPacket::encode).decoder(FrozenChunkServerboundPacket::new)
-                .consumerMainThread(FrozenChunkServerboundPacket::handle).add();
 
         INSTANCE.messageBuilder(FrozenChunkClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(FrozenChunkClientboundPacket::encode).decoder(FrozenChunkClientboundPacket::new)
@@ -159,13 +183,13 @@ public final class PacketHandler {
                 .encoder(AbilityServerboundPacket::encode).decoder(AbilityServerboundPacket::new)
                 .consumerMainThread(AbilityServerboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(EnchantEquipAbilityServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
-                .encoder(EnchantEquipAbilityServerboundPacket::encode).decoder(EnchantEquipAbilityServerboundPacket::new)
-                .consumerMainThread(EnchantEquipAbilityServerboundPacket::handle).add();
+        INSTANCE.messageBuilder(BuildingAbilityServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(BuildingAbilityServerboundPacket::encode).decoder(BuildingAbilityServerboundPacket::new)
+                .consumerMainThread(BuildingAbilityServerboundPacket::handle).add();
 
-        INSTANCE.messageBuilder(TPSClientBoundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
-                .encoder(TPSClientBoundPacket::encode).decoder(TPSClientBoundPacket::new)
-                .consumerMainThread(TPSClientBoundPacket::handle).add();
+        INSTANCE.messageBuilder(BuildingAbilityClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(BuildingAbilityClientboundPacket::encode).decoder(BuildingAbilityClientboundPacket::new)
+                .consumerMainThread(BuildingAbilityClientboundPacket::handle).add();
 
         INSTANCE.messageBuilder(AttackWarningClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(AttackWarningClientboundPacket::encode).decoder(AttackWarningClientboundPacket::new)
@@ -302,6 +326,83 @@ public final class PacketHandler {
                 .encoder(MapMarkerClientboundPacket::encode)
                 .decoder(MapMarkerClientboundPacket::new)
                 .consumerMainThread(MapMarkerClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ScenarioServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ScenarioServerboundPacket::encode)
+                .decoder(ScenarioServerboundPacket::new)
+                .consumerMainThread(ScenarioServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ScenarioClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ScenarioClientboundPacket::encode)
+                .decoder(ScenarioClientboundPacket::new)
+                .consumerMainThread(ScenarioClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(MatchStatsClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(MatchStatsClientboundPacket::encode)
+                .decoder(MatchStatsClientboundPacket::new)
+                .consumerMainThread(MatchStatsClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RTSMapInfoClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(RTSMapInfoClientboundPacket::encode)
+                .decoder(RTSMapInfoClientboundPacket::new)
+                .consumerMainThread(RTSMapInfoClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(RTSMapInfoServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(RTSMapInfoServerboundPacket::encode)
+                .decoder(RTSMapInfoServerboundPacket::new)
+                .consumerMainThread(RTSMapInfoServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(PlayerChunksClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PlayerChunksClientboundPacket::encode)
+                .decoder(PlayerChunksClientboundPacket::new)
+                .consumerMainThread(PlayerChunksClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(HudClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(HudClientboundPacket::encode)
+                .decoder(HudClientboundPacket::new)
+                .consumerMainThread(HudClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(CameraClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CameraClientboundPacket::encode)
+                .decoder(CameraClientboundPacket::new)
+                .consumerMainThread(CameraClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(CameraFadeClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CameraFadeClientboundPacket::encode)
+                .decoder(CameraFadeClientboundPacket::new)
+                .consumerMainThread(CameraFadeClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(FogNeutralUnitClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FogNeutralUnitClientboundPacket::encode)
+                .decoder(FogNeutralUnitClientboundPacket::new)
+                .consumerMainThread(FogNeutralUnitClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(FogBuildingClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(FogBuildingClientboundPacket::encode)
+                .decoder(FogBuildingClientboundPacket::new)
+                .consumerMainThread(FogBuildingClientboundPacket::handle)
+                .add();
+        
+        INSTANCE.messageBuilder(CustomButtonActionServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(CustomButtonActionServerboundPacket::encode)
+                .decoder(CustomButtonActionServerboundPacket::decode)
+                .consumerMainThread(CustomButtonActionServerboundPacket::handle)
+                .add();
+        INSTANCE.messageBuilder(CustomButtonClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CustomButtonClientboundPacket::encode)
+                .decoder(CustomButtonClientboundPacket::decode)
+                .consumerMainThread(CustomButtonClientboundPacket::handle)
                 .add();
     }
 }

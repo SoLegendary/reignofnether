@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
-import com.solegendary.reignofnether.unit.goals.RangedFlyingAttackGroundGoal;
+import com.solegendary.reignofnether.unit.goals.RangedAttackGroundGoal;
 import net.minecraft.world.entity.LivingEntity;
 
 public interface RangedAttackerUnit {
@@ -10,7 +10,7 @@ public interface RangedAttackerUnit {
     int getFogRevealDuration();
     void setFogRevealDuration(int duration);
 
-    default RangedFlyingAttackGroundGoal<?> getRangedAttackGroundGoal() { return null; }
+    default RangedAttackGroundGoal<?> getRangedAttackGroundGoal() { return null; }
 
     default void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         double x = pTarget.getX();

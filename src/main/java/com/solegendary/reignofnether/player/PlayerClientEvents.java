@@ -1,8 +1,11 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
@@ -12,10 +15,13 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.hud.buttons.HelperButtons;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
@@ -63,6 +69,14 @@ public class PlayerClientEvents {
             if (rtsPlayer.name.equals(playerName))
                 return true;
         return false;
+    }
+
+    @Nullable
+    public static RTSPlayer getRTSPlayer() {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (MC.player != null && rtsPlayer.name.equals(MC.player.getName().getString()))
+                return rtsPlayer;
+        return null;
     }
 
     @Nullable
@@ -127,6 +141,16 @@ public class PlayerClientEvents {
         return MC.player != null ? MC.player.getName().getString() : "";
     }
 
+    public static void setMarketRate(TradeAction tradeAction, String playerName, int rate) {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (playerName.equals(rtsPlayer.name))
+                rtsPlayer.tradeRates.put(tradeAction, rate);
+
+        for (BuildingPlacement bpl : BuildingClientEvents.getBuildings())
+            if (bpl.getBuilding() instanceof AbstractMarket)
+                bpl.updateButtons();
+    }
+
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("rts-camera").executes((command) -> {
@@ -136,20 +160,6 @@ public class PlayerClientEvents {
         evt.getDispatcher().register(Commands.literal("rts-surrender").executes((command) -> {
             PlayerServerboundPacket.surrender();
             return 1;
-        }));
-        evt.getDispatcher().register(Commands.literal("rts-reset").executes((command) -> {
-            if (MC.player != null && MC.player.hasPermissions(4)) {
-                PlayerServerboundPacket.resetRTS();
-                return 1;
-            }
-            return 0;
-        }));
-        evt.getDispatcher().register(Commands.literal("rts-hard-reset").executes((command) -> {
-            if (MC.player != null && MC.player.hasPermissions(4)) {
-                PlayerServerboundPacket.resetRTSHard();
-                return 1;
-            }
-            return 0;
         }));
         evt.getDispatcher()
             .register(Commands.literal("rts-syncing").then(Commands.literal("enable").executes((command) -> {
@@ -241,9 +251,27 @@ public class PlayerClientEvents {
     public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId) {
         if (!isRTSPlayer(playerName)) {
             rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId));
+            FogOfWarClientEvents.refreshLocalIsRTSPlayer();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
-                if (!SandboxClientEvents.isSandboxPlayer()) {
+                if (faction != Faction.NONE) {
+                    MC.getMusicManager().stopPlaying();
+                    ResearchClient.removeAllCheats();
+                }
+                PlayerServerboundPacket.requestMarketRates();
+            }
+        }
+    }
+
+    public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
+        if (!isRTSPlayer(playerName)) {
+            RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0);
+            rtsPlayer.scenarioRoleIndex = scenarioRoleIndex;
+            rtsPlayers.add(rtsPlayer);
+            FogOfWarClientEvents.refreshLocalIsRTSPlayer();
+            if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
+                GameruleClient.gamerulesMenuOpen = false;
+                if (faction != Faction.NONE) {
                     MC.getMusicManager().stopPlaying();
                     ResearchClient.removeAllCheats();
                 }
@@ -253,6 +281,7 @@ public class PlayerClientEvents {
 
     public static void removeRTSPlayer(String playerName) {
         boolean removed = rtsPlayers.removeIf(p -> p.name.equals(playerName));
+        if (removed) FogOfWarClientEvents.refreshLocalIsRTSPlayer();
         if (removed && MC.player != null && MC.player.getName().getString().equals(playerName)) {
             SoundClientEvents.stopFadeableMusicInstance();
         }
@@ -262,26 +291,7 @@ public class PlayerClientEvents {
     public static void onPlayerLogoutEvent(PlayerEvent.PlayerLoggedOutEvent evt) {
         // LOG OUT FROM SINGLEPLAYER WORLD ONLY
         if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
-            resetRTS(true);
-            UnitClientEvents.getAllUnits().clear();
-            BuildingClientEvents.getBuildings().clear();
-            FogOfWarClientEvents.movedToCapitol = false;
-            FogOfWarClientEvents.frozenChunks.clear();
-            FogOfWarClientEvents.semiFrozenChunks.clear();
-            OrthoviewClientEvents.unlockCam();
-            HeroClientEvents.fallenHeroes.clear();
-            PlayerDisplayClientEvents.resetDisplay();
-            PlayerColors.reset();
-            CustomBuildingClientEvents.customBuildings.clear();
-            CustomBuildingClientEvents.setCustomBuildingToEdit(null);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-        // LOG IN TO SINGLEPLAYER WORLD ONLY
-        if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
-            FogOfWarClientEvents.updateFogChunks();
+            resetAll();
         }
     }
 
@@ -289,24 +299,35 @@ public class PlayerClientEvents {
     public static void onClientLogout(ClientPlayerNetworkEvent.LoggingOut evt) {
         // LOG OUT FROM SERVER WORLD ONLY
         if (MC.player != null && evt.getPlayer() != null && evt.getPlayer().getId() == MC.player.getId()) {
-            resetRTS(true);
-            UnitClientEvents.getAllUnits().clear();
-            BuildingClientEvents.getBuildings().clear();
-            FogOfWarClientEvents.movedToCapitol = false;
-            FogOfWarClientEvents.frozenChunks.clear();
-            FogOfWarClientEvents.semiFrozenChunks.clear();
-            HeroClientEvents.fallenHeroes.clear();
-            PlayerDisplayClientEvents.resetDisplay();
-            PlayerColors.reset();
-            CustomBuildingClientEvents.customBuildings.clear();
+            resetAll();
         }
+    }
+
+    private static void resetAll() {
+        resetRTS(true);
+        UnitClientEvents.getAllUnits().clear();
+        BuildingClientEvents.getBuildings().clear();
+        FogOfWarClientEvents.movedToCapitol = false;
+        FogOfWarClientEvents.brightChunks.clear();
+        OrthoviewClientEvents.unlockCam();
+        HeroClientEvents.fallenHeroes.clear();
+        PlayerDisplayClientEvents.resetDisplay();
+        PlayerColors.reset();
+        CustomBuildingClientEvents.customBuildings.clear();
+        CustomBuildingClientEvents.setCustomBuildingToEdit(null);
+        AlliancesClient.resetAllAlliances();
+        RTSMapInfoClientEvents.reset();
+        MinimapClientEvents.clearMinimapUnits();
+        PlayerDisplayClientEvents.clearAll();
+        rtsPlayers.clear();
     }
 
     @SubscribeEvent
     public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn evt) {
         // LOG IN TO SERVER WORLD ONLY
         if (MC.player != null && evt.getPlayer().getId() == MC.player.getId()) {
-            FogOfWarClientEvents.updateFogChunks();
+            // server pushes brightChunks; no client recompute
+            FogOfWarClientEvents.refreshLocalIsRTSPlayer();
         }
     }
 
@@ -346,17 +367,18 @@ public class PlayerClientEvents {
     }
 
     public static void resetRTS(boolean hardReset) {
-        boolean isSandbox = SandboxClientEvents.isSandboxPlayer();
+        boolean isSandboxOrScenario = SandboxClientEvents.isSandboxPlayer() || GameruleClient.scenarioMode;
         rtsPlayers.clear();
+        FogOfWarClientEvents.refreshLocalIsRTSPlayer();
         HelperButtons.updateButtons();
         SoundClientEvents.stopFadeableMusicInstance();
 
         HudClientEvents.controlGroups.clear();
         UnitClientEvents.getSelectedUnits().clear();
         UnitClientEvents.getPreselectedUnits().clear();
-        if (!isSandbox)
+        if (!isSandboxOrScenario)
             UnitClientEvents.getAllUnits().removeIf(u -> (hardReset || (u instanceof Unit unit && !Unit.hasAnchor(unit))));
-        if (!isSandbox)
+        if (!isSandboxOrScenario)
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (entity instanceof Unit unit)
                     unit.setOwnerName("");
@@ -364,11 +386,36 @@ public class PlayerClientEvents {
         ResearchClient.removeAllResearch();
         ResearchClient.removeAllCheats();
         BuildingClientEvents.getSelectedBuildings().clear();
-        if (!isSandbox)
+        if (!isSandboxOrScenario)
             BuildingClientEvents.getBuildings().removeIf(b -> b.getBuilding().shouldDestroyOnReset || hardReset);
-        if (!isSandbox)
+        if (!isSandboxOrScenario)
             for (BuildingPlacement building : BuildingClientEvents.getBuildings())
                 building.ownerName = "";
+        ResourcesClientEvents.resourcesList.clear();
+        ClientGameModeHelper.gameMode = ClientGameModeHelper.DEFAULT_GAMEMODE;
+        ClientGameModeHelper.gameModeLocked = false;
+        SurvivalClientEvents.reset();
+        StartPosClientEvents.resetAll();
+        HeroClientEvents.fallenHeroes.clear();
+        AlliancesClient.playersWithAlliedControl.clear();
+        PlayerColors.reset();
+        PlayerDisplayClientEvents.resetDisplay();
+        TimeClientEvents.resetBloodMoon();
+        CustomBuildingClientEvents.setCustomBuildingToEdit(null);
+    }
+
+    public static void publishScenarioMap() {
+        rtsPlayers.clear();
+        FogOfWarClientEvents.refreshLocalIsRTSPlayer();
+        HelperButtons.updateButtons();
+        SoundClientEvents.stopFadeableMusicInstance();
+        HudClientEvents.controlGroups.clear();
+        UnitClientEvents.getSelectedUnits().clear();
+        UnitClientEvents.getPreselectedUnits().clear();
+        UnitClientEvents.idleWorkerIds.clear();
+        ResearchClient.removeAllResearch();
+        ResearchClient.removeAllCheats();
+        BuildingClientEvents.getSelectedBuildings().clear();
         ResourcesClientEvents.resourcesList.clear();
         ClientGameModeHelper.gameMode = ClientGameModeHelper.DEFAULT_GAMEMODE;
         ClientGameModeHelper.gameModeLocked = false;

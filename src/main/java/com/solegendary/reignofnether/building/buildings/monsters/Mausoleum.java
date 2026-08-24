@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.placements.DarknessProductionBuilding;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -10,6 +12,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -17,23 +20,21 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Mausoleum extends ProductionBuilding {
+public class Mausoleum extends ProductionBuilding implements NightSourceAddon, RangeIndicatorAddon {
 
     public final static String buildingName = "Mausoleum";
     public final static String structureName = "mausoleum";
     public final static ResourceCost cost = ResourceCosts.MAUSOLEUM;
-    public final static int nightRange = 80;
+    public final static int nightRange = 60;
     public final static int nightRangeReduced = 40;
-
-    private final Set<BlockPos> nightBorderBps = new HashSet<>();
 
     public Mausoleum() {
         super(structureName, cost, true);
@@ -44,27 +45,22 @@ public class Mausoleum extends ProductionBuilding {
 
         this.buildTimeModifier = 0.274f; // 60s total build time with 3 villagers
         this.canAcceptResources = true;
+        this.maxHealth = 460d;
 
         this.startingBlockTypes.add(Blocks.STONE);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
         this.startingBlockTypes.add(Blocks.STONE_BRICKS);
         this.startingBlockTypes.add(Blocks.STONE_BRICK_STAIRS);
 
-        this.productions.add(ProductionItems.ZOMBIE_VILLAGER, Keybindings.keyQ);
+        this.productions.add(ProductionItems.ZOMBIE_VILLAGER, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.BAT, Keybindings.abilitySlot2);
+
+        setActiveAddon(RangeIndicatorAddon.class, this, true);
+        setActiveAddon(NightSourceAddon.class, this, true);
     }
 
     public Faction getFaction() {
         return Faction.MONSTERS;
-    }
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        int nRange = nightRange;
-        if ((level.isClientSide() && BuildingClientEvents.playerHasFinishedBuilding(this, ownerName)) ||
-            (!level.isClientSide() && BuildingServerEvents.playerHasFinishedBuilding(this, ownerName))) {
-            nRange = nightRangeReduced;
-        }
-        return new DarknessProductionBuilding(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), true, nRange,false, true);
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
@@ -77,21 +73,71 @@ public class Mausoleum extends ProductionBuilding {
             () -> false,
             () -> true,
             List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.mausoleum"),
+                    I18n.get("buildings.reignofnether.mausoleum"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(
-                    I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip1"),
+                    I18n.get("buildings.reignofnether.mausoleum.tooltip1"),
                     Style.EMPTY
                 ),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip2",  nightRange), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.mausoleum.tooltip4",  nightRangeReduced), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.mausoleum.tooltip2",  nightRange), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.mausoleum.tooltip4",  nightRangeReduced), Style.EMPTY)
             ),
             this
         );
+    }
+
+    @Override
+    public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
+        super.tick(tickLevel, buildingPlacement);
+        if (tickLevel.isClientSide && buildingPlacement.getTickAgeAfterBuilt() > 0 && buildingPlacement.getTickAgeAfterBuilt() % 100 == 0)
+            updateHighlightBps(buildingPlacement);
+    }
+
+    @Override
+    public int getRange(BuildingPlacement placement) {
+        List<BuildingPlacement> bpls;
+        if (placement.level.isClientSide())
+            bpls = BuildingClientEvents.getBuildings();
+        else
+            bpls = BuildingServerEvents.getBuildings();
+
+        int nRange = nightRangeReduced;
+        long oldestMausoleumAge = 0;
+        for (BuildingPlacement bpl : bpls)
+            if (bpl.getBuilding().isTypeOf(this) && bpl.ownerName.equals(placement.ownerName))
+                if (bpl.tickAge > oldestMausoleumAge)
+                    oldestMausoleumAge = bpl.tickAge;
+        if (placement.tickAge >= oldestMausoleumAge)
+            nRange = nightRange;
+        return placement.isBuilt ? nRange : 0;
+    }
+
+    @Override
+    public int getNightRange(BuildingPlacement placement) {
+        return getRange(placement);
+    }
+
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ, placement.level, hasActiveAddon(NightSourceAddon.class)));
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected(BuildingPlacement placement) {
+        return false;
+    }
+
+    @Override
+    public int getDefaultNightRange() {
+        return nightRangeReduced;
     }
 }

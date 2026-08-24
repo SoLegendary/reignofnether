@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.ability.abilities;
 import com.solegendary.reignofnether.ability.BeaconAbility;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -23,7 +23,7 @@ public class BeaconStrength extends BeaconAbility {
 
     public BeaconStrength() {
         super(UnitAction.BEACON_STRENGTH, AURA_EFFECT);
-        this.defaultHotkey = Keybindings.keyT;
+        this.defaultHotkey = Keybindings.abilitySlot5;
     }
 
     @Override

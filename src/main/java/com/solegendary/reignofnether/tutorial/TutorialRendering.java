@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.tutorial;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

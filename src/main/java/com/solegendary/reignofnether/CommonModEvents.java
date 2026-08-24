@@ -32,7 +32,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.GRIZZLY_BEAR_UNIT.get(), GrizzlyBearUnit.createAttributes().build());
         evt.put(EntityRegistrar.PANDA_UNIT.get(), PandaUnit.createAttributes().build());
         evt.put(EntityRegistrar.WOLF_UNIT.get(), WolfUnit.createAttributes().build());
-        evt.put(EntityRegistrar.LLAMA_UNIT.get(), WolfUnit.createAttributes().build());
+        evt.put(EntityRegistrar.LLAMA_UNIT.get(), LlamaUnit.createAttributes().build());
         evt.put(EntityRegistrar.PHANTOM_SUMMON.get(), PhantomSummon.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get(), ZombiePiglinUnit.createAttributes().build());
@@ -45,11 +45,17 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.CREEPER_UNIT.get(), CreeperUnit.createAttributes().build());
         evt.put(EntityRegistrar.SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
         evt.put(EntityRegistrar.POISON_SPIDER_UNIT.get(), SpiderUnit.createAttributes().build());
+        evt.put(EntityRegistrar.WRAITH_UNIT.get(), WraithUnit.createAttributes().build());
         evt.put(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnit.createAttributes().build());
+        evt.put(EntityRegistrar.SCOUT_DOG_UNIT.get(), ScoutDogUnit.createAttributes().build());
+        evt.put(EntityRegistrar.SCOUT_CAT_UNIT.get(), ScoutCatUnit.createAttributes().build());
         evt.put(EntityRegistrar.MILITIA_UNIT.get(), MilitiaUnit.createAttributes().build());
+        evt.put(EntityRegistrar.TEMPORARY_MILITIA_UNIT.get(), MilitiaUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), ZombieVillagerUnit.createAttributes().build());
+        evt.put(EntityRegistrar.BAT_UNIT.get(), BatUnit.createAttributes().build());
         evt.put(EntityRegistrar.PILLAGER_UNIT.get(), PillagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.VINDICATOR_UNIT.get(), VindicatorUnit.createAttributes().build());
+        evt.put(EntityRegistrar.WINDCALLER_UNIT.get(), WindcallerUnit.createAttributes().build());
         evt.put(EntityRegistrar.IRON_GOLEM_UNIT.get(), IronGolemUnit.createAttributes().build());
         evt.put(EntityRegistrar.WITCH_UNIT.get(), WitchUnit.createAttributes().build());
         evt.put(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnit.createAttributes().build());
@@ -58,6 +64,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.RAVAGER_UNIT.get(), RavagerUnit.createAttributes().build());
         evt.put(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishUnit.createAttributes().build());
         evt.put(EntityRegistrar.GRUNT_UNIT.get(), GruntUnit.createAttributes().build());
+        evt.put(EntityRegistrar.STRIDER_UNIT.get(), StriderUnit.createAttributes().build());
         evt.put(EntityRegistrar.HEADHUNTER_UNIT.get(), HeadhunterUnit.createAttributes().build());
         evt.put(EntityRegistrar.MARAUDER_UNIT.get(), MarauderUnit.createAttributes().build());
         evt.put(EntityRegistrar.BRUTE_UNIT.get(), BruteUnit.createAttributes().build());
@@ -101,11 +108,13 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.CREEPER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.SPIDER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.POISON_SPIDER_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.WRAITH_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.VILLAGER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.MILITIA_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.ZOMBIE_VILLAGER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.VINDICATOR_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.PILLAGER_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.WINDCALLER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.IRON_GOLEM_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.WITCH_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.EVOKER_UNIT_SPAWN_EGG);
@@ -131,6 +140,10 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.PANDA_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.GRIZZLY_BEAR_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.POLAR_BEAR_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.SCOUT_DOG_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.SCOUT_CAT_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.STRIDER_UNIT_SPAWN_EGG);
+            event.accept(ItemRegistrar.BAT_UNIT_SPAWN_EGG);
         }
         if(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab())==CreativeModeTabs.TOOLS_AND_UTILITIES.location()){
             event.accept(ItemRegistrar.THROWABLE_TNT);

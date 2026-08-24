@@ -4,24 +4,30 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -92,6 +98,10 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -110,29 +120,39 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     // which player owns this unit? this format ensures its synched to client without having to use packets
     public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
-    public static final EntityDataAccessor<String> ownerDataAccessor =
-            SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
+    public static final EntityDataAccessor<String> ownerDataAccessor = SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
+
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.STRING);
+    
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor = SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.INT);
+
+    public boolean isSummoned() { return this.entityData.get(isSummonedAccessor); }
+    public void setIsSummoned(boolean index) { this.entityData.set(isSummonedAccessor, index); }
+    public static final EntityDataAccessor<Boolean> isSummonedAccessor = SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.BOOLEAN);
+
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(isSummonedAccessor, false);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage;}
-    public float getUnitMaxHealth() {return maxHealth;}
     @Nullable
     public ResourceCost getCost() {
-        return isSummonedByNecromancer() ?
+        return isSummoned() ?
                 ResourceCost.Unit(0,0, 0, 0,0) :
                 ResourceCosts.ZOMBIE;
     }
@@ -179,11 +199,6 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     }
 
     @Override
-    public double getUnitRangedArmorPercentage() {
-        return rangedDamageResist;
-    }
-
-    @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -193,6 +208,13 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
                 .add(Attributes.ARMOR, ZombieUnit.armorValue)
                 .add(Attributes.MAX_HEALTH, ZombieUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), rangedDamageResist)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, 0); // needs to be added for parent to work
     }
 
@@ -209,19 +231,29 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
                 if (getOwnerName().equals(BloodMoon.ENEMY_NAME) && !TimeServerEvents.isBloodMoonActive()) {
                     hurt(this.damageSources().starve(), 1.33f);
                 }
-                else if (tickCount > RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY && isSummonedByNecromancer()) {
+                else if (tickCount > RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY && isSummoned()) {
                     hurt(this.damageSources().starve(), 1.33f);
                 }
             }
         }
     }
-
-    public boolean isSummonedByNecromancer() {
-        return hasItemInSlot(EquipmentSlot.HEAD) &&
-                hasItemInSlot(EquipmentSlot.CHEST) &&
-                hasItemInSlot(EquipmentSlot.LEGS) &&
-                hasItemInSlot(EquipmentSlot.FEET) &&
-                hasItemInSlot(EquipmentSlot.MAINHAND);
+    
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+        if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override

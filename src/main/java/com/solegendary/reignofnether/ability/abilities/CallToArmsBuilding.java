@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.ability.abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -40,7 +40,7 @@ public class CallToArmsBuilding extends Ability {
                 false,
                 false
         );
-        this.defaultHotkey = Keybindings.keyV;
+        this.defaultHotkey = Keybindings.hotkey1;
     }
 
     @Override

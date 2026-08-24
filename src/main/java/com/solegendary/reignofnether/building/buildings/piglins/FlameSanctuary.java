@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
-import com.solegendary.reignofnether.building.buildings.placements.FlameSanctuaryPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -20,9 +19,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
@@ -45,16 +48,12 @@ public class FlameSanctuary extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.RED_NETHER_BRICK_STAIRS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
-        this.productions.add(ProductionItems.RESEARCH_BLAZE_FIREWALL, Keybindings.keyQ);
+        this.productions.add(ProductionItems.RESEARCH_BLAZE_FIREWALL, Keybindings.abilitySlot1);
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new FlameSanctuaryPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
-    }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
@@ -68,15 +67,26 @@ public class FlameSanctuary extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.HOGLIN_STABLES) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.flame_sanctuary"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.flame_sanctuary.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.flame_sanctuary.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.flame_sanctuary.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.flame_sanctuary.tooltip3"), Style.EMPTY)
             ),
             this
         );
+    }
+
+    @Override
+    public void onBlockBuilt(BlockPos bp, BlockState bs, BuildingPlacement placement) {
+        if (!placement.getLevel().isClientSide()) {
+            if (bs.hasBlockEntity()) {
+                BlockEntity be = placement.getLevel().getBlockEntity(bp);
+                if (be instanceof SpawnerBlockEntity sbe)
+                    sbe.getSpawner().setEntityId(EntityType.BLAZE, placement.getLevel(), placement.getLevel().random, bp);
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 
-1.20.1-1.3.0
+1.20.1-1.4.2
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -7,41 +7,51 @@
 
 
 
-New Heroes
+
+Hero Items
 ----------
+Emerald Resource
+    - Obtainable by killing neutrals, selling items or selling resources
+    - Used to buy resources now instead of direct exchange
+    - Used to buy items from shops
+    - Only shown if you have any
+    - Neutrals now give emerald bounties
+    - Update diplomacy menu resource exchange
+    - Update all other commands related to resources
+    - Resources class constructors should assume emeralds = 0
 
-[❌] Overflowing graveyards
+Unit Items
+    - Hero inventory GUI
+        - Click to use, can have charges and/or cooldown
+        - Drag to move slots, drop on ground, transfer to another hero or sell
+    - While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
+        - Should be visible to all players
+    - Should have tooltips shown even on the ground
+    - Requires right-click to pick up, will not auto-pickup
 
-[❌] Wraiths
-    - No knockback on melee attacks
-    - Enemies hit by wraiths enough times get feared (uncontrollable and issued a move-away command from the last wraith that hit it)
-    - 2 population
-    - built at dungeons
-    - needs a lab upgrade - possession?
+
+
+Balance
+-------
+
+
+Quality of Life
+---------------
+[✔] All existing militia in saved maps can no longer be converted back into villagers
+[✔] Villagers now convert into the `temporary_militia` entity which follow the normal rules for conversion
+
 
 
 Bugfixes
 --------
-[✔] Fixed a crash from putting a headhunter or evoker egg in a spawner
-[✔] Players can no longer build on barrier blocks
-[✔] Custom buildings no longer provide night range before being completed
-[✔] Fixed a possible crash from winning with a beacon
-[✔] You can no longer stack additional spawns at a unit spawner by pulling existing mobs away
+[✔] Workers can no longer repair a building while garrisoned inside it
+[✔] Fixed chunks disappearing if the worldborder was changed while fog of war was enabled
+    - Note this can still cause lag spikes on slower servers
+[✔] Militia town centre range is now calculated only horizontally (so it better matches the circle radius)
+[✔] Unit underlines are now visible behind blocks
 
-[✔] Fixed the royal guard's abilities not causing any knockback
-
-Quality of Life
----------------
-[✔] Improved slime and magma cube pathfinding
-    - They will still sometimes get stuck at corners, no longer go in straight lines into walls and trees anymore
-
-Balance
--------
-[✔] The Wildfire's Molten Bomb no longer does any damage on impact
-[✔] The Royal Guard's mace slam mana cost increased from 40 to 60, but cooldown decreased from 30s to 20s
-[✔] The Royal Guard's taunting cry mana cost increased from 60 to 75, but cooldown decreased from 50s to 40s
-[✔] The Royal Guard's battle rage mana gain reduced from (0.4, 0.6, 0.8) to (0.3, 0.4, 0.5)
-
+[❌] cat/dog at the start should also match the TC mode
 
 Languages
 ---------
+

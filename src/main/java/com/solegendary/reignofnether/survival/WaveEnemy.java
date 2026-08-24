@@ -148,8 +148,8 @@ public class WaveEnemy {
                             (bruteUnit.getTarget() instanceof RangedAttackerUnit rTarget && bruteUnit.distanceToSqr((Entity) rTarget) <= 36) ||
                             (bruteUnit.getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg && mabg.isAttacking());
 
-                    if ((!bruteUnit.isHoldingUpShield && shouldRaiseShield) ||
-                        ((bruteUnit.isHoldingUpShield && !shouldRaiseShield))) {
+                    if ((!bruteUnit.isHoldingUpShield() && shouldRaiseShield) ||
+                        ((bruteUnit.isHoldingUpShield() && !shouldRaiseShield))) {
                         shield.use(getEntity().level(), unit, (BlockPos) null);
                     }
                 }

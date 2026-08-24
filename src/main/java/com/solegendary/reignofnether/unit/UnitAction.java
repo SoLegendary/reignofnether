@@ -23,11 +23,15 @@ public enum UnitAction {
     RETURN_RESOURCES_TO_CLOSEST, // drops off resources to the nearest building that accepts resources
     DELETE, // instantly kills this unit
     DISCARD, // instantly removes this unit from the level without any death animation/event
+    ENABLE_AUTO_FIND_ENEMIES,
+    DISABLE_AUTO_FIND_ENEMIES,
 
     ATTACK_GROUND,
     // special abilities - these can also be assigned to cursor actions
     EXPLODE,
     CALL_LIGHTNING, // actually not from a unit, but we'll make an exception
+    SET_GRAVEYARD_RELEASE_ON,
+    SET_GRAVEYARD_RELEASE_OFF,
     TELEPORT,
     MOUNT,
     MOUNT_SPIDER,
@@ -55,8 +59,7 @@ public enum UnitAction {
     CAST_SUMMON_VEXES_AUTOCAST_ENABLE,
     CAST_SUMMON_VEXES_AUTOCAST_DISABLE,
     CAST_SONIC_BOOM,
-    ENABLE_SHIELD_RAISE,
-    DISABLE_SHIELD_RAISE,
+    TOGGLE_SHIELD_RAISE,
     SHOOT_FIREWALL,
     CONNECT_PORTAL,
     DISCONNECT_PORTAL,
@@ -68,6 +71,10 @@ public enum UnitAction {
     SPIN_WEBS,
     SPIN_WEBS_AUTOCAST_ENABLE,
     SPIN_WEBS_AUTOCAST_DISABLE,
+    FEAR,
+    FEAR_AUTOCAST_ENABLE,
+    FEAR_AUTOCAST_DISABLE,
+    POSSESS,
     BLOOD_LUST,
     CALL_TO_ARMS_BUILDING,
     CALL_TO_ARMS_UNIT,
@@ -76,8 +83,7 @@ public enum UnitAction {
     CONSUME_SLIME,
     CONSUME_SLIME_AUTOCAST_ENABLE,
     CONSUME_SLIME_AUTOCAST_DISABLE,
-    ENABLE_SPIDER_CLIMBING,
-    DISABLE_SPIDER_CLIMBING,
+    TOGGLE_SPIDER_CLIMBING,
     MILITIA_USE_SWORD,
     MILITIA_USE_BOW,
 
@@ -115,12 +121,28 @@ public enum UnitAction {
     PROTECTIVE_ENCHANTMENT_AUTOCAST_DISABLE,
     MARCH_OF_PROGRESS_TOGGLE,
     MARCH_OF_PROGRESS_SET,
+    TOGGLE_FLYING,
 
     ENCHANT_MULTISHOT,
     ENCHANT_MAIMING,
     ENCHANT_SHARPNESS,
     ENCHANT_VIGOR,
+    ENCHANT_GUST,
     ENCHANT_QUICKCHARGE,
+
+    TRADE_FOOD_FOR_WOOD,
+    TRADE_FOOD_FOR_ORE,
+    TRADE_WOOD_FOR_FOOD,
+    TRADE_WOOD_FOR_ORE,
+    TRADE_ORE_FOR_FOOD,
+    TRADE_ORE_FOR_WOOD,
+
+    SELL_FOOD,
+    SELL_WOOD,
+    SELL_ORE,
+    BUY_FOOD,
+    BUY_WOOD,
+    BUY_ORE,
 
     EQUIP_LEATHER_ARMOR,
     EQUIP_CHAINMAIL_ARMOR,

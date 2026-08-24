@@ -13,15 +13,13 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
-import com.solegendary.reignofnether.unit.Checkpoint;
-import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.unit.UnitAnimationAction;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
@@ -29,14 +27,20 @@ import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.RoyalGuardAnimations;
 import com.solegendary.reignofnether.unit.modelling.renderers.RoyalGuardRenderer;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
@@ -71,13 +75,17 @@ import java.util.Set;
 
 public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated {
     public final Abilities ABILITIES = new Abilities(
-        List.of(
-            new Pair<>(new MaceSlam(), Keybindings.keyQ),
-            new Pair<>(new TauntingCry(), Keybindings.keyW),
-            new Pair<>(new BattleRagePassive(), Keybindings.keyE),
-            new Pair<>(new Avatar(), Keybindings.keyR)
-        )
+            List.of(
+                    new Pair<>(new MaceSlam(), Keybindings.abilitySlot1),
+                    new Pair<>(new TauntingCry(), Keybindings.abilitySlot2),
+                    new Pair<>(new BattleRagePassive(), Keybindings.abilitySlot3),
+                    new Pair<>(new Avatar(), Keybindings.abilitySlot4)
+            )
     );
+
+    boolean needsStatSync = false;
+    @Override public boolean needsStatSync() { return needsStatSync; }
+    @Override public void setNeedsStatSync(boolean value) { needsStatSync = value; }
 
     @Override
     public Object2ObjectArrayMap<HeroAbility, Integer> getHeroAbilityRanks() {
@@ -128,6 +136,10 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private GenericUntargetedSpellGoal castTauntingCryGoal;
     public GenericUntargetedSpellGoal getCastTauntingCryGoal() { return castTauntingCryGoal; }
     private GenericTargetedSpellGoal castMaceSlamGoal;
@@ -158,23 +170,46 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.STRING);
+
+    public int getAvatarTicksLeft() { return this.entityData.get(avatarTicksLeftAccessor); }
+    public void setAvatarTicksLeft(int value) { this.entityData.set(avatarTicksLeftAccessor, value); }
+    public static final EntityDataAccessor<Integer> avatarTicksLeftAccessor =
+            SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.INT);
+
+    public boolean getAvatarScalingStarted() { return this.entityData.get(avatarScalingStartedAccessor); }
+    public void setAvatarScalingStarted(boolean value) { this.entityData.set(avatarScalingStartedAccessor, value); }
+    public static final EntityDataAccessor<Boolean> avatarScalingStartedAccessor =
+            SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.BOOLEAN);
+
+    public int getAvatarScaleTicks() { return this.entityData.get(avatarScaleTicksAccessor); }
+    public void setAvatarScaleTicks(int value) { this.entityData.set(avatarScaleTicksAccessor, value); }
+    public static final EntityDataAccessor<Integer> avatarScaleTicksAccessor =
+            SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.INT);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
+        this.entityData.define(avatarTicksLeftAccessor, 0);
+        this.entityData.define(avatarScalingStartedAccessor, false);
+        this.entityData.define(avatarScaleTicksAccessor, 0);
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage + (attackBonusPerLevel * getHeroLevel());}
-    public float getUnitMaxHealth() {return maxHealth + (maxHealthBonusPerLevel * getHeroLevel());}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.ROYAL_GUARD;}
@@ -197,12 +232,11 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 100;
+    final static private float baseMaxMana = 100;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    private float manaRegenPerSecond = 0.5f;
-    private float manaBonusPerLevel = 6;
-    @Override public float getBaseMaxMana() { return baseMaxMana; }
+    final static private float manaRegenPerSecond = 0.5f;
+    final static private float manaBonusPerLevel = 6;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
         this.maxMana = amount;
@@ -215,8 +249,6 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         if (!level().isClientSide())
             HeroClientboundPacket.setMana(getId(), this.mana);
     }
-    @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
-    @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
     final static public float attackDamage = 6.0f;
     final static public float attackBonusPerLevel = 0.6f;
@@ -227,14 +259,10 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     final static public float movementSpeed = 0.28f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
+    final static public double magicDamageResist = 0.3d;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     public int maxResources = 100;
-
-    @Override public float getHealthBonusPerLevel() { return maxHealthBonusPerLevel; };
-    @Override public float getAttackBonusPerLevel() { return attackBonusPerLevel; };
-    @Override public float getBaseHealth() { return maxHealth; };
-    @Override public float getBaseAttack() { return attackDamage; };
 
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
@@ -256,9 +284,6 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     public int tauntingCryTicksLeft = 0;
 
-    public boolean avatarScalingStarted = false;
-    public int avatarTicksLeft = 0;
-    public int avatarScaleTicks = 0; // at max, will be full sized
     public final int AVATAR_SCALE_TICKS_MAX = 40;
     private final float AVATAR_MAX_BONUS_SCALE = 0.6f;
 
@@ -321,8 +346,8 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
-            pDamage *= 0.7F;
+        if (MiscUtil.isMagicDamage(pSource))
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
 
@@ -330,7 +355,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public void setStatsForLevel(boolean heal) {
         AttributeInstance aiMaxHealth = this.getAttribute(Attributes.MAX_HEALTH);
         float newHealth = getBaseHealth() + ((getHeroLevel() - 1) * getHealthBonusPerLevel());
-        if (avatarTicksLeft > 0)
+        if (getAvatarTicksLeft() > 0)
             newHealth += Avatar.BONUS_HEALTH;
         if (aiMaxHealth != null)
             aiMaxHealth.setBaseValue(newHealth);
@@ -347,7 +372,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     private void updateKnockbackResistance() {
         AttributeInstance ai = getAttribute(Attributes.KNOCKBACK_RESISTANCE);
         if (ai != null) {
-            if (avatarTicksLeft > 0 || tauntingCryTicksLeft > 0)
+            if (getAvatarTicksLeft() > 0 || tauntingCryTicksLeft > 0)
                 ai.setBaseValue(KNOCKBACK_RESISTANCE);
             else
                 ai.setBaseValue(0.5f);
@@ -362,9 +387,9 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         boolean result = super.hurt(pSource, pAmount);
         BattleRagePassive battleRage = getBattleRage();
         if (result && battleRage.getRank(this) > 0 &&
-            pSource.getEntity() instanceof Unit unit &&
-            !List.of(Relationship.OWNED, Relationship.FRIENDLY)
-                    .contains(UnitServerEvents.getUnitToEntityRelationship(unit, this))) {
+                pSource.getEntity() instanceof Unit unit &&
+                !List.of(Relationship.OWNED, Relationship.FRIENDLY)
+                        .contains(UnitServerEvents.getUnitToEntityRelationship(unit, this))) {
             setMana(mana + pAmount * battleRage.manaPerDmgTaken);
         }
         return result;
@@ -373,7 +398,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     @Override
     public boolean doHurtTarget(Entity pEntity) {
         boolean result = super.doHurtTarget(pEntity);
-        if (result && avatarTicksLeft > 0) {
+        if (result && getAvatarTicksLeft() > 0) {
             level().explode(null, null, null, pEntity.getX(), pEntity.getEyeY(), pEntity.getZ(),
                     1.0f, false, Level.ExplosionInteraction.NONE);
             AttributeInstance ai = getAttribute(Attributes.ATTACK_DAMAGE);
@@ -409,7 +434,20 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 .add(Attributes.ARMOR, RoyalGuardUnit.armorValue)
                 .add(Attributes.MAX_HEALTH, RoyalGuardUnit.maxHealth)
                 .add(Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_RESISTANCE)
-                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange());
+                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
+                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), RoyalGuardUnit.maxHealth)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
+                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
+                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
+                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
+                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
+                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
     }
 
     public void tick() {
@@ -447,6 +485,24 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         }
     }
 
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
+    }
+
     private float rotlerp(float pAngle, float pTargetAngle, float pMaxIncrease) {
         float f = Mth.wrapDegrees(pTargetAngle - pAngle);
         if (f > pMaxIncrease) {
@@ -468,6 +524,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         this.readUnitSaveData(pCompound);
+        this.setNeedsStatSync(true);
     }
 
     public MaceSlam getMaceSlam() {
@@ -558,7 +615,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         this.castMaceSlamGoal.stop();
         this.castTauntingCryGoal.stop();
         this.castAvatarGoal.stop();
-        if (avatarTicksLeft <= 0 && avatarScalingStarted) {
+        if (getAvatarTicksLeft() <= 0 && getAvatarScalingStarted()) {
             disableAvatar();
             updateKnockbackResistance();
         }
@@ -577,7 +634,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                     for (int z = (int) (blockPos.getZ() - MaceSlam.RADIUS); z <= blockPos.getZ() + MaceSlam.RADIUS; z++) {
                         BlockPos bp = new BlockPos(x,y,z);
                         if (MiscUtil.isSolidBlocking(level(), bp) && !MiscUtil.isSolidBlocking(level(), bp.above()) &&
-                            bp.distToCenterSqr(blockPos.getCenter()) <= MaceSlam.RADIUS * MaceSlam.RADIUS) {
+                                bp.distToCenterSqr(blockPos.getCenter()) <= MaceSlam.RADIUS * MaceSlam.RADIUS) {
                             level().levelEvent(LevelEvent.PARTICLES_DESTROY_BLOCK, bp, Block.getId(level().getBlockState(bp)));
                         }
                     }
@@ -595,7 +652,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 }
             }
             for (BuildingPlacement building : buildings) {
-                building.destroyRandomBlocks((int) (maceSlam.damage / 2));
+                building.destroyRandomBlocks(maceSlam.damage / 2);
             }
 
             for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(blockPos.above()), MaceSlam.RADIUS, LivingEntity.class, level())) {
@@ -625,7 +682,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         if (tauntingCry != null && tauntingCry.getRank(this) > 0) {
             for (Mob e : MiscUtil.getEntitiesWithinRange(position(), TauntingCry.RANGE, Mob.class, level())) {
                 if (!(e instanceof AttackerUnit attackerUnit) ||
-                    List.of(Relationship.OWNED, Relationship.FRIENDLY).contains(UnitServerEvents.getUnitToEntityRelationship((Unit) attackerUnit, this))) {
+                        List.of(Relationship.OWNED, Relationship.FRIENDLY).contains(UnitServerEvents.getUnitToEntityRelationship((Unit) attackerUnit, this))) {
                     continue;
                 }
                 if (((Unit) e).uninterruptable()) {
@@ -634,6 +691,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 Unit.fullResetBehaviours((Unit) attackerUnit);
                 attackerUnit.setUnitAttackTargetForced(this);
                 ((LivingEntity) attackerUnit).addEffect(new MobEffectInstance(MobEffectRegistrar.UNCONTROLLABLE.get(), tauntingCry.duration));
+                ((LivingEntity) attackerUnit).addEffect(new MobEffectInstance(MobEffectRegistrar.ANGRY.get(), tauntingCry.duration));
             }
             this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, tauntingCry.duration, 2));
             this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, tauntingCry.duration, 2));
@@ -664,42 +722,43 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     }
 
     public float getScale() {
-        return 1 + (AVATAR_MAX_BONUS_SCALE * ((float) avatarScaleTicks / AVATAR_SCALE_TICKS_MAX));
+        return 1 + (AVATAR_MAX_BONUS_SCALE * ((float) getAvatarScaleTicks() / AVATAR_SCALE_TICKS_MAX));
     }
 
     private void tickAvatar() {
-        if (avatarTicksLeft > 0) {
-            avatarTicksLeft -= 1;
+        if (getAvatarTicksLeft() > 0) {
+            setAvatarTicksLeft(getAvatarTicksLeft() - 1);
             removeEffect(MobEffects.MOVEMENT_SLOWDOWN);
-            if (avatarTicksLeft <= 0) {
+            if (getAvatarTicksLeft() <= 0) {
                 disableAvatar();
                 setStatsForLevel();
             }
         }
-        if (avatarScalingStarted && avatarScaleTicks < AVATAR_SCALE_TICKS_MAX) {
-            avatarScaleTicks += 1;
-            if (avatarScaleTicks == AVATAR_SCALE_TICKS_MAX * 0.75f) {
+        if (getAvatarScalingStarted() && getAvatarScaleTicks() < AVATAR_SCALE_TICKS_MAX) {
+            setAvatarScaleTicks(getAvatarScaleTicks() + 1);
+            if (getAvatarScaleTicks() == AVATAR_SCALE_TICKS_MAX * 0.75f) {
                 animateScaleReducing = true;
             }
             this.reapplyPosition();
             this.refreshDimensions();
-        } else if (!avatarScalingStarted && avatarScaleTicks > 0) {
-            avatarScaleTicks -= 1;
+        } else if (!getAvatarScalingStarted() && getAvatarScaleTicks() > 0) {
+            setAvatarScaleTicks(getAvatarScaleTicks() - 1);
             this.reapplyPosition();
             this.refreshDimensions();
         }
     }
 
     public void disableAvatar() {
-        avatarScalingStarted = false;
+        setAvatarScalingStarted(false);
         if (!level().isClientSide()) {
             HeroClientboundPacket.deactivateAbilityClientside(getId(), 3);
         }
     }
 
     public void enableAvatar() {
-        avatarTicksLeft = Avatar.DURATION;
-        addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, avatarTicksLeft, 0));
+        setAvatarTicksLeft(Avatar.DURATION);
+        addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, getAvatarTicksLeft(), 0));
+        addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, getAvatarTicksLeft(), 1));
         updateKnockbackResistance();
         setStatsForLevel();
         heal(Avatar.BONUS_HEALTH);
@@ -710,7 +769,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     @Override
     public void makeStuckInBlock(BlockState pState, Vec3 pMotionMultiplier) {
-        if (avatarTicksLeft <= 0)
+        if (getAvatarTicksLeft() <= 0)
             super.makeStuckInBlock(pState, pMotionMultiplier);
     }
 
@@ -718,7 +777,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public void activateAbilityClientside(int abilityIndex) {
         if (level().isClientSide()) {
             if (abilityIndex == 3) {
-                avatarScalingStarted = true;
+                setAvatarScalingStarted(true);
             } else if (abilityIndex == 4) {
                 enableAvatar();
             }
@@ -729,14 +788,14 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public void deactivateAbilityClientside(int abilityIndex) {
         if (level().isClientSide()) {
             if (abilityIndex == 3) {
-                avatarScalingStarted = false;
+                setAvatarScalingStarted(false);
             }
         }
     }
 
     @Override
     public boolean isPushable() {
-        return avatarTicksLeft <= 0;
+        return getAvatarTicksLeft() <= 0;
     }
 
     @Override

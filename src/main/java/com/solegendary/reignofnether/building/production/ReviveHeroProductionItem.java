@@ -1,12 +1,10 @@
 package com.solegendary.reignofnether.building.production;
 
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -63,7 +61,8 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                         HeroAbility ulti = newHero.getHeroAbilities().get(3);
                         ulti.setRank(newHero, oldHero.ability4Rank);
                         HeroClientboundPacket.setAbilityRank(entity.getId(), oldHero.ability4Rank, 3);
-                        ulti.setCooldown(ulti.cooldownMax / 2, newHero);
+                        if (oldHero.ability4Rank >= 1)
+                            ulti.setCooldown(ulti.cooldownMax / 2, newHero);
                     }
                     for (HeroAbility abl : newHero.getHeroAbilities())
                         abl.updateStatsForRank(newHero);

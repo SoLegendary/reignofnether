@@ -7,19 +7,20 @@ import com.mojang.math.Axis;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -46,12 +47,14 @@ public class PortraitRendererBuilding {
     public RectZone render(GuiGraphics guiGraphics, int x, int y, BuildingPlacement building) {
         Relationship rs = BuildingClientEvents.getPlayerToBuildingRelationship(building);
 
-        String name;
+        String name = "";
         if (building.getBuilding() instanceof CustomBuilding customBuilding) {
             name = customBuilding.name;
         } else {
             ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(building.getBuilding());
-            name = LanguageUtil.getTranslation("buildings." + (building.getFaction() != null && building.getFaction() != Faction.NONE ? building.getFaction().name().toLowerCase() : "neutral") + "." + key.getNamespace() + "." + key.getPath());
+            if (key != null) {
+                name = LanguageUtil.getTranslation("buildings." + key.getNamespace() + "." + key.getPath());
+            }
         }
 
         if (building.getUpgradeLevel() > 0)
@@ -63,8 +66,8 @@ public class PortraitRendererBuilding {
         if (rs != Relationship.OWNED && !building.ownerName.isBlank())
             name += " (" + building.ownerName + ")";
 
-        if (building instanceof SculkCatalystPlacement sc && building.isBuilt)
-            name += " (" + sc.getNightRange() + "/" + SculkCatalyst.nightRangeMax + " range)";
+        if (building instanceof SculkCatalystPlacement sc && building.getBuilding().hasActiveAddon(NightSourceAddon.class) && building.isBuilt)
+            name += " (" + I18n.get("hud.buildings.reignofnether.sculk_catalyst.range", building.getBuilding().getActiveAddon(NightSourceAddon.class).getNightRange(building), SculkCatalyst.MAX_NIGHT_RANGE) + ")";
 
         // draw name
         guiGraphics.drawString(

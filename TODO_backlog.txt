@@ -2,67 +2,73 @@
 Features
 --------
 
-[❌] /gamerule scenarioMap gamerule for sandbox, (default false), when active:
-    - Exiting sandbox does not change building or unit allegiances
-    - Exiting sandbox marks owned buildings to be assigned to the next player that logs in
-    - The next player that logs in starts in Scenario Mode instead of letting them choose the gamemode
 
+Custom building production
+--------------------------
+[❌] If a custom building has a spawn egg inside a chest, have it be able to produce that unit
+[❌] Same for hero items at a shop when that's finished
+
+
+Fog of war
+----------
+[❌] Update night circle vision separate from buildings
+    - If entered clientside, verify from server whether it's really that size or even still there
+    - If entered serverside, sent to client the new range
+
+[❌] Reveal owners of explosive entities to nearby players in fog
+[❌] Allow spectators to see fog, but with vision of all players
+[❌] Add commands for revealing in fog, temporarily or permanently
+[❌] Add commands for force-moving camera
+
+
+[❌] Camera hotkeys (see starcraft example)
+
+[❌] Custom building buttons
+    - Customisable icon, name, tooltip, range, cooldown, activation type (on-click, entity-target, ground target)
+    - Can be used for an ability, production, etc.
+    - On new 3rd screen
+
+[❌] Make custom arrow entity to control logic better
+    - Half pierce and multishot damage
+
+[❌] Save control groups to world per player
+
+Scenario roles:
+    [❌] Use the new start menu for scenarios so we can have a readied start
+        - Need to make start blocks also have a scenario role index
+
+    [❌] Use start menu colours for each role
+    [❌] When role is cycled, move camera to the first found building (or unit if no building)
+    [❌] Show different colours for each different assigned role
+    [❌] Fire events for addons to use when a scenario starts
+
+[❌] Invisible block that units avoid
 
 [❌] Let villagers repair iron golems with ore for 1hp per ore, masons repair faster
 
-[❌] Walls
-    - Connect to garrisonable towers
-    - 3 layers that are broken starting from where the unit attacking it is positioned
-    - Able to be walked along as battlements
-    - Variable height across terrain
-
-[❌] Nydus worm-style ability for transport portals
-    - Because without Fog of war, transport portals are too weak
-    - Includes minimap and sound warning
-
-
 [❌] Config to allow changing resource block values, including modded blocks
 
-[❌] AoE2-style markets
-    - Start as neutral building
-    - Trade with trader units by passing between markets
-        - Striders for piglins, zombie horses for monsters, mules for villagers
+[❌] Horses for villagers and change captain flags to be a resistance aura?
 
 
 Bugfixes
 --------
-[❌] [Code issue] ResearchHoglinCavalry doesn't overwrite the getItemName method of the base ProductionItem class,
-        resulting in a null name when calling the method in the prod queue
-    - Same with FireResistance, SoulFireball, LabLightningRod, WaterPotions, HealingPotions
-
-[❌] Fix bug with not being able to choose superflat
-
-[❌] Avatar state is reset when unloaded
-
+[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
 [❌] Players logging in messes up the observer menu (and freezes resources?)
-[❌] bridge scroll bug (up and down vs left/right?)
-
-
+[❌] Fix day/night time when /gamerule doDaylightCycle false
+[❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
+[❌] Allow fog to be kept on in between singleplayer relogs
 
 Quality of Life Features
 ------------------------
-
 [❌] Handicap command
     - Makes all resource costs some % higher than normal
-
-[❌] More serverside logging for major player actions
-    - Building creation
-    - Start/complete research
-    - Created unit
-    - Used ability
-
-[❌] Command block API for UnitActionItem commands
 
 [❌] Added /gamerule for bridges over void
 
 [❌] restore ores on /rts-reset
     - Have to track each ore block when it is mined or converted into nether terrain
 
-
+[❌] Waypoint looping (by shift clicking back onto a previous waypoint it will automatically cycle the list once it reaches the end)
 
 

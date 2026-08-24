@@ -42,10 +42,12 @@ public class AltarOfDarkness extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.DARK_PRISMARINE);
         this.startingBlockTypes.add(Blocks.TINTED_GLASS);
 
-        this.productions.add(ProductionItems.NECROMANCER, Keybindings.keyQ);
-        this.productions.add(ProductionItems.NECROMANCER_REVIVE, Keybindings.keyQ);
-        this.productions.add(ProductionItems.WRETCHED_WRAITH, Keybindings.keyW);
-        this.productions.add(ProductionItems.WRETCHED_WRAITH_REVIVE, Keybindings.keyW);
+        this.productions.add(ProductionItems.NECROMANCER, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.NECROMANCER_REVIVE, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.WRETCHED_WRAITH, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.WRETCHED_WRAITH_REVIVE, Keybindings.abilitySlot2);
+
+        this.maxHealth = 240d;
     }
 
     @Override
@@ -69,11 +71,11 @@ public class AltarOfDarkness extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness"), true),
+                        fcs(I18n.get("buildings.reignofnether.altar_of_darkness"), true),
                         ResourceCosts.getFormattedCost(cost),
                         fcs(""),
-                        fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness.tooltip1")),
-                        fcs(I18n.get("buildings.monsters.reignofnether.altar_of_darkness.tooltip2"))
+                        fcs(I18n.get("buildings.reignofnether.altar_of_darkness.tooltip1")),
+                        fcs(I18n.get("buildings.reignofnether.altar_of_darkness.tooltip2"))
                 ),
                 this
         );

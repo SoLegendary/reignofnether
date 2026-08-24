@@ -1,19 +1,16 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.unit.MyMobEffect;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
-import org.stringtemplate.v4.ST;
-
-import java.util.List;
 
 
 public class MobEffectRegistrar {
@@ -34,8 +31,17 @@ public class MobEffectRegistrar {
     // usually used in conjunction with a force-attack command for a taunt effect, or a move command for a fear effect
     public static final RegistryObject<MobEffect> UNCONTROLLABLE = MOB_EFFECTS.register("uncontrollable", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0xFF0000));
 
+    public static final RegistryObject<MobEffect> ANGRY = MOB_EFFECTS.register("angry", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0xFF0000));
+
+    public static final RegistryObject<MobEffect> FEARFUL = MOB_EFFECTS.register("scared", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x0000FF));
+
+    public static final RegistryObject<MobEffect> PARTIALLY_POSSESSED = MOB_EFFECTS.register("partially_possessed", () -> new MyMobEffect(MobEffectCategory.HARMFUL, 0x1A001A)
+            .addAttributeModifier(Attributes.MOVEMENT_SPEED, "34787f7c-2718-415f-b15d-9c22ab6d7e84", -0.20, AttributeModifier.Operation.MULTIPLY_BASE));
+
     // Causes a mob to turn into a zombie villager, drowned, zombie piglin or zoglin upon death depending on the unit type
     public static final RegistryObject<MobEffect> ZOMBIE_INFECTED = MOB_EFFECTS.register("zombie_infected", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x000000));
+
+    public static final RegistryObject<MobEffect> SLIME_INFECTED = MOB_EFFECTS.register("slime_infected", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 0x000000));
 
     public static final RegistryObject<MobEffect> MINOR_MOVEMENT_SPEED = MOB_EFFECTS.register("minor_speed", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 3402751)
             .addAttributeModifier(Attributes.MOVEMENT_SPEED, "e6b9720b-131d-4c17-b029-ab8161e8da97", 0.05, AttributeModifier.Operation.MULTIPLY_BASE));
@@ -80,6 +86,8 @@ public class MobEffectRegistrar {
     public static final RegistryObject<MobEffect> DISARM = MOB_EFFECTS.register("disarm", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 3402751)
             .addAttributeModifier(Attributes.ATTACK_SPEED, "a5faf34d-0155-49cf-9c6e-73f16ad41a42", -1.0f, AttributeModifier.Operation.MULTIPLY_TOTAL));
 
+    // for striders to maintain visuals slightly off terrain
+    public static final RegistryObject<MobEffect> WARM = MOB_EFFECTS.register("warm", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
 
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||

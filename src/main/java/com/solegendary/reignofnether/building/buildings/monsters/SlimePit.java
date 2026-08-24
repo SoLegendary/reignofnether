@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -40,8 +41,9 @@ public class SlimePit extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.COBBLED_DEEPSLATE);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
-        this.productions.add(ProductionItems.SLIME, Keybindings.keyQ);
+        this.productions.add(ProductionItems.SLIME, Keybindings.abilitySlot1);
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
@@ -58,18 +60,19 @@ public class SlimePit extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.slime_pit"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.slime_pit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.slime_pit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.slime_pit.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.slime_pit.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.slime_pit.tooltip3"), Style.EMPTY)
             ),
             this
         );
     }
 
-    public BlockPos getDefaultOutdoorSpawnPoint(BlockPos minCorner) {
+    @Override
+    public BlockPos getDefaultOutdoorSpawnPoint(BlockPos minCorner, ProductionPlacement pp) {
         return minCorner.offset((int) (-spawnRadiusOffset + 4), 0, (int) (-spawnRadiusOffset + 9));
     }
 }

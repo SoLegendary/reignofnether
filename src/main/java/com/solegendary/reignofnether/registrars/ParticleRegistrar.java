@@ -21,6 +21,10 @@ public class ParticleRegistrar {
             PARTICLES.register("big_soul_flame",
                     () -> new SimpleParticleType(false));
 
+    public static final RegistryObject<SimpleParticleType> LEVEL_UP =
+            PARTICLES.register("level_up",
+                    () -> new SimpleParticleType(false));
+
     public static void init(FMLJavaModLoadingContext context) {
         PARTICLES.register(context.getModEventBus());
     }

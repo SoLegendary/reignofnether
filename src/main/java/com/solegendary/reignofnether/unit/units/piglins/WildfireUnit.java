@@ -16,11 +16,9 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.registrars.BlockRegistrar;
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
-import com.solegendary.reignofnether.registrars.ParticleRegistrar;
-import com.solegendary.reignofnether.registrars.SoundRegistrar;
+import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -34,14 +32,15 @@ import com.solegendary.reignofnether.util.MyMath;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -62,7 +61,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import oshi.util.tuples.Pair;
 
@@ -77,12 +75,16 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
             List.of(
-                    new Pair<>(new MoltenBomb(), Keybindings.keyQ),
-                    new Pair<>(new ScorchingGaze(), Keybindings.keyW),
-                    new Pair<>(new IntenseHeatPassive(), Keybindings.keyE),
-                    new Pair<>(new SoulsAflame(), Keybindings.keyR)
+                    new Pair<>(new MoltenBomb(), Keybindings.abilitySlot1),
+                    new Pair<>(new ScorchingGaze(), Keybindings.abilitySlot2),
+                    new Pair<>(new IntenseHeatPassive(), Keybindings.abilitySlot3),
+                    new Pair<>(new SoulsAflame(), Keybindings.abilitySlot4)
             )
     );
+
+    boolean needsStatSync = false;
+    @Override public boolean needsStatSync() { return needsStatSync; }
+    @Override public void setNeedsStatSync(boolean value) { needsStatSync = value; }
 
     @Override
     public Object2ObjectArrayMap<HeroAbility, Integer> getHeroAbilityRanks() {
@@ -133,6 +135,10 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     public int getMaxResources() {return maxResources;}
     public MountGoal getMountGoal() {return mountGoal;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -168,23 +174,28 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(WildfireUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(WildfireUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(WildfireUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage + (attackBonusPerLevel * getHeroLevel());}
-    public float getUnitMaxHealth() {return maxHealth + (maxHealthBonusPerLevel * getHeroLevel());}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.WILDFIRE;}
@@ -207,12 +218,11 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 120;
+    final static private float baseMaxMana = 120;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    private float manaRegenPerSecond = 0.6f;
-    private float manaBonusPerLevel = 8;
-    @Override public float getBaseMaxMana() { return baseMaxMana; }
+    final static private float manaRegenPerSecond = 0.6f;
+    final static private float manaBonusPerLevel = 8;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
         this.maxMana = amount;
@@ -225,26 +235,20 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         if (!level().isClientSide())
             HeroClientboundPacket.setMana(getId(), this.mana);
     }
-    @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
-    @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
 
     final static public float attackDamage = 2.0f;
     final static public float attackBonusPerLevel = 0.25f;
-    final static public float attacksPerSecond = 0.75f;
+    final static public float attacksPerSecond = 0.6f;
     final static public float maxHealth = 120.0f;
     final static public float maxHealthBonusPerLevel = 12.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     final static public float attackRange = 12.0F; // only used by ranged units or melee building attackers
     final static public float aggroRange = 12;
+    final static public double magicDamageResist = 0.3d;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     public int maxResources = 100;
-
-    @Override public float getHealthBonusPerLevel() { return maxHealthBonusPerLevel; };
-    @Override public float getAttackBonusPerLevel() { return attackBonusPerLevel; };
-    @Override public float getBaseHealth() { return maxHealth; };
-    @Override public float getBaseAttack() { return attackDamage; };
 
     public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
     public int getFogRevealDuration() { return fogRevealDuration; }
@@ -332,16 +336,22 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     public WildfireUnit(EntityType<? extends Blaze> entityType, Level level) {
         super(entityType, level);
-
         updateAbilityButtons();
         setStatsForLevel();
     }
 
     @Override
+    public boolean hurt(DamageSource pSource, float pAmount) {
+        if (pSource.is(DamageTypes.DROWN) && tickCount % 20 != 0)
+            return false;
+        return super.hurt(pSource, pAmount);
+    }
+
+    @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
-            pDamage *= 0.7F;
+        if (MiscUtil.isMagicDamage(pSource))
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
 
@@ -363,7 +373,20 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                 .add(Attributes.MAX_HEALTH, WildfireUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, WildfireUnit.armorValue)
-                .add(Attributes.ATTACK_KNOCKBACK, 0);
+                .add(Attributes.ATTACK_KNOCKBACK, 0)
+                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), WildfireUnit.maxHealth)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
+                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
+                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
+                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
+                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
+                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
     }
 
     public void tick() {
@@ -418,6 +441,24 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         }
     }
 
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
+    }
+
     private Set<BlockPos> highlightBps = new HashSet<>();
     private BlockPos lastOnPos = new BlockPos(0,0,0);
     private BlockPos lastCursorPos = new BlockPos(0,0,0);
@@ -453,6 +494,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         this.readUnitSaveData(pCompound);
+        this.setNeedsStatSync(true);
     }
 
     @Override protected SoundEvent getAmbientSound() {
@@ -620,6 +662,8 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
             targetEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks + 20, 0, true, true));
         }
         targetEntity.setSecondsOnFire(getScorchingGaze().durationSeconds);
+        if (targetEntity instanceof Unit unit)
+            unit.aggroToEnemyIfIdle(this);
     }
 
     public void soulsAflame() {
@@ -653,7 +697,6 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                 for (int z = -range + z0; z < range + z0; z++) {
                     BlockPos pos = new BlockPos(x, y, z);
                     if (blockPosition().distToCenterSqr(pos.getCenter()) < range * range) {
-                        System.out.println(z);
                         BlockState bs = level().getBlockState(pos);
                         if (bs.getBlock() == Blocks.FIRE) {
                             level().setBlockAndUpdate(pos, BlockRegistrar.UNEXTINGUISHABLE_SOUL_FIRE.get().defaultBlockState());
@@ -689,8 +732,8 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return true;
+    public int getDamageTooltipColour() {
+        return TooltipColours.GREEN;
     }
 
     @Override

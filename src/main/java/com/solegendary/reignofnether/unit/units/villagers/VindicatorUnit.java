@@ -4,22 +4,29 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.enchantments.MaimingEnchantment;
+import com.solegendary.reignofnether.hud.TooltipColours;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.monsters.DrownedUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -91,6 +98,10 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -112,23 +123,29 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(VindicatorUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(VindicatorUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(VindicatorUnit.class, EntityDataSerializers.STRING);
+    
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage + getSharpnessLevel();}
-    public float getUnitMaxHealth() {return maxHealth;}
+    public float getUnitAttackDamage() {return AttackerUnit.super.getUnitAttackDamage() + getSharpnessLevel();}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.VINDICATOR;}
@@ -165,11 +182,6 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     @Override
-    public double getUnitRangedArmorPercentage() {
-        return rangedDamageResist;
-    }
-
-    @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
     // all for animation syncing...
@@ -184,10 +196,10 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         }
     }
     @Override
-    public void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
-        AttackerUnit.super.setAttackBuildingTarget(preselectedBlockPos);
+    public void setAttackBuildingTarget(BlockPos preselectedBlockPos, boolean forced) {
+        AttackerUnit.super.setAttackBuildingTarget(preselectedBlockPos, forced);
         if (!this.level().isClientSide())
-             UnitAnimationClientboundPacket.sendBlockPosPacket(UnitAnimationAction.NON_KEYFRAME_START, this, preselectedBlockPos);
+            UnitAnimationClientboundPacket.sendBlockPosPacket(UnitAnimationAction.NON_KEYFRAME_START, this, preselectedBlockPos);
     }
     @Override
     public void resetBehaviours() {
@@ -201,7 +213,14 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
                 .add(Attributes.ATTACK_DAMAGE, VindicatorUnit.attackDamage)
                 .add(Attributes.ARMOR, VindicatorUnit.armorValue)
                 .add(Attributes.MAX_HEALTH, VindicatorUnit.maxHealth)
-                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange());
+                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), rangedDamageResist)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     public void tick() {
@@ -210,6 +229,24 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         Unit.tick(this);
         AttackerUnit.tick(this);
         PromoteIllager.checkAndApplyBuff(this);
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override
@@ -311,7 +348,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return getSharpnessLevel() > 0;
+    public int getDamageTooltipColour() {
+        return getSharpnessLevel() > 0 ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

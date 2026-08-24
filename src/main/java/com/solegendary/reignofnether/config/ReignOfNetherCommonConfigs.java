@@ -20,6 +20,7 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.CREEPER.define(BUILDER);
         UnitCosts.ZOMBIE.define(BUILDER);
         UnitCosts.ZOMBIE_VILLAGER.define(BUILDER);
+        UnitCosts.BAT.define(BUILDER);
         UnitCosts.SKELETON.define(BUILDER);
         UnitCosts.STRAY.define(BUILDER);
         UnitCosts.BOGGED.define(BUILDER);
@@ -27,6 +28,7 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.DROWNED.define(BUILDER);
         UnitCosts.SPIDER.define(BUILDER);
         UnitCosts.POISON_SPIDER.define(BUILDER);
+        UnitCosts.WRAITH.define(BUILDER);
         UnitCosts.SLIME.define(BUILDER);
         UnitCosts.WARDEN.define(BUILDER);
         UnitCosts.ZOMBIE_PIGLIN.define(BUILDER);
@@ -36,9 +38,12 @@ public class ReignOfNetherCommonConfigs {
         //Villagers
         BUILDER.comment("Villagers");
         UnitCosts.VILLAGER.define(BUILDER);
+        UnitCosts.SCOUT_DOG.define(BUILDER);
+        UnitCosts.SCOUT_CAT.define(BUILDER);
         UnitCosts.MILITIA.define(BUILDER);
         UnitCosts.IRON_GOLEM.define(BUILDER);
         UnitCosts.PILLAGER.define(BUILDER);
+        UnitCosts.WINDCALLER.define(BUILDER);
         UnitCosts.VINDICATOR.define(BUILDER);
         UnitCosts.WITCH.define(BUILDER);
         UnitCosts.EVOKER.define(BUILDER);
@@ -48,6 +53,7 @@ public class ReignOfNetherCommonConfigs {
         //Piglins
         BUILDER.comment("Piglins");
         UnitCosts.GRUNT.define(BUILDER);
+        UnitCosts.STRIDER.define(BUILDER);
         UnitCosts.BRUTE.define(BUILDER);
         UnitCosts.HEADHUNTER.define(BUILDER);
         UnitCosts.MARAUDER.define(BUILDER);
@@ -65,6 +71,8 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.PANDA.define(BUILDER);
         UnitCosts.WOLF.define(BUILDER);
         UnitCosts.LLAMA.define(BUILDER);
+        UnitCosts.KILLER_RABBIT.define(BUILDER);
+        UnitCosts.SILVERFISH.define(BUILDER);
 
         UnitCosts.HERO_BASE_REVIVE_COST.define(BUILDER);
         UnitCosts.HERO_EXTRA_REVIVE_COST_PER_LEVEL.define(BUILDER);
@@ -90,6 +98,7 @@ public class ReignOfNetherCommonConfigs {
         BuildingCosts.SLIME_PIT.define(BUILDER);
         BuildingCosts.STRONGHOLD.define(BUILDER);
         BuildingCosts.ALTAR_OF_DARKNESS.define(BUILDER);
+        BuildingCosts.MONSTER_MARKET.define(BUILDER);
         //Villagers
         BUILDER.comment("Villagers");
         BuildingCosts.TOWN_CENTRE.define(BUILDER);
@@ -98,11 +107,13 @@ public class ReignOfNetherCommonConfigs {
         BuildingCosts.BARRACKS.define(BUILDER);
         BuildingCosts.BLACKSMITH.define(BUILDER);
         BuildingCosts.ARCANE_TOWER.define(BUILDER);
+        BuildingCosts.WITCH_HUT.define(BUILDER);
         BuildingCosts.LIBRARY.define(BUILDER);
         BuildingCosts.WATCHTOWER.define(BUILDER);
         BuildingCosts.CASTLE.define(BUILDER);
         BuildingCosts.IRON_GOLEM_BUILDING.define(BUILDER);
         BuildingCosts.SHRINE_OF_PROSPERITY.define(BUILDER);
+        BuildingCosts.VILLAGER_MARKET.define(BUILDER);
         //Piglins
         BUILDER.comment("Piglins");
         BuildingCosts.CENTRAL_PORTAL.define(BUILDER);
@@ -116,6 +127,7 @@ public class ReignOfNetherCommonConfigs {
         BuildingCosts.BASALT_SPRINGS.define(BUILDER);
         BuildingCosts.FORTRESS.define(BUILDER);
         BuildingCosts.INFERNAL_PORTAL.define(BUILDER);
+        BuildingCosts.PIGLIN_MARKET.define(BUILDER);
 
         //*Research*
         BUILDER.comment("Research Cost Configurations");
@@ -131,11 +143,15 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_DROWNED.define(BUILDER);
         ResearchCosts.RESEARCH_STRAYS.define(BUILDER);
         ResearchCosts.RESEARCH_BOGGED.define(BUILDER);
+        ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD.define(BUILDER);
+        ResearchCosts.RESEARCH_MASS_BURIALS.define(BUILDER);
+        ResearchCosts.RESEARCH_POSSESSION.define(BUILDER);
         ResearchCosts.RESEARCH_SLIME_CONVERSION.define(BUILDER);
         ResearchCosts.RESEARCH_LINGERING_POTIONS.define(BUILDER);
         ResearchCosts.RESEARCH_HEALING_POTIONS.define(BUILDER);
         ResearchCosts.RESEARCH_WATER_POTIONS.define(BUILDER);
         ResearchCosts.RESEARCH_EVOKER_VEXES.define(BUILDER);
+        ResearchCosts.RESEARCH_UPGRADED_WINDCALLERS.define(BUILDER);
         ResearchCosts.RESEARCH_CASTLE_FLAG.define(BUILDER);
         ResearchCosts.RESEARCH_GRAND_LIBRARY.define(BUILDER);
         ResearchCosts.RESEARCH_SILVERFISH.define(BUILDER);
@@ -144,6 +160,7 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_BRUTE_SHIELDS.define(BUILDER);
         ResearchCosts.RESEARCH_HOGLIN_CAVALRY.define(BUILDER);
         ResearchCosts.RESEARCH_HEAVY_TRIDENTS.define(BUILDER);
+        ResearchCosts.RESEARCH_GREEDY_TRIDENTS.define(BUILDER);
         ResearchCosts.RESEARCH_CLEAVING_FLAILS.define(BUILDER);
         ResearchCosts.RESEARCH_BLAZE_FIRE_WALL.define(BUILDER);
         ResearchCosts.RESEARCH_FIRE_RESISTANCE.define(BUILDER);
@@ -160,6 +177,8 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_BEACON_LEVEL3.define(BUILDER);
         ResearchCosts.RESEARCH_BEACON_LEVEL4.define(BUILDER);
         ResearchCosts.RESEARCH_BEACON_LEVEL5.define(BUILDER);
+        ResearchCosts.RESEARCH_VINDICATOR_AXES.define(BUILDER);
+        ResearchCosts.RESEARCH_PILLAGER_CROSSBOWS.define(BUILDER);
 
         //*Abilities*
         BUILDER.comment("Ability Cost Configurations");
@@ -168,6 +187,7 @@ public class ReignOfNetherCommonConfigs {
         AbilityCosts.ENCHANT_SHARPNESS.define(BUILDER);
         AbilityCosts.ENCHANT_MULTISHOT.define(BUILDER);
         AbilityCosts.ENCHANT_VIGOR.define(BUILDER);
+        AbilityCosts.ENCHANT_GUST.define(BUILDER);
         AbilityCosts.EQUIP_LEATHER_ARMOR.define(BUILDER);
         AbilityCosts.EQUIP_CHAINMAIL_ARMOR.define(BUILDER);
         SPEC = BUILDER.build();
@@ -176,6 +196,7 @@ public class ReignOfNetherCommonConfigs {
     public static class UnitCosts implements Costs {
         //Monsters
         public static final ResourceCostConfigEntry CREEPER = ResourceCostConfigEntry.Unit(50, 0, 100, 35, 2, ResourceCosts.CREEPER, "Creeper Config");
+        public static final ResourceCostConfigEntry BAT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.BAT, "Bat Config");
         public static final ResourceCostConfigEntry ZOMBIE = ResourceCostConfigEntry.Unit(75, 0, 0, 18, 1, ResourceCosts.ZOMBIE, "Zombie Config");
         public static final ResourceCostConfigEntry ZOMBIE_VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.ZOMBIE_VILLAGER, "Zombie Villager Config");
         public static final ResourceCostConfigEntry SKELETON = ResourceCostConfigEntry.Unit(50,45,0,18,1, ResourceCosts.SKELETON, "Skeleton Config");
@@ -185,6 +206,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry DROWNED = ResourceCostConfigEntry.Unit(75,0,0,18,1, ResourceCosts.DROWNED, "Drowned Config");
         public static final ResourceCostConfigEntry SPIDER = ResourceCostConfigEntry.Unit(80,20,20,25,2, ResourceCosts.SPIDER, "Spider Config");
         public static final ResourceCostConfigEntry POISON_SPIDER = ResourceCostConfigEntry.Unit(80,20,20,25,2, ResourceCosts.POISON_SPIDER, "Poison Spider Config");
+        public static final ResourceCostConfigEntry WRAITH = ResourceCostConfigEntry.Unit(70,0,70,30,2, ResourceCosts.WRAITH, "Wraith Config");
         public static final ResourceCostConfigEntry SLIME = ResourceCostConfigEntry.Unit(40,40,40,25,2, ResourceCosts.SLIME, "Slime Config");
         public static final ResourceCostConfigEntry WARDEN = ResourceCostConfigEntry.Unit(275,0,125,50,5, ResourceCosts.WARDEN, "Warden Config");
         public static final ResourceCostConfigEntry NECROMANCER = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.NECROMANCER, "Necromancer Config");
@@ -195,18 +217,22 @@ public class ReignOfNetherCommonConfigs {
 
         // Villagers
         public static final ResourceCostConfigEntry VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.VILLAGER, "Villager Config");
+        public static final ResourceCostConfigEntry SCOUT_DOG = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.SCOUT_DOG, "Scout Dog Config");
+        public static final ResourceCostConfigEntry SCOUT_CAT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.SCOUT_CAT, "Scout Cat Config");
         public static final ResourceCostConfigEntry MILITIA = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.MILITIA, "Militia Config");
         public static final ResourceCostConfigEntry IRON_GOLEM = ResourceCostConfigEntry.Unit(0,50,250,45,4, ResourceCosts.IRON_GOLEM, "Iron Golem Config");
-        public static final ResourceCostConfigEntry PILLAGER = ResourceCostConfigEntry.Unit(120,80,0,32,3, ResourceCosts.PILLAGER, "Pillager Config");
-        public static final ResourceCostConfigEntry VINDICATOR = ResourceCostConfigEntry.Unit(170,0,0,32,3, ResourceCosts.VINDICATOR, "Vindicator Config");
+        public static final ResourceCostConfigEntry PILLAGER = ResourceCostConfigEntry.Unit(110,80,0,32,3, ResourceCosts.PILLAGER, "Pillager Config");
+        public static final ResourceCostConfigEntry WINDCALLER = ResourceCostConfigEntry.Unit(140,60,60,35,3, ResourceCosts.WINDCALLER, "Windcaller Config");
+        public static final ResourceCostConfigEntry VINDICATOR = ResourceCostConfigEntry.Unit(160,0,0,32,3, ResourceCosts.VINDICATOR, "Vindicator Config");
         public static final ResourceCostConfigEntry WITCH = ResourceCostConfigEntry.Unit(90,90,90,35,3, ResourceCosts.WITCH, "Witch Config");
-        public static final ResourceCostConfigEntry EVOKER = ResourceCostConfigEntry.Unit(150,0,120,35,3, ResourceCosts.EVOKER, "Evoker Config");
+        public static final ResourceCostConfigEntry EVOKER = ResourceCostConfigEntry.Unit(140,0,120,35,3, ResourceCosts.EVOKER, "Evoker Config");
         public static final ResourceCostConfigEntry RAVAGER = ResourceCostConfigEntry.Unit(400,50,150,60,7, ResourceCosts.RAVAGER, "Ravager Config");
         public static final ResourceCostConfigEntry ROYAL_GUARD = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.ROYAL_GUARD, "Royal Guard Config");
         public static final ResourceCostConfigEntry ENCHANTER = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.ENCHANTER, "Enchanter Config");
 
         // Piglins
         public static final ResourceCostConfigEntry GRUNT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.GRUNT, "Grunt Config");
+        public static final ResourceCostConfigEntry STRIDER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.STRIDER, "Strider Config");
         public static final ResourceCostConfigEntry BRUTE = ResourceCostConfigEntry.Unit(120,0,0,25,2, ResourceCosts.BRUTE, "Brute Config");
         public static final ResourceCostConfigEntry HEADHUNTER = ResourceCostConfigEntry.Unit(90,60,0,25,2, ResourceCosts.HEADHUNTER, "Headhunter Config");
         public static final ResourceCostConfigEntry MARAUDER = ResourceCostConfigEntry.Unit(175,75,75,40,4, ResourceCosts.MARAUDER, "Marauder Config");
@@ -225,6 +251,9 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry WOLF = ResourceCostConfigEntry.Unit(120,0,0,25,2, ResourceCosts.WOLF, "Wolf Config");
         public static final ResourceCostConfigEntry LLAMA = ResourceCostConfigEntry.Unit(180,0,0,25,2, ResourceCosts.LLAMA, "Llama Config");
 
+        public static final ResourceCostConfigEntry KILLER_RABBIT = ResourceCostConfigEntry.Unit(150,0,0,30,2, ResourceCosts.KILLER_RABBIT, "Killer Rabbit Config");
+        public static final ResourceCostConfigEntry SILVERFISH = ResourceCostConfigEntry.Unit(0,0,0,0,0, ResourceCosts.SILVERFISH, "Silverfish Config");
+
         public static final ResourceCostConfigEntry HERO_BASE_REVIVE_COST = ResourceCostConfigEntry.Unit(100,0,0,30, 5, ResourceCosts.HERO_BASE_REVIVE_COST, "Hero Base Revive Cost Config");
         public static final ResourceCostConfigEntry HERO_EXTRA_REVIVE_COST_PER_LEVEL = ResourceCostConfigEntry.Unit(50,0,0,5, 0, ResourceCosts.HERO_EXTRA_REVIVE_COST_PER_LEVEL, "Hero Extra Revive Cost Per Level Config");
     }
@@ -239,8 +268,8 @@ public class ReignOfNetherCommonConfigs {
         // Monsters
         public static final ResourceCostConfigEntry MAUSOLEUM = ResourceCostConfigEntry.Building(0,350,250, 10, ResourceCosts.MAUSOLEUM, "Mausoleum Config");
         public static final ResourceCostConfigEntry HAUNTED_HOUSE = ResourceCostConfigEntry.Building(0,100,0, 10, ResourceCosts.HAUNTED_HOUSE, "Haunted House Config");
-        public static final ResourceCostConfigEntry PUMPKIN_FARM = ResourceCostConfigEntry.Building(0,200,0, 0, ResourceCosts.PUMPKIN_FARM, "Pumpkin Farm Config");
-        public static final ResourceCostConfigEntry SCULK_CATALYST = ResourceCostConfigEntry.Building(0,125,0, 0, ResourceCosts.SCULK_CATALYST, "Sculk Catalyst Config");
+        public static final ResourceCostConfigEntry PUMPKIN_FARM = ResourceCostConfigEntry.Building(0,175,0, 0, ResourceCosts.PUMPKIN_FARM, "Pumpkin Farm Config");
+        public static final ResourceCostConfigEntry SCULK_CATALYST = ResourceCostConfigEntry.Building(0,125,0, 12, ResourceCosts.SCULK_CATALYST, "Sculk Catalyst Config");
         public static final ResourceCostConfigEntry GRAVEYARD = ResourceCostConfigEntry.Building(0,150,0, 0, ResourceCosts.GRAVEYARD, "Graveyard Config");
         public static final ResourceCostConfigEntry SPIDER_LAIR = ResourceCostConfigEntry.Building(0,150,75, 0, ResourceCosts.SPIDER_LAIR, "Spider Lair Config");
         public static final ResourceCostConfigEntry DUNGEON = ResourceCostConfigEntry.Building(0,150,75, 0, ResourceCosts.DUNGEON, "Dungeon Config");
@@ -249,19 +278,22 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry SLIME_PIT = ResourceCostConfigEntry.Building(0,175, 125, 0, ResourceCosts.SLIME_PIT, "Slime Pit Config");
         public static final ResourceCostConfigEntry STRONGHOLD = ResourceCostConfigEntry.Building(0,400,300, 0, ResourceCosts.STRONGHOLD, "Stronghold Config");
         public static final ResourceCostConfigEntry ALTAR_OF_DARKNESS = ResourceCostConfigEntry.Building(0,125,50, 0, ResourceCosts.ALTAR_OF_DARKNESS, "Altar of Darkness Config");
+        public static final ResourceCostConfigEntry MONSTER_MARKET = ResourceCostConfigEntry.Building(0,150,150, 0, ResourceCosts.MONSTER_MARKET, "Monster Market Config");
 
         // Villagers
         public static final ResourceCostConfigEntry TOWN_CENTRE = ResourceCostConfigEntry.Building(0,350,250, 10, ResourceCosts.TOWN_CENTRE, "Town Centre Config");
-        public static final ResourceCostConfigEntry VILLAGER_HOUSE = ResourceCostConfigEntry.Building(0,100,0, 10, ResourceCosts.VILLAGER_HOUSE, "Villager House Config");
+        public static final ResourceCostConfigEntry VILLAGER_HOUSE = ResourceCostConfigEntry.Building(0,90,0, 10, ResourceCosts.VILLAGER_HOUSE, "Villager House Config");
         public static final ResourceCostConfigEntry WHEAT_FARM = ResourceCostConfigEntry.Building(0,150,0, 0, ResourceCosts.WHEAT_FARM, "Wheat Farm Config");
         public static final ResourceCostConfigEntry BARRACKS = ResourceCostConfigEntry.Building(0,150,0, 0, ResourceCosts.BARRACKS, "Barracks Config");
         public static final ResourceCostConfigEntry BLACKSMITH = ResourceCostConfigEntry.Building(0,100,300, 0, ResourceCosts.BLACKSMITH, "Blacksmith Config");
-        public static final ResourceCostConfigEntry ARCANE_TOWER = ResourceCostConfigEntry.Building(0,200,100, 0, ResourceCosts.ARCANE_TOWER, "Arcane Tower Config");
+        public static final ResourceCostConfigEntry WITCH_HUT = ResourceCostConfigEntry.Building(0,200,50, 0, ResourceCosts.WITCH_HUT, "Witch Hut Config");
+        public static final ResourceCostConfigEntry ARCANE_TOWER = ResourceCostConfigEntry.Building(0,100,200, 0, ResourceCosts.ARCANE_TOWER, "Arcane Tower Config");
         public static final ResourceCostConfigEntry LIBRARY = ResourceCostConfigEntry.Building(0,300,100, 0, ResourceCosts.LIBRARY, "Library Config");
         public static final ResourceCostConfigEntry WATCHTOWER = ResourceCostConfigEntry.Building(0,100,75, 0, ResourceCosts.WATCHTOWER, "Watchtower Config");
         public static final ResourceCostConfigEntry CASTLE = ResourceCostConfigEntry.Building(0,400,300, 0, ResourceCosts.CASTLE, "Castle Config");
         public static final ResourceCostConfigEntry IRON_GOLEM_BUILDING = ResourceCostConfigEntry.Building(0,50,250, 0, ResourceCosts.IRON_GOLEM_BUILDING, "Iron Golem Building Config");
         public static final ResourceCostConfigEntry SHRINE_OF_PROSPERITY = ResourceCostConfigEntry.Building(0,125,50, 0, ResourceCosts.SHRINE_OF_PROSPERITY, "Shrine of Prosperity Config");
+        public static final ResourceCostConfigEntry VILLAGER_MARKET = ResourceCostConfigEntry.Building(0,150,150, 0, ResourceCosts.VILLAGER_MARKET, "Villager Market Config");
 
         // Piglins
         public static final ResourceCostConfigEntry CENTRAL_PORTAL = ResourceCostConfigEntry.Building(0,350,250, 10, ResourceCosts.CENTRAL_PORTAL, "Central Portal Config");
@@ -275,6 +307,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry BASALT_SPRINGS = ResourceCostConfigEntry.Building(0, 150, 200, 0, ResourceCosts.BASALT_SPRINGS, "Basalt Springs Config");
         public static final ResourceCostConfigEntry FORTRESS = ResourceCostConfigEntry.Building(0, 400, 300, 0, ResourceCosts.FORTRESS, "Fortress Config");
         public static final ResourceCostConfigEntry INFERNAL_PORTAL = ResourceCostConfigEntry.Building(0,125,50, 0, ResourceCosts.INFERNAL_PORTAL, "Infernal Portal Config");
+        public static final ResourceCostConfigEntry PIGLIN_MARKET = ResourceCostConfigEntry.Building(0,150,150, 0, ResourceCosts.PIGLIN_MARKET, "Piglin Market Config");
     }
     public static class ResearchCosts implements Costs {
         public static final ResourceCostConfigEntry RESEARCH_GOLEM_SMITHING = ResourceCostConfigEntry.Research(0, 150,200, 90, ResourceCosts.RESEARCH_GOLEM_SMITHING, "Golem Smithing Research Config");
@@ -289,19 +322,24 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_DROWNED = ResourceCostConfigEntry.Research(500,0,500, 200, ResourceCosts.RESEARCH_DROWNED, "Drowned Research Config");
         public static final ResourceCostConfigEntry RESEARCH_STRAYS = ResourceCostConfigEntry.Research(500,500,0, 200, ResourceCosts.RESEARCH_STRAYS, "Stray Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BOGGED = ResourceCostConfigEntry.Research(300,300,0, 140, ResourceCosts.RESEARCH_BOGGED, "Bogged Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_OVERFLOWING_GRAVEYARD = ResourceCostConfigEntry.Research(0,75,75, 60, ResourceCosts.RESEARCH_OVERFLOWING_GRAVEYARD, "Overflowing Graveyard Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_MASS_BURIALS = ResourceCostConfigEntry.Research(0,400,400, 160, ResourceCosts.RESEARCH_MASS_BURIALS, "Mass Burials Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_POSSESSION = ResourceCostConfigEntry.Research(400,0,400, 160, ResourceCosts.RESEARCH_POSSESSION, "Possession Research Config");
         public static final ResourceCostConfigEntry RESEARCH_SLIME_CONVERSION = ResourceCostConfigEntry.Research(300,0,300, 140, ResourceCosts.RESEARCH_SLIME_CONVERSION, "Slime Conversion Research Config");
         public static final ResourceCostConfigEntry RESEARCH_LINGERING_POTIONS = ResourceCostConfigEntry.Research(0,250,250, 140, ResourceCosts.RESEARCH_LINGERING_POTIONS, "Extended Lingering Potion Research Config");
         public static final ResourceCostConfigEntry RESEARCH_HEALING_POTIONS = ResourceCostConfigEntry.Research(0,350,350, 180, ResourceCosts.RESEARCH_HEALING_POTIONS, "Healing Potion Research Config");
         public static final ResourceCostConfigEntry RESEARCH_WATER_POTIONS = ResourceCostConfigEntry.Research(0,250,250, 140, ResourceCosts.RESEARCH_WATER_POTIONS, "Water Potion Research Config");
         public static final ResourceCostConfigEntry RESEARCH_EVOKER_VEXES = ResourceCostConfigEntry.Research(500,0,300, 120, ResourceCosts.RESEARCH_EVOKER_VEXES, "Evoker Vex Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_UPGRADED_WINDCALLERS = ResourceCostConfigEntry.Research(300,150,150, 140, ResourceCosts.RESEARCH_UPGRADED_WINDCALLERS, "Upgraded Windcallers Research Config");
         public static final ResourceCostConfigEntry RESEARCH_CASTLE_FLAG = ResourceCostConfigEntry.Research(200,150,150, 90, ResourceCosts.RESEARCH_CASTLE_FLAG, "Captain Banner Research Config");
         public static final ResourceCostConfigEntry RESEARCH_GRAND_LIBRARY = ResourceCostConfigEntry.Research(0,200,100, 140, ResourceCosts.RESEARCH_GRAND_LIBRARY, "Grand Library Research Config");
         public static final ResourceCostConfigEntry RESEARCH_SILVERFISH = ResourceCostConfigEntry.Research(0,300,300, 120, ResourceCosts.RESEARCH_SILVERFISH, "Silverfish Research Config");
-        public static final ResourceCostConfigEntry RESEARCH_SCULK_AMPLIFIERS = ResourceCostConfigEntry.Research(0,200,400, 150, ResourceCosts.RESEARCH_SCULK_AMPLIFIERS, "Sculk Amplifier Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_SCULK_AMPLIFIERS = ResourceCostConfigEntry.Research(0,300,500, 180, ResourceCosts.RESEARCH_SCULK_AMPLIFIERS, "Sculk Amplifier Research Config");
         public static final ResourceCostConfigEntry RESEARCH_RAVAGER_ARTILLERY = ResourceCostConfigEntry.Research(400,0,350, 140, ResourceCosts.RESEARCH_RAVAGER_ARTILLERY, "Ravager Artillery Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BRUTE_SHIELDS = ResourceCostConfigEntry.Research(0,300,300, 150, ResourceCosts.RESEARCH_BRUTE_SHIELDS, "Brute Shields Research Config");
-        public static final ResourceCostConfigEntry RESEARCH_HOGLIN_CAVALRY = ResourceCostConfigEntry.Research(350,300,0, 120, ResourceCosts.RESEARCH_HOGLIN_CAVALRY, "Hoglin Cavalry Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_HOGLIN_CAVALRY = ResourceCostConfigEntry.Research(400,350,0, 180, ResourceCosts.RESEARCH_HOGLIN_CAVALRY, "Hoglin Cavalry Research Config");
         public static final ResourceCostConfigEntry RESEARCH_HEAVY_TRIDENTS = ResourceCostConfigEntry.Research(0, 300, 300, 150, ResourceCosts.RESEARCH_HEAVY_TRIDENTS, "Heavy Tridents Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_GREEDY_TRIDENTS = ResourceCostConfigEntry.Research(0, 350, 350, 160, ResourceCosts.RESEARCH_GREEDY_TRIDENTS, "Greedy Tridents Research Config");
         public static final ResourceCostConfigEntry RESEARCH_CLEAVING_FLAILS = ResourceCostConfigEntry.Research(0, 350, 350, 160, ResourceCosts.RESEARCH_CLEAVING_FLAILS, "Cleaving Flails Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BLAZE_FIRE_WALL = ResourceCostConfigEntry.Research(400, 0, 300, 150, ResourceCosts.RESEARCH_BLAZE_FIRE_WALL, "Blaze Fire Wall Research Config");
         public static final ResourceCostConfigEntry RESEARCH_FIRE_RESISTANCE = ResourceCostConfigEntry.Research(0, 125, 125, 60, ResourceCosts.RESEARCH_FIRE_RESISTANCE, "Fire Resistance Research Config");
@@ -319,6 +357,9 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL3 = ResourceCostConfigEntry.Research(0, 0, 400, 120, ResourceCosts.RESEARCH_BEACON_LEVEL3, "Beacon Level 3 Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL4 = ResourceCostConfigEntry.Research(0, 0, 500, 120, ResourceCosts.RESEARCH_BEACON_LEVEL4, "Beacon Level 4 Research Config");
         public static final ResourceCostConfigEntry RESEARCH_BEACON_LEVEL5 = ResourceCostConfigEntry.Research(0, 0, 600, 120, ResourceCosts.RESEARCH_BEACON_LEVEL5, "Beacon Level 5 Research Config");
+
+        public static final ResourceCostConfigEntry RESEARCH_VINDICATOR_AXES = ResourceCostConfigEntry.Research(0, 200, 400, 150, ResourceCosts.RESEARCH_VINDICATOR_AXES, "Vindicator Axes Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_PILLAGER_CROSSBOWS = ResourceCostConfigEntry.Research(0, 600, 300, 180, ResourceCosts.RESEARCH_PILLAGER_CROSSBOWS, "Pillager Crossbows Research Config");
     }
     public static class AbilityCosts implements Costs {
         public static final ResourceCostConfigEntry ENCHANT_MAIMING = ResourceCostConfigEntry.Ability(0,20, 30, ResourceCosts.ENCHANT_MAIMING, "Maiming Enchantment Config");
@@ -326,8 +367,9 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry ENCHANT_SHARPNESS = ResourceCostConfigEntry.Ability(0,40, 60, ResourceCosts.ENCHANT_SHARPNESS, "Sharpness Enchantment Config");
         public static final ResourceCostConfigEntry ENCHANT_MULTISHOT = ResourceCostConfigEntry.Ability(0,70, 35, ResourceCosts.ENCHANT_MULTISHOT, "Multishot Enchantment Config");
         public static final ResourceCostConfigEntry ENCHANT_VIGOR = ResourceCostConfigEntry.Ability(0,50, 50, ResourceCosts.ENCHANT_VIGOR, "Vigor Enchantment Config");
+        public static final ResourceCostConfigEntry ENCHANT_GUST = ResourceCostConfigEntry.Ability(0,50, 50, ResourceCosts.ENCHANT_GUST, "Gust Enchantment Config");
         public static final ResourceCostConfigEntry EQUIP_LEATHER_ARMOR = ResourceCostConfigEntry.Ability(0,0, 30, ResourceCosts.EQUIP_LEATHER_ARMOR, "Equip Leather Armor Config");
-        public static final ResourceCostConfigEntry EQUIP_CHAINMAIL_ARMOR = ResourceCostConfigEntry.Ability(0,0, 60, ResourceCosts.EQUIP_CHAINMAIL_ARMOR, "Equip Chainmail Armor Config");
+        public static final ResourceCostConfigEntry EQUIP_CHAINMAIL_ARMOR = ResourceCostConfigEntry.Ability(0,0, 40, ResourceCosts.EQUIP_CHAINMAIL_ARMOR, "Equip Chainmail Armor Config");
     }
     public interface Costs {}
 }

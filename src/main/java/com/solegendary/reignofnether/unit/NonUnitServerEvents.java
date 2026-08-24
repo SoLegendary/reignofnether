@@ -1,9 +1,13 @@
 package com.solegendary.reignofnether.unit;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -13,11 +17,17 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.monster.Vex;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.monster.*;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
+import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
+import net.minecraft.world.entity.monster.warden.Warden;
+import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
@@ -86,6 +96,26 @@ public class NonUnitServerEvents {
                 }
             }
         }
+    }
+
+    public static Faction getNonUnitFaction(LivingEntity le) {
+        if (le instanceof IronGolem || le instanceof AbstractIllager || le instanceof AbstractVillager)
+            return Faction.VILLAGERS;
+        else if (le instanceof AbstractPiglin || le instanceof Hoglin || le instanceof Ghast || le instanceof Blaze || le instanceof WitherSkeleton)
+            return Faction.PIGLINS;
+        else if (le instanceof AbstractSkeleton || le instanceof Zombie || le instanceof Creeper || le instanceof Spider || le instanceof Slime || le instanceof Warden)
+            return Faction.MONSTERS;
+        return Faction.NONE;
+    }
+
+    @SubscribeEvent
+    public static void onChangeTarget(LivingChangeTargetEvent evt) {
+        LivingEntity le = evt.getEntity();
+
+        // prevent vanilla mobs attacking their RoN faction equivalents
+        if (!(le instanceof Unit) && evt.getNewTarget() instanceof Unit unit)
+            if (unit.getFaction() == getNonUnitFaction(le))
+                evt.setCanceled(true);
     }
 
     private static boolean shouldMobBeAggressive(Mob mob) {

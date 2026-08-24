@@ -7,13 +7,19 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;
 
@@ -55,6 +61,17 @@ public class AllyCommand {
         String playerName = player.getName().getString();
         String allyPlayerName = allyPlayer.getName().getString();
 
+        if (context.getSource().getLevel().getGameRules().getRule(GameRuleRegistrar.LOCK_ALLIANCES).get() &&
+            (PlayerServerEvents.isRTSPlayer(playerName) || PlayerServerEvents.isRTSPlayer(allyPlayerName))) {
+            player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+            return 0;
+        }
+        if (context.getSource().getLevel().getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get() &&
+            (PlayerServerEvents.isRTSPlayer(playerName) || PlayerServerEvents.isRTSPlayer(allyPlayerName))) {
+            player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock_coop"));
+            return 0;
+        }
+
         if (player.equals(allyPlayer)) {
             player.sendSystemMessage(Component.translatable("alliance.reignofnether.ally_self", playerName));
             return 0;
@@ -63,11 +80,23 @@ public class AllyCommand {
         AllianceClientboundPacket.addPendingAlliance(allyPlayerName, playerName);
         context.getSource().sendSuccess(()->Component.translatable("alliance.reignofnether.sent_request", allyPlayerName), false);
         SoundClientboundPacket.playSoundForPlayer(SoundAction.CHAT, allyPlayerName);
-        if (!allyPlayer.isCreative() && !allyPlayer.isSpectator()) {
-            allyPlayer.sendSystemMessage(Component.translatable("alliance.reignofnether.ally_confirm_survival", playerName, playerName));
-        } else {
-            allyPlayer.sendSystemMessage(Component.translatable("alliance.reignofnether.ally_confirm", playerName, playerName));
-        }
+        allyPlayer.sendSystemMessage(Component.translatable("alliance.reignofnether.ally_confirm", playerName, playerName));
+        if (PlayerServerEvents.isRTSPlayer(allyPlayerName))
+            allyPlayer.sendSystemMessage(Component
+                .translatable("alliance.reignofnether.accept") // [CLick to accept]
+                .withStyle(Style.EMPTY
+                    .withColor(ChatFormatting.GREEN)
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/allyconfirm " + playerName))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("alliance.reignofnether.accept"))))
+                .append(Component
+                    .translatable("alliance.reignofnether.cancel") // [Click to cancel]
+                    .withStyle(Style.EMPTY
+                        .withColor(ChatFormatting.RED)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/allycancelrequest " + playerName))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("alliance.reignofnether.cancel")))
+                    )
+                )
+        );
         SoundClientboundPacket.playSoundForPlayer(SoundAction.CHAT, playerName);
 
         return Command.SINGLE_SUCCESS;
@@ -124,6 +153,17 @@ public class AllyCommand {
         ServerPlayer allyPlayer = EntityArgument.getPlayer(context, "player");
         String playerName = player.getName().getString();
         String allyPlayerName = allyPlayer.getName().getString();
+
+        if (context.getSource().getLevel().getGameRules().getRule(GameRuleRegistrar.LOCK_ALLIANCES).get() &&
+            (PlayerServerEvents.isRTSPlayer(playerName) || PlayerServerEvents.isRTSPlayer(allyPlayerName))) {
+            player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+            return 0;
+        }
+        if (context.getSource().getLevel().getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get() &&
+            (PlayerServerEvents.isRTSPlayer(playerName) || PlayerServerEvents.isRTSPlayer(allyPlayerName))) {
+            player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock_coop"));
+            return 0;
+        }
 
         if (player.equals(allyPlayer)) {
             context.getSource().sendFailure(Component.translatable("alliance.reignofnether.disband_self"));

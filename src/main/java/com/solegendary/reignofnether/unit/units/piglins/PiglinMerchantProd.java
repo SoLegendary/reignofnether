@@ -3,18 +3,13 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.HeroProductionItem;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.sandbox.SandboxAction;
-import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -50,12 +45,12 @@ public class PiglinMerchantProd extends HeroProductionItem {
                 iconRl,
                 List.of(
                         FormattedCharSequence.forward(
-                                I18n.get("units.piglins.reignofnether.piglin_merchant") +
+                                I18n.get("entity.reignofnether.piglin_merchant_unit") +
                                         " (" + I18n.get("hud.units.reignofnether.hero") + ")",
                                 Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.piglin_merchant.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.piglin_merchant.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.piglin_merchant_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.piglin_merchant_unit.tooltip2"), Style.EMPTY)
                 )
         );
     }
@@ -63,14 +58,14 @@ public class PiglinMerchantProd extends HeroProductionItem {
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         ArrayList<FormattedCharSequence> tooltips = new ArrayList<>(List.of(
                 FormattedCharSequence.forward(
-                        I18n.get("units.piglins.reignofnether.piglin_merchant") +
+                        I18n.get("entity.reignofnether.piglin_merchant_unit") +
                                 " (" + I18n.get("hud.units.reignofnether.hero") + ")",
                         Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.piglin_merchant.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.piglins.reignofnether.piglin_merchant.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.piglin_merchant_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.piglin_merchant_unit.tooltip2"), Style.EMPTY)
         ));
         tooltips.addAll(getAdditionalHeroTooltips());
 

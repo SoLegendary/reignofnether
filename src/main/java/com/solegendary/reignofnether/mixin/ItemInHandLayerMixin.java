@@ -40,7 +40,7 @@ public abstract class ItemInHandLayerMixin<T extends LivingEntity, M extends Ent
                                      HumanoidArm pArm, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci) {
         if (pLivingEntity instanceof BruteUnit brute &&
                 pItemStack.getItem() == Items.SHIELD &&
-                brute.isHoldingUpShield) {
+                brute.isHoldingUpShield()) {
 
             ci.cancel();
 

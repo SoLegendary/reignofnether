@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
@@ -59,6 +59,7 @@ public class BitterFrostPassive extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip2")),
+                fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip3")),
                 fcs("")
         ));
         if (getRank(hero) >= 1) {
@@ -80,6 +81,7 @@ public class BitterFrostPassive extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip2")),
+                fcs(I18n.get("abilities.reignofnether.bitter_frost.tooltip3")),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.rank1"), getRank(hero) == 0),
                 fcs(I18n.get("abilities.reignofnether.bitter_frost.rank2"), getRank(hero) == 1),

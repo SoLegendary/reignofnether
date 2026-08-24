@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -31,7 +31,7 @@ public class DisconnectPortal extends Ability {
             0,
             true
         );
-        this.defaultHotkey = Keybindings.keyE;
+        this.defaultHotkey = Keybindings.abilitySlot3;
     }
 
     @Override

@@ -1,78 +1,21 @@
 {
-  "type": "minecraft:canyon",
+  "": "I've had an instance of a crash with `probability = 0` carvers; `replaceable = air` is an effective workaround.",
+  "type": "minecraft:cave",
   "config": {
-    "debug_settings": {
-      "air_state": {
-        "Name": "minecraft:warped_button",
-        "Properties": {
-          "face": "wall",
-          "facing": "north",
-          "powered": "false"
-        }
-      },
-      "barrier_state": {
-        "Name": "minecraft:glass"
-      },
-      "lava_state": {
-        "Name": "minecraft:orange_stained_glass"
-      },
-      "water_state": {
-        "Name": "minecraft:candle",
-        "Properties": {
-          "candles": "1",
-          "lit": "false",
-          "waterlogged": "false"
-        }
-      }
-    },
-    "lava_level": {
-      "above_bottom": 8
-    },
-    "probability": 0.0,
-    "replaceable": "#minecraft:overworld_carver_replaceables",
-    "shape": {
-      "distance_factor": {
-        "type": "minecraft:uniform",
-        "value": {
-          "max_exclusive": 1.0,
-          "min_inclusive": 0.75
-        }
-      },
-      "horizontal_radius_factor": {
-        "type": "minecraft:uniform",
-        "value": {
-          "max_exclusive": 1.0,
-          "min_inclusive": 0.75
-        }
-      },
-      "thickness": {
-        "type": "minecraft:trapezoid",
-        "value": {
-          "max": 6.0,
-          "min": 0.0,
-          "plateau": 2.0
-        }
-      },
-      "vertical_radius_center_factor": 0.0,
-      "vertical_radius_default_factor": 1.0,
-      "width_smoothness": 3
-    },
-    "vertical_rotation": {
-      "type": "minecraft:uniform",
-      "value": {
-        "max_exclusive": 0.125,
-        "min_inclusive": -0.125
-      }
-    },
+    "probability": 0.00,
     "y": {
-      "type": "minecraft:uniform",
-      "max_inclusive": {
-        "absolute": 67
-      },
-      "min_inclusive": {
-        "absolute": 10
+      "type": "minecraft:constant",
+      "value": {
+        "absolute": 0
       }
     },
-    "yScale": 3.0
+    "yScale": 0,
+    "lava_level": {
+      "absolute": 0
+    },
+    "replaceable": "minecraft:air",
+    "horizontal_radius_multiplier": 0,
+    "vertical_radius_multiplier": 0,
+    "floor_level": 0
   }
 }

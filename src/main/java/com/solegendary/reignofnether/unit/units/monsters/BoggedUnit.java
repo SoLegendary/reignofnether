@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.hud.TooltipColours;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -33,13 +35,17 @@ public class BoggedUnit extends SkeletonUnit implements Unit, AttackerUnit, Rang
                 .add(Attributes.MOVEMENT_SPEED, SkeletonUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, SkeletonUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, SkeletonUnit.armorValue);
+                .add(Attributes.ARMOR, SkeletonUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     public static final int POISON_DAMAGE = 6;
-
-    @Override
-    public float getUnitAttackDamage() {return attackDamage;}
 
     final static public float attackDamage = 2.0f;
 
@@ -60,7 +66,7 @@ public class BoggedUnit extends SkeletonUnit implements Unit, AttackerUnit, Rang
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return true;
+    public int getDamageTooltipColour() {
+        return TooltipColours.GREEN;
     }
 }

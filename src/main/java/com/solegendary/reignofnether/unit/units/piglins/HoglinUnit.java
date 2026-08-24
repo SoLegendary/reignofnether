@@ -8,24 +8,33 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import net.minecraft.client.resources.language.I18n;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
@@ -36,6 +45,8 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
+import net.minecraft.world.entity.monster.hoglin.HoglinAi;
+import net.minecraft.world.entity.monster.hoglin.HoglinBase;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -57,8 +68,8 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, ConvertableUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new Eject(), Keybindings.keyQ);
-        ABILITIES.add(new Bloodlust(), Keybindings.keyW);
+        ABILITIES.add(new Eject(), Keybindings.abilitySlot1);
+        ABILITIES.add(new Bloodlust(), Keybindings.abilitySlot2);
     }
 
     //region
@@ -122,25 +133,29 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(HoglinUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(HoglinUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(HoglinUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
-
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.HOGLIN;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
@@ -148,14 +163,16 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     // ConvertableUnit
     private boolean shouldDiscard = false;
     public boolean shouldDiscard() { return shouldDiscard; }
     public void setShouldDiscard(boolean discard) { this.shouldDiscard = discard; }
 
     // endregion
-
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
 
     final static public float attackDamage = 5.0f;
     final static public float attacksPerSecond = 0.45f;
@@ -207,6 +224,11 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
                 } while(!(block instanceof LeavesBlock));
             }
         }
+
+        // for some reason, hoglins don't run this goal when mounted and so don't move beyond follow range
+        if (this.isVehicle())
+            if (this.getMoveGoal().canUse())
+                this.getMoveGoal().canContinueToUse();
     }
 
     @Override
@@ -218,7 +240,14 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
                 .add(Attributes.MOVEMENT_SPEED, HoglinUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, HoglinUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, HoglinUnit.armorValue);
+                .add(Attributes.ARMOR, HoglinUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override // prevent vanilla logic for picking up items
@@ -241,6 +270,24 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
             Unit.tick(this);
             AttackerUnit.tick(this);
         }
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override
@@ -294,7 +341,10 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
     @Override
     public boolean fireImmune() {
         BuildingPlacement bpl = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
-        return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
+        return super.fireImmune() ||
+                (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary ||
+                        bpl.getBuilding() instanceof BasaltSprings ||
+                        bpl.getBuilding() instanceof PiglinMarket));
     }
 
     @Override
@@ -325,8 +375,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
         );
     }
     @Override
-    public boolean hasBonusDamage() {
-        return true;
+    public int getDamageTooltipColour() {
+        return TooltipColours.GREEN;
     }
-
 }

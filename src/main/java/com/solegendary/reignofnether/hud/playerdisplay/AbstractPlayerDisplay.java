@@ -1,11 +1,12 @@
 package com.solegendary.reignofnether.hud.playerdisplay;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -60,10 +61,6 @@ public abstract class AbstractPlayerDisplay {
 
     public static final ResourceLocation defaultIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png");
 
-    public static final ResourceLocation factionVillagerIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
-    public static final ResourceLocation factionMonsterIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png");
-    public static final ResourceLocation factionPiglinIconLocation = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
-
     private void renderPlayer(GuiGraphics guiGraphics, int x, int y) {
         // render colored background
         MyRenderer.renderFrameWithBg(guiGraphics,
@@ -73,13 +70,7 @@ public abstract class AbstractPlayerDisplay {
                 this.backgroundColor
         );
         // render faction icon
-        ResourceLocation factionIcon;
-        switch (this.faction) {
-            case VILLAGERS -> factionIcon = factionVillagerIconLocation;
-            case MONSTERS -> factionIcon = factionMonsterIconLocation;
-            case PIGLINS -> factionIcon = factionPiglinIconLocation;
-            default -> factionIcon = null;
-        }
+        ResourceLocation factionIcon = MiscUtil.getFactionIcon(faction);
         if(factionIcon != null) {
             MyRenderer.renderIcon(guiGraphics,
                     factionIcon,

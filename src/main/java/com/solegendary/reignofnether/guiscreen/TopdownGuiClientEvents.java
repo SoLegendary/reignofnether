@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.guiscreen;
 
+import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
@@ -76,7 +77,7 @@ public class TopdownGuiClientEvents {
     @SubscribeEvent
     public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
         if (OrthoviewClientEvents.isEnabled()) {
-            if (evt.getKeyCode() == Keybindings.pause.key)
+            if (evt.getKeyCode() == Keybindings.pause.getKey())
                 shouldPause = true;
             else if (evt.getKeyCode() == MC.options.keyInventory.getKey().getValue())
                 evt.setCanceled(true);

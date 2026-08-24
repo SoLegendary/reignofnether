@@ -1,14 +1,17 @@
 package com.solegendary.reignofnether.mixin;
 
 import com.google.common.collect.Lists;
+import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.BoggedUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -25,16 +28,21 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -54,19 +62,20 @@ public abstract class AbstractArrowMixin extends Projectile {
         return null;
     }
 
-    private boolean isInsideBuildingAndNotForeignEntity(BuildingPlacement building) {
+    private boolean isInsideBuildingAndNotForeignEntity(BlockHitResult result, BuildingPlacement building) {
         Vec3 vec32 = this.position();
         Vec3 vec33 = vec32.add(getDeltaMovement());
         EntityHitResult entityHitResult = this.findHitEntity(vec32, vec33);
 
         boolean insideForeignEntity = entityHitResult != null && entityHitResult.getEntity() != getOwner();
         if (entityHitResult != null && entityHitResult.getEntity() instanceof Unit unit1 && getOwner() instanceof Unit unit2 &&
-            GarrisonableBuilding.getGarrison(unit1) == GarrisonableBuilding.getGarrison(unit2))
+            GarrisonableBuildingAddon.getGarrison(unit1) == GarrisonableBuildingAddon.getGarrison(unit2))
             insideForeignEntity = false;
 
-        return building.isPosInsideBuilding(this.blockPosition()) && !insideForeignEntity;
+        return building != null && building.isPosInsideBuilding(result.getBlockPos()) && !insideForeignEntity;
     }
 
+    /*
     // prevent arrows from colliding with the building that a garrisoned unit is inside of
     @Inject(
             method = "isNoPhysics",
@@ -76,27 +85,26 @@ public abstract class AbstractArrowMixin extends Projectile {
     public void isNoPhysics(CallbackInfoReturnable<Boolean> cir) {
         if (this.getOwner() instanceof AttackerUnit aUnit) {
             // garrisoned unit -> ground
-            if (GarrisonableBuilding.getGarrison((Unit) aUnit) instanceof BuildingPlacement building &&
-                    isInsideBuildingAndNotForeignEntity(building)) {
+            BuildingPlacement building = GarrisonableBuildingAddon.getGarrison((Unit) aUnit);
+            if (isInsideBuildingAndNotForeignEntity(building)) {
                 cir.setReturnValue(true);
             }
 
             // ground -> garrisoned unit - allow through at 1/2 accuracy
             // can't use random() here or the nophysics status will change every tick
-            /*
-            if (this.getId() % 2 == 0 &&
-                ((Unit) aUnit).getTargetGoal().getTarget() instanceof Unit tUnit) {
-                if (GarrisonableBuilding.getGarrison(tUnit) instanceof Building building &&
-                    isInsideTopOfBuilding(building)) {
+            //if (this.getId() % 2 == 0 &&
+            //    ((Unit) aUnit).getTargetGoal().getTarget() instanceof Unit tUnit) {
+            //    if (GarrisonableBuilding.getGarrison(tUnit) instanceof Building building &&
+            //        isInsideTopOfBuilding(building)) {
 
-                    // nophysics all the time means they wouldn't collide with the actual target
-                    if (this.distanceToSqr((Entity) tUnit) > Math.pow(1.0d, 2))
-                         cir.setReturnValue(true);
-                }
-            }
-             */
+            //        // nophysics all the time means they wouldn't collide with the actual target
+            //        if (this.distanceToSqr((Entity) tUnit) > Math.pow(1.0d, 2))
+            //             cir.setReturnValue(true);
+            //    }
+            //}
         }
     }
+    */
 
     // correct angle of nophysics arrows
     @Inject(
@@ -135,13 +143,23 @@ public abstract class AbstractArrowMixin extends Projectile {
     @Shadow protected abstract ItemStack getPickupItem();
     @Shadow protected void doPostHurtEffects(LivingEntity pTarget) { }
     @Shadow public boolean shotFromCrossbow() { return false; }
-    @Shadow @Final private IntOpenHashSet ignoredEntities;
+    @Shadow(remap = false) @Final private IntOpenHashSet ignoredEntities;
 
     @Unique
     private boolean reignofnether$collidedWithUntargetedAlly(Entity entity) {
+        boolean isAlliedOrOwned = false;
+        if (this.getOwner() instanceof Unit unit1 &&
+                entity instanceof Unit unit2) {
+            String owner1 = unit1.getOwnerName();
+            String owner2 = unit2.getOwnerName();
+            if (entity.level().isClientSide())
+                isAlliedOrOwned = owner1.equals(owner2) || AlliancesClient.isAllied(owner1, owner2);
+            else
+                isAlliedOrOwned = owner1.equals(owner2) || AlliancesServerEvents.isAllied(owner1, owner2);
+        }
         return this.getOwner() instanceof Unit unit1 &&
                 entity instanceof Unit unit2 &&
-                unit1.getOwnerName().equals(unit2.getOwnerName()) &&
+                isAlliedOrOwned &&
                 (unit1.getTargetGoal().getTarget() == null ||
                         !unit1.getTargetGoal().getTarget().equals(unit2));
     }
@@ -285,7 +303,8 @@ public abstract class AbstractArrowMixin extends Projectile {
 
     @Inject(
             method = "onHitBlock",
-            at = @At("HEAD")
+            at = @At("HEAD"),
+            cancellable = true
     )
     protected void onHitBlock(BlockHitResult pResult, CallbackInfo ci) {
         if (this.getOwner() instanceof PillagerUnit pUnit &&
@@ -298,6 +317,31 @@ public abstract class AbstractArrowMixin extends Projectile {
                     false,
                     Level.ExplosionInteraction.TNT);
         }
+
+        if (this.getOwner() instanceof AttackerUnit aUnit) {
+            // garrisoned unit -> ground
+            BuildingPlacement building = GarrisonableBuildingAddon.getGarrison((Unit) aUnit);
+            if (isInsideBuildingAndNotForeignEntity(pResult, building)) {
+                ci.cancel();
+            }
+        }
+    }
+
+    @Unique
+    private boolean reignofnether$ignoresBlockPos(BlockPos pos) {
+        if (!(this.getOwner() instanceof AttackerUnit aUnit))
+            return false;
+        BuildingPlacement building = GarrisonableBuildingAddon.getGarrison((Unit) aUnit);
+        return building != null && building.isPosInsideBuilding(pos);
+    }
+
+    @Redirect(
+            method = "tick",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/block/state/BlockState;getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/shapes/VoxelShape;")
+    )
+    private VoxelShape reignofnether$noStickInGarrison(BlockState state, BlockGetter getter, BlockPos pos) {
+        return reignofnether$ignoresBlockPos(pos) ? Shapes.empty() : state.getCollisionShape(getter, pos);
     }
 }
 

@@ -61,6 +61,7 @@ public class AllianceServerboundPacket {
                 success.set(false);
                 return;
             }
+            ReignOfNether.LOGGER.info("[Alliance] {} performed {} (target: {}, boolValue: {})", player.getName(), action, targetPlayerName, boolValue);
             switch (action) {
                 case REQUEST -> MiscUtil.runPlayerCommand(player, "ally " + targetPlayerName);
                 case CANCEL_REQUEST -> MiscUtil.runPlayerCommand(player, "allycancelrequest " + targetPlayerName);

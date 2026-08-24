@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -76,7 +77,7 @@ public class NonUnitClientEvents {
                             Vec3 pos = new Vec3(bp.getX() + 0.5f, bp.getY() + 1.0f, bp.getZ() + 0.5f);
                             MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, firstPos, pos, isMoveCheckpointGreen ? 0 : 1, isMoveCheckpointGreen ? 1 : 0, 0, a);
 
-                            if (MC.level.getBlockState(bp.offset(0, 1, 0)).getBlock() instanceof SnowLayerBlock) {
+                            if (MiscUtil.isSnowLayerBlock(MC.level.getBlockState(bp.offset(0, 1, 0)).getBlock())) {
                                 AABB aabb = new AABB(bp);
                                 aabb = aabb.setMaxY(aabb.maxY + 0.13f);
                                 MyRenderer.drawSolidBox(

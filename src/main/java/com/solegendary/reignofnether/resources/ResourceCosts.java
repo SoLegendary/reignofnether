@@ -12,6 +12,7 @@ public class ResourceCosts {
     private static final String ID = ReignOfNether.MOD_ID;
 
     public static final ResourceCost ZOMBIE_VILLAGER = new ResourceCost(ID, "ZOMBIE_VILLAGER");
+    public static final ResourceCost BAT = new ResourceCost(ID, "BAT");
     public static final ResourceCost CREEPER = new ResourceCost(ID, "CREEPER");
     public static final ResourceCost ZOMBIE = new ResourceCost(ID, "ZOMBIE");
     public static final ResourceCost SKELETON = new ResourceCost(ID, "SKELETON");
@@ -21,19 +22,24 @@ public class ResourceCosts {
     public static final ResourceCost DROWNED = new ResourceCost(ID, "DROWNED");
     public static final ResourceCost SPIDER = new ResourceCost(ID, "SPIDER");
     public static final ResourceCost POISON_SPIDER = new ResourceCost(ID, "POISON_SPIDER");
+    public static final ResourceCost WRAITH = new ResourceCost(ID, "WRAITH");
     public static final ResourceCost SLIME = new ResourceCost(ID, "SLIME");
     public static final ResourceCost WARDEN = new ResourceCost(ID, "WARDEN");
     public static final ResourceCost ZOMBIE_PIGLIN = new ResourceCost(ID, "ZOMBIE_PIGLIN");
     public static final ResourceCost ZOGLIN = new ResourceCost(ID, "ZOGLIN");
     public static final ResourceCost VILLAGER = new ResourceCost(ID, "VILLAGER");
+    public static final ResourceCost SCOUT_DOG = new ResourceCost(ID, "SCOUT_DOG");
+    public static final ResourceCost SCOUT_CAT = new ResourceCost(ID, "SCOUT_CAT");
     public static final ResourceCost MILITIA = new ResourceCost(ID, "MILITIA");
     public static final ResourceCost IRON_GOLEM = new ResourceCost(ID, "IRON_GOLEM");
     public static final ResourceCost PILLAGER = new ResourceCost(ID, "PILLAGER");
+    public static final ResourceCost WINDCALLER = new ResourceCost(ID, "WINDCALLER");
     public static final ResourceCost VINDICATOR = new ResourceCost(ID, "VINDICATOR");
     public static final ResourceCost WITCH = new ResourceCost(ID, "WITCH");
     public static final ResourceCost EVOKER = new ResourceCost(ID, "EVOKER");
     public static final ResourceCost RAVAGER = new ResourceCost(ID, "RAVAGER");
     public static final ResourceCost GRUNT = new ResourceCost(ID, "GRUNT");
+    public static final ResourceCost STRIDER = new ResourceCost(ID, "STRIDER");
     public static final ResourceCost BRUTE = new ResourceCost(ID, "BRUTE");
     public static final ResourceCost HEADHUNTER = new ResourceCost(ID, "HEADHUNTER");
     public static final ResourceCost MARAUDER = new ResourceCost(ID, "MARAUDER");
@@ -58,6 +64,8 @@ public class ResourceCosts {
     public static final ResourceCost PANDA = new ResourceCost(ID, "PANDA");
     public static final ResourceCost WOLF = new ResourceCost(ID, "WOLF");
     public static final ResourceCost LLAMA = new ResourceCost(ID, "LLAMA");
+    public static final ResourceCost KILLER_RABBIT = new ResourceCost(ID, "KILLER_RABBIT");
+    public static final ResourceCost SILVERFISH = new ResourceCost(ID, "SILVERFISH");
 
     //BUILDINGS
     public static final ResourceCost BEACON = new ResourceCost(ID, "BEACON");
@@ -79,18 +87,21 @@ public class ResourceCosts {
     public static final ResourceCost SLIME_PIT = new ResourceCost(ID, "SLIME_PIT");
     public static final ResourceCost STRONGHOLD = new ResourceCost(ID, "STRONGHOLD");
     public static final ResourceCost ALTAR_OF_DARKNESS = new ResourceCost(ID, "ALTAR_OF_DARKNESS");
+    public static final ResourceCost MONSTER_MARKET = new ResourceCost(ID, "MONSTER_MARKET");
     //Villagers
     public static final ResourceCost TOWN_CENTRE = new ResourceCost(ID, "TOWN_CENTRE");
     public static final ResourceCost VILLAGER_HOUSE = new ResourceCost(ID, "VILLAGER_HOUSE");
     public static final ResourceCost WHEAT_FARM = new ResourceCost(ID, "WHEAT_FARM");
     public static final ResourceCost BARRACKS = new ResourceCost(ID, "BARRACKS");
     public static final ResourceCost BLACKSMITH = new ResourceCost(ID, "BLACKSMITH");
+    public static final ResourceCost WITCH_HUT = new ResourceCost(ID, "WITCH_HUT");
     public static final ResourceCost ARCANE_TOWER = new ResourceCost(ID, "ARCANE_TOWER");
     public static final ResourceCost LIBRARY = new ResourceCost(ID, "LIBRARY");
     public static final ResourceCost WATCHTOWER = new ResourceCost(ID, "WATCHTOWER");
     public static final ResourceCost CASTLE = new ResourceCost(ID, "CASTLE");
     public static final ResourceCost IRON_GOLEM_BUILDING = new ResourceCost(ID, "IRON_GOLEM_BUILDING");
     public static final ResourceCost SHRINE_OF_PROSPERITY = new ResourceCost(ID, "SHRINE_OF_PROSPERITY");
+    public static final ResourceCost VILLAGER_MARKET = new ResourceCost(ID, "VILLAGER_MARKET");
     //Piglins
     public static final ResourceCost CENTRAL_PORTAL = new ResourceCost(ID, "CENTRAL_PORTAL");
     public static final ResourceCost BASIC_PORTAL = new ResourceCost(ID, "BASIC_PORTAL");
@@ -103,6 +114,7 @@ public class ResourceCosts {
     public static final ResourceCost WITHER_SHRINE = new ResourceCost(ID, "WITHER_SHRINE");
     public static final ResourceCost FORTRESS = new ResourceCost(ID, "FORTRESS");
     public static final ResourceCost INFERNAL_PORTAL = new ResourceCost(ID, "INFERNAL_PORTAL");
+    public static final ResourceCost PIGLIN_MARKET = new ResourceCost(ID, "PIGLIN_MARKET");
 
     // RESEARCH
 
@@ -118,11 +130,15 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_DROWNED = new ResourceCost(ID, "RESEARCH_DROWNED");
     public static final ResourceCost RESEARCH_STRAYS = new ResourceCost(ID, "RESEARCH_STRAYS");
     public static final ResourceCost RESEARCH_BOGGED = new ResourceCost(ID, "RESEARCH_BOGGED");
+    public static final ResourceCost RESEARCH_OVERFLOWING_GRAVEYARD = new ResourceCost(ID, "RESEARCH_OVERFLOWING_GRAVEYARD");
+    public static final ResourceCost RESEARCH_MASS_BURIALS = new ResourceCost(ID, "RESEARCH_MASS_BURIALS");
+    public static final ResourceCost RESEARCH_POSSESSION = new ResourceCost(ID, "RESEARCH_POSSESSION");
     public static final ResourceCost RESEARCH_SLIME_CONVERSION = new ResourceCost(ID, "RESEARCH_SLIME_CONVERSION");
     public static final ResourceCost RESEARCH_LINGERING_POTIONS = new ResourceCost(ID, "RESEARCH_LINGERING_POTIONS");
     public static final ResourceCost RESEARCH_HEALING_POTIONS = new ResourceCost(ID, "RESEARCH_HEALING_POTIONS");
     public static final ResourceCost RESEARCH_WATER_POTIONS = new ResourceCost(ID, "RESEARCH_WATER_POTIONS");
     public static final ResourceCost RESEARCH_EVOKER_VEXES = new ResourceCost(ID, "RESEARCH_EVOKER_VEXES");
+    public static final ResourceCost RESEARCH_UPGRADED_WINDCALLERS = new ResourceCost(ID, "RESEARCH_UPGRADED_WINDCALLERS");
     public static final ResourceCost RESEARCH_CASTLE_FLAG = new ResourceCost(ID, "RESEARCH_CASTLE_FLAG");
     public static final ResourceCost RESEARCH_GRAND_LIBRARY = new ResourceCost(ID, "RESEARCH_GRAND_LIBRARY");
     public static final ResourceCost RESEARCH_SILVERFISH = new ResourceCost(ID, "RESEARCH_SILVERFISH");
@@ -131,6 +147,7 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_BRUTE_SHIELDS = new ResourceCost(ID, "RESEARCH_BRUTE_SHIELDS");
     public static final ResourceCost RESEARCH_HOGLIN_CAVALRY = new ResourceCost(ID, "RESEARCH_HOGLIN_CAVALRY");
     public static final ResourceCost RESEARCH_HEAVY_TRIDENTS = new ResourceCost(ID, "RESEARCH_HEAVY_TRIDENTS");
+    public static final ResourceCost RESEARCH_GREEDY_TRIDENTS = new ResourceCost(ID, "RESEARCH_GREEDY_TRIDENTS");
     public static final ResourceCost RESEARCH_CLEAVING_FLAILS = new ResourceCost(ID, "RESEARCH_CLEAVING_FLAILS");
     public static final ResourceCost RESEARCH_BLAZE_FIRE_WALL = new ResourceCost(ID, "RESEARCH_BLAZE_FIRE_WALL");
     public static final ResourceCost RESEARCH_FIRE_RESISTANCE = new ResourceCost(ID, "RESEARCH_FIRE_RESISTANCE");
@@ -155,13 +172,13 @@ public class ResourceCosts {
     public static final ResourceCost ENCHANT_SHARPNESS = new ResourceCost(ID, "ENCHANT_SHARPNESS");
     public static final ResourceCost ENCHANT_MULTISHOT = new ResourceCost(ID, "ENCHANT_MULTISHOT");
     public static final ResourceCost ENCHANT_VIGOR = new ResourceCost(ID, "ENCHANT_VIGOR");
+    public static final ResourceCost ENCHANT_GUST = new ResourceCost(ID, "ENCHANT_GUST");
     public static final ResourceCost EQUIP_LEATHER_ARMOR = new ResourceCost(ID, "EQUIP_LEATHER_ARMOR");
     public static final ResourceCost EQUIP_CHAINMAIL_ARMOR = new ResourceCost(ID, "EQUIP_CHAINMAIL_ARMOR");
 
-    // UNUSED
-
-    public static final ResourceCost RESEARCH_VINDICATOR_AXES = ResourceCost.Research(0,200,400, 150);
-    public static final ResourceCost RESEARCH_PILLAGER_CROSSBOWS = ResourceCost.Research(0,600,300, 180);
+    // Research (previously unused, now configurable)
+    public static final ResourceCost RESEARCH_VINDICATOR_AXES = new ResourceCost(ID, "RESEARCH_VINDICATOR_AXES");
+    public static final ResourceCost RESEARCH_PILLAGER_CROSSBOWS = new ResourceCost(ID, "RESEARCH_PILLAGER_CROSSBOWS");
 
     public static FormattedCharSequence getFormattedCost(ResourceCost resCost) {
         String str = "";
@@ -171,6 +188,8 @@ public class ResourceCosts {
             str += "\uE001  " + resCost.wood + "     ";
         if (resCost.ore > 0)
             str += "\uE002  " + resCost.ore + "     ";
+        if (resCost.emerald > 0)
+            str += "\uE010  " + resCost.emerald + "     ";
 
         if (str.isEmpty())
             str += "\uE000  0     ";
@@ -201,6 +220,7 @@ public class ResourceCosts {
         CREEPER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.CREEPER);
         ZOMBIE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOMBIE);
         ZOMBIE_VILLAGER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOMBIE_VILLAGER);
+        BAT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BAT);
         SKELETON.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SKELETON);
         STRAY.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.STRAY);
         BOGGED.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BOGGED);
@@ -208,6 +228,7 @@ public class ResourceCosts {
         DROWNED.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.DROWNED);
         SPIDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SPIDER);
         POISON_SPIDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.POISON_SPIDER);
+        WRAITH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WRAITH);
         SLIME.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SLIME);
         WARDEN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WARDEN);
         NECROMANCER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.NECROMANCER);
@@ -216,9 +237,12 @@ public class ResourceCosts {
         ZOGLIN.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ZOGLIN);
         // Villagers
         VILLAGER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.VILLAGER);
+        SCOUT_DOG.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SCOUT_DOG);
+        SCOUT_CAT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SCOUT_CAT);
         MILITIA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.MILITIA);
         IRON_GOLEM.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.IRON_GOLEM);
         PILLAGER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PILLAGER);
+        WINDCALLER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WINDCALLER);
         VINDICATOR.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.VINDICATOR);
         WITCH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WITCH);
         EVOKER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.EVOKER);
@@ -227,6 +251,7 @@ public class ResourceCosts {
         ENCHANTER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.ENCHANTER);
         // Piglins
         GRUNT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.GRUNT);
+        STRIDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.STRIDER);
         BRUTE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BRUTE);
         HEADHUNTER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HEADHUNTER);
         MARAUDER.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.MARAUDER);
@@ -244,6 +269,8 @@ public class ResourceCosts {
         PANDA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PANDA);
         WOLF.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WOLF);
         LLAMA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.LLAMA);
+        KILLER_RABBIT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.KILLER_RABBIT);
+        SILVERFISH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SILVERFISH);
 
         HERO_BASE_REVIVE_COST.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HERO_BASE_REVIVE_COST);
         HERO_EXTRA_REVIVE_COST_PER_LEVEL.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.HERO_EXTRA_REVIVE_COST_PER_LEVEL);
@@ -268,18 +295,21 @@ public class ResourceCosts {
         SLIME_PIT.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.SLIME_PIT);
         STRONGHOLD.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.STRONGHOLD);
         ALTAR_OF_DARKNESS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.ALTAR_OF_DARKNESS);
+        MONSTER_MARKET.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.MONSTER_MARKET);
         // Villagers
         TOWN_CENTRE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.TOWN_CENTRE);
         VILLAGER_HOUSE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.VILLAGER_HOUSE);
         WHEAT_FARM.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.WHEAT_FARM);
         BARRACKS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BARRACKS);
         BLACKSMITH.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BLACKSMITH);
+        WITCH_HUT.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.WITCH_HUT);
         ARCANE_TOWER.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.ARCANE_TOWER);
         LIBRARY.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.LIBRARY);
         WATCHTOWER.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.WATCHTOWER);
         CASTLE.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CASTLE);
         IRON_GOLEM_BUILDING.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.IRON_GOLEM_BUILDING);
         SHRINE_OF_PROSPERITY.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.SHRINE_OF_PROSPERITY);
+        VILLAGER_MARKET.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.VILLAGER_MARKET);
         // Piglins
         CENTRAL_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CENTRAL_PORTAL);
         BASIC_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASIC_PORTAL);
@@ -292,6 +322,7 @@ public class ResourceCosts {
         BASALT_SPRINGS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASALT_SPRINGS);
         FORTRESS.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.FORTRESS);
         INFERNAL_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.INFERNAL_PORTAL);
+        PIGLIN_MARKET.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.PIGLIN_MARKET);
         // ******************* RESEARCH ******************* //
         RESEARCH_GOLEM_SMITHING.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_GOLEM_SMITHING);
         RESEARCH_SUPERIOR_BLACKSMITH.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_SUPERIOR_BLACKSMITH);
@@ -305,11 +336,15 @@ public class ResourceCosts {
         RESEARCH_DROWNED.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_DROWNED);
         RESEARCH_STRAYS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_STRAYS);
         RESEARCH_BOGGED.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BOGGED);
+        RESEARCH_OVERFLOWING_GRAVEYARD.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_OVERFLOWING_GRAVEYARD);
+        RESEARCH_MASS_BURIALS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_MASS_BURIALS);
+        RESEARCH_POSSESSION.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_POSSESSION);
         RESEARCH_SLIME_CONVERSION.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_SLIME_CONVERSION);
         RESEARCH_LINGERING_POTIONS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_LINGERING_POTIONS);
         RESEARCH_WATER_POTIONS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_WATER_POTIONS);
         RESEARCH_HEALING_POTIONS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_HEALING_POTIONS);
         RESEARCH_EVOKER_VEXES.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_EVOKER_VEXES);
+        RESEARCH_UPGRADED_WINDCALLERS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_UPGRADED_WINDCALLERS);
         RESEARCH_CASTLE_FLAG.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_CASTLE_FLAG);
         RESEARCH_GRAND_LIBRARY.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_GRAND_LIBRARY);
         RESEARCH_SILVERFISH.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_SILVERFISH);
@@ -318,6 +353,7 @@ public class ResourceCosts {
         RESEARCH_BRUTE_SHIELDS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BRUTE_SHIELDS);
         RESEARCH_HOGLIN_CAVALRY.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_HOGLIN_CAVALRY);
         RESEARCH_HEAVY_TRIDENTS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_HEAVY_TRIDENTS);
+        RESEARCH_GREEDY_TRIDENTS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_GREEDY_TRIDENTS);
         RESEARCH_CLEAVING_FLAILS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_CLEAVING_FLAILS);
         RESEARCH_BLAZE_FIRE_WALL.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BLAZE_FIRE_WALL);
         RESEARCH_FIRE_RESISTANCE.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_FIRE_RESISTANCE);
@@ -334,12 +370,15 @@ public class ResourceCosts {
         RESEARCH_BEACON_LEVEL3.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL3);
         RESEARCH_BEACON_LEVEL4.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL4);
         RESEARCH_BEACON_LEVEL5.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL5);
+        RESEARCH_VINDICATOR_AXES.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_VINDICATOR_AXES);
+        RESEARCH_PILLAGER_CROSSBOWS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_PILLAGER_CROSSBOWS);
         // ******************* ABILITIES ******************* //
         ENCHANT_MAIMING.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.ENCHANT_MAIMING);
         ENCHANT_QUICK_CHARGE.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.ENCHANT_QUICK_CHARGE);
         ENCHANT_SHARPNESS.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.ENCHANT_SHARPNESS);
         ENCHANT_MULTISHOT.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.ENCHANT_MULTISHOT);
         ENCHANT_VIGOR.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.ENCHANT_VIGOR);
+        ENCHANT_GUST.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.ENCHANT_GUST);
         EQUIP_LEATHER_ARMOR.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.EQUIP_LEATHER_ARMOR);
         EQUIP_CHAINMAIL_ARMOR.bakeValues(ReignOfNetherCommonConfigs.AbilityCosts.EQUIP_CHAINMAIL_ARMOR);
     }

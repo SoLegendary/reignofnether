@@ -39,9 +39,9 @@ public class PortalBasic extends AbstractPortal {
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/gray_glazed_terracotta.png");
         this.canSetRallyPoint = false;
 
-        this.productions.add(ProductionItems.RESEARCH_PORTAL_FOR_CIVILIAN, Keybindings.keyQ);
-        this.productions.add(ProductionItems.RESEARCH_PORTAL_FOR_MILITARY, Keybindings.keyW);
-        this.productions.add(ProductionItems.RESEARCH_PORTAL_FOR_TRANSPORT, Keybindings.keyE);
+        this.productions.add(ProductionItems.RESEARCH_PORTAL_FOR_CIVILIAN, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.RESEARCH_PORTAL_FOR_MILITARY, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.RESEARCH_PORTAL_FOR_TRANSPORT, Keybindings.abilitySlot3);
     }
 
     @Override
@@ -60,15 +60,15 @@ public class PortalBasic extends AbstractPortal {
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.CENTRAL_PORTAL) || ResearchClient.hasCheat(
                 "modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.portal_basic"),
+            List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.portal_basic"),
                     Style.EMPTY.withBold(true)
                 ),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.portal_basic.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.portal_basic.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.portal_basic.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.portal_basic.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.portal_basic.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.portal_basic.tooltip3"), Style.EMPTY)
             ),
             this
         );

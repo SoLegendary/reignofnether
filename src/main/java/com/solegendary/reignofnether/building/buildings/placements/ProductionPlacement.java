@@ -1,20 +1,18 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
-import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingClientboundPacket;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.production.ActiveProduction;
-import com.solegendary.reignofnether.building.production.ProductionBuilding;
-import com.solegendary.reignofnether.building.production.ProductionItem;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.production.*;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -37,13 +35,16 @@ public class ProductionPlacement extends BuildingPlacement {
     private LivingEntity rallyPointEntity;
     public List<Button> productionButtons;
     public final List<ActiveProduction> productionQueue = new ArrayList<>();
-    private ActiveProduction active;
+    public boolean attackRally = false;
+    public ResourceName rallyResourceName = ResourceName.NONE; // used to set worker resource targets
 
     public ProductionPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
         if (building instanceof ProductionBuilding productionBuilding) {
             productionButtons = productionBuilding.productions.getButtons(this);
         }
+        if (isCapitol)
+            this.allowProdWhileBuilding = true;
     }
 
     @Nullable
@@ -75,6 +76,7 @@ public class ProductionPlacement extends BuildingPlacement {
         if (!isPosInsideBuilding(rallyPoint))
             this.rallyPoints.add(rallyPoint);
         this.rallyPointEntity = null;
+        rallyResourceName = ResourceSources.getBlockResourceName(rallyPoint, level);
     }
 
     public void addRallyPoint(BlockPos rallyPoint) {
@@ -83,6 +85,7 @@ public class ProductionPlacement extends BuildingPlacement {
         if (!isPosInsideBuilding(rallyPoint))
             this.rallyPoints.add(rallyPoint);
         this.rallyPointEntity = null;
+        rallyResourceName = ResourceSources.getBlockResourceName(rallyPoint, level);
     }
 
     public boolean canSetRallyPoint() {
@@ -90,12 +93,17 @@ public class ProductionPlacement extends BuildingPlacement {
     }
 
     public void setRallyPointEntity(LivingEntity entity) {
-        ProductionBuilding building = (ProductionBuilding) getBuilding();
-        if (!canSetRallyPoint() || entity == null)
+        if (!canSetRallyPoint() || entity == null || !entity.isAlive())
             return;
-        else if (!(entity instanceof Unit unit) || unit.getOwnerName().equals(this.ownerName))
-            this.rallyPointEntity = entity;
+        this.rallyPointEntity = entity;
         this.rallyPoints.clear();
+        attackRally = isRallyEntityAttackable();
+    }
+
+    private boolean isRallyEntityAttackable() {
+        return rallyPointEntity != null && rallyPointEntity.isAlive() &&
+                (ResourceSources.isHuntableAnimal(rallyPointEntity) ||
+                (rallyPointEntity instanceof Unit unit1 && !AlliancesServerEvents.isAlliedOrOwned(unit1.getOwnerName(), ownerName)));
     }
 
     private boolean isProducing() {
@@ -104,16 +112,20 @@ public class ProductionPlacement extends BuildingPlacement {
     // start with the centre pos then go down and look at adjacent blocks until we reach a non-solid block
     public BlockPos getIndoorSpawnPoint(ServerLevel level) {
         ProductionBuilding building = (ProductionBuilding) getBuilding();
-        return building.getIndoorSpawnPoint(level, centrePos);
+        return building.getIndoorSpawnPoint(level, this);
     }
 
     // start with the centre pos then go down and look at adjacent blocks until we reach a non-solid block
     public BlockPos getDefaultOutdoorSpawnPoint() {
         ProductionBuilding building = (ProductionBuilding) getBuilding();
-        return building.getDefaultOutdoorSpawnPoint(getMinCorner(blocks));
+        return building.getDefaultOutdoorSpawnPoint(getMinCorner(blocks), this);
     }
 
     public Entity produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName, boolean spawnIndoors) {
+        return produceUnit(level, entityType, ownerName, spawnIndoors, new Vec3i(0,0,0));
+    }
+
+    public Entity produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName, boolean spawnIndoors, Vec3i spawnOffset) {
         ProductionBuilding building = (ProductionBuilding) getBuilding();
         LivingEntity rallyEntity = getRallyPointEntity();
         BlockPos spawnPoint;
@@ -128,6 +140,8 @@ public class ProductionPlacement extends BuildingPlacement {
             spawnPoint = getClosestGroundPos(rallyPointEntity.getOnPos(), (int) building.spawnRadiusOffset);
         else
             spawnPoint = getDefaultOutdoorSpawnPoint();
+
+        spawnPoint = spawnPoint.offset(spawnOffset);
 
         Entity entity = entityType.spawn(level, (CompoundTag) null,
                 null,
@@ -144,8 +158,8 @@ public class ProductionPlacement extends BuildingPlacement {
             unit.setOwnerName(ownerName);
             unit.setupEquipmentAndUpgradesServer();
 
-            if (rallyEntity != null) {
-                if (ResourceSources.isHuntableAnimal(rallyEntity)) {
+            if (rallyEntity != null && rallyEntity.isAlive()) {
+                if (isRallyEntityAttackable()) {
                     CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
                         if (!fRallyPoints.isEmpty()) {
                             UnitServerEvents.addActionItem(
@@ -179,13 +193,18 @@ public class ProductionPlacement extends BuildingPlacement {
                         if (fRallyPoints.size() > fi)
                             UnitServerEvents.addActionItem(
                                     this.ownerName,
-                                    UnitAction.MOVE,
+                                    attackRally ? UnitAction.ATTACK_MOVE : UnitAction.MOVE,
                                     -1,
                                     new int[] { entity.getId() },
                                     fRallyPoints.get(fi),
                                     new BlockPos(0,0,0),
                                     fi > 0
                             );
+                    });
+                    CompletableFuture.delayedExecutor(750, TimeUnit.MILLISECONDS).execute(() -> {
+                        if (!attackRally && unit instanceof WorkerUnit workerUnit)
+                            if (rallyResourceName != ResourceName.NONE)
+                                workerUnit.getGatherResourceGoal().setTargetResourceName(rallyResourceName);
                     });
                 }
             }
@@ -215,28 +234,46 @@ public class ProductionPlacement extends BuildingPlacement {
                     case ALLOW -> true;
                 };
 
-                if (allow && prodItem.canAfford(getLevel(), ownerName)) {
+                if (allow && prodItem.canAfford(this)) {
                     ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);
                     productionQueue.add(activeProduction);
                     ResourcesServerEvents.addSubtractResources(new Resources(
                             ownerName,
                             -prodItem.getCost(level.isClientSide(), ownerName).food,
                             -prodItem.getCost(level.isClientSide(), ownerName).wood,
-                            -prodItem.getCost(level.isClientSide(), ownerName).ore
+                            -prodItem.getCost(level.isClientSide(), ownerName).ore,
+                            -prodItem.getCost(level.isClientSide(), ownerName).emerald
                     ));
                     success = true;
                 }
                 else {
-                    if (!prodItem.isBelowMaxPopulation(level, ownerName))
+                    if (!prodItem.isBelowMaxPopulation(this))
                         ResourcesClientboundPacket.warnMaxPopulation(ownerName);
-                    else if (!prodItem.canAffordPopulation(getLevel(), ownerName))
-                        ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                    else if (!prodItem.canAffordPopulation(this)) {
+                        if (prodItem instanceof GraveyardUnitProductionItem && this instanceof GraveyardPlacement gy && gy.getUpgradeLevel() > 0) {
+                            ResourcesClientboundPacket.warnFullGraveyard(ownerName);
+                        } else {
+                            ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                        }
+                    }
                     else
                         ResourcesClientboundPacket.warnInsufficientResources(ownerName,
                                 ResourcesServerEvents.canAfford(ownerName, ResourceName.FOOD, prodItem.getCost(level.isClientSide(), ownerName).food),
                                 ResourcesServerEvents.canAfford(ownerName, ResourceName.WOOD, prodItem.getCost(level.isClientSide(), ownerName).wood),
-                                ResourcesServerEvents.canAfford(ownerName, ResourceName.ORE, prodItem.getCost(level.isClientSide(), ownerName).ore)
+                                ResourcesServerEvents.canAfford(ownerName, ResourceName.ORE, prodItem.getCost(level.isClientSide(), ownerName).ore),
+                                ResourcesServerEvents.canAfford(ownerName, ResourceName.EMERALD, prodItem.getCost(level.isClientSide(), ownerName).emerald)
                         );
+                }
+            }
+        }
+        // DISALLOW_FOR_BUILDING items are likely building upgrades, so switch focus to an unupgraded building without any upgrade in progress
+        if (success && level.isClientSide() && prodItem.dupeRule == ProdDupeRule.DISALLOW_FOR_BUILDING) {
+            for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings()) {
+                if (bpl.getBuilding() == this.getBuilding() && bpl != this && bpl instanceof ProductionPlacement ppl &&
+                    !ppl.productionQueue.stream().map(ap -> ap.item.dupeRule).toList().contains(ProdDupeRule.DISALLOW_FOR_BUILDING) &&
+                    ppl.getUpgradeLevel() == 0) {
+                    HudClientEvents.hudSelectedPlacement = bpl;
+                    break;
                 }
             }
         }
@@ -250,7 +287,6 @@ public class ProductionPlacement extends BuildingPlacement {
             if (frontItem) {
                 ActiveProduction prodItem = productionQueue.get(0);
                 productionQueue.remove(0);
-                active = null;
                 if (!getLevel().isClientSide()) {
                     ResourcesServerEvents.addSubtractResources(new Resources(
                             ownerName,
@@ -300,7 +336,6 @@ public class ProductionPlacement extends BuildingPlacement {
             ActiveProduction nextItem = productionQueue.get(0);
             if (nextItem.item.tick(this, nextItem)) {
                 if (!tickLevel.isClientSide()) {
-                    active = null;
                     productionQueue.remove(0);
                     if (productionQueue.isEmpty())
                         BuildingClientboundPacket.clearQueue(this.originPos);

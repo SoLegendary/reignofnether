@@ -61,7 +61,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
 
     @Override
     public String getUpgradedName() {
-        String name = I18n.get("buildings.neutral.reignofnether.capturable_beacon");
+        String name = I18n.get("buildings.reignofnether.capturable_beacon");
         if (getAuraEffect() == MobEffects.LUCK)
             return name + " (" + I18n.get("ability.reignofnether.beacon_aura.wealth") + ")";
         else if (getAuraEffect() == MobEffects.DIG_SPEED)
@@ -201,20 +201,20 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
             BeaconPlacement beacon = BuildingUtils.getBeacon(level.isClientSide);
             if (beacon != null && msg.equals("upgraded_warning")) {
                 String upgradeName = "";
-                if (beacon.getUpgradeLevel() == 1) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level1").getString();
-                else if (beacon.getUpgradeLevel() == 2) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level2").getString();
-                else if (beacon.getUpgradeLevel() == 3) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level3").getString();
-                else if (beacon.getUpgradeLevel() == 4) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level4").getString();
-                else if (beacon.getUpgradeLevel() == 5) upgradeName = Component.translatable("buildings.neutral.reignofnether.beacon.upgrade.beacon_level5").getString();
+                if (beacon.getUpgradeLevel() == 1) upgradeName = Component.translatable("buildings.reignofnether.beacon.upgrade.beacon_level1").getString();
+                else if (beacon.getUpgradeLevel() == 2) upgradeName = Component.translatable("buildings.reignofnether.beacon.upgrade.beacon_level2").getString();
+                else if (beacon.getUpgradeLevel() == 3) upgradeName = Component.translatable("buildings.reignofnether.beacon.upgrade.beacon_level3").getString();
+                else if (beacon.getUpgradeLevel() == 4) upgradeName = Component.translatable("buildings.reignofnether.beacon.upgrade.beacon_level4").getString();
+                else if (beacon.getUpgradeLevel() == 5) upgradeName = Component.translatable("buildings.reignofnether.beacon.upgrade.beacon_level5").getString();
 
-                PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.neutral.reignofnether.beacon.upgrade_warning",
+                PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.reignofnether.beacon.upgrade_warning",
                         true, ownerName, upgradeName, beacon.getUpgradeLevel(), Beacon.MAX_UPGRADE_LEVEL);
             } else {
-                PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.neutral.reignofnether.beacon." + msg,
+                PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.reignofnether.beacon." + msg,
                         true, ownerName);
             }
             if (beacon != null && beacon.getUpgradeLevel() >= Beacon.MAX_UPGRADE_LEVEL && !msg.equals("destroy_warning")) {
-                PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.neutral.reignofnether.beacon.time_to_win",
+                PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.reignofnether.beacon.time_to_win",
                         false, ownerName, PlayerServerEvents.getBeaconWinTime(ownerName));
             }
             PlayerServerEvents.sendMessageToAllPlayersNoNewlines("");

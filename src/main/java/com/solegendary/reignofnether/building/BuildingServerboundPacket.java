@@ -90,9 +90,19 @@ public class BuildingServerboundPacket {
                 BuildingAction.SET_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
+    public static void setAttackRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.SET_ATTACK_RALLY_POINT,
+                "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
+    }
     public static void addRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.ADD_RALLY_POINT,
+                "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
+    }
+    public static void addAttackRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
+        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+                BuildingAction.ADD_ATTACK_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
     public static void setRallyPointEntity(BlockPos buildingPos, int entityId) {
@@ -187,29 +197,46 @@ public class BuildingServerboundPacket {
                 success.set(false);
                 return;
             }
+            ReignOfNether.LOGGER.info("[Building] {} performed {} for {} (itemName: {}, pos: {})", player.getName(), this.action, this.ownerName, this.itemName, this.buildingPos);
             switch (this.action) {
                 case PLACE -> {
-                    BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge);
+                    BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge, false, false);
                 }
                 case PLACE_AND_QUEUE -> {
-                    BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge);
+                    BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge, false, false);
                 }
                 case PLACE_CUSTOM -> {
-                    BuildingServerEvents.placeBuilding(CustomBuildingServerEvents.getCustomBuilding(this.itemName), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge);
+                    BuildingServerEvents.placeBuilding(CustomBuildingServerEvents.getCustomBuilding(this.itemName), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge, false, false);
                 }
                 case PLACE_AND_QUEUE_CUSTOM -> {
-                    BuildingServerEvents.placeBuilding(CustomBuildingServerEvents.getCustomBuilding(this.itemName), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge);
+                    BuildingServerEvents.placeBuilding(CustomBuildingServerEvents.getCustomBuilding(this.itemName), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge, false, false);
                 }
                 case DESTROY -> {
                     BuildingServerEvents.cancelBuilding(building, this.ownerName);
                 }
                 case SET_RALLY_POINT -> {
-                    if (building instanceof ProductionPlacement productionBuilding)
+                    if (building instanceof ProductionPlacement productionBuilding) {
                         productionBuilding.setRallyPoint(rallyPos);
+                        productionBuilding.attackRally = false;
+                    }
+                }
+                case SET_ATTACK_RALLY_POINT -> {
+                    if (building instanceof ProductionPlacement productionBuilding) {
+                        productionBuilding.setRallyPoint(rallyPos);
+                        productionBuilding.attackRally = true;
+                    }
                 }
                 case ADD_RALLY_POINT -> {
-                    if (building instanceof ProductionPlacement productionBuilding)
+                    if (building instanceof ProductionPlacement productionBuilding) {
                         productionBuilding.addRallyPoint(rallyPos);
+                        productionBuilding.attackRally = false;
+                    }
+                }
+                case ADD_ATTACK_RALLY_POINT -> {
+                    if (building instanceof ProductionPlacement productionBuilding) {
+                        productionBuilding.addRallyPoint(rallyPos);
+                        productionBuilding.attackRally = true;
+                    }
                 }
                 case SET_RALLY_POINT_ENTITY -> {
                     if (building instanceof ProductionPlacement productionBuilding) {
@@ -219,9 +246,11 @@ public class BuildingServerboundPacket {
                     }
                 }
                 case START_PRODUCTION -> {
-                    boolean prodSuccess = ((ProductionPlacement) building).startProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)));
-                    if (prodSuccess)
-                        BuildingClientboundPacket.startProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)));
+                    if (building instanceof ProductionPlacement pBuilding) {
+                        boolean prodSuccess = pBuilding.startProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)));
+                        if (prodSuccess)
+                            BuildingClientboundPacket.startProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)));
+                    }
                 }
                 case CANCEL_PRODUCTION -> {
                     if (building instanceof ProductionPlacement pBuilding) {

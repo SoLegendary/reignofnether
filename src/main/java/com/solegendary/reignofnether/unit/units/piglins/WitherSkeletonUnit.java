@@ -7,25 +7,33 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -39,6 +47,7 @@ import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +60,7 @@ import java.util.UUID;
 public class WitherSkeletonUnit extends WitherSkeleton implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new WitherCloud(), Keybindings.keyQ);
+        ABILITIES.add(new WitherCloud(), Keybindings.abilitySlot1);
     }
 
     //region
@@ -67,7 +76,6 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -116,32 +124,40 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(WitherSkeletonUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(WitherSkeletonUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(WitherSkeletonUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
-
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.WITHER_SKELETON;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage;}
+    public float getUnitAttackDamage() {return AttackerUnit.super.getUnitAttackDamage() + getSharpnessLevel();}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
     public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
+
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
 
     // endregion
 
@@ -186,7 +202,14 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ATTACK_KNOCKBACK, 0.5f)
                 .add(Attributes.ARMOR, WitherSkeletonUnit.armorValue)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 0.5f);
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.5f)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override
@@ -230,9 +253,37 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
             aec.setRadiusPerTick(-aec.getRadius() / (float)aec.getDuration());
             aec.addEffect(new MobEffectInstance(MobEffects.WITHER, 2 * 20, 1));
             level().addFreshEntity(aec);
+
+            AreaEffectCloud aec2 = new AreaEffectCloud(level(), getX(), getY(), getZ());
+            aec2.setOwner(this);
+            aec2.setRadius(4.0F);
+            aec2.setRadiusOnUse(0);
+            aec2.setDurationOnUse(0);
+            aec2.setDuration(2 * 20);
+            aec2.setRadiusPerTick(-aec2.getRadius() / (float)aec2.getDuration());
+            aec2.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 2 * 20, 0));
+            level().addFreshEntity(aec2);
         }
         if (deathCloudTicks > 0)
             deathCloudTicks -= 1;
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override
@@ -290,25 +341,24 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
         return itemStack.getItem() == Items.NETHERITE_CHESTPLATE;
     }
 
-    public static final int WITHER_SECONDS = 6;
+    public static final int EFFECT_DURATION = 6;
     public static final int WITHER_MAX_AMPLIFIER = 5; // amplifier starts at 0
     public static final int WITHER_MAX_AMPLIFIER_HERO = 3;
+    public static final int WEAKNESS_MAX_AMPLIFIER = 3; // 4 stacks, -80% dmg
+    public static final int WEAKNESS_MAX_AMPLIFIER_HERO = 1; // 2 stacks, -40% dmg
 
-    public static void applyStackingWither(LivingEntity le) {
+    public static void applyStackingEffect(LivingEntity le, MobEffect mobEffect, int maxAmp) {
         int amplifier = 0;
-        MobEffectInstance witherEffect = null;
-        for (MobEffectInstance effect : (le).getActiveEffects())
-            if (effect.getEffect() == MobEffects.WITHER)
-                witherEffect = effect;
+        MobEffectInstance mei = null;
+        for (MobEffectInstance activeMei : (le).getActiveEffects())
+            if (activeMei.getEffect() == mobEffect)
+                mei = activeMei;
 
-        if (witherEffect != null) {
-            int maxAmp = WITHER_MAX_AMPLIFIER;
-            if (le instanceof HeroUnit heroUnit)
-                maxAmp = WITHER_MAX_AMPLIFIER_HERO;
-            amplifier = Math.min(maxAmp, witherEffect.getAmplifier() + 1);
-            le.removeEffect(MobEffects.WITHER);
+        if (mei != null) {
+            amplifier = Math.min(maxAmp, mei.getAmplifier() + 1);
+            le.removeEffect(mobEffect);
         }
-        le.addEffect(new MobEffectInstance(MobEffects.WITHER, WITHER_SECONDS * 20, amplifier), null);
+        le.addEffect(new MobEffectInstance(mobEffect, EFFECT_DURATION * 20, amplifier), null);
     }
 
     @Override
@@ -316,8 +366,10 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
         if (!super.doHurtTarget(pEntity)) {
             return false;
         } else {
-            if (pEntity instanceof LivingEntity le)
-                applyStackingWither(le);
+            if (pEntity instanceof LivingEntity le) {
+                applyStackingEffect(le, MobEffects.WITHER, le instanceof HeroUnit ? WITHER_MAX_AMPLIFIER_HERO : WITHER_MAX_AMPLIFIER);
+                applyStackingEffect(le, MobEffects.WEAKNESS, le instanceof HeroUnit ? WEAKNESS_MAX_AMPLIFIER_HERO : WEAKNESS_MAX_AMPLIFIER);
+            }
             return true;
         }
     }
@@ -325,7 +377,10 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     @Override
     public boolean fireImmune() {
         BuildingPlacement bpl = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
-        return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
+        return super.fireImmune() ||
+                (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary ||
+                        bpl.getBuilding() instanceof BasaltSprings ||
+                        bpl.getBuilding() instanceof PiglinMarket));
     }
 
     @Override
@@ -347,7 +402,18 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
         setItemSlot(getEquipmentSlotForItem(itemStack), itemStack);
     }
 
+    public int getSharpnessLevel() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        return itemStack.getEnchantmentLevel(Enchantments.SHARPNESS);
+    }
 
+    @Override
+    public int getDamageTooltipColour() {
+        return getSharpnessLevel() > 0 ? TooltipColours.GREEN : TooltipColours.WHITE;
+    }
 
-
+    @Override
+    public boolean canBeAffected(MobEffectInstance pPotioneffect) {
+        return pPotioneffect.getEffect() != MobEffects.WEAKNESS && super.canBeAffected(pPotioneffect);
+    }
 }

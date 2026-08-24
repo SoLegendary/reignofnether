@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
 import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
+import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -43,10 +44,11 @@ public class MountGoal extends MoveToTargetBlockGoal {
             return false;
         else if (!unit.getOwnerName().equals(((Unit) this.mob).getOwnerName()))
             return false;
-        else return (this.mob instanceof PillagerUnit pillager && m instanceof RavagerUnit ravager) ||
-                    (this.mob instanceof SkeletonUnit skeleton && (m instanceof SpiderUnit || m instanceof PoisonSpiderUnit)) ||
-                    (this.mob instanceof StrayUnit stray && (m instanceof SpiderUnit || m instanceof PoisonSpiderUnit)) ||
-                    (this.mob instanceof HeadhunterUnit headhunter && m instanceof HoglinUnit);
+        else return (this.mob instanceof PillagerUnit && m instanceof RavagerUnit) ||
+                    (this.mob instanceof EvokerUnit && m instanceof RavagerUnit) ||
+                    (this.mob instanceof SkeletonUnit && (m instanceof SpiderUnit || m instanceof PoisonSpiderUnit)) ||
+                    (this.mob instanceof StrayUnit && (m instanceof SpiderUnit || m instanceof PoisonSpiderUnit)) ||
+                    (this.mob instanceof HeadhunterUnit && m instanceof HoglinUnit);
     }
 
     public void setNearestTarget() {

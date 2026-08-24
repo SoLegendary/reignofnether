@@ -13,6 +13,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 public abstract class AbstractFarm extends Building {
     public AbstractFarm(String structureName, ResourceCost cost, boolean isCapitol) {
         super(structureName, cost, isCapitol);
+        this.maxHealth = 65d;
     }
 
     @Override

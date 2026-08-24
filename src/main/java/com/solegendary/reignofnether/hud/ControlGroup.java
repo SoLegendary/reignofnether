@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -17,14 +18,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getSelectedBuildings;
@@ -51,7 +49,7 @@ public class ControlGroup {
     public ControlGroup() { }
 
     public int getKey() {
-        return keybinding != null ? keybinding.key : -1;
+        return keybinding != null ? keybinding.getKey() : -1;
     }
 
     public void clearAll() {
@@ -112,7 +110,7 @@ public class ControlGroup {
         // assign the icon resource (won't update if the front entity/building dies)
         if (newGroup) {
             if (hudSelectedEntity != null) {
-                String unitName = MiscUtil.getSimpleEntityName(hudSelectedEntity);
+                String unitName = MiscUtil.getEntityIconName(hudSelectedEntity);
                 iconRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
             } else if (hudSelectedPlacement != null) {
                 iconRl = hudSelectedPlacement.getBuilding().icon;
@@ -133,21 +131,20 @@ public class ControlGroup {
         if (!entityIds.isEmpty()) {
             BuildingClientEvents.clearSelectedBuildings();
             UnitClientEvents.clearSelectedUnits();
-            for (int id : entityIds) {
-                List<LivingEntity> entities = new ArrayList<>();
-                for (LivingEntity e : getAllUnits()) {
-                    if (entityIds.contains(e.getId()) && e instanceof Unit) {
-                        entities.add(e);
-                    }
+            List<LivingEntity> entities = new ArrayList<>();
+            for (LivingEntity e : getAllUnits()) {
+                if (entityIds.contains(e.getId()) && e instanceof Unit) {
+                    entities.add(e);
                 }
-                if (!entities.isEmpty()) {
-                    UnitClientEvents.clearSelectedUnits();
-                    for (LivingEntity entity : entities)
-                        UnitClientEvents.addSelectedUnit(entity);
-                    HudClientEvents.setLowestCdHudEntity();
-                    if (doubleClicked)
-                        OrthoviewClientEvents.centreCameraOnPos(entities.get(0).position());
-                }
+            }
+            if (!entities.isEmpty()) {
+                UnitClientEvents.clearSelectedUnits();
+                for (LivingEntity entity : entities)
+                    UnitClientEvents.addSelectedUnitNoSort(entity);
+                UnitClientEvents.sortedSelectedUnits();
+                HudClientEvents.setLowestCdHudEntity();
+                if (doubleClicked)
+                    OrthoviewClientEvents.centreCameraOnPos(entities.get(0).position());
             }
         }
         else if (!buildingBps.isEmpty()) {

@@ -3,32 +3,45 @@ package com.solegendary.reignofnether.unit.interfaces;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
-import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.FancyFeast;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
+import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
+import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.time.NightUtils;
-import com.solegendary.reignofnether.tps.TPSClientEvents;
 import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
+import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
+import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
@@ -51,7 +64,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -71,6 +86,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import static com.ibm.icu.impl.ValidIdentifiers.Datatype.unit;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // Defines method bodies for Units
@@ -80,10 +96,11 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public interface Unit {
 
+    int DEFAULT_SIGHT_RANGE = 16;
     int ANCHOR_RETREAT_RANGE = 30;
 
     int PIGLIN_HEALING_TICKS = 8 * ResourceCost.TICKS_PER_SECOND;
-    int MONSTER_HEALING_TICKS = 12 * ResourceCost.TICKS_PER_SECOND;
+    int MONSTER_HEALING_TICKS = 8 * ResourceCost.TICKS_PER_SECOND;
 
     // used for increasing pathfinding calculation range, default is 16 for most mobs
     int FOLLOW_RANGE_IMPROVED = 64;
@@ -95,14 +112,12 @@ public interface Unit {
         return map;
     }
 
-    static float HEAL_PER_NUTRITION = 2.5f;
-
     // position that neutral units run back to when past leash range
     void setAnchor(BlockPos bp);
     BlockPos getAnchor();
 
     static int getFollowRange() {
-        return UnitServerEvents.improvedPathfinding ? FOLLOW_RANGE_IMPROVED : FOLLOW_RANGE;
+        return FOLLOW_RANGE_IMPROVED;
     }
 
     // list of positions to draw lines between to indicate unit intents - will fade over time unless shift is held
@@ -125,13 +140,13 @@ public interface Unit {
     public default boolean isEatingFood() { return getEatingTicksLeft() > 0; };
     public default boolean isHoldingEdibleFood() {
         for (ItemStack itemStack : getItems())
-            if (ResourceSources.isPreparedFood(itemStack.getItem()))
+            if (ItemUtil.isPreparedEdibleFood(itemStack.getItem()))
                 return true;
         return false;
     };
     public default Item getFoodBeingEaten() {
         for (ItemStack itemStack : getItems())
-            if (ResourceSources.isPreparedFood(itemStack.getItem()))
+            if (ItemUtil.isPreparedEdibleFood(itemStack.getItem()))
                 return itemStack.getItem();
         return Items.AIR;
     }
@@ -143,8 +158,30 @@ public interface Unit {
     SelectedTargetGoal<?> getTargetGoal();
     ReturnResourcesGoal getReturnResourcesGoal();
 
-    public float getMovementSpeed();
-    public float getUnitMaxHealth();
+    public default float getBaseMovementSpeed() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(Attributes.MOVEMENT_SPEED);
+        return (float) (attr != null ?  attr.getBaseValue() : Attributes.MOVEMENT_SPEED.getDefaultValue());
+    }
+    public default float getMovementSpeed() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(Attributes.MOVEMENT_SPEED);
+        float ms = (float) (attr != null ?  attr.getValue() : Attributes.MOVEMENT_SPEED.getDefaultValue());
+        boolean isInWater = ((LivingEntity) this).isInWater();
+        float waterSlowdown = ((LivingEntity) this).getWaterSlowDown() * ((LivingEntity) this).getWaterSlowDown();
+        return ms * (isInWater ? waterSlowdown : 1f);
+    }
+    public default float getUnitMaxHealth() {
+        float bonus = 0;
+        if (this instanceof HeroUnit heroUnit) {
+            bonus = heroUnit.getHealthBonusPerLevel() * heroUnit.getHeroLevel();
+        }
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(Attributes.MAX_HEALTH);
+        return (float) (attr != null ?  attr.getValue() : Attributes.MAX_HEALTH.getDefaultValue()) + bonus;
+    }
+    public default int getSightRange() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.SIGHT_RANGE.get());
+        return (int) Math.round(attr != null ?  attr.getValue() : AttributeRegistrar.SIGHT_RANGE.get().getDefaultValue());
+    }
+
     public ResourceCost getCost();
 
     LivingEntity getFollowTarget();
@@ -153,6 +190,12 @@ public interface Unit {
 
     String getOwnerName();
     void setOwnerName(String name);
+
+    int getScenarioRoleIndex(); // if -1, no role
+    void setScenarioRoleIndex(int index);
+    
+    String getOnDeathCommand();
+    void setOnDeathCommand(String command);
 
     default double getDamageTakenIncrease() {
         MobEffectInstance mei = ((LivingEntity) this).getEffect(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get());
@@ -170,13 +213,19 @@ public interface Unit {
 
     // SOURCE: inherent unit stats and abilities
     default double getUnitRangedArmorPercentage() {
-        return 0;
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.RANGED_DAMAGE_RESIST.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.RANGED_DAMAGE_RESIST.get().getDefaultValue());
     }
 
     // SOURCE: inherent unit stats and vanilla mechanics (like resistance)
     default double getUnitMagicArmorPercentage() {
-        Mob mob = (Mob) this;
-        return 1 - mob.getDamageAfterMagicAbsorb(mob.damageSources().magic(), 1);
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.MAGIC_DAMAGE_RESIST.get().getDefaultValue());
+    }
+
+    public default float getEvasionChance() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.EVASION_CHANCE.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.EVASION_CHANCE.get().getDefaultValue());
     }
 
     // SOURCE: resistance mob effect
@@ -211,7 +260,7 @@ public interface Unit {
             float cooldown = cooldownEntry.getValue();
             if (cooldown > 0 || unit.getCharges(ability) < ability.maxCharges) {
                 if (((Entity) unit).level().isClientSide())
-                    unit.getCooldowns().put(ability, (float) (cooldown - (TPSClientEvents.getCappedTPS() / 20D)));
+                    unit.getCooldowns().put(ability, (float) (cooldown - (RtsDebugClientEvents.getCappedTPS() / 20D)));
                 else
                     unit.getCooldowns().put(ability, cooldown - 1);
 
@@ -228,17 +277,21 @@ public interface Unit {
         // ------------- CHECKPOINT LOGIC ------------- //
         if (unitMob.level().isClientSide()) {
 
-            unit.getCheckpoints().removeIf(c -> c.isForEntity() && !c.entity.isAlive() || c.ticksLeft <= 0);
+            unit.getCheckpoints().removeIf(c -> (c.isForEntity() && !c.entity.isAlive()) || c.ticksLeft <= 0);
 
             for (Checkpoint cp : unit.getCheckpoints()) {
                 cp.tick();
                 boolean buildingIsDone = false;
-                if (unit instanceof WorkerUnit workerUnit && !cp.isForEntity()) {
+                if (unit instanceof WorkerUnit && !cp.isForEntity()) {
                     if (cp.placement != null && cp.placement.isBuilt && cp.placement.getHealth() >= cp.placement.getMaxHealth())
                         buildingIsDone = true;
                 }
-                if (((Mob) unit).getOnPos().distToCenterSqr(cp.getPos()) < 4f || buildingIsDone)
+                if (cp.isGreen) {
+                    if (((Mob) unit).getOnPos().distToCenterSqr(cp.getPos()) < 4f || buildingIsDone)
+                        cp.startFading();
+                } else if (cp.isForEntity() && !cp.entity.isAlive()) {
                     cp.startFading();
+                }
             }
         } else {
             checkAndPickupEdibleFood(unit);
@@ -279,8 +332,9 @@ public interface Unit {
             }
         }
 
-        if (le.isInWater() && // stuck in bridge
-                BuildingUtils.findBuilding(le.level().isClientSide(), le.getOnPos().above()) instanceof BridgePlacement) {
+        // stuck in bridge
+        BuildingPlacement bpl = BuildingUtils.findBuilding(le.level().isClientSide(), le.getOnPos().above());
+        if (le.isInWater() && bpl != null && bpl.getBuilding() instanceof AbstractBridge) {
             le.setDeltaMovement(0, 0.2, 0);
         }
 
@@ -291,19 +345,29 @@ public interface Unit {
             checkAndRetreatToAnchor(unit);
 
         if (unit.getSunlightEffect() == SunlightEffect.SLOWNESS_II ||
-            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I) {
+            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ||
+            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_MINOR) {
             // apply slowness during daytime for a short time repeatedly
             if (unitMob.tickCount % 10 == 0 && !unitMob.level().isClientSide() && unitMob.level().isDay() &&
                     !NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), false) &&
-                    !ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap"))
-                unitMob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15,
-                        unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ? 0 : 1
-                ));
+                    !ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap")) {
+
+                if (unit.getSunlightEffect() == SunlightEffect.SLOWNESS_MINOR) {
+                    unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), 15, 1));
+                } else {
+                    unitMob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15,
+                            unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ? 0 : 1
+                    ));
+                }
+            }
         }
 
         if (unitMob.tickCount % 20 == 0) {
-            if (unit.hasEffectWithDuration(MobEffectRegistrar.UNCONTROLLABLE.get())) {
+            if (unit.hasEffectWithDuration(MobEffectRegistrar.ANGRY.get())) {
                 addParticlesAroundSelf(unit, ParticleTypes.ANGRY_VILLAGER);
+            }
+            if (unit.hasEffectWithDuration(MobEffectRegistrar.FEARFUL.get())) {
+                addParticlesAroundSelf(unit, ParticleTypes.SCULK_SOUL);
             }
         }
 
@@ -311,23 +375,16 @@ public interface Unit {
             unit.setEatingTicksLeft(unit.getEatingTicksLeft() - 1);
             if (!unit.isEatingFood()) {
                 for (ItemStack itemStack : unit.getItems()) {
-                    if (ResourceSources.isPreparedFood(itemStack.getItem())) {
+                    if (ItemUtil.isPreparedEdibleFood(itemStack.getItem())) {
                         unitMob.level().playSound(null, unitMob.getX(), unitMob.getY(), unitMob.getZ(),
                                 SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F,
                                 unitMob.getRandom().nextFloat() * 0.1F + 0.9F
                         );
-                        int nutrition = itemStack.getItem().getFoodProperties(itemStack, (LivingEntity) unit).getNutrition();
                         if (itemStack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
                             unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, 5));
                             unitMob.setAbsorptionAmount(24);
-                        } else if (itemStack.getItem() == Items.BREAD) {
-                            unitMob.heal(FancyFeast.HEALTH_PER_BREAD);
-                        } else if (itemStack.getItem() == Items.COOKED_CHICKEN) {
-                            unitMob.heal(FancyFeast.HEALTH_PER_CHICKEN);
-                        } else if (itemStack.getItem() == Items.COOKED_BEEF) {
-                            unitMob.heal(FancyFeast.HEALTH_PER_BEEF);
                         } else {
-                            unitMob.heal(nutrition * HEAL_PER_NUTRITION);
+                            unitMob.heal(ItemUtil.getFoodHealAmount(itemStack));
                         }
                         itemStack.setCount(itemStack.getCount() - 1);
                         break;
@@ -341,7 +398,7 @@ public interface Unit {
             }
         } else {
             for (ItemStack itemStack : unit.getItems()) {
-                if (ResourceSources.isPreparedFood(itemStack.getItem())) {
+                if (ItemUtil.isPreparedEdibleFood(itemStack.getItem())) {
                     unit.setEatingTicksLeft(40);
                     break;
                 }
@@ -351,15 +408,22 @@ public interface Unit {
             unitMob.removeEffect(MobEffects.ABSORPTION);
 
         if (unitMob.tickCount % 10 == 0 &&
+            !(unit instanceof WorkerUnit) &&
             unit.getFaction() == Faction.PIGLINS &&
             MiscUtil.isOnNetherTerrain(unitMob)) {
+            unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
+        }
+        if (unitMob.tickCount % 10 == 0 &&
+            !(unit instanceof WorkerUnit) &&
+            unit.getFaction() == Faction.MONSTERS &&
+            NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), unitMob.level().isClientSide)) {
             unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
         }
 
         if (unitMob.tickCount % 80 == 0) {
             int fortifyingLevel = unitMob.getItemBySlot(EquipmentSlot.CHEST).getEnchantmentLevel(EnchantmentRegistrar.FORTYIFYING.get());
             float absorbHp = unitMob.getAbsorptionAmount();
-            if (fortifyingLevel > 0 && absorbHp < fortifyingLevel * ProtectiveEnchantment.MAX_ABSORB_HP)
+            if (fortifyingLevel > 0 && absorbHp < fortifyingLevel * ProtectiveEnchantment.MAX_ABSORB_HP_PER_FORTIFYING_LEVEL)
                 unitMob.setAbsorptionAmount(absorbHp + 1);
         }
 
@@ -377,6 +441,15 @@ public interface Unit {
                 unitMob.setRemainingFireTicks(ticks);
             }
         }
+
+        // possible fix for units getting stuck randomly on rtsPathfinding
+        /*
+        if (unitMob.tickCount % 60 == 0 && BuildingUtils.isPosInsideAnyBuilding(unitMob.level().isClientSide(), unitMob.getOnPos())) {
+            boolean bool1 = unitMob.getRandom().nextBoolean();
+            boolean bool2 = unitMob.getRandom().nextBoolean();
+            unitMob.push(0.005d * (bool1 ? -1 : 1), 0, 0.005d * (bool2 ? -1 : 1));
+        }
+         */
     }
 
     private static void checkAndPickupResources(Unit unit) {
@@ -449,8 +522,8 @@ public interface Unit {
                 }
                 Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
                 if (!itementity.isRemoved() && !itemstack.isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive() && !unit.getOwnerName().isEmpty() &&
-                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ResourceSources.isPreparedFood(itemstack.getItem())) {
-                    if (ResourceSources.isPreparedFood(itemstack.getItem()) &&
+                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isPreparedEdibleFood(itemstack.getItem())) {
+                    if (ItemUtil.isPreparedEdibleFood(itemstack.getItem()) &&
                             (unitMob.getHealth() < unitMob.getMaxHealth() || itemstack.getItem() == Items.ENCHANTED_GOLDEN_APPLE)) {
                         unitMob.onItemPickup(itementity);
                         unitMob.take(itementity, 1);
@@ -469,6 +542,7 @@ public interface Unit {
     // call from addAdditionalSaveData
     public default void addUnitSaveData(@NotNull CompoundTag pCompound) {
         pCompound.putString("ownerName", getOwnerName());
+        pCompound.putInt("scenarioRoleIndex", getScenarioRoleIndex());
         if (getAnchor() != null) {
             pCompound.putInt("anchorPosX", getAnchor().getX());
             pCompound.putInt("anchorPosY", getAnchor().getY());
@@ -482,11 +556,13 @@ public interface Unit {
             if (itemStack.getItem() != Items.AIR)
                 pCompound.put(slot.name() + "Item", itemStack.serializeNBT());
         }
+        pCompound.putString("onDeathCommand", getOnDeathCommand());
     }
 
     // call from readAdditionalSaveData
     public default void readUnitSaveData(@NotNull CompoundTag pCompound) {
         setOwnerName(pCompound.getString("ownerName"));
+        setScenarioRoleIndex(pCompound.getInt("scenarioRoleIndex"));
         BlockPos anchorPos = new BlockPos(
             pCompound.getInt("anchorPosX"),
             pCompound.getInt("anchorPosY"),
@@ -507,12 +583,14 @@ public interface Unit {
                 }
             }
         }
+        setOnDeathCommand(pCompound.getString("onDeathCommand"));
     }
 
     public enum SunlightEffect {
         NONE,
         SLOWNESS_II,
         SLOWNESS_I,
+        SLOWNESS_MINOR,
         FIRE
     }
 
@@ -559,8 +637,10 @@ public interface Unit {
     }
 
     static void fullResetBehaviours(Unit unit) {
-        if (((Entity) unit).level().isClientSide() && !Keybindings.shiftMod.isDown())
+        if (((Entity) unit).level().isClientSide() && !Keybindings.shiftMod.isDown()) {
             unit.getCheckpoints().clear();
+            RtsDebugPathPreview.removeUnitPath(((Entity) unit).getId());
+        }
         unit.resetBehaviours();
         Unit.resetBehaviours(unit);
         if (unit instanceof WorkerUnit workerUnit) {
@@ -610,7 +690,7 @@ public interface Unit {
     default void setupEquipmentAndUpgradesClient() { }
 
     static float getSpeedModifier(Unit unit) {
-        if (unit instanceof BruteUnit brute && brute.isHoldingUpShield) {
+        if (unit instanceof BruteUnit brute && brute.isHoldingUpShield()) {
             return 0.5f;
         }
         return 1.0f;
@@ -630,21 +710,38 @@ public interface Unit {
                     !((Unit) attackerUnit).hasLivingTarget() &&
                     !AttackerUnit.isAttackingBuilding(attackerUnit);
         }
+        boolean idleRangedAttacker = true;
+        if (this instanceof RangedAttackerUnit rangedAttackerUnit) {
+            idleRangedAttacker = rangedAttackerUnit.getRangedAttackGroundGoal() == null ||
+                                rangedAttackerUnit.getRangedAttackGroundGoal().getGroundTarget() == null;
+        }
         boolean idleWorker = true;
         if (this instanceof WorkerUnit)
             idleWorker = WorkerUnit.isIdle((WorkerUnit) this);
 
+        for (Goal goal : ((Mob) this).goalSelector.getAvailableGoals()) {
+            if (goal instanceof GenericUntargetedSpellGoal spellGoal && spellGoal.isCasting())
+                return false;
+            if (goal instanceof GenericTargetedSpellGoal spellGoal && spellGoal.isCasting())
+                return false;
+        }
         // some larger mobs like bears get stuck near their movetarget so nav won't be done but it also won't be null
         boolean stationaryNearMoveTarget = false;
         if (this.getMoveGoal().getMoveTarget() != null) {
             double distToMoveTarget = ((LivingEntity) this).distanceToSqr(this.getMoveGoal().getMoveTarget().getCenter());
-            boolean stationary = ((Mob) this).getDeltaMovement().x == 0 || ((Mob) this).getDeltaMovement().z == 0;
+            // Genuinely stuck = barely moving on BOTH axes. Must be && (not ||): a unit walking straight along
+            // one axis has ~0 velocity on the other, so || wrongly reads it as stationary while it's still moving.
+            // Epsilon, not == 0: physics rarely lands exactly on zero.
+            net.minecraft.world.phys.Vec3 dm = ((Mob) this).getDeltaMovement();
+            boolean stationary = Math.abs(dm.x) < 1.0e-3 && Math.abs(dm.z) < 1.0e-3;
             stationaryNearMoveTarget = stationary && distToMoveTarget < 4;
         }
-        return (this.getMoveGoal().getMoveTarget() == null || stationaryNearMoveTarget) &&
+        boolean isMoving = !((Mob) this).getNavigation().isDone() || this.getMoveGoal().getMoveTarget() != null;
+        return (!isMoving || stationaryNearMoveTarget) &&
                 this.getFollowTarget() == null &&
                 idleAttacker &&
-                idleWorker;
+                idleWorker &&
+                idleRangedAttacker;
     }
 
     static Random RANDOM = new Random();
@@ -803,5 +900,45 @@ public interface Unit {
                     .clip(new ClipContext(vec3, vec31, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, thisEntity))
                     .getType() == HitResult.Type.MISS;
         }
+    }
+
+    default boolean isFlyingUnit() {
+        return getMoveGoal() instanceof FlyingMoveToTargetGoal;
+    }
+
+    // if true, will ignore all commands except for stop (S)
+    // used for things like channeling blizzard on the wraith to prevent accidental cancels
+    default boolean ignoreNonStopCommands() {
+        return false;
+    }
+
+    default void aggroToEnemyIfIdle(Unit aggroTarget) {
+        if (((Entity) this).level().isClientSide())
+            return;
+        if (isIdle() && !AlliancesServerEvents.isAlliedOrOwned(this.getOwnerName(), aggroTarget.getOwnerName()))
+            this.getTargetGoal().setTarget((LivingEntity) aggroTarget);
+    }
+
+    public default boolean hasRtsPlayerOwner() {
+        RTSPlayer rtsPlayer = ((Entity) this).level().isClientSide() ?
+                PlayerClientEvents.getRTSPlayer(getOwnerName()) :
+                PlayerServerEvents.getRTSPlayer(getOwnerName());
+        return rtsPlayer != null;
+    }
+
+    public default boolean hasScenarioNpcOwner() {
+        return ScenarioUtils.isScenarioNpc(((Entity) this).level().isClientSide(), this.getOwnerName());
+    }
+
+    public default boolean isScout() {
+        return this instanceof ScoutDogUnit || this instanceof ScoutCatUnit || this instanceof BatUnit || this instanceof StriderUnit;
+    }
+
+    public default boolean isGarrisoned() {
+        return getGarrison() != null;
+    }
+
+    public default BuildingPlacement getGarrison() {
+        return GarrisonableBuildingAddon.getGarrison(this);
     }
 }

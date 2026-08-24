@@ -4,24 +4,30 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.abilities.Eject;
-import com.solegendary.reignofnether.ability.abilities.SpiderClimbing;
+import com.solegendary.reignofnether.ability.abilities.ToggleSpiderClimbing;
 import com.solegendary.reignofnether.ability.abilities.SpinWebs;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
+import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -31,6 +37,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -56,9 +63,9 @@ import java.util.Set;
 public class SpiderUnit extends Spider implements Unit, AttackerUnit, ConvertableUnit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new SpiderClimbing(), Keybindings.keyQ);
-        ABILITIES.add(new Eject(), Keybindings.keyW);
-        ABILITIES.add(new SpinWebs(), Keybindings.keyE);
+        ABILITIES.add(new ToggleSpiderClimbing(), Keybindings.abilitySlot1);
+        ABILITIES.add(new Eject(), Keybindings.abilitySlot2);
+        ABILITIES.add(new SpinWebs(), Keybindings.abilitySlot3);
     }
 
     //region
@@ -103,6 +110,10 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -124,23 +135,34 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(SpiderUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(SpiderUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(SpiderUnit.class, EntityDataSerializers.STRING);
+
+    public boolean isWallClimbing() { return this.entityData.get(wallClimbingAccessor); }
+    public void setWallClimbing(boolean value) { this.entityData.set(wallClimbingAccessor, value); }
+    public static final EntityDataAccessor<Boolean> wallClimbingAccessor =
+            SynchedEntityData.defineId(SpiderUnit.class, EntityDataSerializers.BOOLEAN);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
+        this.entityData.define(wallClimbingAccessor, true);
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.SPIDER;}
@@ -163,10 +185,9 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     final static public float movementSpeed = 0.34f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
+    final static public int bonusNightSightRange = 4;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
-
-    private boolean wallClimbing = true;
 
     public int maxResources = 100;
 
@@ -188,24 +209,21 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
 
     public SpiderUnit(EntityType<? extends Spider> entityType, Level level) {
         super(entityType, level);
-        this.setMaxUpStep(1.0F);
+        this.setMaxUpStep(1.15F);
     }
 
-    public boolean isWallClimbing() { return wallClimbing; }
-
-    public boolean toggleWallClimbing() {
-        wallClimbing = !wallClimbing;
-        if (wallClimbing) {
+    public void toggleWallClimbing() {
+        setWallClimbing(!isWallClimbing());
+        if (isWallClimbing()) {
             this.navigation = new WallClimberNavigation(this, level());
         } else {
             this.navigation = new GroundPathNavigation(this, level());
         }
-        return wallClimbing;
     }
 
     @Override
     public boolean isClimbing() {
-        if (wallClimbing)
+        if (isWallClimbing())
             return super.isClimbing();
         else
             return false;
@@ -220,7 +238,20 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
                 .add(Attributes.ATTACK_DAMAGE, SpiderUnit.attackDamage)
                 .add(Attributes.ARMOR, SpiderUnit.armorValue)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.MAX_HEALTH, SpiderUnit.maxHealth);
+                .add(Attributes.MAX_HEALTH, SpiderUnit.maxHealth)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+    }
+
+    @Override
+    public int getSightRange() {
+        boolean isNight = !level().isDay() || NightUtils.isInRangeOfNightSource(getEyePosition(), level().isClientSide);
+        return Unit.super.getSightRange() + (isNight ? bonusNightSightRange : 0);
     }
 
     // for some reason this.getNavigation().stop(); doesn't stop spider units from moving
@@ -249,6 +280,28 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
             }
             lastOnPos = getOnPos();
         }
+
+        if (this.isVehicle())
+            if (this.getMoveGoal().canUse())
+                this.getMoveGoal().canContinueToUse();
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     private Set<BlockPos> highlightBps = new HashSet<>();
@@ -261,12 +314,15 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
         this.addUnitSaveData(pCompound);
+        pCompound.putBoolean("isWallClimbing", isWallClimbing());
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         this.readUnitSaveData(pCompound);
+        if (pCompound.contains("isWallClimbing"))
+            setWallClimbing(pCompound.getBoolean("isWallClimbing"));
     }
 
     @Override

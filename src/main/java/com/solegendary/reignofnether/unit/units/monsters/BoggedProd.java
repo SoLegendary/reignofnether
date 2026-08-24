@@ -1,11 +1,9 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
-import com.solegendary.reignofnether.building.production.ProductionItem;
-import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.building.production.StartProductionButton;
-import com.solegendary.reignofnether.building.production.StopProductionButton;
+import com.solegendary.reignofnether.building.production.*;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -21,7 +19,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class BoggedProd extends ProductionItem {
+public class BoggedProd extends GraveyardUnitProductionItem {
 
     public final static String itemName = "Bogged";
     public final static ResourceCost cost = ResourceCosts.BOGGED;
@@ -29,8 +27,13 @@ public class BoggedProd extends ProductionItem {
     public BoggedProd() {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (!level.isClientSide())
-                placement.produceUnit((ServerLevel) level, EntityRegistrar.BOGGED_UNIT.get(), placement.ownerName, true);
+            if (!level.isClientSide()) {
+                if (placement instanceof GraveyardPlacement gy && placement.getUpgradeLevel() > 0) {
+                    gy.createSkull(EntityRegistrar.BOGGED_UNIT.get());
+                } else {
+                    placement.produceUnit((ServerLevel) level, EntityRegistrar.BOGGED_UNIT.get(), placement.ownerName, true);
+                }
+            }
         };
     }
 
@@ -43,12 +46,12 @@ public class BoggedProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/bogged.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit"), Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip2"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip3"), Style.EMPTY)
                 )
         );
     }
@@ -61,14 +64,14 @@ public class BoggedProd extends ProductionItem {
             () -> false,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_BOGGED),
             List.of(
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.bogged.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip3"), Style.EMPTY)
             ),
             this
         );

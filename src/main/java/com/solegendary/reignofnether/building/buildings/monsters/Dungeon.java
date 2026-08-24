@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
-import com.solegendary.reignofnether.building.buildings.placements.DungeonPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -20,9 +19,13 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
@@ -42,16 +45,16 @@ public class Dungeon extends ProductionBuilding {
 
         this.startingBlockTypes.add(Blocks.DEEPSLATE_BRICK_STAIRS);
 
+        this.buildTimeModifier = 2.0f;
+
         this.explodeChance = 0.2f;
-        this.productions.add(ProductionItems.CREEPER, Keybindings.keyQ);
+        this.productions.add(ProductionItems.CREEPER, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.WRAITH, Keybindings.abilitySlot2);
+
+        this.maxHealth = 120d;
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
-
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new DungeonPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
-    }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
@@ -65,19 +68,30 @@ public class Dungeon extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dungeon"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dungeon.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.dungeon.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dungeon.tooltip2"), Style.EMPTY)
             ),
             this
         );
     }
 
     @Override
-    public BlockPos getIndoorSpawnPoint(ServerLevel level, BlockPos centerPos) {
-        return super.getIndoorSpawnPoint(level, centerPos).offset(-1,0,0);
+    public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
+        return super.getIndoorSpawnPoint(level, placement).offset(-1,0,0);
+    }
+
+    @Override
+    public void onBlockBuilt(BlockPos bp, BlockState bs, BuildingPlacement placement) {
+        if (!placement.getLevel().isClientSide()) {
+            if (bs.hasBlockEntity()) {
+                BlockEntity be = placement.getLevel().getBlockEntity(bp);
+                if (be instanceof SpawnerBlockEntity sbe)
+                    sbe.getSpawner().setEntityId(EntityType.CREEPER, placement.getLevel(), placement.getLevel().random, bp);
+            }
+        }
     }
 }

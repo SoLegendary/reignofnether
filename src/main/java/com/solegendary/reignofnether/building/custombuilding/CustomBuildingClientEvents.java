@@ -5,13 +5,14 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -25,6 +26,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static net.minecraft.util.Mth.sign;
 
 public class CustomBuildingClientEvents {
 
@@ -39,11 +41,17 @@ public class CustomBuildingClientEvents {
     private static final ArrayList<Button> renderedButtons = new ArrayList<>();
     private static final ArrayList<RectZone> hudZones = new ArrayList<>();
 
+    public static boolean showCommandsMenu = false;
+    public static boolean deregisterConfirm = false;
+
     public static void setCustomBuildingToEdit(CustomBuilding customBuilding) {
         if (customBuildingToEdit != customBuilding)
             customBuildingToEdit = customBuilding;
         else
             customBuildingToEdit = null;
+        CustomBuildingClientEvents.deregisterConfirm = false;
+        if (showCommandsMenu)
+            CustomBuildingMenu.forceRefreshCommandEditBoxes();
     }
 
     public static CustomBuilding getCustomBuildingToEdit() {
@@ -57,7 +65,7 @@ public class CustomBuildingClientEvents {
         return null;
     }
 
-    public static void registerCustomBuilding(String playerName, String name, Vec3i structureSize, CompoundTag structureNbt, CompoundTag attributesNbt) {
+    public static void registerCustomBuilding(String playerName, String name, Vec3i structureSize, CompoundTag structureNbt, CompoundTag attributesNbt, ListTag commandsNbt) {
         if (MC.player == null || (!playerName.isEmpty() && !MC.player.getName().getString().equals(playerName)))
             return;
 
@@ -75,7 +83,7 @@ public class CustomBuildingClientEvents {
                 portraitBlock = bs.getBlock();
             }
         }
-        CustomBuilding building = new CustomBuilding(name, structureSize, portraitBlock, structureNbt, attributesNbt);
+        CustomBuilding building = new CustomBuilding(name, structureSize, portraitBlock, structureNbt, attributesNbt, commandsNbt);
 
         customBuildings.add(building);
     }
@@ -107,19 +115,21 @@ public class CustomBuildingClientEvents {
         hudZones.clear();
         renderedButtons.clear();
         if (customBuildingToEdit != null && MC.screen instanceof TopdownGui) {
-            int blitX = 100;
-            int blitY = 40;
-            int width = 310;
-            int height = 200;
+            int blitX = 120;
+            int blitY = 30;
+            int width = 315;
+            int height = 225;
             MyRenderer.renderFrameWithBg(evt.getGuiGraphics(), blitX, blitY, width, height, 0xA0000000);
 
             renderedButtons.add(CustomBuildingMenu.renderIconButtonNameAndPortrait(evt, customBuildingToEdit, blitX + 18, blitY + 18));
             renderedButtons.add(CustomBuildingMenu.renderCloseButton(evt, blitX + width - Button.itemIconSize - 12, blitY + 4));
             renderedButtons.add(CustomBuildingMenu.renderDeregisterButton(evt, blitX + width - Button.itemIconSize - 12, blitY + height - 26));
-            renderedButtons.addAll(CustomBuildingMenu.renderCustomisationButtons(evt, blitX + 6, blitY + 38));
-
-            evt.getGuiGraphics().drawString(MC.font, "More options coming soon!", blitX + 10, blitY + height - 18, 0xFFFFFF);
-
+            if (!showCommandsMenu) {
+                renderedButtons.addAll(CustomBuildingMenu.renderCustomisationButtons(evt, customBuildingToEdit,blitX + 8, blitY + 38));
+            } else {
+                renderedButtons.addAll(CustomBuildingMenu.renderCommandsButtonsAndInputs(evt, customBuildingToEdit, blitX + 6, blitY + 38));
+            }
+            renderedButtons.addAll(CustomBuildingMenu.renderCommandsMenuButton(evt, blitX + 10, blitY + height - 32));
             hudZones.add(new RectZone(blitX, blitY, blitX + width, blitY + height));
         }
     }
@@ -139,6 +149,13 @@ public class CustomBuildingClientEvents {
             } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
                 button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onMouseScroll(ScreenEvent.MouseScrolled.Post evt) {
+        if (customBuildingToEdit != null && showCommandsMenu) {
+            CustomBuildingMenu.scrollCommands(-sign(evt.getScrollDelta()));
         }
     }
 }

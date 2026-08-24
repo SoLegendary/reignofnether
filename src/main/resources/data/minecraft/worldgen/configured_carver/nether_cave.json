@@ -1,0 +1,21 @@
+{
+  "": "I've had an instance of a crash with `probability = 0` carvers; `replaceable = air` is an effective workaround.",
+  "type": "minecraft:cave",
+  "config": {
+    "probability": 0.01,
+    "y": {
+      "type": "minecraft:constant",
+      "value": {
+        "absolute": 0
+      }
+    },
+    "yScale": 0,
+    "lava_level": {
+      "absolute": 0
+    },
+    "replaceable": "minecraft:air",
+    "horizontal_radius_multiplier": 0,
+    "vertical_radius_multiplier": 0,
+    "floor_level": 0
+  }
+}

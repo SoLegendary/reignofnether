@@ -58,6 +58,10 @@ public class ItemRegistrar {
             ITEMS.register("poison_spider_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.POISON_SPIDER_UNIT,
                     0x0B3F4A, 0x840B0B, new Item.Properties()));
 
+    public static final RegistryObject<ForgeSpawnEggItem> WRAITH_UNIT_SPAWN_EGG =
+            ITEMS.register("wraith_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WRAITH_UNIT,
+                    0xc3cdc9, 0x1a1862, new Item.Properties()));
+
     public static final RegistryObject<ForgeSpawnEggItem> VILLAGER_UNIT_SPAWN_EGG =
             ITEMS.register("villager_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.VILLAGER_UNIT,
                     0x523632, 0x946F66, new Item.Properties()));
@@ -76,6 +80,10 @@ public class ItemRegistrar {
 
     public static final RegistryObject<ForgeSpawnEggItem> PILLAGER_UNIT_SPAWN_EGG =
             ITEMS.register("pillager_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.PILLAGER_UNIT,
+                    0x502C34, 0x757D78, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> WINDCALLER_UNIT_SPAWN_EGG =
+            ITEMS.register("windcaller_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WINDCALLER_UNIT,
                     0x502C34, 0x757D78, new Item.Properties()));
 
     public static final RegistryObject<ForgeSpawnEggItem> IRON_GOLEM_UNIT_SPAWN_EGG =
@@ -173,6 +181,22 @@ public class ItemRegistrar {
     public static final RegistryObject<ForgeSpawnEggItem> WOLF_UNIT_SPAWN_EGG =
             ITEMS.register("wolf_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.WOLF_UNIT,
                     0xc3bfbf, 0x947e6c, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> SCOUT_DOG_UNIT_SPAWN_EGG =
+            ITEMS.register("scout_dog_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.SCOUT_DOG_UNIT,
+                    0x665232, 0xccbda5, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> SCOUT_CAT_UNIT_SPAWN_EGG =
+            ITEMS.register("scout_cat_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.SCOUT_CAT_UNIT,
+                    0xcead7b, 0x755a44, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> STRIDER_UNIT_SPAWN_EGG =
+            ITEMS.register("strider_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.STRIDER_UNIT,
+                    0x8b2f31, 0x353535, new Item.Properties()));
+
+    public static final RegistryObject<ForgeSpawnEggItem> BAT_UNIT_SPAWN_EGG =
+            ITEMS.register("bat_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.BAT_UNIT,
+                    0x473a2d, 0x0c0c0c, new Item.Properties()));
 
     public static final RegistryObject<ForgeSpawnEggItem> LLAMA_UNIT_SPAWN_EGG =
             ITEMS.register("llama_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.LLAMA_UNIT,

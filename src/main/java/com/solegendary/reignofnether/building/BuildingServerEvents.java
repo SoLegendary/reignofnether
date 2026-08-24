@@ -1,13 +1,28 @@
 package com.solegendary.reignofnether.building;
 
+import com.google.common.collect.Sets;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.ability.EnchantAbility;
+import com.solegendary.reignofnether.ability.BuildingAbilityClientboundPacket;
+import com.solegendary.reignofnether.ability.EquipAbility;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
 import com.solegendary.reignofnether.building.buildings.neutral.NeutralTransportPortal;
+import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.placements.*;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.building.buildings.villagers.Blacksmith;
+import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
+import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
+import com.solegendary.reignofnether.building.data.DataType;
+import com.solegendary.reignofnether.commands.rtsapi.ResourceObjectiveCriteria;
+import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
-import com.solegendary.reignofnether.nether.NetherBlocks;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -24,25 +39,36 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.TntBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.Objective;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.MobSpawnEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -57,30 +83,88 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class BuildingServerEvents {
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 
+public class BuildingServerEvents {
+    
+    public static final DataType<Set<String>> BUILDING_TAGS = DataType.createRegistered(
+        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "building_tags"),
+        (tag, server) -> {
+            Set<String> tags = Sets.newHashSet();
+            if (tag.contains("tags", Tag.TAG_LIST)) {
+                ListTag tagList = tag.getList("tags", Tag.TAG_STRING);
+                for (int i = 0; i < tagList.size(); i++) {
+                    tags.add(tagList.getString(i));
+                }
+            }
+            return tags;
+        },
+        tags -> {
+            CompoundTag nbt = new CompoundTag();
+            ListTag tagList = new ListTag();
+            for (String tagName : tags) {
+                tagList.add(StringTag.valueOf(tagName));
+            }
+            nbt.put("tags", tagList);
+            return nbt;
+        },
+        Sets::newHashSet
+    );
+    public static final DataType<ArrayList<BuildingCommand>> BUILDING_COMMANDS = DataType.createRegistered(
+        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "building_commands"),
+        (tag, server) -> {
+            ArrayList<BuildingCommand> commands = new ArrayList<>();
+            if (tag.contains("commands", Tag.TAG_LIST)) {
+                ListTag commandList = tag.getList("commands", Tag.TAG_COMPOUND);
+                for (int i = 0; i < commandList.size(); i++) {
+                    CompoundTag commandTag = commandList.getCompound(i);
+                    commands.add(BuildingCommand.getFromNbt(commandTag));
+                }
+            }
+            return commands;
+        },
+        commands -> {
+            CompoundTag nbt = new CompoundTag();
+            ListTag commandList = new ListTag();
+            for (BuildingCommand command : commands) {
+                CompoundTag commandTag = new CompoundTag();
+                commandTag.putInt("tickCooldown", command.tickCooldown);
+                commandTag.putInt("tickCooldownMax", command.tickCooldownMax);
+                commandTag.putString("commandStr", command.commandStr);
+                commandTag.putString("condition", command.condition.name());
+                commandList.add(commandTag);
+            }
+            nbt.put("commands", commandList);
+            return nbt;
+        },
+        ArrayList::new
+    );
     private static final int BUILDING_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
 
     private static final int TNT_BUILDING_BASE_DAMAGE = 20;
     private static final int MAX_SCAFFOLD_DEPTH = 5;
 
-    private static ServerLevel serverLevel = null;
+    private static @Nullable ServerLevel serverLevel = null;
 
-    public static ServerLevel getServerLevel() { return serverLevel; }
+    public static @Nullable ServerLevel getServerLevel() { return serverLevel; }
 
     // buildings that currently exist serverside
     private static final ArrayList<BuildingPlacement> buildings = new ArrayList<>();
-    private static final ArrayList<GarrisonableBuilding>  garrisonableBuildings = new ArrayList<>();
-
+    
+    public static Object2IntArrayMap<String> populations = new Object2IntArrayMap<>();
     public static final ArrayList<NetherZone> netherZones = new ArrayList<>();
 
     public static ArrayList<BuildingPlacement> getBuildings() {
         return buildings;
     }
 
-    public static List<GarrisonableBuilding> getGarrisonableBuildings() {
-        return garrisonableBuildings;
+    public static List<BuildingPlacement> getGarrisonableBuildings() {
+        ArrayList<BuildingPlacement> garrs = new ArrayList<>();
+        for (BuildingPlacement bpl : buildings)
+            if (bpl.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class))
+                garrs.add(bpl);
+        return garrs;
     }
 
     public static final Random random = new Random();
@@ -103,13 +187,22 @@ public class BuildingServerEvents {
     }
 
     public static void saveBuildings(ServerLevel level) {
-        BuildingSaveData buildingData = BuildingSaveData.getInstance(serverLevel);
+        if (level == null)
+            return;
+        BuildingSaveData buildingData = BuildingSaveData.getInstance(level);
         buildingData.buildings.clear();
 
         getBuildings().forEach(b -> {
+            
+            b.getDataStorage().setData(BUILDING_TAGS, b.tags);
+            b.getDataStorage().setData(BUILDING_COMMANDS, b.commands);
+            
             PortalPlacement.PortalType portalType = null;
             if (b instanceof PortalPlacement portal) {
                 portalType = portal.getPortalType();
+            }
+            if (b instanceof CustomBuildingPlacement cb) {
+                cb.packCommandsNbt();
             }
             buildingData.buildings.add(new BuildingSave(b.originPos,
                     level,
@@ -121,7 +214,11 @@ public class BuildingServerEvents {
                     b.isBuilt,
                     b.getUpgradeLevel(),
                     portalType,
-                    b instanceof PortalPlacement portal && portal.hasDestination() ? portal.destination : new BlockPos(0,0,0)
+                    b instanceof PortalPlacement portal && portal.hasDestination() ? portal.destination : new BlockPos(0,0,0),
+                    b.scenarioRoleIndex,
+                    b.getDataStorage(),
+                    b.partialBlocksDestroyed,
+                    b instanceof CustomBuildingPlacement cb ? cb.commandsNbt : new ListTag()
             ));
             //ReignOfNether.LOGGER.info("saved buildings/nether in serverevents: " + b.originPos);
         });
@@ -164,9 +261,15 @@ public class BuildingServerEvents {
                 );
 
                 if (building != null) {
+                    building.partialBlocksDestroyed = b.partialBlocksDestroyed;
+                    building.dataStorage = b.dataStorage;
+                    
+                    building.tags = b.dataStorage.getData(BUILDING_TAGS);
+                    building.commands = b.dataStorage.getData(BUILDING_COMMANDS);
+                    
+                    building.scenarioRoleIndex = b.scenarioRoleIndex;
                     building.isBuilt = b.isBuilt;
                     BuildingServerEvents.getBuildings().add(building);
-
                     if (building instanceof ProductionPlacement pb) {
                         pb.setRallyPoint(b.rallyPoint);
                     }
@@ -190,15 +293,20 @@ public class BuildingServerEvents {
                     }
                     // setNetherZone can only be run once - this supercedes where it normally happens in tick() ->
                     // onBuilt()
-                    if (building instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0) {
+                    NetherConvertingAddon ncb;
+                    if ((ncb = building.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(building) > 0) {
                         for (NetherZone nz : netherData.netherZones)
                             if (building.isPosInsideBuilding(nz.getOrigin())) {
-                                ncb.setNetherZone(nz, false);
+                                ncb.setNetherZone(building, nz, false);
                                 placedNZs.add(nz.getOrigin());
                                 ReignOfNether.LOGGER.info("loaded netherzone for: " + b.building.name + "|" + b.originPos);
                                 break;
                             }
                     }
+                    if (building instanceof CustomBuildingPlacement cb) {
+                        cb.setAndUnpackCommandsNbt(b.commandsNbt);
+                    }
+
                     ReignOfNether.LOGGER.info("loaded building in serverevents: " + b.building.name + "|" + b.originPos);
                 }
             });
@@ -219,6 +327,8 @@ public class BuildingServerEvents {
         if (level != null) {
             saveNetherZones(level);
             saveBuildings(level);
+            netherZones.clear();
+            buildings.clear();
         }
     }
 
@@ -245,110 +355,170 @@ public class BuildingServerEvents {
     @Nullable
     public static BuildingPlacement placeBuilding(
         Building building,
-        BlockPos pos,
+        BlockPos originPos,
         Rotation rotation,
         String ownerName,
         int[] builderUnitIds,
-        boolean queue,
-        boolean isDiagonalBridge
+        boolean queue, // shift-queue the building for assigned workers
+        boolean isDiagonalBridge,
+        boolean fromCommand, // ignore resources, terrain or any other restrictions and self-build
+        boolean ignoreFog
     ) {
+        if (serverLevel == null)
+            return null;
+
         BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
             serverLevel,
-            pos,
+            originPos,
             rotation,
             ownerName,
             isDiagonalBridge
         );
+        return placeBuilding(newBuilding, originPos, rotation, ownerName, builderUnitIds, queue, isDiagonalBridge, fromCommand, ignoreFog);
+    }
+
+    public static BuildingPlacement placeBuilding(
+        BuildingPlacement newBuilding,
+        BlockPos originPos,
+        Rotation rotation,
+        String ownerName,
+        int[] builderUnitIds,
+        boolean queue, // shift-queue the building for assigned workers
+        boolean isDiagonalBridge,
+        boolean fromCommand, // ignore resources, terrain or any other restrictions and self-build
+        boolean ignoreFog
+    ) {
         boolean buildingExists = false;
         for (BuildingPlacement placement : buildings) {
-            if (placement.originPos.equals(pos)) {
+            if (placement.originPos.equals(originPos)) {
                 buildingExists = true;
                 break;
             }
         }
-        if (newBuilding != null && !buildingExists) {
+        if (newBuilding != null && !buildingExists && serverLevel != null) {
+
             // Handle special building (Iron Golem)
-            if (newBuilding instanceof IronGolemPlacement) {
-                int currentPop = UnitServerEvents.getCurrentPopulation(serverLevel, ownerName);
+            if (newBuilding.getBuilding() instanceof IronGolemBuilding) {
+                int currentPop = UnitServerEvents.getCurrentPopulation(ownerName);
                 int popSupply = BuildingServerEvents.getTotalPopulationSupply(ownerName);
 
                 boolean canAffordPop = false;
                 for (Resources resources : ResourcesServerEvents.resourcesList) {
                     if (resources.ownerName.equals(ownerName)
-                         && (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply) {
+                            && (currentPop + ResourceCosts.IRON_GOLEM.population) <= popSupply) {
                         canAffordPop = true;
                         break;
                     }
                 }
-
-                if (!canAffordPop) {
+                if (!canAffordPop && !fromCommand) {
                     ResourcesClientboundPacket.warnInsufficientPopulation(ownerName);
+                    FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
                     return null;
                 }
             }
 
-            if (newBuilding.canAfford(ownerName)) {
-                if (serverLevel.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get() &&
-                    !(newBuilding instanceof BridgePlacement)) {
-                    BuildingUtils.clearBuildingArea(newBuilding);
-                }
-                buildings.add(newBuilding);
-                if (newBuilding instanceof GarrisonableBuilding garrisonableBuilding) {
-                    garrisonableBuildings.add(garrisonableBuilding);
-                }
-                newBuilding.forceChunk(true);
-                int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
+            boolean canAfford = fromCommand || newBuilding.canAfford(ownerName);
+            if (!canAfford) {
+                warnInsufficientResources(newBuilding);
+                FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
+                return null;
+            }
 
-                if (!(newBuilding instanceof BridgePlacement))
-                    for (BuildingBlock block : newBuilding.blocks)
-                        if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
-                            placeScaffoldingUnder(block, newBuilding);
+            boolean isSandbox = SandboxServer.isAnyoneASandboxPlayer();
+            if (!fromCommand && !isSandbox && !BuildingValidators.isInBrightChunk(serverLevel, newBuilding.centrePos, ownerName) && !ignoreFog) {
+                for (int id : builderUnitIds) {
+                    Entity entity = serverLevel.getEntity(id);
+                    if (entity instanceof WorkerUnit workerUnit) {
+                        if (!queue) {
+                            Unit.fullResetBehaviours((Unit) entity);
+                        }
+                        workerUnit.getExploreBuildLocationGoal().getFogQueuedBuildings().add(newBuilding);
+                    }
+                }
+                return null;
+            } else if (!fromCommand) {
+                String errorMsgKey = BuildingValidators.getPlacementValidityError(serverLevel, newBuilding.getBuilding(), originPos, ownerName, rotation, isDiagonalBridge, isSandbox, true);
+                if (errorMsgKey != null) {
+                    HudClientboundPacket.showTempMessageI18n(ownerName, errorMsgKey);
+                    FogBuildingClientboundPacket.removeFogQueuedBuilding(originPos);
+                    return null;
+                }
+            }
 
+            if (fromCommand ||
+                    (serverLevel.getGameRules().getRule(GameRuleRegistrar.SLANTED_BUILDING).get() &&
+                            !(newBuilding.getBuilding() instanceof AbstractBridge))) {
+                BuildingUtils.clearBuildingArea(newBuilding);
+            }
+            buildings.add(newBuilding);
+            newBuilding.forceChunk(true);
+            int minY = BuildingUtils.getMinCorner(newBuilding.blocks).getY();
+
+            if (!(newBuilding.getBuilding() instanceof AbstractBridge))
+                for (BuildingBlock block : newBuilding.blocks)
+                    if (block.getBlockPos().getY() == minY && !block.getBlockState().isAir())
+                        placeScaffoldingUnder(block, newBuilding);
+
+            boolean hasFastBuildCheat = ResearchServerEvents.playerHasCheat(ownerName, "warpten");
+            if (SandboxServer.isAnyoneASandboxPlayer() && hasFastBuildCheat) {
+                newBuilding.maxBlocksPerTick = 4;
+                newBuilding.queueAllBlocks(serverLevel);
+            } else {
+                // speed up first capitol
+                if (newBuilding.isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) == 0) {
+                    newBuilding.blocksPerBuild = 2;
+                    newBuilding.maxBlocksPerTick = 2;
+                }
                 for (BuildingBlock block : newBuilding.blocks) {
                     if (block.getBlockPos().getY() <= minY + (newBuilding.getBuilding().foundationYLayers - 1)
-                        && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
+                            && newBuilding.getBuilding().startingBlockTypes.contains(block.getBlockState().getBlock())) {
                         newBuilding.addToBlockPlaceQueue(block);
                     }
                 }
+            }
 
-                BuildingClientboundPacket.placeBuilding(pos,
-                    building,
+            BuildingClientboundPacket.placeBuilding(originPos,
+                    newBuilding.getBuilding(),
                     rotation,
-                    ownerName,
+                    newBuilding.getBuilding() instanceof AbstractBridge ? "" : ownerName,
+                    -1,
                     newBuilding.blockPlaceQueue.size(),
                     isDiagonalBridge,
                     0,
                     false,
                     PortalPlacement.PortalType.BASIC,
-                    pos,
+                    originPos,
                     false
-                );
+            );
+            if (!fromCommand) {
                 ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
-                    -newBuilding.getBuilding().cost.food,
-                    -newBuilding.getBuilding().cost.wood,
-                    -newBuilding.getBuilding().cost.ore
+                        -newBuilding.getBuilding().cost.food,
+                        -newBuilding.getBuilding().cost.wood,
+                        -newBuilding.getBuilding().cost.ore
                 ));
+            }
 
-                if (ownerName.isEmpty() || ownerName.equals("Enemy"))
-                    newBuilding.selfBuilding = true;
+            if (SandboxServer.isAnyoneASandboxPlayer() && (ownerName.isEmpty() || ownerName.equals("Enemy")))
+                newBuilding.selfBuilding = true;
 
-                assignBuilderUnits(builderUnitIds, queue, newBuilding);
+            assignBuilderUnits(builderUnitIds, queue, newBuilding);
 
-                for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
-                    if (entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
+            for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
+                if (entity instanceof Unit unit && unit.getOwnerName().equals(ownerName) &&
                         newBuilding.isPosInsideBuilding(entity.getOnPos().above().above()) &&
                         (unit.getMoveGoal().getMoveTarget() == null ||
-                         newBuilding.isPosInsideBuilding(unit.getMoveGoal().getMoveTarget()))) {
-                        moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
-                    }
+                                newBuilding.isPosInsideBuilding(unit.getMoveGoal().getMoveTarget()))) {
+                    moveNonBuildersAwayFromBuildingFoundations(entity, builderUnitIds, newBuilding);
                 }
-
-            } else if (!PlayerServerEvents.isBot(ownerName)) {
-                warnInsufficientResources(newBuilding);
             }
+            moveAnimalsAwayFromBuildingFoundations(newBuilding);
+
+            if (newBuilding.getBuilding() instanceof AbstractBridge)
+                newBuilding.ownerName = "";
+
             if (SandboxServer.isAnyoneASandboxPlayer() && builderUnitIds.length == 0) {
                 newBuilding.getBuilding().shouldDestroyOnReset = false;
-                saveBuildings(getServerLevel());
+                saveBuildings(serverLevel);
             }
             return newBuilding;
         }
@@ -383,13 +553,16 @@ public class BuildingServerEvents {
 
 
     private static void assignBuilderUnits(int[] builderUnitIds, boolean queue, BuildingPlacement newBuilding) {
+        if (serverLevel == null)
+            return;
+
         for (int id : builderUnitIds) {
             Entity entity = serverLevel.getEntity(id);
             if (entity instanceof WorkerUnit workerUnit) {
                 if (queue) {
                     if (workerUnit.getBuildRepairGoal().queuedBuildings.isEmpty()) {
                         ((Unit) entity).resetBehaviours();
-                        WorkerUnit.resetBehaviours(workerUnit);
+                        WorkerUnit.resetBehavioursExceptExploreBuild(workerUnit);
                     }
                     workerUnit.getBuildRepairGoal().queuedBuildings.add(newBuilding);
                     if (workerUnit.getBuildRepairGoal().getBuildingTarget() == null) {
@@ -397,7 +570,7 @@ public class BuildingServerEvents {
                     }
                 } else {
                     ((Unit) entity).resetBehaviours();
-                    WorkerUnit.resetBehaviours(workerUnit);
+                    WorkerUnit.resetBehavioursExceptExploreBuild(workerUnit);
                     workerUnit.getBuildRepairGoal().setBuildingTarget(newBuilding);
                 }
             }
@@ -408,7 +581,8 @@ public class BuildingServerEvents {
         ResourcesClientboundPacket.warnInsufficientResources(newBuilding.ownerName,
             ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.FOOD, newBuilding.getBuilding().cost.food),
             ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.WOOD, newBuilding.getBuilding().cost.wood),
-            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.getBuilding().cost.ore)
+            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.ORE, newBuilding.getBuilding().cost.ore),
+            ResourcesServerEvents.canAfford(newBuilding.ownerName, ResourceName.EMERALD, newBuilding.getBuilding().cost.emerald)
         );
     }
 
@@ -427,9 +601,20 @@ public class BuildingServerEvents {
                 UnitAction.MOVE,
                 -1,
                 new int[] { entity.getId() },
-                newBuilding.getClosestGroundPos(entity.getOnPos(), 2),
+                newBuilding.getClosestGroundPos(entity.getOnPos(), 3, true),
                 new BlockPos(0, 0, 0)
             );
+        }
+    }
+
+    private static void moveAnimalsAwayFromBuildingFoundations(BuildingPlacement newBuilding) {
+        List<Mob> mobs = MiscUtil.getEntitiesWithinRange(newBuilding.centrePos.getCenter(), 10, Mob.class, newBuilding.level);
+        for (Mob mob : mobs) {
+            if (ResourceSources.isHuntableAnimal(mob)) {
+                BlockPos bp = newBuilding.getClosestGroundPos(mob.getOnPos(), 3, true);
+                Path path = mob.getNavigation().createPath(bp.getX(), bp.getY(), bp.getZ(), 0);
+                mob.getNavigation().moveTo(path, 1);
+            }
         }
     }
 
@@ -437,13 +622,27 @@ public class BuildingServerEvents {
         if (building == null)
             return;
         if (building.isBuilt && !SandboxServer.isSandboxPlayer(playerName) &&
-            BuildingUtils.getTotalCompletedBuildingsOwned(false, building.ownerName) == 1)
+            BuildingUtils.getTotalCompletedBuildingsOwned(false, building.ownerName) == 1) {
+            HudClientboundPacket.showTempMessageI18n(playerName,"hud.helperbuttons.reignofnether.cancel.error");
             return;
+        }
+        if (building.getBuilding().capturable && !SandboxServer.isAnyoneASandboxPlayer()) {
+            HudClientboundPacket.showTempMessageI18n(playerName,"hud.helperbuttons.reignofnether.cancel.error");
+            return;
+        }
+        NightSourceAddon nsa = building.getBuilding().getActiveAddon(NightSourceAddon.class);
+        if (nsa != null && nsa.getNightRange(building) > 0 && building.isBuilt && !SandboxServer.isAnyoneASandboxPlayer()) {
+            HudClientboundPacket.showTempMessageI18n(playerName,"hud.helperbuttons.reignofnether.cancel.error");
+            return;
+        }
 
         // remove from tracked buildings, all of its leftover queued blocks and then blow it up
         buildings.remove(building);
-        if (building instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0 && ncb.getNetherZone() != null) {
-            ncb.getNetherZone().startRestoring();
+        NetherConvertingAddon ncb;
+        if ((ncb = building.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(building) > 0 && ncb.getNetherZone(building) != null) {
+            NetherZone nz = ncb.getNetherZone(building);
+            if (nz != null)
+                nz.startRestoring();
             saveNetherZones(serverLevel);
         }
         FrozenChunkClientboundPacket.setBuildingDestroyedServerside(building.originPos);
@@ -501,14 +700,27 @@ public class BuildingServerEvents {
                     building.getBuilding(),
                     building.rotation,
                     building.ownerName,
+                    building.scenarioRoleIndex,
                     building.blockPlaceQueue.size(),
-                    building instanceof BridgePlacement bridge && bridge.isDiagonalBridge,
+                    building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                     building.getUpgradeLevel(),
                     building.isBuilt,
                     building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
                     building instanceof PortalPlacement p && p.hasDestination() ? p.destination : new BlockPos(0, 0, 0),
                     true
             );
+
+            if (building.getBuilding() instanceof Library) {
+                EnchantAbility ability = building.getDataStorage().getData(Library.AUTO_CAST_ENCHANT);
+                if (ability != null) {
+                    BuildingAbilityClientboundPacket.doAbility(ability.action, building.originPos);
+                }
+            }else if (building.getBuilding() instanceof Blacksmith) {
+                EquipAbility ability = building.getDataStorage().getData(Blacksmith.AUTO_CAST_EQUIP);
+                if (ability != null) {
+                    BuildingAbilityClientboundPacket.doAbility(ability.action, building.originPos);
+                }
+            }
         }
     }
 
@@ -519,8 +731,9 @@ public class BuildingServerEvents {
                         building.getBuilding(),
                         building.rotation,
                         building.ownerName,
+                        building.scenarioRoleIndex,
                         building.blockPlaceQueue.size(),
-                        building instanceof BridgePlacement bridge && bridge.isDiagonalBridge,
+                        building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                         building.getUpgradeLevel(),
                         building.isBuilt,
                         building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
@@ -562,10 +775,11 @@ public class BuildingServerEvents {
     public static void onLivingSpawn(MobSpawnEvent.FinalizeSpawn evt) {
         if (evt.getSpawnType() == MobSpawnType.SPAWNER) {
             if (evt.getSpawner() != null && evt.getSpawner().getSpawnerBlockEntity() != null) {
-                BlockEntity be = evt.getSpawner().getSpawnerBlockEntity();
                 BlockPos bp = evt.getSpawner().getSpawnerBlockEntity().getBlockPos();
-                if (BuildingUtils.findBuilding(false, bp) instanceof DungeonPlacement ||
-                    BuildingUtils.findBuilding(false, bp) instanceof FlameSanctuaryPlacement) {
+                BuildingPlacement bpl = BuildingUtils.findBuilding(false, bp);
+                if (bpl != null &&
+                   (bpl.getBuilding() instanceof Dungeon ||
+                    bpl.getBuilding() instanceof FlameSanctuary)) {
                     evt.getEntity().discard();
                 }
             }
@@ -584,7 +798,8 @@ public class BuildingServerEvents {
         if (buildingSyncTicks <= 0) {
             buildingSyncTicks = BUILDING_SYNC_TICKS_MAX;
             for (BuildingPlacement building : buildings)
-                BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(), building.ownerName);
+                BuildingClientboundPacket.syncBuilding(building.originPos, building.getBlocksPlaced(),
+                        building.partialBlocksDestroyed, building.ownerName, building.scenarioRoleIndex);
         }
         // need to remove from the list first as destroy() will read it to check defeats
         List<BuildingPlacement> buildingsToDestroy = new ArrayList<>();
@@ -595,8 +810,11 @@ public class BuildingServerEvents {
         }
         buildings.removeIf(b -> {
             if (b.shouldBeDestroyed()) {
-                if (b instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0 && ncb.getNetherZone() != null) {
-                    ncb.getNetherZone().startRestoring();
+                NetherConvertingAddon ncb;
+                if ((ncb = b.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(b) > 0 && ncb.getNetherZone(b) != null) {
+                    NetherZone nz = ncb.getNetherZone(b);
+                    if (nz != null)
+                        nz.startRestoring();
                     saveNetherZones(serverLevel);
                 }
                 FrozenChunkClientboundPacket.setBuildingDestroyedServerside(b.originPos);
@@ -608,7 +826,8 @@ public class BuildingServerEvents {
         for (BuildingPlacement building : buildingsToDestroy)
             building.destroy(serverLevel);
 
-        for (BuildingPlacement building : buildings)
+        ArrayList<BuildingPlacement> bpls = new ArrayList<>(buildings);
+        for (BuildingPlacement building : bpls)
             building.tick(serverLevel);
 
         for (NetherZone netherConversionZone : netherZones)
@@ -619,6 +838,31 @@ public class BuildingServerEvents {
         int nzSizeAfter = netherZones.size();
         if (nzSizeBefore != nzSizeAfter) {
             saveNetherZones(serverLevel);
+        }
+
+        String playerName;
+        if (serverLevel.getServer().getTickCount() % 10 == 0) {
+            for (Objective objective : serverLevel.getScoreboard().getObjectives()) {
+                if (objective.getCriteria().equals(ResourceObjectiveCriteria.POPULATION))
+                    for (ServerPlayer player : serverLevel.players()) {
+                        playerName = player.getName().getString();
+                        int currentPopulation = UnitServerEvents.getCurrentPopulation(playerName);
+                        if (serverLevel != null && currentPopulation != populations.getInt(playerName)) {
+                            populations.put(playerName, currentPopulation);
+	                        serverLevel.getScoreboard().forAllObjectives(ResourceObjectiveCriteria.POPULATION, playerName, (p_9178_) -> p_9178_.setScore(currentPopulation));
+                        }
+                    }
+            }
+            
+            for (BuildingPlacement bpl : getBuildings()) {
+                if (bpl instanceof GraveyardPlacement gy && gy.getUpgradeLevel() > 0 && gy.autoRelease) {
+                    playerName = gy.ownerName;
+                    int currentPop = UnitServerEvents.getCurrentPopulation(playerName);
+                    int popSupply = BuildingServerEvents.getTotalPopulationSupply(gy.ownerName);
+                    if (popSupply > currentPop)
+                        gy.releaseNextUnit();
+                }
+            }
         }
     }
 
@@ -683,28 +927,27 @@ public class BuildingServerEvents {
                 } else if (pillagerUnit != null) {
                     atkDmg = pillagerUnit.getUnitAttackDamage() / 2;
                     building.lastAttacker = pillagerUnit;
+                } else if (exp.getExploder() instanceof AdjustablePrimedTnt aTNT) {
+                    atkDmg = aTNT.getExplosionPower() *  AdjustablePrimedTnt.DAMAGE_PER_POWER;
                 } else if (exp.getExploder() instanceof PrimedTnt) {
                     atkDmg = TNT_BUILDING_BASE_DAMAGE;
                 }
 
                 if (atkDmg > 0) {
                     // all explosion damage will directly hit all occupants at an average of 1/4 rate
-                    if (building instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
-                        for (LivingEntity le : garr.getOccupants())
+                    GarrisonableBuildingAddon garr;
+                    if ((garr = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null) {
+                        for (LivingEntity le : garr.getOccupants(building))
                             le.hurt(exp.getDamageSource(), (random.nextFloat(atkDmg + 1)) / 2f);
                     }
 
-                    if (building instanceof BridgePlacement) {
-                        atkDmg /= 2;
-                    }
-
-                    building.destroyRandomBlocks((int) atkDmg);
+                    building.destroyRandomBlocks(atkDmg);
                 }
 
             }
         }
         // don't do any block damage apart from the scripted building damage above or damage to leaves/tnt
-        if (!serverLevel.getGameRules().getRule(GameRuleRegistrar.DO_UNIT_GRIEFING).get()) {
+        if (serverLevel == null || !serverLevel.getGameRules().getRule(GameRuleRegistrar.DO_UNIT_GRIEFING).get()) {
             evt.getAffectedBlocks().removeIf(bp -> {
                 BlockState bs = evt.getLevel().getBlockState(bp);
                 return !(bs.getBlock() instanceof LeavesBlock) && !(bs.getBlock() instanceof TntBlock);
@@ -743,6 +986,17 @@ public class BuildingServerEvents {
         }
     }
 
+    // prevent crops from becoming items when a farm is damaged
+    @SubscribeEvent
+    public static void onItemDrop(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof ItemEntity ie && BuildingUtils.isPosInsideFarm(evt.getLevel().isClientSide(), ie.getOnPos())) {
+            Item item = ie.getItem().getItem();
+            if (List.of(Items.NETHER_WART, Items.WHEAT, Items.CARROT, Items.BEETROOT, Items.POTATO).contains(item)) {
+                evt.setCanceled(true);
+            }
+        }
+    }
+
     public static void replaceClientBuilding(BlockPos buildingPos) {
         if (!PlayerServerEvents.rtsSyncingEnabled) {
             return;
@@ -754,8 +1008,9 @@ public class BuildingServerEvents {
                         building.getBuilding(),
                         building.rotation,
                         building.ownerName,
+                        building.scenarioRoleIndex,
                         building.blockPlaceQueue.size(),
-                        building instanceof BridgePlacement bridge && bridge.isDiagonalBridge,
+                        building.getBuilding() instanceof AbstractBridge && building.isDiagonalBridge,
                         building.getUpgradeLevel(),
                         building.isBuilt,
                         building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
@@ -765,40 +1020,5 @@ public class BuildingServerEvents {
                 return;
             }
         }
-    }
-
-    private static final float MIN_NETHER_BLOCKS_PERCENT = 0.8f;
-
-    public static boolean isOnNetherBlocks(List<BuildingBlock> blocks, BlockPos originPos, ServerLevel level) {
-        int netherBlocksBelow = 0;
-        int blocksBelow = 0;
-        for (BuildingBlock block : blocks) {
-            if (block.getBlockPos().getY() == originPos.getY() + 1 && level != null) {
-                BlockPos bp = block.getBlockPos();
-                BlockState bs = block.getBlockState(); // building block
-
-                if (bs.isSolid()) {
-                    blocksBelow += 1;
-                    if (NetherBlocks.isNetherBlock(level, bp.below())) {
-                        netherBlocksBelow += 1;
-                    }
-                }
-            }
-        }
-        if (blocksBelow <= 0) {
-            return false; // avoid division by 0
-        }
-        return ((float) netherBlocksBelow / (float) blocksBelow) > MIN_NETHER_BLOCKS_PERCENT;
-    }
-
-    // does the player own one of these buildings?
-    public static boolean playerHasFinishedBuilding(Building building, String playerName) {
-        for (BuildingPlacement bpl : buildings) {
-            if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt &&
-                    (bpl.ownerName.equals(playerName))) {
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -136,7 +136,7 @@ public class PiglinUnitModel<T extends Mob> extends PlayerModel<T> {
 
         if (entity instanceof BruteUnit brute &&
             entity.getOffhandItem().getItem() == Items.SHIELD &&
-            brute.isHoldingUpShield) {
+            brute.isHoldingUpShield()) {
             this.leftArm.xRot = -1.5f;
         }
     }

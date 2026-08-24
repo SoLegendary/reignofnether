@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.ability.TradeAction;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.faction.Faction;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -18,10 +21,17 @@ public class PlayerClientboundPacket {
     Long value1;
     int value2;
     Faction faction;
+    TradeAction tradeAction; // for updating market rates
+    BlockPos pos;
 
     public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new PlayerClientboundPacket(PlayerAction.ADD_RTS_PLAYER, playerName, id, startPosColorId, faction));
+    }
+
+    public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.ADD_SCENARIO_NPC_RTS_PLAYER, playerName, id, scenarioRoleIndex, faction));
     }
 
     public static void removeRTSPlayer(String playerName) {
@@ -47,6 +57,11 @@ public class PlayerClientboundPacket {
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new PlayerClientboundPacket(PlayerAction.RESET_RTS, "", 0L, 0, Faction.NONE));
         }
+    }
+
+    public static void publishScenarioMap() {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.PUBLISH_SCENARIO_MAP, "", 0L, 0, Faction.NONE));
     }
 
     public static void syncRtsGameTime(Long rtsGameTicks) {
@@ -79,12 +94,49 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(PlayerAction.SYNC_BEACON_OWNER_TICKS, playerName, ticks, 0, Faction.NONE));
     }
 
+    public static void setRTSCamera(String playerName, boolean value) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.SET_RTS_CAMERA, playerName, (long) (value ? 1 : 0), 0, Faction.NONE));
+    }
+
+    public static void setMarketRate(TradeAction tradeAction, String playerName, int value) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(tradeAction, playerName, (long) value));
+    }
+
+    public static void teleport(String playerName, BlockPos pos) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.TELEPORT, playerName, pos));
+    }
+
+    public PlayerClientboundPacket(PlayerAction playerAction, String playerName, BlockPos pos) {
+        this.playerAction = playerAction;
+        this.playerName = playerName;
+        this.value1 = 0L;
+        this.value2 = 0;
+        this.faction = Faction.NONE;
+        this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
+        this.pos = pos;
+    }
+
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1, int value2, Faction faction) {
         this.playerAction = playerAction;
         this.playerName = playerName;
         this.value1 = value1;
         this.value2 = value2;
         this.faction = faction;
+        this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
+        this.pos = new BlockPos(0,0,0);
+    }
+
+    public PlayerClientboundPacket(TradeAction tradeAction, String playerName, Long value1) {
+        this.playerAction = PlayerAction.SET_MARKET_RATE;
+        this.playerName = playerName;
+        this.value1 = value1;
+        this.value2 = 0;
+        this.faction = Faction.NONE;
+        this.tradeAction = tradeAction;
+        this.pos = new BlockPos(0,0,0);
     }
 
     public PlayerClientboundPacket(FriendlyByteBuf buffer) {
@@ -93,6 +145,8 @@ public class PlayerClientboundPacket {
         this.value1 = buffer.readLong();
         this.value2 = buffer.readInt();
         this.faction = buffer.readEnum(Faction.class);
+        this.tradeAction = buffer.readEnum(TradeAction.class);
+        this.pos = buffer.readBlockPos();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -101,6 +155,8 @@ public class PlayerClientboundPacket {
         buffer.writeLong(this.value1);
         buffer.writeInt(this.value2);
         buffer.writeEnum(this.faction);
+        buffer.writeEnum(this.tradeAction);
+        buffer.writeBlockPos(this.pos);
     }
 
     // server-side packet-consuming functions
@@ -111,18 +167,23 @@ public class PlayerClientboundPacket {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         switch (playerAction) {
+                            case TELEPORT -> OrthoviewClientEvents.centreCameraOnPosForPlayer(playerName, pos);
                             case DEFEAT -> PlayerClientEvents.defeat(playerName);
                             case VICTORY -> PlayerClientEvents.victory(playerName);
                             case ADD_RTS_PLAYER -> PlayerClientEvents.addRTSPlayer(playerName, faction, value1, value2);
+                            case ADD_SCENARIO_NPC_RTS_PLAYER -> PlayerClientEvents.addScenarioNPCRTSPlayer(playerName, faction, value1, value2);
                             case REMOVE_RTS_PLAYER -> PlayerClientEvents.removeRTSPlayer(playerName);
                             case RESET_RTS -> PlayerClientEvents.resetRTS(false);
                             case RESET_RTS_HARD -> PlayerClientEvents.resetRTS(true);
+                            case PUBLISH_SCENARIO_MAP -> PlayerClientEvents.publishScenarioMap();
                             case SYNC_RTS_GAME_TIME -> PlayerClientEvents.syncRtsGameTime(value1);
                             case LOCK_RTS -> PlayerClientEvents.setRTSLock(true);
                             case UNLOCK_RTS -> PlayerClientEvents.setRTSLock(false);
                             case ENABLE_START_RTS -> PlayerClientEvents.setCanStartRTS(true);
                             case DISABLE_START_RTS -> PlayerClientEvents.setCanStartRTS(false);
                             case SYNC_BEACON_OWNER_TICKS -> PlayerClientEvents.syncBeaconOwnerTicks(playerName, value1);
+                            case SET_RTS_CAMERA -> OrthoviewClientEvents.tryToSetCamera(playerName, value1 == 1L);
+                            case SET_MARKET_RATE -> PlayerClientEvents.setMarketRate(tradeAction, playerName, Math.toIntExact(value1));
                         }
                         success.set(true);
                     });

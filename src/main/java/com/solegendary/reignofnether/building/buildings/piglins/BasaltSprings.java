@@ -38,8 +38,9 @@ public class BasaltSprings extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
-        this.productions.add(ProductionItems.RESEARCH_CUBE_MAGMA, Keybindings.keyQ);
+        this.productions.add(ProductionItems.RESEARCH_CUBE_MAGMA, Keybindings.abilitySlot1);
     }
 
     public Faction getFaction() {return Faction.PIGLINS;}
@@ -56,13 +57,13 @@ public class BasaltSprings extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BASTION) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.basalt_springs"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.basalt_springs"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.basalt_springs.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.basalt_springs.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.basalt_springs.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.basalt_springs.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.basalt_springs.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.basalt_springs.tooltip3"), Style.EMPTY)
             ),
             this
         );

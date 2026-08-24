@@ -31,9 +31,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import static com.solegendary.reignofnether.sounds.SoundClientEvents.getOrthoviewSoundPos;
 import static com.solegendary.reignofnether.time.TimeUtils.normaliseTime;
 
 @Mixin(ClientLevel.class)
@@ -122,48 +120,6 @@ public class ClientLevelMixin {
         }
     }
 
-    // calculates the location of where local world sounds should play for an orthoview player based on the selected
-    // units and/or buildings that are currently on the screen
-    // eg. if the player has selected a unit at pos (4,6) but their player entity is at (34,52) and a sound plays at
-    // (10,10), the new sound position should instead be (10,10) - (4,6) + (34,52) = (40,56)
-    // if nothing is selected, then default to the centre of the screen
-    private Vec3 getOrthoviewSoundPos(Vec3 originalPos) {
-        Player player = this.minecraft.player;
-        if (player == null)
-            return originalPos;
-
-        ArrayList<Vec3> posList = new ArrayList<>();
-
-        for (LivingEntity entity : UnitClientEvents.getSelectedUnits())
-            posList.add(entity.getEyePosition());
-        for (BuildingPlacement building : BuildingClientEvents.getSelectedBuildings()) {
-            BlockPos bp = BuildingUtils.getCentrePos(building.getBlocks());
-            posList.add(new Vec3(bp.getX(), bp.getY(), bp.getZ()));
-        }
-        // remove any positions that aren't on the screen
-        List<Vec3> posListOnScreen = new ArrayList<>();
-        for (Vec3 vec3 : posList) {
-            if (MinimapClientEvents.isWorldXZinsideMap((int) vec3.x, (int) vec3.z)) {
-                posListOnScreen.add(vec3);
-            }
-        }
-
-        // calculate the average position
-        Vec3 newPos = new Vec3(0,0,0);
-        if (!posListOnScreen.isEmpty()) {
-            for (Vec3 pos : posListOnScreen)
-                newPos = newPos.add(pos);
-            double m = 1D/posListOnScreen.size();
-            newPos = newPos.multiply(m, m, m);
-        } else {
-            // do a similar kind of calculation to get the pos at the centre of the screen as in CursorClientEvents
-            newPos = MiscUtil.getOrthoviewCentreWorldPos(this.minecraft);
-        }
-        // get the position for the sound as though the player was at position newPos
-        Vec3 diffOriginalToNew = originalPos.add(newPos.multiply(-1,-1,-1));
-        return new Vec3(player.getX(), player.getY(), player.getZ()).add(diffOriginalToNew);
-    }
-
     @Shadow public void setGameTime(long pTime) { }
     @Shadow public void setDayTime(long pTime) { }
 
@@ -227,5 +183,15 @@ public class ClientLevelMixin {
     public void getSkyColor(Vec3 pPos, float pPartialTick, CallbackInfoReturnable<Vec3> cir) {
         if (TimeClientEvents.isBloodMoonActive())
             cir.setReturnValue(new Vec3(0.25f, 0f, 0f));
+    }
+
+    @Inject(
+            method = "setServerVerifiedBlockState",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void reignofnether$gateFoggedBlockUpdate(BlockPos pPos, BlockState pState, int pFlags, CallbackInfo ci) {
+        if (FogOfWarClientEvents.isEnabled() && !FogOfWarClientEvents.isBlockVisible(pPos))
+            ci.cancel();
     }
 }

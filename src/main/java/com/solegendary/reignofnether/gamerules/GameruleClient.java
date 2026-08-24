@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.gamerules;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -28,16 +27,24 @@ public class GameruleClient {
     public static int maxPopulation = ResourceCosts.DEFAULT_MAX_POPULATION;
     public static boolean doUnitGriefing = false; // only for GUI
     public static boolean doPlayerGriefing = true; // only for GUI
-    public static boolean improvedPathfinding = true; // only for GUI
     public static double groundYLevel = -320;
     public static double flyingMaxYLevel = 320;
     public static boolean allowBeacons = true;
     public static boolean pvpModesOnly = false;
     public static double beaconWinMinutes = 10;
     public static boolean slantedBuilding = true;
-    public static int allowedHeroes = 1;
+    public static int allowedHeroes = 2;
+    public static boolean lockAlliances = false;
+    public static boolean scenarioMode = false;
+    public static boolean coopMode = false;
+    public static boolean buildingsOutsideBorder = false;
+    public static boolean rtsPathfinding = false; // only for GUI
+    public static int animalSpawnYDiff = 5;
 
     public static boolean gamerulesMenuOpen = false;
+
+    public static final String BOOLEAN_BUTTON_NAME = "Boolean Game Rule";
+    public static final String INTEGER_BUTTON_NAME = "Integer Game Rule";
 
     public static Button getGamerulesButton() {
         return new Button(
@@ -46,7 +53,7 @@ public class GameruleClient {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/repeating_command_block_back.png"),
                 (Keybinding) null,
                 () -> gamerulesMenuOpen,
-                () -> false,
+                () -> scenarioMode,
                 () -> !StartPosClientEvents.isStarting,
                 () -> gamerulesMenuOpen = !gamerulesMenuOpen,
                 null,
@@ -60,11 +67,12 @@ public class GameruleClient {
     }
 
     private static class GameruleBooleanButton extends Button {
+        private static final Minecraft MC = Minecraft.getInstance();
         private final String label;
         public GameruleBooleanButton(String label, boolean enabled, Runnable onLeftClick, String tooltip) {
             super(
-                    "Boolean Game Rule",
-                    10,
+                    BOOLEAN_BUTTON_NAME,
+                    8,
                     enabled ? ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png") :
                             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
                     (Keybinding) null,
@@ -75,13 +83,14 @@ public class GameruleClient {
                     null,
                     List.of(fcs(tooltip))
             );
+            this.imageSize = 12;
             this.label = label;
             this.frameResource = null;
         }
         @Override
         public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
             super.render(guiGraphics, x, y, mouseX, mouseY);
-            guiGraphics.drawString(MC.font, label,x + 23, y + 7, 0xFFFFFF);
+            guiGraphics.drawString(MC.font, label,x + 22, y + 6, 0xFFFFFF);
         }
         @Override
         public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -90,11 +99,12 @@ public class GameruleClient {
     }
 
     private static class GameruleIntegerButton extends Button {
+        private static final Minecraft MC = Minecraft.getInstance();
         private final String label;
         public GameruleIntegerButton(String label, Runnable onLeftClick, Runnable onRightClick, List<FormattedCharSequence> tooltipLines) {
             super(
-                "Integer Game Rule",
-                10,
+                INTEGER_BUTTON_NAME,
+                8,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png"),
                 (Keybinding) null,
                 () -> false,
@@ -104,13 +114,14 @@ public class GameruleClient {
                 onRightClick,
                 tooltipLines
             );
+            this.imageSize = 12;
             this.label = label;
         }
         @Override
         public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
             super.render(guiGraphics, x, y, mouseX, mouseY);
             guiGraphics.drawString(MC.font, label,
-                    x + 23, y + 7, 0xFFFFFF);
+                    x + 23, y + 6, 0xFFFFFF);
         }
         @Override
         public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
@@ -122,8 +133,8 @@ public class GameruleClient {
     public static List<Button> renderGamerulesGUI(GuiGraphics guiGraphics, int xTR, int yTR, int mouseX, int mouseY) {
         ArrayList<Button> buttons = new ArrayList<>();
         int width = 145;
-        int x = xTR - width - 10;
-        int y = yTR - 30;
+        int x = xTR - width - 8;
+        int y = yTR - 36;
 
         buttons.add(new GameruleBooleanButton("doLogFalling", doLogFalling,
             () -> GameruleServerboundPacket.setLogFalling(!doLogFalling),
@@ -141,10 +152,6 @@ public class GameruleClient {
             () -> GameruleServerboundPacket.setPlayerGriefing(!doPlayerGriefing),
             I18n.get("commands.reignofnether.gamerule.player_griefing")
         ));
-        buttons.add(new GameruleBooleanButton("improvedPathfinding", improvedPathfinding,
-            () -> GameruleServerboundPacket.setImprovedPathfinding(!improvedPathfinding),
-            I18n.get("commands.reignofnether.gamerule.improved_pathfinding")
-        ));
         buttons.add(new GameruleBooleanButton("allowBeacons", allowBeacons,
             () -> GameruleServerboundPacket.setAllowBeacons(!allowBeacons),
             I18n.get("commands.reignofnether.gamerule.allow_beacons")
@@ -154,8 +161,20 @@ public class GameruleClient {
             I18n.get("commands.reignofnether.gamerule.pvp_modes_only")
         ));
         buttons.add(new GameruleBooleanButton("slantedBuilding", slantedBuilding,
-            () -> GameruleServerboundPacket.setSlantedBuilding(!slantedBuilding),
-            I18n.get("commands.reignofnether.gamerule.slanted_buildings")
+                () -> GameruleServerboundPacket.setSlantedBuilding(!slantedBuilding),
+                I18n.get("commands.reignofnether.gamerule.slanted_buildings")
+        ));
+        buttons.add(new GameruleBooleanButton("lockAlliances", lockAlliances,
+                () -> GameruleServerboundPacket.setLockAlliances(!lockAlliances),
+                I18n.get("commands.reignofnether.gamerule.lock_alliances")
+        ));
+        buttons.add(new GameruleBooleanButton("coopMode", coopMode,
+                () -> GameruleServerboundPacket.setCoopMode(!coopMode),
+                I18n.get("commands.reignofnether.gamerule.coop_mode")
+        ));
+        buttons.add(new GameruleBooleanButton("rtsPathfinding", rtsPathfinding,
+                () -> GameruleServerboundPacket.setRtsPathfinding(!rtsPathfinding),
+                I18n.get("commands.reignofnether.gamerule.rts_pathfinding")
         ));
         buttons.add(new GameruleIntegerButton("allowedHeroes: " + Math.round(allowedHeroes),
             () -> {
@@ -231,14 +250,28 @@ public class GameruleClient {
                 fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
             )
         ));
+        buttons.add(new GameruleIntegerButton("animalSpawnYDiff: " + Math.round(animalSpawnYDiff),
+            () -> {
+                int value = Math.min(100, animalSpawnYDiff + (Keybindings.shiftMod.isDown() ? 5 : 1));
+                GameruleServerboundPacket.setAnimalSpawnYDiff(value);
+            },
+            () -> {
+                int value = Math.max(1, animalSpawnYDiff - (Keybindings.shiftMod.isDown() ? 5 : 1));
+                GameruleServerboundPacket.setAnimalSpawnYDiff(value);
+            },
+            List.of(
+                    fcs(I18n.get("commands.reignofnether.gamerule.animal_spawn_y_diff")),
+                    fcs(I18n.get("hud.gamerule.reignofnether.click")),
+                    fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
+            )
+        ));
 
-        int height = (buttons.size() * 20) - 5;
-        MyRenderer.renderFrameWithBg(guiGraphics, x, y, width, height, 0xA0000000);
+        int height = (buttons.size() * 18) - 12;
+        MyRenderer.renderFrameWithBg(guiGraphics, x, y, width, height, 0xC8000000);
 
-        int i = 0;
         for (Button button : buttons) {
             button.render(guiGraphics, x + 5, y + 5, mouseX, mouseY);
-            y += 18;
+            y += 16;
         }
         return buttons;
     }

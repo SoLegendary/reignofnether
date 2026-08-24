@@ -15,11 +15,8 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.registrars.BlockRegistrar;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
-import com.solegendary.reignofnether.registrars.SoundRegistrar;
-import com.solegendary.reignofnether.resources.BlockUtils;
+import com.solegendary.reignofnether.registrars.*;
+import com.solegendary.reignofnether.blocks.BlockUtils;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -32,6 +29,7 @@ import com.solegendary.reignofnether.unit.modelling.animations.WretchedWraithAni
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -40,7 +38,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -68,12 +65,16 @@ import java.util.*;
 public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
         List.of(
-            new Pair<>(new ChillingScreech(), Keybindings.keyQ),
-            new Pair<>(new FrostBlink(), Keybindings.keyW),
-            new Pair<>(new BitterFrostPassive(), Keybindings.keyE),
-            new Pair<>(new Blizzard(), Keybindings.keyR)
+            new Pair<>(new ChillingScreech(), Keybindings.abilitySlot1),
+            new Pair<>(new FrostBlink(), Keybindings.abilitySlot2),
+            new Pair<>(new BitterFrostPassive(), Keybindings.abilitySlot3),
+            new Pair<>(new Blizzard(), Keybindings.abilitySlot4)
         )
     );
+
+    boolean needsStatSync = false;
+    @Override public boolean needsStatSync() { return needsStatSync; }
+    @Override public void setNeedsStatSync(boolean value) { needsStatSync = value; }
 
     @Override
     public Object2ObjectArrayMap<HeroAbility, Integer> getHeroAbilityRanks() {
@@ -124,6 +125,10 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     public int getMaxResources() {return maxResources;}
     public MountGoal getMountGoal() {return mountGoal;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -159,23 +164,28 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(WretchedWraithUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(WretchedWraithUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(WretchedWraithUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
     public boolean getWillRetaliate() {return !isBlizzardInProgress() && willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage + (attackBonusPerLevel * getHeroLevel());}
-    public float getUnitMaxHealth() {return maxHealth + (maxHealthBonusPerLevel * getHeroLevel());}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.WRETCHED_WRAITH;}
@@ -198,12 +208,12 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         experience = amount;
         setStatsForLevel();
     }
-    private float baseMaxMana = 120;
+    final static private float baseMaxMana = 120;
     private float maxMana = baseMaxMana;
     private float mana = maxMana;
-    private float manaRegenPerSecond = 1;
-    private float manaBonusPerLevel = 10;
-    @Override public float getBaseMaxMana() { return baseMaxMana; }
+    final static private float manaRegenPerSecond = 0.75f;
+    final static private float bonusManaRegenPerSnowLayer = 0.25f;
+    final static private float manaBonusPerLevel = 10;
     @Override public float getMaxMana() { return maxMana; }
     @Override public void setMaxMana(float amount) {
         this.maxMana = amount;
@@ -216,10 +226,16 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         if (!level().isClientSide())
             HeroClientboundPacket.setMana(getId(), this.mana);
     }
-    @Override public float getManaRegenPerSecond() { return manaRegenPerSecond; }
-    @Override public float getManaBonusPerLevel() { return manaBonusPerLevel; }
+    @Override
+    public float getManaRegenPerSecond() {
+        float regen = HeroUnit.super.getManaRegenPerSecond();
+        int layers = 0;
+        if (onGround())
+            layers = BlockUtils.getWraithSnowLayers(level().getBlockState(getOnPos().above()));
+        return regen + (bonusManaRegenPerSnowLayer * layers);
+    }
 
-    final static public float attackDamage = 5.0f;
+    final static public float attackDamage = 6.5f;
     final static public float attackBonusPerLevel = 0.5f;
     final static public float attacksPerSecond = 0.4f;
     final static public float maxHealth = 140.0f;
@@ -228,14 +244,10 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     final static public float movementSpeed = 0.28f;
     final static public float attackRange = 3F; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
+    final static public double magicDamageResist = 0.3d;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
     public int maxResources = 100;
-
-    @Override public float getHealthBonusPerLevel() { return maxHealthBonusPerLevel; };
-    @Override public float getAttackBonusPerLevel() { return attackBonusPerLevel; };
-    @Override public float getBaseHealth() { return maxHealth; };
-    @Override public float getBaseAttack() { return attackDamage; };
 
     public int fogRevealDuration = 0; // set > 0 for the client who is attacked by this unit
     public int getFogRevealDuration() { return fogRevealDuration; }
@@ -351,6 +363,19 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         setStatsForLevel();
     }
 
+    @Override
+    public boolean ignoreNonStopCommands() {
+        return isBlizzardInProgress();
+    }
+
+    @Override
+    public void kill() {
+        if (!level().isClientSide()) {
+            SoundClientboundPacket.stopSoundWithId(getId());
+        }
+        super.kill();
+    }
+
     // prevent vanilla logic for picking up items
     @Override
     protected void pickUpItem(ItemEntity pItemEntity) { }
@@ -358,8 +383,8 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
-            pDamage *= 0.7F;
+        if (MiscUtil.isMagicDamage(pSource))
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
 
@@ -388,7 +413,20 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, WretchedWraithUnit.armorValue)
                 .add(Attributes.ATTACK_KNOCKBACK, 0f)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0f);
+                .add(Attributes.KNOCKBACK_RESISTANCE, 1.0f)
+                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), WretchedWraithUnit.maxHealth)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
+                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
+                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
+                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
+                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
+                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
     }
 
     public void tick() {
@@ -416,14 +454,16 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
                 }
             }
             snowToPlace = newSnowQueue;
+
             // heal while on wraith snow
             int layers = BlockUtils.getWraithSnowLayers(level().getBlockState(getOnPos().above()));
-            if (onGround() && layers > 0 && tickCount % (80 / layers) == 0) {
-                heal(1);
+            if (onGround() && layers > 0 && tickCount % 20 == 0) {
+                heal(0.25f + (layers * 0.25f));
             }
         }
         if (!level().isClientSide()) {
             tickFrostBlink();
+            tickBitterFrost();
         }
         tickBlizzard();
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
@@ -432,6 +472,24 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
             }
             lastOnPos = getOnPos();
         }
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     private Set<BlockPos> highlightBps = new HashSet<>();
@@ -450,6 +508,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         this.readUnitSaveData(pCompound);
+        this.setNeedsStatSync(true);
     }
 
     @Override
@@ -612,6 +671,18 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         }
     }
 
+    private void tickBitterFrost() {
+        if (getBitterFrost().getRank(this) >= 1 && tickCount % 5 == 0 && onGround()) {
+            BlockPos onPos = getOnPos().above();
+            for (BlockPos pos : List.of(onPos, onPos.north(), onPos.south(), onPos.west(), onPos.east())) {
+                BlockState bs = level().getBlockState(pos);
+                if (bs.getBlock() != BlockRegistrar.WRAITH_SNOW_LAYER.get()) {
+                    BlockServerEvents.placeWraithSnow((ServerLevel) level(), pos, getId(),  false);
+                }
+            }
+        }
+    }
+
     private void freezeRandomNearbyEnemy() {
         ArrayList<LivingEntity> mobs = new ArrayList<>(MiscUtil.getEntitiesWithinRange(position(), Blizzard.RADIUS, LivingEntity.class, level()));
         Collections.shuffle(mobs);
@@ -692,20 +763,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public boolean isIdle() {
-        boolean idleAttacker = getAttackMoveTarget() == null &&
-                !hasLivingTarget() &&
-                !AttackerUnit.isAttackingBuilding(this);
-
-        // some larger mobs like bears get stuck near their movetarget so nav won't be done but it also won't be null
-        boolean stationaryNearMoveTarget = false;
-        if (this.getMoveGoal().getMoveTarget() != null) {
-            double distToMoveTarget = this.distanceToSqr(this.getMoveGoal().getMoveTarget().getCenter());
-            boolean stationary = this.getDeltaMovement().x == 0 || this.getDeltaMovement().z == 0;
-            stationaryNearMoveTarget = stationary && distToMoveTarget < 4;
-        }
-        return (this.getMoveGoal().getMoveTarget() == null || stationaryNearMoveTarget) &&
-                this.getFollowTarget() == null &&
-                idleAttacker &&
+        return HeroUnit.super.isIdle() &&
                 !isBlizzardInProgress() &&
                 !isFrostBlinkInProgress();
     }
@@ -721,7 +779,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     @Override
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         boolean result = super.doHurtTarget(pEntity);
-        if (result && getBitterFrost().getRank(this) >= 1 && !level().isClientSide()) {
+        if (result && getBitterFrost().getRank(this) >= 2 && !level().isClientSide()) {
             snowToPlace.putAll(BlockServerEvents.getSnowPositions(level(), pEntity.getOnPos().above(), 1));
         }
         return result;
@@ -729,8 +787,10 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
+        if ((frostBlinkInProgress || level().isClientSide()) && (pSource.is(DamageTypes.FELL_OUT_OF_WORLD) || pSource.is(DamageTypes.IN_WALL)))
+            return false;
         boolean result = super.hurt(pSource, pAmount);
-        if (result && getBitterFrost().getRank(this) >= 2 && !level().isClientSide()) {
+        if (result && getBitterFrost().getRank(this) >= 3 && !level().isClientSide()) {
             if (pSource.getEntity() instanceof Mob mob) {
                 BlockServerEvents.placeWraithSnow((ServerLevel) level(), mob.getOnPos().above(), getId());
             } else if (pSource.getEntity() instanceof Projectile projectile && projectile.getOwner() instanceof Mob mob) {
@@ -759,7 +819,20 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public boolean isPushable() {
-        return !isBlizzardInProgress() && !isFrostBlinkInProgress();
+        return true;
+    }
+
+    @Override
+    protected void doPush(Entity entity) {
+        if (entity.getClass() == this.getClass()) {
+            super.doPush(entity);
+        }
+    }
+    @Override
+    public void push(Entity entity) {
+        if (entity.getClass() == this.getClass()) {
+            super.push(entity);
+        }
     }
 
     @Override

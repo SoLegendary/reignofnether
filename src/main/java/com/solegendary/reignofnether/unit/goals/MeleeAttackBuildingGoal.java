@@ -33,7 +33,10 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
     protected BuildingPlacement buildingTarget;
 
     protected final int RECALC_COOLDOWN_MAX = 10;
-    protected int recalcCooldown = 0; // limit start() used by canContinueToUse
+    protected static final int MELEE_RECALC_COOLDOWN_CAP = 100; // 5s — attacks should respond faster than generic move
+    protected int currentMeleeRecalcCooldown = RECALC_COOLDOWN_MAX;
+    protected int recalcCooldown = 0; // limit start() used by tick()
+    public boolean forced = false;
 
     public MeleeAttackBuildingGoal(Mob mob) {
         super(mob, true, 0);
@@ -43,22 +46,33 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
         if (buildingTarget != null) {
 
             // for some reason, isDone() can sometimes be true even when moveTarget is nonnull and
-            // we haven't reached the target, esp. for Brutes
+            // we haven't reached the target, esp. for Brutes.
+            // A1+A5: if the repathed final node matches the previous one, the target is unreachable —
+            // stop instead of looping. Otherwise back off exponentially.
             if (this.mob.getNavigation().isDone() && moveTarget != null &&
-                this.mob.getOnPos().distSqr(moveTarget) > 1 && !isAttacking()) {
+                    this.mob.getOnPos().distSqr(moveTarget) > 1 && !isAttacking()) {
                 if (recalcCooldown > 0) {
                     recalcCooldown -= 1;
                 } else {
-                    recalcCooldown = RECALC_COOLDOWN_MAX;
+                    BlockPos oldFinalNode = getFinalNodePos();
                     this.start();
+                    BlockPos newFinalNode = getFinalNodePos();
+                    if (oldFinalNode != null && oldFinalNode.equals(newFinalNode)) {
+                        currentMeleeRecalcCooldown = Math.min(currentMeleeRecalcCooldown * 2, MELEE_RECALC_COOLDOWN_CAP);
+                    } else {
+                        currentMeleeRecalcCooldown = RECALC_COOLDOWN_MAX;
+                    }
+                    recalcCooldown = currentMeleeRecalcCooldown;
                 }
             }
-
+            if (buildingTarget == null) {
+                return;
+            }
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() <= 0) {
                 stopAttacking();
             }
-            if (isAttacking()) {
+            if (buildingTarget != null && isAttacking()) {
                 BlockPos bp = buildingTarget.centrePos;
                 this.mob.getLookControl().setLookAt(bp.getX(), bp.getY(), bp.getZ());
                 mob.getLookControl().lookAtCooldown = 20;
@@ -89,14 +103,8 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
         AttackerUnit unit = (AttackerUnit) mob;
         ticksToNextBlockBreak = (int) unit.getAttackCooldown();
-        double damageFloat = unit.getUnitAttackDamage() * buildingTarget.getMeleeDamageMult();
-        damageFloat *= unit.getBuildingDamageMultiplier();
-
-        double damageFloor = Math.floor(damageFloat);
-        int damageInt = (int) damageFloor;
-        if (new Random().nextDouble(1.0f) < damageFloat - damageFloor)
-            damageInt += 1;
-        buildingTarget.destroyRandomBlocks(damageInt);
+        double dmg = unit.getUnitAttackDamage() * buildingTarget.getMeleeDamageMult() * unit.getBuildingDamageMultiplier();
+        buildingTarget.destroyRandomBlocks(dmg);
         buildingTarget.lastAttacker = this.mob;
 
         if (unit instanceof MarauderUnit marauderUnit) {
@@ -121,21 +129,22 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
     public void setBuildingTarget(BlockPos blockPos) {
         if (blockPos != null) {
+            currentMeleeRecalcCooldown = RECALC_COOLDOWN_MAX;
             if (this.mob.level().isClientSide()) {
                 BuildingPlacement b = BuildingUtils.findBuilding(this.mob.level().isClientSide(), blockPos);
-                if (b != null && !b.getBuilding().invulnerable) {
+                if (b != null && b.isAttackable()) {
                     this.buildingTarget = b;
                     MiscUtil.addUnitCheckpoint(((Unit) mob), new BlockPos(
-                            buildingTarget.centrePos.getX(),
-                            buildingTarget.originPos.getY() + 1,
-                            buildingTarget.centrePos.getZ()),
+                                    buildingTarget.centrePos.getX(),
+                                    buildingTarget.originPos.getY() + 1,
+                                    buildingTarget.centrePos.getZ()),
                             false
                     );
                 }
             }
             else {
                 BuildingPlacement b = BuildingUtils.findBuilding(this.mob.level().isClientSide(), blockPos);
-                if (b != null && !b.getBuilding().invulnerable) {
+                if (b != null && b.isAttackable()) {
                     this.buildingTarget = b;
                     if (this.mob.isVehicle() && this.mob.getFirstPassenger() instanceof AttackerUnit aUnit &&
                             aUnit.getAttackBuildingGoal() instanceof RangedAttackBuildingGoal<?> rabg)
@@ -153,5 +162,6 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
     public void stopAttacking() {
         buildingTarget = null;
         super.stopMoving();
+        forced = false;
     }
 }

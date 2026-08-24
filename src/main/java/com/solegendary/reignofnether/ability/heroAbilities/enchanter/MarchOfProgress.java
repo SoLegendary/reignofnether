@@ -2,9 +2,8 @@ package com.solegendary.reignofnether.ability.heroAbilities.enchanter;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -53,7 +52,7 @@ public class MarchOfProgress extends HeroAbility {
         AbilityButton button = new AbilityButton("March of Progress",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/march_of_progress.png"),
                 hotkey,
-                () -> ((EnchanterUnit) unit).auraEnabled,
+                () -> ((EnchanterUnit) unit).isAuraEnabled(),
                 () -> getRank(hero) == 0,
                 () -> true,
                 () -> sendUnitCommand(UnitAction.MARCH_OF_PROGRESS_TOGGLE),

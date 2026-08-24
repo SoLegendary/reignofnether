@@ -22,6 +22,7 @@ public class ResourcesClientboundPacket {
     public int food;
     public int wood;
     public int ore;
+    public int emerald;
     public BlockPos pos;
     public String msg;
 
@@ -33,6 +34,7 @@ public class ResourcesClientboundPacket {
                     resources.food,
                     resources.wood,
                     resources.ore,
+                    resources.emerald,
                     new BlockPos(0, 0, 0),
                     ""
                 )
@@ -46,6 +48,7 @@ public class ResourcesClientboundPacket {
                 resources.food,
                 resources.wood,
                 resources.ore,
+                resources.emerald,
                 new BlockPos(0, 0, 0),
                 ""
             )
@@ -59,6 +62,7 @@ public class ResourcesClientboundPacket {
                 resources.food,
                 resources.wood,
                 resources.ore,
+                resources.emerald,
                 new BlockPos(0, 0, 0),
                 ""
             )
@@ -66,7 +70,7 @@ public class ResourcesClientboundPacket {
     }
 
     public static void warnInsufficientResources(
-        String ownerName, boolean foodBool, boolean woodBool, boolean oreBool
+        String ownerName, boolean foodBool, boolean woodBool, boolean oreBool, boolean emeraldBool
     ) {
         for (Player player : PlayerServerEvents.players) {
             if (player.getName().getString().equals(ownerName)) {
@@ -80,15 +84,16 @@ public class ResourcesClientboundPacket {
                 if (!oreBool) {
                     msg = "server.resources.reignofnether.not_enough_ore";
                 }
+                if (!emeraldBool) {
+                    msg = "server.resources.reignofnether.not_enough_emerald";
+                }
 
                 assert msg != null;
 
                 PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new ResourcesClientboundPacket(ResourcesAction.SHOW_WARNING,
                         ownerName,
-                        0,
-                        0,
-                        0,
+                        0,0,0,0,
                         new BlockPos(0, 0, 0),
                         msg
                     )
@@ -99,14 +104,23 @@ public class ResourcesClientboundPacket {
 
     public static void warnInsufficientPopulation(String ownerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-            new ResourcesClientboundPacket(ResourcesAction.SHOW_WARNING,
-                ownerName,
-                0,
-                0,
-                0,
-                new BlockPos(0, 0, 0),
-                "server.resources.reignofnether.not_enough_pop"
-            )
+                new ResourcesClientboundPacket(ResourcesAction.SHOW_WARNING,
+                        ownerName,
+                        0,0,0,0,
+                        new BlockPos(0, 0, 0),
+                        "server.resources.reignofnether.not_enough_pop"
+                )
+        );
+    }
+
+    public static void warnFullGraveyard(String ownerName) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new ResourcesClientboundPacket(ResourcesAction.SHOW_WARNING,
+                        ownerName,
+                        0,0,0,0,
+                        new BlockPos(0, 0, 0),
+                        "server.resources.reignofnether.full_graveyard"
+                )
         );
     }
 
@@ -114,9 +128,7 @@ public class ResourcesClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
             new ResourcesClientboundPacket(ResourcesAction.SHOW_WARNING,
                 ownerName,
-                0,
-                0,
-                0,
+                0,0,0,0,
                 new BlockPos(0, 0, 0),
                 "server.resources.reignofnether.max_pop"
             )
@@ -130,6 +142,7 @@ public class ResourcesClientboundPacket {
                 res.food,
                 res.wood,
                 res.ore,
+                res.emerald,
                 pos,
                 ""
             )
@@ -137,13 +150,14 @@ public class ResourcesClientboundPacket {
     }
 
     public ResourcesClientboundPacket(
-            ResourcesAction action, String ownerName, int food, int wood, int ore, BlockPos pos, String msg
+            ResourcesAction action, String ownerName, int food, int wood, int ore, int emerald, BlockPos pos, String msg
     ) {
         this.action = action;
         this.ownerName = ownerName;
         this.food = food;
         this.wood = wood;
         this.ore = ore;
+        this.emerald = emerald;
         this.pos = pos;
         this.msg = msg;
     }
@@ -154,6 +168,7 @@ public class ResourcesClientboundPacket {
         this.food = buffer.readInt();
         this.wood = buffer.readInt();
         this.ore = buffer.readInt();
+        this.emerald = buffer.readInt();
         this.pos = buffer.readBlockPos();
         this.msg = buffer.readUtf();
     }
@@ -164,6 +179,7 @@ public class ResourcesClientboundPacket {
         buffer.writeInt(this.food);
         buffer.writeInt(this.wood);
         buffer.writeInt(this.ore);
+        buffer.writeInt(this.emerald);
         buffer.writeBlockPos(this.pos);
         buffer.writeUtf(this.msg);
     }
@@ -178,25 +194,29 @@ public class ResourcesClientboundPacket {
                     case SYNC -> ResourcesClientEvents.syncResources(new Resources(this.ownerName,
                         this.food,
                         this.wood,
-                        this.ore
+                        this.ore,
+                        this.emerald
                     ));
                     case ADD_SUBTRACT -> ResourcesClientEvents.addSubtractResources(new Resources(this.ownerName,
                         this.food,
                         this.wood,
-                        this.ore
+                        this.ore,
+                        this.emerald
                     ));
                     case ADD_SUBTRACT_INSTANT ->
                         ResourcesClientEvents.addSubtractResourcesInstantly(new Resources(this.ownerName,
                             this.food,
                             this.wood,
-                            this.ore
+                            this.ore,
+                            this.emerald
                         ));
                     case SHOW_WARNING -> ResourcesClientEvents.showWarning(this.ownerName, this.msg);
                     case SHOW_FLOATING_TEXT ->
                         ResourcesClientEvents.addFloatingTextsFromResources(new Resources(this.ownerName,
                             this.food,
                             this.wood,
-                            this.ore
+                            this.ore,
+                            this.emerald
                         ), this.pos);
                 }
                 success.set(true);

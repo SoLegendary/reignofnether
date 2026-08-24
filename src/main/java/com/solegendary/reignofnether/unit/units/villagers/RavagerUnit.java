@@ -2,28 +2,37 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.abilities.AttackGround;
+import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
 import com.solegendary.reignofnether.ability.abilities.Eject;
 import com.solegendary.reignofnether.ability.abilities.Roar;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -31,6 +40,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -53,8 +63,10 @@ import java.util.function.Predicate;
 public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new Roar(), Keybindings.keyQ);
-        ABILITIES.add(new Eject(), Keybindings.keyW);
+        ABILITIES.add(new Roar(), Keybindings.abilitySlot1);
+        ABILITIES.add(new Eject(), Keybindings.abilitySlot2);
+        ABILITIES.add(new CastSummonVexes(), Keybindings.abilitySlot3);
+        ABILITIES.add(new AttackGround(PillagerUnit.attackRange), Keybindings.abilitySlot3);
     }
 
     //region
@@ -100,6 +112,10 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private MoveToTargetBlockGoal moveGoal;
     private SelectedTargetGoal<? extends LivingEntity> targetGoal;
     private ReturnResourcesGoal returnResourcesGoal;
@@ -121,23 +137,28 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(RavagerUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(RavagerUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(RavagerUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitAttackDamage() {return attackDamage;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.RAVAGER;}
@@ -167,7 +188,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     private final List<ItemStack> items = new ArrayList<>();
 
     public final static float ROAR_DAMAGE = 8.0f;
-    public final static float ROAR_RANGE = 4.0f;
+    public final static float ROAR_RANGE = 5.0f;
     public final static float ROAR_KNOCKBACK = 6f;
     public final static int ROAR_SLOW_DURATION = 10 * ResourceCost.TICKS_PER_SECOND;
 
@@ -194,7 +215,14 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                 .add(Attributes.ARMOR, RavagerUnit.armorValue)
                 .add(Attributes.ATTACK_KNOCKBACK, 1.5)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.75)
-                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange());
+                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     // prevent shield blocks from stunning and triggering a roar
@@ -203,10 +231,27 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     public void tick() {
         this.setCanPickUpLoot(false);
-
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override
@@ -243,15 +288,19 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
-    private void strongKnockback(Entity pEntity) {
-        double d0 = pEntity.getX() - this.getX();
-        double d1 = pEntity.getZ() - this.getZ();
+    private void strongKnockback(Mob mob) {
+        double d0 = mob.getX() - this.getX();
+        double d1 = mob.getZ() - this.getZ();
         double d2 = Math.max(d0 * d0 + d1 * d1, 0.001);
-        pEntity.push(d0 / d2 * ROAR_KNOCKBACK, 0.2, d1 / d2 * ROAR_KNOCKBACK);
+        AttributeInstance ai = mob.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
+        float knockbackMult = 1.0f;
+        if (ai != null)
+            knockbackMult = (float) Math.min(1, 1 - ai.getValue());
+        mob.push((d0 / d2 * ROAR_KNOCKBACK) * knockbackMult, 0.2 * knockbackMult, (d1 / d2 * ROAR_KNOCKBACK) * knockbackMult);
     }
 
     public void startToRoar() {
-        this.playSound(SoundEvents.RAVAGER_ROAR, 3.0F, 1.0F);
+        this.playSound(SoundEvents.RAVAGER_ROAR, 1.5F, 1.0F);
         this.roarTick = 40;
     }
 
@@ -267,8 +316,6 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public void roar() {
         if (this.isAlive()) {
             if (!level().isClientSide()) {
-                LivingEntity livingentity;
-
                 List<Mob> nearbyMobs = MiscUtil.getEntitiesWithinRange(
                         new Vector3d(this.position().x, this.position().y, this.position().z),
                         ROAR_RANGE,
@@ -295,7 +342,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                     }
                 }
                 for (BuildingPlacement building : affectedBuildings)
-                    building.destroyRandomBlocks((int) ROAR_DAMAGE);
+                    building.destroyRandomBlocks(ROAR_DAMAGE);
 
                 Vec3 vec3 = this.getBoundingBox().getCenter();
 

@@ -6,12 +6,17 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CallToArmsUnit;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.TooltipColours;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -20,6 +25,7 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
@@ -27,6 +33,8 @@ import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.resources.language.I18n;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -34,6 +42,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
@@ -68,6 +77,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession.*;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -75,7 +85,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, AttackerUnit, ArmSwingingUnit, VillagerDataHolder, ConvertableUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new CallToArmsUnit(), Keybindings.keyQ);
+        ABILITIES.add(new CallToArmsUnit(), Keybindings.abilitySlot1);
     }
 
     //region
@@ -91,7 +101,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -119,6 +128,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public BuildRepairGoal getBuildRepairGoal() {return buildRepairGoal;}
     public GatherResourcesGoal getGatherResourceGoal() {return gatherResourcesGoal;}
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
+    public ExploreBuildLocationGoal getExploreBuildLocationGoal() {return exploreBuildLocationGoal;}
     public int getMaxResources() {return maxResources;}
 
     private MoveToTargetBlockGoal moveGoal;
@@ -126,6 +136,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public BuildRepairGoal buildRepairGoal;
     public GatherResourcesGoal gatherResourcesGoal;
     private ReturnResourcesGoal returnResourcesGoal;
+    private ExploreBuildLocationGoal exploreBuildLocationGoal;
     private AbstractMeleeAttackUnitGoal attackGoal;
     public CallToArmsGoal callToArmsGoal;
 
@@ -145,26 +156,31 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(VillagerUnit.class, EntityDataSerializers.STRING);
 
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(VillagerUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(VillagerUnit.class, EntityDataSerializers.STRING);
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.VILLAGER;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
     public Goal getAttackBuildingGoal() { return null; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
+
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
 
     // ConvertableUnit
     public boolean converted = false;
@@ -274,9 +290,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             makeVeteran();
     }
 
-    // chickens only worth 1, other animals worth 2
-    // does 2 damage to huntable animals (3 for veteran)
-    final static public int HUNTER_EXP_REQ = 8;
+    // chickens only worth 1, other animals worth 2, hunters do bonus damage to animals
+    final static public int HUNTER_EXP_REQ = 4;
     public int hunterExp = 0;
     public void incrementHunterExp() {
         hunterExp += hasSpeedCheat() ? 10 : 1;
@@ -349,7 +364,14 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                 .add(Attributes.MOVEMENT_SPEED, VillagerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, VillagerUnit.armorValue);
+                .add(Attributes.ARMOR, VillagerUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override
@@ -381,6 +403,24 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                 }
             }
         }
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
@@ -428,7 +468,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
     public void convertToMilitia() {
         if (!converted) {
-            LivingEntity newEntity = this.convertToUnit(EntityRegistrar.MILITIA_UNIT.get());
+            LivingEntity newEntity = this.convertToUnit(EntityRegistrar.TEMPORARY_MILITIA_UNIT.get());
             if (newEntity instanceof MilitiaUnit mUnit) {
                 mUnit.resourcesSaveData = this.gatherResourcesGoal.permSaveData;
                 mUnit.profession = this.getProfession();
@@ -467,6 +507,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         this.buildRepairGoal = new BuildRepairGoal(this);
         this.gatherResourcesGoal = new GatherResourcesGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
+        this.exploreBuildLocationGoal = new ExploreBuildLocationGoal(this);
         this.callToArmsGoal = new CallToArmsGoal(this);
     }
 
@@ -477,6 +518,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
+        this.goalSelector.addGoal(2, exploreBuildLocationGoal);
         this.goalSelector.addGoal(2, buildRepairGoal);
         this.goalSelector.addGoal(2, gatherResourcesGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
@@ -519,8 +561,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         }
     }
     @Override
-    public boolean hasBonusDamage() {
-        return getUnitProfession() == HUNTER;
+    public int getDamageTooltipColour() {
+        return getUnitProfession() == HUNTER ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 
     private static final EntityDataAccessor<VillagerData> VILLAGER_DATA;
@@ -529,6 +571,8 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
         this.entityData.define(VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
     }
 
@@ -558,7 +602,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     @Override
     public List<Button> getAbilityButtons() {
         List<Button> abilities = new ArrayList<>(getAbilities().getButtons(this));
-        //TODO Remove need for I18n
         if (FMLEnvironment.dist == Dist.CLIENT) {
             abilities.addAll(getBuildingButtons());
         }

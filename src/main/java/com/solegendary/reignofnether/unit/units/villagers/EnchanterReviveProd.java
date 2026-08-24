@@ -13,7 +13,7 @@ public class EnchanterReviveProd extends ReviveHeroProductionItem {
         super(
             "Revive Enchanter",
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/enchanter.png"),
-            "units.villagers.reignofnether.enchanter.revive"
+            "entity.reignofnether.enchanter_unit.revive"
         );
     }
 

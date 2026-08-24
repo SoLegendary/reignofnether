@@ -1,47 +1,69 @@
 package com.solegendary.reignofnether;
 
 import com.solegendary.reignofnether.blocks.GarrisonBlockRenderer;
+import com.solegendary.reignofnether.blocks.SkullTypes;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
-import com.solegendary.reignofnether.entities.models.NecromancerProjectileModel;
-import com.solegendary.reignofnether.entities.renderers.ThrowableTntRenderer;
+import com.solegendary.reignofnether.entities.models.MagicProjectileModel;
 import com.solegendary.reignofnether.entities.renderers.NecromancerProjectileRenderer;
+import com.solegendary.reignofnether.entities.renderers.ThrowableTntRenderer;
+import com.solegendary.reignofnether.entities.renderers.WindcallerProjectileRenderer;
+import com.solegendary.reignofnether.fogofwar.FogTintingBakedModel;
+import com.solegendary.reignofnether.fogofwar.FogTintingBlockColor;
+import com.solegendary.reignofnether.mixin.fogofwar.BlockColorsAccessor;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.particles.BigEnchantParticle;
 import com.solegendary.reignofnether.particles.BigSoulFlameParticle;
+import com.solegendary.reignofnether.particles.LevelUpParticle;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.unit.modelling.models.*;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
-import com.solegendary.reignofnether.unit.units.monsters.*;
-import com.solegendary.reignofnether.unit.units.neutral.*;
-import com.solegendary.reignofnether.unit.units.piglins.*;
-import com.solegendary.reignofnether.unit.units.villagers.*;
+import net.minecraft.client.color.block.BlockColor;
+import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.model.SkullModel;
+import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.*;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+
+import java.util.HashSet;
 
 @Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID, bus = Bus.MOD, value = Dist.CLIENT)
 public class ClientModEvents {
 
+    // wrap every baked model so the fog tint applies to untinted quads
     @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public static void onModifyBakingResult(ModelEvent.ModifyBakingResult evt) {
+        var models = evt.getModels();
+        for (var entry : models.entrySet()) {
+            entry.setValue(new FogTintingBakedModel(entry.getValue()));
+        }
+    }
+
+    // LOWEST so we wrap after vanilla and other mods
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     @OnlyIn(Dist.CLIENT)
     public static void onBlockColourEvent(RegisterColorHandlersEvent.Block evt) {
         evt.register((bs, blockAndTintGetter, bp, tintIndex) -> {
@@ -63,6 +85,23 @@ public class ClientModEvents {
                 (state, level, pos, tintIndex) -> 0xE0E0E0,
                 BlockRegistrar.WRAITH_SNOW_LAYER.get()
         );
+
+        // wrap every block's provider with the fog multiplier; skip biome-tinted (BiomeColorsMixin handles those)
+        java.util.Set<Block> biomeTinted = java.util.Set.of(
+                Blocks.GRASS_BLOCK, Blocks.FERN, Blocks.GRASS, Blocks.POTTED_FERN,
+                Blocks.PINK_PETALS, Blocks.SUGAR_CANE, Blocks.LARGE_FERN, Blocks.TALL_GRASS,
+                Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES,
+                Blocks.DARK_OAK_LEAVES, Blocks.VINE, Blocks.MANGROVE_LEAVES,
+                Blocks.WATER, Blocks.BUBBLE_COLUMN
+        );
+        BlockColors blockColors = evt.getBlockColors();
+        java.util.Map<Holder.Reference<Block>, BlockColor> map =
+                ((BlockColorsAccessor) (Object) blockColors).getBlockColors();
+        for (Block block : ForgeRegistries.BLOCKS.getValues()) {
+            if (biomeTinted.contains(block)) continue;
+            BlockColor existing = map.get(ForgeRegistries.BLOCKS.getDelegateOrThrow(block));
+            evt.register(new FogTintingBlockColor(existing), block);
+        }
     }
 
     @SubscribeEvent
@@ -78,11 +117,17 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.CREEPER_UNIT.get(), CreeperRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SPIDER_UNIT.get(), SpiderRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.POISON_SPIDER_UNIT.get(), PoisonSpiderUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.WRAITH_UNIT.get(), WraithRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.VILLAGER_UNIT.get(), VillagerUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.SCOUT_DOG_UNIT.get(), DogUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.SCOUT_CAT_UNIT.get(), CatUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MILITIA_UNIT.get(), VillagerUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.TEMPORARY_MILITIA_UNIT.get(), VillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get(), ZombieVillagerUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.BAT_UNIT.get(), BatUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.PILLAGER_UNIT.get(), PillagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.VINDICATOR_UNIT.get(), VindicatorUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.WINDCALLER_UNIT.get(), WindcallerRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.IRON_GOLEM_UNIT.get(), IronGolemRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WITCH_UNIT.get(), WitchRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnitRenderer::new);
@@ -91,6 +136,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.RAVAGER_UNIT.get(), RavagerRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.GRUNT_UNIT.get(), PiglinUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.STRIDER_UNIT.get(), StriderRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.BRUTE_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.HEADHUNTER_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MARAUDER_UNIT.get(), MarauderRenderer::new);
@@ -100,7 +146,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.WITHER_SKELETON_UNIT.get(), WitherSkeletonRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.GHAST_UNIT.get(), GhastUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MAGMA_CUBE_UNIT.get(), MagmaCubeUnitRenderer::new);
-        evt.registerEntityRenderer(EntityRegistrar.SLIME_UNIT.get(), SlimeRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.SLIME_UNIT.get(), SlimeUnitRenderer::new);
 
         evt.registerEntityRenderer(EntityRegistrar.ROYAL_GUARD_UNIT.get(), RoyalGuardRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ENCHANTER_UNIT.get(), EnchanterRenderer::new);
@@ -122,6 +168,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.THROWABLE_TNT_PROJECTILE.get(), ThrowableTntRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get(), ThrownItemRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.NECROMANCER_PROJECTILE.get(), NecromancerProjectileRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.WINDCALLER_PROJECTILE.get(), WindcallerProjectileRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WRAITH_SNOWBALL.get(), ThrownItemRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MOLTEN_BOMB_PROJECTILE.get(), (ctx) -> new ThrownItemRenderer<>(ctx, 3.0F, true));
     }
@@ -136,6 +183,61 @@ public class ClientModEvents {
                     RenderType.cutout()
             );
         });
+        evt.enqueueWork(() -> {
+            SkullBlockRenderer.SKIN_BY_TYPE.put(
+                    SkullTypes.DROWNED,
+                    ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/zombie/drowned.png")
+            );
+        });
+        evt.enqueueWork(() -> {
+            SkullBlockRenderer.SKIN_BY_TYPE.put(
+                    SkullTypes.HUSK,
+                    ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/zombie/husk.png")
+            );
+        });
+        evt.enqueueWork(() -> {
+            SkullBlockRenderer.SKIN_BY_TYPE.put(
+                    SkullTypes.STRAY,
+                    ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/skeleton/stray.png")
+            );
+        });
+        evt.enqueueWork(() -> {
+            SkullBlockRenderer.SKIN_BY_TYPE.put(
+                    SkullTypes.BOGGED,
+                    ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/entities/bogged_overlay.png")
+            );
+        });
+
+        BlockEntityType.SKULL.validBlocks = new HashSet<>(BlockEntityType.SKULL.validBlocks);
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.DROWNED_HEAD.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.HUSK_HEAD.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.STRAY_SKULL.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.BOGGED_SKULL.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.DROWNED_WALL_HEAD.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.HUSK_WALL_HEAD.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.STRAY_WALL_SKULL.get());
+        BlockEntityType.SKULL.validBlocks.add(BlockRegistrar.BOGGED_WALL_SKULL.get());
+    }
+
+    @SubscribeEvent
+    public static void onCreateSkullModels(EntityRenderersEvent.CreateSkullModels evt) {
+        EntityModelSet modelSet = evt.getEntityModelSet();
+        evt.registerSkullModel(
+                SkullTypes.DROWNED,
+                new SkullModel(modelSet.bakeLayer(ModelLayers.ZOMBIE_HEAD))
+        );
+        evt.registerSkullModel(
+                SkullTypes.HUSK,
+                new SkullModel(modelSet.bakeLayer(ModelLayers.ZOMBIE_HEAD))
+        );
+        evt.registerSkullModel(
+                SkullTypes.STRAY,
+                new SkullModel(modelSet.bakeLayer(ModelLayers.SKELETON_SKULL))
+        );
+        evt.registerSkullModel(
+                SkullTypes.BOGGED,
+                new SkullModel(modelSet.bakeLayer(ModelLayers.SKELETON_SKULL))
+        );
     }
 
     @SubscribeEvent
@@ -151,10 +253,12 @@ public class ClientModEvents {
         event.registerLayerDefinition(PiglinMerchantModel.LAYER_LOCATION, PiglinMerchantModel::createBodyLayer);
         event.registerLayerDefinition(MarauderModel.LAYER_LOCATION, MarauderModel::createBodyLayer);
         event.registerLayerDefinition(ArmouredHoglinUnitModel.LAYER_LOCATION, ArmouredHoglinUnitModel::createBodyLayer);
-        event.registerLayerDefinition(NecromancerProjectileModel.LAYER_LOCATION, NecromancerProjectileModel::createBodyLayer);
+        event.registerLayerDefinition(MagicProjectileModel.LAYER_LOCATION, MagicProjectileModel::createBodyLayer);
         event.registerLayerDefinition(EnchanterModel.LAYER_LOCATION, EnchanterModel::createBodyLayer);
         event.registerLayerDefinition(WretchedWraithModel.LAYER_LOCATION, WretchedWraithModel::createBodyLayer);
         event.registerLayerDefinition(WildfireModel.LAYER_LOCATION, WildfireModel::createBodyLayer);
+        event.registerLayerDefinition(WindcallerModel.LAYER_LOCATION, WindcallerModel::createBodyLayer);
+        event.registerLayerDefinition(WraithModel.LAYER_LOCATION, WraithModel::createBodyLayer);
         event.registerLayerDefinition(AbstractVillagerUnitRenderer.VILLAGER_ARMOR_OUTER_LAYER, IllagerArmorModel::createOuterArmorLayer);
         event.registerLayerDefinition(AbstractVillagerUnitRenderer.VILLAGER_ARMOR_INNER_LAYER, IllagerArmorModel::createInnerArmorLayer);
     }
@@ -170,7 +274,10 @@ public class ClientModEvents {
                 ParticleRegistrar.BIG_SOUL_FLAME.get(),
                 BigSoulFlameParticle.Provider::new
         );
+        evt.registerSpriteSet(
+                ParticleRegistrar.LEVEL_UP.get(),
+                LevelUpParticle.Provider::new
+        );
     }
-
 }
 

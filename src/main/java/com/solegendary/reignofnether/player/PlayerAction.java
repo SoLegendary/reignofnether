@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.player;
 
 // actions that can be done to Player entities serverside
 public enum PlayerAction {
-    START_RTS_EVERYONE,
-    CANCEL_START_RTS_EVERYONE,
+    //START_RTS_EVERYONE,
+    //CANCEL_START_RTS_EVERYONE,
     TELEPORT,
     ENABLE_ORTHOVIEW,
     DISABLE_ORTHOVIEW,
@@ -11,12 +11,15 @@ public enum PlayerAction {
     START_RTS_MONSTERS,
     START_RTS_PIGLINS,
     START_RTS_SANDBOX,
+    START_RTS_SCENARIO, // faction decided serverside
     DEFEAT,
     VICTORY,
     ADD_RTS_PLAYER,
+    ADD_SCENARIO_NPC_RTS_PLAYER,
     REMOVE_RTS_PLAYER,
     RESET_RTS,
     RESET_RTS_HARD,
+    PUBLISH_SCENARIO_MAP,
     SYNC_RTS_GAME_TIME,
     LOCK_RTS,
     UNLOCK_RTS,
@@ -24,5 +27,8 @@ public enum PlayerAction {
     DISABLE_START_RTS,
     DISABLE_RTS_SYNCING,
     ENABLE_RTS_SYNCING,
-    SYNC_BEACON_OWNER_TICKS
+    SYNC_BEACON_OWNER_TICKS,
+    SET_RTS_CAMERA,
+    REQUEST_MARKET_RATES,
+    SET_MARKET_RATE
 }

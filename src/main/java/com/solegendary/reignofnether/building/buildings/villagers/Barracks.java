@@ -37,9 +37,10 @@ public class Barracks extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.POLISHED_ANDESITE_STAIRS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 150d;
 
-        this.productions.add(ProductionItems.VINDICATOR, Keybindings.keyQ);
-        this.productions.add(ProductionItems.PILLAGER, Keybindings.keyW);
+        this.productions.add(ProductionItems.VINDICATOR, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.PILLAGER, Keybindings.abilitySlot2);
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
@@ -56,10 +57,10 @@ public class Barracks extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.barracks"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.barracks"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.barracks.tooltip1"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.barracks.tooltip1"), Style.EMPTY)
                 ),
                 this
         );

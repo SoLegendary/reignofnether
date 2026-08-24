@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.alliance;
 
+import com.solegendary.reignofnether.gamerules.GameruleClient;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
@@ -62,6 +64,10 @@ public class AlliancesClient {
                 alliances.remove(owner2);
             }
         }
+    }
+
+    public static boolean isAlliedOrOwned(String owner1, String owner2) {
+        return isAllied(owner1, owner2) || owner1.equals(owner2);
     }
 
     public static boolean isAllied(String owner1, String owner2) {

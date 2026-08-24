@@ -9,14 +9,17 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
+import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
+import com.solegendary.reignofnether.entities.GhastUnitFireball;
+import com.solegendary.reignofnether.entities.WindcallerProjectile;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -28,10 +31,7 @@ import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
-import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
-import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.piglins.*;
@@ -48,8 +48,6 @@ import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.damagesource.DamageSources;
-import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -64,6 +62,7 @@ import net.minecraft.world.entity.projectile.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -76,10 +75,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.EntityStruckByLightningEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -93,10 +89,9 @@ import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
 import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_UNIT_BOUNTY_PERCENT;
+import static com.solegendary.reignofnether.resources.ResourcesServerEvents.UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
 
 public class UnitServerEvents {
-
-    public static boolean improvedPathfinding = true;
 
     private static final int UNIT_SYNC_TICKS_MAX = 20; // how often we send out unit syncing packets
     private static int unitSyncTicks = UNIT_SYNC_TICKS_MAX;
@@ -104,20 +99,50 @@ public class UnitServerEvents {
     // max possible pop you can have regardless of buildings, adjustable via /gamerule maxPopulation
     public static int maxPopulation = ResourceCosts.DEFAULT_MAX_POPULATION;
 
+    // server-side mirror of the rtsPathfinding gamerule: when true, units route through the RTS
+    // grid A* pathfinder (with walkability caching + worker pool); when false they use vanilla
+    // pathfinding and the caching/worker work is skipped. Kept in sync by GameruleServerEvents.
+    public static boolean rtsPathfinding = false;
+
     // actioned only when the associated unit is idle, one at a time
     private static final List<UnitActionItem> unitActionSlowQueue = Collections.synchronizedList(new ArrayList<>());
     // actioned ASAP regardless of what the unit was doing
     private static final List<UnitActionItem> unitActionFastQueue = Collections.synchronizedList(new ArrayList<>());
 
+    public static List<UnitActionItem> getUnitActionSlowQueue() { return unitActionSlowQueue; }
+
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
 
-    private static final ArrayList<Pair<Integer, ChunkAccess>> forcedUnitChunks = new ArrayList<>();
+    private static final HashMap<Integer, ChunkAccess> forcedUnitChunks = new HashMap<>();
+
+    private static final Random RANDOM = new Random();
+
+    // Time-sliced formation dispatch: VANILLA-ONLY (rtsPathfinding off). Large group MOVE commands
+    // are spread across ticks to avoid the spike from N units all running vanilla's synchronous main-thread
+    // A* in the same tick. With RTS pathfinding on, moves dispatch immediately (UnitActionItem) since the
+    // worker pool queues + backpressures off-thread, so this queue stays empty. LinkedHashMap preserves
+    // insertion order while letting a re-queued unit overwrite its old target (supersession).
+    private static final int FORMATION_DISPATCH_PER_TICK = 5;
+    // unit -> formation slot. Queued so a large vanilla selection's moves dispatch time-sliced across ticks
+    // instead of running N concurrent synchronous A* searches in one tick.
+    private record FormationOrder(LivingEntity unit, BlockPos target) {}
+    private static final LinkedHashMap<Integer, FormationOrder> formationDispatchQueue = new LinkedHashMap<>();
+
+    public static void queueFormationMove(List<Pair<LivingEntity, BlockPos>> pairs) {
+        synchronized (formationDispatchQueue) {
+            for (Pair<LivingEntity, BlockPos> p : pairs) {
+                formationDispatchQueue.put(p.getFirst().getId(), new FormationOrder(p.getFirst(), p.getSecond()));
+            }
+        }
+    }
 
     public static ArrayList<LivingEntity> getAllUnits() {
         return allUnits;
     }
 
     public static final ArrayList<TargetResourcesSave> savedTargetResources = new ArrayList<>();
+
+    private static boolean isServerStopping = false;
 
     private static final int SAVE_TICKS_MAX = 600;
     private static int saveTicks = 0;
@@ -137,11 +162,18 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent evt) {
+        isServerStopping = true;
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null) {
             saveFallenHeroUnits(level);
             saveGatherTargets(level);
+            allUnits.clear();
+            forcedUnitChunks.clear();
         }
+    }
+
+    public static void addUnitPoofs(Level level, Entity entity) {
+        MiscUtil.addParticleExplosion(ParticleTypes.POOF, 35, level, entity.position());
     }
 
     public static void saveFallenHeroUnits(ServerLevel level) {
@@ -178,6 +210,7 @@ public class UnitServerEvents {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent evt) {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+        isServerStopping = false;
 
         if (level != null) {
             HeroUnitSaveData heroData = HeroUnitSaveData.getInstance(level);
@@ -221,7 +254,7 @@ public class UnitServerEvents {
         }
     }
 
-    public static int getCurrentPopulation(ServerLevel level, String ownerName) {
+    public static int getCurrentPopulation(String ownerName) {
         int currentPopulation = 0;
         for (LivingEntity entity : allUnits)
             if (entity instanceof Unit unit) {
@@ -233,7 +266,8 @@ public class UnitServerEvents {
             if (building.ownerName.equals(ownerName)) {
                 if (building instanceof ProductionPlacement prodPlacement) {
                     for (ActiveProduction prodItem : prodPlacement.productionQueue)
-                        currentPopulation += prodItem.item.getCost(false, ownerName).population;
+                        if (!(prodPlacement instanceof GraveyardPlacement gy) || gy.getUpgradeLevel() <= 0)
+                            currentPopulation += prodItem.item.getCost(false, ownerName).population;
                 } else if (building.getBuilding() instanceof IronGolemBuilding) {
                     currentPopulation += ResourceCosts.IRON_GOLEM.population;
                 }
@@ -345,12 +379,23 @@ public class UnitServerEvents {
 
     @SubscribeEvent
     public static void onEntityJoin(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof LivingEntity le &&
+                (ResourceSources.isHuntableAnimal(le) || le instanceof PhantomSummon || le instanceof Unit))
+            addUnitPoofs(evt.getLevel(), le);
 
         if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof Mob mob) {
             mob.setBaby(false);
             mob.setPathfindingMalus(BlockPathTypes.WATER, -1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0f);
+            mob.setPathfindingMalus(BlockPathTypes.STICKY_HONEY, 1.0f);
+        }
+
+        // for some reason some units need to be nudged a little on spawn or they can't move
+        if (!evt.getLevel().isClientSide() && evt.getEntity() instanceof Unit && evt.getEntity() instanceof LivingEntity le) {
+            boolean bool1 = le.getRandom().nextBoolean();
+            boolean bool2 = le.getRandom().nextBoolean();
+            evt.getEntity().push(0.005d * (bool1 ? -1 : 1), 0, 0.005d * (bool2 ? -1 : 1));
         }
 
         if (evt.getEntity() instanceof Unit unit && evt.getEntity() instanceof LivingEntity entity
@@ -389,12 +434,18 @@ public class UnitServerEvents {
                 true,
                 true
             );
-            forcedUnitChunks.add(new Pair<>(entity.getId(), chunk));
+            forcedUnitChunks.put(entity.getId(), chunk);
+        }
+
+        if (evt.getEntity() instanceof Projectile proj) {
+            proj.getPersistentData().putFloat("accuracyRoll", RANDOM.nextFloat());
         }
     }
 
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
+        if (isServerStopping) return;
+
         if (evt.getEntity() instanceof Unit && evt.getEntity() instanceof LivingEntity entity
             && !evt.getLevel().isClientSide) {
 
@@ -422,7 +473,7 @@ public class UnitServerEvents {
                     }
                 }
             } catch (ConcurrentModificationException e) {
-                System.out.println("Caught ConcurrentModificationException in UnitServerEvents EntityLeaveLevelEvent: " + e.getMessage());
+                ReignOfNether.LOGGER.error("Caught ConcurrentModificationException in UnitServerEvents EntityLeaveLevelEvent", e);
             }
         }
     }
@@ -487,8 +538,8 @@ public class UnitServerEvents {
 
         boolean drownedInfected = evt.getEntity().getActiveEffectsMap().containsKey(MobEffectRegistrar.ZOMBIE_INFECTED.get()) ||
                 lastHurtByMob instanceof DrownedUnit;
-        boolean slimeInfected = evt.getEntity().getActiveEffectsMap().containsKey(MobEffects.CONFUSION) ||
-                ((lastHurtByMob instanceof SlimeUnit) && !(lastHurtByMob instanceof MagmaCubeUnit));
+        boolean slimeInfected = (evt.getEntity().getActiveEffectsMap().containsKey(MobEffectRegistrar.SLIME_INFECTED.get()) ||
+                ((lastHurtByMob instanceof SlimeUnit) && !(lastHurtByMob instanceof MagmaCubeUnit)));
 
         if (lastHurtByMob instanceof Unit unit && (drownedInfected || slimeInfected)) {
 
@@ -507,7 +558,7 @@ public class UnitServerEvents {
                     entityType = EntityRegistrar.DROWNED_UNIT.get();
                 }
             }
-            if (slimeInfected && entityType == null) {
+            if (slimeInfected && entityType == null && ResearchServerEvents.playerHasResearch(unit.getOwnerName(), ProductionItems.RESEARCH_SLIME_CONVERSION)) {
                 entityType = EntityRegistrar.SLIME_UNIT.get();
             }
 
@@ -537,13 +588,20 @@ public class UnitServerEvents {
                 vUnit.incrementHunterExp();
         }
 
-        if (evt.getEntity() instanceof Unit unitKilled && unitKilled.getOwnerName().isEmpty()) {
-            if (evt.getSource().getEntity() instanceof Unit unit) {
+        if (evt.getEntity() instanceof Unit unitKilled && evt.getSource().getEntity() instanceof Unit unit) {
+            float bountyPercent = 0;
+            if (unitKilled.getOwnerName().isEmpty()) {
+                bountyPercent = NEUTRAL_UNIT_BOUNTY_PERCENT;
+            } else if (!AlliancesServerEvents.isAlliedOrOwned(unitKilled.getOwnerName(), unit.getOwnerName())) {
+                int lootingLevel = ((LivingEntity) unit).getMainHandItem().getEnchantmentLevel(Enchantments.MOB_LOOTING);
+                bountyPercent = lootingLevel * UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
+            }
+            if (bountyPercent > 0) {
                 ResourceCost cost = unitKilled.getCost();
                 Resources resources = new Resources(unit.getOwnerName(),
-                        (int) (cost.food * NEUTRAL_UNIT_BOUNTY_PERCENT),
-                        (int) (cost.wood * NEUTRAL_UNIT_BOUNTY_PERCENT),
-                        (int) (cost.ore * NEUTRAL_UNIT_BOUNTY_PERCENT)
+                        (int) (cost.food * bountyPercent),
+                        (int) (cost.wood * bountyPercent),
+                        (int) (cost.ore * bountyPercent)
                 );
                 if (resources.getTotalValue() > 0) {
                     ResourcesClientboundPacket.showFloatingText(resources, evt.getEntity().getOnPos());
@@ -592,9 +650,8 @@ public class UnitServerEvents {
                 }
             }
         }
-        if (evt.getEntity() instanceof WretchedWraithUnit wretchedWraithUnit) {
-            SoundClientboundPacket.stopSoundWithId(wretchedWraithUnit.getId());
-        }
+
+        //worker drops
     }
 
     // prevent onDropItem firing twice if the same animal is killed by two workers on the same tick
@@ -605,32 +662,73 @@ public class UnitServerEvents {
     public static void onDropItem(LivingDropsEvent evt) {
         if (ResourceSources.isHuntableAnimal(evt.getEntity()) && !evt.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO) && evt.getSource()
             .getEntity() instanceof Unit unit && evt.getSource().getEntity() instanceof WorkerUnit && evt.getSource()
-            .getEntity() instanceof Mob mob && mob.canPickUpLoot() && !Unit.atMaxResources(unit)) {
+            .getEntity() instanceof Mob mob && mob.canPickUpLoot()) {
 
-            evt.setCanceled(true);
+            if (!Unit.atMaxResources(unit))
+                evt.setCanceled(true);
 
             if (lastHuntedAnimalId != evt.getEntity().getId()) {
-                for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
-                    ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
 
-                    if (res != null) {
-                        unit.getItems().add(itemStack);
-                        if (unit instanceof VillagerUnit vUnit) {
-                            vUnit.incrementHunterExp();
-                            if (!(evt.getEntity() instanceof Chicken))
-                                vUnit.incrementHunterExp();
-                        }
+                if (!Unit.atMaxResources(unit)) {
+                    for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal((Animal) evt.getEntity())) {
+                        ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
+                        if (res != null)
+                            unit.getItems().add(itemStack);
                     }
                 }
+
+                // insert a drop-off command without disrupting other queued commands
+                /*
                 if (Unit.atThresholdResources(unit)) {
-                    unit.getReturnResourcesGoal().returnToClosestBuilding();
+                    int unitId = ((Mob) unit).getId();
+                    boolean hasDropOffCommandQueued = false;
+                    for (UnitActionItem uai : unitActionSlowQueue) {
+                        for (int id : uai.getUnitIds()) {
+                            if (id == unitId && (
+                                uai.getAction() == UnitAction.RETURN_RESOURCES_TO_CLOSEST ||
+                                uai.getAction() == UnitAction.RETURN_RESOURCES)) {
+                                hasDropOffCommandQueued = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!hasDropOffCommandQueued) {
+                        unitActionSlowQueue.add(0, new UnitActionItem(
+                                unit.getOwnerName(),
+                                UnitAction.RETURN_RESOURCES_TO_CLOSEST,
+                                -1,
+                                new int[]{((Entity) unit).getId()}
+                        ));
+                    }
                 }
+
+                 */
             } else {
                 lastHuntedAnimalId = evt.getEntity().getId();
             }
         }
     }
 
+    @SubscribeEvent
+    public static void onFormationDispatchTick(TickEvent.LevelTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
+            return;
+        synchronized (formationDispatchQueue) {
+            if (formationDispatchQueue.isEmpty())
+                return;
+            int processed = 0;
+            Iterator<FormationOrder> it = formationDispatchQueue.values().iterator();
+            while (processed < FORMATION_DISPATCH_PER_TICK && it.hasNext()) {
+                FormationOrder order = it.next();
+                it.remove();
+                LivingEntity le = order.unit();
+                if (le != null && le.isAlive() && le instanceof Unit unit) {
+                    unit.getMoveGoal().setMoveTarget(order.target());
+                }
+                processed += 1;
+            }
+        }
+    }
 
     // for some reason we have to use the level in the same tick as the unit actions or else level.getEntity returns
     // null
@@ -646,32 +744,9 @@ public class UnitServerEvents {
             UnitIdleWorkerClientBoundPacket.sendIdleWorkerPacket();
 
             for (LivingEntity entity : allUnits) {
-                if (entity instanceof Unit unit) {
+                if (entity instanceof Unit unit && evt.level.getServer() != null) {
                     UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
-                    UnitSyncClientboundPacket.sendSyncStatsPacket(entity);
-
-                    for (MobEffect me : List.of(
-                            MobEffects.DAMAGE_RESISTANCE,
-                            MobEffectRegistrar.STUN.get(),
-                            MobEffectRegistrar.FREEZE.get(),
-                            MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(),
-                            MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(),
-                            MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(),
-                            MobEffectRegistrar.ATTACK_SLOWDOWN.get(),
-                            MobEffectRegistrar.TEMPORARY_EFFICIENCY.get(),
-                            MobEffectRegistrar.BLOODLUST.get(),
-                            MobEffectRegistrar.FROST_DAMAGE.get(),
-                            MobEffectRegistrar.DISARM.get(),
-                            MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get(),
-                            MobEffectRegistrar.SCORCHING_FIRE.get(),
-                            MobEffectRegistrar.SOULS_AFLAME.get()
-                    )) {
-                        MobEffectInstance mei = entity.getEffect(me);
-                        if (mei != null)
-                            UnitSyncMobEffectsClientboundPacket.addEffectClientside(entity, mei);
-                        else
-                            UnitSyncMobEffectsClientboundPacket.removeEffectClientside(entity, me);
-                    }
+                    UnitSyncClientboundPacket.sendSyncStatsPacket(evt.level.getServer().getPlayerList().getPlayers(), entity);
 
                     if (unit.getAnchor() != null)
                         UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
@@ -685,28 +760,21 @@ public class UnitServerEvents {
                 }
 
                 // remove old chunk // add current chunk
-                boolean chunkNeedsUpdate = false;
                 ChunkAccess newChunk = evt.level.getChunk(entity.getOnPos());
+                ChunkAccess oldChunk = forcedUnitChunks.get(entity.getId());
+                boolean chunkNeedsUpdate = oldChunk != null && (
+                    oldChunk.getPos().x != newChunk.getPos().x || oldChunk.getPos().z != newChunk.getPos().z
+                );
 
-                for (Pair<Integer, ChunkAccess> forcedChunk : forcedUnitChunks) {
-                    int id = forcedChunk.getFirst();
-                    ChunkAccess chunk = forcedChunk.getSecond();
-                    if (id == entity.getId() && (
-                        chunk.getPos().x != newChunk.getPos().x || chunk.getPos().z != newChunk.getPos().z
-                    )) {
-                        ForgeChunkManager.forceChunk((ServerLevel) evt.level,
-                            ReignOfNether.MOD_ID,
-                            entity,
-                            chunk.getPos().x,
-                            chunk.getPos().z,
-                            false,
-                            true
-                        );
-                        chunkNeedsUpdate = true;
-                    }
-                }
                 if (chunkNeedsUpdate) {
-                    forcedUnitChunks.removeIf(p -> p.getFirst() == entity.getId());
+                    ForgeChunkManager.forceChunk((ServerLevel) evt.level,
+                        ReignOfNether.MOD_ID,
+                        entity,
+                        oldChunk.getPos().x,
+                        oldChunk.getPos().z,
+                        false,
+                        true
+                    );
                     ForgeChunkManager.forceChunk((ServerLevel) evt.level,
                         ReignOfNether.MOD_ID,
                         entity,
@@ -715,7 +783,7 @@ public class UnitServerEvents {
                         true,
                         true
                     );
-                    forcedUnitChunks.add(new Pair<>(entity.getId(), newChunk));
+                    forcedUnitChunks.put(entity.getId(), newChunk);
                     //ReignOfNether.LOGGER.info("Updated forced chunk for entity: " + entity.getId() + " at: " +
                     // newChunk.getPos().x + "," + newChunk.getPos().z);
                 }
@@ -777,27 +845,34 @@ public class UnitServerEvents {
     }
 
     private static boolean shouldIgnoreKnockback(LivingDamageEvent evt) {
-        Entity projectile = evt.getSource().getDirectEntity();
+        Entity directEntity = evt.getSource().getDirectEntity();
         Entity sourceEntity = evt.getSource().getEntity();
 
-        if (sourceEntity instanceof HeadhunterUnit headhunterUnit && projectile instanceof ThrownTrident) {
-            return !ResearchServerEvents.playerHasResearch(headhunterUnit.getOwnerName(),
-                    ProductionItems.RESEARCH_HEAVY_TRIDENTS
-            );
+        if (sourceEntity instanceof LivingEntity le && (le.getMainHandItem().getEnchantmentLevel(Enchantments.PUNCH_ARROWS) > 0)) {
+            return false;
         }
+
         if (sourceEntity instanceof WretchedWraithUnit)
+            return true;
+        if (sourceEntity instanceof WraithUnit)
             return true;
         if (sourceEntity instanceof SlimeUnit slimeUnit && slimeUnit.isTiny())
             return true;
-        if (projectile instanceof Fireball && sourceEntity instanceof BlazeUnit)
+        if (directEntity instanceof Fireball && sourceEntity instanceof BlazeUnit)
             return true;
-        if (projectile instanceof AbstractArrow)
+        if (directEntity instanceof AbstractArrow)
             return true;
-        if (projectile instanceof BlazeUnitFireball)
+        if (directEntity instanceof WindcallerProjectile)
+            return true;
+        if (directEntity instanceof BlazeUnitFireball)
+            return true;
+        if (sourceEntity instanceof WorkerUnit &&
+            sourceEntity instanceof Mob mob &&
+            ResourceSources.isHuntableAnimal(mob.getTarget()))
             return true;
 
         return evt.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO) && evt.getSource().isIndirect()
-            && (!(sourceEntity instanceof EvokerUnit));
+                && (!(sourceEntity instanceof EvokerUnit));
     }
 
     public static Entity spawnMob(
@@ -864,7 +939,7 @@ public class UnitServerEvents {
         // halve direct ghast damage since they get bonus damage from launching units into the air
         if (evt.getSource().getEntity() instanceof GhastUnit) {
             // (unless its to a garrisoned unit)
-            if (!(evt.getEntity() instanceof Unit unit && GarrisonableBuilding.getGarrison(unit) != null)) {
+            if (!(evt.getEntity() instanceof Unit unit && GarrisonableBuildingAddon.getGarrison(unit) != null)) {
                 evt.setAmount(evt.getAmount() / 2);
             }
         }
@@ -895,8 +970,9 @@ public class UnitServerEvents {
             }
         }
 
-        if (evt.getEntity().getAbsorptionAmount() > 0)
-            UnitSyncClientboundPacket.sendSyncStatsPacket(evt.getEntity());
+        MinecraftServer server = evt.getEntity().level().getServer();
+        if (evt.getEntity().getAbsorptionAmount() > 0 && server != null)
+            UnitSyncClientboundPacket.sendSyncStatsPacket(server.getPlayerList().getPlayers(), evt.getEntity());
 
         if (evt.getSource().getEntity() instanceof HeadhunterUnit headhunterUnit &&
                 headhunterUnit.hasFlameTrident() &&
@@ -939,6 +1015,18 @@ public class UnitServerEvents {
         if (evt.getEntity().hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) && evt.getSource().is(DamageTypes.ON_FIRE)) {
             evt.setAmount(evt.getAmount() * 2);
         }
+
+        if (evt.getEntity().hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) && evt.getSource().is(DamageTypes.ON_FIRE)) {
+            evt.setAmount(evt.getAmount() * 2);
+        }
+
+        if (evt.getEntity() instanceof HeroUnit && evt.getSource().getEntity() instanceof PhantomSummon) {
+            evt.setAmount(evt.getAmount() * PhantomSummon.HERO_DAMAGE_MULT);
+        }
+
+        if (evt.getSource().getDirectEntity() instanceof GhastUnitFireball) {
+            evt.setAmount(evt.getAmount() / 2);
+        }
     }
 
     @SubscribeEvent
@@ -958,10 +1046,10 @@ public class UnitServerEvents {
             hit = ((EntityHitResult) evt.getRayTraceResult()).getEntity();
         }
 
-        // prevent fireballs actually directly hitting anything, except other ghasts
-        //  instead just relying on splash damage and fire creation
+        // prevent fireballs actually directly hitting anything, except other flying units
+        // instead just relying on splash damage and fire creation
         if (owner instanceof GhastUnit && hit != null) {
-            if (!(hit instanceof GhastUnit)) {
+            if (!(hit instanceof Unit unit && unit.isFlyingUnit())) {
                 evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
             }
         }
@@ -976,6 +1064,12 @@ public class UnitServerEvents {
                 evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
             }
         }
+
+        if (hit instanceof Unit unit && evt.getProjectile().getPersistentData().contains("accuracyRoll")) {
+            float accuracyRoll = evt.getProjectile().getPersistentData().getFloat("accuracyRoll");
+            if (accuracyRoll < unit.getEvasionChance())
+                evt.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
+        }
     }
 
     @SubscribeEvent
@@ -988,6 +1082,8 @@ public class UnitServerEvents {
         if (evt.getEntity() instanceof Unit unit && MobEffectRegistrar.isInterrupt(evt.getEffectInstance().getEffect()) && unit.uninterruptable()) {
             evt.setCanceled(true);
         }
+        if (!evt.getEntity().level().isClientSide())
+            UnitSyncMobEffectsClientboundPacket.addEffectClientside(evt.getEntity(), evt.getEffectInstance());
     }
 
     @SubscribeEvent
@@ -1001,6 +1097,8 @@ public class UnitServerEvents {
                 EnchantmentHelper.setEnchantments(new HashMap<>(), evt.getEntity().getMainHandItem());
             }
         }
+        if (!evt.getEntity().level().isClientSide())
+            UnitSyncMobEffectsClientboundPacket.removeEffectClientside(evt.getEntity(), evt.getEffectInstance().getEffect());
     }
 
     @SubscribeEvent
@@ -1013,7 +1111,10 @@ public class UnitServerEvents {
         }
     }
 
+    private static float KNOCKBACK_RESIST_PER_TICKS = 0.01f;
+
     public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();
+    public static ArrayList<Pair<Integer, Integer>> knockbackResistIds = new ArrayList<>();
 
     @SubscribeEvent
     public static void onLivingKnockBack(LivingKnockBackEvent evt) {
@@ -1021,9 +1122,9 @@ public class UnitServerEvents {
             evt.setCanceled(true);
         if (evt.getEntity() instanceof GhastUnit)
             evt.setCanceled(true);
-        else if (evt.getEntity() instanceof WretchedWraithUnit wraith && wraith.isBlizzardInProgress())
+        else if (evt.getEntity() instanceof WraithUnit)
             evt.setCanceled(true);
-        else if (evt.getEntity() instanceof BruteUnit bruteUnit && bruteUnit.isHoldingUpShield)
+        else if (evt.getEntity() instanceof BruteUnit bruteUnit && bruteUnit.isHoldingUpShield())
             evt.setCanceled(true);
         else if (knockbackIgnoreIds.removeIf(i -> i == evt.getEntity().getId()))
             evt.setCanceled(true);

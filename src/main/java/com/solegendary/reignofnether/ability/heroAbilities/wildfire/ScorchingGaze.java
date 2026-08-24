@@ -3,11 +3,12 @@ package com.solegendary.reignofnether.ability.heroAbilities.wildfire;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
@@ -33,6 +34,16 @@ public class ScorchingGaze extends HeroAbility {
 
     public static final int MIN_MAGMA_DURATION = 200;
     public static final int MAX_MAGMA_DURATION = 300;
+
+    @Override
+    public boolean isCasting(Unit unit) {
+        if (unit instanceof WildfireUnit wildfireUnit) {
+            GenericTargetedSpellGoal goal = wildfireUnit.getCastScorchingGazeGoal();
+            if (goal != null)
+                return goal.isCasting();
+        }
+        return false;
+    }
 
     public ScorchingGaze() {
         super(3, 50, UnitAction.SCORCHING_GAZE, 30 * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true);

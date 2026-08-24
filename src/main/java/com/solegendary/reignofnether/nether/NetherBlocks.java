@@ -1,5 +1,9 @@
 package com.solegendary.reignofnether.nether;
 
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.contents.TranslatableContents;
@@ -8,8 +12,11 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NetherWartBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.MapColor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,11 +31,20 @@ public class NetherBlocks {
 
     public static BlockState getNetherBlock(Level level, BlockPos overworldBp) {
         BlockState overworldBs = level.getBlockState(overworldBp);
-        if (!overworldBs.isAir())
+        if (!overworldBs.isAir()) {
             for (Map.Entry<Block, List<Block>> entrySet : MAPPINGS.entrySet())
                 for (Block block : entrySet.getValue())
                     if (overworldBs.getBlock().equals(block))
                         return entrySet.getKey().defaultBlockState();
+
+            String descId = overworldBs.getBlock().getDescriptionId();
+            if (descId.contains("concrete_powder"))
+                return Blocks.SOUL_SOIL.defaultBlockState();
+            else if (descId.contains("concrete"))
+                return Blocks.NETHERRACK.defaultBlockState();
+            else if (descId.contains("terracotta") && !descId.contains("glazed_terracotta"))
+                return Blocks.NETHERRACK.defaultBlockState();
+        }
         return null;
     }
 
@@ -49,9 +65,14 @@ public class NetherBlocks {
     public static boolean isNetherBlock(Level level, BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
 
+        if (bs.getBlock() == Blocks.OBSIDIAN)
+            return true;
+
         if (bs.getBlock().getName().getContents() instanceof TranslatableContents contents &&
             (contents.getKey().contains("blackstone") ||
             contents.getKey().contains("nylium") ||
+            contents.getKey().contains("warped") ||
+            contents.getKey().contains("crimson") ||
             contents.getKey().contains("nether_brick"))) {
             return true;
         }
@@ -145,6 +166,7 @@ public class NetherBlocks {
             Blocks.PINK_TULIP
     );
 
+    public static final Map<Block, List<String>> STRING_MAPPINGS = new HashMap<>(); // if block key ends in this string
     public static final Map<Block, List<Block>> MAPPINGS = new HashMap<>();
     public static final Map<Block, List<Block>> PLANT_MAPPINGS = new HashMap<>();
 
@@ -202,15 +224,9 @@ public class NetherBlocks {
                 Blocks.GRANITE,
                 Blocks.SNOW_BLOCK,
                 Blocks.POWDER_SNOW,
-                Blocks.TERRACOTTA,
-                Blocks.RED_TERRACOTTA,
-                Blocks.ORANGE_TERRACOTTA,
-                Blocks.YELLOW_TERRACOTTA,
-                Blocks.BROWN_TERRACOTTA,
-                Blocks.WHITE_TERRACOTTA,
-                Blocks.LIGHT_GRAY_TERRACOTTA,
                 Blocks.MOSSY_COBBLESTONE,
-                Blocks.PRISMARINE
+                Blocks.PRISMARINE,
+                Blocks.END_STONE
             ));
         MAPPINGS.put(Blocks.NETHER_BRICKS,
             List.of(
@@ -218,7 +234,8 @@ public class NetherBlocks {
                 Blocks.CRACKED_STONE_BRICKS,
                 Blocks.MOSSY_STONE_BRICKS,
                 Blocks.PRISMARINE_BRICKS,
-                Blocks.DARK_PRISMARINE
+                Blocks.DARK_PRISMARINE,
+                Blocks.END_STONE_BRICKS
             ));
         MAPPINGS.put(Blocks.CHISELED_NETHER_BRICKS,
             List.of(
@@ -247,6 +264,7 @@ public class NetherBlocks {
         MAPPINGS.put(Blocks.BLACKSTONE,
             List.of(
                 Blocks.DEEPSLATE,
+                Blocks.COBBLED_DEEPSLATE,
                 Blocks.TUFF
             ));
         MAPPINGS.put(Blocks.SOUL_SAND,

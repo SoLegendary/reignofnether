@@ -66,13 +66,13 @@ public class BlackstoneBridge extends AbstractBridge {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.CENTRAL_PORTAL) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.blackstone_bridge"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blackstone_bridge"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.blackstone_bridge.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.blackstone_bridge.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blackstone_bridge.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blackstone_bridge.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.piglins.reignofnether.blackstone_bridge.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blackstone_bridge.tooltip3"), Style.EMPTY)
                 ),
                 this
         );

@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -17,19 +19,33 @@ public class CustomBuildingServerboundPacket {
     public String strValue;
 
     public static void deregisterBuilding(String buildingName) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(CustomBuildingAction.DEREGISTER, buildingName, false, 0, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, boolean boolValue) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, boolValue, 0, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, int intValue) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, intValue, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, String strValue) {
+        if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, 0, strValue));
+    }
+
+    public static void customiseBuilding(CustomBuildingAction action, String buildingName) {
+        if (!MiscUtil.isConnected()) return;
+        PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, 0, ""));
+    }
+
+    public static void customiseBuilding(CustomBuildingAction action, String buildingName, int intValue, String strValue) {
+        if (!MiscUtil.isConnected()) return;
+        PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, intValue, strValue));
     }
 
     public CustomBuildingServerboundPacket(CustomBuildingAction action,
@@ -67,6 +83,8 @@ public class CustomBuildingServerboundPacket {
             if (!SandboxServer.isAnyoneASandboxPlayer())
                 return;
 
+            ReignOfNether.LOGGER.info("[CustomBuilding] action={}, buildingName={}, boolValue={}, intValue={}, strValue={}", this.action, this.buildingName, this.boolValue, this.intValue, this.strValue);
+
             CustomBuilding customBuilding = CustomBuildingServerEvents.getCustomBuilding(this.buildingName);
 
             if (customBuilding != null) {
@@ -77,16 +95,24 @@ public class CustomBuildingServerboundPacket {
                     case SET_INVULNERABLE -> customBuilding.invulnerable = this.boolValue;
                     case SET_REPAIRABLE -> customBuilding.repairable = this.boolValue;
                     case SET_DESTROY_ON_RESET -> customBuilding.shouldDestroyOnReset = this.boolValue;
+                    case SET_DRAW_AGGRO -> customBuilding.drawAggro = this.boolValue;
                     case SET_NIGHT_RADIUS -> customBuilding.nightRadius = this.intValue;
                     case SET_NETHER_RADIUS -> customBuilding.netherRadius = this.intValue;
                     case SET_BUILDABLE_BY_VILLAGERS -> customBuilding.buildableByVillagers = this.boolValue;
                     case SET_BUILDABLE_BY_MONSTERS -> customBuilding.buildableByMonsters = this.boolValue;
                     case SET_BUILDABLE_BY_PIGLINS -> customBuilding.buildableByPiglins = this.boolValue;
+                    case SET_NETHER_TERRAIN_ONLY -> customBuilding.netherTerrainOnly = this.boolValue;
                     case SET_FOOD_COST -> customBuilding.cost.food = this.intValue;
                     case SET_WOOD_COST -> customBuilding.cost.wood = this.intValue;
                     case SET_ORE_COST -> customBuilding.cost.ore = this.intValue;
                     case SET_GARRISON_CAPACITY -> customBuilding.garrisonCapacity = this.intValue;
                     case SET_GARRISON_RANGE -> customBuilding.garrisonRange = this.intValue;
+                    case ADD_COMMAND -> customBuilding.addCommand();
+                    case DELETE_COMMAND -> customBuilding.deleteCommand(this.intValue);
+                    case SET_COMMAND_TEXT -> customBuilding.setCommandText(this.intValue, this.strValue);
+                    case SET_COMMAND_COOLDOWN -> customBuilding.setCommandCooldownTicks(this.intValue, this.strValue);
+                    case SET_COMMAND_TRIGGER -> customBuilding.setCommandTrigger(this.intValue, this.strValue);
+                    case SET_MAX_HEALTH -> customBuilding.maxHealth = this.intValue;
                 }
             }
             success.set(true);

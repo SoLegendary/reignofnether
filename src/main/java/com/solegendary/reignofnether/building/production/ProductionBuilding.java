@@ -23,13 +23,13 @@ public abstract class ProductionBuilding extends Building {
         return new ProductionPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation), this.isCapitol);
     }
 
-    public BlockPos getDefaultOutdoorSpawnPoint(BlockPos minCorner) {
+    public BlockPos getDefaultOutdoorSpawnPoint(BlockPos minCorner, ProductionPlacement pp) {
         return minCorner.offset((int) -spawnRadiusOffset, 0, (int) -spawnRadiusOffset);
     }
 
-    public BlockPos getIndoorSpawnPoint(ServerLevel level, BlockPos centrePos) {
+    public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
         BlockPos spawnPoint;
-        for(spawnPoint = centrePos; level.getBlockState(spawnPoint.below()).isAir(); spawnPoint = spawnPoint.offset(0, -1, 0)) {
+        for(spawnPoint = placement.centrePos; level.getBlockState(spawnPoint.below()).isAir(); spawnPoint = spawnPoint.offset(0, -1, 0)) {
         }
 
         return spawnPoint;

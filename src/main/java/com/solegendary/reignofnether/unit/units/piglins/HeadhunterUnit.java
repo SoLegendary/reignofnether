@@ -8,26 +8,33 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
@@ -59,8 +66,8 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, RangedAttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new MountHoglin(), Keybindings.keyQ);
-        ABILITIES.add(new Bloodlust(), Keybindings.keyW);
+        ABILITIES.add(new MountHoglin(), Keybindings.abilitySlot1);
+        ABILITIES.add(new Bloodlust(), Keybindings.abilitySlot2);
     }
 
     //region
@@ -126,25 +133,30 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(HeadhunterUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(HeadhunterUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(HeadhunterUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
-
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.HEADHUNTER;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
-    public float getUnitAttackDamage() {return attackDamage + (hasFlameTrident() ? 1 : 0);}
+    public float getUnitAttackDamage() {return AttackerUnit.super.getUnitAttackDamage() + (hasFlameTrident() ? 1 : 0) + getPowerLevel();}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
@@ -152,11 +164,13 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     private UnitBowAttackGoal<? extends LivingEntity> attackGoal;
 
     // endregion
-
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
 
     final static public float attackDamage = 6.0f;
     final static public float attacksPerSecond = 0.3f;
@@ -197,7 +211,14 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
                 .add(Attributes.MOVEMENT_SPEED, HeadhunterUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, HeadhunterUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, HeadhunterUnit.armorValue);
+                .add(Attributes.ARMOR, HeadhunterUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override
@@ -219,6 +240,24 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
         Unit.tick(this);
         AttackerUnit.tick(this);
         this.mountGoal.tick();
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override
@@ -288,18 +327,21 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
             ItemStack tridentStack = new ItemStack(Items.TRIDENT);
             AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
             tridentStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
-
-            if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_HEAVY_TRIDENTS))
-                tridentStack.enchant(Enchantments.PUNCH_ARROWS, 1);
-
             this.setItemSlot(EquipmentSlot.MAINHAND, tridentStack);
         }
+        //if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_HEAVY_TRIDENTS))
+        //    this.getItemBySlot(EquipmentSlot.MAINHAND).enchant(Enchantments.PUNCH_ARROWS, 1);
+        if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_GREEDY_TRIDENTS))
+            this.getItemBySlot(EquipmentSlot.MAINHAND).enchant(Enchantments.MOB_LOOTING, 1);
     }
 
     @Override
     public boolean fireImmune() {
         BuildingPlacement bpl = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
-        return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
+        return super.fireImmune() ||
+                (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary ||
+                        bpl.getBuilding() instanceof BasaltSprings ||
+                        bpl.getBuilding() instanceof PiglinMarket));
     }
 
     public boolean hasNetheriteChestplate() {
@@ -348,8 +390,13 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
         );
     }
 
+    public int getPowerLevel() {
+        ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        return itemStack.getEnchantmentLevel(Enchantments.POWER_ARROWS);
+    }
+
     @Override
-    public boolean hasBonusDamage() {
-        return hasFlameTrident();
+    public int getDamageTooltipColour() {
+        return (hasFlameTrident() || getPowerLevel() > 0) ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

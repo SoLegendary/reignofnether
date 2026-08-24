@@ -18,8 +18,15 @@ public class UsePortalGoal extends MoveToTargetBlockGoal {
 
     private BuildingPlacement buildingTarget;
 
+    private static final float BASE_RANGE = 2.0f;
+
     public UsePortalGoal(Mob mob) {
         super(mob, true, 0);
+    }
+
+    private float getRangeSqr() {
+        float range = BASE_RANGE + mob.getBbWidth();
+        return range * range;
     }
 
     public void tick() {
@@ -28,10 +35,10 @@ public class UsePortalGoal extends MoveToTargetBlockGoal {
             if (buildingTarget.getBlocksPlaced() <= 0) {
                 stopUsingPortal();
             }
-            if (this.mob.distanceToSqr(new Vec3(moveTarget.getX() + 0.5f,
+            if (moveTarget != null && this.mob.distanceToSqr(new Vec3(moveTarget.getX() + 0.5f,
                 moveTarget.getY() + 0.5f,
                 moveTarget.getZ() + 0.5f
-            )) <= 3f) {
+            )) <= getRangeSqr()) {
                 // teleport to destination
                 if (portal.hasDestination()) {
                     BlockPos bp = portal.destination;

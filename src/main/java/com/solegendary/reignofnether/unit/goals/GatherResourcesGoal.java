@@ -6,13 +6,13 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.TargetResourcesSave;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieVillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-import static com.solegendary.reignofnether.resources.BlockUtils.isFallingLogBlock;
-import static com.solegendary.reignofnether.resources.BlockUtils.isLogBlock;
+import static com.solegendary.reignofnether.blocks.BlockUtils.isFallingLogBlock;
+import static com.solegendary.reignofnether.blocks.BlockUtils.isLogBlock;
 
 // Move towards the nearest open resource blocks and start gathering them
 // Can be toggled between food, wood and ore, and disabled by clicking
@@ -47,6 +47,9 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public TargetResourcesSave permSaveData = new TargetResourcesSave();
 
     private static final int REACH_RANGE = 5;
+    // How far below a resource block a worker may stand and still reach it: mining reach is REACH_RANGE (3D),
+    // so standing ~4 below an adjacent column keeps it in range (sqrt(1^2 + 4^2) < 5).
+    private static final int MAX_REACH_DOWN = 4;
     private static final int DEFAULT_MAX_GATHER_TICKS = 600; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private float gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
@@ -63,6 +66,19 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     public static final int TICKS_STATIONARY_TIMEOUT = 100; // ticks that the worker hasn't moved and gatherTarget != null
     private BlockPos lastOnPos = null;
     private BlockPos altSearchPos = null; // block search origin that may be used instead of the mob position
+    // Whether the worker is in range and gathering, computed authoritatively on the SERVER and synced to the
+    // client (mirrors BuildRepairGoal.isBuildingServerside). The client must not recompute isBlockInRange
+    // itself - its entity position is interpolated, so it would disagree with the server. Set in
+    // UnitSyncWorkerClientBoundPacket via setIsGatheringServerside.
+    private boolean isGatheringServerside = false;
+
+    public void setIsGatheringServerside(boolean isGathering) {
+        this.isGatheringServerside = isGathering;
+    }
+
+    private int getReplantWoodCost() {
+        return (mob instanceof ZombieVillagerUnit) ? ResourceCosts.REDUCED_REPLANT_WOOD_COST : ResourceCosts.REPLANT_WOOD_COST;
+    }
 
     // whenever we attempt to assign a block as a target it must pass this test
     private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
@@ -88,7 +104,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 return false;
         }
         // is not part of a building (unless farming)
-        else if (data.targetFarm == null && BuildingUtils.isPosInsideAnyNonBridgeBuilding(mob.level().isClientSide(), bp))
+        else if (data.targetFarm == null && BuildingUtils.isPosInsideAnyBuilding(mob.level().isClientSide(), bp))
             return false;
 
         // not covered by solid blocks
@@ -100,6 +116,12 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             }
         }
         if (!hasClearNeighbour)
+            return false;
+
+        // must have a cell a worker can actually STAND in (floor below, head clear) within mining reach -
+        // rejects blocks suspended high off the ground (upper tree logs/leaves) that have air neighbours but
+        // no nearby ground, which the worker can never path up to and would just stall beneath.
+        if (!hasReachableStandSpot(bp))
             return false;
 
         // not targeted by another nearby worker
@@ -121,6 +143,16 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     // set move goal as range -1, so we aren't slightly out of range
     public GatherResourcesGoal(Mob mob) {
         super(mob, true, REACH_RANGE - 1);
+    }
+
+    // moveReachRange is REACH_RANGE-1 (4), so the base recalc threshold is 16, but isBlockInRange() gathers
+    // out to REACH_RANGE (5). That 4-5 block band is where a worker is gathering yet still "too far ->
+    // repath", which makes it shuffle back and forth. Match the threshold to the gather reach so a worker in
+    // range to chop never triggers a recalc; a genuinely-unreachable block is dropped by NO_TARGET_TIMEOUT /
+    // TICKS_STATIONARY_TIMEOUT instead.
+    @Override
+    public double getMinDistToRecalculateSqr() {
+        return Math.max(super.getMinDistToRecalculateSqr(), REACH_RANGE * REACH_RANGE);
     }
 
     public void syncFromServer(ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
@@ -179,9 +211,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 else {
                     Optional<BlockPos> bpOpt;
                     if (altSearchPos != null) {
-                        bpOpt = BlockPos.findClosestMatch(
-                                altSearchPos, REACH_RANGE/2, REACH_RANGE/2,
-                            BLOCK_CONDITION);
+                        bpOpt = ResourceIndex.get(mob.level()).findClosest(
+                                mob.level(), altSearchPos, REACH_RANGE / 2, data.targetResourceName, BLOCK_CONDITION);
                         altSearchPos = null;
                     }
                     else {
@@ -193,12 +224,13 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                             ticksIdle += 200;
                         }
 
-                        bpOpt = BlockPos.findClosestMatch(
+                        bpOpt = ResourceIndex.get(mob.level()).findClosest(
+                            mob.level(),
                             new BlockPos(
                                     (int) mob.getEyePosition().x,
                                     (int) mob.getEyePosition().y,
                                     (int) mob.getEyePosition().z
-                            ), range, range,
+                            ), range, data.targetResourceName,
                             BLOCK_CONDITION);
                     }
 
@@ -238,7 +270,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             if (!BLOCK_CONDITION.test(this.data.gatherTarget))
                 removeGatherTarget();
             else // keep persistently moving towards the target
-                super.setMoveTarget(data.gatherTarget);
+                setMoveTarget(data.gatherTarget);
 
             if (isGathering()) {
                 ticksIdle = 0;
@@ -258,7 +290,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
 
                         if (canAffordReplant()) {
-                            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -ResourceCosts.REPLANT_WOOD_COST, 0));
+                            ResourcesServerEvents.addSubtractResources(new Resources(((Unit) mob).getOwnerName(), 0, -getReplantWoodCost(), 0));
                             mob.level().setBlockAndUpdate(data.gatherTarget.above(), ((WorkerUnit) mob).getReplantBlockState());
                             removeGatherTarget();
                         }
@@ -406,24 +438,51 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
 
-    private boolean isBlockInRange(BlockPos target) {
-        int reachRangeBonus = (int) Math.min(5, ticksWithoutTarget / TICK_CD);
-        return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= Math.pow(REACH_RANGE + reachRangeBonus, 2);
+    // True if a worker can stand somewhere adjacent to bp (within mining reach) to gather it: a cell with a
+    // solid floor below and clear feet+head, in one of the 4 cardinal neighbour columns across a vertical band
+    // from one above down to MAX_REACH_DOWN below. A block high in the air (no ground in any neighbour column)
+    // fails - that's the "very high tree" case. Checked nearest-first in BLOCK_CONDITION, so a reachable base
+    // log usually passes immediately and we rarely scan the full band.
+    private boolean hasReachableStandSpot(BlockPos bp) {
+        var level = mob.level();
+        for (BlockPos side : List.of(bp.north(), bp.south(), bp.east(), bp.west())) {
+            for (int dy = 1; dy >= -MAX_REACH_DOWN; dy--) {
+                BlockPos feet = side.above(dy); // above(negative) = below
+                if (!MiscUtil.isSolidBlocking(level, feet)
+                        && !MiscUtil.isSolidBlocking(level, feet.above())
+                        && MiscUtil.isSolidBlocking(level, feet.below()))
+                    return true;
+            }
+        }
+        return false;
     }
 
-    // only count as gathering if in range of the target
-    public boolean isGathering() {
-        if (!Unit.atMaxResources((Unit) mob) && data.gatherTarget != null && this.mob.level().isClientSide())
-            return isBlockInRange(data.gatherTarget);
+    private boolean isBlockInRange(BlockPos target) {
+        // always in range if the gatherer is assigned to a farm
+        if (getTargetFarm() != null &&
+            getTargetFarm().isPosInsideBuilding(mob.getOnPos()) &&
+            getGatherTarget() != null &&
+            getTargetFarm().isPosInsideBuilding(getGatherTarget()))
+            return true;
 
-        if (!Unit.atMaxResources((Unit) mob) && this.data.gatherTarget != null && this.data.targetResourceSource != null &&
+        return target.distToCenterSqr(mob.getX(), mob.getEyeY(), mob.getZ()) <= REACH_RANGE * REACH_RANGE;
+    }
+
+    // only count as gathering if in range of the target. The CLIENT trusts the server-synced value (its
+    // entity position is interpolated, so it can't compute isBlockInRange consistently); the SERVER computes
+    // it authoritatively and syncs it via UnitSyncWorkerClientBoundPacket.
+    public boolean isGathering() {
+        if (this.mob.level().isClientSide())
+            return isGatheringServerside;
+
+         if (!Unit.atMaxResources((Unit) mob) && this.data.gatherTarget != null && this.data.targetResourceSource != null &&
             ResourceSources.getBlockResourceName(this.data.gatherTarget, mob.level()) != ResourceName.NONE)
             return isBlockInRange(data.gatherTarget);
         return false;
     }
 
     private boolean canAffordReplant() {
-        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), ResourceName.WOOD, ResourceCosts.REPLANT_WOOD_COST);
+        return ResourcesServerEvents.canAfford(((Unit) mob).getOwnerName(), ResourceName.WOOD, getReplantWoodCost());
     }
 
     public void setTargetResourceName(ResourceName resourceName) {
@@ -439,11 +498,20 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         if (bp != null) {
             MiscUtil.addUnitCheckpoint((Unit) mob, bp, true);
         }
-        super.setMoveTarget(bp);
+        // if assigned to a farm and not on that farm, keep retrying movement to avoid getting stuck
+        if (getTargetFarm() != null && !getTargetFarm().isPosInsideBuilding(mob.getOnPos())) {
+            this.moveReachRange = 2;
+            super.setMoveTarget(getTargetFarm().centrePos);
+            super.start();
+        } else {
+            this.moveReachRange = REACH_RANGE - 1;
+            super.setMoveTarget(bp);
+        }
         if (BLOCK_CONDITION.test(bp)) {
             this.data.gatherTarget = bp;
             this.data.targetResourceSource = ResourceSources.getFromBlockPos(data.gatherTarget, this.mob.level());
         }
+
     }
 
     public boolean isFarming() {

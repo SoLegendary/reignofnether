@@ -1,8 +1,11 @@
 package com.solegendary.reignofnether.mixin.fire;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FireBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -194,5 +197,21 @@ public abstract class FireBlockMixin {
         fireblock.setFlammable(Blocks.SMALL_DRIPLEAF, 0, 100);
         fireblock.setFlammable(Blocks.HANGING_ROOTS, 0, 60);
         fireblock.setFlammable(Blocks.GLOW_LICHEN, 0, 100);
+
+        fireblock.setFlammable(Blocks.OBSIDIAN, 20, 5);
     }
+
+    @Inject(
+            method = "tryCatchFire(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;ILnet/minecraft/util/RandomSource;ILnet/minecraft/core/Direction;)V",
+            at = @At("HEAD"),
+            cancellable = true,
+            remap = false
+    )
+    private void examplemod$protectObsidian(Level level, BlockPos pos, int chance, RandomSource random,
+                                            int age, Direction face, CallbackInfo ci) {
+        if (level.getBlockState(pos).is(Blocks.OBSIDIAN) && !BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), pos)) {
+            ci.cancel();
+        }
+    }
+
 }

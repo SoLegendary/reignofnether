@@ -2,11 +2,12 @@ package com.solegendary.reignofnether.building;
 
 // class for static building functions
 
+import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
 import com.solegendary.reignofnether.building.buildings.monsters.Stronghold;
 import com.solegendary.reignofnether.building.buildings.piglins.Fortress;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
+import com.solegendary.reignofnether.building.buildings.placements.FarmPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.Castle;
@@ -30,6 +31,43 @@ import java.util.function.Predicate;
 public class BuildingUtils {
 
     public static List<Keybinding> keybindings = Arrays.asList();
+
+    public static boolean isBridge(Building building) {
+        return building instanceof AbstractBridge;
+    }
+
+    // gets the cursor position rotated according to the preselected building
+    public static BlockPos getBuildingOriginPos(BlockPos cursorBp, boolean isBridge, Rotation buildingRotation, Vec3i buildingDimensions) {
+        int xAdj = 0;
+        int zAdj = 0;
+        int xRadius = buildingDimensions.getX() / 2;
+        int zRadius = buildingDimensions.getZ() / 2;
+
+        switch (buildingRotation) {
+            case NONE -> {
+                xAdj = -xRadius;
+                zAdj = -zRadius;
+            }
+            case CLOCKWISE_90 -> {
+                xAdj = xRadius;
+                zAdj = -zRadius;
+            }
+            case CLOCKWISE_180 -> {
+                xAdj = xRadius;
+                zAdj = zRadius;
+            }
+            case COUNTERCLOCKWISE_90 -> {
+                xAdj = -xRadius;
+                zAdj = zRadius;
+            }
+        }
+        if (isBridge) {
+            cursorBp = cursorBp.offset(0, -1, 0);
+        }
+
+        return cursorBp.offset(xAdj, 0, zAdj);
+    }
+
 
     public static int getTotalCompletedBuildingsOwned(boolean isClientSide, String ownerName) {
         List<BuildingPlacement> buildings;
@@ -74,7 +112,7 @@ public class BuildingUtils {
             buildings = BuildingServerEvents.getBuildings();
         var flag = false;
         for (BuildingPlacement buildingPlacement : buildings) {
-            if (buildingPlacement.originPos == building.originPos) {
+            if (buildingPlacement.originPos.equals(building.originPos)) {
                 flag = true;
                 break;
             }
@@ -112,7 +150,7 @@ public class BuildingUtils {
     }
 
     public static BuildingPlacement getNewBuildingPlacement(Building building, Level level, BlockPos pos, Rotation rotation, String ownerName, boolean isDiagonalBridge) {
-        BuildingPlacement buildingPlacement = null;
+        BuildingPlacement buildingPlacement;
         if (building instanceof AbstractBridge bridge) {
             buildingPlacement = bridge.createBuildingPlacement(level, pos, rotation, ownerName, isDiagonalBridge);
         } else {
@@ -139,17 +177,17 @@ public class BuildingUtils {
 
     // functions for corners/centrePos given only blocks
     // if you have access to the Building itself, you should use .minCorner, .maxCorner and .centrePos
-    public static BlockPos getMinCorner(ArrayList<BuildingBlock> blocks) {
+    public static BlockPos getMinCorner(List<BuildingBlock> blocks) {
         MinMaxValues minMax = calculateMinMax(blocks);
         return new BlockPos(minMax.minX, minMax.minY, minMax.minZ);
     }
 
-    public static BlockPos getMaxCorner(ArrayList<BuildingBlock> blocks) {
+    public static BlockPos getMaxCorner(List<BuildingBlock> blocks) {
         MinMaxValues minMax = calculateMinMax(blocks);
         return new BlockPos(minMax.maxX, minMax.maxY, minMax.maxZ);
     }
 
-    public static BlockPos getCentrePos(ArrayList<BuildingBlock> blocks) {
+    public static BlockPos getCentrePos(List<BuildingBlock> blocks) {
         MinMaxValues minMax = calculateMinMax(blocks);
         return new BlockPos(
                 (minMax.minX + minMax.maxX) / 2,
@@ -158,7 +196,7 @@ public class BuildingUtils {
         );
     }
 
-    private static MinMaxValues calculateMinMax(ArrayList<BuildingBlock> blocks) {
+    private static MinMaxValues calculateMinMax(List<BuildingBlock> blocks) {
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, minZ = Integer.MAX_VALUE;
         int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE, maxZ = Integer.MIN_VALUE;
 
@@ -262,7 +300,7 @@ public class BuildingUtils {
         return false;
     }
 
-    public static boolean isPosInsideAnyNonBridgeBuilding(boolean isClientSide, BlockPos bp) {
+    public static boolean isPosInsideFarm(boolean isClientSide, BlockPos bp) {
         List<BuildingPlacement> buildings;
         if (isClientSide)
             buildings = BuildingClientEvents.getBuildings();
@@ -270,7 +308,7 @@ public class BuildingUtils {
             buildings = BuildingServerEvents.getBuildings();
 
         for (BuildingPlacement building : buildings)
-            if (!(building instanceof BridgePlacement) && building.isPosInsideBuilding(bp))
+            if (building instanceof FarmPlacement && building.isPosInsideBuilding(bp))
                 return true;
         return false;
     }
@@ -303,8 +341,9 @@ public class BuildingUtils {
         List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings) {
-            if (building instanceof NetherConvertingBuilding ncb && ncb.getMaxNetherRange() > 0) {
-                double maxRangeSquared = Math.pow(ncb.getMaxNetherRange(), 2);
+            NetherConvertingAddon ncb;
+            if ((ncb = building.getBuilding().getActiveAddon(NetherConvertingAddon.class)) != null && ncb.getMaxNetherRange(building) > 0) {
+                double maxRangeSquared = Math.pow(ncb.getMaxNetherRange(building), 2);
                 if (bp.distSqr(building.centrePos) <= maxRangeSquared) {
                     return true;
                 }
@@ -321,7 +360,7 @@ public class BuildingUtils {
         for (BuildingPlacement building : buildings) {
             if (building instanceof SculkCatalystPlacement sc) {
                 if (entity.distanceToSqr(Vec3.atCenterOf(sc.centrePos)) < maxCatalystRangeSquared &&
-                        sc.getUncappedNightRange() >= SculkCatalyst.nightRangeMax * 1.5f) {
+                        sc.getUncappedNightRange() >= SculkCatalyst.MAX_NIGHT_RANGE * 1.5f) {
                     return true;
                 }
             }
@@ -330,7 +369,7 @@ public class BuildingUtils {
     }
 
     // Helper method to get the buildings list based on client or server side.
-    private static List<BuildingPlacement> getBuildingsList(boolean isClientSide) {
+    public static List<BuildingPlacement> getBuildingsList(boolean isClientSide) {
         return isClientSide
                 ? BuildingClientEvents.getBuildings()
                 : BuildingServerEvents.getBuildings();
@@ -351,6 +390,31 @@ public class BuildingUtils {
                     for (int z = building.minCorner.getZ() - 1; z < building.maxCorner.getZ() + 2; z++)
                         if (!isPosInsideAnyBuilding(building.level.isClientSide(), new BlockPos(x,y,z)))
                             building.getLevel().setBlockAndUpdate(new BlockPos(x,y,z), Blocks.AIR.defaultBlockState());
+        }
+    }
+
+    public static BlockPos rotatePos(BlockPos pos, Rotation rot) {
+        if (rot == Rotation.NONE) {
+            return new BlockPos(pos.getX(), pos.getY(), pos.getZ());
+        } else if (rot == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-pos.getX(), pos.getY(), pos.getZ());
+        } else if (rot == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-pos.getX(), pos.getY(), -pos.getZ());
+        } else {
+            return new BlockPos(pos.getX(), pos.getY(), -pos.getZ());
+        }
+    }
+
+    // not sure why, but this needs to be slightly different to BuildingUtils.rotatePos for some uses
+    public static BlockPos altRotatePos(BlockPos pos, Rotation rot) {
+        if (rot == Rotation.NONE) {
+            return new BlockPos(pos.getX(), pos.getY(), pos.getZ());
+        } else if (rot == Rotation.CLOCKWISE_90) {
+            return new BlockPos(-pos.getZ(), pos.getY(), pos.getX()); // z and x switched
+        } else if (rot == Rotation.CLOCKWISE_180) {
+            return new BlockPos(-pos.getX(), pos.getY(), -pos.getZ());
+        } else {
+            return new BlockPos(pos.getZ(), pos.getY(), -pos.getX()); // z and x switched
         }
     }
 }

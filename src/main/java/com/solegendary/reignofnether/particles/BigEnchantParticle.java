@@ -7,6 +7,7 @@ package com.solegendary.reignofnether.particles;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -31,10 +32,10 @@ public class BigEnchantParticle extends TextureSheetParticle {
         this.x = this.xo;
         this.y = this.yo;
         this.z = this.zo;
-        this.quadSize = 0.4F * (this.random.nextFloat() * 0.5F + 0.2F);
+        this.quadSize = 0.4F * (this.random.nextFloat() * 0.5F + 0.3F);
         float f = this.random.nextFloat() * 0.6F + 0.4F;
-        this.rCol = 0.9F * f;
-        this.gCol = 0.9F * f;
+        this.rCol = f;
+        this.gCol = f;
         this.bCol = f;
         this.hasPhysics = false;
         this.lifetime = (int)(Math.random() * 10.0) + 30;
@@ -49,19 +50,9 @@ public class BigEnchantParticle extends TextureSheetParticle {
         this.setLocationFromBoundingbox();
     }
 
+    @Override
     public int getLightColor(float pPartialTick) {
-        int i = super.getLightColor(pPartialTick);
-        float f = (float)this.age / (float)this.lifetime;
-        f *= f;
-        f *= f;
-        int j = i & 255;
-        int k = i >> 16 & 255;
-        k += (int)(f * 15.0F * 16.0F);
-        if (k > 240) {
-            k = 240;
-        }
-
-        return j | k << 16;
+        return LightTexture.FULL_BRIGHT;
     }
 
     public void tick() {

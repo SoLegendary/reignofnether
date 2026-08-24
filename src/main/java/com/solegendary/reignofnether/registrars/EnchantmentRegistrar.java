@@ -23,6 +23,10 @@ public class EnchantmentRegistrar {
 
     public static final RegistryObject<Enchantment> ZEAL = ENCHANTMENTS.register("zeal", ZealEnchantment::new);
 
+    public static final RegistryObject<Enchantment> GUST = ENCHANTMENTS.register("gust", GustEnchantment::new);
+
+    public static final RegistryObject<Enchantment> LONGSHOT = ENCHANTMENTS.register("longshot", GustEnchantment::new);
+
     public static void init(FMLJavaModLoadingContext context) {
         ENCHANTMENTS.register(context.getModEventBus());
     }

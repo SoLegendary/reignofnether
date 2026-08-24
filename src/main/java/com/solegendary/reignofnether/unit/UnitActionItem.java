@@ -7,10 +7,10 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
-import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.FarmPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -76,6 +76,20 @@ public class UnitActionItem {
     );
 
     public UnitActionItem(
+            String ownerName,
+            UnitAction action,
+            int unitId,
+            int[] unitIds
+    ) {
+        this.ownerName = ownerName;
+        this.action = action;
+        this.unitId = unitId;
+        this.unitIds = unitIds;
+        this.preselectedBlockPos = new BlockPos(0,0,0);
+        this.selectedBuildingPos = new BlockPos(0,0,0);
+    }
+
+    public UnitActionItem(
         String ownerName,
         UnitAction action,
         int unitId,
@@ -135,12 +149,15 @@ public class UnitActionItem {
 
             if (entity instanceof Unit unit) {
                 boolean alliedControl;
-                if (level.isClientSide())
+                boolean fullControl;
+                if (level.isClientSide()) {
                     alliedControl = AlliancesClient.canControlAlly(unit.getOwnerName());
-                else
+                    fullControl = NonUnitClientEvents.canControlAllMobs();
+                } else {
                     alliedControl = AlliancesServerEvents.canControlAlly(this.ownerName, unit.getOwnerName());
-
-                if (unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer || alliedControl) {
+                    fullControl = NonUnitServerEvents.canControlAllMobs(entity.level(), this.ownerName);
+                }
+                if (unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer || alliedControl || fullControl) {
                     actionableUnits.add(unit);
                 }
             }
@@ -157,7 +174,8 @@ public class UnitActionItem {
                 continue;
             } else if (((LivingEntity) unit).getEffect(MobEffectRegistrar.UNCONTROLLABLE.get()) != null) {
                 continue;
-            }
+            } else if (unit.ignoreNonStopCommands() && action != UnitAction.STOP)
+                continue;
             // recalculating pathfinding can be expensive, so check if we actually need to first
             if (action == UnitAction.MOVE && isRedundantMove(unit, preselectedBlockPos)) {
                 continue;
@@ -167,13 +185,17 @@ public class UnitActionItem {
             if (action == UnitAction.TOGGLE_GATHER_TARGET) {
                 if (unit instanceof WorkerUnit workerUnit) {
                     GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
-                    ResourceName targetResourceName = goal.getTargetResourceName();
-                    Unit.fullResetBehaviours(unit);
-                    switch (targetResourceName) {
-                        case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
-                        case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
-                        case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
-                        case ORE -> goal.setTargetResourceName(ResourceName.NONE);
+                    if (goal != null) {
+                        ResourceName targetResourceName = goal.getTargetResourceName();
+                        Unit.fullResetBehaviours(unit);
+                        if (targetResourceName != null) {
+                            switch (targetResourceName) {
+                                case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
+                                case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
+                                case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
+                                case ORE -> goal.setTargetResourceName(ResourceName.NONE);
+                            }
+                        }
                     }
                 }
             } else {
@@ -213,15 +235,15 @@ public class UnitActionItem {
                     unit.setHoldPosition(true);
                 }
                 case GARRISON -> {
-                    if (unit.canGarrison()) {
+                    if (unit.canGarrison() && unit.getGarrisonGoal() != null) {
                         unit.getGarrisonGoal().setBuildingTarget(preselectedBlockPos);
                     }
                 }
                 case UNGARRISON -> {
-                    GarrisonableBuilding garr = GarrisonableBuilding.getGarrison(unit);
-                    if (garr != null && garr.getExitPosition() != null ) {
-                        BuildingPlacement building = (BuildingPlacement) garr;
-                        BlockPos bp = garr.getExitPosition();
+                    BuildingPlacement placement = GarrisonableBuildingAddon.getGarrison(unit);
+                    GarrisonableBuildingAddon garr = placement != null ? placement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+                    if (garr != null && garr.getExitPosition(placement) != null ) {
+                        BlockPos bp = garr.getExitPosition(placement);
                         ((LivingEntity) unit).teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
                     }
                 }
@@ -232,15 +254,17 @@ public class UnitActionItem {
                     );
 
                     if (unit instanceof WorkerUnit workerUnit && resName != ResourceName.NONE
-                        && (buildingAtPos == null || buildingAtPos instanceof BridgePlacement)) {
+                        && (buildingAtPos == null || buildingAtPos.getBuilding() instanceof AbstractBridge)) {
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
-                        goal.setTargetResourceName(resName);
-                        goal.setMoveTarget(preselectedBlockPos);
-                        if (Unit.atMaxResources((Unit) workerUnit)) {
-                            if (level.isClientSide()) {
-                                HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.worker_inv_full"));
+                        if (goal != null) {
+                            goal.setTargetResourceName(resName);
+                            goal.setMoveTarget(preselectedBlockPos);
+                            if (Unit.atMaxResources((Unit) workerUnit)) {
+                                if (level.isClientSide()) {
+                                    HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.worker_inv_full"));
+                                }
+                                goal.saveAndReturnResources();
                             }
-                            goal.saveAndReturnResources();
                         }
                     } else if (buildingAtPos instanceof PortalPlacement portal
                         && portal.getPortalType() == PortalPlacement.PortalType.TRANSPORT && unit.canUsePortal()) {
@@ -259,20 +283,61 @@ public class UnitActionItem {
                     if (unit instanceof AttackerUnit attackerUnit) {
                         MiscUtil.addUnitCheckpoint(unit, preselectedBlockPos, false);
                         attackerUnit.setAttackMoveTarget(preselectedBlockPos);
+                        if (((LivingEntity) unit).getFirstPassenger() instanceof RangedAttackerUnit rau &&
+                            rau.getRangedAttackGroundGoal() != null) {
+                            rau.getRangedAttackGroundGoal().setGroundTarget(null);
+                        }
                     } else {
                         unit.setMoveTarget(preselectedBlockPos);
                     }
                 }
                 case ATTACK -> {
-                    // if the unit can't actually attack just treat this as a follow action
+                    LivingEntity le = (LivingEntity) level.getEntity(unitId);
                     if (unit instanceof AttackerUnit attackerUnit) {
-                        attackerUnit.setUnitAttackTargetForced((LivingEntity) level.getEntity(unitId));
-                    } else {
-                        LivingEntity livingEntity = (LivingEntity) level.getEntity(unitId);
-                        if (livingEntity != null) {
-                            MiscUtil.addUnitCheckpoint(unit, unitId, true);
+                        if (unit instanceof WorkerUnit && ResourceSources.isHuntableAnimal(le) && Unit.atMaxResources(unit)) {
+                            if (level.isClientSide()) {
+                                HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.worker_inv_full"));
+                            } else {
+                                UnitServerEvents.getUnitActionSlowQueue().add(0, new UnitActionItem(
+                                        unit.getOwnerName(),
+                                        UnitAction.ATTACK,
+                                        unitId,
+                                        unitIds
+                                ));
+                                UnitServerEvents.getUnitActionSlowQueue().add(0, new UnitActionItem(
+                                        unit.getOwnerName(),
+                                        UnitAction.RETURN_RESOURCES_TO_CLOSEST,
+                                        -1,
+                                        unitIds
+                                ));
+                            }
+                        } else if (le != null) {
+                            attackerUnit.setUnitAttackTargetForced(le);
+                            if (unit instanceof WorkerUnit && ResourceSources.isHuntableAnimal(le)) {
+                                // insert a drop-off command without disrupting other queued commands
+                                boolean hasDropOffCommandQueued = false;
+                                for (UnitActionItem uai : UnitServerEvents.getUnitActionSlowQueue()) {
+                                    for (int id : uai.getUnitIds()) {
+                                        if (id == le.getId() && (
+                                                uai.getAction() == UnitAction.RETURN_RESOURCES_TO_CLOSEST ||
+                                                uai.getAction() == UnitAction.RETURN_RESOURCES)) {
+                                            hasDropOffCommandQueued = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (!hasDropOffCommandQueued) {
+                                    UnitServerEvents.getUnitActionSlowQueue().add(0, new UnitActionItem(
+                                            unit.getOwnerName(),
+                                            UnitAction.RETURN_RESOURCES_TO_CLOSEST,
+                                            -1,
+                                            new int[]{((Entity) unit).getId()}
+                                    ));
+                                }
+                            }
                         }
-                        unit.setFollowTarget(livingEntity);
+                    } else { // if the unit can't actually attack just treat this as a follow action
+                        unit.setFollowTarget(le);
                     }
                 }
                 case ATTACK_BUILDING -> {
@@ -303,7 +368,7 @@ public class UnitActionItem {
                 }
                 case ENABLE_AUTOCAST_BUILD_REPAIR, DISABLE_AUTOCAST_BUILD_REPAIR -> {
                     // if the unit can't actually build/repair just treat this as a move action
-                    if (unit instanceof WorkerUnit workerUnit) {
+                    if (unit instanceof WorkerUnit workerUnit && workerUnit.getBuildRepairGoal() != null) {
                         workerUnit.getBuildRepairGoal().autocastRepair =
                                 action == UnitAction.ENABLE_AUTOCAST_BUILD_REPAIR;
                     }
@@ -332,7 +397,7 @@ public class UnitActionItem {
                     if (unit instanceof WorkerUnit workerUnit) { // if we manually did this, ignore automated return
                         // to gather
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
-                        if (goal != null) {
+                        if (goal != null && goal.saveData != null) {
                             goal.saveData.delete();
                         }
                     }
@@ -345,9 +410,10 @@ public class UnitActionItem {
                 case RETURN_RESOURCES_TO_CLOSEST -> { // drop resources off early and return to work
                     if (unit instanceof WorkerUnit workerUnit) {
                         GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
-                        if (goal != null) {
-                            goal.saveAndReturnResources();
-                        }
+                        if (goal != null)
+                            goal.saveAndReturnResources(); // saves gather state, then returns
+                    } else if (unit.getReturnResourcesGoal() != null) {
+                        unit.getReturnResourcesGoal().returnToClosestBuilding();
                     }
                 }
                 case DELETE -> {
@@ -397,15 +463,28 @@ public class UnitActionItem {
             List<Pair<LivingEntity, BlockPos>> formationPairs = UnitFormations.getMoveFormation(
                 level, new ArrayList<>(list), preselectedBlockPos
             );
+            // Filter out redundant moves once, then either dispatch immediately (small groups)
+            // or queue for time-sliced dispatch on the server (large groups) so we don't run
+            // N concurrent A* searches in the same tick.
+            List<Pair<LivingEntity, BlockPos>> filtered = new ArrayList<>(formationPairs.size());
             for (Pair<LivingEntity, BlockPos> pair : formationPairs) {
-                LivingEntity le = pair.getFirst();
-                BlockPos targetPos = pair.getSecond();
-
-                if (isRedundantMove((Unit) le, targetPos))
-                    continue;
-
-                Unit unit = (Unit) le;
-                unit.setMoveTarget(targetPos);
+                if (!isRedundantMove((Unit) pair.getFirst(), pair.getSecond()))
+                    filtered.add(pair);
+            }
+            // Dispatch immediately on the client, when RTS pathfinding is on, or for small groups. The
+            // time-sliced queue is ONLY needed to spread out vanilla's synchronous main-thread A* for a
+            // large group; the RTS pathfinder already queues + backpressures requests off-thread, so it
+            // doesn't need the stagger - and staggering leaves units idle for a few ticks after their
+            // combat state was reset, in which the aggressive-when-idle scan re-acquires the enemy they
+            // were just ordered away from (the "team move-away snaps back to attacking" bug).
+            if (level.isClientSide() || UnitServerEvents.rtsPathfinding || filtered.size() <= 20) {
+                for (Pair<LivingEntity, BlockPos> pair : filtered) {
+                    if (pair.getFirst() instanceof Unit unit) {
+                        unit.getMoveGoal().setMoveTarget(pair.getSecond());
+                    }
+                }
+            } else {
+                UnitServerEvents.queueFormationMove(filtered);
             }
         }
 

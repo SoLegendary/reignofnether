@@ -65,12 +65,14 @@ public class Beacon extends ProductionBuilding {
         this.startingBlockTypes.add(Blocks.CHISELED_STONE_BRICKS);
 
         this.explodeChance = 0.2f;
+        this.maxHealth = 500d;
+        this.maxHealthBonusPerUpgradeLevel = 100d;
 
-        this.abilities.add(new BeaconWealth(), Keybindings.keyQ);
-        this.abilities.add(new BeaconHaste(), Keybindings.keyW);
-        this.abilities.add(new BeaconRegeneration(), Keybindings.keyE);
-        this.abilities.add(new BeaconResistance(), Keybindings.keyR);
-        this.abilities.add(new BeaconStrength(), Keybindings.keyT);
+        this.abilities.add(new BeaconWealth(), Keybindings.abilitySlot1);
+        this.abilities.add(new BeaconHaste(), Keybindings.abilitySlot2);
+        this.abilities.add(new BeaconRegeneration(), Keybindings.abilitySlot3);
+        this.abilities.add(new BeaconResistance(), Keybindings.abilitySlot4);
+        this.abilities.add(new BeaconStrength(), Keybindings.abilitySlot5);
 
         this.productions.add(ProductionItems.RESEARCH_BEACON_LEVEL_1, null);
         this.productions.add(ProductionItems.RESEARCH_BEACON_LEVEL_2, null);
@@ -110,15 +112,15 @@ public class Beacon extends ProductionBuilding {
                     );
                 },
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon.tooltip4"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip4"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip3"), Style.EMPTY)
                 ),
                 this
         );

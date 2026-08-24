@@ -13,6 +13,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -219,6 +220,52 @@ public class BlockRegistrar {
                             .instabreak()
                             .randomTicks()
                             .lightLevel((p_152605_) -> 10)));
+
+    public static final RegistryObject<Block> DROWNED_HEAD = registerBlock("drowned_head", () ->
+                    new SkullBlock(SkullTypes.DROWNED, BlockBehaviour.Properties.of()
+                            .instrument(NoteBlockInstrument.ZOMBIE).strength(1.0F).pushReaction(PushReaction.DESTROY)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> HUSK_HEAD = registerBlock("husk_head", () ->
+                    new SkullBlock(SkullTypes.HUSK, BlockBehaviour.Properties.of()
+                            .instrument(NoteBlockInstrument.ZOMBIE).strength(1.0F).pushReaction(PushReaction.DESTROY)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> STRAY_SKULL = registerBlock("stray_skull", () ->
+                    new SkullBlock(SkullTypes.STRAY, BlockBehaviour.Properties.of()
+                            .instrument(NoteBlockInstrument.SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> BOGGED_SKULL = registerBlock("bogged_skull", () ->
+                    new SkullBlock(SkullTypes.BOGGED, BlockBehaviour.Properties.of()
+                            .instrument(NoteBlockInstrument.SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> DROWNED_WALL_HEAD = registerBlock("drowned_wall_head", () ->
+                    new DrownedWallSkullBlock(BlockBehaviour.Properties.of()
+                            .instrument(NoteBlockInstrument.ZOMBIE).strength(1.0F).pushReaction(PushReaction.DESTROY)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> HUSK_WALL_HEAD = registerBlock("husk_wall_head", () ->
+                    new HuskWallSkullBlock(BlockBehaviour.Properties.of()
+                            .instrument(NoteBlockInstrument.ZOMBIE).strength(1.0F).pushReaction(PushReaction.DESTROY)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> STRAY_WALL_SKULL = registerBlock("stray_wall_skull", () ->
+                    new StrayWallSkullBlock(BlockBehaviour.Properties.of()
+                            .instrument(NoteBlockInstrument.SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> BOGGED_WALL_SKULL = registerBlock("bogged_wall_skull", () ->
+                    new BoggedWallSkullBlock(BlockBehaviour.Properties.of()
+                            .instrument(NoteBlockInstrument.SKELETON).strength(1.0F).pushReaction(PushReaction.DESTROY)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> SPIDER_FRIENDLY_BARRIER = registerBlock("spider_friendly_barrier",
+            () -> new SpiderFriendlyBarrierBlock(BlockBehaviour.Properties.of()
+                    .strength(-1.0F, 3600000.0F)
+                    .noOcclusion()
+            ), CreativeModeTabs.BUILDING_BLOCKS);
 
     private static boolean always(BlockState p_50775_, BlockGetter p_50776_, BlockPos p_50777_) {
         return true;

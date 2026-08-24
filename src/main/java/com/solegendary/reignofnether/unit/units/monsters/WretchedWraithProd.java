@@ -45,14 +45,14 @@ public class WretchedWraithProd extends HeroProductionItem {
                 iconRl,
                 List.of(
                         FormattedCharSequence.forward(
-                                I18n.get("units.monsters.reignofnether.wretched_wraith") +
+                                I18n.get("entity.reignofnether.wretched_wraith_unit") +
                                         " (" + I18n.get("hud.units.reignofnether.hero") + ")",
                                 Style.EMPTY.withBold(true)),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wretched_wraith.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wretched_wraith.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wretched_wraith.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip3"), Style.EMPTY)
                 )
         );
     }
@@ -60,16 +60,16 @@ public class WretchedWraithProd extends HeroProductionItem {
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         ArrayList<FormattedCharSequence> tooltips = new ArrayList<>(List.of(
                 FormattedCharSequence.forward(
-                        I18n.get("units.monsters.reignofnether.wretched_wraith") +
+                        I18n.get("entity.reignofnether.wretched_wraith_unit") +
                                 " (" + I18n.get("hud.units.reignofnether.hero") + ")",
                         Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wretched_wraith.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wretched_wraith.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("units.monsters.reignofnether.wretched_wraith.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip3"), Style.EMPTY)
         ));
         tooltips.addAll(getAdditionalHeroTooltips());
 

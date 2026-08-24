@@ -1,9 +1,8 @@
 package com.solegendary.reignofnether.ability;
 
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -12,18 +11,9 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import oshi.util.tuples.Pair;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Abilities {
-    public static final List<Keybinding> ABILITY_KEYBINDS = List.of(
-            Keybindings.keyQ,
-            Keybindings.keyW,
-            Keybindings.keyE,
-            Keybindings.keyR,
-            Keybindings.keyT,
-            Keybindings.keyY
-    );
     List<Pair<Ability, Keybinding>> abilities = new ArrayList<>();
 
     public Abilities() { }
@@ -39,24 +29,38 @@ public class Abilities {
     }
 
     public List<AbilityButton> getButtons(BuildingPlacement placement) {
+        List<Keybinding> keybindings = List.of(
+                Keybindings.abilitySlot1,
+                Keybindings.abilitySlot2,
+                Keybindings.abilitySlot3,
+                Keybindings.abilitySlot4,
+                Keybindings.abilitySlot5,
+                Keybindings.abilitySlot6
+        );
         List<AbilityButton> buttons = new ArrayList<>();
-        //TODO Remove need for Minecraft
         if (FMLEnvironment.dist == Dist.CLIENT) {
             for (int i = 0; i < abilities.size(); i++) {
                 Pair<Ability, Keybinding> ability = abilities.get(i);
-                buttons.add(ability.getA().getButton(ability.getB() != null ? ability.getB() : ABILITY_KEYBINDS.get(i) , placement));
+                buttons.add(ability.getA().getButton(ability.getB() != null ? ability.getB() : keybindings.get(i) , placement));
             }
         }
         return buttons;
     }
 
     public List<Button> getButtons(Unit unit) {
+        List<Keybinding> keybindings = List.of(
+                Keybindings.abilitySlot1,
+                Keybindings.abilitySlot2,
+                Keybindings.abilitySlot3,
+                Keybindings.abilitySlot4,
+                Keybindings.abilitySlot5,
+                Keybindings.abilitySlot6
+        );
         List<Button> buttons = new ArrayList<>();
-        //TODO Remove need for I18n
         if (FMLEnvironment.dist == Dist.CLIENT) {
             for (int i = 0; i < abilities.size(); i++) {
                 Pair<Ability, Keybinding> ability = abilities.get(i);
-                buttons.add(ability.getA().getButton(ability.getB() != null ? ability.getB() : ABILITY_KEYBINDS.get(i) , unit));
+                buttons.add(ability.getA().getButton(ability.getB() != null ? ability.getB() : keybindings.get(i) , unit));
             }
         }
         return buttons;

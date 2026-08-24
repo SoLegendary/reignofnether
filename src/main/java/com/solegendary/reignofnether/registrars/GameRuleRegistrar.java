@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.unit.pathfinding.PathfinderConfig;
 import net.minecraft.world.level.GameRules;
 
 public class GameRuleRegistrar {
@@ -10,7 +11,6 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> MAX_POPULATION;
     public static GameRules.Key<GameRules.BooleanValue> DO_UNIT_GRIEFING;
     public static GameRules.Key<GameRules.BooleanValue> DO_PLAYER_GRIEFING;
-    public static GameRules.Key<GameRules.BooleanValue> IMPROVED_PATHFINDING;
     public static GameRules.Key<GameRules.IntegerValue> GROUND_Y_LEVEL;
     public static GameRules.Key<GameRules.IntegerValue> FLYING_MAX_Y_LEVEL;
     public static GameRules.Key<GameRules.BooleanValue> ALLOW_BEACONS;
@@ -18,6 +18,16 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.BooleanValue> PVP_MODES_ONLY;
     public static GameRules.Key<GameRules.BooleanValue> SLANTED_BUILDING;
     public static GameRules.Key<GameRules.IntegerValue> ALLOWED_HEROES;
+    public static GameRules.Key<GameRules.BooleanValue> LOCK_ALLIANCES;
+    public static GameRules.Key<GameRules.BooleanValue> SCENARIO_MODE;
+    public static GameRules.Key<GameRules.BooleanValue> COOP_MODE;
+    public static GameRules.Key<GameRules.BooleanValue> DO_NETHER_CONVERSION;
+    public static GameRules.Key<GameRules.BooleanValue> BUILDINGS_OUTSIDE_BORDER;
+    public static GameRules.Key<GameRules.BooleanValue> FORCE_FOG;
+    public static GameRules.Key<GameRules.BooleanValue> RTS_PATHFINDING;
+    public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_THREADS;
+    public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_CHUNK_BUILDS;
+    public static GameRules.Key<GameRules.IntegerValue> ANIMAL_SPAWN_Y_DIFF;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -38,10 +48,6 @@ public class GameRuleRegistrar {
         );
         // allow players to break blocks other than buildings and resource blocks
         DO_PLAYER_GRIEFING = GameRules.register("doPlayerGriefing", GameRules.Category.PLAYER,
-                GameRules.BooleanValue.create(true)
-        );
-        // increase pathfinding accuracy in exchange for increased CPU usage
-        IMPROVED_PATHFINDING = GameRules.register("improvedPathfinding", GameRules.Category.MOBS,
                 GameRules.BooleanValue.create(true)
         );
         // sets the minimum Y level for the camera so it doesn't fall into the void
@@ -70,7 +76,52 @@ public class GameRuleRegistrar {
         );
         // enable heroes in all gamemodes
         ALLOWED_HEROES = GameRules.register("allowedHeroes", GameRules.Category.PLAYER,
-                GameRules.IntegerValue.create(1)
+                GameRules.IntegerValue.create(2)
+        );
+        // only allow alliances to be made/broken with non-RTS players (ie. before a game starts)
+        LOCK_ALLIANCES = GameRules.register("lockAlliances", GameRules.Category.PLAYER,
+                GameRules.BooleanValue.create(false)
+        );
+        // map is set to be played as a scenario by the player that opens it
+        SCENARIO_MODE = GameRules.register("scenarioMode", GameRules.Category.MISC,
+                GameRules.BooleanValue.create(false)
+        );
+        // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands
+        COOP_MODE = GameRules.register("coopMode", GameRules.Category.PLAYER,
+                GameRules.BooleanValue.create(false)
+        );
+        // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands
+        DO_NETHER_CONVERSION = GameRules.register("doNetherConversion", GameRules.Category.UPDATES,
+                GameRules.BooleanValue.create(true)
+        );
+        // allow buildings outside the worldborder
+        BUILDINGS_OUTSIDE_BORDER = GameRules.register("buildingsOutsideBorder", GameRules.Category.MISC,
+                GameRules.BooleanValue.create(true)
+        );
+        // when true, fog of war auto-enables on world tick and any disable attempt is refused
+        FORCE_FOG = GameRules.register("reignofnetherForceFog", GameRules.Category.MISC,
+                GameRules.BooleanValue.create(false)
+        );
+        // use the RTS-optimised pathfinder (async grid A*, walkability cache) instead of vanilla.
+        // Auto-enabled at world load for RTS-optimised maps (small world border) - see
+        // WorldBorderServerEvents - which also prewarms the navmesh. Off otherwise.
+        // May cause additional TPS lag on worlds without world borders as they will not have a pregenerated navmesh
+        RTS_PATHFINDING = GameRules.register("rtsPathfinding", GameRules.Category.MOBS,
+                GameRules.BooleanValue.create(false)
+        );
+        // number of background threads the RTS grid A* pathfinder uses. defaults to ~half the cores; the
+        // worker pool clamps to [1, 32] and rebuilds itself live when this changes.
+        PATHFINDING_THREADS = GameRules.register("pathfindingThreads", GameRules.Category.MOBS,
+                GameRules.IntegerValue.create(PathfinderConfig.WORKER_THREADS)
+        );
+        // cold chunks the pathfinder warms per tick (main-thread work). higher = faster first paths but more
+        // TPS cost. clamped to [1, 64] by the worker pool.
+        PATHFINDING_CHUNK_BUILDS = GameRules.register("pathfindingChunkBuildsPerTick", GameRules.Category.MOBS,
+                GameRules.IntegerValue.create(PathfinderConfig.CHUNK_BUILDS_PER_TICK_DEFAULT)
+        );
+        // Difference in level that animals can spawn around capitols at
+        ANIMAL_SPAWN_Y_DIFF = GameRules.register("animalSpawnYDiff", GameRules.Category.MOBS,
+                GameRules.IntegerValue.create(5)
         );
     }
 }

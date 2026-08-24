@@ -2,11 +2,12 @@ package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
+import com.solegendary.reignofnether.unit.units.villagers.TemporaryMilitiaUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -38,11 +39,11 @@ public class BackToWorkUnit extends Ability {
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
         if (!(unit instanceof MilitiaUnit militiaUnit)) return null;
         return new AbilityButton(
-                "Back to Work (Building)",
+                "Back to Work (Unit)",
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/iron_pickaxe.png"),
                 hotkey,
                 () -> false,
-                () -> militiaUnit.isCaptain,
+                () -> militiaUnit.isCaptain || !(militiaUnit instanceof TemporaryMilitiaUnit),
                 () -> true,
                 () -> sendUnitCommand(UnitAction.BACK_TO_WORK_UNIT),
                 null,

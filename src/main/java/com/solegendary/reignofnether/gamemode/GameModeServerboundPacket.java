@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.gamemode;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -32,6 +33,7 @@ public class GameModeServerboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
+            ReignOfNether.LOGGER.info("[GameMode] Setting game mode to: {}", this.gameMode);
             GameModeClientboundPacket.setAndLockAllClientGameModes(this.gameMode);
             success.set(true);
         });

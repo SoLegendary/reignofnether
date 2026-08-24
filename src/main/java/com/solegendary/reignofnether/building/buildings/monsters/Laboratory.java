@@ -2,8 +2,10 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.ability.abilities.CallLightning;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.buildings.placements.RangeIndicatorProductionPlacement;
+import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -12,6 +14,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -19,15 +22,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
-public class Laboratory extends ProductionBuilding {
+public class Laboratory extends ProductionBuilding implements RangeIndicatorAddon {
 
     public final static String buildingName = "Laboratory";
     public final static String structureName = "laboratory";
@@ -41,25 +41,30 @@ public class Laboratory extends ProductionBuilding {
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/brewing_stand.png");
 
         this.buildTimeModifier = 0.85f;
+        this.maxHealth = 300d;
 
         this.canSetRallyPoint = false;
 
         this.startingBlockTypes.add(Blocks.SPRUCE_PLANKS);
         this.startingBlockTypes.add(Blocks.BLACKSTONE);
 
-        this.abilities.add(new CallLightning(), Keybindings.keyL);
+        this.abilities.add(new CallLightning(), Keybindings.hotkey2);
 
-        this.productions.add(ProductionItems.RESEARCH_HUSKS, Keybindings.keyQ);
-        this.productions.add(ProductionItems.RESEARCH_DROWNED, Keybindings.keyW);
-        this.productions.add(ProductionItems.RESEARCH_STRAYS, Keybindings.keyE);
-        this.productions.add(ProductionItems.RESEARCH_BOGGED, Keybindings.keyR);
-        this.productions.add(ProductionItems.RESEARCH_SPIDER_JOCKEYS, Keybindings.keyT);
-        this.productions.add(ProductionItems.RESEARCH_POISON_SPIDERS, Keybindings.keyY);
-        this.productions.add(ProductionItems.RESEARCH_SPIDER_WEBS, Keybindings.keyU);
-        this.productions.add(ProductionItems.RESEARCH_SLIME_CONVERSION, Keybindings.keyI);
-        this.productions.add(ProductionItems.RESEARCH_LAB_LIGHTNING_ROD, Keybindings.keyO);
-        this.productions.add(ProductionItems.RESEARCH_SILVERFISH, Keybindings.keyP);
-        this.productions.add(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, Keybindings.keyJ);
+        this.productions.add(ProductionItems.RESEARCH_HUSKS, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.RESEARCH_DROWNED, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.RESEARCH_STRAYS, Keybindings.abilitySlot3);
+        this.productions.add(ProductionItems.RESEARCH_BOGGED, Keybindings.abilitySlot4);
+        this.productions.add(ProductionItems.RESEARCH_SPIDER_JOCKEYS, Keybindings.abilitySlot5);
+        this.productions.add(ProductionItems.RESEARCH_POISON_SPIDERS, Keybindings.abilitySlot6);
+        this.productions.add(ProductionItems.RESEARCH_SPIDER_WEBS, Keybindings.abilitySlot7);
+        this.productions.add(ProductionItems.RESEARCH_SLIME_CONVERSION, Keybindings.abilitySlot8);
+        this.productions.add(ProductionItems.RESEARCH_LAB_LIGHTNING_ROD, Keybindings.abilitySlot9);
+        this.productions.add(ProductionItems.RESEARCH_POSSESSION, Keybindings.abilitySlot10);
+        this.productions.add(ProductionItems.RESEARCH_SILVERFISH, Keybindings.hotkey6);
+        this.productions.add(ProductionItems.RESEARCH_SCULK_AMPLIFIERS, null);
+        this.productions.add(ProductionItems.RESEARCH_MASS_BURIAL, Keybindings.hotkey9);
+
+        setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
 
     public Faction getFaction() {return Faction.MONSTERS;}
@@ -85,11 +90,6 @@ public class Laboratory extends ProductionBuilding {
         return 0;
     }
 
-    @Override
-    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new RangeIndicatorProductionPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false, CallLightning.RANGE, true, true);
-    }
-
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
         String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
@@ -103,13 +103,13 @@ public class Laboratory extends ProductionBuilding {
                     BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD)) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.laboratory"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.laboratory"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.laboratory.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.laboratory.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.laboratory.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.laboratory.tooltip2"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.monsters.reignofnether.laboratory.tooltip3"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.laboratory.tooltip3"), Style.EMPTY)
             ),
                 this
         );
@@ -118,5 +118,31 @@ public class Laboratory extends ProductionBuilding {
     @Override
     public String getUpgradedStructureName(int upgradeLevel) {
         return upgradeLevel > 0 ? upgradedStructureName : structureName;
+    }
+
+    @Override
+    public void tick(Level tickLevel, BuildingPlacement buildingPlacement) {
+        super.tick(tickLevel, buildingPlacement);
+        if (tickLevel.isClientSide && buildingPlacement.getTickAgeAfterBuilt() > 0 && buildingPlacement.getTickAgeAfterBuilt() % 100 == 0)
+            updateHighlightBps(buildingPlacement);
+    }
+
+    @Override
+    public int getRange(BuildingPlacement placement) {
+        return (getUpgradeLevel(placement) > 0 && placement.isBuilt) ? CallLightning.RANGE : 0;
+    }
+
+    @Override
+    public void updateHighlightBps(BuildingPlacement placement) {
+        if (!placement.level.isClientSide())
+            return;
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).clear();
+        placement.getDataStorage().getData(RangeIndicatorAddon.HIGHLIGHT_BPS_CACHE).addAll(MiscUtil.getRangeIndicatorCircleBlocks(placement.centrePos,
+                getRange(placement) - BlockClientEvents.VISIBLE_BORDER_ADJ, placement.level, hasActiveAddon(NightSourceAddon.class)));
+    }
+
+    @Override
+    public boolean showOnlyWhenSelected(BuildingPlacement placement) {
+        return true;
     }
 }

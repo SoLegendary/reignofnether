@@ -1,11 +1,11 @@
 package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ability.EnchantAbility;
-import com.solegendary.reignofnether.ability.EnchantEquipAbilityServerboundPacket;
+import com.solegendary.reignofnether.ability.BuildingAbilityServerboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.LibraryPlacement;
+import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -29,7 +29,7 @@ public class EnchantQuickCharge extends EnchantAbility {
 
     public EnchantQuickCharge() {
         super(ENCHANT_ACTION, ResourceCosts.ENCHANT_QUICK_CHARGE, 2, EquipmentSlot.MAINHAND);
-        this.defaultHotkey = Keybindings.keyW;
+        this.defaultHotkey = Keybindings.abilitySlot2;
     }
 
     @Override
@@ -39,22 +39,21 @@ public class EnchantQuickCharge extends EnchantAbility {
 
     @Override
     public AbilityButton getButton(Keybinding hotkey, BuildingPlacement placement) {
-        if (!(placement instanceof LibraryPlacement)) return null;
-        LibraryPlacement library = (LibraryPlacement) placement;
+        if (!(placement.getBuilding() instanceof Library)) return null;
         return new AbilityButton(
                 "Quick Charge Enchantment",
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/crossbow_arrow.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || library.autoCastEnchant == this,
+                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this,
                 () -> false,
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(ENCHANT_ACTION),
                 () -> {
-                    EnchantEquipAbilityServerboundPacket.setAutocastEnchantOrEquip(ENCHANT_ACTION, library.originPos);
-                    if (library.autoCastEnchant == this)
-                        library.autoCastEnchant = null;
+                    BuildingAbilityServerboundPacket.doAbility(ENCHANT_ACTION, placement.originPos, this.oneClickOneUse);
+                    if (placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this)
+                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
                     else
-                        library.autoCastEnchant = this;
+                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, this);
                 },
                 List.of(
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.quickshot"), Style.EMPTY.withBold(true)),

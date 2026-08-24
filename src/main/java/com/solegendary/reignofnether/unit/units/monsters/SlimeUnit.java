@@ -5,11 +5,15 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ConsumeSlime;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
-import com.solegendary.reignofnether.unit.controls.SlimeUnitMoveControl;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
+import com.solegendary.reignofnether.unit.controls.SlimeJumpMoveControl;
+import com.solegendary.reignofnether.unit.controls.SlimeRollMoveControl;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -17,18 +21,20 @@ import com.solegendary.reignofnether.unit.units.piglins.MagmaCubeUnit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -56,7 +62,7 @@ import java.util.List;
 public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new ConsumeSlime(), Keybindings.keyQ);
+        ABILITIES.add(new ConsumeSlime(), Keybindings.abilitySlot1);
     }
 
     //region
@@ -102,6 +108,10 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public ReturnResourcesGoal getReturnResourcesGoal() {return returnResourcesGoal;}
     public int getMaxResources() {return maxResources;}
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     protected MoveToTargetBlockGoal moveGoal;
     protected SelectedTargetGoal<? extends LivingEntity> targetGoal;
     protected ReturnResourcesGoal returnResourcesGoal;
@@ -123,28 +133,42 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(SlimeUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(SlimeUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(SlimeUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() { return ((getSize() + 1) * 0.5f); }
-    public float getMovementSpeed() {return movementSpeed;}
 
     public ResourceCost getCost() {
         int popCost = Math.min(getSize(), MAX_POP_COST);
         if (getSize() == 1)
             popCost = 0;
 
-        ResourceCost cost = ResourceCosts.SLIME;
+        ResourceCost cost = ResourceCost.Unit(
+            ResourceCosts.SLIME.food,
+            ResourceCosts.SLIME.wood,
+            ResourceCosts.SLIME.ore,
+            ResourceCosts.SLIME.ticks / 20,
+            ResourceCosts.SLIME.population
+        );
         cost.population = popCost;
         return cost;
     }
@@ -162,11 +186,11 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     final static public float attackDamagePerSize = 2.0f;
     final static public float attacksPerSecond = 0.5f;
-    final static public float armorPerSize = 1.2f;
-    final static public float movementSpeed = 0.6f; // needs to be 2x other units
+    final static public float movementSpeed = 0.25f;
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
+    final static public double magicDamageResist = 0.5d;
 
     protected boolean forceTiny = false; // prevent split on death temporarily
     public boolean shouldSpawnSlimes = true; // prevent split on death without changing size
@@ -183,8 +207,17 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     public SlimeUnit(EntityType<? extends Slime> entityType, Level level) {
         super(entityType, level);
-        this.moveControl = new SlimeUnitMoveControl(this);
+        this.moveControl = new SlimeRollMoveControl(this);
         updateAbilityButtons();
+    }
+
+    public BlockPos getMoveTarget() {
+        BlockPos targetPos = getMoveGoal().getMoveTarget();
+        if (targetPos == null && getTargetGoal().getTarget() != null)
+            targetPos = getTargetGoal().getTarget().getOnPos().above();
+        if (targetPos == null && getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg)
+            targetPos = mabg.getMoveTarget();
+        return targetPos;
     }
 
     // big slimes sometimes bounce off of each other midair
@@ -220,7 +253,21 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     }
 
     @Override
-    public void remove(RemovalReason pReason) {
+    public void remove(@NotNull RemovalReason pReason) {
+        if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
         // prevent vanilla split logic
         forceTiny = true;
         super.remove(pReason);
@@ -230,8 +277,8 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);
-        if (pSource.is(DamageTypeTags.WITCH_RESISTANT_TO) || pSource.is(DamageTypes.ON_FIRE))
-            pDamage *= 0.5F;
+        if (MiscUtil.isMagicDamage(pSource))
+            pDamage *= (1 - getUnitMagicArmorPercentage());
         return pDamage;
     }
 
@@ -261,7 +308,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     }
 
     public float getUnitAttackDamage() {
-        return attackDamagePerSize * getSize();
+        return AttackerUnit.super.getUnitAttackDamage() + (attackDamagePerSize * getSize());
     }
     public float getUnitMaxHealth() { return getMaxHealthForSize(getSize()); }
     public float getKnockbackResistance() {
@@ -283,10 +330,10 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         this.reapplyPosition();
         this.refreshDimensions();
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(getUnitMaxHealth());
-        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(getMovementSpeed());
-        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(getUnitAttackDamage());
+        this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(getBaseMovementSpeed());
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0);
+        this.getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get()).setBaseValue(0);
         this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(getKnockbackResistance());
-        this.getAttribute(Attributes.ARMOR).setBaseValue(pSize == 1 ? 0 : armorPerSize * pSize);
 
         if (pResetHealth)
             this.setHealth(this.getMaxHealth());
@@ -309,15 +356,15 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     protected int getMaxHealthForSize(int size) {
         if (size >= 6)
-            return 200;
+            return 225;
         else if (size == 5)
-            return 160;
+            return 180;
         else if (size == 4)
-            return 120;
+            return 135;
         else if (size == 3)
-            return 80;
+            return 90;
         else if (size == 2)
-            return 45;
+            return 50;
         else
             return 15;
     }
@@ -343,21 +390,130 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     @Override
     public void jumpFromGround() {
         Vec3 vec3 = this.getDeltaMovement();
-        this.setDeltaMovement(vec3.x, (double)(this.getJumpPower() + (float)this.getSize() * 0.1F), vec3.z);
+        this.setDeltaMovement(vec3.x, this.getJumpPower(), vec3.z);
         this.hasImpulse = true;
         ForgeHooks.onLivingJump(this);
+    }
+
+    @Override
+    protected float getJumpPower() {
+        float power = 0.42F * this.getBlockJumpFactor() + this.getJumpBoostPower();
+        if (isInRangeOfAttackTarget()) {
+            power += (float)this.getSize() * 0.1F;
+        }
+        return power;
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MOVEMENT_SPEED, SlimeUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, SlimeUnit.attackDamagePerSize)
-                .add(Attributes.ARMOR, SlimeUnit.armorPerSize)
                 .add(Attributes.MAX_HEALTH, 10)
-                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange());
+                .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamagePerSize)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), 2)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
+    }
+
+    SlimeJumpMoveControl jumpMoveControl = new SlimeJumpMoveControl(this);
+    SlimeRollMoveControl rollMoveControl = new SlimeRollMoveControl(this);
+
+    // Rendering-only interpolation copies, same pattern as Slime's squish/oSquish.
+    public float rollAngle = 0;
+    public float oRollAngle = 0;
+
+    // Internal tracking of last tick's position, to measure horizontal movement.
+    protected double prevRollTrackX;
+    protected double prevRollTrackZ;
+
+    /** Degrees of roll per block of horizontal distance moved, while actively moving.
+     *  This needs to be changed if either speed OR SlimeRollMoveControl lengths are changed */
+    protected static final float ROLL_DEGREES_PER_BLOCK_ROLLING = 33f;
+    protected static final float ROLL_DEGREES_PER_BLOCK_JUMPING = 44f;
+
+    /** Fixed settle speed (degrees/tick) used to ease toward the nearest corner while at rest. */
+    protected static final float REST_SETTLE_DEGREES_PER_TICK = 12f;
+
+    /** Horizontal distance below which the slime is considered "at rest" for rotation purposes. */
+    protected static final double MOVEMENT_THRESHOLD = 0.005;
+
+    protected float getRollDegreesPerBlock() {
+        if (isUsingJumpingMovement())
+            return ROLL_DEGREES_PER_BLOCK_JUMPING;
+        return ROLL_DEGREES_PER_BLOCK_ROLLING;
+    }
+
+    protected void handleRoll() {
+        double dx = this.getX() - this.prevRollTrackX;
+        double dz = this.getZ() - this.prevRollTrackZ;
+        double horizontalMoved = Math.sqrt(dx * dx + dz * dz);
+        this.prevRollTrackX = this.getX();
+        this.prevRollTrackZ = this.getZ();
+
+        boolean isMoving = horizontalMoved > MOVEMENT_THRESHOLD;
+
+        float target;
+        float maxStep;
+        if (isMoving) {
+            // Always the next multiple of 90 strictly ahead - never looks back.
+            target = (float) (Math.floor(this.rollAngle / 90.0) + 1.0) * 90.0F;
+            maxStep = (float) (horizontalMoved * getRollDegreesPerBlock());
+        } else {
+            // The nearest multiple of 90 - settles forward or backward, whichever is closer.
+            target = (float) Math.round(this.rollAngle / 90.0) * 90.0F;
+            maxStep = REST_SETTLE_DEGREES_PER_TICK;
+        }
+
+        float diff = target - this.rollAngle;
+        float step = Math.signum(diff) * Math.min(Math.abs(diff), maxStep);
+
+        float prevRollAngle = this.rollAngle;
+
+        this.oRollAngle = this.rollAngle;
+        this.rollAngle += step;
+
+        if (!isUsingJumpingMovement() && rollAngle % 90 == 0 && !(prevRollAngle % 90 == 0)) {
+            this.onFinishedRoll();
+        }
+        normaliseRollAngles();
+    }
+
+    protected void normaliseRollAngles() {
+        if (oRollAngle >= 3600)
+            oRollAngle -= 3600;
+        if (rollAngle >= 3600)
+            rollAngle -= 3600;
+        if (oRollAngle <= 3600)
+            oRollAngle += 3600;
+        if (rollAngle <= 3600)
+            rollAngle += 3600;
+    }
+
+    protected void onFinishedRoll() {
+        int i = this.getSize();
+        if (!this.spawnCustomParticles()) {
+            for(int j = 0; j < i * 8; ++j) {
+                float f = this.random.nextFloat() * 6.2831855F;
+                float f1 = this.random.nextFloat() * 0.5F + 0.5F;
+                float f2 = Mth.sin(f) * (float)i * 0.5F * f1;
+                float f3 = Mth.cos(f) * (float)i * 0.5F * f1;
+                this.level().addParticle(this.getParticleType(), this.getX() + (double)f2, this.getY(), this.getZ() + (double)f3, 0.0, 0.0, 0.0);
+            }
+        }
+        this.playSound(this.getSquishSound(), this.getSoundVolume(), ((this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 0.5F));
+        this.targetSquish = -0.5F;
+    }
+
+    public boolean isUsingJumpingMovement() {
+        return getMoveControl() instanceof SlimeJumpMoveControl;
     }
 
     public void tick() {
+        this.setMaxUpStep(1.15f);
         this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
@@ -380,7 +536,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
             SlimeUnit closestTarget = null;
 
             for (SlimeUnit slime : nearbyEntities) {
-                if (slime.getOwnerName().equals(getOwnerName()) && slime != this && slime.getSize() == STARTING_SIZE) {
+                if (slime.getOwnerName().equals(getOwnerName()) && slime != this && slime.getSize() == STARTING_SIZE && !slime.autocastingConsume()) {
                     double dist = position().distanceTo(slime.position());
                     if (dist < closestDist) {
                         closestDist = dist;
@@ -393,6 +549,37 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
                 setUnitAttackTarget(closestTarget);
             }
         }
+        if (isInWater() || isInLava())
+            setDeltaMovement(new Vec3(0, 0.25, 0));
+
+        if (onGround()) {
+            boolean shouldJump = this.getPersistentData().getBoolean("forceJumping") || isInRangeOfAttackTarget();
+            if (shouldJump) {
+                if (!(getMoveControl() instanceof SlimeJumpMoveControl)) {
+                    this.moveControl = jumpMoveControl;
+                    this.getAttribute(Attributes.MOVEMENT_SPEED)
+                            .setBaseValue(movementSpeed * SlimeJumpMoveControl.MOVESPEED_MULTIPLIER);
+                }
+            } else if (!(getMoveControl() instanceof SlimeRollMoveControl)) {
+                this.moveControl = rollMoveControl;
+                this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
+            }
+        }
+
+        if (level().isClientSide()) {
+            handleRoll();
+        }
+    }
+
+    double JUMP_PREFERRED_RANGE_SQR = 6 * 6; // within this range of an attack target, we prefer to use jumping move control instead
+
+    private boolean isInRangeOfAttackTarget() {
+        boolean hasBuildingTarget = getAttackBuildingGoal() instanceof MeleeAttackBuildingGoal mabg && mabg.getBuildingTarget() != null;
+        boolean hasEntityTarget = getTargetGoal().getTarget() != null;
+        if ((hasBuildingTarget || hasEntityTarget) && getMoveTarget() != null) {
+            return getMoveTarget().getCenter().distanceToSqr(position()) < JUMP_PREFERRED_RANGE_SQR;
+        }
+        return false;
     }
 
     @Override
@@ -481,7 +668,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         this.goalSelector.addGoal(2, attackBuildingGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.targetSelector.addGoal(3, moveGoal);
-        this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
+        //this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
 
     @Override
@@ -499,16 +686,16 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         if (result && pEntity == consumeTarget) {
             this.setSize(Math.min(MAX_SIZE, getSize() + consumeTarget.getSize() / 2), false);
             if (consumeTarget.getSize() != 1)
-                this.heal((consumeTarget.getUnitMaxHealth() / 2) + 15);
+                this.heal((consumeTarget.getUnitMaxHealth() / 2) + 20);
             else
-                this.heal((consumeTarget.getUnitMaxHealth() / 2));
+                this.heal(consumeTarget.getUnitMaxHealth());
             pEntity.kill();
             consumeTarget = null;
             return true;
         }
         if (result && getSize() >= 2 && pEntity instanceof LivingEntity && !(this instanceof MagmaCubeUnit) && !this.level().isClientSide())
             if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_SLIME_CONVERSION))
-                ((LivingEntity)pEntity).addEffect(new MobEffectInstance(MobEffects.CONFUSION, CONVERT_DEBUFF_DURATION_SECONDS * 20, 0), this);
+                ((LivingEntity)pEntity).addEffect(new MobEffectInstance(MobEffectRegistrar.SLIME_INFECTED.get(), CONVERT_DEBUFF_DURATION_SECONDS * 20, 0), this);
         return result;
     }
 
@@ -544,5 +731,17 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     @Override
     public float getBonusMeleeRangeForAttackers() {
         return 0.3f * (Math.max(2, getSize()) - 2);
+    }
+
+    public float getModelHeight() {
+        return super.getDimensions(Pose.STANDING).height;
+    }
+
+    // increase tiny slime hitbox
+    public EntityDimensions getDimensions(Pose pPose) {
+        if (isTiny()) {
+            return super.getDimensions(pPose).scale(1.5f);
+        }
+        return super.getDimensions(pPose);
     }
 }

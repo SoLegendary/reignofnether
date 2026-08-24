@@ -2,9 +2,9 @@ package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
-import com.solegendary.reignofnether.hud.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -51,7 +51,7 @@ public class HelperButtons {
         chatButton = new Button(
                 "Chat",
                 ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/book.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/speech_bubble.png"),
                 (Keybinding) null,
                 () -> false,
                 () -> false,
@@ -64,7 +64,7 @@ public class HelperButtons {
                 "Idle workers (CTRL-click to select all)",
                 ICON_SIZE,
                 getIdleWorkerIcon(),
-                Keybindings.keyJ,
+                Keybindings.hotkey6,
                 () -> false,
                 idleWorkerIds::isEmpty,
                 () -> true,
@@ -128,13 +128,13 @@ public class HelperButtons {
                 "Select all military units",
                 ICON_SIZE,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/sword_and_bow.png"),
-                Keybindings.keyK,
+                Keybindings.hotkey7,
                 () -> false,
                 () -> {
                     var flag = false;
                     for (LivingEntity u : UnitClientEvents.getAllUnits()) {
                         if (!(u instanceof WorkerUnit) &&
-                            GarrisonableBuilding.getGarrison((Unit) u) == null &&
+                            GarrisonableBuildingAddon.getGarrison((Unit) u) == null &&
                             getPlayerToEntityRelationship(u) == Relationship.OWNED) {
                             flag = true;
                             break;
@@ -150,8 +150,10 @@ public class HelperButtons {
                         militaryUnits.addAll(UnitClientEvents.getMilitaryUnitsOnScreen());
                     } else {
                         for (LivingEntity u : UnitClientEvents.getAllUnits()) {
-                            if (!(u instanceof WorkerUnit) &&
-                                GarrisonableBuilding.getGarrison((Unit) u) == null &&
+                            if (u instanceof Unit unit &&
+                                !(u instanceof WorkerUnit) &&
+                                !(unit.isScout()) &&
+                                GarrisonableBuildingAddon.getGarrison(unit) == null &&
                                 getPlayerToEntityRelationship(u) == Relationship.OWNED) {
                                 militaryUnits.add(u);
                             }

@@ -107,6 +107,33 @@ public class PassiveIcons {
                     fcs(I18n.get("hud.enchant.reignofnether.zeal.tooltip"))
             )
     );
+    public static final EnchantmentIcon GUST = new EnchantmentIcon(
+            EnchantmentRegistrar.GUST.get(),
+            EquipmentSlot.MAINHAND,
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/gust.png"),
+            List.of(
+                    fcs(I18n.get("hud.enchant.reignofnether.gust"), true),
+                    fcs(I18n.get("hud.enchant.reignofnether.gust.tooltip"))
+            )
+    );
+    public static final EnchantmentIcon PUNCH = new EnchantmentIcon(
+            Enchantments.PUNCH_ARROWS,
+            EquipmentSlot.MAINHAND,
+            getEnchantedItemStack(Items.BOW),
+            List.of(
+                    fcs(I18n.get("hud.enchant.reignofnether.punch"), true),
+                    fcs(I18n.get("hud.enchant.reignofnether.punch.tooltip"))
+            )
+    );
+    public static final EnchantmentIcon LONGSHOT = new EnchantmentIcon(
+            EnchantmentRegistrar.LONGSHOT.get(),
+            EquipmentSlot.MAINHAND,
+            getEnchantedItemStack(Items.SPYGLASS),
+            List.of(
+                    fcs(I18n.get("hud.enchant.reignofnether.longshot"), true),
+                    fcs(I18n.get("hud.enchant.reignofnether.longshot.tooltip"))
+            )
+    );
     public static final EnchantmentIcon PIERCING = new EnchantmentIcon(
             Enchantments.PIERCING,
             EquipmentSlot.MAINHAND,
@@ -163,6 +190,16 @@ public class PassiveIcons {
             )
     );
 
+    public static final EnchantmentIcon LOOTING = new EnchantmentIcon(
+            Enchantments.MOB_LOOTING,
+            EquipmentSlot.MAINHAND,
+            getEnchantedItemStack(Items.EMERALD),
+            List.of(
+                    fcs(I18n.get("hud.enchant.reignofnether.looting"), true),
+                    fcs(I18n.get("hud.enchant.reignofnether.looting.tooltip"))
+            )
+    );
+
     public static final List<EnchantmentIcon> ENCHANTMENT_ICONS = List.of(
             MULTISHOT,
             QUICK_CHARGE,
@@ -170,13 +207,16 @@ public class PassiveIcons {
             SHARPNESS,
             VIGOR,
             ZEAL,
-            //EFFICIENCY,
+            GUST,
+            PUNCH,
+            LONGSHOT,
             FORTIFYING,
             POWER,
             PIERCING,
             BREACHING,
             THORNS,
             FIRE_ASPECT,
-            FLAME
+            FLAME,
+            LOOTING
     );
 }

@@ -49,12 +49,14 @@ public class CustomBuildingSaveData extends SavedData {
                 Vec3i structureSize = new Vec3i(btag.getInt("structureSizeX"), btag.getInt("structureSizeY"), btag.getInt("structureSizeZ"));
                 CompoundTag structureNbt = btag.getCompound("structureNbt");
                 CompoundTag attributesNbt = btag.getCompound("attributesNbt");
+                ListTag commandsNbt = btag.contains("commandsNbt") ? btag.getList("commandsNbt", Tag.TAG_COMPOUND) : new ListTag();
 
                 data.customBuildings.add(new CustomBuildingSave(
                         structureNbt,
                         buildingName,
                         structureSize,
-                        attributesNbt
+                        attributesNbt,
+                        commandsNbt
                 ));
                 ReignOfNether.LOGGER.info("CustomBuildingSaveData.load: " + buildingName);
             }
@@ -73,6 +75,7 @@ public class CustomBuildingSaveData extends SavedData {
             cTag.putInt("structureSizeZ", b.structureSize.getZ());
             cTag.put("structureNbt", b.structureNbt);
             cTag.put("attributesNbt", b.attributesNbt);
+            cTag.put("commandsNbt", b.commandsNbt);
             list.add(cTag);
         });
         tag.put("custombuildings", list);

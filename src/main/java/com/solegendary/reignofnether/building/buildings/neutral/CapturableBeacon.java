@@ -75,13 +75,13 @@ public class CapturableBeacon extends Beacon {
                     return list.isEmpty();
                 },
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon.tooltip3"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.capturable_beacon"), Style.EMPTY.withBold(true)),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.capturable_beacon.tooltip3"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.capturable_beacon.tooltip2"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.capturable_beacon.tooltip1"), Style.EMPTY),
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.capturable_beacon.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.neutral.reignofnether.beacon.tooltip3"), Style.EMPTY)
+                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip3"), Style.EMPTY)
                 ),
                 this
         );

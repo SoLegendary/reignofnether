@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -22,7 +24,6 @@ import net.minecraftforge.common.IPlantable;
 
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class ResourceSources {
 
@@ -60,25 +61,30 @@ public class ResourceSources {
         BlockState bs = level.getBlockState(bp);
         Block block = bs.getBlock();
 
-        for (List<ResourceSource> resourceSources : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
+        if ((block == Blocks.FARMLAND || block == Blocks.SOUL_SAND) && !BuildingUtils.isPosInsideFarm(level.isClientSide, bp))
+            return null;
+
+        for (List<ResourceSource> resourceSources : RESOURCE_BLOCK_LISTS)
             for (ResourceSource resourceSource : resourceSources)
                 if (resourceSource.validBlocks.contains(block))
                     return resourceSource;
-        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LOGS))
+        // bs.is(tag) is an O(1) membership test; the old getTags().collect(toSet()).contains(...) allocated a
+        // Set on every call - brutal when ResourceIndex's chunk scan runs this per cell of a resource section.
+        if (bs.is(BlockTags.LOGS))
             return GENERIC_LOG_BLOCK;
-        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LEAVES))
+        if (bs.is(BlockTags.LEAVES))
             return GENERIC_LEAVES_BLOCK;
         return null;
     }
 
     public static ResourceSource getFromBlockState(BlockState bs) {
-        for (List<ResourceSource> resourceSources : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
+        for (List<ResourceSource> resourceSources : RESOURCE_BLOCK_LISTS)
             for (ResourceSource resourceSource : resourceSources)
                 if (resourceSource.validBlocks.contains(bs.getBlock()))
                     return resourceSource;
-        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LOGS))
+        if (bs.is(BlockTags.LOGS))
             return GENERIC_LOG_BLOCK;
-        if (bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LEAVES))
+        if (bs.is(BlockTags.LEAVES))
             return GENERIC_LEAVES_BLOCK;
         return null;
     }
@@ -99,7 +105,7 @@ public class ResourceSources {
     // is the given item an item that is worth resources?
     // used for unit item pickups and player resource deposits
     public static ResourceSource getFromItem(Item item) {
-        for (List<ResourceSource> resourceSources : List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS))
+        for (List<ResourceSource> resourceSources : RESOURCE_BLOCK_LISTS)
             for (ResourceSource resourceSource : resourceSources) {
                 if (resourceSource.items.contains(item))
                     return resourceSource;
@@ -113,7 +119,7 @@ public class ResourceSources {
     // return a list of food items that a worker gets when killing a huntable animal to make it more consistent
     public static List<ItemStack> getFoodItemsFromAnimal(Animal animal) {
         if (animal instanceof MushroomCow) {
-            return List.of(new ItemStack(Items.BROWN_MUSHROOM, 3), new ItemStack(Items.RED_MUSHROOM, 4)); // 175 food / 10hp
+            return List.of(new ItemStack(Items.BROWN_MUSHROOM, 3), new ItemStack(Items.RED_MUSHROOM, 3)); // 150 food / 10hp
         } else if (animal instanceof Cow) {
             return List.of(new ItemStack(Items.BEEF, 2), new ItemStack(Items.LEATHER, 2)); // 150 food / 10hp
         } else if (animal instanceof Pig) {
@@ -134,30 +140,6 @@ public class ResourceSources {
             return List.of(new ItemStack(Items.LEATHER, 2)); // 50 food
         }
         return List.of();
-    }
-
-    private static List<Item> edibleFoods = List.of(
-        Items.COOKED_BEEF,
-        Items.COOKED_CHICKEN,
-        Items.COOKED_COD,
-        Items.COOKED_PORKCHOP,
-        Items.COOKED_RABBIT,
-        Items.COOKED_SALMON,
-        Items.COOKED_MUTTON,
-        Items.COOKIE,
-        Items.BREAD,
-        Items.PUMPKIN_PIE,
-        Items.MUSHROOM_STEW,
-        Items.RABBIT_STEW,
-        Items.BEETROOT_SOUP,
-        Items.BAKED_POTATO,
-        Items.GOLDEN_APPLE,
-        Items.ENCHANTED_GOLDEN_APPLE,
-        Items.GOLDEN_CARROT
-    );
-
-    public static boolean isPreparedFood(Item item) {
-        return item.isEdible() && edibleFoods.contains(item);
     }
 
     public static final int REPLANT_TICKS_MAX = 10;
@@ -285,6 +267,13 @@ public class ResourceSources {
                     10,
                     ResourceName.FOOD
             ),
+            new ResourceSource("Hay block",
+                    List.of(Blocks.HAY_BLOCK),
+                    List.of(Items.HAY_BLOCK),
+                    TICKS_PER_SECOND * 20,
+                    20,
+                    ResourceName.FOOD
+            ),
             new ResourceSource("Bee nest",
                     List.of(Blocks.BEE_NEST),
                     List.of(Items.BEE_NEST),
@@ -375,7 +364,7 @@ public class ResourceSources {
                     ),
                     List.of(Items.CRIMSON_STEM, Items.WARPED_STEM, Items.CRIMSON_HYPHAE, Items.WARPED_HYPHAE),
                     TICKS_PER_SECOND * 12,
-                    18,
+                    17,
                     ResourceName.WOOD
             ),
             new ResourceSource("Leaves",
@@ -397,6 +386,13 @@ public class ResourceSources {
     );
 
     public static final List<ResourceSource> ORE_BLOCKS = List.of(
+            new ResourceSource("Emerald", // item only
+                    List.of(),
+                    List.of(Items.EMERALD),
+                    0,
+                    1,
+                    ResourceName.EMERALD
+            ),
             new ResourceSource("Stone", // item only
                     List.of(),
                     List.of(Items.STONE),
@@ -468,4 +464,10 @@ public class ResourceSources {
                     ResourceName.ORE
             )
     );
+
+    // The three resource-block lists in a single immutable view, so the per-block lookups below iterate it
+    // WITHOUT allocating a fresh List.of(...) on every call. Declared last so FOOD/WOOD/ORE_BLOCKS are already
+    // initialised. getFromBlockState in particular runs per cell of every resource section the ResourceIndex
+    // scans and per block change, so the old per-call allocation churned hard during placement bursts.
+    private static final List<List<ResourceSource>> RESOURCE_BLOCK_LISTS = List.of(FOOD_BLOCKS, WOOD_BLOCKS, ORE_BLOCKS);
 }

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.nether.NetherBlocks;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -63,6 +64,9 @@ public class NetherZone {
 
     public void tick(ServerLevel level) {
         if (!level.isClientSide()) {
+            boolean doNetherConversion = level.getGameRules().getRule(GameRuleRegistrar.DO_NETHER_CONVERSION).get();
+            if (!isRestoring && !doNetherConversion)
+                startRestoring();
 
             ticksLeft -= 1;
             if (ticksLeft <= 0 && convertsAfterConstantRange < MAX_CONVERTS_AFTER_CONSTANT_RANGE) {

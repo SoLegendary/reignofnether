@@ -30,7 +30,7 @@ public abstract class ArmorStandMixin extends LivingEntity {
         if (pSource.is(DamageTypes.MOB_ATTACK) || pSource.is(DamageTypes.MOB_ATTACK_NO_AGGRO)) {
             BuildingPlacement building = BuildingUtils.findBuilding(level().isClientSide(), blockPosition());
             if (building != null) {
-                building.destroyRandomBlocks((int) (pAmount / 2));
+                building.destroyRandomBlocks(pAmount / 2);
             }
             cir.cancel();
             cir.setReturnValue(true);

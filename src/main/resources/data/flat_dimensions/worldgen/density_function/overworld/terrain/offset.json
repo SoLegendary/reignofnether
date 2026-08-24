@@ -1,0 +1,1095 @@
+{
+  "": "Tweaked sea_level const (~-0.501..); slope retained 0 intercepts for all points with 0 derivative on other-half",
+  "type": "minecraft:flat_cache",
+  "argument": {
+    "type": "minecraft:cache_2d",
+    "argument": {
+      "type": "minecraft:add",
+      "argument1": {
+        "type": "minecraft:mul",
+        "argument1": {
+          "type": "minecraft:blend_offset"
+        },
+        "argument2": {
+          "type": "minecraft:add",
+          "argument1": 1,
+          "argument2": {
+            "type": "minecraft:mul",
+            "argument1": -1,
+            "argument2": {
+              "type": "minecraft:cache_once",
+              "argument": {
+                "type": "minecraft:blend_alpha"
+              }
+            }
+          }
+        }
+      },
+      "argument2": {
+        "type": "minecraft:mul",
+        "argument1": {
+          "type": "minecraft:add",
+          "argument1": -0.53,
+          "argument2": {
+            "type": "minecraft:spline",
+            "spline": {
+              "coordinate": "flat_dimensions:overworld/continents",
+              "points": [
+                {
+                  "derivative": 0,
+                  "location": -1.1,
+                  "value": 0
+                },
+                {
+                  "derivative": 0,
+                  "location": -1.02,
+                  "value": -0.2222
+                },
+                {
+                  "derivative": 0,
+                  "location": -0.51,
+                  "value": -0.2222
+                },
+                {
+                  "derivative": 0,
+                  "location": -0.44,
+                  "value": -0.12
+                },
+                {
+                  "derivative": 0,
+                  "location": -0.18,
+                  "value": -0.12
+                },
+                {
+                  "derivative": 0,
+                  "location": -0.16,
+                  "value": {
+                    "coordinate": "flat_dimensions:overworld/erosion",
+                    "points": [
+                      {
+                        "derivative": 0,
+                        "location": -0.85,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.38940096,
+                              "location": -1,
+                              "value": -0.08880186
+                            },
+                            {
+                              "derivative": 0.38940096,
+                              "location": -0.771952642336,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.771952642336,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.7,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.37788022,
+                              "location": -1,
+                              "value": -0.115760356
+                            },
+                            {
+                              "derivative": 0.37788022,
+                              "location": -0.693658599013,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.693658599013,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.4,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.2222
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.75,
+                              "value": -0.2222
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.65,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.35,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.3
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.4,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.1,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.15
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.2,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.15
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.7,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.02
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": -0.03
+                            },
+                            {
+                              "derivative": 0,
+                              "location": 0,
+                              "value": -0.03
+                            },
+                            {
+                              "derivative": 0.06,
+                              "location": 0.4,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": 0.4,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "derivative": 0,
+                  "location": -0.15,
+                  "value": {
+                    "coordinate": "flat_dimensions:overworld/erosion",
+                    "points": [
+                      {
+                        "derivative": 0,
+                        "location": -0.85,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.38940096,
+                              "location": -1,
+                              "value": -0.08880186
+                            },
+                            {
+                              "derivative": 0.38940096,
+                              "location": -0.771952642336,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.771952642336,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.7,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.37788022,
+                              "location": -1,
+                              "value": -0.115760356
+                            },
+                            {
+                              "derivative": 0.37788022,
+                              "location": -0.693658599013,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.693658599013,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.4,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.2222
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.75,
+                              "value": -0.2222
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.65,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.35,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.3
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.4,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.1,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.15
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.2,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.15
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.7,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.02
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": -0.03
+                            },
+                            {
+                              "derivative": 0,
+                              "location": 0,
+                              "value": -0.03
+                            },
+                            {
+                              "derivative": 0.06,
+                              "location": 0.4,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": 0.4,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "derivative": 0,
+                  "location": -0.1,
+                  "value": {
+                    "coordinate": "flat_dimensions:overworld/erosion",
+                    "points": [
+                      {
+                        "derivative": 0,
+                        "location": -0.85,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.38940096,
+                              "location": -1,
+                              "value": -0.08880186
+                            },
+                            {
+                              "derivative": 0.38940096,
+                              "location": -0.771952642336,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.771952642336,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.7,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.37788022,
+                              "location": -1,
+                              "value": -0.115760356
+                            },
+                            {
+                              "derivative": 0.37788022,
+                              "location": -0.693658599013,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.693658599013,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.4,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.2222
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.75,
+                              "value": -0.2222
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.65,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.35,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.25
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.5,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.5,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.1,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.1
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.8,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.8,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.2,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.1
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.8,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.8,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.7,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.02
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": -0.03
+                            },
+                            {
+                              "derivative": 0,
+                              "location": 0,
+                              "value": -0.03
+                            },
+                            {
+                              "derivative": 0.12,
+                              "location": 0.15,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": 0.15,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "derivative": 0,
+                  "location": 0.25,
+                  "value": {
+                    "coordinate": "flat_dimensions:overworld/erosion",
+                    "points": [
+                      {
+                        "derivative": 0,
+                        "location": -0.4,
+                        "value": 0
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.35,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.25
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.5,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.5,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.1,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.1
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.8,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.8,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.2,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.1
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.8,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.8,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.4,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.1
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.8,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.8,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.45,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.1
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": {
+                                "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                                "points": [
+                                  {
+                                    "derivative": 0.5,
+                                    "location": -1,
+                                    "value": -0.1
+                                  },
+                                  {
+                                    "derivative": 0.5,
+                                    "location": -0.8,
+                                    "value": 0
+                                  },
+                                  {
+                                    "derivative": 0,
+                                    "location": -0.8,
+                                    "value": 0
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.55,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.1
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": {
+                                "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                                "points": [
+                                  {
+                                    "derivative": 0.5,
+                                    "location": -1,
+                                    "value": -0.1
+                                  },
+                                  {
+                                    "derivative": 0.5,
+                                    "location": -0.8,
+                                    "value": 0
+                                  },
+                                  {
+                                    "derivative": 0,
+                                    "location": -0.8,
+                                    "value": 0
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.58,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.1
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.8,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.8,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.7,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.02
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": -0.03
+                            },
+                            {
+                              "derivative": 0,
+                              "location": 0,
+                              "value": -0.03
+                            },
+                            {
+                              "derivative": 0.12,
+                              "location": 0.15,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": 0.15,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "derivative": 0,
+                  "location": 1,
+                  "value": {
+                    "coordinate": "flat_dimensions:overworld/erosion",
+                    "points": [
+                      {
+                        "derivative": 0,
+                        "location": -0.4,
+                        "value": 0
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.35,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.2
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.6,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.6,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": -0.1,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.05
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.9,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.9,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.2,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.05
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.9,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.9,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.4,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.05
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.9,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.9,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.45,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.05
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": {
+                                "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                                "points": [
+                                  {
+                                    "derivative": 0.5,
+                                    "location": -1,
+                                    "value": -0.05
+                                  },
+                                  {
+                                    "derivative": 0.5,
+                                    "location": -0.9,
+                                    "value": 0
+                                  },
+                                  {
+                                    "derivative": 0,
+                                    "location": -0.9,
+                                    "value": 0
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.55,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0,
+                              "location": -1,
+                              "value": -0.05
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.4,
+                              "value": {
+                                "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                                "points": [
+                                  {
+                                    "derivative": 0.5,
+                                    "location": -1,
+                                    "value": -0.05
+                                  },
+                                  {
+                                    "derivative": 0.5,
+                                    "location": -0.9,
+                                    "value": 0
+                                  },
+                                  {
+                                    "derivative": 0,
+                                    "location": -0.9,
+                                    "value": 0
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.58,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.5,
+                              "location": -1,
+                              "value": -0.05
+                            },
+                            {
+                              "derivative": 0.5,
+                              "location": -0.9,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": -0.9,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "derivative": 0,
+                        "location": 0.7,
+                        "value": {
+                          "coordinate": "flat_dimensions:overworld/terrain/ridges_folded",
+                          "points": [
+                            {
+                              "derivative": 0.015,
+                              "location": -1,
+                              "value": -0.02
+                            },
+                            {
+                              "derivative": 0.015,
+                              "location": 0.333333,
+                              "value": 0
+                            },
+                            {
+                              "derivative": 0,
+                              "location": 0.333333,
+                              "value": 0
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "argument2": {
+          "type": "minecraft:cache_once",
+          "argument": {
+            "type": "minecraft:blend_alpha"
+          }
+        }
+      }
+    }
+  }
+}

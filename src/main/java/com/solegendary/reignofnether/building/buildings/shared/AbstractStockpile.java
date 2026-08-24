@@ -28,7 +28,9 @@ public abstract class AbstractStockpile extends ProductionBuilding {
         this.canAcceptResources = true;
         this.canSetRallyPoint = false;
 
-        this.productions.add(ProductionItems.RESEARCH_RESOURCE_CAPACITY, Keybindings.keyQ);
+        this.productions.add(ProductionItems.RESEARCH_RESOURCE_CAPACITY, Keybindings.abilitySlot1);
+
+        this.maxHealth = 95d;
     }
 
     @Override

@@ -2,9 +2,8 @@ package com.solegendary.reignofnether.hud.playerdisplay;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
-import com.solegendary.reignofnether.hud.playerdisplay.AbstractPlayerDisplay;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.resources.ResourceName;

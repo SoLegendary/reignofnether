@@ -8,9 +8,12 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.piglins.BasaltSprings;
 import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
+import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -25,11 +28,13 @@ import com.solegendary.reignofnether.unit.modelling.animations.MarauderAnimation
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -55,7 +60,7 @@ import java.util.List;
 public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, KeyframeAnimated {
     public static final Abilities ABILITIES = new Abilities();
     static {
-        ABILITIES.add(new Bloodlust(), Keybindings.keyQ);
+        ABILITIES.add(new Bloodlust(), Keybindings.abilitySlot1);
     }
 
     //region
@@ -122,29 +127,35 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(MarauderUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(MarauderUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(MarauderUnit.class, EntityDataSerializers.STRING);
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
     }
-
-    // combat stats
-    public float getMovementSpeed() {return movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     @Nullable
     public ResourceCost getCost() {return ResourceCosts.MARAUDER;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
-    public float getBaseAttacksPerSecond() {return attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return attackRange;}
     public float getUnitAttackDamage() {
+        float dmg = AttackerUnit.super.getUnitAttackDamage();
         if (useCleavingHitDamage) {
-            return cleavingHitDamage;
+            return dmg + cleavingHitDamageMod;
         }
-        return isNextHitBig() ? bigHitDamage : attackDamage;}
+        return isNextHitBig() ? dmg + bigHitDamageMod : dmg;}
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
     public boolean canAttackBuildings() {return getAttackBuildingGoal() != null;}
     public Goal getAttackGoal() { return attackGoal; }
@@ -152,13 +163,15 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
 
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
+
     // endregion
 
-    public float getAttackCooldown() {return ((20 / attacksPerSecond) * getAttackCooldownMultiplier());}
-
     final static public float attackDamage = 7.0f;
-    final static public float bigHitDamage = 10.0f;
-    final static public float cleavingHitDamage = 5f;
+    final static public float bigHitDamageMod = 3f;
+    final static public float cleavingHitDamageMod = -2;
     final static public float attacksPerSecond = 0.4f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
@@ -239,11 +252,6 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     }
 
     @Override
-    public double getUnitRangedArmorPercentage() {
-        return rangedDamageResist;
-    }
-
-    @Override
     protected boolean onSoulSpeedBlock() {
         return false;
     }
@@ -259,7 +267,14 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, MarauderUnit.armorValue)
                 .add(Attributes.ATTACK_KNOCKBACK, 0f)
-                .add(Attributes.KNOCKBACK_RESISTANCE, 0.66f);
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.66f)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override
@@ -284,6 +299,24 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         if (level().isClientSide() && animateTicks > 0) {
             animateTicks -= 1;
         }
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+        super.remove(pReason);
     }
 
     @Override
@@ -385,7 +418,10 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     @Override
     public boolean fireImmune() {
         BuildingPlacement bpl = BuildingUtils.findBuilding(level().isClientSide(), getOnPos());
-        return super.fireImmune() || (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary || bpl.getBuilding() instanceof BasaltSprings));
+        return super.fireImmune() ||
+                (bpl != null && (bpl.getBuilding() instanceof FlameSanctuary ||
+                        bpl.getBuilding() instanceof BasaltSprings ||
+                        bpl.getBuilding() instanceof PiglinMarket));
     }
 
     public boolean hasNetheriteChestplate() {
@@ -407,8 +443,8 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.5f, 0, 0.5f);
-        aabb.setMaxY(aabb.maxY + 0.8f);
+        AABB aabb = this.getBoundingBox().inflate(0.2f, 0, 0.2f);
+        aabb.setMaxY(aabb.maxY + 0.7f);
         return aabb;
     }
 
@@ -423,7 +459,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     }
 
     @Override
-    public boolean hasBonusDamage() {
-        return isNextHitBig();
+    public int getDamageTooltipColour() {
+        return isNextHitBig() ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }

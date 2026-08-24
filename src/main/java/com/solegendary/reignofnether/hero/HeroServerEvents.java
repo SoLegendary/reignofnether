@@ -67,7 +67,7 @@ public class HeroServerEvents {
         }
         // save killed hero unit for revival
         if (evt.getEntity() instanceof HeroUnit heroUnit) {
-            String heroName = ((LivingEntity) heroUnit).getName().getString();
+            String heroName = ((LivingEntity) heroUnit).getType().getDescriptionId();
             fallenHeroes.removeIf(fHero -> fHero.ownerName.equals(heroUnit.getOwnerName()) && fHero.name.equals(heroName));
             HeroUnitSave fallenHero = new HeroUnitSave(
                     ((Entity) heroUnit).getStringUUID(),
@@ -101,7 +101,7 @@ public class HeroServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         for (HeroUnitSave fallenHero : fallenHeroes) {
-            if (fallenHero.ownerName.equals(evt.getEntity().getName().getString()))
+            if (fallenHero.ownerName.equals(evt.getEntity().getType().getDescriptionId()))
                 FallenHeroClientboundPacket.addFallenHero(fallenHero);
         }
     }

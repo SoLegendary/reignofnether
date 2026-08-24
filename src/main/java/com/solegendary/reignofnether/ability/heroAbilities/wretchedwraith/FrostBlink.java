@@ -3,8 +3,8 @@ package com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.hud.AbilityButton;
-import com.solegendary.reignofnether.hud.Button;
+import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -31,9 +31,9 @@ public class FrostBlink extends HeroAbility {
     public static final int RANGE_RANK_2 = 10;
     public static final int RANGE_RANK_3 = 12;
 
-    public static final int CD_RANK_1 = 20;
-    public static final int CD_RANK_2 = 15;
-    public static final int CD_RANK_3 = 10;
+    public static final int CD_RANK_1 = 18;
+    public static final int CD_RANK_2 = 13;
+    public static final int CD_RANK_3 = 8;
 
     public static final int RADIUS = 3;
 

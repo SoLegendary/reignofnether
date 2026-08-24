@@ -30,7 +30,6 @@ import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.StreamSupport;
 
 public class HealthBarClientEvents {
 
@@ -70,9 +69,16 @@ public class HealthBarClientEvents {
         return entity instanceof LivingEntity && !(entity instanceof ArmorStand) &&
                    (!entity.isInvisibleTo(client.player) || entity.isCurrentlyGlowing() || entity.isOnFire() ||
                    entity instanceof Creeper && ((Creeper) entity).isPowered() ||
-                   StreamSupport.stream(entity.getAllSlots().spliterator(), false).anyMatch(is -> !is.isEmpty())) &&
+                   hasAnyEquippedItem(entity)) &&
                  entity != client.player &&
                 !entity.isSpectator();
+    }
+
+    private static boolean hasAnyEquippedItem(Entity entity) {
+        for (var stack : entity.getAllSlots())
+            if (!stack.isEmpty())
+                return true;
+        return false;
     }
 
     private static void prepareRenderInWorld(LivingEntity entity) {

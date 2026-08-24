@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "powered=false,facing=north": { "model": "reignofnether:block/husk_wall_head" },
+    "powered=false,facing=south": { "model": "reignofnether:block/husk_wall_head", "y": 180 },
+    "powered=false,facing=west":  { "model": "reignofnether:block/husk_wall_head", "y": 270 },
+    "powered=false,facing=east":  { "model": "reignofnether:block/husk_wall_head", "y": 90  },
+    "powered=true,facing=north":  { "model": "reignofnether:block/husk_wall_head" },
+    "powered=true,facing=south":  { "model": "reignofnether:block/husk_wall_head", "y": 180 },
+    "powered=true,facing=west":   { "model": "reignofnether:block/husk_wall_head", "y": 270 },
+    "powered=true,facing=east":   { "model": "reignofnether:block/husk_wall_head", "y": 90  }
+  }
+}

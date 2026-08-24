@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -42,9 +43,10 @@ public class ArcaneTower extends ProductionBuilding {
 
         this.buildTimeModifier = 0.7f;
         this.explodeChance = 0.2f;
+        this.maxHealth = 340d;
 
-        this.productions.add(ProductionItems.WITCH, Keybindings.keyQ);
-        this.productions.add(ProductionItems.EVOKER, Keybindings.keyW);
+        this.productions.add(ProductionItems.EVOKER, Keybindings.abilitySlot1);
+        this.productions.add(ProductionItems.WINDCALLER, Keybindings.abilitySlot2);
     }
 
     public Faction getFaction() {return Faction.VILLAGERS;}
@@ -61,19 +63,19 @@ public class ArcaneTower extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower"), Style.EMPTY.withBold(true)),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.arcane_tower"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower.tooltip1"), Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.arcane_tower.tooltip1"), Style.EMPTY),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.villagers.reignofnether.arcane_tower.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.arcane_tower.tooltip2"), Style.EMPTY)
             ),
             this
         );
     }
 
     @Override
-    public BlockPos getIndoorSpawnPoint(ServerLevel level, BlockPos centrePos) {
-        return super.getIndoorSpawnPoint(level, centrePos).offset(0,-10,0);
+    public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
+        return super.getIndoorSpawnPoint(level, placement).offset(0,-10,0);
     }
 }

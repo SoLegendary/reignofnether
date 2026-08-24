@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.GarrisonableBuilding;
+import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -22,7 +22,8 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     }
 
     public void tick() {
-        if (buildingTarget instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
+        GarrisonableBuildingAddon garr;
+        if ((garr = buildingTarget.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null) {
             calcMoveTarget();
             if (buildingTarget.getBlocksPlaced() <= 0) {
                 stopGarrisoning();
@@ -33,8 +34,8 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
             )) <= 3f) {
 
                 // teleport to garrison entry pos
-                if (!garr.isFull() && buildingTarget.isBuilt && garr.getEntryPosition() != null) {
-                    BlockPos bp = garr.getEntryPosition();
+                if (!garr.isFull(buildingTarget) && buildingTarget.isBuilt && garr.getEntryPosition(buildingTarget) != null) {
+                    BlockPos bp = garr.getEntryPosition(buildingTarget);
                     this.mob.teleportTo(bp.getX() + 0.5f, bp.getY() + 0.5f, bp.getZ() + 0.5f);
                 }
                 this.stopGarrisoning();
@@ -45,7 +46,7 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
     }
 
     private void calcMoveTarget() {
-        if (this.buildingTarget instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) {
+        if (buildingTarget.getBuilding().hasActiveAddon(GarrisonableBuildingAddon.class)) {
             this.moveTarget = this.buildingTarget.getClosestGroundPos(mob.getOnPos(), 1);
         }
     }
@@ -64,12 +65,13 @@ public class GarrisonGoal extends MoveToTargetBlockGoal {
             else
                 isAllied = AlliancesServerEvents.isAllied(building.ownerName, ((Unit) mob).getOwnerName());
 
-            if (!(building instanceof GarrisonableBuilding garr && garr.getCapacity() > 0) ||
+            GarrisonableBuildingAddon garr;
+            if ((garr = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) == null ||
                 (!building.ownerName.equals(((Unit) mob).getOwnerName()) && !isAllied)) {
                 if (clientside)
                     HudClientEvents.showTemporaryMessage(I18n.get("hud.reignofnether.not_garrisonable"));
             }
-            else if (garr.isFull()) {
+            else if (garr.isFull(building)) {
                 if (clientside)
                     HudClientEvents.showTemporaryMessage(I18n.get("hud.reignofnether.building_full"));
             } else {

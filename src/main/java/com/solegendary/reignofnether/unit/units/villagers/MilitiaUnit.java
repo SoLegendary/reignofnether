@@ -10,11 +10,20 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
+import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
+import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.TargetResourcesSave;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -25,12 +34,16 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
@@ -64,8 +77,8 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new BackToWorkUnit(), Keybindings.build);
-        ABILITIES.add(new WeaponSwapBow(), Keybindings.keyQ);
-        ABILITIES.add(new WeaponSwapSword(), Keybindings.keyQ);
+        ABILITIES.add(new WeaponSwapBow(), Keybindings.abilitySlot1);
+        ABILITIES.add(new WeaponSwapSword(), Keybindings.abilitySlot1);
     }
 
     //region
@@ -133,23 +146,31 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(MilitiaUnit.class, EntityDataSerializers.STRING);
 
+    // which scenario role does this unit use?
+    public int getScenarioRoleIndex() { return this.entityData.get(scenarioRoleDataAccessor); }
+    public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
+    public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
+            SynchedEntityData.defineId(MilitiaUnit.class, EntityDataSerializers.INT);
+    
+    public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
+    public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
+    public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
+        SynchedEntityData.defineId(MilitiaUnit.class, EntityDataSerializers.STRING);
+
     // combat stats
     public float getMovementSpeed() {return isUsingBow() ? rangedMovementSpeed : movementSpeed;}
-    public float getUnitMaxHealth() {return maxHealth;}
 
     public ResourceCost getCost() {return ResourceCosts.MILITIA;}
     public boolean getWillRetaliate() {return willRetaliate;}
     public float getAttackCooldown() {return ((20 / (isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond)) * getAttackCooldownMultiplier());}
-    public float getAttacksPerSecond() {return 20f / getAttackCooldown();}
     public float getBaseAttacksPerSecond() {return isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond;}
-    public float getAggroRange() {return aggroRange;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
-    public float getAttackRange() {return isUsingBow() ? attackRange : 2;}
+    public float getAttackRange() {return isUsingBow() ? AttackerUnit.super.getAttackRange() : 2;}
     public float getUnitAttackDamage() {
         if (isUsingBow()) {
-            return rangedAttackDamage + getPowerLevel();
+            return AttackerUnit.super.getUnitAttackDamage() + getPowerLevel();
         } else {
-            return attackDamage + getSharpnessLevel();
+            return AttackerUnit.super.getUnitAttackDamage() + getSharpnessLevel();
         }
     }
     public BlockPos getAttackMoveTarget() { return attackMoveTarget; }
@@ -158,6 +179,10 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public Goal getAttackBuildingGoal() { return attackBuildingGoal; }
     public void setAttackMoveTarget(@Nullable BlockPos bp) { this.attackMoveTarget = bp; }
     public void setFollowTarget(@Nullable LivingEntity target) { this.followTarget = target; }
+
+    private EnemySearchBehaviour attackSearchBehaviour = EnemySearchBehaviour.NONE;
+    public EnemySearchBehaviour getEnemySearchBehaviour() { return attackSearchBehaviour; }
+    public void setEnemySearchBehaviour(EnemySearchBehaviour behaviour) { attackSearchBehaviour = behaviour; }
 
     // ConvertableUnit
     public boolean converted = false;
@@ -184,7 +209,6 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public boolean bowEnchanted = false;
 
     final static public float attackDamage = 3.0f;
-    final static public float rangedAttackDamage = 3.0f;
     final static public float attacksPerSecond = 0.5f;
     final static public float rangedAttacksPerSecond = 0.3f;
     final static public float attackRange = 10; // only used by ranged units or melee building attackers
@@ -225,9 +249,6 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
         AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), damageMod, AttributeModifier.Operation.ADDITION);
         weaponStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
         this.setItemSlot(EquipmentSlot.MAINHAND, weaponStack);
-        AttributeInstance ai1 = getAttribute(Attributes.ATTACK_DAMAGE);
-        if (ai1 != null)
-            ai1.setBaseValue(useBow ? rangedAttackDamage : attackDamage);
         AttributeInstance ai2 = getAttribute(Attributes.MOVEMENT_SPEED);
         if (ai2 != null)
             ai2.setBaseValue(useBow ? rangedMovementSpeed : movementSpeed);
@@ -261,8 +282,8 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
         }
     }
     @Override
-    public void setAttackBuildingTarget(BlockPos preselectedBlockPos) {
-        AttackerUnit.super.setAttackBuildingTarget(preselectedBlockPos);
+    public void setAttackBuildingTarget(BlockPos preselectedBlockPos, boolean forced) {
+        AttackerUnit.super.setAttackBuildingTarget(preselectedBlockPos, forced);
         if (!this.level().isClientSide())
             UnitAnimationClientboundPacket.sendBlockPosPacket(UnitAnimationAction.NON_KEYFRAME_START, this, preselectedBlockPos);
     }
@@ -278,7 +299,14 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
                 .add(Attributes.MOVEMENT_SPEED, MilitiaUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, MilitiaUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(Attributes.ARMOR, MilitiaUnit.armorValue);
+                .add(Attributes.ARMOR, MilitiaUnit.armorValue)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
+                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
+                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
+                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
+                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
     }
 
     @Override
@@ -301,22 +329,25 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
             Unit.tick(this);
             AttackerUnit.tick(this);
             PromoteIllager.checkAndApplyBuff(this);
+        }
+    }
 
-            this.isCaptain = getItemBySlot(EquipmentSlot.HEAD).getItem() instanceof BannerItem;
-
-            if (!this.isCaptain && this.tickCount > 100 && this.tickCount % 10 == 0 && !converted &&
-                !level().isClientSide() && !getOwnerName().equals(ENEMY_OWNER_NAME)) {
-
-                BuildingPlacement building = BuildingUtils.findClosestBuilding(level().isClientSide(), this.getEyePosition(),
-                        (b) -> b.isBuilt && b.ownerName.equals(getOwnerName()) && b.getBuilding() instanceof TownCentre);
-
-                int range = TownCentre.MILITIA_RANGE;
-                if (building != null &&
-                    distanceToSqr(building.centrePos.getX(), building.centrePos.getY(), building.centrePos.getZ()) > range * range) {
-                    convertToVillager();
-                }
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+	    if (this.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source;
+                source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(this)
+                    .withPosition(this.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
             }
         }
+        super.remove(pReason);
     }
 
     @Override
@@ -356,29 +387,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     }
 
     public void convertToVillager() {
-        if (!converted) {
-            LivingEntity newEntity = this.convertToUnit(EntityRegistrar.VILLAGER_UNIT.get());
-            if (newEntity instanceof VillagerUnit vUnit) {
-                if (resourcesSaveData != null) {
-                    vUnit.getGatherResourceGoal().saveData = resourcesSaveData;
-                    vUnit.getGatherResourceGoal().loadState();
-                }
-                vUnit.setProfession(this.profession);
-                vUnit.isVeteran = this.isVeteran;
-                vUnit.farmerExp = this.farmerExp;
-                vUnit.lumberjackExp = this.lumberjackExp;
-                vUnit.minerExp = this.minerExp;
-                vUnit.masonExp = this.masonExp;
-                vUnit.hunterExp = this.hunterExp;
-                vUnit.chestplate = this.getItemBySlot(EquipmentSlot.CHEST).getItem();
-                vUnit.chestplateEnchanted = this.getItemBySlot(EquipmentSlot.CHEST).isEnchanted();
-                vUnit.swordEnchanted = this.swordEnchanted;
-                vUnit.bowEnchanted = this.bowEnchanted;
-
-                UnitConvertClientboundPacket.syncConvertedUnits(getOwnerName(), List.of(getId()), List.of(newEntity.getId()));
-                converted = true;
-            }
-        }
+        // only used in TemporaryMilitiaUnit
     }
 
     public void initialiseGoals() {
@@ -457,6 +466,8 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");
+        this.entityData.define(scenarioRoleDataAccessor, -1);
+        this.entityData.define(onDeathCommandDataAccessor, "");
         this.entityData.define(VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.ARMORER, 1));
     }
 
@@ -472,7 +483,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     }
 
     static {
-        VILLAGER_DATA = SynchedEntityData.defineId(Villager.class, EntityDataSerializers.VILLAGER_DATA);
+        VILLAGER_DATA = SynchedEntityData.defineId(MilitiaUnit.class, EntityDataSerializers.VILLAGER_DATA);
     }
 
     public int getSharpnessLevel() {
@@ -486,8 +497,8 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     }
 
     @Override
-    public boolean hasBonusDamage() {
+    public int getDamageTooltipColour() {
         return (isUsingBow() && getPowerLevel() > 0) ||
-                (!isUsingBow() && getSharpnessLevel() > 0);
+                (!isUsingBow() && getSharpnessLevel() > 0) ? TooltipColours.GREEN : TooltipColours.WHITE;
     }
 }
