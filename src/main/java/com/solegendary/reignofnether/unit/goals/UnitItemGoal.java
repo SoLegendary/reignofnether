@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
+import com.solegendary.reignofnether.items.ItemAction;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
@@ -19,22 +20,11 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.util.UUID;
 
 // allows a unit to be able to mount any target as long as their ability allows them to
 public class UnitItemGoal extends MoveToTargetBlockGoal {
 
-    private enum ItemAction {
-        DROP,
-        SELL,
-        GIVE,
-        PICKUP,
-        USE_ON_BLOCK,
-        USE_ON_ENTITY,
-        USE_ON_BUILDING,
-        USE,
-        NONE
-    }
+
 
     public static final float RANGE = 2;
     private ItemEntity itemTarget = null;
@@ -61,14 +51,6 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
             return ItemAction.PICKUP;
         }
         return ItemAction.NONE;
-    }
-
-    private boolean hasUUID() {
-        return itemInHand != null && itemInHand.getTag() != null && itemInHand.getTag().hasUUID("uuid");
-    }
-
-    private UUID getUUID() { // if no uuid, return a random one so we don't crash but just do nothing
-        return hasUUID() ? itemInHand.getTag().getUUID("uuid") : UUID.randomUUID();
     }
 
     @Nullable
@@ -98,11 +80,11 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
             if (distSqr < RANGE * RANGE) {
                 if (!this.mob.level().isClientSide()) {
                     switch (action) {
-                        case DROP -> inv.dropUUID(getUUID(), blockTarget);
+                        case DROP -> inv.dropUUID(ItemUtil.getUUID(itemInHand), blockTarget);
                         case SELL -> {
                             BuildingPlacement bpl = BuildingUtils.findBuilding(false, blockTarget);
                             if (bpl != null && bpl.getBuilding() instanceof AbstractMarket) {
-                                inv.deleteUUID(getUUID());
+                                inv.deleteUUID(ItemUtil.getUUID(itemInHand));
                                 UnitItem unitItem = ItemUtil.getUnitItem(itemInHand.getItem());
                                 if (mob instanceof Unit unit) {
                                     RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(unit.getOwnerName());
@@ -115,16 +97,16 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                         }
                         case GIVE -> {
                             if (unitTarget instanceof UnitInventory inv2)
-                                inv.giveTo(getUUID(), inv2);
+                                inv.giveTo(ItemUtil.getUUID(itemInHand), inv2);
                         }
                         case PICKUP -> {
                             if (itemTarget.isAlive() && inv.tryAdding(itemTarget.getItem()))
                                 itemTarget.discard(); // todo: actually pickup physically
                         }
-                        case USE_ON_BLOCK -> inv.useOnGround(getUUID(), blockTarget);
-                        case USE_ON_ENTITY -> inv.useOnEntity(getUUID(), (LivingEntity) unitTarget);
-                        case USE_ON_BUILDING -> inv.useOnBuilding(getUUID(), buildingTarget);
-                        case USE -> inv.use(getUUID());
+                        case USE_ON_BLOCK -> inv.useOnGround(ItemUtil.getUUID(itemInHand), blockTarget);
+                        case USE_ON_ENTITY -> inv.useOnEntity(ItemUtil.getUUID(itemInHand), (LivingEntity) unitTarget);
+                        case USE_ON_BUILDING -> inv.useOnBuilding(ItemUtil.getUUID(itemInHand), buildingTarget);
+                        case USE -> inv.use(ItemUtil.getUUID(itemInHand));
                         case NONE -> { }
                     }
                 }

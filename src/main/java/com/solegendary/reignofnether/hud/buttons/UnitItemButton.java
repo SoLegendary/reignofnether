@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.hud.buttons;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -18,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class UnitItemButton extends Button {
 
@@ -40,7 +42,8 @@ public class UnitItemButton extends Button {
 
     private UnitItem unitItem;
     private ItemStack itemStack;
-    public int invIndex = 0;
+    public int invIndex;
+    public UUID invUUID;
 
     public UnitItemButton(int invIndex, UnitItem unitItem, ItemStack itemStack, Unit unit) {
         super(
@@ -49,7 +52,8 @@ public class UnitItemButton extends Button {
                 null,
                 null,
                 () -> ItemClientEvents.actionableUnitItem == unitItem &&
-                    ItemClientEvents.actionableInvIndex == invIndex,
+                    ItemClientEvents.actionableInvIndex == invIndex &&
+                    ItemClientEvents.actionableInvUUID == ItemUtil.getUUID(itemStack),
                 () -> false,
                 () -> true,
                 () -> {
@@ -68,6 +72,7 @@ public class UnitItemButton extends Button {
         this.unitItem = unitItem;
         this.itemStack = itemStack;
         this.invIndex = invIndex;
+        this.invUUID = ItemUtil.getUUID(itemStack);
     }
 
     private static final float GHOST_ALPHA = 0.45f;

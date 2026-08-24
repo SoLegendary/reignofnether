@@ -33,7 +33,8 @@ Unit Items
 
 Balance
 -------
-
+[❌] Slimes and magma cubes now roll on attack too
+[❌] Slimes no longer create a free tiny slime whenever they consume a friendly slime
 
 Quality of Life
 ---------------

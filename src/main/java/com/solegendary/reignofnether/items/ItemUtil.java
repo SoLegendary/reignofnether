@@ -8,6 +8,7 @@ import net.minecraft.world.item.Items;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.UUID;
 
 public class ItemUtil {
 
@@ -15,6 +16,14 @@ public class ItemUtil {
     public static final float HEALTH_PER_CHICKEN = 18;
     public static final float HEALTH_PER_BEEF = 24;
     public static final float HEAL_PER_NUTRITION = 2.5f;
+
+    public static boolean hasUUID(ItemStack itemStack) {
+        return itemStack != null && itemStack.getTag() != null && itemStack.getTag().hasUUID("uuid");
+    }
+
+    public static UUID getUUID(ItemStack itemStack) { // if no uuid, return a random one so we don't crash but just do nothing
+        return hasUUID(itemStack) ? itemStack.getTag().getUUID("uuid") : UUID.randomUUID();
+    }
 
     public static boolean isUnitItem(ItemStack itemStack) {
         return itemStack != null && isUnitItem(itemStack.getItem());

@@ -25,6 +25,7 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -35,6 +36,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class ItemClientEvents {
 
@@ -46,6 +48,7 @@ public class ItemClientEvents {
     // Used for: dropping, giving to another unit, selling and rearranging inventory
     public static UnitItem actionableUnitItem = null;
     public static int actionableInvIndex = 0;
+    public static UUID actionableInvUUID = null;
 
     private static int mouseX = 0;
     private static int mouseY = 0;
@@ -131,13 +134,15 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
-        for (Button button : renderedButtons) {
-            if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+        if (MC.player == null)
+            return;
+
+        for (Button button : renderedButtons)
+            if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1)
                 button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-            }
-        }
 
         if (hasActionableItem() && HudClientEvents.hudSelectedEntity instanceof UnitInventory inv) {
+            String playerName = MC.player.getName().getString();
             Button mousedOverButton = getMousedOverButton();
             Button hudMousedOverButton = HudClientEvents.getMousedOverButton();
             if (mousedOverButton instanceof UnitItemButton uiButton) {
@@ -148,8 +153,8 @@ public class ItemClientEvents {
                     hudMousedOverButton.entity instanceof UnitInventory) {
                 Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
                 if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED) {
-                    // todo: wire to move goal and enforce range
-
+                    // Give via group button
+                    ItemServerboundPacket.give(playerName, ((Entity) inv).getId(), actionableInvUUID, hudMousedOverButton.entity.getId());
                 }
             } else if (!HudClientEvents.isMouseOverAnyButtonOrHud()) {
                 BuildingPlacement bpl = BuildingClientEvents.getPreselectedBuilding();
@@ -162,19 +167,19 @@ public class ItemClientEvents {
                         le instanceof UnitInventory &&
                         le != HudClientEvents.hudSelectedEntity &&
                         (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED)) {
-                        // todo: wire to move goal and enforce range
-
+                        // Give via direct entity
+                        ItemServerboundPacket.give(playerName, ((Entity) inv).getId(), actionableInvUUID, le.getId());
                     }
                 } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
                         (rl == Relationship.FRIENDLY || rl == Relationship.OWNED)) {
-                    // todo: wire to move goal and enforce range
-                    // todo: sell item at market
+                    // sell at market
+                    ItemServerboundPacket.sell(playerName, ((Entity) inv).getId(), actionableInvUUID, bpl.originPos);
                 } else {
                     BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
-                    // todo: wire to move goal and enforce range
-
+                    // drop on ground
+                    ItemServerboundPacket.drop(playerName, ((Entity) inv).getId(), actionableInvUUID, bp);
                 }
-            }
+            } // TODO: pickup preselectedItem
         }
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             actionableUnitItem = null;
