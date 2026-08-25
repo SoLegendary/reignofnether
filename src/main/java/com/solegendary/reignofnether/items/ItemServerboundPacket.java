@@ -63,10 +63,6 @@ public class ItemServerboundPacket {
         send(ownerName, ItemAction.SWAP, unitId, null, -1, null, invIndex1, invIndex2);
     }
 
-    public static void none(String ownerName, int unitId) { // clears the unit's current item action
-        send(ownerName, ItemAction.NONE, unitId, null, -1, null);
-    }
-
     private static void send(
             String ownerName,
             ItemAction action,

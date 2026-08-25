@@ -22,8 +22,9 @@ Unit Items
         [❌] Should be visible to all players
     [❌] Allow use (no target, ground, entity, building)
     [❌] Add attribute modifications
-
-
+    [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
+    [❌] Add tooltips for food and merchant armour and make useable in inventory
+    [❌] Save in HeroUnitSave
 
 Balance
 -------

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -39,6 +40,8 @@ public class ItemUtil {
 
     @Nullable
     public static UnitItem getUnitItem(Item item) {
+        if (isPreparedEdibleFood(item))
+            return new EdibleFoodItem(item);
         for (UnitItem unitItem : UnitItems.ITEMS)
             if (unitItem.item == item)
                 return unitItem;

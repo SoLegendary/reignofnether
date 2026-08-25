@@ -45,13 +45,12 @@ public class UnitItemBuilder {
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
     int sellValue = 0;
-    String descKey = "";
+    int buyCost = 0;
+    String desc = "";
     Keybinding hotkey = null;
-    boolean canUnitPickup = false;
-    boolean canUnitAutopickup = false;
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
-    final List<String> pointKeys = new ArrayList<>();
+    final List<String> pointDescs = new ArrayList<>();
     final List<AttributeModifier> getAttributeModifiers = new ArrayList<>();
     Consumer<BlockPos> onUseGround = blockPos -> {};
     Consumer<LivingEntity> onUseEntity = entity -> {};
@@ -87,22 +86,28 @@ public class UnitItemBuilder {
         return this;
     }
 
+    /** Emerald cost at shops */
+    public UnitItemBuilder buyCost(int buyCost) {
+        this.buyCost = buyCost;
+        return this;
+    }
+
     /** I18n key for the short description line(s) in the tooltip's middle band. */
-    public UnitItemBuilder descKey(String descKey) {
-        this.descKey = descKey == null ? "" : descKey;
+    public UnitItemBuilder desc(String desc) {
+        this.desc = desc == null ? "" : desc;
         return this;
     }
 
     /** Adds one bullet to the passive stat list; call once per bullet, in display order. */
-    public UnitItemBuilder pointKey(String i18nKey) {
+    public UnitItemBuilder pointDesc(String i18nKey) {
         if (i18nKey != null && !i18nKey.isBlank())
-            this.pointKeys.add(i18nKey);
+            this.pointDescs.add(i18nKey);
         return this;
     }
 
-    public UnitItemBuilder pointKeys(String... i18nKeys) {
-        for (String key : i18nKeys)
-            pointKey(key);
+    public UnitItemBuilder pointDescs(String... descs) {
+        for (String desc : descs)
+            pointDesc(desc);
         return this;
     }
 
@@ -119,17 +124,6 @@ public class UnitItemBuilder {
     /** Shown bottom-right of the tooltip and used by the button's key handler. */
     public UnitItemBuilder hotkey(@Nullable Keybinding hotkey) {
         this.hotkey = hotkey;
-        return this;
-    }
-
-    public UnitItemBuilder canUnitPickup(boolean canUnitPickup) {
-        this.canUnitPickup = canUnitPickup;
-        return this;
-    }
-
-    /** Usually true for resources and piglin merchant loot. */
-    public UnitItemBuilder canUnitAutopickup(boolean canUnitAutopickup) {
-        this.canUnitAutopickup = canUnitAutopickup;
         return this;
     }
 

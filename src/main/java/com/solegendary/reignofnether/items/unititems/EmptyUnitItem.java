@@ -13,8 +13,6 @@ public class EmptyUnitItem extends UnitItem {
     public EmptyUnitItem() {
         super(UnitItemBuilder.of(Items.AIR)
                 .type(UnitItemType.NONE)
-                .canUnitPickup(false)
-                .canUnitAutopickup(false)
                 .enableTooltip(false));
     }
 

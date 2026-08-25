@@ -16,9 +16,12 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public class UnitItemButton extends Button {
@@ -69,7 +72,7 @@ public class UnitItemButton extends Button {
                 // todo: actual item usage
             }
         };
-        this.iconItem = new ItemStack(itemStack.getItem());
+        this.iconItem = itemStack;
         this.unitItem = unitItem;
         this.itemStack = itemStack;
         this.invIndex = invIndex;
@@ -168,9 +171,11 @@ public class UnitItemButton extends Button {
         // ---- band 2: description + dot points (all small) ----
         List<FormattedCharSequence> bodyLines = new ArrayList<>();
         String desc = unitItem.getDescription();
-        if (desc != null)
+        if (!desc.isBlank())
             bodyLines.addAll(font.split(Component.literal(desc).withStyle(DESC_STYLE), smallWrapWidth));
-        for (String point : unitItem.getPointLines()) // TODO: add enchantments
+        List<String> points = new ArrayList<>(unitItem.getPointDescs());
+        points.addAll(getEnchantmentDescs(itemStack));
+        for (String point : points)
             bodyLines.addAll(font.split(
                     Component.literal("\u2022 " + point).withStyle(POINTS_STYLE), smallWrapWidth));
 
@@ -240,6 +245,14 @@ public class UnitItemButton extends Button {
         }
 
         guiGraphics.pose().popPose();
+    }
+
+    // "Sharpness V", "Unbreaking III", ... in NBT order
+    private static List<String> getEnchantmentDescs(ItemStack itemStack) {
+        List<String> descs = new ArrayList<>();
+        for (Map.Entry<Enchantment, Integer> entry : EnchantmentHelper.getEnchantments(itemStack).entrySet())
+            descs.add(entry.getKey().getFullname(entry.getValue()).getString());
+        return descs;
     }
 
     // on-screen width needed to fit both halves of a justified row without them touching

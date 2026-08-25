@@ -420,6 +420,7 @@ public class BuildingPlacement {
         return getClosestGroundPos(bpTarget, radiusOffset, false);
     }
     public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset, boolean avoidAllBuildings) {
+        radiusOffset = Math.max(1, radiusOffset);
         float minDist = 999999;
         BlockPos minPos = this.minCorner;
         int minX = minPos.getX() - radiusOffset;

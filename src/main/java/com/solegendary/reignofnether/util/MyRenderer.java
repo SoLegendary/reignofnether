@@ -555,7 +555,7 @@ public class MyRenderer {
         int paddingChars = iconSize / Math.max(spaceWidth, 1);
         String pad = " ".repeat(paddingChars);
         Component name = unitItem.iconRl != null ? Component.literal(pad).append(unitItem.getName()) : unitItem.getName();
-        List<FormattedCharSequence> lore = unitItem.getTooltip(itemStack);
+        List<FormattedCharSequence> lore = unitItem.getEntityTooltip(itemStack);
 
         List<FormattedCharSequence> lines = new ArrayList<>();
         lines.add(name.getVisualOrderText());

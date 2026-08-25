@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -380,9 +381,14 @@ public interface Unit {
                                 SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F,
                                 unitMob.getRandom().nextFloat() * 0.1F + 0.9F
                         );
-                        if (itemStack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
-                            unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, 5));
-                            unitMob.setAbsorptionAmount(24);
+                        if (itemStack.getItem() == Items.GOLDEN_APPLE) {
+                            int absorb = EdibleFoodItem.GOLDEN_APPLE_ABSORB;
+                            unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, (absorb / 4) - 1));
+                            unitMob.setAbsorptionAmount(absorb);
+                        } else if (itemStack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
+                            int absorb = EdibleFoodItem.ENCHANTED_GOLDEN_APPLE_ABSORB;
+                            unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, (absorb / 4) - 1));
+                            unitMob.setAbsorptionAmount(absorb);
                         } else {
                             unitMob.heal(ItemUtil.getFoodHealAmount(itemStack));
                         }
@@ -516,7 +522,8 @@ public interface Unit {
         Mob unitMob = (Mob) unit;
         if (!unit.isHoldingEdibleFood()) {
             for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
-
+                if (itementity.isRemoved())
+                    continue;
                 ItemStack itemstack = itementity.getItem();
                 if (itemstack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
                     if (unitMob.getAbsorptionAmount() > 0)
@@ -529,18 +536,23 @@ public interface Unit {
                     (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isPreparedEdibleFood(itemstack.getItem())) {
                     if (ItemUtil.isPreparedEdibleFood(itemstack.getItem()) &&
                             (unitMob.getHealth() < unitMob.getMaxHealth() || itemstack.getItem() == Items.ENCHANTED_GOLDEN_APPLE)) {
-                        unitMob.onItemPickup(itementity);
-                        unitMob.take(itementity, 1);
-                        unit.getItems().add(new ItemStack(itemstack.getItem(), 1));
-                        UnitAnimationClientboundPacket.sendEatFoodPacket(unitMob, BuiltInRegistries.ITEM.getId(itemstack.getItem()));
-                        itemstack.setCount(itemstack.getCount() - 1);
-                        if (itemstack.getCount() <= 0)
-                            itementity.discard();
+                        startEatingFood(unit, itementity);
                         break;
                     }
                 }
             }
         }
+    }
+
+    private static void startEatingFood(Unit unit, ItemEntity itemEntity) {
+        ItemStack itemStack = itemEntity.getItem();
+        ((LivingEntity) unit).onItemPickup(itemEntity);
+        ((LivingEntity) unit).take(itemEntity, 1);
+        unit.getItems().add(new ItemStack(itemStack.getItem(), 1));
+        UnitAnimationClientboundPacket.sendEatFoodPacket(((LivingEntity) unit), BuiltInRegistries.ITEM.getId(itemStack.getItem()));
+        itemStack.setCount(itemStack.getCount() - 1);
+        if (itemStack.getCount() <= 0)
+            itemEntity.discard();
     }
 
     // call from addAdditionalSaveData

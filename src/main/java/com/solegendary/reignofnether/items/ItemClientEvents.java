@@ -77,9 +77,8 @@ public class ItemClientEvents {
     }
 
     public static boolean shouldRenderUnitInventory(Unit unit) {
-        return unit instanceof UnitInventory inv &&
-                (unit instanceof HeroUnit ||
-                        !inv.getAllItems().isEmpty());
+        return unit instanceof UnitInventory &&
+                unit.getItemGoal() != null;
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {
@@ -180,10 +179,11 @@ public class ItemClientEvents {
                         ItemServerboundPacket.give(playerName, ((Entity) inv).getId(), actionableInvUUID, le.getId());
                     }
                 } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
-                        (rl == Relationship.FRIENDLY || rl == Relationship.OWNED)) {
+                        (rl == Relationship.FRIENDLY || rl == Relationship.OWNED) &&
+                        actionableUnitItem != null && actionableUnitItem.sellValue > 0) {
                     // sell at market
                     unit.getCheckpoints().clear();
-                    unit.getCheckpoints().add(new Checkpoint(bpl.centrePos, true));
+                    unit.getCheckpoints().add(new Checkpoint(new BlockPos(bpl.centrePos.getX(), bpl.minCorner.getY(), bpl.centrePos.getZ()), true));
                     ItemServerboundPacket.sell(playerName, ((Entity) inv).getId(), actionableInvUUID, bpl.originPos);
                 } else {
                     BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
@@ -243,12 +243,6 @@ public class ItemClientEvents {
                 UnitItem unitItem = ItemUtil.getUnitItem(itemEntity.getItem().getItem());
                 if (unitItem != null && unitItem.enableTooltip) {
                     MyRenderer.renderItemEntityTooltip(evt.getGuiGraphics(), unitItem, itemEntity.getItem(), evt.getMouseX(), evt.getMouseY());
-                    break;
-                } else if (ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
-                    UnitItem foodUnitItem = new EdibleFoodItem(itemEntity.getItem().getItem());
-                    if (foodUnitItem.enableTooltip) {
-                        MyRenderer.renderTooltip(evt.getGuiGraphics(), foodUnitItem.getTooltip(itemEntity.getItem()), evt.getMouseX(), evt.getMouseY());
-                    }
                     break;
                 }
             }

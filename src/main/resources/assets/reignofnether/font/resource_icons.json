@@ -3,79 +3,86 @@
         {
             "type": "bitmap",
             "file": "reignofnether:icons/items/wheat.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE000"]
         },
         {
             "type": "bitmap",
             "file": "reignofnether:icons/items/wood.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE001"]
         },
         {
             "type": "bitmap",
             "file": "reignofnether:icons/items/iron_ore.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE002"]
         },
         {
             "type": "bitmap",
             "file": "reignofnether:icons/items/bed.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE003"]
         },
         {
             "type": "bitmap",
             "file": "reignofnether:icons/items/clock.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE004"]
         },
         {
             "type": "bitmap",
             "file": "reignofnether:icons/items/bow.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE005"]
         },
         {
             "type": "bitmap",
             "file": "reignofnether:icons/items/sword.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE006"]
         },
         {
             "type": "bitmap",
-            "file": "reignofnether:icons/items/heart.png",
-            "ascent": 9,
+            "file": "minecraft:mob_effect/regeneration.png",
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE007"]
         },
         {
             "type": "bitmap",
             "file": "reignofnether:icons/items/lapis.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE008"]
         },
         {
             "type": "bitmap",
             "file": "reignofnether:hud/warning.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE009"]
         },
         {
             "type": "bitmap",
             "file": "reignofnether:icons/items/emerald.png",
-            "ascent": 9,
+            "ascent": 8,
             "height": 9,
             "chars": ["\uE010"]
+        },
+        {
+            "type": "bitmap",
+            "file": "minecraft:mob_effect/absorption.png",
+            "ascent": 8,
+            "height": 9,
+            "chars": ["\uE011"]
         },
         {
             "type": "bitmap",

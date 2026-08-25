@@ -68,7 +68,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
     private BlockPos getMoveTargetForAction(ItemAction action) {
         return switch (action) {
             case DROP, USE_ON_BLOCK -> blockTarget;
-            case SELL, USE_ON_BUILDING -> buildingTarget.getClosestGroundPos(mob.getOnPos(), 0);
+            case SELL, USE_ON_BUILDING -> buildingTarget.getClosestGroundPos(mob.getOnPos(), 1);
             case GIVE, USE_ON_ENTITY -> leTarget.getOnPos();
             case PICKUP -> itemTarget.getOnPos();
             case USE, NONE, SWAP -> null;
