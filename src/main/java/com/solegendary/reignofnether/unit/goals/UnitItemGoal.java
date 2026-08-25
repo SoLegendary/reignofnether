@@ -12,6 +12,8 @@ import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -48,10 +50,10 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
     private ItemAction getAction() {
         if (!(mob instanceof UnitInventory)) {
             return ItemAction.NONE;
-        } else if (ItemUtil.isUnitItem(itemInHand) && blockTarget != null && mob.level().getWorldBorder().isWithinBounds(blockTarget)) {
-            return useItem ? ItemAction.USE_ON_BLOCK : ItemAction.DROP;
         } else if (ItemUtil.isUnitItem(itemInHand) && buildingTarget != null) {
             return useItem ? ItemAction.USE_ON_BUILDING : ItemAction.SELL;
+        } else if (ItemUtil.isUnitItem(itemInHand) && blockTarget != null && mob.level().getWorldBorder().isWithinBounds(blockTarget)) {
+            return useItem ? ItemAction.USE_ON_BLOCK : ItemAction.DROP;
         } else if (ItemUtil.isUnitItem(itemInHand) && leTarget != null && useItem) {
             return ItemAction.USE_ON_ENTITY;
         } else if (ItemUtil.isUnitItem(itemInHand) && leTarget instanceof UnitInventory) {
@@ -69,8 +71,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
             case SELL, USE_ON_BUILDING -> buildingTarget.getClosestGroundPos(mob.getOnPos(), 0);
             case GIVE, USE_ON_ENTITY -> leTarget.getOnPos();
             case PICKUP -> itemTarget.getOnPos();
-            case USE -> mob.getOnPos();
-            case NONE, SWAP -> null; // swap is done instantly in ItemServerEvents
+            case USE, NONE, SWAP -> null;
         };
     }
 
@@ -101,7 +102,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                                         Resources res = new Resources(unit.getOwnerName(), 0, 0, 0, unitItem.sellValue);
                                         ResourcesServerEvents.addSubtractResources(res);
                                         ResourcesClientboundPacket.showFloatingText(res, this.mob.getOnPos());
-                                        // TODO: play money sound
+                                        SoundClientboundPacket.playSoundAtPos(SoundAction.SELL_ITEM, this.mob.getOnPos());
                                     }
                                 }
                             }

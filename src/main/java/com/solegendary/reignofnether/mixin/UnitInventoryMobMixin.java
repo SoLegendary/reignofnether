@@ -111,7 +111,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                         return false;
                     }
                     if (!stack.isEmpty()) {
-                        BehaviorUtils.throwItem(this, stack, bp.getCenter());
+                        BehaviorUtils.throwItem(this, stack, bp.getCenter(), new Vec3(0.25f,0.25f,0.25f), 0.3F);
                     }
                     this.unitItems.set(i, ItemStack.EMPTY);
                     syncToClient();

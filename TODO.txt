@@ -11,23 +11,17 @@
 Hero Items
 ----------
 Emerald Resource
-    - Obtainable by killing neutrals, selling items or selling resources
-    - Used to buy resources now instead of direct exchange
-    - Used to buy items from shops
-    - Only shown if you have any
-    - Neutrals now give emerald bounties
-    - Update diplomacy menu resource exchange
-    - Update all other commands related to resources
-    - Resources class constructors should assume emeralds = 0
+    [❌] Market trading all has to go via emeralds
+    [❌] Markets can be built at the start of the game, but upgraded to unlock resource buying
+    [❌] Used to buy items from shops
+    [❌] Show in top left if you have any
+    [❌] Neutrals now give emerald bounties
 
 Unit Items
-    - Hero inventory GUI
-        - Click to use, can have charges and/or cooldown
-        - Drag to move slots, drop on ground, transfer to another hero or sell
-    - While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
-        - Should be visible to all players
-    - Should have tooltips shown even on the ground
-    - Requires right-click to pick up, will not auto-pickup
+    [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
+        [❌] Should be visible to all players
+    [❌] Allow use (no target, ground, entity, building)
+    [❌] Add attribute modifications
 
 
 

@@ -235,6 +235,7 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.CHAT, SoundRegistrar.CHAT.get());
         SOUND_MAP.put(SoundAction.ENEMY, SoundRegistrar.ENEMY.get());
         SOUND_MAP.put(SoundAction.DAWN_ROOSTER, SoundRegistrar.DAWN_ROOSTER.get());
+        SOUND_MAP.put(SoundAction.SELL_ITEM, SoundRegistrar.SELL_ITEM.get());
         SOUND_MAP.put(SoundAction.DUSK_WOLF, SoundRegistrar.DUSK_WOLF.get());
         SOUND_MAP.put(SoundAction.BELL, SoundEvents.BELL_BLOCK);
         SOUND_MAP.put(SoundAction.BEACON_DEACTIVATE, SoundEvents.BEACON_DEACTIVATE);

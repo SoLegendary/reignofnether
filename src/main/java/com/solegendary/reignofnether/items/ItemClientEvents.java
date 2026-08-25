@@ -183,7 +183,7 @@ public class ItemClientEvents {
                         (rl == Relationship.FRIENDLY || rl == Relationship.OWNED)) {
                     // sell at market
                     unit.getCheckpoints().clear();
-                    unit.getCheckpoints().add(new Checkpoint(bpl.originPos, true));
+                    unit.getCheckpoints().add(new Checkpoint(bpl.centrePos, true));
                     ItemServerboundPacket.sell(playerName, ((Entity) inv).getId(), actionableInvUUID, bpl.originPos);
                 } else {
                     BlockPos bp = CursorClientEvents.getPreselectedBlockPos();

@@ -40,6 +40,10 @@ public class SoundRegistrar {
             SOUND_EVENTS.register("chat", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "chat")));
 
+    public static final RegistryObject<SoundEvent> SELL_ITEM =
+            SOUND_EVENTS.register("sell_item", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "sell_item")));
+
     public static final RegistryObject<SoundEvent> DAWN_ROOSTER =
             SOUND_EVENTS.register("dawn_rooster", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "dawn_rooster")));
