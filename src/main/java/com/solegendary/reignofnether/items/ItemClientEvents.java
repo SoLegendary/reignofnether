@@ -10,11 +10,8 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
-import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
-import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -30,7 +27,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -49,6 +45,7 @@ public class ItemClientEvents {
     public static UnitItem actionableUnitItem = null;
     public static int actionableInvIndex = 0;
     public static UUID actionableInvUUID = null;
+    public static boolean leftClickUseItem = true;
 
     private static int mouseX = 0;
     private static int mouseY = 0;
@@ -72,8 +69,8 @@ public class ItemClientEvents {
         return preselectedItems;
     }
 
-    public static boolean hasActionableItem() {
-        return actionableUnitItem != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY);
+    public static boolean hasDragActionItem() {
+        return actionableUnitItem != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) && !hasLeftClickAction();
     }
 
     public static boolean shouldRenderUnitInventory(Unit unit) {
@@ -113,7 +110,7 @@ public class ItemClientEvents {
             ItemStack itemStack = inv.getAllItems().get(i);
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
             if (unitItem instanceof EmptyUnitItem emptyItem) {
-                ItemClientEvents.renderedButtons.add(emptyItem.getEmptySlotButton(i, hasActionableItem(), (Unit) inv));
+                ItemClientEvents.renderedButtons.add(emptyItem.getEmptySlotButton(i, hasDragActionItem(), (Unit) inv));
             } else if (unitItem != null) {
                 ItemClientEvents.renderedButtons.add(unitItem.getButton(i, itemStack, (Unit) inv));
             }
@@ -138,10 +135,7 @@ public class ItemClientEvents {
         if (MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
 
-        for (Button button : renderedButtons)
-            button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-
-        if (hasActionableItem() &&
+        if (hasDragActionItem() &&
             HudClientEvents.hudSelectedEntity instanceof UnitInventory inv &&
             HudClientEvents.hudSelectedEntity instanceof Unit unit
         ) {
@@ -194,9 +188,56 @@ public class ItemClientEvents {
                 }
             }
         }
+        resetActions();
+
+        for (Button button : renderedButtons)
+            button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
+    }
+
+    public static boolean hasLeftClickAction() {
+        return leftClickUseItem && actionableUnitItem != null && actionableInvUUID != null;
+    }
+
+    @SubscribeEvent
+    public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
+        if (!(MC.screen instanceof TopdownGui) || MC.player == null)
+            return;
+        for (Button button : renderedButtons) {
+            if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
+            } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
+            }
+        }
+        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
+            mouseLeftDownX = (int) evt.getMouseX();
+            mouseLeftDownY = (int) evt.getMouseY();
+
+            String playerName = MC.player.getName().getString();
+            if (hasLeftClickAction() &&
+                HudClientEvents.hudSelectedEntity instanceof UnitInventory inv) {
+                if (actionableUnitItem.onUseGround != null) {
+                    ItemServerboundPacket.useOnBlock(playerName, ((Entity) inv).getId(), actionableInvUUID, CursorClientEvents.getPreselectedBlockPos());
+                } else if (actionableUnitItem.onUseBuilding != null &&
+                    BuildingClientEvents.getPreselectedBuilding() != null) {
+                    ItemServerboundPacket.useOnBuilding(playerName, ((Entity) inv).getId(), actionableInvUUID, BuildingClientEvents.getPreselectedBuilding().originPos);
+                } else if (actionableUnitItem.onUseEntity != null &&
+                    !UnitClientEvents.getPreselectedUnits().isEmpty()) {
+                    ItemServerboundPacket.useOnEntity(playerName, ((Entity) inv).getId(), actionableInvUUID, UnitClientEvents.getPreselectedUnits().get(0).getId());
+                }
+                resetActions();
+            }
+        } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            resetActions();
+        }
+    }
+
+    public static void resetActions() {
         actionableUnitItem = null;
-        mouseLeftDownX = 0;
-        mouseLeftDownY = 0;
+        actionableInvUUID = null;
+        actionableInvIndex = 0;
+        leftClickUseItem = false;
+        CursorClientEvents.setLeftClickAction(null);
     }
 
     private static Button getMousedOverButton() {
@@ -246,27 +287,10 @@ public class ItemClientEvents {
                     break;
                 }
             }
-            if (hasActionableItem() && HudClientEvents.hudSelectedEntity instanceof Unit unit) {
+            if (hasDragActionItem() && HudClientEvents.hudSelectedEntity instanceof Unit unit) {
                 actionableUnitItem.getButton(0, new ItemStack(actionableUnitItem.item), unit)
                         .renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
             }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (!(MC.screen instanceof TopdownGui))
-            return;
-        for (Button button : renderedButtons) {
-            if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-            } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
-            }
-        }
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-            mouseLeftDownX = (int) evt.getMouseX();
-            mouseLeftDownY = (int) evt.getMouseY();
         }
     }
 }

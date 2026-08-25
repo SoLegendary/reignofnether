@@ -174,7 +174,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
-            if (unitItem != null) {
+            if (unitItem != null && unitItem.onUseGround != null) {
                 unitItem.onUseGround.accept(blockPos);
                 this.deleteUUID(uuid);
             }
@@ -186,7 +186,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
-            if (unitItem != null && entity.isAlive()) {
+            if (unitItem != null && entity.isAlive() && unitItem.onUseEntity != null) {
                 unitItem.onUseEntity.accept(entity);
                 this.deleteUUID(uuid);
             }
@@ -198,7 +198,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
-            if (unitItem != null && !building.shouldBeDestroyed()) {
+            if (unitItem != null && !building.shouldBeDestroyed() && unitItem.onUseBuilding != null) {
                 unitItem.onUseBuilding.accept(building);
                 this.deleteUUID(uuid);
             }

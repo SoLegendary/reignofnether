@@ -29,6 +29,9 @@ public class UnitItems {
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_sword.png"))
             .desc(descStr("item.reignofnether.merchant_sword.desc"))
             .enchant(Enchantments.FIRE_ASPECT, 1)
+            .onUseEntity(le -> {
+                le.kill();
+            })
             .build();
 
     public static final UnitItem MERCHANT_CHESTPLATE = UnitItemBuilder.of(Items.NETHERITE_CHESTPLATE)

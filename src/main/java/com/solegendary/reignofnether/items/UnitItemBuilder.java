@@ -52,10 +52,10 @@ public class UnitItemBuilder {
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     final List<String> pointDescs = new ArrayList<>();
     final List<AttributeModifier> getAttributeModifiers = new ArrayList<>();
-    Consumer<BlockPos> onUseGround = blockPos -> {};
-    Consumer<LivingEntity> onUseEntity = entity -> {};
-    Consumer<BuildingPlacement> onUseBuilding = entity -> {};
-    Runnable onUse = () -> {};
+    Consumer<BlockPos> onUseGround = null;
+    Consumer<LivingEntity> onUseEntity = null;
+    Consumer<BuildingPlacement> onUseBuilding = null;
+    Runnable onUse = null;
 
     private UnitItemBuilder(Item item) {
         if (item == null)

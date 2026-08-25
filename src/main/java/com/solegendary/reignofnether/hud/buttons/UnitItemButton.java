@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
@@ -13,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -60,6 +62,7 @@ public class UnitItemButton extends Button {
                 () -> false,
                 () -> true,
                 () -> {
+                    // drag actions
                     ItemClientEvents.actionableUnitItem = unitItem;
                     ItemClientEvents.actionableInvIndex = invIndex;
                     ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
@@ -67,9 +70,18 @@ public class UnitItemButton extends Button {
                 null,
                 List.of()
         );
-        this.onLeftClickRelease = () -> {
-            if (!ItemClientEvents.hasActionableItem()) {
-                // todo: actual item usage
+        this.onLeftClickRelease = () -> { // actual item use actions
+            if (!ItemClientEvents.hasDragActionItem()) {
+                if (unitItem.onUse != null) {
+                    unitItem.onUse.run();
+                } else if (unitItem.onUseEntity != null ||
+                        unitItem.onUseBuilding != null ||
+                        unitItem.onUseGround != null) {
+                    ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableInvIndex = invIndex;
+                    ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
+                    ItemClientEvents.leftClickUseItem = true;
+                }
             }
         };
         this.iconItem = itemStack;
@@ -77,6 +89,18 @@ public class UnitItemButton extends Button {
         this.itemStack = itemStack;
         this.invIndex = invIndex;
         this.invUUID = ItemUtil.getUUID(itemStack);
+    }
+
+    @Override
+    public void checkPressed(int key) {
+        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
+            return;
+
+        if (hotkey != null && hotkey.getKey() == key) {
+            if (MC.player != null)
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+            this.onLeftClickRelease.run();
+        }
     }
 
     private static final float GHOST_ALPHA = 0.45f;

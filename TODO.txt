@@ -26,6 +26,12 @@ Unit Items
     [❌] Add tooltips for food and merchant armour and make useable in inventory
     [❌] Save in HeroUnitSave
 
+    [❌] Allow giving of upgrade items like merchant items to appropriate units
+        - useOnEntity()
+    [❌] Allow eating of food in inventory
+        - use() -> Unit.startEatingFood()
+    [❌] Render UnitItemButton hotkey and charges
+
 Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too

@@ -141,6 +141,8 @@ public class CursorClientEvents {
         } else if (HudClientEvents.hudSelectedPlacement != null && (hudSelectedRIA = HudClientEvents.hudSelectedPlacement.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
             hudSelectedRIA.updateHighlightBps(HudClientEvents.hudSelectedPlacement);
         }
+        if (actionName != null)
+            ItemClientEvents.resetActions();
     }
 
     public static void setLeftClickSandboxAction(SandboxAction actionName) {
@@ -203,7 +205,7 @@ public class CursorClientEvents {
         } else if (leftClickAction != null && leftClickAction.equals(UnitAction.BUILD_REPAIR)) {
             RenderSystem.setShaderTexture(0, TEXTURE_SHOVEL);
             texture = TEXTURE_SHOVEL;
-        } else if (leftClickAction != null || leftClickSandboxAction != null) {
+        } else if (leftClickAction != null || leftClickSandboxAction != null || ItemClientEvents.hasLeftClickAction()) {
             RenderSystem.setShaderTexture(0, TEXTURE_CROSS);
             texture = TEXTURE_CROSS;
             cursorXoffset = -8;
