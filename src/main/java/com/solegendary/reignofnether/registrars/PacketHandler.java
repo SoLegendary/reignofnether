@@ -410,11 +410,13 @@ public final class PacketHandler {
 
         INSTANCE.messageBuilder(ItemServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ItemServerboundPacket::encode)
+                .decoder(ItemServerboundPacket::new)
                 .consumerMainThread(ItemServerboundPacket::handle)
                 .add();
 
         INSTANCE.messageBuilder(ItemClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(ItemClientboundPacket::encode)
+                .decoder(ItemClientboundPacket::new)
                 .consumerMainThread(ItemClientboundPacket::handle)
                 .add();
     }

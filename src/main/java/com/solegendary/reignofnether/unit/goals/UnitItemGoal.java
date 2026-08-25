@@ -107,12 +107,15 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                             }
                         }
                         case GIVE -> {
-                            if (leTarget instanceof UnitInventory inv2)
+                            if (leTarget instanceof UnitInventory inv2) {
                                 inv.giveTo(ItemUtil.getUUID(itemInHand), inv2);
+                            }
                         }
                         case PICKUP -> {
-                            if (itemTarget.isAlive() && inv.tryAdding(itemTarget.getItem()))
-                                itemTarget.discard(); // todo: actually pickup physically
+                            if (itemTarget.isAlive() && inv.tryAdding(itemTarget.getItem())) {
+                                this.mob.take(itemTarget, itemTarget.getItem().getCount());
+                                itemTarget.discard();
+                            }
                         }
                         case USE_ON_BLOCK -> inv.useOnGround(ItemUtil.getUUID(itemInHand), blockTarget);
                         case USE_ON_ENTITY -> inv.useOnEntity(ItemUtil.getUUID(itemInHand), leTarget);
@@ -129,5 +132,11 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
     @Override
     public void stop() {
         this.stopMoving();
+        this.itemInHand = null;
+        this.itemTarget = null;
+        this.leTarget = null;
+        this.blockTarget = null;
+        this.buildingTarget = null;
+        this.useItem = false;
     }
 }

@@ -54,7 +54,9 @@ public class ItemClientboundPacket {
 
     public static ItemStack readStack(FriendlyByteBuf buffer) {
         CompoundTag tag = buffer.readNbt();
-        return tag == null ? ItemStack.EMPTY : ItemStack.of(tag);
+        if (tag == null) return ItemStack.EMPTY;
+        ItemStack stack = ItemStack.of(tag);
+        return stack.isEmpty() ? ItemStack.EMPTY : stack; // normalise to the singleton
     }
 
     // client-side packet-consuming functions

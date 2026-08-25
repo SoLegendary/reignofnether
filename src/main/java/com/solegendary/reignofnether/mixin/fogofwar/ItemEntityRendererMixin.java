@@ -38,19 +38,8 @@ public abstract class ItemEntityRendererMixin {
     @Final @Shadow private ItemRenderer itemRenderer;
     @Final @Shadow private RandomSource random = RandomSource.create();
     @Shadow protected int getRenderAmount(ItemStack pStack) { return 0; }
-    
-    private static final List<Item> enlargedItems = List.of(
-        Items.GOLDEN_CHESTPLATE,
-        Items.GOLDEN_LEGGINGS,
-        Items.GOLDEN_BOOTS,
-        Items.GOLDEN_HELMET,
-        Items.NETHERITE_CHESTPLATE,
-        Items.NETHERITE_LEGGINGS,
-        Items.NETHERITE_BOOTS,
-        Items.NETHERITE_HELMET,
-        Items.NETHERITE_SWORD,
-        Items.TRIDENT
-    );
+
+    private final float LARGE_ITEM_SCALE = 2.25f;
 
     @Unique
     private boolean reignofnether$shouldRenderLargeItemEntity(ItemEntity itemEntity) {
@@ -59,7 +48,7 @@ public abstract class ItemEntityRendererMixin {
             return false;
         return ItemUtil.isPreparedEdibleFood(item) ||
                 ResourceSources.getFromItem(item) != null ||
-                enlargedItems.contains(item);
+                ItemUtil.isUnitItem(item);
     }
 
     @Inject(
@@ -85,7 +74,7 @@ public abstract class ItemEntityRendererMixin {
             ci.cancel();
 
             pPoseStack.pushPose();
-            pPoseStack.scale(2,2,2);
+            pPoseStack.scale(LARGE_ITEM_SCALE, LARGE_ITEM_SCALE, LARGE_ITEM_SCALE);
             ItemStack itemstack = pEntity.getItem();
             int i = itemstack.isEmpty() ? 187 : Item.getId(itemstack.getItem()) + itemstack.getDamageValue();
             this.random.setSeed(i);

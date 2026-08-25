@@ -15,10 +15,13 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -52,7 +55,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     @Override
     public boolean isFull() {
         for (ItemStack itemStack : getAllItems())
-            if (itemStack == ItemStack.EMPTY)
+            if (itemStack == ItemStack.EMPTY || itemStack.isEmpty())
                 return false;
         return true;
     }
@@ -76,21 +79,12 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public void set(int index, ItemStack stack, UUID uuid) {
-        CompoundTag uuidTag = new CompoundTag();
-        uuidTag.putUUID("uuid", uuid);
-        if (stack != null)
-            stack.setTag(uuidTag);
-        this.unitItems.set(index, stack == null ? ItemStack.EMPTY : stack);
-        syncToClient();
-    }
-
-    @Override
     public void set(int index, ItemStack stack) {
-        CompoundTag uuidTag = new CompoundTag();
-        uuidTag.putUUID("uuid", UUID.randomUUID());
-        if (stack != null)
-            stack.setTag(uuidTag);
+        if (stack != null) {
+            CompoundTag tag = stack.getOrCreateTag();
+            if (!tag.hasUUID("uuid"))
+                tag.putUUID("uuid", UUID.randomUUID());
+        }
         this.unitItems.set(index, stack == null ? ItemStack.EMPTY : stack);
         syncToClient();
     }
@@ -107,31 +101,17 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public boolean dropSlot(int index, BlockPos bp) {
-        ItemStack stack = this.unitItems.get(index);
-        if (!stack.isEmpty() && EnchantmentHelper.hasBindingCurse(stack)) {
-            return false;
-        }
-        if (!stack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(stack)) {
-            this.spawnAtLocation(stack);
-        }
-        this.unitItems.set(index, ItemStack.EMPTY);
-        syncToClient();
-        return true;
-    }
-
-    @Override
     public boolean dropUUID(UUID uuid, BlockPos bp) {
         for (int i = 0; i < unitItems.size(); i++) {
             ItemStack stack = get(i);
             if (stack != null && stack.getTag() != null && stack.getItem() != Items.AIR) {
                 UUID stackuuid = stack.getTag().getUUID("uuid");
                 if (stackuuid.equals(uuid) && !stack.isEmpty()) {
-                    if (EnchantmentHelper.hasBindingCurse(stack)) {
+                    if (!stack.isEmpty() && EnchantmentHelper.hasBindingCurse(stack)) {
                         return false;
                     }
-                    if (!EnchantmentHelper.hasVanishingCurse(stack)) {
-                        this.spawnAtLocation(stack);
+                    if (!stack.isEmpty()) {
+                        BehaviorUtils.throwItem(this, stack, bp.getCenter());
                     }
                     this.unitItems.set(i, ItemStack.EMPTY);
                     syncToClient();
@@ -177,8 +157,16 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Override
     public void giveTo(UUID uuid, UnitInventory inv) {
-        if (inv.tryAdding(get(uuid)))
-            this.deleteUUID(uuid);
+        ItemStack itemStack = get(uuid);
+        if (itemStack != null && !EnchantmentHelper.hasBindingCurse(itemStack)) {
+            if (inv.tryAdding(get(uuid))) {
+                this.deleteUUID(uuid);
+                ItemEntity itemEntity = this.spawnAtLocation(itemStack);
+                if (itemEntity != null)
+                    ((LivingEntity) inv).take(itemEntity, itemStack.getCount());
+            }
+        }
+
     }
 
     @Override
@@ -264,7 +252,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
         for (int i = 0; i < this.unitItems.size(); i++) {
             ItemStack stack = this.unitItems.get(i);
-            if (!stack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(stack)) {
+            if (!stack.isEmpty()) {
                 this.spawnAtLocation(stack);
             }
             this.unitItems.set(i, ItemStack.EMPTY);

@@ -450,6 +450,10 @@ public interface Unit {
             unitMob.push(0.005d * (bool1 ? -1 : 1), 0, 0.005d * (bool2 ? -1 : 1));
         }
          */
+
+        if (unit.getItemGoal() != null) {
+            unit.getItemGoal().tick();
+        }
     }
 
     private static void checkAndPickupResources(Unit unit) {
@@ -666,6 +670,8 @@ public interface Unit {
             if (unit.getUsePortalGoal() instanceof UsePortalGoal usePortalGoal)
                 usePortalGoal.stopUsingPortal();
         }
+        if (unit.getItemGoal() != null)
+            unit.getItemGoal().stop();
     }
 
     // can be overridden in the Unit's class to do additional logic on a reset

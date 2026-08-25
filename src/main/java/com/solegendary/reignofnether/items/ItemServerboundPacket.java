@@ -93,18 +93,6 @@ public class ItemServerboundPacket {
         ));
     }
 
-    // packet-handler functions
-    public ItemServerboundPacket(
-            String ownerName,
-            ItemAction action,
-            int unitId,
-            UUID itemUuid,
-            int targetId,
-            BlockPos targetPos
-    ) {
-        this(ownerName, action, unitId, itemUuid, targetId, targetPos, NO_INDEX, NO_INDEX);
-    }
-
     public ItemServerboundPacket(
             String ownerName,
             ItemAction action,

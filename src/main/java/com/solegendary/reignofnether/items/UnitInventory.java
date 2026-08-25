@@ -18,7 +18,6 @@ public interface UnitInventory {
     void set(int index, ItemStack stack, UUID uuid);
     void set(int index, ItemStack stack);
     void swapSlots(int index1, int index2);
-    boolean dropSlot(int index, BlockPos bp);
     boolean dropUUID(UUID uuid, BlockPos bp);
     boolean deleteUUID(UUID uuid);
     boolean tryAdding(ItemStack itemStack);

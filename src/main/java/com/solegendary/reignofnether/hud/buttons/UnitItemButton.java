@@ -170,7 +170,7 @@ public class UnitItemButton extends Button {
         String desc = unitItem.getDescription();
         if (desc != null)
             bodyLines.addAll(font.split(Component.literal(desc).withStyle(DESC_STYLE), smallWrapWidth));
-        for (String point : unitItem.getPointLines())
+        for (String point : unitItem.getPointLines()) // TODO: add enchantments
             bodyLines.addAll(font.split(
                     Component.literal("\u2022 " + point).withStyle(POINTS_STYLE), smallWrapWidth));
 

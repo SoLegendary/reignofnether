@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
@@ -42,8 +43,6 @@ import java.util.UUID;
 public class ItemClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
-
-    public static boolean isRenderingGroundItemTooltip = false;
 
     // UnitItem that the player right-clicked or is left-click dragging
     // Used for: dropping, giving to another unit, selling and rearranging inventory
@@ -143,7 +142,10 @@ public class ItemClientEvents {
         for (Button button : renderedButtons)
             button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
 
-        if (hasActionableItem() && HudClientEvents.hudSelectedEntity instanceof UnitInventory inv) {
+        if (hasActionableItem() &&
+            HudClientEvents.hudSelectedEntity instanceof UnitInventory inv &&
+            HudClientEvents.hudSelectedEntity instanceof Unit unit
+        ) {
             String playerName = MC.player.getName().getString();
             Button mousedOverButton = getMousedOverButton();
             Button hudMousedOverButton = HudClientEvents.getMousedOverButton();
@@ -157,6 +159,8 @@ public class ItemClientEvents {
                 Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
                 if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED) {
                     // Give via group button
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(hudMousedOverButton.entity, true));
                     ItemServerboundPacket.give(playerName, ((Entity) inv).getId(), actionableInvUUID, hudMousedOverButton.entity.getId());
                 }
             } else if (!HudClientEvents.isMouseOverAnyButtonOrHud()) {
@@ -171,15 +175,21 @@ public class ItemClientEvents {
                         le != HudClientEvents.hudSelectedEntity &&
                         (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED)) {
                         // Give via direct entity
+                        unit.getCheckpoints().clear();
+                        unit.getCheckpoints().add(new Checkpoint(le, true));
                         ItemServerboundPacket.give(playerName, ((Entity) inv).getId(), actionableInvUUID, le.getId());
                     }
                 } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
                         (rl == Relationship.FRIENDLY || rl == Relationship.OWNED)) {
                     // sell at market
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(bpl.originPos, true));
                     ItemServerboundPacket.sell(playerName, ((Entity) inv).getId(), actionableInvUUID, bpl.originPos);
                 } else {
                     BlockPos bp = CursorClientEvents.getPreselectedBlockPos();
                     // drop on ground
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(bp, true));
                     ItemServerboundPacket.drop(playerName, ((Entity) inv).getId(), actionableInvUUID, bp);
                 }
             }
@@ -206,7 +216,7 @@ public class ItemClientEvents {
             for (ItemEntity itemEntity : preselectedItems) {
                 ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
                 boolean isResourceItem = res != null && res.resourceValue > 0;
-                if (!isRenderingGroundItemTooltip && ItemUtil.isUnitItem(itemEntity) || isResourceItem || ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
+                if (ItemUtil.isUnitItem(itemEntity) || isResourceItem || ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
                     MyRenderer.drawBoxBottom(
                             evt.getPoseStack(),
                             itemEntity.getBoundingBox().inflate(0.25, 0, 0.25),
@@ -228,25 +238,23 @@ public class ItemClientEvents {
             mouseLeftDownY = 0;
         }
 
-        isRenderingGroundItemTooltip = false;
         if (OrthoviewClientEvents.isEnabled() && MC.screen instanceof TopdownGui) {
             for (ItemEntity itemEntity : preselectedItems) {
                 UnitItem unitItem = ItemUtil.getUnitItem(itemEntity.getItem().getItem());
                 if (unitItem != null && unitItem.enableTooltip) {
                     MyRenderer.renderItemEntityTooltip(evt.getGuiGraphics(), unitItem, itemEntity.getItem(), evt.getMouseX(), evt.getMouseY());
-                    isRenderingGroundItemTooltip = true;
                     break;
                 } else if (ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
                     UnitItem foodUnitItem = new EdibleFoodItem(itemEntity.getItem().getItem());
                     if (foodUnitItem.enableTooltip) {
                         MyRenderer.renderTooltip(evt.getGuiGraphics(), foodUnitItem.getTooltip(itemEntity.getItem()), evt.getMouseX(), evt.getMouseY());
-                        isRenderingGroundItemTooltip = true;
                     }
                     break;
                 }
             }
             if (hasActionableItem() && HudClientEvents.hudSelectedEntity instanceof Unit unit) {
-                actionableUnitItem.getButton(0, new ItemStack(actionableUnitItem.item), unit).renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
+                actionableUnitItem.getButton(0, new ItemStack(actionableUnitItem.item), unit)
+                        .renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
             }
         }
     }
@@ -265,16 +273,6 @@ public class ItemClientEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             mouseLeftDownX = (int) evt.getMouseX();
             mouseLeftDownY = (int) evt.getMouseY();
-        }
-        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-            if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
-                !preselectedItems.isEmpty() && MC.player != null) {
-                ItemServerboundPacket.pickup(
-                    MC.player.getName().getString(),
-                    HudClientEvents.hudSelectedEntity.getId(),
-                    preselectedItems.get(0).getId()
-                );
-            }
         }
     }
 }
