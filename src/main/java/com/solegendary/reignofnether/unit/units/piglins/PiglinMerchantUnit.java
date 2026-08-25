@@ -119,6 +119,9 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     public GarrisonGoal getGarrisonGoal() { return null; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
+
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
@@ -449,6 +452,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.castTNTGoal = new GenericTargetedSpellGoal(
                 this,
                 getAttackWindupTicks(),
@@ -489,6 +493,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, attackBuildingGoal);
+        this.goalSelector.addGoal(2, itemGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         //this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));

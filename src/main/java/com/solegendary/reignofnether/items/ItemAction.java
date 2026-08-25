@@ -9,5 +9,6 @@ public enum ItemAction {
     USE_ON_ENTITY,
     USE_ON_BUILDING,
     USE,
+    SWAP,
     NONE
 }

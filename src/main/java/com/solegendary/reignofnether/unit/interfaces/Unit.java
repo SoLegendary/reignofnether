@@ -941,4 +941,9 @@ public interface Unit {
     public default BuildingPlacement getGarrison() {
         return GarrisonableBuildingAddon.getGarrison(this);
     }
+
+    @Nullable
+    public default UnitItemGoal getItemGoal() {
+        return null;
+    }
 }

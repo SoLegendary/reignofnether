@@ -36,6 +36,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class ItemClientEvents {
@@ -77,13 +78,15 @@ public class ItemClientEvents {
     }
 
     public static boolean shouldRenderUnitInventory(Unit unit) {
-        return false;
-        /*
         return unit instanceof UnitInventory inv &&
                 (unit instanceof HeroUnit ||
                         !inv.getAllItems().isEmpty());
+    }
 
-         */
+    public static void syncInventory(int unitId, List<ItemStack> items) {
+        if (MC.level != null && MC.level.getEntity(unitId) instanceof UnitInventory inv)
+            for (int i = 0; i < items.size() && i < inv.getAllItems().size(); i++)
+                inv.set(i, items.get(i));
     }
 
     /*
@@ -133,13 +136,12 @@ public class ItemClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
-        if (MC.player == null)
+    public static void onLeftMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
+        if (MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
 
         for (Button button : renderedButtons)
-            if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1)
-                button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
+            button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
 
         if (hasActionableItem() && HudClientEvents.hudSelectedEntity instanceof UnitInventory inv) {
             String playerName = MC.player.getName().getString();
@@ -147,6 +149,7 @@ public class ItemClientEvents {
             Button hudMousedOverButton = HudClientEvents.getMousedOverButton();
             if (mousedOverButton instanceof UnitItemButton uiButton) {
                 inv.swapSlots(actionableInvIndex, uiButton.invIndex);
+                ItemServerboundPacket.swap(playerName, ((Entity) inv).getId(), actionableInvIndex, uiButton.invIndex);
             } else if (hudMousedOverButton != null &&
                     hudMousedOverButton.entity instanceof HeroUnit &&
                     hudMousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
@@ -179,13 +182,11 @@ public class ItemClientEvents {
                     // drop on ground
                     ItemServerboundPacket.drop(playerName, ((Entity) inv).getId(), actionableInvUUID, bp);
                 }
-            } // TODO: pickup preselectedItem
+            }
         }
-        if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-            actionableUnitItem = null;
-            mouseLeftDownX = 0;
-            mouseLeftDownY = 0;
-        }
+        actionableUnitItem = null;
+        mouseLeftDownX = 0;
+        mouseLeftDownY = 0;
     }
 
     private static Button getMousedOverButton() {
@@ -264,6 +265,16 @@ public class ItemClientEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             mouseLeftDownX = (int) evt.getMouseX();
             mouseLeftDownY = (int) evt.getMouseY();
+        }
+        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+            if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
+                !preselectedItems.isEmpty() && MC.player != null) {
+                ItemServerboundPacket.pickup(
+                    MC.player.getName().getString(),
+                    HudClientEvents.hudSelectedEntity.getId(),
+                    preselectedItems.get(0).getId()
+                );
+            }
         }
     }
 }

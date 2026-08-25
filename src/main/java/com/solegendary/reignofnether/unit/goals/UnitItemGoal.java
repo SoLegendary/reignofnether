@@ -10,10 +10,10 @@ import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -21,21 +21,28 @@ import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 
-// allows a unit to be able to mount any target as long as their ability allows them to
 public class UnitItemGoal extends MoveToTargetBlockGoal {
 
-
-
     public static final float RANGE = 2;
-    private ItemEntity itemTarget = null;
     private ItemStack itemInHand = null;
-    private Unit unitTarget = null;
+    private ItemEntity itemTarget = null;
+    private LivingEntity leTarget = null;
     private BlockPos blockTarget = null;
     private BuildingPlacement buildingTarget = null;
     private boolean useItem = false;
 
     public UnitItemGoal(Mob mob) {
         super(mob, false, 0);
+    }
+
+    public void start(ItemStack itemInHand, ItemEntity itemTarget, LivingEntity leTarget,
+                      BlockPos blockTarget, BuildingPlacement buildingTarget, boolean useItem) {
+        this.itemInHand = itemInHand;
+        this.itemTarget = itemTarget;
+        this.leTarget = leTarget;
+        this.blockTarget = blockTarget;
+        this.buildingTarget = buildingTarget;
+        this.useItem = useItem;
     }
 
     private ItemAction getAction() {
@@ -45,8 +52,10 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
             return useItem ? ItemAction.USE_ON_BLOCK : ItemAction.DROP;
         } else if (ItemUtil.isUnitItem(itemInHand) && buildingTarget != null) {
             return useItem ? ItemAction.USE_ON_BUILDING : ItemAction.SELL;
-        } else if (ItemUtil.isUnitItem(itemInHand) && unitTarget instanceof UnitInventory) {
-            return useItem ? ItemAction.USE_ON_ENTITY : ItemAction.GIVE;
+        } else if (ItemUtil.isUnitItem(itemInHand) && leTarget != null && useItem) {
+            return ItemAction.USE_ON_ENTITY;
+        } else if (ItemUtil.isUnitItem(itemInHand) && leTarget instanceof UnitInventory) {
+            return ItemAction.GIVE;
         } else if (ItemUtil.isUnitItem(itemTarget)) {
             return ItemAction.PICKUP;
         }
@@ -58,10 +67,10 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
         return switch (action) {
             case DROP, USE_ON_BLOCK -> blockTarget;
             case SELL, USE_ON_BUILDING -> buildingTarget.getClosestGroundPos(mob.getOnPos(), 0);
-            case GIVE, USE_ON_ENTITY -> ((Entity) unitTarget).getOnPos();
+            case GIVE, USE_ON_ENTITY -> leTarget.getOnPos();
             case PICKUP -> itemTarget.getOnPos();
             case USE -> mob.getOnPos();
-            case NONE -> null;
+            case NONE, SWAP -> null; // swap is done instantly in ItemServerEvents
         };
     }
 
@@ -72,8 +81,8 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
 
         if (getMoveTarget() != null && this.mob instanceof UnitInventory inv) {
             double distSqr;
-            if (unitTarget != null)
-                distSqr = this.mob.distanceToSqr((Entity) unitTarget);
+            if (leTarget != null)
+                distSqr = this.mob.distanceToSqr(leTarget);
             else
                 distSqr = this.mob.distanceToSqr(getMoveTarget().getCenter());
 
@@ -89,14 +98,16 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                                 if (mob instanceof Unit unit) {
                                     RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(unit.getOwnerName());
                                     if (rtsPlayer != null && unitItem != null) {
-                                        ResourcesServerEvents.addSubtractResources(new Resources(unit.getOwnerName(), 0, 0, 0, unitItem.sellValue));
+                                        Resources res = new Resources(unit.getOwnerName(), 0, 0, 0, unitItem.sellValue);
+                                        ResourcesServerEvents.addSubtractResources(res);
+                                        ResourcesClientboundPacket.showFloatingText(res, this.mob.getOnPos());
                                         // TODO: play money sound
                                     }
                                 }
                             }
                         }
                         case GIVE -> {
-                            if (unitTarget instanceof UnitInventory inv2)
+                            if (leTarget instanceof UnitInventory inv2)
                                 inv.giveTo(ItemUtil.getUUID(itemInHand), inv2);
                         }
                         case PICKUP -> {
@@ -104,10 +115,10 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                                 itemTarget.discard(); // todo: actually pickup physically
                         }
                         case USE_ON_BLOCK -> inv.useOnGround(ItemUtil.getUUID(itemInHand), blockTarget);
-                        case USE_ON_ENTITY -> inv.useOnEntity(ItemUtil.getUUID(itemInHand), (LivingEntity) unitTarget);
+                        case USE_ON_ENTITY -> inv.useOnEntity(ItemUtil.getUUID(itemInHand), leTarget);
                         case USE_ON_BUILDING -> inv.useOnBuilding(ItemUtil.getUUID(itemInHand), buildingTarget);
                         case USE -> inv.use(ItemUtil.getUUID(itemInHand));
-                        case NONE -> { }
+                        case NONE, SWAP -> { }
                     }
                 }
                 this.stop();

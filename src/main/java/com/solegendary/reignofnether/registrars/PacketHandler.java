@@ -25,6 +25,8 @@ import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonActionServerboundPacket;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientboundPacket;
+import com.solegendary.reignofnether.items.ItemClientboundPacket;
+import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerServerboundPacket;
 import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
@@ -393,16 +395,27 @@ public final class PacketHandler {
                 .decoder(FogBuildingClientboundPacket::new)
                 .consumerMainThread(FogBuildingClientboundPacket::handle)
                 .add();
-        
+
         INSTANCE.messageBuilder(CustomButtonActionServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(CustomButtonActionServerboundPacket::encode)
                 .decoder(CustomButtonActionServerboundPacket::decode)
                 .consumerMainThread(CustomButtonActionServerboundPacket::handle)
                 .add();
+
         INSTANCE.messageBuilder(CustomButtonClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(CustomButtonClientboundPacket::encode)
                 .decoder(CustomButtonClientboundPacket::decode)
                 .consumerMainThread(CustomButtonClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ItemServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ItemServerboundPacket::encode)
+                .consumerMainThread(ItemServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ItemClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ItemClientboundPacket::encode)
+                .consumerMainThread(ItemClientboundPacket::handle)
                 .add();
     }
 }

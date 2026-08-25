@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
@@ -81,6 +82,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         if (stack != null)
             stack.setTag(uuidTag);
         this.unitItems.set(index, stack == null ? ItemStack.EMPTY : stack);
+        syncToClient();
     }
 
     @Override
@@ -90,6 +92,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         if (stack != null)
             stack.setTag(uuidTag);
         this.unitItems.set(index, stack == null ? ItemStack.EMPTY : stack);
+        syncToClient();
     }
 
     @Override
@@ -100,6 +103,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack tmp = this.unitItems.get(index1);
         this.unitItems.set(index1, this.unitItems.get(index2));
         this.unitItems.set(index2, tmp);
+        syncToClient();
     }
 
     @Override
@@ -112,6 +116,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             this.spawnAtLocation(stack);
         }
         this.unitItems.set(index, ItemStack.EMPTY);
+        syncToClient();
         return true;
     }
 
@@ -129,6 +134,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                         this.spawnAtLocation(stack);
                     }
                     this.unitItems.set(i, ItemStack.EMPTY);
+                    syncToClient();
                     return true;
                 }
             }
@@ -147,6 +153,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                         return false;
                     }
                     this.unitItems.set(i, ItemStack.EMPTY);
+                    syncToClient();
                     return true;
                 }
             }
@@ -161,6 +168,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         for (int i = 0; i < getAllItems().size(); i++) {
             if (getAllItems().get(i).getItem() == Items.AIR) {
                 set(i, newItemStack);
+                syncToClient();
                 return true;
             }
         }
@@ -219,6 +227,11 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                 this.deleteUUID(uuid);
             }
         }
+    }
+
+    private void syncToClient() {
+        if (!this.level().isClientSide())
+            ItemClientboundPacket.syncToAll(this.getId(), getAllItems());
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))

@@ -59,6 +59,7 @@ public class UnitItemButton extends Button {
                 () -> {
                     ItemClientEvents.actionableUnitItem = unitItem;
                     ItemClientEvents.actionableInvIndex = invIndex;
+                    ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
                 },
                 null,
                 List.of()

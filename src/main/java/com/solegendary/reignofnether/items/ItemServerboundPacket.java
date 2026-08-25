@@ -15,12 +15,16 @@ import java.util.function.Supplier;
 
 public class ItemServerboundPacket {
 
+    private static final int NO_INDEX = -1;
+
     private final String ownerName; // player that is issuing this command
     private final ItemAction action;
     private final int unitId; // unit performing the action
-    private final UUID itemUuid; // uuid of the item in the unit's inventory (unused for PICKUP/NONE)
+    private final UUID itemUuid; // uuid of the item in the unit's inventory (unused for PICKUP/NONE/SWAP)
     private final int targetId; // GIVE/USE_ON_ENTITY: target unit, PICKUP: target ItemEntity (-1 if unused)
     private final BlockPos targetPos; // DROP/USE_ON_BLOCK: block, SELL/USE_ON_BUILDING: building pos (null if unused)
+    private final int invIndex1; // SWAP: first inventory slot (-1 if unused)
+    private final int invIndex2; // SWAP: second inventory slot (-1 if unused)
 
     // client-side senders: one per ItemAction, each taking only what that action needs
     public static void drop(String ownerName, int unitId, UUID itemUuid, BlockPos blockPos) {
@@ -55,6 +59,10 @@ public class ItemServerboundPacket {
         send(ownerName, ItemAction.USE, unitId, itemUuid, -1, null);
     }
 
+    public static void swap(String ownerName, int unitId, int invIndex1, int invIndex2) { // swaps two slots in the unit's inventory
+        send(ownerName, ItemAction.SWAP, unitId, null, -1, null, invIndex1, invIndex2);
+    }
+
     public static void none(String ownerName, int unitId) { // clears the unit's current item action
         send(ownerName, ItemAction.NONE, unitId, null, -1, null);
     }
@@ -67,7 +75,22 @@ public class ItemServerboundPacket {
             int targetId,
             BlockPos targetPos
     ) {
-        PacketHandler.INSTANCE.sendToServer(new ItemServerboundPacket(ownerName, action, unitId, itemUuid, targetId, targetPos));
+        send(ownerName, action, unitId, itemUuid, targetId, targetPos, NO_INDEX, NO_INDEX);
+    }
+
+    private static void send(
+            String ownerName,
+            ItemAction action,
+            int unitId,
+            UUID itemUuid,
+            int targetId,
+            BlockPos targetPos,
+            int invIndex1,
+            int invIndex2
+    ) {
+        PacketHandler.INSTANCE.sendToServer(new ItemServerboundPacket(
+                ownerName, action, unitId, itemUuid, targetId, targetPos, invIndex1, invIndex2
+        ));
     }
 
     // packet-handler functions
@@ -79,12 +102,27 @@ public class ItemServerboundPacket {
             int targetId,
             BlockPos targetPos
     ) {
+        this(ownerName, action, unitId, itemUuid, targetId, targetPos, NO_INDEX, NO_INDEX);
+    }
+
+    public ItemServerboundPacket(
+            String ownerName,
+            ItemAction action,
+            int unitId,
+            UUID itemUuid,
+            int targetId,
+            BlockPos targetPos,
+            int invIndex1,
+            int invIndex2
+    ) {
         this.ownerName = ownerName;
         this.action = action;
         this.unitId = unitId;
         this.itemUuid = itemUuid;
         this.targetId = targetId;
         this.targetPos = targetPos;
+        this.invIndex1 = invIndex1;
+        this.invIndex2 = invIndex2;
     }
 
     public ItemServerboundPacket(FriendlyByteBuf buffer) {
@@ -94,6 +132,14 @@ public class ItemServerboundPacket {
         this.itemUuid = buffer.readBoolean() ? buffer.readUUID() : null;
         this.targetId = buffer.readInt();
         this.targetPos = buffer.readBoolean() ? buffer.readBlockPos() : null;
+        if (buffer.readBoolean()) {
+            this.invIndex1 = buffer.readInt();
+            this.invIndex2 = buffer.readInt();
+        }
+        else {
+            this.invIndex1 = NO_INDEX;
+            this.invIndex2 = NO_INDEX;
+        }
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -107,6 +153,12 @@ public class ItemServerboundPacket {
         buffer.writeBoolean(this.targetPos != null);
         if (this.targetPos != null)
             buffer.writeBlockPos(this.targetPos);
+        boolean hasIndices = this.invIndex1 != NO_INDEX || this.invIndex2 != NO_INDEX;
+        buffer.writeBoolean(hasIndices);
+        if (hasIndices) {
+            buffer.writeInt(this.invIndex1);
+            buffer.writeInt(this.invIndex2);
+        }
     }
 
     // server-side packet-consuming functions
@@ -125,17 +177,17 @@ public class ItemServerboundPacket {
                 success.set(false);
             }
             else {
-                // TODO: wire up to goals and run in ItemServerEvents (and reset behaviours before usage)
-                /*
-                ItemServerEvents.addActionItem(
-                        this.ownerName,
-                        this.action,
-                        this.unitId,
-                        this.itemUuid,
-                        this.targetId,
-                        this.targetPos
-                );
-                 */
+                if (this.action == ItemAction.SWAP) {
+                    ItemServerEvents.swapItems(this.unitId, this.invIndex1, this.invIndex2);
+                } else {
+                    ItemServerEvents.doAction(
+                            this.action,
+                            this.unitId,
+                            this.itemUuid,
+                            this.targetId,
+                            this.targetPos
+                    );
+                }
                 success.set(true);
             }
         });
