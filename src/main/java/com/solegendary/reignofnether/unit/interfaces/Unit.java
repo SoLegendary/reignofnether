@@ -496,20 +496,27 @@ public interface Unit {
     private static void checkAndPickupEquipment(Unit unit) {
         Mob unitMob = (Mob) unit;
         for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
-
             Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
-            ItemStack itemstack = itementity.getItem();
-            if (unit.canPickUpEquipment(itemstack) && !itementity.isRemoved() &&
-                !itemstack.isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive() &&
-                (rl != Relationship.HOSTILE || itementity.tickCount > 100)) {
-
-                unitMob.onItemPickup(itementity);
-                unitMob.take(itementity, 1);
-                unit.onPickupEquipment(itemstack);
-                itementity.discard();
-                break;
+            if (rl != Relationship.HOSTILE) {
+                if (tryPickingUpEquipment(unit, itementity))
+                    break;
             }
         }
+    }
+
+    public static boolean tryPickingUpEquipment(Unit unit, ItemEntity itemEntity) {
+        Mob unitMob = (Mob) unit;
+        ItemStack itemstack = itemEntity.getItem();
+        if (unit.canPickUpEquipment(itemstack) && !itemEntity.isRemoved() &&
+                !itemstack.isEmpty() && !itemEntity.hasPickUpDelay() && unitMob.isAlive() &&
+                (itemEntity.tickCount >= 100)) {
+            unitMob.onItemPickup(itemEntity);
+            unitMob.take(itemEntity, 1);
+            unit.onPickupEquipment(itemstack);
+            itemEntity.discard();
+            return true;
+        }
+        return false;
     }
 
     default boolean canPickUpEquipment(ItemStack itemStack) { return false; }
@@ -522,7 +529,7 @@ public interface Unit {
         Mob unitMob = (Mob) unit;
         if (!unit.isHoldingEdibleFood()) {
             for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
-                if (itementity.isRemoved())
+                if (itementity.isRemoved() || itementity.tickCount < 10)
                     continue;
                 ItemStack itemstack = itementity.getItem();
                 if (itemstack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
@@ -532,10 +539,14 @@ public interface Unit {
                     continue;
                 }
                 Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
+                Item item = itemstack.getItem();
                 if (!itementity.isRemoved() && !itemstack.isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive() && !unit.getOwnerName().isEmpty() &&
-                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isPreparedEdibleFood(itemstack.getItem())) {
-                    if (ItemUtil.isPreparedEdibleFood(itemstack.getItem()) &&
-                            (unitMob.getHealth() < unitMob.getMaxHealth() || itemstack.getItem() == Items.ENCHANTED_GOLDEN_APPLE)) {
+                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isPreparedEdibleFood(item)) {
+
+                    boolean isApple = item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE;
+                    boolean noAbsorb = unitMob.getAbsorptionAmount() <= 0;
+                    boolean isHurt = unitMob.getHealth() < ((Mob) unit).getMaxHealth();
+                    if ((isApple && noAbsorb) || (!isApple && isHurt)) {
                         startEatingFood(unit, itementity);
                         break;
                     }
@@ -544,7 +555,7 @@ public interface Unit {
         }
     }
 
-    private static void startEatingFood(Unit unit, ItemEntity itemEntity) {
+    public static void startEatingFood(Unit unit, ItemEntity itemEntity) {
         ItemStack itemStack = itemEntity.getItem();
         ((LivingEntity) unit).onItemPickup(itemEntity);
         ((LivingEntity) unit).take(itemEntity, 1);

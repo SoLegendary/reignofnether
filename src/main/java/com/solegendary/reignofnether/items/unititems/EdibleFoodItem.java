@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.items.unititems;
 
 import com.solegendary.reignofnether.items.*;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -21,8 +24,16 @@ public class EdibleFoodItem extends UnitItem {
              .type(UnitItemType.CONSUMABLE)
              .desc(descStr("item.reignofnether.edible_food_item.desc"))
              .pointDesc(getPointDesc(item))
+             .consumeOnUse()
              .onUse(unit -> {
-                 // todo: start eating
+                 Mob mob = (Mob) unit;
+                 boolean isApple = item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE;
+                 boolean noAbsorb = mob.getAbsorptionAmount() <= 0;
+                 boolean isHurt = mob.getHealth() < ((Mob) unit).getMaxHealth();
+                 if ((isApple && noAbsorb) || (!isApple && isHurt)) {
+                     Unit.startEatingFood(unit, new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), new ItemStack(item)));
+                     return true;
+                 }
                  return false;
              })
          );

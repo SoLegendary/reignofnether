@@ -22,8 +22,8 @@ public interface UnitInventory {
     boolean deleteUUID(UUID uuid);
     boolean tryAdding(ItemStack itemStack);
     void giveTo(UUID uuid, UnitInventory inv);
-    void useOnGround(UUID uuid, BlockPos blockPos);
-    void useOnEntity(UUID uuid, LivingEntity entity);
-    void useOnBuilding(UUID uuid, BuildingPlacement building);
-    void use(UUID uuid);
+    boolean useOnGround(UUID uuid, BlockPos blockPos);
+    boolean useOnEntity(UUID uuid, LivingEntity entity);
+    boolean useOnBuilding(UUID uuid, BuildingPlacement building);
+    boolean use(UUID uuid);
 }

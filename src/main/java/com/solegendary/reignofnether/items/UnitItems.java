@@ -3,9 +3,14 @@ package com.solegendary.reignofnether.items;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -22,8 +27,22 @@ public class UnitItems {
             .desc(descStr("item.reignofnether.merchant_trident.desc"))
             .enchant(Enchantments.FLAMING_ARROWS, 1)
             .enchant(Enchantments.MOB_LOOTING, 1)
+            .consumeOnUse()
             .onUseEntity((unit, le) -> {
-                // todo: give to headhunters
+                if (le instanceof HeadhunterUnit headhunterUnit && !headhunterUnit.hasFlameTrident()) {
+                    Mob mob = (Mob) unit;
+                    UnitItem unitItem = ItemUtil.getUnitItem(Items.TRIDENT);
+                    if (unitItem != null) {
+                        ItemStack itemStack = unitItem.getNewItemStack();
+                        ItemEntity itemEntity = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), itemStack);
+                        mob.level().addFreshEntity(itemEntity);
+                        itemEntity.tickCount = 100;
+                        if (Unit.tryPickingUpEquipment(headhunterUnit, itemEntity))
+                            return true;
+                        else
+                            itemEntity.discard();
+                    }
+                }
                 return false;
             })
             .build();
@@ -34,8 +53,22 @@ public class UnitItems {
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_sword.png"))
             .desc(descStr("item.reignofnether.merchant_sword.desc"))
             .enchant(Enchantments.FIRE_ASPECT, 1)
+            .consumeOnUse()
             .onUseEntity((unit, le) -> {
-                // todo: give to brutes
+                if (le instanceof BruteUnit bruteUnit && !bruteUnit.hasEnchantedNetheriteSword()) {
+                    Mob mob = (Mob) unit;
+                    UnitItem unitItem = ItemUtil.getUnitItem(Items.NETHERITE_SWORD);
+                    if (unitItem != null) {
+                        ItemStack itemStack = unitItem.getNewItemStack();
+                        ItemEntity itemEntity = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), itemStack);
+                        mob.level().addFreshEntity(itemEntity);
+                        itemEntity.tickCount = 100;
+                        if (Unit.tryPickingUpEquipment(bruteUnit, itemEntity))
+                            return true;
+                        else
+                            itemEntity.discard();
+                    }
+                }
                 return false;
             })
             .build();
@@ -46,8 +79,28 @@ public class UnitItems {
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_chestplate.png"))
             .desc(descStr("item.reignofnether.merchant_chestplate.desc"))
             .pointDesc(descStr("item.reignofnether.merchant_chestplate.point1"))
+            .consumeOnUse()
             .onUseEntity((unit, le) -> {
-                // todo: give to brutes, headhunters, marauders or hoglin
+                boolean isCompatibleUnit =
+                        (le instanceof BruteUnit bruteUnit && !bruteUnit.hasNetheriteChestplate()) ||
+                        (le instanceof HeadhunterUnit headhunterUnit && !headhunterUnit.hasNetheriteChestplate()) ||
+                        (le instanceof MarauderUnit marauderUnit && !marauderUnit.hasNetheriteChestplate()) ||
+                        (le instanceof HoglinUnit && !(le instanceof ArmouredHoglinUnit));
+
+                if (le instanceof Unit unit1 && isCompatibleUnit) {
+                    Mob mob = (Mob) unit;
+                    UnitItem unitItem = ItemUtil.getUnitItem(Items.NETHERITE_CHESTPLATE);
+                    if (unitItem != null) {
+                        ItemStack itemStack = unitItem.getNewItemStack();
+                        ItemEntity itemEntity = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), itemStack);
+                        mob.level().addFreshEntity(itemEntity);
+                        itemEntity.tickCount = 100;
+                        if (Unit.tryPickingUpEquipment(unit1, itemEntity))
+                            return true;
+                        else
+                            itemEntity.discard();
+                    }
+                }
                 return false;
             })
             .build();

@@ -147,6 +147,9 @@ public class ItemClientEvents {
         if (MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
 
+        for (Button button : renderedButtons)
+            button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
+
         if (hasDragActionItem() &&
             HudClientEvents.hudSelectedEntity instanceof UnitInventory inv &&
             HudClientEvents.hudSelectedEntity instanceof Unit unit
@@ -154,7 +157,7 @@ public class ItemClientEvents {
             String playerName = MC.player.getName().getString();
             Button mousedOverButton = getMousedOverButton();
             Button hudMousedOverButton = HudClientEvents.getMousedOverButton();
-            if (mousedOverButton instanceof UnitItemButton uiButton) {
+            if (mousedOverButton instanceof UnitItemButton uiButton && actionableInvIndex != uiButton.invIndex) {
                 inv.swapSlots(actionableInvIndex, uiButton.invIndex);
                 ItemServerboundPacket.swap(playerName, ((Entity) inv).getId(), actionableInvIndex, uiButton.invIndex);
             } else if (hudMousedOverButton != null &&
@@ -199,12 +202,11 @@ public class ItemClientEvents {
                     ItemServerboundPacket.drop(playerName, ((Entity) inv).getId(), actionableInvUUID, bp);
                 }
             }
+            resetActions();
+            CursorClientEvents.setLeftClickAction(null);
         }
-        resetActions();
-        CursorClientEvents.setLeftClickAction(null);
 
-        for (Button button : renderedButtons)
-            button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
+        actionableUnitItem = null;
     }
 
     public static boolean hasLeftClickAction() {

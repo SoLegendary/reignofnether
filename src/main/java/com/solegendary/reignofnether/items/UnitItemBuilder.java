@@ -166,8 +166,8 @@ public class UnitItemBuilder {
         return this;
     }
 
-    public UnitItemBuilder consumeOnUse(boolean consumeOnUse) {
-        this.consumeOnUse = consumeOnUse;
+    public UnitItemBuilder consumeOnUse() {
+        this.consumeOnUse = true;
         return this;
     }
 

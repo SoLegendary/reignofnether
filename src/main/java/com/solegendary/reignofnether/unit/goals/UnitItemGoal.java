@@ -81,7 +81,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
         this.setMoveTarget(getMoveTargetForAction(action));
 
         if (getMoveTarget() != null && this.mob instanceof UnitInventory inv) {
-            double distSqr;
+            double distSqr = 0;
             if (leTarget != null)
                 distSqr = this.mob.distanceToSqr(leTarget);
             else
@@ -121,8 +121,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                         case USE_ON_BLOCK -> inv.useOnGround(ItemUtil.getUUID(itemInHand), blockTarget);
                         case USE_ON_ENTITY -> inv.useOnEntity(ItemUtil.getUUID(itemInHand), leTarget);
                         case USE_ON_BUILDING -> inv.useOnBuilding(ItemUtil.getUUID(itemInHand), buildingTarget);
-                        case USE -> inv.use(ItemUtil.getUUID(itemInHand));
-                        case NONE, SWAP -> { }
+                        case NONE, SWAP, USE -> { }
                     }
                 }
                 this.stop();

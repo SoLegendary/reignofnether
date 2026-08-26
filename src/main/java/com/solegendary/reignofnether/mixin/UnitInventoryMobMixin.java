@@ -160,15 +160,16 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             if (inv.tryAdding(get(uuid))) {
                 this.deleteUUID(uuid);
                 ItemEntity itemEntity = this.spawnAtLocation(itemStack);
-                if (itemEntity != null)
+                if (itemEntity != null) {
                     ((LivingEntity) inv).take(itemEntity, itemStack.getCount());
+                    itemEntity.discard();
+                }
             }
         }
-
     }
 
     @Override
-    public void useOnGround(UUID uuid, BlockPos blockPos) {
+    public boolean useOnGround(UUID uuid, BlockPos blockPos) {
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
@@ -177,13 +178,15 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     itemStack.setCount(itemStack.getCount() - 1);
                     if (itemStack.isEmpty())
                         this.deleteUUID(uuid);
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     @Override
-    public void useOnEntity(UUID uuid, LivingEntity entity) {
+    public boolean useOnEntity(UUID uuid, LivingEntity entity) {
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
@@ -192,13 +195,15 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     itemStack.setCount(itemStack.getCount() - 1);
                     if (itemStack.isEmpty())
                         this.deleteUUID(uuid);
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     @Override
-    public void useOnBuilding(UUID uuid, BuildingPlacement building) {
+    public boolean useOnBuilding(UUID uuid, BuildingPlacement building) {
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
@@ -207,13 +212,15 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     itemStack.setCount(itemStack.getCount() - 1);
                     if (itemStack.isEmpty())
                         this.deleteUUID(uuid);
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     @Override
-    public void use(UUID uuid) {
+    public boolean use(UUID uuid) {
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
@@ -222,9 +229,11 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     itemStack.setCount(itemStack.getCount() - 1);
                     if (itemStack.isEmpty())
                         this.deleteUUID(uuid);
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     private void syncToClient() {

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.hud.buttons;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -20,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -75,10 +77,16 @@ public class UnitItemButton extends Button {
                 null,
                 List.of()
         );
+        this.iconItem = itemStack;
+        this.unitItem = unitItem;
+        this.itemStack = itemStack;
+        this.invIndex = invIndex;
+        this.invUUID = ItemUtil.getUUID(itemStack);
+
         this.onLeftClickRelease = () -> { // actual item use actions
             if (!ItemClientEvents.hasDragActionItem()) {
                 if (unitItem.onUse != null) {
-                    unitItem.onUse.test(unit);
+                    ItemServerboundPacket.use(unit.getOwnerName(), ((Entity) unit).getId(), invUUID);
                 } else if (unitItem.onUseEntity != null ||
                         unitItem.onUseBuilding != null ||
                         unitItem.onUseGround != null) {
@@ -89,11 +97,6 @@ public class UnitItemButton extends Button {
                 }
             }
         };
-        this.iconItem = itemStack;
-        this.unitItem = unitItem;
-        this.itemStack = itemStack;
-        this.invIndex = invIndex;
-        this.invUUID = ItemUtil.getUUID(itemStack);
         if (hasUseAction())
             this.hotkey = hotkey;
     }

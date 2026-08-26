@@ -28,8 +28,6 @@ Unit Items
 
     [❌] Allow giving of upgrade items like merchant items to appropriate units
         - useOnEntity()
-    [❌] Allow eating of food in inventory
-        - use() -> Unit.startEatingFood()
     [❌] Error messages on different usage types:
         - use -> "Can't use that item right now"
         - useOnEntity -> "Can't use on that unit"
@@ -37,6 +35,7 @@ Unit Items
         - useOnGround -> "Can't use that item there"
     [❌] Mana costs
     [❌] Cooldown
+    [❌] Animations keep resetting on blank click
 
 Balance
 -------
