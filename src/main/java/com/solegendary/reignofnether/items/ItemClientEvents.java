@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.RectZone;
-import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
@@ -46,6 +45,7 @@ public class ItemClientEvents {
     // UnitItem that the player right-clicked or is left-click dragging
     // Used for: dropping, giving to another unit, selling and rearranging inventory
     public static UnitItem actionableUnitItem = null;
+    public static UnitItem actionableUnitItemDrag = null;
     public static int actionableInvIndex = 0;
     public static UUID actionableInvUUID = null;
     public static boolean leftClickUseItem = true;
@@ -73,7 +73,7 @@ public class ItemClientEvents {
     }
 
     public static boolean hasDragActionItem() {
-        return actionableUnitItem != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) && !hasLeftClickAction();
+        return actionableUnitItemDrag != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) && !hasLeftClickAction();
     }
 
     public static boolean shouldRenderUnitInventory(Unit unit) {
@@ -189,7 +189,7 @@ public class ItemClientEvents {
                     }
                 } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
                         (rl == Relationship.FRIENDLY || rl == Relationship.OWNED) &&
-                        actionableUnitItem != null && actionableUnitItem.sellValue > 0) {
+                        actionableUnitItemDrag != null && actionableUnitItemDrag.sellValue > 0) {
                     // sell at market
                     unit.getCheckpoints().clear();
                     unit.getCheckpoints().add(new Checkpoint(new BlockPos(bpl.centrePos.getX(), bpl.minCorner.getY(), bpl.centrePos.getZ()), true));
@@ -205,8 +205,7 @@ public class ItemClientEvents {
             resetActions();
             CursorClientEvents.setLeftClickAction(null);
         }
-
-        actionableUnitItem = null;
+        actionableUnitItemDrag = null;
     }
 
     public static boolean hasLeftClickAction() {
@@ -258,6 +257,7 @@ public class ItemClientEvents {
 
     public static void resetActions() {
         actionableUnitItem = null;
+        actionableUnitItemDrag = null;
         actionableInvUUID = null;
         actionableInvIndex = 0;
         leftClickUseItem = false;
@@ -311,7 +311,7 @@ public class ItemClientEvents {
                 }
             }
             if (hasDragActionItem() && HudClientEvents.hudSelectedEntity instanceof Unit unit) {
-                actionableUnitItem.getButton(0, new ItemStack(actionableUnitItem.item), unit, null)
+                actionableUnitItemDrag.getButton(0, new ItemStack(actionableUnitItemDrag.item), unit, null)
                         .renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
             }
         }

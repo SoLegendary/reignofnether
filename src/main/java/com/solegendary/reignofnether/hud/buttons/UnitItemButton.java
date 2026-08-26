@@ -63,14 +63,14 @@ public class UnitItemButton extends Button {
                 Button.DEFAULT_ICON_SIZE,
                 null,
                 null,
-                () -> ItemClientEvents.actionableUnitItem == unitItem &&
+                () -> ItemClientEvents.actionableUnitItemDrag == unitItem &&
                     ItemClientEvents.actionableInvIndex == invIndex &&
                     ItemClientEvents.actionableInvUUID == ItemUtil.getUUID(itemStack),
                 () -> false,
                 () -> true,
                 () -> {
-                    // drag actions
                     ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableUnitItemDrag = unitItem;
                     ItemClientEvents.actionableInvIndex = invIndex;
                     ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
                 },
@@ -94,6 +94,7 @@ public class UnitItemButton extends Button {
                     ItemClientEvents.actionableInvIndex = invIndex;
                     ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
                     ItemClientEvents.leftClickUseItem = true;
+                    ItemClientEvents.actionableUnitItemDrag = null;
                 }
             }
         };
