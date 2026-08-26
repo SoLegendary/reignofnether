@@ -86,6 +86,34 @@
         },
         {
             "type": "bitmap",
+            "file": "reignofnether:icons/items/sword.png",
+            "ascent": 8,
+            "height": 9,
+            "chars": ["\uE012"]
+        },
+        {
+            "type": "bitmap",
+            "file": "reignofnether:icons/items/sparkler.png",
+            "ascent": 8,
+            "height": 9,
+            "chars": ["\uE013"]
+        },
+        {
+            "type": "bitmap",
+            "file": "reignofnether:icons/items/chestplate.png",
+            "ascent": 8,
+            "height": 9,
+            "chars": ["\uE014"]
+        },
+        {
+            "type": "bitmap",
+            "file": "reignofnether:icons/items/boots.png",
+            "ascent": 8,
+            "height": 9,
+            "chars": ["\uE015"]
+        },
+        {
+            "type": "bitmap",
             "file": "minecraft:font/ascii.png",
             "ascent": 7,
             "chars": [

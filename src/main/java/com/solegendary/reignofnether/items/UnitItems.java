@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.items;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
+import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -21,6 +22,10 @@ public class UnitItems {
             .desc(descStr("item.reignofnether.merchant_trident.desc"))
             .enchant(Enchantments.FLAMING_ARROWS, 1)
             .enchant(Enchantments.MOB_LOOTING, 1)
+            .onUseEntity((unit, le) -> {
+                // todo: give to headhunters
+                return false;
+            })
             .build();
 
     public static final UnitItem MERCHANT_SWORD = UnitItemBuilder.of(Items.NETHERITE_SWORD)
@@ -29,8 +34,9 @@ public class UnitItems {
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_sword.png"))
             .desc(descStr("item.reignofnether.merchant_sword.desc"))
             .enchant(Enchantments.FIRE_ASPECT, 1)
-            .onUseEntity(le -> {
-                le.kill();
+            .onUseEntity((unit, le) -> {
+                // todo: give to brutes
+                return false;
             })
             .build();
 
@@ -40,6 +46,10 @@ public class UnitItems {
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_chestplate.png"))
             .desc(descStr("item.reignofnether.merchant_chestplate.desc"))
             .pointDesc(descStr("item.reignofnether.merchant_chestplate.point1"))
+            .onUseEntity((unit, le) -> {
+                // todo: give to brutes, headhunters, marauders or hoglin
+                return false;
+            })
             .build();
 
     private static final int EXPERIENCE_BOTTLE_EXP_VALUE = 100;

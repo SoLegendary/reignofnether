@@ -737,7 +737,9 @@ public class UnitClientEvents {
                     NonUnitClientEvents.canControlAllMobs())) {
                         addSelectedUnit(preselectedUnits.get(0));
                 }
-                else if (!deselected) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
+                else if (!deselected &&
+                        CursorClientEvents.getLeftClickAction() == null &&
+                        !ItemClientEvents.hasLeftClickAction()) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
                     clearSelectedUnits();
                     addSelectedUnit(preselectedUnits.get(0));
                 }

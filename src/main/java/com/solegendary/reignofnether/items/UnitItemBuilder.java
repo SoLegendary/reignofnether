@@ -3,9 +3,11 @@ package com.solegendary.reignofnether.items;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -13,7 +15,10 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Fluent builder for UnitItems.
@@ -52,10 +57,11 @@ public class UnitItemBuilder {
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     final List<String> pointDescs = new ArrayList<>();
     final List<AttributeModifier> getAttributeModifiers = new ArrayList<>();
-    Consumer<BlockPos> onUseGround = null;
-    Consumer<LivingEntity> onUseEntity = null;
-    Consumer<BuildingPlacement> onUseBuilding = null;
-    Runnable onUse = null;
+    BiPredicate<Unit, BlockPos> onUseGround = null;
+    BiPredicate<Unit, LivingEntity> onUseEntity = null;
+    BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
+    Predicate<Unit> onUse = null;
+    boolean consumeOnUse = false;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -140,24 +146,28 @@ public class UnitItemBuilder {
         return this;
     }
 
-    public UnitItemBuilder onUseGround(Consumer<BlockPos> onUseGround) {
+    public UnitItemBuilder onUseGround(BiPredicate<Unit, BlockPos> onUseGround) {
         this.onUseGround = onUseGround;
         return this;
     }
 
-    public UnitItemBuilder onUseEntity(Consumer<LivingEntity> onUseEntity) {
+    public UnitItemBuilder onUseEntity(BiPredicate<Unit, LivingEntity> onUseEntity) {
         this.onUseEntity = onUseEntity;
         return this;
     }
 
-    public UnitItemBuilder onUseBuilding(Consumer<BuildingPlacement> onUseBuilding) {
+    public UnitItemBuilder onUseBuilding(BiPredicate<Unit, BuildingPlacement> onUseBuilding) {
         this.onUseBuilding = onUseBuilding;
         return this;
     }
 
-    /** Invoked for untargeted activation. */
-    public UnitItemBuilder onUse(Runnable onUse) {
+    public UnitItemBuilder onUse(Predicate<Unit> onUse) {
         this.onUse = onUse;
+        return this;
+    }
+
+    public UnitItemBuilder consumeOnUse(boolean consumeOnUse) {
+        this.consumeOnUse = consumeOnUse;
         return this;
     }
 

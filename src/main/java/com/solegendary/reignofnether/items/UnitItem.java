@@ -18,7 +18,10 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 // items that can be held and used by RTS units, especially heroes
 // they are still registered as actual Minecraft items
@@ -44,10 +47,11 @@ public abstract class UnitItem {
     protected final List<Pair<Enchantment, Integer>> enchantments;
     protected final List<String> pointDescs;
     public final List<AttributeModifier> getAttributeModifiers;
-    public final Consumer<BlockPos> onUseGround;
-    public final Consumer<LivingEntity> onUseEntity;
-    public final Consumer<BuildingPlacement> onUseBuilding;
-    public final Runnable onUse;
+    public final BiPredicate<Unit, BlockPos> onUseGround;
+    public final BiPredicate<Unit, LivingEntity> onUseEntity;
+    public final BiPredicate<Unit, BuildingPlacement> onUseBuilding;
+    public final Predicate<Unit> onUse;
+    public final boolean consumeOnUse;
 
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
@@ -65,6 +69,7 @@ public abstract class UnitItem {
         this.onUseEntity = builder.onUseEntity;
         this.onUseBuilding = builder.onUseBuilding;
         this.onUse = builder.onUse;
+        this.consumeOnUse = builder.consumeOnUse;
     }
 
     public Item getItem() {
@@ -80,8 +85,8 @@ public abstract class UnitItem {
         return itemStack;
     }
 
-    public UnitItemButton getButton(int index, ItemStack itemStack, Unit unit) {
-        return new UnitItemButton(index, this, itemStack, unit);
+    public UnitItemButton getButton(int index, ItemStack itemStack, Unit unit, Keybinding hotkey) {
+        return new UnitItemButton(index, this, itemStack, unit, hotkey);
     }
 
     public Component getName() {

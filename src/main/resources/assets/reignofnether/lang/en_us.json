@@ -53,6 +53,7 @@
     "unititemtype.reignofnether.quest": "Quest",
     "unititemtype.reignofnether.upgrade": "Upgrade",
 
+    "item.reignofnether.hotkey": "Hotkey: %s",
     "item.reignofnether.throwable_tnt": "Throwable TNT",
     "item.reignofnether.thrown_hero_experience_bottle": "Bottle O'Hero Experience",
     "item.reignofnether.hero_experience_bottle.desc": "Drink to instantly gain %d experience.",
@@ -63,10 +64,10 @@
     "item.reignofnether.merchant_trident.desc": "An enchanted netherite trident that headhunters can equip",
     "item.reignofnether.merchant_sword.desc": "An enchanted netherite sword that brutes can equip",
     "item.reignofnether.merchant_chestplate.desc": "A netherite chestplate that piglins and hoglins can equip",
-    "item.reignofnether.merchant_chestplate.point1": "+30%% armour",
+    "item.reignofnether.merchant_chestplate.point1": "+30%% physical \uE014",
     "item.reignofnether.edible_food_item.desc": "A piece of food to be eaten or dropped for a friendly unit",
-    "item.reignofnether.edible_food_item_heal.point1": "+%d health",
-    "item.reignofnether.edible_food_item_absorb.point1": "+%d absorption",
+    "item.reignofnether.edible_food_item_heal.point1": "+%d \uE007",
+    "item.reignofnether.edible_food_item_absorb.point1": "+%d \uE011",
 
     "attribute.reignofnether.attack_damage": "Attack Damage",
     "attribute.reignofnether.attacks_per_second": "Attacks per Second",

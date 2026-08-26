@@ -9,7 +9,6 @@ import net.minecraft.world.item.Items;
 import java.util.List;
 
 import static com.solegendary.reignofnether.items.UnitItems.descStr;
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class EdibleFoodItem extends UnitItem {
@@ -22,6 +21,10 @@ public class EdibleFoodItem extends UnitItem {
              .type(UnitItemType.CONSUMABLE)
              .desc(descStr("item.reignofnether.edible_food_item.desc"))
              .pointDesc(getPointDesc(item))
+             .onUse(unit -> {
+                 // todo: start eating
+                 return false;
+             })
          );
     }
 
@@ -31,7 +34,7 @@ public class EdibleFoodItem extends UnitItem {
         } else if (item == Items.ENCHANTED_GOLDEN_APPLE) {
             return descStr("item.reignofnether.edible_food_item_absorb.point1", ENCHANTED_GOLDEN_APPLE_ABSORB);
         } else {
-            return descStr("item.reignofnether.edible_food_item_heal.point1", ItemUtil.getFoodHealAmount(new ItemStack(item)));
+            return descStr("item.reignofnether.edible_food_item_heal.point1", (int) ItemUtil.getFoodHealAmount(new ItemStack(item)));
         }
     }
 
@@ -43,7 +46,7 @@ public class EdibleFoodItem extends UnitItem {
         } else if (itemStack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
             healAmount = "\uE011   " + Math.round(ENCHANTED_GOLDEN_APPLE_ABSORB);
         } else {
-            healAmount = "\uE007   " + Math.round(ItemUtil.getFoodHealAmount(itemStack));
+            healAmount = "\uE007   " + (int) Math.round(ItemUtil.getFoodHealAmount(itemStack));
         }
         if (itemStack.getCount() > 1)
             healAmount += "   (x" + itemStack.getCount() + ")";

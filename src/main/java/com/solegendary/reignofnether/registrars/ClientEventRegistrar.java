@@ -111,6 +111,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(RtsDebugPathPreview.class);
         vanillaEventBus.register(PlayerChunksClientEvents.class);
         vanillaEventBus.register(CameraFadeClientEvents.class);
+        vanillaEventBus.register(ItemClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(GameruleServerEvents.class);
@@ -137,7 +138,6 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CommandsServerEvents.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
         vanillaEventBus.register(WorldBorderServerEvents.class);
-        vanillaEventBus.register(ItemClientEvents.class);
         vanillaEventBus.register(CustomButtonServerEvents.class);
         vanillaEventBus.register(ItemServerEvents.class);
     }

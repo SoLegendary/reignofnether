@@ -8,9 +8,12 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.RectZone;
+import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -103,16 +106,25 @@ public class ItemClientEvents {
     private static final int BUTTON_WIDTH = 22;
     public static final int INV_WIDTH = BUTTON_WIDTH * 2;
     public static final int INV_HEIGHT = BUTTON_WIDTH * 3;
+    public static final List<Keybinding> hotkeys = List.of(
+            Keybindings.item1,
+            Keybindings.item2,
+            Keybindings.item3,
+            Keybindings.item4,
+            Keybindings.item5,
+            Keybindings.item6
+    );
 
     public static RectZone renderUnitInventory(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, UnitInventory inv) {
         ItemClientEvents.renderedButtons.clear();
         for (int i = 0; i < inv.getAllItems().size(); i++) {
+            Keybinding hotkey = i < hotkeys.size() ? hotkeys.get(i) : null;
             ItemStack itemStack = inv.getAllItems().get(i);
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
             if (unitItem instanceof EmptyUnitItem emptyItem) {
                 ItemClientEvents.renderedButtons.add(emptyItem.getEmptySlotButton(i, hasDragActionItem(), (Unit) inv));
             } else if (unitItem != null) {
-                ItemClientEvents.renderedButtons.add(unitItem.getButton(i, itemStack, (Unit) inv));
+                ItemClientEvents.renderedButtons.add(unitItem.getButton(i, itemStack, (Unit) inv, hotkey));
             }
         }
         int i = 0;
@@ -189,6 +201,7 @@ public class ItemClientEvents {
             }
         }
         resetActions();
+        CursorClientEvents.setLeftClickAction(null);
 
         for (Button button : renderedButtons)
             button.checkClickedReleased((int) evt.getMouseX(), (int) evt.getMouseY(), true);
@@ -196,6 +209,13 @@ public class ItemClientEvents {
 
     public static boolean hasLeftClickAction() {
         return leftClickUseItem && actionableUnitItem != null && actionableInvUUID != null;
+    }
+
+    // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
+    @SubscribeEvent
+    public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
+        for (Button button : renderedButtons)
+            button.checkPressed(evt.getKeyCode());
     }
 
     @SubscribeEvent
@@ -226,9 +246,11 @@ public class ItemClientEvents {
                     ItemServerboundPacket.useOnEntity(playerName, ((Entity) inv).getId(), actionableInvUUID, UnitClientEvents.getPreselectedUnits().get(0).getId());
                 }
                 resetActions();
+                CursorClientEvents.setLeftClickAction(null);
             }
         } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             resetActions();
+            CursorClientEvents.setLeftClickAction(null);
         }
     }
 
@@ -237,7 +259,6 @@ public class ItemClientEvents {
         actionableInvUUID = null;
         actionableInvIndex = 0;
         leftClickUseItem = false;
-        CursorClientEvents.setLeftClickAction(null);
     }
 
     private static Button getMousedOverButton() {
@@ -288,7 +309,7 @@ public class ItemClientEvents {
                 }
             }
             if (hasDragActionItem() && HudClientEvents.hudSelectedEntity instanceof Unit unit) {
-                actionableUnitItem.getButton(0, new ItemStack(actionableUnitItem.item), unit)
+                actionableUnitItem.getButton(0, new ItemStack(actionableUnitItem.item), unit, null)
                         .renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
             }
         }

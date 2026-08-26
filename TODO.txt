@@ -30,7 +30,13 @@ Unit Items
         - useOnEntity()
     [❌] Allow eating of food in inventory
         - use() -> Unit.startEatingFood()
-    [❌] Render UnitItemButton hotkey and charges
+    [❌] Error messages on different usage types:
+        - use -> "Can't use that item right now"
+        - useOnEntity -> "Can't use on that unit"
+        - useOnBuilding -> "Can't use on that building"
+        - useOnGround -> "Can't use that item there"
+    [❌] Mana costs
+    [❌] Cooldown
 
 Balance
 -------

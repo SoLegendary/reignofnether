@@ -1,11 +1,9 @@
 package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.items.ItemClientboundPacket;
-import com.solegendary.reignofnether.items.ItemUtil;
-import com.solegendary.reignofnether.items.UnitInventory;
-import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -172,11 +170,14 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     @Override
     public void useOnGround(UUID uuid, BlockPos blockPos) {
         ItemStack itemStack = get(uuid);
-        if (itemStack != null) {
+        if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
             if (unitItem != null && unitItem.onUseGround != null) {
-                unitItem.onUseGround.accept(blockPos);
-                this.deleteUUID(uuid);
+                if (unitItem.onUseGround.test(unit, blockPos) && unitItem.consumeOnUse) {
+                    itemStack.setCount(itemStack.getCount() - 1);
+                    if (itemStack.isEmpty())
+                        this.deleteUUID(uuid);
+                }
             }
         }
     }
@@ -184,11 +185,14 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     @Override
     public void useOnEntity(UUID uuid, LivingEntity entity) {
         ItemStack itemStack = get(uuid);
-        if (itemStack != null) {
+        if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
             if (unitItem != null && entity.isAlive() && unitItem.onUseEntity != null) {
-                unitItem.onUseEntity.accept(entity);
-                this.deleteUUID(uuid);
+                if (unitItem.onUseEntity.test(unit, entity) && unitItem.consumeOnUse) {
+                    itemStack.setCount(itemStack.getCount() - 1);
+                    if (itemStack.isEmpty())
+                        this.deleteUUID(uuid);
+                }
             }
         }
     }
@@ -196,11 +200,14 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     @Override
     public void useOnBuilding(UUID uuid, BuildingPlacement building) {
         ItemStack itemStack = get(uuid);
-        if (itemStack != null) {
+        if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
             if (unitItem != null && !building.shouldBeDestroyed() && unitItem.onUseBuilding != null) {
-                unitItem.onUseBuilding.accept(building);
-                this.deleteUUID(uuid);
+                if (unitItem.onUseBuilding.test(unit, building) && unitItem.consumeOnUse) {
+                    itemStack.setCount(itemStack.getCount() - 1);
+                    if (itemStack.isEmpty())
+                        this.deleteUUID(uuid);
+                }
             }
         }
     }
@@ -208,11 +215,14 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     @Override
     public void use(UUID uuid) {
         ItemStack itemStack = get(uuid);
-        if (itemStack != null) {
+        if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
             if (unitItem != null) {
-                unitItem.onUse.run();
-                this.deleteUUID(uuid);
+                if (unitItem.onUse.test(unit) && unitItem.consumeOnUse) {
+                    itemStack.setCount(itemStack.getCount() - 1);
+                    if (itemStack.isEmpty())
+                        this.deleteUUID(uuid);
+                }
             }
         }
     }
