@@ -1,8 +1,11 @@
 package com.solegendary.reignofnether.hero;
 
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.HeroUnitSave;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
@@ -22,6 +25,7 @@ public class FallenHeroClientboundPacket {
     public int ability2Rank;
     public int ability3Rank;
     public int ability4Rank;
+    public NonNullList<ItemStack> items;
 
     public static void addFallenHero(HeroUnitSave heroUnitSave) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
@@ -38,6 +42,7 @@ public class FallenHeroClientboundPacket {
         this.ability2Rank = heroUnitSave.ability2Rank;
         this.ability3Rank = heroUnitSave.ability3Rank;
         this.ability4Rank = heroUnitSave.ability4Rank;
+        this.items = heroUnitSave.items;
     }
 
     public FallenHeroClientboundPacket(FriendlyByteBuf buffer) {
@@ -50,6 +55,9 @@ public class FallenHeroClientboundPacket {
         this.ability2Rank = buffer.readInt();
         this.ability3Rank = buffer.readInt();
         this.ability4Rank = buffer.readInt();
+        this.items = NonNullList.withSize(UnitInventory.MAX_INVENTORY_SIZE, ItemStack.EMPTY);
+        for (int i = 0; i < this.items.size(); i++)
+            this.items.set(i, buffer.readItem());
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -62,6 +70,8 @@ public class FallenHeroClientboundPacket {
         buffer.writeInt(this.ability2Rank);
         buffer.writeInt(this.ability3Rank);
         buffer.writeInt(this.ability4Rank);
+        for (ItemStack stack : this.items)
+            buffer.writeItem(stack);
     }
 
     // server-side packet-consuming functions
@@ -81,7 +91,8 @@ public class FallenHeroClientboundPacket {
                         ability1Rank,
                         ability2Rank,
                         ability3Rank,
-                        ability4Rank
+                        ability4Rank,
+                        items
                     ));
                     success.set(true);
                 });

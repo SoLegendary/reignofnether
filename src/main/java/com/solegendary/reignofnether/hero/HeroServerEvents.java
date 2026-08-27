@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.hero;
 
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -10,9 +11,11 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -69,6 +72,10 @@ public class HeroServerEvents {
         if (evt.getEntity() instanceof HeroUnit heroUnit) {
             String heroName = ((LivingEntity) heroUnit).getType().getDescriptionId();
             fallenHeroes.removeIf(fHero -> fHero.ownerName.equals(heroUnit.getOwnerName()) && fHero.name.equals(heroName));
+
+            NonNullList<ItemStack> items = heroUnit instanceof UnitInventory inv ?
+                    inv.getAllItems() : NonNullList.withSize(UnitInventory.MAX_INVENTORY_SIZE, ItemStack.EMPTY);
+
             HeroUnitSave fallenHero = new HeroUnitSave(
                     ((Entity) heroUnit).getStringUUID(),
                     heroName,
@@ -79,7 +86,8 @@ public class HeroServerEvents {
                     heroUnit.getHeroAbilities().size() > 0 ? heroUnit.getHeroAbilities().get(0).getRank(heroUnit) : 0,
                     heroUnit.getHeroAbilities().size() > 1 ? heroUnit.getHeroAbilities().get(1).getRank(heroUnit) : 0,
                     heroUnit.getHeroAbilities().size() > 2 ? heroUnit.getHeroAbilities().get(2).getRank(heroUnit) : 0,
-                    heroUnit.getHeroAbilities().size() > 3 ? heroUnit.getHeroAbilities().get(3).getRank(heroUnit) : 0
+                    heroUnit.getHeroAbilities().size() > 3 ? heroUnit.getHeroAbilities().get(3).getRank(heroUnit) : 0,
+                    items
             );
             fallenHeroes.add(fallenHero);
             FallenHeroClientboundPacket.addFallenHero(fallenHero);

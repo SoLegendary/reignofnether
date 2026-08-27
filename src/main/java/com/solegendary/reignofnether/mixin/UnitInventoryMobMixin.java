@@ -46,7 +46,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public List<ItemStack> getAllItems() {
+    public NonNullList<ItemStack> getAllItems() {
         return this.unitItems;
     }
 

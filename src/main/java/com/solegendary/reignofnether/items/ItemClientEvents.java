@@ -237,14 +237,24 @@ public class ItemClientEvents {
             String playerName = MC.player.getName().getString();
             if (hasLeftClickAction() &&
                 HudClientEvents.hudSelectedEntity instanceof UnitInventory inv) {
+                Unit unit = (Unit) inv;
                 if (actionableUnitItem.onUseGround != null) {
-                    ItemServerboundPacket.useOnBlock(playerName, ((Entity) inv).getId(), actionableInvUUID, CursorClientEvents.getPreselectedBlockPos());
+                    BlockPos pos = CursorClientEvents.getPreselectedBlockPos();
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(pos, true));
+                    ItemServerboundPacket.useOnBlock(playerName, ((Entity) inv).getId(), actionableInvUUID, pos);
                 } else if (actionableUnitItem.onUseBuilding != null &&
                     BuildingClientEvents.getPreselectedBuilding() != null) {
-                    ItemServerboundPacket.useOnBuilding(playerName, ((Entity) inv).getId(), actionableInvUUID, BuildingClientEvents.getPreselectedBuilding().originPos);
+                    BuildingPlacement bpl = BuildingClientEvents.getPreselectedBuilding();
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(new BlockPos(bpl.centrePos.getX(), bpl.minCorner.getY(), bpl.centrePos.getZ()), true));
+                    ItemServerboundPacket.useOnBuilding(playerName, ((Entity) inv).getId(), actionableInvUUID, bpl.originPos);
                 } else if (actionableUnitItem.onUseEntity != null &&
                     !UnitClientEvents.getPreselectedUnits().isEmpty()) {
-                    ItemServerboundPacket.useOnEntity(playerName, ((Entity) inv).getId(), actionableInvUUID, UnitClientEvents.getPreselectedUnits().get(0).getId());
+                    LivingEntity le = UnitClientEvents.getPreselectedUnits().get(0);
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(le, true));
+                    ItemServerboundPacket.useOnEntity(playerName, ((Entity) inv).getId(), actionableInvUUID, le.getId());
                 }
                 resetActions();
                 CursorClientEvents.setLeftClickAction(null);

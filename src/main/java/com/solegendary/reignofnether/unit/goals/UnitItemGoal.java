@@ -129,6 +129,10 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
         }
     }
 
+    public boolean isIdle() {
+        return moveTarget == null;
+    }
+
     @Override
     public void stop() {
         this.stopMoving();

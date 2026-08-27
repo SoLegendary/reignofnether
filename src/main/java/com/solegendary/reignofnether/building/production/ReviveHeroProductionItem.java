@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -66,6 +67,10 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                     }
                     for (HeroAbility abl : newHero.getHeroAbilities())
                         abl.updateStatsForRank(newHero);
+
+                    if (newHero instanceof UnitInventory inv)
+                        for (int i = 0; i < inv.getAllItems().size() && i < oldHero.items.size(); i++)
+                            inv.set(i, oldHero.items.get(i));
                 }
                 HeroServerEvents.fallenHeroes.remove(oldHero);
             } else {
@@ -90,7 +95,6 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
 
     @Override
     public ResourceCost getCost(boolean isClientSide, String ownerName) {
-        ArrayList<HeroUnitSave> heroSaves = isClientSide ? HeroClientEvents.fallenHeroes : HeroServerEvents.fallenHeroes;
         HeroUnitSave heroSave = HeroUnit.getFallenHero(isClientSide, ownerName, getHeroEntityType().getDescriptionId());
         if (heroSave != null)
             return HeroUnit.getReviveCost(HeroUnit.getHeroLevel(heroSave.experience));

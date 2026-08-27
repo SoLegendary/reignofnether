@@ -770,7 +770,8 @@ public interface Unit {
                 this.getFollowTarget() == null &&
                 idleAttacker &&
                 idleWorker &&
-                idleRangedAttacker;
+                idleRangedAttacker &&
+                (getItemGoal() == null || getItemGoal().isIdle());
     }
 
     static Random RANDOM = new Random();

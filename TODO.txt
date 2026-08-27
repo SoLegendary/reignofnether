@@ -20,14 +20,10 @@ Emerald Resource
 Unit Items
     [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
         [❌] Should be visible to all players
-    [❌] Allow use (no target, ground, entity, building)
     [❌] Add attribute modifications
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
-    [❌] Add tooltips for food and merchant armour and make useable in inventory
-    [❌] Save in HeroUnitSave
+    [🟡] Save in HeroUnitSave
 
-    [❌] Allow giving of upgrade items like merchant items to appropriate units
-        - useOnEntity()
     [❌] Error messages on different usage types:
         - use -> "Can't use that item right now"
         - useOnEntity -> "Can't use on that unit"
@@ -35,7 +31,6 @@ Unit Items
         - useOnGround -> "Can't use that item there"
     [❌] Mana costs
     [❌] Cooldown
-    [❌] Animations keep resetting on blank click
 
 Balance
 -------

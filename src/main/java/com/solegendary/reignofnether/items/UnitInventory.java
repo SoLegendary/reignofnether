@@ -2,16 +2,16 @@ package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface UnitInventory {
     int MAX_INVENTORY_SIZE = 6;
 
-    List<ItemStack> getAllItems();
+    NonNullList<ItemStack> getAllItems();
     boolean isFull();
     ItemStack get(int index);
     ItemStack get(UUID uuid);
