@@ -943,11 +943,14 @@ public class BuildingPlacement {
         }
 
         // check and do animal spawns around capitols for consistent hunting sources
-        if (isCapitol && isBuilt) {
+        if (!this.level.isClientSide() && isCapitol && isBuilt) {
             ticksToSpawnAnimals += 1;
             if (ticksToSpawnAnimals >= ticksToSpawnAnimalsMax) {
                 ticksToSpawnAnimals = 0;
-                spawnHuntableAnimalsNearby(animalSpawnBlockRange);
+                if (FogOfWarServerEvents.isEnabled())
+                    spawnHuntableAnimalsNearby(animalSpawnBlockRange / 2);
+                else
+                    spawnHuntableAnimalsNearby(animalSpawnBlockRange);
             }
         }
         if (isBuilt) {

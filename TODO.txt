@@ -17,12 +17,22 @@ Emerald Resource
     [❌] Show in top left if you have any
     [❌] Neutrals now give emerald bounties
 
+Shops
+    [❌] Shop buy screen
+        - New floating menu opened from bottom left OR by right-clicking with hero (once in range)
+        - Add building addon - ItemShop
+        - Hero served == hudSelectedUnit
+        - Stock == items in chest in structure
+        - Custom tags:
+            - Infinite stock
+            - Unique (no stacking effects with multiples held)
+            - Buy cooldown
+
 Unit Items
     [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
         [❌] Should be visible to all players
     [❌] Add attribute modifications
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
-    [🟡] Save in HeroUnitSave
 
     [❌] Error messages on different usage types:
         - use -> "Can't use that item right now"
@@ -32,6 +42,12 @@ Unit Items
     [❌] Mana costs
     [❌] Cooldown
 
+
+Server tests
+    [🟡] Save in HeroUnitSave
+    [🟡] All drag actions
+    [🟡] All use types
+
 Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
@@ -39,7 +55,7 @@ Balance
 
 Quality of Life
 ---------------
-
+[🟡] When fog of war is enabled, animals spawn much closer to capitols
 
 Bugfixes
 --------
@@ -47,6 +63,16 @@ Bugfixes
 
 [🟡] Fixed fallen heroes not being revivable if you relogged while they were dead
 
+[❌] Animals still spawning in weird places
+
 Languages
 ---------
-
+[🟡] Updated Spanish (es_es)
+    - Thanks @Ikrlegido12!
+    - This has also been added as a fallback for all South American Spanish locales, including:
+        - Argentina (es_ar)
+        – Chile (es_cl)
+        – Ecuador (es_ec)
+        - México (es_mx)
+        – Uruguay (es_uy)
+        – Venezuela (es_ve)
