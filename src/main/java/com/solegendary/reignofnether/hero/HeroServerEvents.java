@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -109,8 +110,10 @@ public class HeroServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         for (HeroUnitSave fallenHero : fallenHeroes) {
-            if (fallenHero.ownerName.equals(evt.getEntity().getType().getDescriptionId()))
-                FallenHeroClientboundPacket.addFallenHero(fallenHero);
+            if (evt.getEntity() instanceof ServerPlayer sp &&
+                fallenHero.ownerName.equals(sp.getName().getString())) {
+                FallenHeroClientboundPacket.addFallenHero(sp, fallenHero);
+            }
         }
     }
 }

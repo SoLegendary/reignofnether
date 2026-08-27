@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.hero;
 
 import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.HeroUnitSave;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -28,7 +30,16 @@ public class FallenHeroClientboundPacket {
     public NonNullList<ItemStack> items;
 
     public static void addFallenHero(HeroUnitSave heroUnitSave) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        for (ServerPlayer sp : PlayerServerEvents.players) {
+            if (sp.getName().getString().equals(heroUnitSave.ownerName)) {
+                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp),
+                        new FallenHeroClientboundPacket(heroUnitSave));
+            }
+        }
+    }
+
+    public static void addFallenHero(ServerPlayer player, HeroUnitSave heroUnitSave) {
+        PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
                 new FallenHeroClientboundPacket(heroUnitSave));
     }
 

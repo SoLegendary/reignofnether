@@ -45,7 +45,7 @@ Bugfixes
 --------
 [❌] cat/dog at the start should also match the TC mode
 
-[❌] Relogging doesn't sync buildings if a new structure is added
+[🟡] Fixed fallen heroes not being revivable if you relogged while they were dead
 
 Languages
 ---------
