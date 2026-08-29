@@ -36,6 +36,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -548,8 +549,8 @@ public class CommandsServerEvents {
 		try {
 			action = UnitAction.valueOf(actionName.trim().toUpperCase());
 		} catch (IllegalArgumentException ex) {
-			ctx.getSource().sendFailure(Component.literal(
-				"Unknown action '" + actionName + "'. Valid values: " +
+			ctx.getSource().sendFailure(Component.translatable(
+				"commands.reignofnether.action.unknown.details", actionName,
 					java.util.Arrays.stream(UnitAction.values())
 						.map(a -> a.name().toLowerCase())
 						.collect(java.util.stream.Collectors.joining(", "))
@@ -558,7 +559,7 @@ public class CommandsServerEvents {
 		}
 		int[] unitIds = collectUnitIds(selectFrom, selectTo);
 		if (unitIds.length == 0) {
-			ctx.getSource().sendFailure(Component.literal("No units found in the selection"));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.unit.selection.none"));
 			return 0;
 		}
 		int[] targetUnitIds = new int[]{};
@@ -575,12 +576,13 @@ public class CommandsServerEvents {
 			new BlockPos(0, 0, 0)
 		);
 		item.action(ctx.getSource().getLevel());
-		
+
+		String ownersText = ownerName.isEmpty() ? "" : I18n.get("commands.reignofnether.unit.action.issue.owner", ownerName);
 		ctx.getSource().sendSuccess(
-			() -> Component.literal(
-				"Issued " + action.name().toLowerCase() +
-					" to " + unitIds.length + " unit(s)" +
-					(ownerName.isEmpty() ? "" : " (owner: " + ownerName + ")")
+			() -> Component.translatable(
+				"commands.reignofnether.unit.action.issue.with_owner.success",
+					action.name().toLowerCase(),
+					unitIds.length, ownersText
 			),
 			true
 		);
@@ -638,7 +640,7 @@ public class CommandsServerEvents {
 		});
 		
 		if (entity == null) {
-			ctx.getSource().sendFailure(Component.literal("Failed to create entity: " + entityId));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.entity.create.failed", entityId));
 			return 0;
 		}
 		level.addFreshEntity(entity);
@@ -649,7 +651,7 @@ public class CommandsServerEvents {
 		}
 		
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Summoned " + entityId + " for " + ownerName + " at " + formatPos(pos)), true
+			() -> Component.translatable("commands.reignofnether.entity.summon.success", entityId, ownerName, formatPos(pos)), true
 		);
 		return 1;
 	}
@@ -661,7 +663,7 @@ public class CommandsServerEvents {
 			case "180" -> Rotation.CLOCKWISE_180;
 			case "270" -> Rotation.COUNTERCLOCKWISE_90;
 			default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
-				.create("Invalid rotation: " + input);
+				.create(I18n.get("commands.reignofnether.entity.rotation.invalid", input));
 		};
 	}
 	
@@ -727,12 +729,12 @@ public class CommandsServerEvents {
 			true
 		);
 		if (placement == null) {
-			ctx.getSource().sendFailure(Component.literal("Unable to place building at " + formatPos(pos)));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.building.place.unable", formatPos(pos)));
 			return 0;
 		}
 		placement.selfBuilding = autoBuild;
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Placed " + building.name + " for " + ownerName + " at " + formatPos(pos)),
+			() -> Component.translatable("commands.reignofnether.building.place.success", building.name, ownerName, formatPos(pos)),
 			true
 		);
 		return 1;
@@ -748,11 +750,11 @@ public class CommandsServerEvents {
 		}
 		
 		if (removed == 0) {
-			source.sendFailure(Component.literal("No buildings found at " + formatPos(pos)));
+			source.sendFailure(Component.translatable("commands.reignofnether.building.not_found", formatPos(pos)));
 		} else {
 			int finalRemoved = removed;
 			source.sendSuccess(
-				() -> Component.literal("Destroyed " + finalRemoved + " building(s) at " + formatPos(pos)),
+				() -> Component.translatable("commands.reignofnether.building.destroy.at", finalRemoved, formatPos(pos)),
 				true
 			);
 		}
@@ -783,7 +785,7 @@ public class CommandsServerEvents {
 		}
 		SandboxServer.setUnitOwner(idArray, ownerName);
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Assigned " + ids.size() + " unit(s) to " + ownerName),
+			() -> Component.translatable("commands.reignofnether.unit.assign.success", ids.size(), ownerName),
 			true
 		);
 		return ids.size();
@@ -805,11 +807,11 @@ public class CommandsServerEvents {
 			}
 		}
 		if (changed == 0) {
-			ctx.getSource().sendFailure(Component.literal("No buildings found in selection"));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.building.selection.none"));
 		} else {
 			int finalChanged = changed;
 			ctx.getSource().sendSuccess(
-				() -> Component.literal("Updated owner for " + finalChanged + " building(s)"),
+				() -> Component.translatable("commands.reignofnether.building.owner.update", finalChanged),
 				true
 			);
 		}
@@ -825,7 +827,7 @@ public class CommandsServerEvents {
 		int[] ids = collectUnitIds(from, to);
 		SandboxServer.setAnchor(ids, anchor);
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Set anchor for " + ids.length + " unit(s)"),
+			() -> Component.translatable("commands.reignofnether.unit.anchor.set.success", ids.length),
 			true
 		);
 		return ids.length;
@@ -839,7 +841,7 @@ public class CommandsServerEvents {
 		int[] ids = collectUnitIds(from, to);
 		SandboxServer.removeAnchor(ids);
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Removed anchor for " + ids.length + " unit(s)"),
+			() -> Component.translatable("commands.reignofnether.unit.anchor.remove.success", ids.length),
 			true
 		);
 		return ids.length;
@@ -859,7 +861,7 @@ public class CommandsServerEvents {
 		
 		ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore, emerald));
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Changed " + resource.name().toLowerCase() + " by " + amount + " for " + playerName),
+			() -> Component.translatable("commands.reignofnether.player.resource.add", I18n.get("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
 			true
 		);
 		return 1;
@@ -873,7 +875,7 @@ public class CommandsServerEvents {
 		ResearchServerEvents.addResearch(playerName, researchItemName);
 		ResearchServerEvents.syncResearch(playerName);
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Added research '" + researchItemName + "' for " + playerName),
+			() -> Component.translatable("commands.reignofnether.research.add.success", researchItemName, playerName),
 			true
 		);
 		return 1;
@@ -887,7 +889,7 @@ public class CommandsServerEvents {
 		ResearchServerEvents.removeResearch(playerName, researchItemName);
 		ResearchServerEvents.syncResearch(playerName);
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Removed research '" + researchItemName + "' for " + playerName),
+			() -> Component.translatable("commands.reignofnether.research.remove.success", researchItemName, playerName),
 			true
 		);
 		return 1;
@@ -916,11 +918,11 @@ public class CommandsServerEvents {
 			}
 		}
 		if (changed == 0) {
-			ctx.getSource().sendFailure(Component.literal("No attacker units owned by '" + ownerName + "' found in selection"));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.unit.attacker.not_found", ownerName));
 		} else {
 			int finalChanged = changed;
 			ctx.getSource().sendSuccess(
-				() -> Component.literal("Set search behaviour to " + behaviour.name() + " for " + finalChanged + " unit(s)"),
+				() -> Component.translatable("commands.reignofnether.behaviour.set", behaviour.name(), finalChanged),
 				true
 			);
 		}
@@ -934,7 +936,7 @@ public class CommandsServerEvents {
 	) {
 		PlayerClientboundPacket.setRTSCamera(playerName, value);
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Set RTS camera '" + value + "' for " + playerName),
+			() -> Component.translatable("commands.reignofnether.player.rts_camera.set", value, playerName),
 			true
 		);
 		return 1;
@@ -985,17 +987,17 @@ public class CommandsServerEvents {
 			return 0;
 		}
 		if (RTSMapInfoServerEvents.rtsMapInfo == null) {
-			ctx.getSource().sendFailure(Component.literal("No rtsMapInfo loaded"));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.rtsmap.not_load"));
 			return 0;
 		}
 		if (!RTSMapInfoServerEvents.rtsMapInfo.supportsMode(mode)) {
-			ctx.getSource().sendFailure(Component.literal("Unknown mode '" + mode + "' - not present in this map's modes"));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.rtsmap.unknown_mode", mode));
 			return 0;
 		}
 		RTSMapInfoServerEvents.rtsMapInfo.setDefaultMode(mode);
 		RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MODE, RTSMapInfoServerEvents.rtsMapInfo.getDefaultMode());
 		ctx.getSource().sendSuccess(
-			() -> Component.literal("Set starting teams mode to '" + mode + "'"),
+			() -> Component.translatable("commands.reignofnether.rtsmap.starting_team_mode.set", mode),
 			true
 		);
 		StartPosServerEvents.loadPositionsFromMapInfo();
@@ -1009,15 +1011,15 @@ public class CommandsServerEvents {
 		String playerName2
 	) {
 		if (playerName1.equals(playerName2)) {
-			ctx.getSource().sendFailure(Component.literal("Cannot ally a player with themselves"));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.ally_self"));
 			return 0;
 		}
 		if (!PlayerServerEvents.isRTSPlayer(playerName1)) {
-			ctx.getSource().sendFailure(Component.literal("Unknown RTS player '" + playerName1 + "'"));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.unknown", playerName1));
 			return 0;
 		}
 		if (!PlayerServerEvents.isRTSPlayer(playerName2)) {
-			ctx.getSource().sendFailure(Component.literal("Unknown RTS player '" + playerName2 + "'"));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.unknown", playerName2));
 			return 0;
 		}
 
@@ -1025,22 +1027,22 @@ public class CommandsServerEvents {
 
 		if (value) {
 			if (alreadyAllied) {
-				ctx.getSource().sendFailure(Component.literal(playerName1 + " and " + playerName2 + " are already allied"));
+				ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.ally.already", playerName1, playerName2));
 				return 0;
 			}
 			AlliancesServerEvents.addAlliance(playerName1, playerName2);
 			ctx.getSource().sendSuccess(
-					() -> Component.literal("Allied " + playerName1 + " and " + playerName2),
+					() -> Component.translatable("commands.reignofnether.player.ally.success", playerName1, playerName2),
 					true
 			);
 		} else {
 			if (!alreadyAllied) {
-				ctx.getSource().sendFailure(Component.literal(playerName1 + " and " + playerName2 + " are not allied"));
+				ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.ally.not_allied", playerName1, playerName2));
 				return 0;
 			}
 			AlliancesServerEvents.removeAlliance(playerName1, playerName2);
 			ctx.getSource().sendSuccess(
-					() -> Component.literal("Unallied " + playerName1 + " and " + playerName2),
+					() -> Component.translatable("commands.reignofnether.player.unally.success", playerName1, playerName2),
 					true
 			);
 		}

@@ -269,11 +269,6 @@ public class ScenarioMenu {
         if (role == null)
             return List.of();
 
-        // TODO:
-        // Scenario Name
-        // Scenario opening message
-        // Scenario starting time
-
         Button factionButton = new Button(
             "Toggle Faction",
             Button.itemIconSize,

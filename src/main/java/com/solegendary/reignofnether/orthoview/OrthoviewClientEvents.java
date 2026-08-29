@@ -89,13 +89,14 @@ public class OrthoviewClientEvents {
     private static final float CAMROTX_DEFAULT = 135;
     private static final float CAMROTY_DEFAULT = -45;
 
-    private static final int FORCE_PAN_TICKS_MAX = 20;
+    private static final int FORCE_PAN_TICKS_DEFAULT = 20;
     private static int forcePanTicksLeft = 0;
     private static float forcePanTargetX = 0;
     private static float forcePanTargetZ = 0;
     private static float forcePanOriginalX = 0;
     private static float forcePanOriginalZ = 0;
     private static float forcePanOriginalZoom = 0;
+    private static float forceZoom = 0;
 
     private static final int FORCE_ROT_FRAMES_MAX = 20;
     private static int forceRotFramesLeft = 0;
@@ -267,22 +268,27 @@ public class OrthoviewClientEvents {
             MC.player.setPos(cx, MC.player.getY(), cz);
     }
 
-    // lock the camera and move it towards a location, remain locked for cameraLockTicks
     public static void forceMoveCam(int x, int z, int cameraLockTicks) {
+        forceMoveCam(x, z, cameraLockTicks, FORCE_PAN_TICKS_DEFAULT, (int) ZOOM_DEFAULT);
+    }
+
+    // lock the camera and move it towards a location, remain locked for cameraLockTicks
+    public static void forceMoveCam(int x, int z, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
         if (MC.player != null && OrthoviewClientEvents.isEnabled()) {
-            forcePanTicksLeft = FORCE_PAN_TICKS_MAX;
+            forcePanTicksLeft = forcePanTicks;
             forcePanTargetX = x;
             forcePanTargetZ = z;
-            cameraLockTicksLeft = FORCE_PAN_TICKS_MAX + cameraLockTicks;
+            cameraLockTicksLeft = forcePanTicks + cameraLockTicks;
             forcePanOriginalX = MC.player.getOnPos().getX();
             forcePanOriginalZ = MC.player.getOnPos().getZ();
+            forceZoom = zoomLevel == 0 ? zoom : zoomLevel;
             forcePanOriginalZoom = zoom;
         }
     }
 
-    public static void forceMoveCam(String playerName, Vec3i pos, int cameraLockTicks) {
+    public static void forceMoveCam(String playerName, Vec3i pos, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
         if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
-            forceMoveCam(pos.getX(), pos.getZ(), cameraLockTicks);
+            forceMoveCam(pos.getX(), pos.getZ(), cameraLockTicks, forcePanTicks, zoomLevel);
         }
     }
 
@@ -336,9 +342,9 @@ public class OrthoviewClientEvents {
         }
 
         if (forcePanTicksLeft > 0) {
-            float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_MAX;
-            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / FORCE_PAN_TICKS_MAX;
-            float zoomDiff = (ZOOM_DEFAULT - forcePanOriginalZoom) / FORCE_PAN_TICKS_MAX;
+            float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_DEFAULT;
+            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / FORCE_PAN_TICKS_DEFAULT;
+            float zoomDiff = (forceZoom - forcePanOriginalZoom) / FORCE_PAN_TICKS_DEFAULT;
             zoom += zoomDiff;
             MC.player.move(MoverType.SELF, new Vec3(xDiff, 0, zDiff));
             clampPlayerToWorldBorder();

@@ -97,10 +97,8 @@ public abstract class UnitItem {
     }
 
     // TODO:
-    // - consume()
     // - onUse() // (on left click release)
-    // - drop()
-    // - applyAttributeModifiers()
+    // - getAttributeModifiers()
 
 
 }

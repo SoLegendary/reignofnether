@@ -1,5 +1,5 @@
 
-1.20.1-1.4.2-beta-1
+1.20.1-1.4.2
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -37,18 +37,17 @@ Balance
 
 Quality of Life
 ---------------
-[🟡] All existing militia in saved maps can no longer be converted back into villagers
-[🟡] Villagers now convert into the `temporary_militia` entity which follow the normal rules for conversion
+[✔] All existing militia in saved maps can no longer be converted back into villagers
+[✔] Villagers now convert into the `temporary_militia` entity which follow the normal rules for conversion
 
-[🟡] Added a force move command
-[❌] Allow fog to be kept on in between singleplayer relogs
+
 
 Bugfixes
 --------
-[🟡] Workers can no longer repair a building while garrisoned inside it
-[🟡] Fixed chunks disappearing if the worldborder was changed while fog of war was enabled
+[✔] Workers can no longer repair a building while garrisoned inside it
+[✔] Fixed chunks disappearing if the worldborder was changed while fog of war was enabled
     - Note this can still cause lag spikes on slower servers
-[🟡] Militia town centre range is now calculated only horizontally (so it better matches the circle radius)
+[✔] Militia town centre range is now calculated only horizontally (so it better matches the circle radius)
 [✔] Unit underlines are now visible behind blocks
 
 [❌] cat/dog at the start should also match the TC mode
