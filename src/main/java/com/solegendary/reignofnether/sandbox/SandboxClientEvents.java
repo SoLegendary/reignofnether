@@ -105,7 +105,7 @@ public class SandboxClientEvents {
     }
 
     public static List<UnitSpawnButton> getUnitButtons() {
-        return faction.getEntityButtons();
+        return faction.equals(Factions.NONE) ? Factions.NEUTRAL.getEntityButtons() : faction.getEntityButtons();
     }
 
     public static String getRelationshipName(Relationship relationship) {
