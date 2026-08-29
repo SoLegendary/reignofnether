@@ -28,6 +28,7 @@ import com.solegendary.reignofnether.building.data.DataStorage;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
@@ -765,7 +766,7 @@ public class BuildingPlacement {
         totalBlocksEverBroken += 1;
         Random rand = new Random();
 
-        if (this.getFaction() == Faction.MONSTERS && ResearchServerEvents.playerHasResearch(this.ownerName,
+        if (this.getFaction().equals(Factions.MONSTERS) && ResearchServerEvents.playerHasResearch(this.ownerName,
             ProductionItems.RESEARCH_SILVERFISH
         )) {
             randomSilverfishSpawn(pos);

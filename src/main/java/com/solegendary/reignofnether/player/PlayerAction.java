@@ -7,10 +7,8 @@ public enum PlayerAction {
     TELEPORT,
     ENABLE_ORTHOVIEW,
     DISABLE_ORTHOVIEW,
-    START_RTS_VILLAGERS,
-    START_RTS_MONSTERS,
-    START_RTS_PIGLINS,
     START_RTS_SANDBOX,
+    START_RTS,
     START_RTS_SCENARIO, // faction decided serverside
     DEFEAT,
     VICTORY,

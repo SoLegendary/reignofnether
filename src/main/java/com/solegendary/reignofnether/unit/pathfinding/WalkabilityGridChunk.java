@@ -119,7 +119,7 @@ public final class WalkabilityGridChunk {
                                      BlockPos.MutableBlockPos mp, BlockPos.MutableBlockPos mpBelow) {
         cellKind[i] = WalkabilityBuilder.classify(level, wx, y, wz);
         // leaves report non-solid but block the body, and fences/walls/closed gates are 1.5-tall barriers - count
-        // both as body-blocking so they register as walls for the crowding malus and block footprints. (classify
+        // both as body-blocking so they registerBuilding as walls for the crowding malus and block footprints. (classify
         // still treats them as no floor support, so units don't walk on them.)
         mp.set(wx, y, wz);
         BlockState bs = level.getBlockState(mp);

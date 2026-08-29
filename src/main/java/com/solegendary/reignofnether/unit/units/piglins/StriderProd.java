@@ -5,12 +5,13 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
+import com.solegendary.reignofnether.building.production.UnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -19,7 +20,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class StriderProd extends ProductionItem {
+public class StriderProd extends ProductionItem implements UnitProductionItem {
 
     public final static String itemName = "Strider";
     public final static ResourceCost cost = ResourceCosts.STRIDER;
@@ -43,11 +44,11 @@ public class StriderProd extends ProductionItem {
                 itemName,
                 TEXTURE_LOCATION,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip3"), Style.EMPTY)
+                        Component.translatable("entity.reignofnether.strider_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.strider_unit.tooltip1").getVisualOrderText(),
+                        Component.translatable("entity.reignofnether.strider_unit.tooltip2").getVisualOrderText(),
+                        Component.translatable("entity.reignofnether.strider_unit.tooltip3").getVisualOrderText()
                 )
         );
     }
@@ -60,13 +61,13 @@ public class StriderProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit"), Style.EMPTY.withBold(true)),
+                Component.translatable("entity.reignofnether.strider_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.strider_unit.tooltip3"), Style.EMPTY)
+                Component.translatable("entity.reignofnether.strider_unit.tooltip1").getVisualOrderText(),
+                Component.translatable("entity.reignofnether.strider_unit.tooltip2").getVisualOrderText(),
+                Component.translatable("entity.reignofnether.strider_unit.tooltip3").getVisualOrderText()
             ),
             this
         );

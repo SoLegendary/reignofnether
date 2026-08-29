@@ -4,13 +4,14 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
+import com.solegendary.reignofnether.building.production.UnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -19,7 +20,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class WitchProd extends ProductionItem {
+public class WitchProd extends ProductionItem implements UnitProductionItem {
 
     public final static String itemName = "Witch";
     public final static ResourceCost cost = ResourceCosts.WITCH;
@@ -41,9 +42,9 @@ public class WitchProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/witch.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.witch_unit"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.witch_unit.tooltip1"), Style.EMPTY)
+                        Component.translatable("entity.reignofnether.witch_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.witch_unit.tooltip1").getVisualOrderText()
                 )
         );
     }
@@ -56,11 +57,11 @@ public class WitchProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.witch_unit"), Style.EMPTY.withBold(true)),
+                Component.translatable("entity.reignofnether.witch_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.witch_unit.tooltip1"), Style.EMPTY)
+                Component.translatable("entity.reignofnether.witch_unit.tooltip1").getVisualOrderText()
             ),
             this
         );

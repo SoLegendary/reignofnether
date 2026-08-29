@@ -13,11 +13,12 @@ import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
 import com.solegendary.reignofnether.items.ItemUtil;
-import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -38,7 +39,6 @@ import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
@@ -86,7 +86,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static com.ibm.icu.impl.ValidIdentifiers.Datatype.unit;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // Defines method bodies for Units
@@ -128,8 +127,7 @@ public interface Unit {
 
     MoveToTargetBlockGoal getUsePortalGoal();
     boolean canUsePortal();
-
-    Faction getFaction();
+    
     Abilities getAbilities();
     default List<Button> getAbilityButtons() {
         return getAbilities().getButtons(this);
@@ -317,15 +315,15 @@ public interface Unit {
         LivingEntity le = (LivingEntity) unit;
 
         if (!le.level().isClientSide()) {
-            if (unit.getFaction() == Faction.MONSTERS &&
+            if (Factions.getFaction(unit).equals(Factions.MONSTERS) &&
                     le.tickCount % MONSTER_HEALING_TICKS == 0 &&
                     (!le.level().isDay())) {
                 le.heal(1);
-            } else if (unit.getFaction() == Faction.MONSTERS &&
+            } else if (Factions.getFaction(unit).equals(Factions.MONSTERS) &&
                     (le.tickCount + MONSTER_HEALING_TICKS / 2) % MONSTER_HEALING_TICKS == 0 &&
                     (NightUtils.isInRangeOfNightSource(le.position(), le.level().isClientSide()))) {
                 le.heal(1);
-            } else if (unit.getFaction() == Faction.PIGLINS &&
+            } else if (Factions.getFaction(unit).equals(Factions.PIGLINS) &&
                     le.tickCount % PIGLIN_HEALING_TICKS == 0 &&
                     (MiscUtil.isOnNetherTerrain(le) || unit instanceof GhastUnit)) {
                 le.heal(1);
@@ -409,13 +407,13 @@ public interface Unit {
 
         if (unitMob.tickCount % 10 == 0 &&
             !(unit instanceof WorkerUnit) &&
-            unit.getFaction() == Faction.PIGLINS &&
+            Factions.getFaction(unit).equals(Factions.PIGLINS) &&
             MiscUtil.isOnNetherTerrain(unitMob)) {
             unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
         }
         if (unitMob.tickCount % 10 == 0 &&
             !(unit instanceof WorkerUnit) &&
-            unit.getFaction() == Faction.MONSTERS &&
+            Factions.getFaction(unit).equals(Factions.MONSTERS) &&
             NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), unitMob.level().isClientSide)) {
             unitMob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), 15, 1, true, false));
         }

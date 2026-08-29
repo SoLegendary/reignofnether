@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
+import com.solegendary.reignofnether.building.production.UnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -13,7 +14,7 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -22,7 +23,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class SpiderProd extends ProductionItem {
+public class SpiderProd extends ProductionItem implements UnitProductionItem {
 
     public final static String itemName = "Spider";
     public final static ResourceCost cost = ResourceCosts.SPIDER;
@@ -62,12 +63,12 @@ public class SpiderProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/spider.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.spider_unit"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.spider_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.spider_unit.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.spider_unit.tooltip3"), Style.EMPTY)
+                        Component.translatable("entity.reignofnether.spider_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.spider_unit.tooltip1").getVisualOrderText(),
+                        Component.translatable("entity.reignofnether.spider_unit.tooltip2").getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.spider_unit.tooltip3").getVisualOrderText()
                 )
         );
     }
@@ -80,14 +81,14 @@ public class SpiderProd extends ProductionItem {
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS),
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.spider_unit"), Style.EMPTY.withBold(true)),
+                Component.translatable("entity.reignofnether.spider_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.spider_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.spider_unit.tooltip2"), Style.EMPTY),
+                Component.translatable("entity.reignofnether.spider_unit.tooltip1").getVisualOrderText(),
+                Component.translatable("entity.reignofnether.spider_unit.tooltip2").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.spider_unit.tooltip3"), Style.EMPTY)
+                Component.translatable("entity.reignofnether.spider_unit.tooltip3").getVisualOrderText()
             ),
             this
         );

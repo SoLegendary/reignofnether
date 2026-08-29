@@ -5,22 +5,20 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
-
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class MonsterMarket extends AbstractMarket {
 
@@ -44,11 +42,9 @@ public class MonsterMarket extends AbstractMarket {
         this.startingBlockTypes.add(Blocks.DARK_PRISMARINE_SLAB);
     }
 
-    public Faction getFaction() { return Faction.MONSTERS; }
-
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_deepslate.png"),
@@ -58,12 +54,12 @@ public class MonsterMarket extends AbstractMarket {
                 () -> BuildingClientEvents.numFinishedBuildings(Buildings.SCULK_CATALYST) >= 5 ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        fcs(I18n.get("buildings.reignofnether.monster_market"), true),
+                        Component.translatable("buildings.reignofnether.monster_market").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        fcs(""),
-                        fcs(I18n.get("buildings.reignofnether.monster_market.tooltip1")),
-                        fcs(""),
-                        fcs(I18n.get("buildings.reignofnether.monster_market.tooltip2"))
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("buildings.reignofnether.monster_market.tooltip1").getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("buildings.reignofnether.monster_market.tooltip2").getVisualOrderText()
                 ),
                 this
         );

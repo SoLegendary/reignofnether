@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.building.buildings.shared;
 
-import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.ability.abilities.TradeResources;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.keybinds.Keybindings;

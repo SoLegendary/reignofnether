@@ -13,23 +13,19 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class FlameSanctuary extends ProductionBuilding {
 
@@ -53,11 +49,10 @@ public class FlameSanctuary extends ProductionBuilding {
         this.productions.add(ProductionItems.RESEARCH_BLAZE_FIREWALL, Keybindings.abilitySlot1);
     }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
             name,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/magma.png"),
@@ -67,13 +62,13 @@ public class FlameSanctuary extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.HOGLIN_STABLES) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.flame_sanctuary"), Style.EMPTY.withBold(true)),
+                Component.translatable("buildings.reignofnether.flame_sanctuary").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.flame_sanctuary.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.flame_sanctuary.tooltip2"), Style.EMPTY),
+                Component.translatable("buildings.reignofnether.flame_sanctuary.tooltip1").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.flame_sanctuary.tooltip2").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.flame_sanctuary.tooltip3"), Style.EMPTY)
+                Component.translatable("buildings.reignofnether.flame_sanctuary.tooltip3").getVisualOrderText()
             ),
             this
         );

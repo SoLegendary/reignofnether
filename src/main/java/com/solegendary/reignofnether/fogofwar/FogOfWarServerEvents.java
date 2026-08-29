@@ -619,7 +619,7 @@ public class FogOfWarServerEvents {
         return out;
     }
 
-    // register here too for command blocks
+    // registerBuilding here too for command blocks
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("enable")

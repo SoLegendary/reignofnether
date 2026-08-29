@@ -2,12 +2,11 @@ package com.solegendary.reignofnether.unit;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
-import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
-import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -100,12 +99,12 @@ public class NonUnitServerEvents {
 
     public static Faction getNonUnitFaction(LivingEntity le) {
         if (le instanceof IronGolem || le instanceof AbstractIllager || le instanceof AbstractVillager)
-            return Faction.VILLAGERS;
+            return Factions.VILLAGERS;
         else if (le instanceof AbstractPiglin || le instanceof Hoglin || le instanceof Ghast || le instanceof Blaze || le instanceof WitherSkeleton)
-            return Faction.PIGLINS;
+            return Factions.PIGLINS;
         else if (le instanceof AbstractSkeleton || le instanceof Zombie || le instanceof Creeper || le instanceof Spider || le instanceof Slime || le instanceof Warden)
-            return Faction.MONSTERS;
-        return Faction.NONE;
+            return Factions.MONSTERS;
+        return Factions.NONE;
     }
 
     @SubscribeEvent
@@ -114,7 +113,7 @@ public class NonUnitServerEvents {
 
         // prevent vanilla mobs attacking their RoN faction equivalents
         if (!(le instanceof Unit) && evt.getNewTarget() instanceof Unit unit)
-            if (unit.getFaction() == getNonUnitFaction(le))
+            if (Factions.getFaction(unit).equals(getNonUnitFaction(le)))
                 evt.setCanceled(true);
     }
 

@@ -1,9 +1,15 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+
 import com.solegendary.reignofnether.ability.abilities.Sacrifice;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
@@ -13,21 +19,19 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SculkCatalyst extends Building implements NightSourceAddon, RangeIndicatorAddon {
     //TODO public static final DataType<ArrayList<BlockPos>> SCULK_BPS_CACHE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "sculk_bps_cache"), (nbt, server) -> new ArrayList<>(), (netherZone -> new CompoundTag()), () -> new ArrayList<>()); //Cache only, shouldn't be saved
@@ -59,9 +63,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
         setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
 
-    public Faction getFaction() {
-        return Faction.MONSTERS;
-    }
+    
 
     @Override
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
@@ -70,7 +72,7 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(name,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/sculk_catalyst_side.png"),
             hotkey,
@@ -78,14 +80,14 @@ public class SculkCatalyst extends Building implements NightSourceAddon, RangeIn
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) || ResearchClient.hasCheat(
                 "modifythephasevariance"),
-            List.of(fcs(I18n.get("buildings.reignofnether.sculk_catalyst"), Style.EMPTY.withBold(true)),
+            List.of(Component.translatable("buildings.reignofnether.sculk_catalyst").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
-                fcs(""),
-                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip1")),
-                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip2", MIN_NIGHT_RANGE)),
-                fcs(""),
-                fcs(I18n.get("buildings.reignofnether.sculk_catalyst.tooltip3"))
+                FormattedCharSequence.EMPTY,
+                Component.translatable("buildings.reignofnether.sculk_catalyst.tooltip1").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.sculk_catalyst.tooltip2", MIN_NIGHT_RANGE).getVisualOrderText(),
+                FormattedCharSequence.EMPTY,
+                Component.translatable("buildings.reignofnether.sculk_catalyst.tooltip3").getVisualOrderText()
             ),
             this
         );
