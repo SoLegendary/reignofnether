@@ -7,7 +7,7 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClien
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.faction.FactionRegistries;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -47,7 +47,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class SandboxClientEvents {
 
     // NONE == neutral
-    private static Faction faction = Faction.NONE;
+    private static Faction faction = Factions.NONE;
     public static Relationship relationship = Relationship.OWNED;
     public static SandboxMenuType sandboxMenuType = SandboxMenuType.UNITS;
     public static CustomBuildingSortOption customBuildingSortOption = CustomBuildingSortOption.NAME;
@@ -67,17 +67,8 @@ public class SandboxClientEvents {
         return PlayerClientEvents.isRTSPlayer() && ClientGameModeHelper.gameMode == GameMode.SANDBOX;
     }
 
-    public static List<BuildingPlaceButton> getNeutralBuildingButtons() {
-        return FactionRegistries.NONE.getBuildingButtons();
-    }
-
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        return switch (faction) {
-            case VILLAGERS -> VillagerUnit.getBuildingButtons();
-            case MONSTERS -> ZombieVillagerUnit.getBuildingButtons();
-            case PIGLINS -> GruntUnit.getBuildingButtons();
-            default -> getNeutralBuildingButtons();
-        };
+        return faction.getBuildingButtons();
     }
 
     public static List<Button> getCustomBuildingButtons() {
@@ -114,65 +105,7 @@ public class SandboxClientEvents {
     }
 
     public static List<UnitSpawnButton> getUnitButtons() {
-        return switch (faction) {
-            case VILLAGERS -> List.of(
-                ProductionItems.VILLAGER.getPlaceButton(),
-                ProductionItems.VILLAGER.getMilitiaPlaceButton(),
-                ProductionItems.SCOUT_DOG.getPlaceButton(),
-                ProductionItems.SCOUT_CAT.getPlaceButton(),
-                ProductionItems.VINDICATOR.getPlaceButton(),
-                ProductionItems.PILLAGER.getPlaceButton(),
-                ProductionItems.IRON_GOLEM.getPlaceButton(),
-                ProductionItems.WITCH.getPlaceButton(),
-                ProductionItems.EVOKER.getPlaceButton(),
-                ProductionItems.WINDCALLER.getPlaceButton(),
-                ProductionItems.RAVAGER.getPlaceButton(),
-                ProductionItems.ROYAL_GUARD.getPlaceButton(),
-                ProductionItems.ENCHANTER.getPlaceButton()
-            );
-            case MONSTERS -> List.of(
-                ProductionItems.ZOMBIE_VILLAGER.getPlaceButton(),
-                ProductionItems.BAT.getPlaceButton(),
-                ProductionItems.ZOMBIE.getPlaceButton(),
-                ProductionItems.DROWNED.getPlaceButton(),
-                ProductionItems.HUSK.getPlaceButton(),
-                ProductionItems.SKELETON.getPlaceButton(),
-                ProductionItems.BOGGED.getPlaceButton(),
-                ProductionItems.STRAY.getPlaceButton(),
-                ProductionItems.SPIDER.getPlaceButton(),
-                ProductionItems.POISON_SPIDER.getPlaceButton(),
-                ProductionItems.CREEPER.getPlaceButton(),
-                ProductionItems.WRAITH.getPlaceButton(),
-                ProductionItems.SLIME.getPlaceButton(),
-                ProductionItems.WARDEN.getPlaceButton(),
-                ProductionItems.ZOMBIE_PIGLIN.getPlaceButton(),
-                ProductionItems.ZOGLIN.getPlaceButton(),
-                ProductionItems.NECROMANCER.getPlaceButton(),
-                ProductionItems.WRETCHED_WRAITH.getPlaceButton()
-            );
-            case PIGLINS -> List.of(
-                ProductionItems.GRUNT.getPlaceButton(),
-                ProductionItems.STRIDER.getPlaceButton(),
-                ProductionItems.BRUTE.getPlaceButton(),
-                ProductionItems.HEADHUNTER.getPlaceButton(),
-                ProductionItems.MARAUDER.getPlaceButton(),
-                ProductionItems.HOGLIN.getPlaceButton(),
-                ProductionItems.BLAZE.getPlaceButton(),
-                ProductionItems.WITHER_SKELETON.getPlaceButton(),
-                ProductionItems.MAGMA_CUBE.getPlaceButton(),
-                ProductionItems.GHAST.getPlaceButton(),
-                ProductionItems.PIGLIN_MERCHANT.getPlaceButton(),
-                ProductionItems.WILDFIRE.getPlaceButton()
-            );
-            default -> List.of(
-                ProductionItems.ENDERMAN.getPlaceButton(),
-                ProductionItems.POLAR_BEAR.getPlaceButton(),
-                ProductionItems.GRIZZLY_BEAR.getPlaceButton(),
-                ProductionItems.PANDA.getPlaceButton(),
-                ProductionItems.WOLF.getPlaceButton(),
-                ProductionItems.LLAMA.getPlaceButton()
-            );
-        };
+        return faction.getEntityButtons();
     }
 
     public static String getRelationshipName(Relationship relationship) {
@@ -188,34 +121,27 @@ public class SandboxClientEvents {
         return new Button(
                 "Toggle Faction",
                 Button.itemIconSize,
-                MiscUtil.getFactionIcon(faction),
-                (Keybinding) null,
+                faction.icon,
+	        null,
                 () -> false,
                 () -> false,
                 () -> true,
-                () -> {
-                    switch (faction) {
-                        case VILLAGERS -> faction = Faction.MONSTERS;
-                        case MONSTERS -> faction = Faction.PIGLINS;
-                        case PIGLINS -> faction = Faction.NONE;
-                        default -> faction = Faction.VILLAGERS;
-                    }
-                },
-                () -> {
-                    switch (faction) {
-                        case VILLAGERS -> faction = Faction.NONE;
-                        case MONSTERS -> faction = Faction.VILLAGERS;
-                        case PIGLINS -> faction = Faction.MONSTERS;
-                        default -> faction = Faction.PIGLINS;
-                    }
-                },
-                List.of(
-                        fcs(I18n.get("hud.faction.reignofnether.villagers"), faction == Faction.VILLAGERS),
-                        fcs(I18n.get("hud.faction.reignofnether.monsters"), faction == Faction.MONSTERS),
-                        fcs(I18n.get("hud.faction.reignofnether.piglins"), faction == Faction.PIGLINS),
-                        fcs(I18n.get("hud.faction.reignofnether.neutral"), faction == Faction.NONE)
-                )
+                () -> faction = Factions.getFaction(MiscUtil.getNextItem(Factions.PLAYABLE_FACTIONS, faction.key)),
+                () -> faction = Factions.getFaction(MiscUtil.getLastItem(Factions.PLAYABLE_FACTIONS, faction.key)),
+                getRenderTooltipList()
         );
+    }
+    
+    public static List<FormattedCharSequence> getRenderTooltipList() {
+        List<FormattedCharSequence> list = new ArrayList<>();
+        for (ResourceLocation rl : Factions.PLAYABLE_FACTIONS) {
+            if (faction == Factions.getFaction(rl))
+                list.add(fcs(I18n.get(String.format("hud.faction.%s.%s", rl.getNamespace(), rl.getPath())), true));
+            else
+                list.add(fcs(I18n.get(String.format("hud.faction.%s.%s", rl.getNamespace(), rl.getPath()))));
+        }
+        
+        return list;
     }
 
     public static Button getToggleRelationshipButton() {

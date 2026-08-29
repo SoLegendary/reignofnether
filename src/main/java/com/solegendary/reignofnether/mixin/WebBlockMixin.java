@@ -3,8 +3,9 @@ package com.solegendary.reignofnether.mixin;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.monsters.SpiderLair;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -24,8 +25,8 @@ public abstract class WebBlockMixin {
     )
     private void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity, CallbackInfo ci) {
         BuildingPlacement building = BuildingUtils.findBuilding(pLevel.isClientSide, pPos);
-        if (building != null && building.getBuilding() instanceof SpiderLair spiderLair &&
-            pEntity instanceof Unit unit && unit.getFaction() == Faction.MONSTERS)
+        if (building != null && building.getBuilding() instanceof SpiderLair &&
+            pEntity instanceof Unit unit && Factions.getFaction(unit).equals(Factions.MONSTERS))
             ci.cancel();
     }
 }

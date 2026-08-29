@@ -3,11 +3,12 @@ package com.solegendary.reignofnether.unit.units.neutral;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.building.production.UnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class GrizzlyBearProd extends ProductionItem {
+public class GrizzlyBearProd extends ProductionItem implements UnitProductionItem {
 
     public final static String itemName = "Grizzly Bear";
     public final static ResourceCost cost = ResourceCosts.GRIZZLY_BEAR;
@@ -39,7 +40,7 @@ public class GrizzlyBearProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grizzly_bear.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.grizzly_bear_unit"), Style.EMPTY.withBold(true))
+                        Component.translatable("entity.reignofnether.grizzly_bear_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText()
                 )
         );
     }

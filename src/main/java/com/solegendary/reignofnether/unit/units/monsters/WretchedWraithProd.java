@@ -4,13 +4,14 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.HeroProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
+import com.solegendary.reignofnether.building.production.UnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -21,7 +22,7 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WretchedWraithProd extends HeroProductionItem {
+public class WretchedWraithProd extends HeroProductionItem implements UnitProductionItem {
 
     public final static String itemName = "Wretched Wraith";
     public final static ResourceCost cost = ResourceCosts.WRETCHED_WRAITH;
@@ -44,32 +45,26 @@ public class WretchedWraithProd extends HeroProductionItem {
                 itemName,
                 iconRl,
                 List.of(
-                        FormattedCharSequence.forward(
-                                I18n.get("entity.reignofnether.wretched_wraith_unit") +
-                                        " (" + I18n.get("hud.units.reignofnether.hero") + ")",
-                                Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip3"), Style.EMPTY)
+                        Component.translatable("entity.reignofnether.wretched_wraith_unit").append(Component.literal(" (")).append(Component.translatable("hud.units.reignofnether.hero")).append(Component.literal(")")).withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.wretched_wraith_unit.tooltip1").getVisualOrderText(),
+                        Component.translatable("entity.reignofnether.wretched_wraith_unit.tooltip2").getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.wretched_wraith_unit.tooltip3").getVisualOrderText()
                 )
         );
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         ArrayList<FormattedCharSequence> tooltips = new ArrayList<>(List.of(
-                FormattedCharSequence.forward(
-                        I18n.get("entity.reignofnether.wretched_wraith_unit") +
-                                " (" + I18n.get("hud.units.reignofnether.hero") + ")",
-                        Style.EMPTY.withBold(true)),
+                Component.translatable("entity.reignofnether.wretched_wraith_unit").append(Component.literal(" (")).append(Component.translatable("hud.units.reignofnether.hero")).append(Component.literal(")")).withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip2"), Style.EMPTY),
+                Component.translatable("entity.reignofnether.wretched_wraith_unit.tooltip1").getVisualOrderText(),
+                Component.translatable("entity.reignofnether.wretched_wraith_unit.tooltip2").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.wretched_wraith_unit.tooltip3"), Style.EMPTY)
+                Component.translatable("entity.reignofnether.wretched_wraith_unit.tooltip3").getVisualOrderText()
         ));
         tooltips.addAll(getAdditionalHeroTooltips());
 

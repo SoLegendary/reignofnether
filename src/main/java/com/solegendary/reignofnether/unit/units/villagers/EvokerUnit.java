@@ -4,7 +4,6 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.abilities.*;
-import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.enchantments.VigorEnchantment;
@@ -25,8 +24,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.models.VillagerUnitModel;
-import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
@@ -37,7 +35,6 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
@@ -59,7 +56,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAttackerUnit {
@@ -111,8 +107,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
-    public Abilities getAbilities() {return abilities;}
+	public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}

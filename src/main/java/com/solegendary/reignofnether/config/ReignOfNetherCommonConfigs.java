@@ -35,8 +35,8 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.ZOGLIN.define(BUILDER);
         UnitCosts.NECROMANCER.define(BUILDER);
         UnitCosts.WRETCHED_WRAITH.define(BUILDER);
-        //Villagers
-        BUILDER.comment("Villagers");
+        //VillagersFaction
+        BUILDER.comment("VillagersFaction");
         UnitCosts.VILLAGER.define(BUILDER);
         UnitCosts.SCOUT_DOG.define(BUILDER);
         UnitCosts.SCOUT_CAT.define(BUILDER);
@@ -99,8 +99,8 @@ public class ReignOfNetherCommonConfigs {
         BuildingCosts.STRONGHOLD.define(BUILDER);
         BuildingCosts.ALTAR_OF_DARKNESS.define(BUILDER);
         BuildingCosts.MONSTER_MARKET.define(BUILDER);
-        //Villagers
-        BUILDER.comment("Villagers");
+        //VillagersFaction
+        BUILDER.comment("VillagersFaction");
         BuildingCosts.TOWN_CENTRE.define(BUILDER);
         BuildingCosts.VILLAGER_HOUSE.define(BUILDER);
         BuildingCosts.WHEAT_FARM.define(BUILDER);
@@ -215,7 +215,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry ZOMBIE_PIGLIN = ResourceCostConfigEntry.Unit(0,0,0,10,1, ResourceCosts.ZOMBIE_PIGLIN, "Zombie Piglin Config");
         public static final ResourceCostConfigEntry ZOGLIN = ResourceCostConfigEntry.Unit(0,0,0,10,2, ResourceCosts.ZOGLIN, "Zoglin Config");
 
-        // Villagers
+        // VillagersFaction
         public static final ResourceCostConfigEntry VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.VILLAGER, "Villager Config");
         public static final ResourceCostConfigEntry SCOUT_DOG = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.SCOUT_DOG, "Scout Dog Config");
         public static final ResourceCostConfigEntry SCOUT_CAT = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.SCOUT_CAT, "Scout Cat Config");
@@ -280,7 +280,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry ALTAR_OF_DARKNESS = ResourceCostConfigEntry.Building(0,125,50, 0, ResourceCosts.ALTAR_OF_DARKNESS, "Altar of Darkness Config");
         public static final ResourceCostConfigEntry MONSTER_MARKET = ResourceCostConfigEntry.Building(0,150,150, 0, ResourceCosts.MONSTER_MARKET, "Monster Market Config");
 
-        // Villagers
+        // VillagersFaction
         public static final ResourceCostConfigEntry TOWN_CENTRE = ResourceCostConfigEntry.Building(0,350,250, 10, ResourceCosts.TOWN_CENTRE, "Town Centre Config");
         public static final ResourceCostConfigEntry VILLAGER_HOUSE = ResourceCostConfigEntry.Building(0,90,0, 10, ResourceCosts.VILLAGER_HOUSE, "Villager House Config");
         public static final ResourceCostConfigEntry WHEAT_FARM = ResourceCostConfigEntry.Building(0,150,0, 0, ResourceCosts.WHEAT_FARM, "Wheat Farm Config");

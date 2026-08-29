@@ -12,8 +12,8 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -43,11 +43,10 @@ public class HoglinStables extends ProductionBuilding {
         this.productions.add(ProductionItems.RESEARCH_HOGLIN_CAVALRY, Keybindings.abilitySlot1);
     }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
             name,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/crimson_stem.png"),
@@ -57,13 +56,13 @@ public class HoglinStables extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.PORTAL_BASIC) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.hoglin_stables"), Style.EMPTY.withBold(true)),
+                Component.translatable("buildings.reignofnether.hoglin_stables").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.hoglin_stables.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.hoglin_stables.tooltip2"), Style.EMPTY),
+                Component.translatable("buildings.reignofnether.hoglin_stables.tooltip1").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.hoglin_stables.tooltip2").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.hoglin_stables.tooltip3"), Style.EMPTY)
+                Component.translatable("buildings.reignofnether.hoglin_stables.tooltip3").getVisualOrderText()
             ),
             this
         );

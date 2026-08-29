@@ -8,14 +8,16 @@ import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
+import com.solegendary.reignofnether.building.production.UnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
@@ -26,7 +28,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class WindcallerProd extends ProductionItem {
+public class WindcallerProd extends ProductionItem implements UnitProductionItem {
 
     public final static String itemName = "Windcaller";
     public final static ResourceCost cost = ResourceCosts.WINDCALLER;
@@ -56,24 +58,24 @@ public class WindcallerProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/windcaller.png"),
                 List.of(
-                        fcs(I18n.get("entity.reignofnether.windcaller_unit"), true),
+                        Component.translatable("entity.reignofnether.windcaller_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         fcs(""),
-                        fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip1")),
-                        fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip2"))
+                        Component.translatable("entity.reignofnether.windcaller_unit.tooltip1").getVisualOrderText(),
+                        Component.translatable("entity.reignofnether.windcaller_unit.tooltip2").getVisualOrderText()
                 )
         );
     }
 
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>(List.of(
-                fcs(I18n.get("entity.reignofnether.windcaller_unit"), true),
+                Component.translatable("entity.reignofnether.windcaller_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 fcs(""),
-                fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip1")),
-                fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip2")),
+                Component.translatable("entity.reignofnether.windcaller_unit.tooltip1").getVisualOrderText(),
+                Component.translatable("entity.reignofnether.windcaller_unit.tooltip2").getVisualOrderText(),
                 fcs(""),
-                fcs(I18n.get("entity.reignofnether.windcaller_unit.tooltip3"))
+                Component.translatable("entity.reignofnether.windcaller_unit.tooltip3").getVisualOrderText()
         ));
         return new StartProductionButton(
             WindcallerProd.itemName,

@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.FlameSanctuary;
 import com.solegendary.reignofnether.building.buildings.piglins.PiglinMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.faction.FactionRegistries;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -22,7 +22,7 @@ import com.solegendary.reignofnether.unit.interfaces.ArmSwingingUnit;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
-import com.solegendary.reignofnether.faction.Faction;
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
@@ -51,9 +51,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit, ArmSwingingUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -90,8 +88,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
-    public Abilities getAbilities() {return ABILITIES;}
+	public Abilities getAbilities() {return ABILITIES;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -203,8 +200,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     }
 
     public static List<BuildingPlaceButton> getBuildingButtons() {
-        List<BuildingPlaceButton> buttons = new ArrayList<>();
-        buttons.addAll(FactionRegistries.PIGLINS.getBuildingButtons());
+	    List<BuildingPlaceButton> buttons = new ArrayList<>(Factions.PIGLINS.getBuildingButtons());
 
         //TODO Add to Register
         CustomBuildingClientEvents.customBuildings.forEach(cb -> {
@@ -355,7 +351,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     public List<Button> getAbilityButtons() {
         List<Button> abilities = new ArrayList<>(getAbilities().getButtons(this));
         if (FMLEnvironment.dist == Dist.CLIENT) {
-            abilities.addAll(getBuildingButtons());
+            abilities.addAll(Factions.getFaction(this).getBuildingButtons());
         }
         return abilities;
     }

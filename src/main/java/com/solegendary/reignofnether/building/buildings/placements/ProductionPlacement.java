@@ -1,16 +1,31 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
+
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
-import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.production.*;
-import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingClientboundPacket;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.production.ActiveProduction;
+import com.solegendary.reignofnether.building.production.GraveyardUnitProductionItem;
+import com.solegendary.reignofnether.building.production.ProdDupeRule;
+import com.solegendary.reignofnether.building.production.ProductionBuilding;
+import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.resources.*;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
+import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -22,13 +37,12 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
+import javax.annotation.Nullable;
 
 public class ProductionPlacement extends BuildingPlacement {
     private ArrayList<BlockPos> rallyPoints = new ArrayList<>();

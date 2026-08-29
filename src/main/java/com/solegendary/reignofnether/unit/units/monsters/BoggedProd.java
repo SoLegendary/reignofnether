@@ -10,7 +10,7 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -19,7 +19,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class BoggedProd extends GraveyardUnitProductionItem {
+public class BoggedProd extends GraveyardUnitProductionItem implements UnitProductionItem {
 
     public final static String itemName = "Bogged";
     public final static ResourceCost cost = ResourceCosts.BOGGED;
@@ -46,12 +46,12 @@ public class BoggedProd extends GraveyardUnitProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/bogged.png"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip3"), Style.EMPTY)
+                        Component.translatable("entity.reignofnether.bogged_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.bogged_unit.tooltip1").getVisualOrderText(),
+                        Component.translatable("entity.reignofnether.bogged_unit.tooltip2").getVisualOrderText(),
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("entity.reignofnether.bogged_unit.tooltip3").getVisualOrderText()
                 )
         );
     }
@@ -64,14 +64,14 @@ public class BoggedProd extends GraveyardUnitProductionItem {
             () -> false,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_BOGGED),
             List.of(
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit"), Style.EMPTY.withBold(true)),
+                Component.translatable("entity.reignofnether.bogged_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip2"), Style.EMPTY),
+                Component.translatable("entity.reignofnether.bogged_unit.tooltip1").getVisualOrderText(),
+                Component.translatable("entity.reignofnether.bogged_unit.tooltip2").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit.tooltip3"), Style.EMPTY)
+                Component.translatable("entity.reignofnether.bogged_unit.tooltip3").getVisualOrderText()
             ),
             this
         );

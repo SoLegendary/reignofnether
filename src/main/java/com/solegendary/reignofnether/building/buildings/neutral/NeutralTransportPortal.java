@@ -6,8 +6,8 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalTransport;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -39,11 +39,6 @@ public class NeutralTransportPortal extends PortalTransport {
     }
 
     @Override
-    public Faction getFaction() {
-        return Faction.NONE;
-    }
-
-    @Override
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         return new BuildingPlaceButton(NeutralTransportPortal.buildingName,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/blue_glazed_terracotta.png"),
@@ -51,12 +46,10 @@ public class NeutralTransportPortal extends PortalTransport {
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> false,
                 () -> true,
-                List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.neutral_transport_portal"),
-                                Style.EMPTY.withBold(true)
-                        ),
+                List.of(Component.translatable("buildings.reignofnether.neutral_transport_portal").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.neutral_transport_portal.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.neutral_transport_portal.tooltip2"), Style.EMPTY)
+                        Component.translatable("buildings.reignofnether.neutral_transport_portal.tooltip1").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.neutral_transport_portal.tooltip2").getVisualOrderText()
                 ),
                 this
         );

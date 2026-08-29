@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.neutral;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -10,8 +11,8 @@ import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.faction.Factions;
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
@@ -95,11 +96,7 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
         return getUsePortalGoal() != null;
     }
 
-    public Faction getFaction() {
-        return Faction.NONE;
-    }
-
-    public Abilities getAbilities() {
+	public Abilities getAbilities() {
         return abilities;
     }
 

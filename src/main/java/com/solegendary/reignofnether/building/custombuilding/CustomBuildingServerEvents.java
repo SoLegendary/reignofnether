@@ -75,7 +75,7 @@ public class CustomBuildingServerEvents {
                 }
             }
             if (numSolidBlocks == 0) {
-                PlayerServerEvents.sendMessageToAllPlayers("ERROR (server): cannot register custom building with no solid blocks");
+                PlayerServerEvents.sendMessageToAllPlayers("ERROR (server): cannot registerBuilding custom building with no solid blocks");
             } else {
                 CustomBuilding building = new CustomBuilding(structureName, structureSize, portraitBlock, structureNbt);
                 for (CustomBuilding customBuilding : customBuildings) {

@@ -5,11 +5,9 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
-import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.scenario.ScenarioRole;
-import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.scenario.ScenarioUtils;
 
 import java.util.*;

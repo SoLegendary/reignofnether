@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -12,7 +13,7 @@ import com.solegendary.reignofnether.survival.Wave;
 import com.solegendary.reignofnether.survival.WavePortal;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
@@ -174,6 +175,6 @@ public class PiglinWaveSpawner {
         if (failedPortalPlacements > 0)
             PlayerServerEvents.sendMessageToAllPlayers("Failed to spawn " + failedPortalPlacements + " portals!");
 
-        lastFaction = Faction.PIGLINS;
+        lastFaction = Factions.PIGLINS;
     }
 }

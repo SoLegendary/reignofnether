@@ -1,12 +1,13 @@
 package com.solegendary.reignofnether.player;
 
-import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
@@ -17,7 +18,6 @@ import com.solegendary.reignofnether.hud.buttons.HelperButtons;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
@@ -29,7 +29,7 @@ import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -91,7 +91,7 @@ public class PlayerClientEvents {
         for (RTSPlayer rtsPlayer : rtsPlayers)
             if (MC.player != null && rtsPlayer.name.equals(MC.player.getName().getString()))
                 return rtsPlayer.faction;
-        return Faction.NONE;
+        return Factions.NONE;
     }
 
     public static RTSPlayer getPlayer(String playerName) {
@@ -131,7 +131,7 @@ public class PlayerClientEvents {
     public static Faction getPlayerFaction(String playerName) {
         var player = getPlayer(playerName);
         if (player == null) {
-            return Faction.NONE;
+            return Factions.NONE;
         }
 
         return player.faction;
@@ -254,7 +254,7 @@ public class PlayerClientEvents {
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
-                if (faction != Faction.NONE) {
+                if (faction != Factions.NONE) {
                     MC.getMusicManager().stopPlaying();
                     ResearchClient.removeAllCheats();
                 }
@@ -271,7 +271,7 @@ public class PlayerClientEvents {
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
-                if (faction != Faction.NONE) {
+                    if (faction != Factions.NONE) {
                     MC.getMusicManager().stopPlaying();
                     ResearchClient.removeAllCheats();
                 }

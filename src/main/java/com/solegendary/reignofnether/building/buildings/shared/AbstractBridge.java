@@ -1,10 +1,15 @@
 package com.solegendary.reignofnether.building.buildings.shared;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingBlockData;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.BridgePlacement;
 import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.resources.ResourceCost;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -19,8 +24,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public abstract class AbstractBridge extends Building {
     //Is this still necessary?

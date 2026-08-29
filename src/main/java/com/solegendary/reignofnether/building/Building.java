@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.addon.BuildingAddon;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.faction.Faction;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 // Registered object in Buildings
 // is a member of BuildingPlacement and is generally not instantiated directly
@@ -30,6 +32,7 @@ public abstract class Building {
     public final boolean isCapitol;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
     public boolean canAcceptResources = false; // can workers drop off resources here?
+    private Faction faction = Factions.NONE;
 
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
@@ -97,7 +100,13 @@ public abstract class Building {
         return new BuildingPlacement(this, level, pos, rotation, ownerName, BuildingUtils.getAbsoluteBlockData(this.getRelativeBlockData(level), level, pos, rotation), this.isCapitol);
     }
 
-    public abstract Faction getFaction();
+    public void setFaction(ResourceLocation faction) {
+        this.faction = Factions.getFaction(faction);
+    }
+    
+    public Faction getFaction() {
+        return this.faction;
+    }
 
     public int getUpgradeLevel(BuildingPlacement placement) {
         return 0;

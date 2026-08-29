@@ -6,22 +6,12 @@ import com.solegendary.reignofnether.ability.abilities.BackToWorkUnit;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.ability.abilities.WeaponSwapBow;
 import com.solegendary.reignofnether.ability.abilities.WeaponSwapSword;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
-import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.sandbox.SandboxServer;
-import com.solegendary.reignofnether.scenario.ScenarioRole;
-import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
-import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.TargetResourcesSave;
@@ -32,9 +22,7 @@ import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
-import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
-import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
@@ -70,8 +58,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static com.solegendary.reignofnether.survival.SurvivalServerEvents.ENEMY_OWNER_NAME;
 
 public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, RangedAttackerUnit, VillagerDataHolder, ConvertableUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -113,8 +99,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
-    public Abilities getAbilities() {return abilities;}
+	public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}

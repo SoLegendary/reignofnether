@@ -2,10 +2,19 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.EnchantAbility;
-import com.solegendary.reignofnether.ability.abilities.*;
+import com.solegendary.reignofnether.ability.abilities.EnchantGust;
+import com.solegendary.reignofnether.ability.abilities.EnchantMaiming;
+import com.solegendary.reignofnether.ability.abilities.EnchantMultishot;
+import com.solegendary.reignofnether.ability.abilities.EnchantQuickCharge;
+import com.solegendary.reignofnether.ability.abilities.EnchantSharpness;
+import com.solegendary.reignofnether.ability.abilities.EnchantVigor;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -16,22 +25,21 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class Library extends ProductionBuilding implements RangeIndicatorAddon {
     private static final EnchantMaiming ENCHANT_MAIMING = new EnchantMaiming();
@@ -107,13 +115,11 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
         setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
 
-    public Faction getFaction() {
-        return Faction.VILLAGERS;
-    }
+    
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(name,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/enchanting_table_top.png"),
             hotkey,
@@ -121,21 +127,13 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
             TutorialClientEvents::isEnabled,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(Component.translatable("buildings.reignofnether.library").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library.tooltip1"),
-                    Style.EMPTY
-                ),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library.tooltip2"),
-                    Style.EMPTY
-                ),
+                Component.translatable("buildings.reignofnether.library.tooltip1").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.library.tooltip2").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.library.tooltip3"),
-                    Style.EMPTY
-                )
+                Component.translatable("buildings.reignofnether.library.tooltip3").getVisualOrderText()
             ),
             this
         );
@@ -158,7 +156,7 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
 
     @Override
     public String getUpgradedName(BuildingPlacement placement) {
-        return I18n.get("buildings.reignofnether.library.upgraded");
+        return Component.translatable("buildings.reignofnether.library.upgraded").getString();
     }
 
     @Override

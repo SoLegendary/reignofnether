@@ -1,8 +1,14 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingBlockData;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
 import com.solegendary.reignofnether.building.buildings.neutral.CapturableBeacon;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -16,7 +22,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.packets.BeaconSyncClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -30,6 +36,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
@@ -38,8 +45,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class BeaconPlacement extends ProductionPlacement implements RangeIndicator {
     public BlockPos beaconPos;
@@ -61,17 +66,17 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
 
     @Override
     public String getUpgradedName() {
-        String name = I18n.get("buildings.reignofnether.capturable_beacon");
+        String name = Component.translatable("buildings.reignofnether.capturable_beacon").getString();
         if (getAuraEffect() == MobEffects.LUCK)
-            return name + " (" + I18n.get("ability.reignofnether.beacon_aura.wealth") + ")";
+            return name + " (" + Component.translatable("ability.reignofnether.beacon_aura.wealth").getString() + ")";
         else if (getAuraEffect() == MobEffects.DIG_SPEED)
-            return name + " (" + I18n.get("ability.reignofnether.beacon_aura.haste") + ")";
+            return name + " (" + Component.translatable("ability.reignofnether.beacon_aura.haste").getString() + ")";
         else if (getAuraEffect() == MobEffects.REGENERATION)
-            return name + " (" + I18n.get("ability.reignofnether.beacon_aura.regeneration") + ")";
+            return name + " (" + Component.translatable("ability.reignofnether.beacon_aura.regeneration").getString() + ")";
         else if (getAuraEffect() == MobEffects.DAMAGE_BOOST)
-            return name + " (" + I18n.get("ability.reignofnether.beacon_aura.strength") + ")";
+            return name + " (" + Component.translatable("ability.reignofnether.beacon_aura.strength").getString() + ")";
         else if (getAuraEffect() == MobEffects.DAMAGE_RESISTANCE)
-            return name + " (" + I18n.get("ability.reignofnether.beacon_aura.resistance") + ")";
+            return name + " (" + Component.translatable("ability.reignofnether.beacon_aura.resistance").getString() + ")";
         else
             return name;
     }

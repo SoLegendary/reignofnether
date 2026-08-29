@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
@@ -23,7 +24,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
@@ -914,7 +915,7 @@ public class TutorialClientEvents {
                 if (stageProgress == 0) {
                     TutorialServerboundPacket.doServerAction(TutorialAction.EXPAND_MONSTER_BASE_B);
                     for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-                        if (building.getHealth() < building.getMaxHealth() && building.getFaction() == Faction.VILLAGERS
+                        if (building.getHealth() < building.getMaxHealth() && building.getFaction() == Factions.VILLAGERS
                             && damagedBuildings.size() < 3) {
                             damagedBuildings.add(building);
                         }
@@ -1003,7 +1004,7 @@ public class TutorialClientEvents {
                     progressStageAfterDelay(200);
                 } else if (stageProgress == 3) {
                     for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-                        if (building.getFaction() == Faction.MONSTERS
+                        if (building.getFaction() == Factions.MONSTERS
                             && building.getHealth() < building.getMaxHealth()) {
                             msg("tutorial.reignofnether.tip.monster_capitol");
                             progressStage();
@@ -1013,7 +1014,7 @@ public class TutorialClientEvents {
                 } else if (stageProgress == 4) {
                     boolean botAlive = false;
                     for (BuildingPlacement building : BuildingClientEvents.getBuildings())
-                        if (building.getFaction() == Faction.MONSTERS) {
+                        if (building.getFaction() == Factions.MONSTERS) {
                             botAlive = true;
                         }
 

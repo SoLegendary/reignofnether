@@ -16,17 +16,17 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
-
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ShrineOfProsperity extends ProductionBuilding {
 
@@ -57,11 +57,10 @@ public class ShrineOfProsperity extends ProductionBuilding {
         return pp;
     }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/acacia_log_top.png"),
@@ -71,11 +70,11 @@ public class ShrineOfProsperity extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        fcs(I18n.get("buildings.reignofnether.shrine_of_prosperity"), true),
+                        Component.translatable("buildings.reignofnether.shrine_of_prosperity").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        fcs(""),
-                        fcs(I18n.get("buildings.reignofnether.shrine_of_prosperity.tooltip1")),
-                        fcs(I18n.get("buildings.reignofnether.shrine_of_prosperity.tooltip2"))
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("buildings.reignofnether.shrine_of_prosperity.tooltip1").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.shrine_of_prosperity.tooltip2").getVisualOrderText()
                 ),
                 this
         );

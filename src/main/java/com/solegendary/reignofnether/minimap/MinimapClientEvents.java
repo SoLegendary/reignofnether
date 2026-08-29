@@ -963,7 +963,7 @@ public class MinimapClientEvents {
                                 z0 < START_POS_THICKNESS || z0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS
                         )) {
                             //rgb = PlayerColors.getPlayerDisplayColorHex(startPos.playerName);
-                            //if (startPos.faction == Faction.NONE)
+                            //if (startPos.faction == Factions.NONE)
                             //    rgb = 0xFFFF00;
                             rgb = startPos.getHexColor();
                         }
