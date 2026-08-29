@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-public class GarrisonZoneBlock extends Block implements EntityBlock {
-    public GarrisonZoneBlock(Properties pProperties) {
+public class ProductionSpawnBlock extends Block implements EntityBlock {
+    public ProductionSpawnBlock(Properties pProperties) {
         super(pProperties);
     }
 

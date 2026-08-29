@@ -1655,6 +1655,7 @@
     "block.reignofnether.garrison_entry_block": "Garrison Entry Block",
     "block.reignofnether.garrison_exit_block": "Garrison Exit Block",
     "block.reignofnether.garrison_zone_block": "Garrison Zone Block",
+    "block.reignofnether.production_spawn_block": "Production Spawn Block",
     "block.reignofnether.wraith_snow_layer_block": "Wraith Snow Layer Block",
     "block.reignofnether.unextinguishable_soul_fire_block": "Unextinguishable Soul Fire Block",
     "block.reignofnether.drowned_head": "Drowned Head",

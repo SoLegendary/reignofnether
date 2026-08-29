@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.production;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.neutral.*;
@@ -9,6 +10,11 @@ import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class ProductionItems {
     public static final CreeperProd CREEPER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "creeper"), new CreeperProd());
@@ -117,11 +123,75 @@ public class ProductionItems {
     public static final ResearchBeaconLevel4 RESEARCH_BEACON_LEVEL_4 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_4"), new ResearchBeaconLevel4());
     public static final ResearchBeaconLevel5 RESEARCH_BEACON_LEVEL_5 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_5"), new ResearchBeaconLevel5());
 
-
-
     private static <T extends ProductionItem> T register(ResourceLocation id, T building) {
         return Registry.register(ReignOfNetherRegistries.PRODUCTION_ITEM, id, building);
     }
 
     public static void init() {}
+
+    private static final List<ProductionItem> ALL = List.of(
+        CREEPER,
+        WRAITH,
+        SKELETON,
+        BOGGED,
+        ZOMBIE,
+        STRAY,
+        HUSK,
+        DROWNED,
+        SPIDER,
+        POISON_SPIDER,
+        VILLAGER,
+        SCOUT_DOG,
+        SCOUT_CAT,
+        ZOMBIE_VILLAGER,
+        BAT,
+        VINDICATOR,
+        PILLAGER,
+        IRON_GOLEM,
+        WITCH,
+        EVOKER,
+        WINDCALLER,
+        SLIME,
+        WARDEN,
+        RAVAGER,
+        GRUNT,
+        STRIDER,
+        BRUTE,
+        HEADHUNTER,
+        MARAUDER,
+        HOGLIN,
+        BLAZE,
+        WITHER_SKELETON,
+        MAGMA_CUBE,
+        GHAST,
+        ROYAL_GUARD,
+        ROYAL_GUARD_REVIVE,
+        ENCHANTER,
+        ENCHANTER_REVIVE,
+        NECROMANCER,
+        NECROMANCER_REVIVE,
+        WRETCHED_WRAITH,
+        WRETCHED_WRAITH_REVIVE,
+        PIGLIN_MERCHANT,
+        PIGLIN_MERCHANT_REVIVE,
+        WILDFIRE,
+        WILDFIRE_REVIVE,
+        ZOMBIE_PIGLIN,
+        ZOGLIN,
+        ENDERMAN,
+        POLAR_BEAR,
+        GRIZZLY_BEAR,
+        PANDA,
+        WOLF,
+        LLAMA
+    );
+
+    @Nullable
+    public static ProductionItem getProductionItem(EntityType<? extends Mob> entityType) {
+        for (ProductionItem prodItem : ALL) {
+            if (EntityRegistrar.getEntityType(prodItem.getItemName()) == entityType)
+                return prodItem;
+        }
+        return null;
+    }
 }

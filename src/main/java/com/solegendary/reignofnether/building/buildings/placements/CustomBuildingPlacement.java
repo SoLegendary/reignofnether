@@ -1,9 +1,9 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.building.BuildingBlock;
-import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.BuildingCommand;
+import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -15,9 +15,10 @@ import net.minecraft.world.level.block.Rotation;
 
 import java.util.ArrayList;
 
-public class CustomBuildingPlacement extends BuildingPlacement {
+public class CustomBuildingPlacement extends ProductionPlacement {
     public final ArrayList<BlockPos> garrisonEntries = new ArrayList<>();
     public final ArrayList<BlockPos> garrisonExits = new ArrayList<>();
+    public final ArrayList<BlockPos> spawnBlocks = new ArrayList<>();
     public final ArrayList<BuildingCommand> commands = new ArrayList<>();
     public ListTag commandsNbt = new ListTag();
 
@@ -29,6 +30,8 @@ public class CustomBuildingPlacement extends BuildingPlacement {
                 garrisonEntries.add(bb.getBlockPos());
             } else if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_EXIT_BLOCK.get()) {
                 garrisonExits.add(bb.getBlockPos());
+            } else if (bb.getBlockState().getBlock() == BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get()) {
+                spawnBlocks.add(bb.getBlockPos());
             }
         }
         for (BuildingCommand command : customBuilding.commands) {

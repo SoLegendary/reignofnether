@@ -17,6 +17,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import javax.annotation.Nullable;
+
 
 public class EntityRegistrar {
 
@@ -419,6 +421,7 @@ public class EntityRegistrar {
         ENTITIES.register(context.getModEventBus());
     }
 
+    @Nullable
     public static EntityType<? extends Mob> getEntityType(String unitName) {
         return switch(unitName) {
             case CreeperProd.itemName -> EntityRegistrar.CREEPER_UNIT.get();

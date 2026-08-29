@@ -8,26 +8,35 @@ import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
+import com.solegendary.reignofnether.building.production.ProductionBuilding;
+import com.solegendary.reignofnether.building.production.ProductionItem;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
-import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.resources.ResourceCosts;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,11 +45,12 @@ import java.util.*;
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class CustomBuilding extends Building implements GarrisonableBuildingAddon, NetherConvertingAddon, NightSourceAddon, RangeIndicatorAddon {
+public class CustomBuilding extends ProductionBuilding implements GarrisonableBuildingAddon, NetherConvertingAddon, NightSourceAddon, RangeIndicatorAddon {
     public static final List<Block> INVULNERABLE_BLOCKS = List.of(
             BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
             BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
             BlockRegistrar.GARRISON_ZONE_BLOCK.get(),
+            BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get(),
             Blocks.NETHER_PORTAL,
             Blocks.LIGHT,
             Blocks.COMMAND_BLOCK,
@@ -50,7 +60,8 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
 
     public static final List<Block> INVULNERABLE_ABOVE_BLOCKS = List.of(
             BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
-            BlockRegistrar.GARRISON_ZONE_BLOCK.get()
+            BlockRegistrar.GARRISON_ZONE_BLOCK.get(),
+            BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get()
     );
 
     public Vec3i structureSize;
@@ -86,17 +97,21 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         this.structureNbt = structureNbt;
         this.portraitBlock = portraitBlock;
         this.icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_front.png");
-        for (BuildingBlock buildingBlock : BuildingBlockData.getBuildingBlocksFromNbt(this.structureNbt)) {
+
+        ArrayList<BuildingBlock> buildingBlocks = BuildingBlockData.getBuildingBlocksFromNbt(this.structureNbt);
+
+        for (BuildingBlock buildingBlock : buildingBlocks) {
             if (buildingBlock.getBlockPos().getY() == 0) {
                 Block block = buildingBlock.getBlockState().getBlock();
                 this.startingBlockTypes.add(block);
             }
         }
-        for (BuildingBlock buildingBlock : BuildingBlockData.getBuildingBlocksFromNbt(this.structureNbt)) {
+        for (BuildingBlock buildingBlock : buildingBlocks) {
             if (!List.of(
                 BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
                 BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
-                BlockRegistrar.GARRISON_ZONE_BLOCK.get()
+                BlockRegistrar.GARRISON_ZONE_BLOCK.get(),
+                BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get()
             ).contains(buildingBlock.getBlockState().getBlock())) {
                 Block block = buildingBlock.getBlockState().getBlock();
                 this.portraitBlockOptions.add(block);
@@ -113,13 +128,30 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
             this.unpackCommandsNbt();
         }
 
-        for (BuildingBlock bb : BuildingBlockData.getBuildingBlocksFromNbt(structureNbt)) {
+        List<Block> storageBlock = List.of(
+                Blocks.BARREL,
+                Blocks.CHEST,
+                Blocks.TRAPPED_CHEST,
+                Blocks.DISPENSER,
+                Blocks.DROPPER,
+                Blocks.CAULDRON,
+                Blocks.HOPPER
+        );
+
+        for (BuildingBlock bb : buildingBlocks) {
             if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_ZONE_BLOCK.get()) {
                 numGarrisonZones += 1;
             } else if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_ENTRY_BLOCK.get()) {
                 numGarrisonEntries += 1;
             } else if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_EXIT_BLOCK.get()) {
                 numGarrisonExits += 1;
+            } else if (bb.getBlockNbt() != null &&
+                        storageBlock.contains(bb.getBlockState().getBlock()) &&
+                        bb.getBlockNbt().contains("Items")) {
+                ListTag listTag = bb.getBlockNbt().getList("Items", Tag.TAG_COMPOUND);
+                checkAndAddProductionItems(listTag);
+                if (this.productions.get().isEmpty())
+                    this.canSetRallyPoint = false;
             }
         }
 
@@ -131,6 +163,49 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
         setActiveAddon(NetherConvertingAddon.class, this, true);
         setActiveAddon(NightSourceAddon.class, this, true);
         setActiveAddon(RangeIndicatorAddon.class, this, true);
+    }
+
+    private static final List<Keybinding> HOTKEYS = List.of(
+            Keybindings.abilitySlot1,
+            Keybindings.abilitySlot2,
+            Keybindings.abilitySlot3,
+            Keybindings.abilitySlot4,
+            Keybindings.abilitySlot5,
+            Keybindings.abilitySlot6,
+            Keybindings.abilitySlot7,
+            Keybindings.abilitySlot8,
+            Keybindings.abilitySlot9,
+            Keybindings.abilitySlot10
+    );
+
+    // check the chest items for any RoN unit spawn eggs and add production items for them
+    public void checkAndAddProductionItems(ListTag items) {
+        int hotkeyIndex = 0;
+        for (Tag tag : items) {
+            try {
+                CompoundTag itemTag = (CompoundTag) tag;
+                ResourceLocation itemId = ResourceLocation.tryParse(itemTag.getString("id"));
+
+                Item item = ForgeRegistries.ITEMS.getValue(itemId);
+                if (!(item instanceof SpawnEggItem spawnEgg)) continue;
+
+                CompoundTag stackNbt = itemTag.contains("tag", Tag.TAG_COMPOUND)
+                        ? itemTag.getCompound("tag")
+                        : null;
+
+                EntityType<?> type = spawnEgg.getType(stackNbt);
+                if (type.getDescriptionId().contains("reignofnether") && type.getDescriptionId().contains("_unit")) {
+                    ProductionItem prodItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
+                    if (prodItem != null) {
+                        Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
+                        this.productions.add(prodItem, hotkey);
+                        hotkeyIndex += 1;
+                    }
+                }
+            } catch (Exception e) {
+                continue;
+            }
+        }
     }
 
     public void setToDefaultMaxHealth() {
@@ -448,5 +523,14 @@ public class CustomBuilding extends Building implements GarrisonableBuildingAddo
     @Override
     public int getDefaultNightRange() {
         return nightRadius;
+    }
+
+    @Override
+    public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
+        CustomBuildingPlacement cbp = (CustomBuildingPlacement) placement;
+        if (!cbp.spawnBlocks.isEmpty()) {
+            return cbp.spawnBlocks.get(random.nextInt(cbp.spawnBlocks.size())).above();
+        }
+        return placement.centrePos;
     }
 }

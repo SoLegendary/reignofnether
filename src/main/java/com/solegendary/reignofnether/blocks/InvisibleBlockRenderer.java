@@ -15,12 +15,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.RenderTypeHelper;
 import net.minecraftforge.client.model.data.ModelData;
 
-public class GarrisonBlockRenderer implements BlockEntityRenderer<GarrisonBlockEntity> {
+public class InvisibleBlockRenderer implements BlockEntityRenderer<InvisibleBlockEntity> {
 
-    public GarrisonBlockRenderer(BlockEntityRendererProvider.Context context) {}
+    public InvisibleBlockRenderer(BlockEntityRendererProvider.Context context) {}
 
     @Override
-    public void render(GarrisonBlockEntity blockEntity, float partialTicks, PoseStack poseStack,
+    public void render(InvisibleBlockEntity blockEntity, float partialTicks, PoseStack poseStack,
                        MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         Player player = Minecraft.getInstance().player;
         if ((player != null && !player.isCreative()) || OrthoviewClientEvents.isEnabled()) {
