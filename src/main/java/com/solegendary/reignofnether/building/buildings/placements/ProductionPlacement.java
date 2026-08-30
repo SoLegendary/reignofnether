@@ -214,6 +214,11 @@ public class ProductionPlacement extends BuildingPlacement {
 
     // return true if successful
     public boolean startProductionItem(ProductionItem prodItem) {
+        return startProductionItem(prodItem, -1);
+    }
+
+    // if ticksLeft <= 0, just use default cost ticks
+    public boolean startProductionItem(ProductionItem prodItem, float ticksLeft) {
         boolean success = false;
 
         if (getBuilding() instanceof ProductionBuilding pb && !pb.productions.get().contains(prodItem)) {
@@ -224,6 +229,8 @@ public class ProductionPlacement extends BuildingPlacement {
             // only worry about checking affordability on serverside
             if (getLevel().isClientSide()) {
                 ActiveProduction activeProduction = new ActiveProduction(prodItem, true, ownerName);
+                if (ticksLeft > 0)
+                    activeProduction.ticksLeft = ticksLeft;
                 productionQueue.add(activeProduction);
                 success = true;
             }
@@ -338,9 +345,9 @@ public class ProductionPlacement extends BuildingPlacement {
                 if (!tickLevel.isClientSide()) {
                     productionQueue.remove(0);
                     if (productionQueue.isEmpty())
-                        BuildingClientboundPacket.clearQueue(this.originPos);
+                        BuildingProductionClientboundPacket.clearQueue(this.originPos);
                     else
-                        BuildingClientboundPacket.completeProduction(this.originPos);
+                        BuildingProductionClientboundPacket.completeProduction(this.originPos);
                 }
             }
         }

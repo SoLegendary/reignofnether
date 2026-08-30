@@ -7,9 +7,7 @@ import com.solegendary.reignofnether.ability.BuildingAbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.BuildingAbilityServerboundPacket;
 import com.solegendary.reignofnether.alliance.*;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
-import com.solegendary.reignofnether.building.BuildingClientboundPacket;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
-import com.solegendary.reignofnether.building.FogBuildingClientboundPacket;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerboundPacket;
 import com.solegendary.reignofnether.config.ClientboundSyncResourceCostPacket;
@@ -166,6 +164,14 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(BuildingClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(BuildingClientboundPacket::encode).decoder(BuildingClientboundPacket::new)
                 .consumerMainThread(BuildingClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(BuildingProductionServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(BuildingProductionServerboundPacket::encode).decoder(BuildingProductionServerboundPacket::new)
+                .consumerMainThread(BuildingProductionServerboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(BuildingProductionClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(BuildingProductionClientboundPacket::encode).decoder(BuildingProductionClientboundPacket::new)
+                .consumerMainThread(BuildingProductionClientboundPacket::handle).add();
 
         INSTANCE.messageBuilder(ResourcesClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(ResourcesClientboundPacket::encode).decoder(ResourcesClientboundPacket::new)

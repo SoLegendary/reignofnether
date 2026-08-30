@@ -48,27 +48,32 @@ Server tests
     [🟡] All drag actions
     [🟡] All use types
 
+
 Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
 [❌] Slimes no longer create a free tiny slime whenever they consume a friendly slime
 [❌] Add roof to dark watchtower
 
+
 Quality of Life
 ---------------
 [🟡] When fog of war is enabled, animals spawn much closer to capitols
 
+
 Bugfixes
 --------
-[❌] cat/dog at the start should also match the TC mode
+[❌] Cat/dog at the start should also match the TC mode
+[❌] Animals still spawning in weird places - mostly chickens in walls
 
-[🟡] Fixed fallen heroes not being revivable if you relogged while they were dead
+[✔] Fixed fallen heroes not being revivable if you relogged while they were dead
+[❌] In-progress units and research are no longer cancelled upon relogging from a server
+[❌] In-progress units and research are now cancelled and refunded on logout in singleplayer
 
-[❌] Animals still spawning in weird places
 
 Languages
 ---------
-[🟡] Updated Spanish (es_es)
+[✔] Updated Spanish (es_es)
     - Thanks @Ikrlegido12!
     - This has also been added as a fallback for all South American Spanish locales, including:
         - Argentina (es_ar)
