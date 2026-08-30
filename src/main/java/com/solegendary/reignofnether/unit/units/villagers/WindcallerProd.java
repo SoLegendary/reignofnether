@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -80,7 +81,7 @@ public class WindcallerProd extends ProductionItem {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/windcaller.png"),
             hotkey,
             () -> false,
-            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.LIBRARY),
+            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.LIBRARY) || prodBuilding instanceof CustomBuildingPlacement,
             tooltipLines,
             this
         );

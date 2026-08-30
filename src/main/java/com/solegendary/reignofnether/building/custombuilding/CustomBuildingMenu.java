@@ -259,7 +259,7 @@ public class CustomBuildingMenu {
         );
         setOreCostButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
         buttonsCol1.add(setOreCostButton);
-        
+
         Button setMaxHealthButton = new IntegerButton(
             I18n.get("sandbox.reignofnether.custom_buildings.set_max_health.label") + ": " + (int) customBuilding.maxHealth,
             () -> {
@@ -288,7 +288,16 @@ public class CustomBuildingMenu {
         );
         setMaxHealthButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/heart.png");
         buttonsCol1.add(setMaxHealthButton);
-        
+
+        Button trainableUnitsButton = new IntegerButton(
+                I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.label") + ": " + customBuilding.productions.get().size(),
+                null,
+                null,
+                getTrainableUnitsTooltips(customBuilding)
+        );
+        trainableUnitsButton.iconResource = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/fletching_table_front.png");
+        buttonsCol1.add(trainableUnitsButton);
+
         buttonsCol2.add(new BooleanButton(
             I18n.get("sandbox.reignofnether.custom_buildings.set_capturable.label"), customBuilding.capturable,
             () -> {
@@ -411,7 +420,7 @@ public class CustomBuildingMenu {
         buttonsCol1.addAll(buttonsCol2);
         return buttonsCol1;
     }
-    
+
     private static List<FormattedCharSequence> getGarrisonTooltips(CustomBuilding customBuilding, String originalTooltip) {
         ArrayList<FormattedCharSequence> tooltips = new ArrayList<>();
         tooltips.add(fcs(originalTooltip));
@@ -429,6 +438,18 @@ public class CustomBuildingMenu {
         }
         return tooltips;
     }
+
+    private static List<FormattedCharSequence> getTrainableUnitsTooltips(CustomBuilding customBuilding) {
+        ArrayList<FormattedCharSequence> tooltips = new ArrayList<>();
+        tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.tooltip1")));
+        tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.tooltip2")));
+        if (customBuilding.numSpawnBlocks <= 0) {
+            tooltips.add(fcsIcons(I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.no_spawn_block")));
+        } else if (customBuilding.numSpawnBlocks > 1) {
+            tooltips.add(fcsIcons(I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.multiple_spawn_blocks")));
+        }
+        return tooltips;
+    }
     
     private static final int MAX_COMMANDS = 50;
     private static final int COMMAND_ROW_HEIGHT = 16;
@@ -438,7 +459,7 @@ public class CustomBuildingMenu {
     private static final int COOLDOWN_EDIT_BOX_WIDTH = 40;
     
     // how many command rows are visible in the scrollable viewport at once
-    private static final int VISIBLE_COMMAND_ROWS = 8;
+    private static final int VISIBLE_COMMAND_ROWS = 9;
     private static final int SCROLLBAR_WIDTH = 6;
     // gap between the delete-command button column and the scrollbar
     private static final int SCROLLBAR_X_OFFSET = COOLDOWN_EDIT_BOX_WIDTH + TEXT_EDIT_BOX_WIDTH + 80;

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.*;
@@ -62,7 +63,7 @@ public class BoggedProd extends GraveyardUnitProductionItem {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/bogged.png"),
             hotkey,
             () -> false,
-            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_BOGGED),
+            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_BOGGED) || prodBuilding instanceof CustomBuildingPlacement,
             List.of(
                 FormattedCharSequence.forward(I18n.get("entity.reignofnether.bogged_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),

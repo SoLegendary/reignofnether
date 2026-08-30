@@ -80,6 +80,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
     public int numGarrisonZones = 0;
     public int numGarrisonEntries = 0;
     public int numGarrisonExits = 0;
+    public int numSpawnBlocks = 0;
     public ArrayList<BuildingCommand> commands = new ArrayList<>(List.of(new BuildingCommand()));
     private final Random random = new Random();
 
@@ -145,6 +146,8 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                 numGarrisonEntries += 1;
             } else if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_EXIT_BLOCK.get()) {
                 numGarrisonExits += 1;
+            } else if (bb.getBlockState().getBlock() == BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get()) {
+                numSpawnBlocks += 1;
             } else if (bb.getBlockNbt() != null &&
                         storageBlocks.contains(bb.getBlockState().getBlock()) &&
                         bb.getBlockNbt().contains("Items")) {

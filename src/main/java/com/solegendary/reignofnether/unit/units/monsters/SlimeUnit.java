@@ -693,7 +693,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
             consumeTarget = null;
             return true;
         }
-        if (result && getSize() >= 2 && pEntity instanceof LivingEntity && !(this instanceof MagmaCubeUnit) && !this.level().isClientSide())
+        if (result && getSize() >= 2 && pEntity instanceof LivingEntity && !(this instanceof MagmaCubeUnit) && !this.level().isClientSide() && !(pEntity instanceof SlimeUnit))
             if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_SLIME_CONVERSION))
                 ((LivingEntity)pEntity).addEffect(new MobEffectInstance(MobEffectRegistrar.SLIME_INFECTED.get(), CONVERT_DEBUFF_DURATION_SECONDS * 20, 0), this);
         return result;
@@ -707,10 +707,8 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     @Override
     public boolean hurt(DamageSource pSource, float pAmount) {
         boolean result = super.hurt(pSource, pAmount);
-
-        boolean lastHurtByOwnedSlime = getLastHurtByMob() instanceof SlimeUnit slimeUnit && slimeUnit.getOwnerName().equals(getOwnerName());
         int newSize = getSizeForHealth(getHealth());
-        if (newSize < getSize() && shouldSpawnSlimes && !lastHurtByOwnedSlime) {
+        if (newSize < getSize() && shouldSpawnSlimes) {
             if (getSize() >= 2)
                 spawnTinySlime();
             if (getSize() >= 4)

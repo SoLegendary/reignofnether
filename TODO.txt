@@ -52,7 +52,7 @@ Server tests
 Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
-[🟡] You no longer get a free tiny slime whenever you consume a friendly slime
+[🟡] You no longer get a free tiny slime whenever you consume with Slime Conversion researched
 [❌] Add roof to dark watchtower
 
 
@@ -61,13 +61,16 @@ Quality of Life
 [✔] When fog of war is enabled, animals spawn much closer to capitols
 [✔] Unit spawn eggs in containers in a custom building's structure now allow that building to train that unit
     [✔] You can use a Production Spawn Block to mark where buildings should spawn trained units
-    [❌] Also added a new indicator to the custom building menu to show this
     [✔] Add proper buttons and tooltips for all units
         - Polar bear/grizzly bear/panda
         - Wolf
         - Llama
         - Zoglin
         - Zombie Piglin
+    [❌] Also added a new indicator to the custom building menu to show this
+        - [ ] Trainable units: N (if >0, show warning if there is no spawn block)
+        - Tooltip: "To train units from a custom building, capture its structure"
+                   "with a unit spawn egg into a chest or other container block"
 
 Bugfixes
 --------

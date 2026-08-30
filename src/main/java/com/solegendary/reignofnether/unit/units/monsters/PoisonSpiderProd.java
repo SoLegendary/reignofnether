@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -58,7 +59,7 @@ public class PoisonSpiderProd extends ProductionItem {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/poison_spider.png"),
             hotkey,
             () -> false,
-            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS),
+            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS) || prodBuilding instanceof CustomBuildingPlacement,
             List.of(
                 FormattedCharSequence.forward(I18n.get("entity.reignofnether.poison_spider_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),

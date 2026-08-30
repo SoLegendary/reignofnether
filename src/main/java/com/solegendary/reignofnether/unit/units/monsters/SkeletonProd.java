@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.*;
@@ -81,7 +82,7 @@ public class SkeletonProd extends GraveyardUnitProductionItem {
             SkeletonProd.itemName,
             getIcon(),
             hotkey,
-            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS),
+            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS) && !(prodBuilding instanceof CustomBuildingPlacement),
             () -> true,
             List.of(
                 FormattedCharSequence.forward(I18n.get("entity.reignofnether.skeleton_unit"), Style.EMPTY.withBold(true)),
