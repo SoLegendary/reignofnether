@@ -58,8 +58,10 @@ Balance
 
 Quality of Life
 ---------------
-[🟡] When fog of war is enabled, animals spawn much closer to capitols
-
+[✔] When fog of war is enabled, animals spawn much closer to capitols
+[✔] Unit spawn eggs in containers in a custom building's structure now allow that building to train that unit
+    [❌] Also added a new indicator to the custom building menu to show this
+    [✔] You can use a Production Spawn Block to mark where buildings should spawn trained units
 
 Bugfixes
 --------
@@ -67,8 +69,8 @@ Bugfixes
 [❌] Animals still spawning in weird places - mostly chickens in walls
 
 [✔] Fixed fallen heroes not being revivable if you relogged while they were dead
-[❌] In-progress units and research are no longer cancelled upon relogging from a server
-[❌] In-progress units and research are now cancelled and refunded on logout in singleplayer
+[✔] In-progress units and research are no longer cancelled upon relogging from a server
+[✔] In-progress units and research are now cancelled and refunded on logout in singleplayer
 
 
 Languages

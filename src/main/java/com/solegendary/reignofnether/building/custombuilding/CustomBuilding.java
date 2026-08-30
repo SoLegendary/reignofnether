@@ -128,13 +128,12 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             this.unpackCommandsNbt();
         }
 
-        List<Block> storageBlock = List.of(
+        List<Block> storageBlocks = List.of(
                 Blocks.BARREL,
                 Blocks.CHEST,
                 Blocks.TRAPPED_CHEST,
                 Blocks.DISPENSER,
                 Blocks.DROPPER,
-                Blocks.CAULDRON,
                 Blocks.HOPPER
         );
 
@@ -146,7 +145,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             } else if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_EXIT_BLOCK.get()) {
                 numGarrisonExits += 1;
             } else if (bb.getBlockNbt() != null &&
-                        storageBlock.contains(bb.getBlockState().getBlock()) &&
+                        storageBlocks.contains(bb.getBlockState().getBlock()) &&
                         bb.getBlockNbt().contains("Items")) {
                 ListTag listTag = bb.getBlockNbt().getList("Items", Tag.TAG_COMPOUND);
                 checkAndAddProductionItems(listTag);

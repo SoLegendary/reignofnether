@@ -189,7 +189,8 @@ public class ProductionItems {
     @Nullable
     public static ProductionItem getProductionItem(EntityType<? extends Mob> entityType) {
         for (ProductionItem prodItem : ALL) {
-            if (EntityRegistrar.getEntityType(prodItem.getItemName()) == entityType)
+            String itemName = prodItem.getItemName();
+            if (itemName != null && EntityRegistrar.getEntityType(prodItem.getItemName()) == entityType)
                 return prodItem;
         }
         return null;
