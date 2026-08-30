@@ -201,7 +201,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                     EntityType<?> type = spawnEgg.getType(stackNbt);
                     if (type.getDescriptionId().contains("reignofnether") && type.getDescriptionId().contains("_unit")) {
                         ProductionItem prodItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
-                        if (prodItem != null) {
+                        if (prodItem != null && !this.productions.get().contains(prodItem)) {
                             Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
                             this.productions.add(prodItem, hotkey);
                             hotkeyIndex += 1;

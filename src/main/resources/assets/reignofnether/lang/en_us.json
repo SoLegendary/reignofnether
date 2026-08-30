@@ -1860,7 +1860,7 @@
     "sandbox.reignofnether.custom_buildings.garrison_warning.multiple_entries": "\uE009   Multiple    garrison    entry    blocks    detected!",
     "sandbox.reignofnether.custom_buildings.trainable_units.label": "Trainable Units",
     "sandbox.reignofnether.custom_buildings.trainable_units.tooltip1": "To train units from this building, save its structure",
-    "sandbox.reignofnether.custom_buildings.trainable_units.tooltip2": "with a unit spawn egg in a chest or other container.",
+    "sandbox.reignofnether.custom_buildings.trainable_units.tooltip2": "with a unit spawn egg in a chest or other container",
     "sandbox.reignofnether.custom_buildings.trainable_units.no_spawn_block": "\uE009   No    production    spawn    blocks    blocks    detected!",
     "sandbox.reignofnether.custom_buildings.trainable_units.multiple_spawn_blocks": "\uE009   Multiple    production    spawn    blocks    blocks    detected!",
 

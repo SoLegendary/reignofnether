@@ -52,9 +52,8 @@ Server tests
 Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
-[🟡] You no longer get a free tiny slime whenever you consume with Slime Conversion researched
 [❌] Add roof to dark watchtower
-
+[✔] You no longer get a free tiny slime whenever you consume with Slime Conversion researched
 
 Quality of Life
 ---------------
@@ -67,7 +66,7 @@ Quality of Life
         - Llama
         - Zoglin
         - Zombie Piglin
-    [❌] Also added a new indicator to the custom building menu to show this
+    [✔] Also added a new indicator to the custom building menu to show this
         - [ ] Trainable units: N (if >0, show warning if there is no spawn block)
         - Tooltip: "To train units from a custom building, capture its structure"
                    "with a unit spawn egg into a chest or other container block"
@@ -75,13 +74,12 @@ Quality of Life
 Bugfixes
 --------
 [❌] Cat/dog at the start should also match the TC mode
-[❌] Animals still spawning in weird places - mostly chickens in walls
 
 [✔] Fixed sculk sensors showing particle effects in fog
 [✔] Fixed fallen heroes not being revivable if you relogged while they were dead
 [✔] In-progress units and research are no longer cancelled upon relogging from a server
 [✔] In-progress units and research are now cancelled and refunded on logout in singleplayer
-[🟡] Fixed animals sometimes spawning clipped into walls
+[✔] Fixed animals sometimes spawning clipped into walls
 
 [❌] Can't kill catalyst from above?
     but apparently if i attack the catalyst from below
