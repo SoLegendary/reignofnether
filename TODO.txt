@@ -60,8 +60,14 @@ Quality of Life
 ---------------
 [✔] When fog of war is enabled, animals spawn much closer to capitols
 [✔] Unit spawn eggs in containers in a custom building's structure now allow that building to train that unit
-    [❌] Also added a new indicator to the custom building menu to show this
     [✔] You can use a Production Spawn Block to mark where buildings should spawn trained units
+    [❌] Also added a new indicator to the custom building menu to show this
+    [❌] Add proper buttons and tooltips for all units
+        - Polar bear/grizzly bear/panda
+        - Wolf
+        - Llama
+        - Zoglin
+        - Zombie Piglin
 
 Bugfixes
 --------
@@ -71,6 +77,11 @@ Bugfixes
 [✔] Fixed fallen heroes not being revivable if you relogged while they were dead
 [✔] In-progress units and research are no longer cancelled upon relogging from a server
 [✔] In-progress units and research are now cancelled and refunded on logout in singleplayer
+
+[❌] Can't kill catalyst from above?
+    but apparently if i attack the catalyst from below
+    it kills it
+    but not above
 
 
 Languages
