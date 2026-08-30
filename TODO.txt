@@ -52,7 +52,7 @@ Server tests
 Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
-[❌] Slimes no longer create a free tiny slime whenever they consume a friendly slime
+[🟡] You no longer get a free tiny slime whenever you consume a friendly slime
 [❌] Add roof to dark watchtower
 
 
@@ -62,7 +62,7 @@ Quality of Life
 [✔] Unit spawn eggs in containers in a custom building's structure now allow that building to train that unit
     [✔] You can use a Production Spawn Block to mark where buildings should spawn trained units
     [❌] Also added a new indicator to the custom building menu to show this
-    [❌] Add proper buttons and tooltips for all units
+    [✔] Add proper buttons and tooltips for all units
         - Polar bear/grizzly bear/panda
         - Wolf
         - Llama
@@ -78,7 +78,7 @@ Bugfixes
 [✔] Fixed fallen heroes not being revivable if you relogged while they were dead
 [✔] In-progress units and research are no longer cancelled upon relogging from a server
 [✔] In-progress units and research are now cancelled and refunded on logout in singleplayer
-
+[🟡] Fixed animals sometimes spawning clipped into walls
 
 [❌] Can't kill catalyst from above?
     but apparently if i attack the catalyst from below

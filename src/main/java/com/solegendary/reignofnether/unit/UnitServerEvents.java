@@ -903,7 +903,11 @@ public class UnitServerEvents {
             for (int i = 0; i < qty; i++) {
                 Entity entity = entityType.create(level);
                 if (entity != null) {
-                    entity.moveTo(pos.above().getX() + i, pos.above().getY(), pos.above().getZ());
+                    entity.moveTo(
+                            pos.above().getX() + 0.5f + i,
+                            pos.above().getY(),
+                            pos.above().getZ() + 0.5f
+                    );
                     entities.add(entity);
                     if (entity instanceof Unit unit) {
                         unit.setOwnerName(ownerName);

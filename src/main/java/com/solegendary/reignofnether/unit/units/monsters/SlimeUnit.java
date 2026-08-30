@@ -708,8 +708,9 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public boolean hurt(DamageSource pSource, float pAmount) {
         boolean result = super.hurt(pSource, pAmount);
 
+        boolean lastHurtByOwnedSlime = getLastHurtByMob() instanceof SlimeUnit slimeUnit && slimeUnit.getOwnerName().equals(getOwnerName());
         int newSize = getSizeForHealth(getHealth());
-        if (newSize < getSize() && shouldSpawnSlimes) {
+        if (newSize < getSize() && shouldSpawnSlimes && !lastHurtByOwnedSlime) {
             if (getSize() >= 2)
                 spawnTinySlime();
             if (getSize() >= 4)
