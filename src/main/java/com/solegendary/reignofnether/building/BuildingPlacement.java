@@ -403,8 +403,14 @@ public class BuildingPlacement {
 
     public boolean isPosInsideBuilding(BlockPos bp) {
         return bp.getX() <= this.maxCorner.getX() && bp.getX() >= this.minCorner.getX()
-               && bp.getY() <= this.maxCorner.getY() && bp.getY() >= this.minCorner.getY()
-               && bp.getZ() <= this.maxCorner.getZ() && bp.getZ() >= this.minCorner.getZ();
+            && bp.getY() <= this.maxCorner.getY() && bp.getY() >= this.minCorner.getY()
+            && bp.getZ() <= this.maxCorner.getZ() && bp.getZ() >= this.minCorner.getZ();
+    }
+
+    public boolean isPosInsideBuilding(BlockPos bp, int edgeModifier) {
+        return bp.getX() <= this.maxCorner.getX() + edgeModifier && bp.getX() >= this.minCorner.getX() - edgeModifier
+            && bp.getY() <= this.maxCorner.getY() + edgeModifier && bp.getY() >= this.minCorner.getY() - edgeModifier
+            && bp.getZ() <= this.maxCorner.getZ() + edgeModifier && bp.getZ() >= this.minCorner.getZ() - edgeModifier;
     }
 
     public boolean isPosPartOfBuilding(BlockPos bp, boolean onlyPlacedBlocks) {

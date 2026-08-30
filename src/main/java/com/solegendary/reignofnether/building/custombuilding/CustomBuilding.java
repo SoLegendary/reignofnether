@@ -137,6 +137,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                 Blocks.HOPPER
         );
 
+        ArrayList<ListTag> listTags = new ArrayList<>();
         for (BuildingBlock bb : buildingBlocks) {
             if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_ZONE_BLOCK.get()) {
                 numGarrisonZones += 1;
@@ -147,12 +148,13 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             } else if (bb.getBlockNbt() != null &&
                         storageBlocks.contains(bb.getBlockState().getBlock()) &&
                         bb.getBlockNbt().contains("Items")) {
-                ListTag listTag = bb.getBlockNbt().getList("Items", Tag.TAG_COMPOUND);
-                checkAndAddProductionItems(listTag);
-                if (this.productions.get().isEmpty())
-                    this.canSetRallyPoint = false;
+                listTags.add(bb.getBlockNbt().getList("Items", Tag.TAG_COMPOUND));
             }
         }
+
+        checkAndAddProductionItems(listTags);
+        if (this.productions.get().isEmpty())
+            this.canSetRallyPoint = false;
 
         if (maxHealth <= 0)
             setToDefaultMaxHealth();
@@ -178,31 +180,33 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
     );
 
     // check the chest items for any RoN unit spawn eggs and add production items for them
-    public void checkAndAddProductionItems(ListTag items) {
+    public void checkAndAddProductionItems(List<ListTag> itemsLists) {
         int hotkeyIndex = 0;
-        for (Tag tag : items) {
-            try {
-                CompoundTag itemTag = (CompoundTag) tag;
-                ResourceLocation itemId = ResourceLocation.tryParse(itemTag.getString("id"));
+        for (ListTag items : itemsLists) {
+            for (Tag tag : items) {
+                try {
+                    CompoundTag itemTag = (CompoundTag) tag;
+                    ResourceLocation itemId = ResourceLocation.tryParse(itemTag.getString("id"));
 
-                Item item = ForgeRegistries.ITEMS.getValue(itemId);
-                if (!(item instanceof SpawnEggItem spawnEgg)) continue;
+                    Item item = ForgeRegistries.ITEMS.getValue(itemId);
+                    if (!(item instanceof SpawnEggItem spawnEgg)) continue;
 
-                CompoundTag stackNbt = itemTag.contains("tag", Tag.TAG_COMPOUND)
-                        ? itemTag.getCompound("tag")
-                        : null;
+                    CompoundTag stackNbt = itemTag.contains("tag", Tag.TAG_COMPOUND)
+                            ? itemTag.getCompound("tag")
+                            : null;
 
-                EntityType<?> type = spawnEgg.getType(stackNbt);
-                if (type.getDescriptionId().contains("reignofnether") && type.getDescriptionId().contains("_unit")) {
-                    ProductionItem prodItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
-                    if (prodItem != null) {
-                        Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
-                        this.productions.add(prodItem, hotkey);
-                        hotkeyIndex += 1;
+                    EntityType<?> type = spawnEgg.getType(stackNbt);
+                    if (type.getDescriptionId().contains("reignofnether") && type.getDescriptionId().contains("_unit")) {
+                        ProductionItem prodItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
+                        if (prodItem != null) {
+                            Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
+                            this.productions.add(prodItem, hotkey);
+                            hotkeyIndex += 1;
+                        }
                     }
+                } catch (Exception e) {
+                    continue;
                 }
-            } catch (Exception e) {
-                continue;
             }
         }
     }

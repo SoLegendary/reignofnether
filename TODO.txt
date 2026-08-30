@@ -74,9 +74,11 @@ Bugfixes
 [❌] Cat/dog at the start should also match the TC mode
 [❌] Animals still spawning in weird places - mostly chickens in walls
 
+[✔] Fixed sculk sensors showing particle effects in fog
 [✔] Fixed fallen heroes not being revivable if you relogged while they were dead
 [✔] In-progress units and research are no longer cancelled upon relogging from a server
 [✔] In-progress units and research are now cancelled and refunded on logout in singleplayer
+
 
 [❌] Can't kill catalyst from above?
     but apparently if i attack the catalyst from below
