@@ -321,7 +321,7 @@ public class ResourceSources {
             ),
             new ResourceSource("Saplings", // item only
                     List.of(),
-                    List.of(Items.ACACIA_SAPLING, Items.SPRUCE_SAPLING, Items.BIRCH_SAPLING, Items.OAK_SAPLING, Items.OAK_SAPLING, Items.DARK_OAK_SAPLING, Items.JUNGLE_SAPLING),
+                    List.of(Items.ACACIA_SAPLING, Items.SPRUCE_SAPLING, Items.BIRCH_SAPLING, Items.OAK_SAPLING, Items.OAK_SAPLING, Items.DARK_OAK_SAPLING, Items.JUNGLE_SAPLING, Items.CHERRY_SAPLING),
                     0,
                     5,
                     ResourceName.WOOD
@@ -335,7 +335,7 @@ public class ResourceSources {
                     ResourceName.WOOD
             ), */
             new ResourceSource("Logs",
-                    List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG,
+                    List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG, Blocks.CHERRY_LOG,
                             BlockRegistrar.FALLING_OAK_LOG.get(),
                             BlockRegistrar.FALLING_BIRCH_LOG.get(),
                             BlockRegistrar.FALLING_ACACIA_LOG.get(),
@@ -343,9 +343,10 @@ public class ResourceSources {
                             BlockRegistrar.FALLING_JUNGLE_LOG.get(),
                             BlockRegistrar.FALLING_MANGROVE_LOG.get(),
                             BlockRegistrar.FALLING_SPRUCE_LOG.get(),
+                            BlockRegistrar.FALLING_CHERRY_LOG.get(),
                             Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD, Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD),
-                    List.of(Items.OAK_LOG, Items.BIRCH_LOG, Items.ACACIA_LOG, Items.DARK_OAK_LOG, Items.JUNGLE_LOG, Items.MANGROVE_LOG, Items.SPRUCE_LOG,
-                            Items.OAK_WOOD, Items.BIRCH_WOOD, Items.ACACIA_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD),
+                    List.of(Items.OAK_LOG, Items.BIRCH_LOG, Items.ACACIA_LOG, Items.DARK_OAK_LOG, Items.JUNGLE_LOG, Items.MANGROVE_LOG, Items.SPRUCE_LOG, Items.CHERRY_LOG,
+                            Items.OAK_WOOD, Items.BIRCH_WOOD, Items.ACACIA_WOOD, Items.DARK_OAK_WOOD, Items.JUNGLE_WOOD, Items.MANGROVE_WOOD, Items.SPRUCE_WOOD, Items.CHERRY_WOOD),
                     TICKS_PER_SECOND * 12,
                     15,
                     ResourceName.WOOD
@@ -368,10 +369,11 @@ public class ResourceSources {
                     ResourceName.WOOD
             ),
             new ResourceSource("Leaves",
-                    List.of(Blocks.ACACIA_LEAVES, Blocks.AZALEA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.DARK_OAK_LEAVES,
-                            Blocks.MANGROVE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES, BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(), BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get()),
+                    List.of(Blocks.ACACIA_LEAVES, Blocks.AZALEA_LEAVES, Blocks.BIRCH_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES, Blocks.CHERRY_LEAVES,
+                            Blocks.JUNGLE_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.OAK_LEAVES, Blocks.SPRUCE_LEAVES,
+                            BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(), BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get()),
                     List.of(Items.ACACIA_LEAVES, Items.AZALEA_LEAVES, Items.BIRCH_LEAVES, Items.FLOWERING_AZALEA_LEAVES, Items.JUNGLE_LEAVES, Items.DARK_OAK_LEAVES,
-                            Items.MANGROVE_LEAVES, Items.OAK_LEAVES, Items.SPRUCE_LEAVES),
+                            Items.MANGROVE_LEAVES, Items.OAK_LEAVES, Items.SPRUCE_LEAVES, Items.CHERRY_LEAVES),
                     8,
                     1,
                     ResourceName.WOOD

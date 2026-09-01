@@ -55,8 +55,10 @@ Balance
 [❌] Add roof to dark watchtower
 [✔] You no longer get a free tiny slime whenever you consume with Slime Conversion researched
 
+
 Quality of Life
 ---------------
+[✔] Animals can no longer spawn on obsidian
 [✔] When fog of war is enabled, animals spawn much closer to capitols
 [✔] Unit spawn eggs in containers in a custom building's structure now allow that building to train that unit
     [✔] You can use a Production Spawn Block to mark where buildings should spawn trained units
@@ -70,6 +72,7 @@ Quality of Life
         - [ ] Trainable units: N (if >0, show warning if there is no spawn block)
         - Tooltip: "To train units from a custom building, capture its structure"
                    "with a unit spawn egg into a chest or other container block"
+    [🟡] Cancel and refund productions if captured
 
 Bugfixes
 --------
@@ -80,6 +83,7 @@ Bugfixes
 [✔] In-progress units and research are no longer cancelled upon relogging from a server
 [✔] In-progress units and research are now cancelled and refunded on logout in singleplayer
 [✔] Fixed animals sometimes spawning clipped into walls
+[🟡] Fixed cherry logs/leaves/wood/etc. not being convertable into nether blocks or falling logs
 
 [❌] Can't kill catalyst from above?
     but apparently if i attack the catalyst from below

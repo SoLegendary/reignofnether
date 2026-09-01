@@ -362,4 +362,18 @@ public class ProductionPlacement extends BuildingPlacement {
             }
         }
     }
+
+    @Override
+    protected boolean checkAndDoCapture(ServerLevel serverLevel) {
+        String oldOwner = this.ownerName;
+        boolean captured = super.checkAndDoCapture(serverLevel);
+        String newOwner = this.ownerName;
+        if (captured) {
+            this.ownerName = oldOwner;
+            for (ActiveProduction activeProd : new ArrayList<>(productionQueue))
+                cancelProductionItem(activeProd.item, true);
+            this.ownerName = newOwner;
+        }
+        return captured;
+    }
 }

@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.building.buildings.placements;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.BuildingCommand;
-import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -85,8 +84,8 @@ public class CustomBuildingPlacement extends ProductionPlacement {
     }
 
     @Override
-    protected boolean checkIfCaptured(ServerLevel serverLevel) {
-        boolean captured = super.checkIfCaptured(serverLevel);
+    protected boolean checkAndDoCapture(ServerLevel serverLevel) {
+        boolean captured = super.checkAndDoCapture(serverLevel);
         if (captured) {
             for (BuildingCommand command : commands) {
                 if (command.condition == BuildingCommand.TriggerCondition.ON_CAPTURE ||

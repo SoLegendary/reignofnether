@@ -90,6 +90,10 @@ public class BlockRegistrar {
             () -> fallingLog(MapColor.COLOR_RED, MapColor.PODZOL),
             CreativeModeTabs.BUILDING_BLOCKS
     );
+    public static final RegistryObject<Block> FALLING_CHERRY_LOG = registerBlock("falling_cherry_log",
+            () -> fallingLog(MapColor.TERRACOTTA_WHITE, MapColor.TERRACOTTA_GRAY),
+            CreativeModeTabs.BUILDING_BLOCKS
+    );
     public static final RegistryObject<Block> FALLING_WARPED_STEM = registerBlock("falling_warped_stem",
             () -> fallingNetherStem(MapColor.WARPED_STEM),
             CreativeModeTabs.BUILDING_BLOCKS

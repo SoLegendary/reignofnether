@@ -1062,7 +1062,7 @@ public class BuildingPlacement {
             buildNextBlock();
         }
         if (isBuilt && tickAgeAfterBuilt % 10 == 0 && getBuilding().capturable) {
-            checkIfCaptured(serverLevel);
+            checkAndDoCapture(serverLevel);
         }
     }
 
@@ -1179,6 +1179,7 @@ public class BuildingPlacement {
             }
         } while (!spawnBs.isSolid()
                  || spawnBs.getBlock() == Blocks.BARRIER
+                 || spawnBs.getBlock() == Blocks.OBSIDIAN
                  || spawnBs.is(BlockTags.PLANKS)
                  || ResourceSources.getBlockResourceName(spawnBp, level) != ResourceName.NONE
                  || spawnBp.distSqr(centrePos) < animalSpawnRangeMin * animalSpawnRangeMin
@@ -1260,7 +1261,7 @@ public class BuildingPlacement {
         refreshBlocks();
     }
 
-    protected boolean checkIfCaptured(ServerLevel serverLevel) {
+    protected boolean checkAndDoCapture(ServerLevel serverLevel) {
         if (PlayerServerEvents.rtsPlayers.isEmpty())
             return false;
 
