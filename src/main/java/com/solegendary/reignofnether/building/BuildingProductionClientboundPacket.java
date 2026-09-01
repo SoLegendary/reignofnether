@@ -153,14 +153,7 @@ public class BuildingProductionClientboundPacket {
                     }
                     case CLEAR_PRODUCTION -> {
                         if (building instanceof ProductionPlacement pBuilding) {
-                            if (!pBuilding.productionQueue.isEmpty()) {
-                                ActiveProduction pItem = pBuilding.productionQueue.get(0);
-                                if (!pItem.completed) {
-                                    pItem.completed = true;
-                                    pItem.item.onComplete.accept(pBuilding.level, pBuilding);
-                                }
-                                pBuilding.productionQueue.clear();
-                            }
+                            pBuilding.productionQueue.clear();
                         }
                     }
                     case COMPLETE_PRODUCTION -> {

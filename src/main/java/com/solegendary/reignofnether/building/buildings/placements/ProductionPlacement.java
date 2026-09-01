@@ -374,8 +374,10 @@ public class ProductionPlacement extends BuildingPlacement {
         String newOwner = this.ownerName;
         if (captured) {
             this.ownerName = oldOwner;
-            for (ActiveProduction activeProd : new ArrayList<>(productionQueue))
+            for (ActiveProduction activeProd : new ArrayList<>(productionQueue)) {
                 cancelProductionItem(activeProd.item, true);
+            }
+            BuildingProductionClientboundPacket.clearQueue(this.originPos);
             this.ownerName = newOwner;
         }
         return captured;
