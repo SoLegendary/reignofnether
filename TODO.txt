@@ -1,5 +1,5 @@
 
-1.20.1-1.4.3
+1.20.1-1.4.3a
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -53,53 +53,18 @@ Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
 [❌] Add roof to dark watchtower
-[✔] You no longer get a free tiny slime whenever you consume with Slime Conversion researched
 
 
 Quality of Life
 ---------------
-[✔] Animals can no longer spawn on obsidian
-[✔] When fog of war is enabled, animals spawn much closer to capitols
-[✔] Unit spawn eggs in containers in a custom building's structure now allow that building to train that unit
-    [✔] You can use a Production Spawn Block to mark where buildings should spawn trained units
-    [✔] Add proper buttons and tooltips for all units
-        - Polar bear/grizzly bear/panda
-        - Wolf
-        - Llama
-        - Zoglin
-        - Zombie Piglin
-    [✔] Also added a new indicator to the custom building menu to show this
-        - [ ] Trainable units: N (if >0, show warning if there is no spawn block)
-        - Tooltip: "To train units from a custom building, capture its structure"
-                   "with a unit spawn egg into a chest or other container block"
+[❌] Add ability to hide unit underlines (and in F1 toggle too)
 
-    [🟡] Cancel and refund productions if captured
 
 Bugfixes
 --------
 [❌] Cat/dog at the start should also match the TC mode
-
-[✔] Fixed sculk sensors showing particle effects in fog
-[✔] Fixed fallen heroes not being revivable if you relogged while they were dead
-[✔] In-progress units and research are no longer cancelled upon relogging from a server
-[✔] In-progress units and research are now cancelled and refunded on logout in singleplayer
-[✔] Fixed animals sometimes spawning clipped into walls
-[✔] Fixed cherry logs/leaves/wood/etc. not being convertable into nether blocks or falling logs
-
-[❌] Can't kill catalyst from above?
-    but apparently if i attack the catalyst from below
-    it kills it
-    but not above
+[❌] Hide the hero items menu if there are no items picked up
 
 
 Languages
 ---------
-[✔] Updated Spanish (es_es)
-    - Thanks @Ikrlegido12!
-    - This has also been added as a fallback for all South American Spanish locales, including:
-        - Argentina (es_ar)
-        – Chile (es_cl)
-        – Ecuador (es_ec)
-        - México (es_mx)
-        – Uruguay (es_uy)
-        – Venezuela (es_ve)
