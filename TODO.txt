@@ -74,8 +74,6 @@ Quality of Life
                    "with a unit spawn egg into a chest or other container block"
 
     [🟡] Cancel and refund productions if captured
-    [🟡] Dont spawn outdoors always for big units if you have a spawn block
-    [🟡] Add spawn egg nbt support
 
 Bugfixes
 --------
@@ -86,7 +84,7 @@ Bugfixes
 [✔] In-progress units and research are no longer cancelled upon relogging from a server
 [✔] In-progress units and research are now cancelled and refunded on logout in singleplayer
 [✔] Fixed animals sometimes spawning clipped into walls
-[🟡] Fixed cherry logs/leaves/wood/etc. not being convertable into nether blocks or falling logs
+[✔] Fixed cherry logs/leaves/wood/etc. not being convertable into nether blocks or falling logs
 
 [❌] Can't kill catalyst from above?
     but apparently if i attack the catalyst from below

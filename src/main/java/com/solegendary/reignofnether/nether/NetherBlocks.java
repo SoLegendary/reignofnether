@@ -290,7 +290,7 @@ public class NetherBlocks {
         MAPPINGS.put(Blocks.CRIMSON_STEM,
             List.of(
                 Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG,
-                Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG, Blocks.CHERRY_WOOD
+                Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG, Blocks.CHERRY_LOG
             ));
         MAPPINGS.put(BlockRegistrar.FALLING_CRIMSON_STEM.get(),
             List.of(

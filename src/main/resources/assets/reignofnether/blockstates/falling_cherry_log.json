@@ -1,16 +1,13 @@
 {
   "variants": {
     "axis=x": {
-      "model": "minecraft:block/cherry_log_horizontal",
-      "x": 90,
-      "y": 90
+      "model": "minecraft:block/cherry_log_x"
     },
     "axis=y": {
-      "model": "minecraft:block/cherry_log"
+      "model": "minecraft:block/cherry_log_y"
     },
     "axis=z": {
-      "model": "minecraft:block/cherry_log_horizontal",
-      "x": 90
+      "model": "minecraft:block/cherry_log_z"
     }
   }
 }
