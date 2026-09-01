@@ -113,6 +113,7 @@ public abstract class FireBlockMixin {
         fireblock.setFlammable(Blocks.OAK_LEAVES, 0, 5);
         fireblock.setFlammable(Blocks.SPRUCE_LEAVES, 0, 5);
         fireblock.setFlammable(Blocks.BIRCH_LEAVES, 0, 5);
+        fireblock.setFlammable(Blocks.CHERRY_LEAVES, 0, 5);
         fireblock.setFlammable(Blocks.JUNGLE_LEAVES, 0, 5);
         fireblock.setFlammable(Blocks.ACACIA_LEAVES, 0, 5);
         fireblock.setFlammable(Blocks.DARK_OAK_LEAVES, 0, 5);

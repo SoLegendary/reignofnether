@@ -13,13 +13,11 @@ public class EmptyUnitItem extends UnitItem {
     public EmptyUnitItem() {
         super(UnitItemBuilder.of(Items.AIR)
                 .type(UnitItemType.NONE)
-                .canUnitPickup(false)
-                .canUnitAutopickup(false)
                 .enableTooltip(false));
     }
 
     public UnitItemButton getEmptySlotButton(int index, boolean enabled, Unit unit) {
-        UnitItemButton button = new UnitItemButton(index, this, new ItemStack(item), unit);
+        UnitItemButton button = new UnitItemButton(index, this, new ItemStack(item), unit, null);
         button.isEnabled = () -> enabled;
         return button;
     }

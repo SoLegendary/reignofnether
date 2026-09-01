@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
@@ -13,6 +14,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -31,7 +33,7 @@ public class GhastProd extends ProductionItem {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide())
-                placement.produceUnit((ServerLevel) level, EntityRegistrar.GHAST_UNIT.get(), placement.ownerName, true);
+                placement.produceUnit((ServerLevel) level, EntityRegistrar.GHAST_UNIT.get(), placement.ownerName, false, new Vec3i(0,5,0));
         };
     }
 
@@ -71,7 +73,7 @@ public class GhastProd extends ProductionItem {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/ghast.png"),
                 hotkey,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(Buildings.FORTRESS),
+                () -> BuildingClientEvents.hasFinishedBuilding(Buildings.FORTRESS) || prodBuilding instanceof CustomBuildingPlacement,
                 tooltipLines,
                 this
         );

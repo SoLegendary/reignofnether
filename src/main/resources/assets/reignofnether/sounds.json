@@ -23,6 +23,10 @@
         "subtitle": "sounds.reignofnether.enemy",
         "sounds": [ "reignofnether:enemy" ]
     },
+    "sell_item": {
+        "subtitle": "sounds.reignofnether.sell_item",
+        "sounds": [ "reignofnether:sell_item" ]
+    },
     "dawn_rooster": {
         "subtitle": "sounds.reignofnether.dawn_rooster",
         "sounds": [ "reignofnether:dawn_rooster" ]

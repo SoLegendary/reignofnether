@@ -1,5 +1,9 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.items.UnitInventory;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
+
 public class HeroUnitSave {
 
     public String uuid;
@@ -12,9 +16,10 @@ public class HeroUnitSave {
     public int ability2Rank;
     public int ability3Rank;
     public int ability4Rank;
+    public NonNullList<ItemStack> items;
 
     public HeroUnitSave(String uuid, String name, String ownerName, int experience, int skillPoints, int charges,
-                        int ability1Rank, int ability2Rank, int ability3Rank, int ability4Rank) {
+                        int ability1Rank, int ability2Rank, int ability3Rank, int ability4Rank, NonNullList<ItemStack> items) {
         this.uuid = uuid;
         this.name = name;
         this.ownerName = ownerName;
@@ -25,5 +30,8 @@ public class HeroUnitSave {
         this.ability2Rank = ability2Rank;
         this.ability3Rank = ability3Rank;
         this.ability4Rank = ability4Rank;
+        this.items = items != null
+                ? items
+                : NonNullList.withSize(UnitInventory.MAX_INVENTORY_SIZE, ItemStack.EMPTY);
     }
 }

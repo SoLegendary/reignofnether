@@ -121,7 +121,12 @@ public class CameraFadeClientEvents {
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
+
+        guiGraphics.pose().pushPose();
+        guiGraphics.pose().translate(0, 0, 3001);
         guiGraphics.fill(0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight(), alphaInt);
+        guiGraphics.pose().popPose();
+
         RenderSystem.disableBlend();
     }
 

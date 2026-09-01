@@ -1,8 +1,13 @@
 package com.solegendary.reignofnether.hud.buttons;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.ItemServerboundPacket;
+import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
@@ -12,12 +17,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class UnitItemButton extends Button {
 
@@ -32,7 +44,9 @@ public class UnitItemButton extends Button {
     private static final Style QTY_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xB4B2A9));
     private static final Style TYPE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFAC775));
     private static final Style DESC_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD3D1C7));
-    private static final Style POINTS_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x97C459));
+    private static final Style POINTS_STYLE = Style.EMPTY
+            .withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"))
+            .withColor(TextColor.fromRgb(0x97C459));
     private static final Style SELL_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x5DCAA5));
     private static final Style HOTKEY_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xB4B2A9));
 
@@ -40,34 +54,97 @@ public class UnitItemButton extends Button {
 
     private UnitItem unitItem;
     private ItemStack itemStack;
-    public int invIndex = 0;
+    public int invIndex;
+    public UUID invUUID;
 
-    public UnitItemButton(int invIndex, UnitItem unitItem, ItemStack itemStack, Unit unit) {
+    public UnitItemButton(int invIndex, UnitItem unitItem, ItemStack itemStack, Unit unit, Keybinding hotkey) {
         super(
                 "button_" + itemStack.getItem().getDescriptionId(),
                 Button.DEFAULT_ICON_SIZE,
                 null,
                 null,
-                () -> ItemClientEvents.actionableUnitItem == unitItem &&
-                    ItemClientEvents.actionableInvIndex == invIndex,
+                () -> ItemClientEvents.actionableUnitItemDrag == unitItem &&
+                    ItemClientEvents.actionableInvIndex == invIndex &&
+                    ItemClientEvents.actionableInvUUID == ItemUtil.getUUID(itemStack),
                 () -> false,
                 () -> true,
                 () -> {
                     ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableUnitItemDrag = unitItem;
                     ItemClientEvents.actionableInvIndex = invIndex;
+                    ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
                 },
                 null,
                 List.of()
         );
-        this.onLeftClickRelease = () -> {
-            if (!ItemClientEvents.hasActionableItem()) {
-                // todo: actual item usage
-            }
-        };
-        this.iconItem = new ItemStack(itemStack.getItem());
+        this.iconItem = itemStack;
         this.unitItem = unitItem;
         this.itemStack = itemStack;
         this.invIndex = invIndex;
+        this.invUUID = ItemUtil.getUUID(itemStack);
+
+        this.onLeftClickRelease = () -> { // actual item use actions
+            if (!ItemClientEvents.hasDragActionItem()) {
+                if (unitItem.onUse != null) {
+                    ItemServerboundPacket.use(unit.getOwnerName(), ((Entity) unit).getId(), invUUID);
+                } else if (unitItem.onUseEntity != null ||
+                        unitItem.onUseBuilding != null ||
+                        unitItem.onUseGround != null) {
+                    ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableInvIndex = invIndex;
+                    ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
+                    ItemClientEvents.leftClickUseItem = true;
+                    ItemClientEvents.actionableUnitItemDrag = null;
+                }
+            }
+        };
+        if (hasUseAction())
+            this.hotkey = hotkey;
+    }
+
+    @Override
+    public void checkPressed(int key) {
+        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
+            return;
+
+        if (hotkey != null && hotkey.getKey() == key) {
+            if (MC.player != null)
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+            this.onLeftClickRelease.run();
+        }
+    }
+
+    public boolean hasUseAction() {
+        return this.unitItem.onUse != null ||
+                this.unitItem.onUseEntity != null ||
+                this.unitItem.onUseBuilding != null ||
+                this.unitItem.onUseGround != null;
+    }
+
+    // scale down and recentre
+    @Override
+    protected void renderHotkey(GuiGraphics guiGraphics, int x, int y) {
+        if (this.hotkey != null) {
+            String hotkeyStr = hotkey.getCurrentLabel();
+            hotkeyStr = hotkeyStr.substring(0, Math.min(3, hotkeyStr.length()));
+
+            int drawX = x + iconSize + 8 - (hotkeyStr.length() * 4);
+            int drawY = y + iconSize;
+
+            guiGraphics.pose().pushPose();
+
+            guiGraphics.pose().translate(drawX, drawY, 0);
+            guiGraphics.pose().scale(SMALL_SCALE, SMALL_SCALE, 1.0f);
+            guiGraphics.pose().translate(-drawX, -drawY, 0);
+
+            guiGraphics.drawCenteredString(MC.font,
+                    hotkeyStr,
+                    drawX,
+                    drawY,
+                    0xFFFFFF);
+
+            guiGraphics.pose().popPose();
+        }
     }
 
     private static final float GHOST_ALPHA = 0.45f;
@@ -162,11 +239,18 @@ public class UnitItemButton extends Button {
         // ---- band 2: description + dot points (all small) ----
         List<FormattedCharSequence> bodyLines = new ArrayList<>();
         String desc = unitItem.getDescription();
-        if (desc != null)
+        if (!desc.isBlank())
             bodyLines.addAll(font.split(Component.literal(desc).withStyle(DESC_STYLE), smallWrapWidth));
-        for (String point : unitItem.getPointLines())
+
+        int descLineCount = bodyLines.size(); // marks where desc ends and points begin
+
+        List<String> points = new ArrayList<>(unitItem.getPointDescs());
+        points.addAll(getEnchantmentDescs(itemStack));
+        for (String point : points)
             bodyLines.addAll(font.split(
-                    Component.literal("\u2022 " + point).withStyle(POINTS_STYLE), smallWrapWidth));
+                    MyRenderer.styledWithIcons(point.replace(" ", "   "), POINTS_STYLE), smallWrapWidth));
+
+        boolean hasDescGap = descLineCount > 0 && bodyLines.size() > descLineCount;
 
         // ---- band 3: sell value | hotkey ----
         FormattedCharSequence sellSeq = null;
@@ -178,7 +262,7 @@ public class UnitItemButton extends Button {
 
         FormattedCharSequence hotkeySeq = null;
         if (hotkey != null)
-            hotkeySeq = Component.literal(hotkey.getCurrentLabel())
+            hotkeySeq = Component.translatable("item.reignofnether.hotkey", hotkey.getCurrentLabel())
                     .withStyle(HOTKEY_STYLE).getVisualOrderText();
 
         boolean hasBody = !bodyLines.isEmpty();
@@ -189,11 +273,13 @@ public class UnitItemButton extends Button {
         for (FormattedCharSequence line : bodyLines)
             width = Math.max(width, MyRenderer.scaledWidth(font, line, SMALL_SCALE));
         if (hasFooter)
-            width = Math.max(width, rowWidth(font, sellSeq, SMALL_SCALE, hotkeySeq, 1.0f));
+            width = Math.max(width, rowWidth(font, sellSeq, SMALL_SCALE, hotkeySeq, SMALL_SCALE));
 
         int height = LINE_HEIGHT;
         if (hasBody)
             height += DIVIDER_HEIGHT + (bodyLines.size() * SMALL_LINE_HEIGHT);
+        if (hasDescGap)
+            height += 2;
         if (hasFooter)
             height += DIVIDER_HEIGHT + LINE_HEIGHT;
         height -= 2; // trailing line spacing isn't visible ink
@@ -221,8 +307,10 @@ public class UnitItemButton extends Button {
         if (hasBody) {
             MyRenderer.renderTooltipDivider(guiGraphics, x, lineY, width);
             lineY += DIVIDER_HEIGHT;
-            for (FormattedCharSequence line : bodyLines) {
-                MyRenderer.drawScaledString(guiGraphics, font, line, x, lineY, 0xFFFFFF, SMALL_SCALE);
+            for (int i = 0; i < bodyLines.size(); i++) {
+                if (hasDescGap && i == descLineCount)
+                    lineY += 2; // extra gap between desc and point lines
+                MyRenderer.drawScaledString(guiGraphics, font, bodyLines.get(i), x, lineY, 0xFFFFFF, SMALL_SCALE);
                 lineY += SMALL_LINE_HEIGHT;
             }
         }
@@ -230,10 +318,17 @@ public class UnitItemButton extends Button {
         if (hasFooter) {
             MyRenderer.renderTooltipDivider(guiGraphics, x, lineY, width);
             lineY += DIVIDER_HEIGHT;
-            MyRenderer.renderJustifiedRow(guiGraphics, sellSeq, SMALL_SCALE, hotkeySeq, 1.0f, x, lineY, width);
+            MyRenderer.renderJustifiedRow(guiGraphics, sellSeq, SMALL_SCALE, hotkeySeq, SMALL_SCALE, x, lineY, width);
         }
-
         guiGraphics.pose().popPose();
+    }
+
+    // "Sharpness V", "Unbreaking III", ... in NBT order
+    private static List<String> getEnchantmentDescs(ItemStack itemStack) {
+        List<String> descs = new ArrayList<>();
+        for (Map.Entry<Enchantment, Integer> entry : EnchantmentHelper.getEnchantments(itemStack).entrySet())
+            descs.add(entry.getKey().getFullname(entry.getValue()).getString());
+        return descs;
     }
 
     // on-screen width needed to fit both halves of a justified row without them touching

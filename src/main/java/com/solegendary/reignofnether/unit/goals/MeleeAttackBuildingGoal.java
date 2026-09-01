@@ -1,7 +1,10 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -122,8 +125,8 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
     // only count as building if in range of the target - building is actioned in Building.tick()
     public boolean isAttacking() {
-        if (buildingTarget != null && this.moveTarget != null)
-            return MiscUtil.isMobInRangeOfPos(moveTarget, mob, 2);
+        if (buildingTarget != null)
+            return buildingTarget.isPosInsideBuilding(mob.getOnPos(), 2);
         return false;
     }
 

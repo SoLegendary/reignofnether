@@ -22,6 +22,8 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -405,9 +407,21 @@ public class UnitClientEvents {
     }
 
     private static void doResolveMoveAction() {
+        // pickup item
+        if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
+                !ItemClientEvents.getPreselectedItems().isEmpty() && MC.player != null) {
+            unit.getCheckpoints().clear();
+            unit.getCheckpoints().add(new Checkpoint(ItemClientEvents.getPreselectedItems().get(0), true));
+
+            ItemServerboundPacket.pickup(
+                    MC.player.getName().getString(),
+                    HudClientEvents.hudSelectedEntity.getId(),
+                    ItemClientEvents.getPreselectedItems().get(0).getId()
+            );
+        }
         // follow friendly unit
-        if (preselectedUnits.size() == 1 && !targetingSelf()) {
-            if (hudSelectedEntity instanceof WitchUnit witchUnit) {
+        else if (preselectedUnits.size() == 1 && !targetingSelf()) {
+            if (hudSelectedEntity instanceof WitchUnit) {
                 sendUnitCommand(UnitAction.THROW_LINGERING_REGEN_POTION);
             } else {
                 sendUnitCommand(UnitAction.FOLLOW);
@@ -723,7 +737,9 @@ public class UnitClientEvents {
                     NonUnitClientEvents.canControlAllMobs())) {
                         addSelectedUnit(preselectedUnits.get(0));
                 }
-                else if (!deselected) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
+                else if (!deselected &&
+                        CursorClientEvents.getLeftClickAction() == null &&
+                        !ItemClientEvents.hasLeftClickAction()) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
                     clearSelectedUnits();
                     addSelectedUnit(preselectedUnits.get(0));
                 }

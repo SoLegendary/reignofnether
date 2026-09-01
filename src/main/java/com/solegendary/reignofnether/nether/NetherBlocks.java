@@ -280,17 +280,17 @@ public class NetherBlocks {
         MAPPINGS.put(Blocks.CRIMSON_HYPHAE,
             List.of(
                 Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD,
-                Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD
+                Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD, Blocks.CHERRY_WOOD
             ));
         MAPPINGS.put(Blocks.STRIPPED_CRIMSON_HYPHAE,
             List.of(
                 Blocks.STRIPPED_OAK_WOOD, Blocks.STRIPPED_BIRCH_WOOD, Blocks.STRIPPED_ACACIA_WOOD, Blocks.STRIPPED_DARK_OAK_WOOD,
-                Blocks.STRIPPED_JUNGLE_WOOD, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.STRIPPED_SPRUCE_WOOD
+                Blocks.STRIPPED_JUNGLE_WOOD, Blocks.STRIPPED_MANGROVE_WOOD, Blocks.STRIPPED_SPRUCE_WOOD, Blocks.STRIPPED_CHERRY_WOOD
             ));
         MAPPINGS.put(Blocks.CRIMSON_STEM,
             List.of(
                 Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG,
-                Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG
+                Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG, Blocks.CHERRY_LOG
             ));
         MAPPINGS.put(BlockRegistrar.FALLING_CRIMSON_STEM.get(),
             List.of(
@@ -298,6 +298,7 @@ public class NetherBlocks {
                 BlockRegistrar.FALLING_ACACIA_LOG.get(),
                 BlockRegistrar.FALLING_BIRCH_LOG.get(),
                 BlockRegistrar.FALLING_MANGROVE_LOG.get(),
+                BlockRegistrar.FALLING_CHERRY_LOG.get(),
                 BlockRegistrar.FALLING_DARK_OAK_LOG.get(),
                 BlockRegistrar.FALLING_JUNGLE_LOG.get(),
                 BlockRegistrar.FALLING_SPRUCE_LOG.get()
@@ -309,7 +310,7 @@ public class NetherBlocks {
             ));
         MAPPINGS.put(BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(),
             List.of(
-                Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES,
+                Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.CHERRY_LEAVES,
                 Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.AZALEA_LEAVES, Blocks.FLOWERING_AZALEA_LEAVES
             ));
         MAPPINGS.put(Blocks.NETHER_QUARTZ_ORE,

@@ -32,6 +32,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -51,6 +52,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static net.minecraft.client.renderer.RenderStateShard.*;
 
@@ -87,6 +90,26 @@ public class MyRenderer {
 
 
     public static final Style iconStyle = Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"));
+
+    // matches any of the custom bitmap-font icon chars from font/default.json's private-use range
+    private static final Pattern ICON_CHAR = Pattern.compile("[\uE000-\uE0FF]");
+
+    // builds a component where icon chars keep their native (untinted) texture colour
+    // via MyRenderer.iconStyle, and everything else uses textStyle's colour
+    public static MutableComponent styledWithIcons(String text, Style textStyle) {
+        MutableComponent result = Component.empty();
+        Matcher m = ICON_CHAR.matcher(text);
+        int last = 0;
+        while (m.find()) {
+            if (m.start() > last)
+                result.append(Component.literal(text.substring(last, m.start())).withStyle(textStyle));
+            result.append(Component.literal(m.group()).withStyle(MyRenderer.iconStyle));
+            last = m.end();
+        }
+        if (last < text.length())
+            result.append(Component.literal(text.substring(last)).withStyle(textStyle));
+        return result;
+    }
 
     public static void drawBlockOutline(PoseStack matrixStack, BlockPos blockpos, float a) {
         AABB aabb = new AABB(blockpos).move(0, 0.01, 0);
@@ -555,7 +578,7 @@ public class MyRenderer {
         int paddingChars = iconSize / Math.max(spaceWidth, 1);
         String pad = " ".repeat(paddingChars);
         Component name = unitItem.iconRl != null ? Component.literal(pad).append(unitItem.getName()) : unitItem.getName();
-        List<FormattedCharSequence> lore = unitItem.getTooltip(itemStack);
+        List<FormattedCharSequence> lore = unitItem.getEntityTooltip(itemStack);
 
         List<FormattedCharSequence> lines = new ArrayList<>();
         lines.add(name.getVisualOrderText());

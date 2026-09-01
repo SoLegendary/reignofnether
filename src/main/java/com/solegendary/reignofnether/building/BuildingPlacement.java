@@ -403,8 +403,14 @@ public class BuildingPlacement {
 
     public boolean isPosInsideBuilding(BlockPos bp) {
         return bp.getX() <= this.maxCorner.getX() && bp.getX() >= this.minCorner.getX()
-               && bp.getY() <= this.maxCorner.getY() && bp.getY() >= this.minCorner.getY()
-               && bp.getZ() <= this.maxCorner.getZ() && bp.getZ() >= this.minCorner.getZ();
+            && bp.getY() <= this.maxCorner.getY() && bp.getY() >= this.minCorner.getY()
+            && bp.getZ() <= this.maxCorner.getZ() && bp.getZ() >= this.minCorner.getZ();
+    }
+
+    public boolean isPosInsideBuilding(BlockPos bp, int edgeModifier) {
+        return bp.getX() <= this.maxCorner.getX() + edgeModifier && bp.getX() >= this.minCorner.getX() - edgeModifier
+            && bp.getY() <= this.maxCorner.getY() + edgeModifier && bp.getY() >= this.minCorner.getY() - edgeModifier
+            && bp.getZ() <= this.maxCorner.getZ() + edgeModifier && bp.getZ() >= this.minCorner.getZ() - edgeModifier;
     }
 
     public boolean isPosPartOfBuilding(BlockPos bp, boolean onlyPlacedBlocks) {
@@ -420,6 +426,7 @@ public class BuildingPlacement {
         return getClosestGroundPos(bpTarget, radiusOffset, false);
     }
     public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset, boolean avoidAllBuildings) {
+        radiusOffset = Math.max(1, radiusOffset);
         float minDist = 999999;
         BlockPos minPos = this.minCorner;
         int minX = minPos.getX() - radiusOffset;
@@ -942,11 +949,14 @@ public class BuildingPlacement {
         }
 
         // check and do animal spawns around capitols for consistent hunting sources
-        if (isCapitol && isBuilt) {
+        if (!this.level.isClientSide() && isCapitol && isBuilt) {
             ticksToSpawnAnimals += 1;
             if (ticksToSpawnAnimals >= ticksToSpawnAnimalsMax) {
                 ticksToSpawnAnimals = 0;
-                spawnHuntableAnimalsNearby(animalSpawnBlockRange);
+                if (FogOfWarServerEvents.isEnabled())
+                    spawnHuntableAnimalsNearby(animalSpawnBlockRange / 2);
+                else
+                    spawnHuntableAnimalsNearby(animalSpawnBlockRange);
             }
         }
         if (isBuilt) {
@@ -1052,7 +1062,7 @@ public class BuildingPlacement {
             buildNextBlock();
         }
         if (isBuilt && tickAgeAfterBuilt % 10 == 0 && getBuilding().capturable) {
-            checkIfCaptured(serverLevel);
+            checkAndDoCapture(serverLevel);
         }
     }
 
@@ -1169,6 +1179,7 @@ public class BuildingPlacement {
             }
         } while (!spawnBs.isSolid()
                  || spawnBs.getBlock() == Blocks.BARRIER
+                 || spawnBs.getBlock() == Blocks.OBSIDIAN
                  || spawnBs.is(BlockTags.PLANKS)
                  || ResourceSources.getBlockResourceName(spawnBp, level) != ResourceName.NONE
                  || spawnBp.distSqr(centrePos) < animalSpawnRangeMin * animalSpawnRangeMin
@@ -1250,7 +1261,7 @@ public class BuildingPlacement {
         refreshBlocks();
     }
 
-    protected boolean checkIfCaptured(ServerLevel serverLevel) {
+    protected boolean checkAndDoCapture(ServerLevel serverLevel) {
         if (PlayerServerEvents.rtsPlayers.isEmpty())
             return false;
 

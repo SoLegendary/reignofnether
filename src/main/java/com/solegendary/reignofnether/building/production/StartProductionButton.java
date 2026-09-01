@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.production;
 
+import com.solegendary.reignofnether.building.BuildingProductionServerboundPacket;
 import com.solegendary.reignofnether.building.BuildingServerboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -15,7 +16,7 @@ public class StartProductionButton extends Button {
                                 List<FormattedCharSequence> tooltipLines, ProductionItem production) {
 
         // generate x/y based on given position (starting at 0 which is bottom left 1 row above generic action buttons)
-        super(name, Button.itemIconSize, rl, hotkey, () -> false, isHidden, isEnabled, () -> BuildingServerboundPacket.startProduction(production), () -> {}, tooltipLines);
+        super(name, Button.itemIconSize, rl, hotkey, () -> false, isHidden, isEnabled, () -> BuildingProductionServerboundPacket.startProduction(production), () -> {}, tooltipLines);
     }
 
     public StartProductionButton(String name, ResourceLocation iconRl, ResourceLocation frameRl, Keybinding hotkey,
@@ -23,6 +24,6 @@ public class StartProductionButton extends Button {
                                  List<FormattedCharSequence> tooltipLines, ProductionItem production) {
 
         // generate x/y based on given position (starting at 0 which is bottom left 1 row above generic action buttons)
-        super(name, Button.itemIconSize, iconRl, frameRl, hotkey, () -> false, isHidden, isEnabled, () -> BuildingServerboundPacket.startProduction(production), () -> {}, tooltipLines);
+        super(name, Button.itemIconSize, iconRl, frameRl, hotkey, () -> false, isHidden, isEnabled, () -> BuildingProductionServerboundPacket.startProduction(production), () -> {}, tooltipLines);
     }
 }

@@ -12,7 +12,6 @@ import com.solegendary.reignofnether.building.RangeIndicator;
 import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -57,7 +56,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -118,6 +116,9 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     public GarrisonGoal getGarrisonGoal() { return null; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
 
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
@@ -449,6 +450,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.castTNTGoal = new GenericTargetedSpellGoal(
                 this,
                 getAttackWindupTicks(),
@@ -489,6 +491,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         this.goalSelector.addGoal(1, new FloatGoal(this));
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, attackBuildingGoal);
+        this.goalSelector.addGoal(2, itemGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
         //this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
@@ -607,12 +610,12 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         ArrayList<LivingEntity> units = new ArrayList<>(list);
         Collections.shuffle(units);
 
-        ItemStack appleStack = new ItemStack(UnitItems.MERCHANT_GOLDEN_APPLE.getItem());
-        ItemStack chestPlateStack = new ItemStack(UnitItems.MERCHANT_CHESTPLATE.getItem());
-        ItemStack swordStack = new ItemStack(UnitItems.MERCHANT_SWORD.getItem());
-        ItemStack tridentStack = new ItemStack(UnitItems.MERCHANT_TRIDENT.getItem());
-
         for (int n = 0; n < amount; n++) {
+            ItemStack appleStack = new ItemStack(Items.ENCHANTED_GOLDEN_APPLE);
+            ItemStack chestPlateStack = UnitItems.MERCHANT_CHESTPLATE.getNewItemStack();
+            ItemStack swordStack = UnitItems.MERCHANT_SWORD.getNewItemStack();
+            ItemStack tridentStack = UnitItems.MERCHANT_TRIDENT.getNewItemStack();
+
             if (units.size() > n) {
                 int i = random.nextInt(100);
                 LivingEntity unit = units.get(n);

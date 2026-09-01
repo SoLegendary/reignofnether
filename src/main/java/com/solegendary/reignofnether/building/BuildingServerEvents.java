@@ -19,6 +19,7 @@ import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuild
 import com.solegendary.reignofnether.building.buildings.villagers.Library;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.building.data.DataType;
+import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.commands.rtsapi.ResourceObjectiveCriteria;
 import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
@@ -193,7 +194,6 @@ public class BuildingServerEvents {
         buildingData.buildings.clear();
 
         getBuildings().forEach(b -> {
-            
             b.getDataStorage().setData(BUILDING_TAGS, b.tags);
             b.getDataStorage().setData(BUILDING_COMMANDS, b.commands);
             
@@ -325,6 +325,11 @@ public class BuildingServerEvents {
     public static void onServerStopping(ServerStoppingEvent evt) {
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null) {
+            for (BuildingPlacement bp : getBuildings()) {
+                if (bp instanceof ProductionPlacement pp)
+                    for (ActiveProduction activeProd : new ArrayList<>(pp.productionQueue))
+                        pp.cancelProductionItem(activeProd.item, true);
+            }
             saveNetherZones(level);
             saveBuildings(level);
             netherZones.clear();
@@ -487,8 +492,7 @@ public class BuildingServerEvents {
                     0,
                     false,
                     PortalPlacement.PortalType.BASIC,
-                    originPos,
-                    false
+                    originPos
             );
             if (!fromCommand) {
                 ResourcesServerEvents.addSubtractResources(new Resources(ownerName,
@@ -706,8 +710,7 @@ public class BuildingServerEvents {
                     building.getUpgradeLevel(),
                     building.isBuilt,
                     building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
-                    building instanceof PortalPlacement p && p.hasDestination() ? p.destination : new BlockPos(0, 0, 0),
-                    true
+                    building instanceof PortalPlacement p && p.hasDestination() ? p.destination : new BlockPos(0, 0, 0)
             );
 
             if (building.getBuilding() instanceof Library) {
@@ -737,8 +740,7 @@ public class BuildingServerEvents {
                         building.getUpgradeLevel(),
                         building.isBuilt,
                         building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
-                        building instanceof PortalPlacement p && p.hasDestination() ? p.destination : new BlockPos(0, 0, 0),
-                        true
+                        building instanceof PortalPlacement p && p.hasDestination() ? p.destination : new BlockPos(0, 0, 0)
                 );
             }
             break;
@@ -1014,8 +1016,7 @@ public class BuildingServerEvents {
                         building.getUpgradeLevel(),
                         building.isBuilt,
                         building instanceof PortalPlacement p ? p.getPortalType() : PortalPlacement.PortalType.BASIC,
-                        building instanceof PortalPlacement p && p.getPortalType() == PortalPlacement.PortalType.TRANSPORT ? p.destination : new BlockPos(0,0,0),
-                        false
+                        building instanceof PortalPlacement p && p.getPortalType() == PortalPlacement.PortalType.TRANSPORT ? p.destination : new BlockPos(0,0,0)
                 );
                 return;
             }

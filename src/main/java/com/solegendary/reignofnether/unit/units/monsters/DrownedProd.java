@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.*;
@@ -64,7 +65,7 @@ public class DrownedProd extends GraveyardUnitProductionItem {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/drowned.png"),
             hotkey,
             () -> false,
-            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED),
+            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED) || prodBuilding instanceof CustomBuildingPlacement,
             List.of(
                 FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit"), Style.EMPTY.withBold(true)),
                 ResourceCosts.getFormattedCost(cost),

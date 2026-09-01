@@ -31,6 +31,7 @@ import com.solegendary.reignofnether.hud.custombutton.CustomButtonServerEvents;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.hud.TitleClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.matchstart.MatchEndClientEvents;
 import com.solegendary.reignofnether.matchstart.MatchStartClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -110,6 +111,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(RtsDebugPathPreview.class);
         vanillaEventBus.register(PlayerChunksClientEvents.class);
         vanillaEventBus.register(CameraFadeClientEvents.class);
+        vanillaEventBus.register(ItemClientEvents.class);
 
         // to allow singleplayer integrated server to work
         vanillaEventBus.register(GameruleServerEvents.class);
@@ -136,7 +138,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(CommandsServerEvents.class);
         vanillaEventBus.register(ScenarioServerEvents.class);
         vanillaEventBus.register(WorldBorderServerEvents.class);
-        vanillaEventBus.register(ItemClientEvents.class);
         vanillaEventBus.register(CustomButtonServerEvents.class);
+        vanillaEventBus.register(ItemServerEvents.class);
     }
 }

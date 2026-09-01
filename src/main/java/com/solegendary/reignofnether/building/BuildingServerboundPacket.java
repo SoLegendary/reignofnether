@@ -9,8 +9,6 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.buildings.placements.StockpilePlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
-import com.solegendary.reignofnether.building.production.ProductionItem;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import net.minecraft.core.BlockPos;
@@ -29,10 +27,9 @@ import java.util.function.Supplier;
 import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
 
 public class BuildingServerboundPacket {
-    // pos is used to identify the building object serverside
-    public String itemName; // name of the building or production item // PLACE, START_PRODUCTION, CANCEL_PRODUCTION
+    public String itemName; // name of the building // PLACE
     public BlockPos buildingPos; // required for all actions (used to identify the relevant building)
-    public BlockPos rallyPos; // required for all actions (used to identify the relevant building)
+    public BlockPos rallyPos;
     public Rotation rotation; // PLACE
     public String ownerName; // PLACE
     public int[] builderUnitIds;
@@ -52,9 +49,6 @@ public class BuildingServerboundPacket {
             BuildingAction.SET_RALLY_POINT,
             BuildingAction.ADD_RALLY_POINT,
             BuildingAction.SET_RALLY_POINT_ENTITY,
-            BuildingAction.START_PRODUCTION,
-            BuildingAction.CANCEL_PRODUCTION,
-            BuildingAction.CANCEL_BACK_PRODUCTION,
             BuildingAction.CHANGE_PORTAL
     );
 
@@ -109,20 +103,6 @@ public class BuildingServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.SET_RALLY_POINT_ENTITY,
                 "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[]{ entityId }, false));
-    }
-    public static void startProduction(ProductionItem item) {
-        BuildingClientEvents.switchHudToIdlestBuilding();
-        if (HudClientEvents.hudSelectedPlacement instanceof ProductionPlacement pp) {
-                PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
-                        BuildingAction.START_PRODUCTION,
-                        ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString(),
-                        pp.originPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
-        }
-    }
-    public static void cancelProduction(BlockPos buildingPos, ProductionItem item, boolean frontItem) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
-                frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-                ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString(), buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
     }
     public static void checkStockpileChests(BlockPos chestPos) {
         PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
@@ -189,7 +169,7 @@ public class BuildingServerboundPacket {
             else if (((newBuildingAuthActions.contains(this.action) &&
                     !player.getName().getString().equals(ownerName)) ||
                     (existingBuildingAuthActions.contains(this.action) && building != null &&
-                    !player.getName().getString().equals(building.ownerName))) &&
+                            !player.getName().getString().equals(building.ownerName))) &&
                     !SandboxServer.isAnyoneASandboxPlayer() &&
                     !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
 
@@ -243,27 +223,6 @@ public class BuildingServerboundPacket {
                         Entity e = building.level.getEntity(this.builderUnitIds[0]);
                         if (e instanceof LivingEntity le)
                             productionBuilding.setRallyPointEntity(le);
-                    }
-                }
-                case START_PRODUCTION -> {
-                    if (building instanceof ProductionPlacement pBuilding) {
-                        boolean prodSuccess = pBuilding.startProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)));
-                        if (prodSuccess)
-                            BuildingClientboundPacket.startProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)));
-                    }
-                }
-                case CANCEL_PRODUCTION -> {
-                    if (building instanceof ProductionPlacement pBuilding) {
-                        boolean cancelSuccess = pBuilding.cancelProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)), true);
-                        if (cancelSuccess || pBuilding.productionQueue.isEmpty())
-                            BuildingClientboundPacket.cancelProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)), true);
-                    }
-                }
-                case CANCEL_BACK_PRODUCTION -> {
-                    if (building instanceof ProductionPlacement pBuilding) {
-                        boolean cancelSuccess = pBuilding.cancelProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)), false);
-                        if (cancelSuccess || pBuilding.productionQueue.isEmpty())
-                            BuildingClientboundPacket.cancelProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)), false);
                     }
                 }
                 case CHECK_STOCKPILE_CHEST -> {

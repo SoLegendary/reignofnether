@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.production;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.research.researchItems.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
 import com.solegendary.reignofnether.unit.units.neutral.*;
@@ -9,6 +10,11 @@ import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class ProductionItems {
     public static final CreeperProd CREEPER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "creeper"), new CreeperProd());
@@ -22,6 +28,7 @@ public class ProductionItems {
     public static final SpiderProd SPIDER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "spider"), new SpiderProd());
     public static final PoisonSpiderProd POISON_SPIDER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "poison_spider"), new PoisonSpiderProd());
     public static final VillagerProd VILLAGER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "villager"), new VillagerProd());
+    public static final MilitiaProd MILITIA = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "militia"), new MilitiaProd());
     public static final ScoutDogProd SCOUT_DOG = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "scout_dog"), new ScoutDogProd());
     public static final ScoutCatProd SCOUT_CAT = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "scout_cat"), new ScoutCatProd());
     public static final ZombieVillagerProd ZOMBIE_VILLAGER = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "zombie_villager"), new ZombieVillagerProd());
@@ -117,11 +124,77 @@ public class ProductionItems {
     public static final ResearchBeaconLevel4 RESEARCH_BEACON_LEVEL_4 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_4"), new ResearchBeaconLevel4());
     public static final ResearchBeaconLevel5 RESEARCH_BEACON_LEVEL_5 = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "beacon_level_5"), new ResearchBeaconLevel5());
 
-
-
     private static <T extends ProductionItem> T register(ResourceLocation id, T building) {
         return Registry.register(ReignOfNetherRegistries.PRODUCTION_ITEM, id, building);
     }
 
     public static void init() {}
+
+    private static final List<ProductionItem> ALL = List.of(
+        CREEPER,
+        WRAITH,
+        SKELETON,
+        BOGGED,
+        ZOMBIE,
+        STRAY,
+        HUSK,
+        DROWNED,
+        SPIDER,
+        POISON_SPIDER,
+        VILLAGER,
+        MILITIA,
+        SCOUT_DOG,
+        SCOUT_CAT,
+        ZOMBIE_VILLAGER,
+        BAT,
+        VINDICATOR,
+        PILLAGER,
+        IRON_GOLEM,
+        WITCH,
+        EVOKER,
+        WINDCALLER,
+        SLIME,
+        WARDEN,
+        RAVAGER,
+        GRUNT,
+        STRIDER,
+        BRUTE,
+        HEADHUNTER,
+        MARAUDER,
+        HOGLIN,
+        BLAZE,
+        WITHER_SKELETON,
+        MAGMA_CUBE,
+        GHAST,
+        ROYAL_GUARD,
+        ROYAL_GUARD_REVIVE,
+        ENCHANTER,
+        ENCHANTER_REVIVE,
+        NECROMANCER,
+        NECROMANCER_REVIVE,
+        WRETCHED_WRAITH,
+        WRETCHED_WRAITH_REVIVE,
+        PIGLIN_MERCHANT,
+        PIGLIN_MERCHANT_REVIVE,
+        WILDFIRE,
+        WILDFIRE_REVIVE,
+        ZOMBIE_PIGLIN,
+        ZOGLIN,
+        ENDERMAN,
+        POLAR_BEAR,
+        GRIZZLY_BEAR,
+        PANDA,
+        WOLF,
+        LLAMA
+    );
+
+    @Nullable
+    public static ProductionItem getProductionItem(EntityType<? extends Mob> entityType) {
+        for (ProductionItem prodItem : ALL) {
+            String itemName = prodItem.getItemName();
+            if (itemName != null && EntityRegistrar.getEntityType(prodItem.getItemName()) == entityType)
+                return prodItem;
+        }
+        return null;
+    }
 }

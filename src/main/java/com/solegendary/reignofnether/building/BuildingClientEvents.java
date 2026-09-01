@@ -835,8 +835,7 @@ public class BuildingClientEvents {
         int upgradeLevel,
         boolean isBuilt,
         PortalPlacement.PortalType portalType,
-        BlockPos portalDestination,
-        boolean forPlayerLoggingIn
+        BlockPos portalDestination
     ) {
         BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
             MC.level,
@@ -845,14 +844,10 @@ public class BuildingClientEvents {
             ownerName,
             isDiagonalBridge
         );
-        // allow overrides for custom buildings
-        //if (building instanceof CustomBuilding) {
-        //    buildings.removeIf(b -> b.originPos.equals(pos));
-        //} else {
-            for (BuildingPlacement placement : buildings)
-                if (newBuilding.originPos.equals(placement.originPos))
-                    return; // skip, building already exists clientside
-        //}
+        for (BuildingPlacement placement : buildings)
+            if (newBuilding.originPos.equals(placement.originPos))
+                return; // skip, building already exists clientside
+
         // add a bunch of dummy blocks so clients know not to remove buildings before the first blocks get placed
         while (numBlocksToPlace > 0) {
             newBuilding.addToBlockPlaceQueue(new BuildingBlock(new BlockPos(0, 0, 0), Blocks.AIR.defaultBlockState()));
@@ -882,19 +877,7 @@ public class BuildingClientEvents {
                 }
             }
             buildings.add(newBuilding);
-
-            // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
-            // they are frozen so move them to their capitol (or any of their buildings if they don't have one)
-            /*
-            if (MC.player != null && forPlayerLoggingIn && ownerName.equals(MC.player.getName().getString()) && FogOfWarClientEvents.isEnabled()) {
-                if (!FogOfWarClientEvents.movedToCapitol) {
-                    OrthoviewClientEvents.centreCameraOnPos(newBuilding.originPos);
-                    if (newBuilding.isCapitol) {
-                        FogOfWarClientEvents.movedToCapitol = true;  // Set the AtomicBoolean to true
-                    }
-                }
-            }
-             */
+            BuildingProductionServerboundPacket.requestSync(newBuilding.originPos);
         }
         // sync the goal so we can display the correct animations
         Entity entity = hudSelectedEntity;

@@ -16,10 +16,10 @@ public class GarrisonZoneBlock extends Block implements EntityBlock {
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new GarrisonBlockEntity(blockPos, blockState);
+        return new InvisibleBlockEntity(blockPos, blockState);
     }
 
-    @Override // render in GarrisonBlockRenderer
+    @Override // render in InvisibleBlockRenderer
     public RenderShape getRenderShape(BlockState pState) {
         return RenderShape.INVISIBLE;
     }

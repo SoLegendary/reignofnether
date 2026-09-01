@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.*;
@@ -35,7 +36,7 @@ public class SkeletonProd extends GraveyardUnitProductionItem {
                     else
                         gy.createSkull(EntityRegistrar.SKELETON_UNIT.get());
                 } else {
-                    if (ResearchServerEvents.playerHasResearch(placement.ownerName, ProductionItems.RESEARCH_STRAYS))
+                    if (ResearchServerEvents.playerHasResearch(placement.ownerName, ProductionItems.RESEARCH_STRAYS) && !(placement instanceof CustomBuildingPlacement))
                         placement.produceUnit((ServerLevel) level, EntityRegistrar.STRAY_UNIT.get(), placement.ownerName, true);
                     else
                         placement.produceUnit((ServerLevel) level, EntityRegistrar.SKELETON_UNIT.get(), placement.ownerName, true);
@@ -48,15 +49,15 @@ public class SkeletonProd extends GraveyardUnitProductionItem {
         return SkeletonProd.itemName;
     }
 
-    private static ResourceLocation getIcon() {
-        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS))
+    private static ResourceLocation getIcon(ProductionPlacement prodBuilding) {
+        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS) && !(prodBuilding instanceof CustomBuildingPlacement))
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/stray.png");
         else
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/skeleton.png");
     }
 
-    private static String getCancelName() {
-        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS))
+    private static String getCancelName(ProductionPlacement prodBuilding) {
+        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS) && !(prodBuilding instanceof CustomBuildingPlacement))
             return "Stray";
         else
             return "Skeleton";
@@ -79,9 +80,9 @@ public class SkeletonProd extends GraveyardUnitProductionItem {
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(
             SkeletonProd.itemName,
-            getIcon(),
+            getIcon(prodBuilding),
             hotkey,
-            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS),
+            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS) && !(prodBuilding instanceof CustomBuildingPlacement),
             () -> true,
             List.of(
                 FormattedCharSequence.forward(I18n.get("entity.reignofnether.skeleton_unit"), Style.EMPTY.withBold(true)),
@@ -98,8 +99,8 @@ public class SkeletonProd extends GraveyardUnitProductionItem {
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         return new StopProductionButton(
-            getCancelName(),
-            getIcon(),
+            getCancelName(prodBuilding),
+            getIcon(prodBuilding),
             prodBuilding,
             this,
             first

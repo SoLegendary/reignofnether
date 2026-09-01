@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.passives.PassiveIcons;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -380,9 +381,14 @@ public interface Unit {
                                 SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F,
                                 unitMob.getRandom().nextFloat() * 0.1F + 0.9F
                         );
-                        if (itemStack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
-                            unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, 5));
-                            unitMob.setAbsorptionAmount(24);
+                        if (itemStack.getItem() == Items.GOLDEN_APPLE) {
+                            int absorb = EdibleFoodItem.GOLDEN_APPLE_ABSORB;
+                            unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, (absorb / 4) - 1));
+                            unitMob.setAbsorptionAmount(absorb);
+                        } else if (itemStack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
+                            int absorb = EdibleFoodItem.ENCHANTED_GOLDEN_APPLE_ABSORB;
+                            unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, (absorb / 4) - 1));
+                            unitMob.setAbsorptionAmount(absorb);
                         } else {
                             unitMob.heal(ItemUtil.getFoodHealAmount(itemStack));
                         }
@@ -450,6 +456,10 @@ public interface Unit {
             unitMob.push(0.005d * (bool1 ? -1 : 1), 0, 0.005d * (bool2 ? -1 : 1));
         }
          */
+
+        if (unit.getItemGoal() != null) {
+            unit.getItemGoal().tick();
+        }
     }
 
     private static void checkAndPickupResources(Unit unit) {
@@ -486,20 +496,27 @@ public interface Unit {
     private static void checkAndPickupEquipment(Unit unit) {
         Mob unitMob = (Mob) unit;
         for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
-
             Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
-            ItemStack itemstack = itementity.getItem();
-            if (unit.canPickUpEquipment(itemstack) && !itementity.isRemoved() &&
-                !itemstack.isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive() &&
-                (rl != Relationship.HOSTILE || itementity.tickCount > 100)) {
-
-                unitMob.onItemPickup(itementity);
-                unitMob.take(itementity, 1);
-                unit.onPickupEquipment(itemstack);
-                itementity.discard();
-                break;
+            if (rl != Relationship.HOSTILE) {
+                if (tryPickingUpEquipment(unit, itementity))
+                    break;
             }
         }
+    }
+
+    public static boolean tryPickingUpEquipment(Unit unit, ItemEntity itemEntity) {
+        Mob unitMob = (Mob) unit;
+        ItemStack itemstack = itemEntity.getItem();
+        if (unit.canPickUpEquipment(itemstack) && !itemEntity.isRemoved() &&
+                !itemstack.isEmpty() && !itemEntity.hasPickUpDelay() && unitMob.isAlive() &&
+                (itemEntity.tickCount >= 100)) {
+            unitMob.onItemPickup(itemEntity);
+            unitMob.take(itemEntity, 1);
+            unit.onPickupEquipment(itemstack);
+            itemEntity.discard();
+            return true;
+        }
+        return false;
     }
 
     default boolean canPickUpEquipment(ItemStack itemStack) { return false; }
@@ -512,7 +529,8 @@ public interface Unit {
         Mob unitMob = (Mob) unit;
         if (!unit.isHoldingEdibleFood()) {
             for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
-
+                if (itementity.isRemoved() || itementity.tickCount < 10)
+                    continue;
                 ItemStack itemstack = itementity.getItem();
                 if (itemstack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
                     if (unitMob.getAbsorptionAmount() > 0)
@@ -521,22 +539,31 @@ public interface Unit {
                     continue;
                 }
                 Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
+                Item item = itemstack.getItem();
                 if (!itementity.isRemoved() && !itemstack.isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive() && !unit.getOwnerName().isEmpty() &&
-                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isPreparedEdibleFood(itemstack.getItem())) {
-                    if (ItemUtil.isPreparedEdibleFood(itemstack.getItem()) &&
-                            (unitMob.getHealth() < unitMob.getMaxHealth() || itemstack.getItem() == Items.ENCHANTED_GOLDEN_APPLE)) {
-                        unitMob.onItemPickup(itementity);
-                        unitMob.take(itementity, 1);
-                        unit.getItems().add(new ItemStack(itemstack.getItem(), 1));
-                        UnitAnimationClientboundPacket.sendEatFoodPacket(unitMob, BuiltInRegistries.ITEM.getId(itemstack.getItem()));
-                        itemstack.setCount(itemstack.getCount() - 1);
-                        if (itemstack.getCount() <= 0)
-                            itementity.discard();
+                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isPreparedEdibleFood(item)) {
+
+                    boolean isApple = item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE;
+                    boolean noAbsorb = unitMob.getAbsorptionAmount() <= 0;
+                    boolean isHurt = unitMob.getHealth() < ((Mob) unit).getMaxHealth();
+                    if ((isApple && noAbsorb) || (!isApple && isHurt)) {
+                        startEatingFood(unit, itementity);
                         break;
                     }
                 }
             }
         }
+    }
+
+    public static void startEatingFood(Unit unit, ItemEntity itemEntity) {
+        ItemStack itemStack = itemEntity.getItem();
+        ((LivingEntity) unit).onItemPickup(itemEntity);
+        ((LivingEntity) unit).take(itemEntity, 1);
+        unit.getItems().add(new ItemStack(itemStack.getItem(), 1));
+        UnitAnimationClientboundPacket.sendEatFoodPacket(((LivingEntity) unit), BuiltInRegistries.ITEM.getId(itemStack.getItem()));
+        itemStack.setCount(itemStack.getCount() - 1);
+        if (itemStack.getCount() <= 0)
+            itemEntity.discard();
     }
 
     // call from addAdditionalSaveData
@@ -666,6 +693,8 @@ public interface Unit {
             if (unit.getUsePortalGoal() instanceof UsePortalGoal usePortalGoal)
                 usePortalGoal.stopUsingPortal();
         }
+        if (unit.getItemGoal() != null)
+            unit.getItemGoal().stop();
     }
 
     // can be overridden in the Unit's class to do additional logic on a reset
@@ -741,7 +770,8 @@ public interface Unit {
                 this.getFollowTarget() == null &&
                 idleAttacker &&
                 idleWorker &&
-                idleRangedAttacker;
+                idleRangedAttacker &&
+                (getItemGoal() == null || getItemGoal().isIdle());
     }
 
     static Random RANDOM = new Random();
@@ -940,5 +970,10 @@ public interface Unit {
 
     public default BuildingPlacement getGarrison() {
         return GarrisonableBuildingAddon.getGarrison(this);
+    }
+
+    @Nullable
+    public default UnitItemGoal getItemGoal() {
+        return null;
     }
 }

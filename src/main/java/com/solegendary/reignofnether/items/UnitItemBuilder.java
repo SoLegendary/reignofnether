@@ -1,14 +1,24 @@
 package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Fluent builder for UnitItems.
@@ -40,13 +50,18 @@ public class UnitItemBuilder {
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
     int sellValue = 0;
-    String descKey = "";
+    int buyCost = 0;
+    String desc = "";
     Keybinding hotkey = null;
-    boolean canUnitPickup = false;
-    boolean canUnitAutopickup = false;
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
-    final List<String> pointKeys = new ArrayList<>();
+    final List<String> pointDescs = new ArrayList<>();
+    final List<AttributeModifier> getAttributeModifiers = new ArrayList<>();
+    BiPredicate<Unit, BlockPos> onUseGround = null;
+    BiPredicate<Unit, LivingEntity> onUseEntity = null;
+    BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
+    Predicate<Unit> onUse = null;
+    boolean consumeOnUse = false;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -77,22 +92,28 @@ public class UnitItemBuilder {
         return this;
     }
 
+    /** Emerald cost at shops */
+    public UnitItemBuilder buyCost(int buyCost) {
+        this.buyCost = buyCost;
+        return this;
+    }
+
     /** I18n key for the short description line(s) in the tooltip's middle band. */
-    public UnitItemBuilder descKey(String descKey) {
-        this.descKey = descKey == null ? "" : descKey;
+    public UnitItemBuilder desc(String desc) {
+        this.desc = desc == null ? "" : desc;
         return this;
     }
 
     /** Adds one bullet to the passive stat list; call once per bullet, in display order. */
-    public UnitItemBuilder pointKey(String i18nKey) {
+    public UnitItemBuilder pointDesc(String i18nKey) {
         if (i18nKey != null && !i18nKey.isBlank())
-            this.pointKeys.add(i18nKey);
+            this.pointDescs.add(i18nKey);
         return this;
     }
 
-    public UnitItemBuilder pointKeys(String... i18nKeys) {
-        for (String key : i18nKeys)
-            pointKey(key);
+    public UnitItemBuilder pointDescs(String... descs) {
+        for (String desc : descs)
+            pointDesc(desc);
         return this;
     }
 
@@ -112,14 +133,41 @@ public class UnitItemBuilder {
         return this;
     }
 
-    public UnitItemBuilder canUnitPickup(boolean canUnitPickup) {
-        this.canUnitPickup = canUnitPickup;
+    /** Adds one attribute modifier applied while the item is held; call once per modifier. */
+    public UnitItemBuilder attributeModifier(AttributeModifier modifier) {
+        if (modifier != null)
+            this.getAttributeModifiers.add(modifier);
         return this;
     }
 
-    /** Usually true for resources and piglin merchant loot. */
-    public UnitItemBuilder canUnitAutopickup(boolean canUnitAutopickup) {
-        this.canUnitAutopickup = canUnitAutopickup;
+    public UnitItemBuilder attributeModifiers(AttributeModifier... modifiers) {
+        for (AttributeModifier modifier : modifiers)
+            attributeModifier(modifier);
+        return this;
+    }
+
+    public UnitItemBuilder onUseGround(BiPredicate<Unit, BlockPos> onUseGround) {
+        this.onUseGround = onUseGround;
+        return this;
+    }
+
+    public UnitItemBuilder onUseEntity(BiPredicate<Unit, LivingEntity> onUseEntity) {
+        this.onUseEntity = onUseEntity;
+        return this;
+    }
+
+    public UnitItemBuilder onUseBuilding(BiPredicate<Unit, BuildingPlacement> onUseBuilding) {
+        this.onUseBuilding = onUseBuilding;
+        return this;
+    }
+
+    public UnitItemBuilder onUse(Predicate<Unit> onUse) {
+        this.onUse = onUse;
+        return this;
+    }
+
+    public UnitItemBuilder consumeOnUse() {
+        this.consumeOnUse = true;
         return this;
     }
 
