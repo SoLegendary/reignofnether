@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -69,6 +70,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
     public Set<Block> portraitBlockOptions = new HashSet<>();
     public CompoundTag attributesNbt = new CompoundTag(); // NBT containing all the below fields (including portrait block key)
     public ListTag commandsNbt = new ListTag();
+    public HashMap<EntityType<?>, CompoundTag> unitProductionNbts = new HashMap<>();
     public int nightRadius = 0;
     public int netherRadius = 0;
     public boolean buildableByVillagers = false;
@@ -199,11 +201,15 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             : null;
 
                     EntityType<?> type = spawnEgg.getType(stackNbt);
+
                     if (type.getDescriptionId().contains("reignofnether") && type.getDescriptionId().contains("_unit")) {
                         ProductionItem prodItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
                         if (prodItem != null && !this.productions.get().contains(prodItem)) {
                             Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
                             this.productions.add(prodItem, hotkey);
+                            if (stackNbt != null && stackNbt.contains("EntityTag")) {
+                                this.unitProductionNbts.put(type, stackNbt.getCompound("EntityTag"));
+                            }
                             hotkeyIndex += 1;
                         }
                     }
@@ -529,14 +535,5 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
     @Override
     public int getDefaultNightRange() {
         return nightRadius;
-    }
-
-    @Override
-    public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
-        CustomBuildingPlacement cbp = (CustomBuildingPlacement) placement;
-        if (!cbp.spawnBlocks.isEmpty()) {
-            return cbp.spawnBlocks.get(random.nextInt(cbp.spawnBlocks.size())).above();
-        }
-        return placement.centrePos;
     }
 }

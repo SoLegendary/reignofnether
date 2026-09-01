@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.production.*;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -14,6 +15,8 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -31,8 +34,8 @@ import java.util.concurrent.TimeUnit;
 import static com.solegendary.reignofnether.building.BuildingUtils.getMinCorner;
 
 public class ProductionPlacement extends BuildingPlacement {
-    private ArrayList<BlockPos> rallyPoints = new ArrayList<>();
-    private LivingEntity rallyPointEntity;
+    protected ArrayList<BlockPos> rallyPoints = new ArrayList<>();
+    protected LivingEntity rallyPointEntity;
     public List<Button> productionButtons;
     public final List<ActiveProduction> productionQueue = new ArrayList<>();
     public boolean attackRally = false;
@@ -127,12 +130,9 @@ public class ProductionPlacement extends BuildingPlacement {
 
     public Entity produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName, boolean spawnIndoors, Vec3i spawnOffset) {
         ProductionBuilding building = (ProductionBuilding) getBuilding();
-        LivingEntity rallyEntity = getRallyPointEntity();
         BlockPos spawnPoint;
         if (spawnIndoors) {
             spawnPoint = getIndoorSpawnPoint(level);
-            if (entityType == EntityRegistrar.GHAST_UNIT.get())
-                spawnPoint = spawnPoint.offset(0,5,0);
         }
         else if (!rallyPoints.isEmpty())
             spawnPoint = getClosestGroundPos(rallyPoints.get(0), (int) building.spawnRadiusOffset);
@@ -150,66 +150,70 @@ public class ProductionPlacement extends BuildingPlacement {
                 true,
                 false
         );
-        BlockPos defaultRallyPoint = getDefaultOutdoorSpawnPoint();
-
-        final List<BlockPos> fRallyPoints = this.rallyPoints.isEmpty() ? List.of(defaultRallyPoint) : this.rallyPoints;
-
         if (entity instanceof Unit unit) {
             unit.setOwnerName(ownerName);
             unit.setupEquipmentAndUpgradesServer();
-
-            if (rallyEntity != null && rallyEntity.isAlive()) {
-                if (isRallyEntityAttackable()) {
-                    CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                        if (!fRallyPoints.isEmpty()) {
-                            UnitServerEvents.addActionItem(
-                                    this.ownerName,
-                                    UnitAction.ATTACK,
-                                    rallyEntity.getId(),
-                                    new int[] { entity.getId() },
-                                    fRallyPoints.get(0),
-                                    new BlockPos(0,0,0)
-                            );
-                        }
-                    });
-                } else {
-                    CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                        if (!fRallyPoints.isEmpty()) {
-                            UnitServerEvents.addActionItem(
-                                    this.ownerName,
-                                    UnitAction.FOLLOW,
-                                    rallyEntity.getId(),
-                                    new int[] { entity.getId() },
-                                    fRallyPoints.get(0),
-                                    new BlockPos(0,0,0)
-                            );
-                        }
-                    });
-                }
-            } else {
-                for (int i = 0; i < fRallyPoints.size(); i++) {
-                    final int fi = i;
-                    CompletableFuture.delayedExecutor(500L * fi, TimeUnit.MILLISECONDS).execute(() -> {
-                        if (fRallyPoints.size() > fi)
-                            UnitServerEvents.addActionItem(
-                                    this.ownerName,
-                                    attackRally ? UnitAction.ATTACK_MOVE : UnitAction.MOVE,
-                                    -1,
-                                    new int[] { entity.getId() },
-                                    fRallyPoints.get(fi),
-                                    new BlockPos(0,0,0),
-                                    fi > 0
-                            );
-                    });
-                    CompletableFuture.delayedExecutor(750, TimeUnit.MILLISECONDS).execute(() -> {
-                        if (!attackRally && unit instanceof WorkerUnit workerUnit)
-                            if (rallyResourceName != ResourceName.NONE)
-                                workerUnit.getGatherResourceGoal().setTargetResourceName(rallyResourceName);
-                    });
-                }
-            }
+            setDelayedRally(unit);
         }
         return entity;
+    }
+
+    protected void setDelayedRally(Unit unit) {
+        Entity entity = (Entity) unit;
+        LivingEntity rallyEntity = getRallyPointEntity();
+        BlockPos defaultRallyPoint = getDefaultOutdoorSpawnPoint();
+        final List<BlockPos> fRallyPoints = this.rallyPoints.isEmpty() ? List.of(defaultRallyPoint) : this.rallyPoints;
+
+        if (rallyEntity != null && rallyEntity.isAlive()) {
+            if (isRallyEntityAttackable()) {
+                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                    if (!fRallyPoints.isEmpty()) {
+                        UnitServerEvents.addActionItem(
+                                this.ownerName,
+                                UnitAction.ATTACK,
+                                rallyEntity.getId(),
+                                new int[] { entity.getId() },
+                                fRallyPoints.get(0),
+                                new BlockPos(0,0,0)
+                        );
+                    }
+                });
+            } else {
+                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                    if (!fRallyPoints.isEmpty()) {
+                        UnitServerEvents.addActionItem(
+                                this.ownerName,
+                                UnitAction.FOLLOW,
+                                rallyEntity.getId(),
+                                new int[] { entity.getId() },
+                                fRallyPoints.get(0),
+                                new BlockPos(0,0,0)
+                        );
+                    }
+                });
+            }
+        } else {
+            for (int i = 0; i < fRallyPoints.size(); i++) {
+                final int fi = i;
+                CompletableFuture.delayedExecutor(500L * fi, TimeUnit.MILLISECONDS).execute(() -> {
+                    if (fRallyPoints.size() > fi)
+                        UnitServerEvents.addActionItem(
+                                this.ownerName,
+                                attackRally ? UnitAction.ATTACK_MOVE : UnitAction.MOVE,
+                                -1,
+                                new int[] { entity.getId() },
+                                fRallyPoints.get(fi),
+                                new BlockPos(0,0,0),
+                                fi > 0
+                        );
+                });
+                CompletableFuture.delayedExecutor(750, TimeUnit.MILLISECONDS).execute(() -> {
+                    if (!attackRally && unit instanceof WorkerUnit workerUnit)
+                        if (rallyResourceName != ResourceName.NONE)
+                            workerUnit.getGatherResourceGoal().setTargetResourceName(rallyResourceName);
+                });
+            }
+        }
     }
 
     // return true if successful

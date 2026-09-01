@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -32,7 +33,7 @@ public class GhastProd extends ProductionItem {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide())
-                placement.produceUnit((ServerLevel) level, EntityRegistrar.GHAST_UNIT.get(), placement.ownerName, true);
+                placement.produceUnit((ServerLevel) level, EntityRegistrar.GHAST_UNIT.get(), placement.ownerName, false, new Vec3i(0,5,0));
         };
     }
 

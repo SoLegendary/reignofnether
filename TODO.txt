@@ -72,7 +72,10 @@ Quality of Life
         - [ ] Trainable units: N (if >0, show warning if there is no spawn block)
         - Tooltip: "To train units from a custom building, capture its structure"
                    "with a unit spawn egg into a chest or other container block"
+
     [🟡] Cancel and refund productions if captured
+    [🟡] Dont spawn outdoors always for big units if you have a spawn block
+    [🟡] Add spawn egg nbt support
 
 Bugfixes
 --------

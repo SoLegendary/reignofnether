@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.*;
@@ -37,9 +38,9 @@ public class ZombieProd extends GraveyardUnitProductionItem {
                     else
                         gy.createSkull(EntityRegistrar.ZOMBIE_UNIT.get());
                 } else {
-                    if (ResearchServerEvents.playerHasResearch(building.ownerName, ProductionItems.RESEARCH_HUSKS))
+                    if (ResearchServerEvents.playerHasResearch(building.ownerName, ProductionItems.RESEARCH_HUSKS) && !(building instanceof CustomBuildingPlacement))
                         building.produceUnit((ServerLevel) level, EntityRegistrar.HUSK_UNIT.get(), building.ownerName, true);
-                    else if (ResearchServerEvents.playerHasResearch(building.ownerName, ProductionItems.RESEARCH_DROWNED))
+                    else if (ResearchServerEvents.playerHasResearch(building.ownerName, ProductionItems.RESEARCH_DROWNED) && !(building instanceof CustomBuildingPlacement))
                         building.produceUnit((ServerLevel) level, EntityRegistrar.DROWNED_UNIT.get(), building.ownerName, true);
                     else
                         building.produceUnit((ServerLevel) level, EntityRegistrar.ZOMBIE_UNIT.get(), building.ownerName, true);
@@ -52,19 +53,19 @@ public class ZombieProd extends GraveyardUnitProductionItem {
         return ZombieProd.itemName;
     }
 
-    private static ResourceLocation getIcon() {
-        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS))
+    private static ResourceLocation getIcon(ProductionPlacement prodBuilding) {
+        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS) && !(prodBuilding instanceof CustomBuildingPlacement))
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/husk.png");
-        else if (ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED))
+        else if (ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED) && !(prodBuilding instanceof CustomBuildingPlacement))
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/drowned.png");
         else
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie.png");
     }
 
-    private static String getCancelName() {
-        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS))
+    private static String getCancelName(ProductionPlacement prodBuilding) {
+        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS) && !(prodBuilding instanceof CustomBuildingPlacement))
             return "Husk";
-        else if (ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED))
+        else if (ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED) && !(prodBuilding instanceof CustomBuildingPlacement))
             return "Drowned";
         else
             return "Zombie";
@@ -87,9 +88,10 @@ public class ZombieProd extends GraveyardUnitProductionItem {
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(
                 ZombieProd.itemName,
-                getIcon(),
+                getIcon(prodBuilding),
                 hotkey,
-                () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS) || ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED),
+                () -> !(prodBuilding instanceof CustomBuildingPlacement) &&
+                        (ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS) || ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED)),
                 () -> true,
                 List.of(
                     FormattedCharSequence.forward(I18n.get("entity.reignofnether.zombie_unit"), Style.EMPTY.withBold(true)),
@@ -106,8 +108,8 @@ public class ZombieProd extends GraveyardUnitProductionItem {
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         return new StopProductionButton(
-            getCancelName(),
-            getIcon(),
+            getCancelName(prodBuilding),
+            getIcon(prodBuilding),
             prodBuilding,
             this,
             first

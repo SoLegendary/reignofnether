@@ -42,7 +42,9 @@ public class GrizzlyBearProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grizzly_bear.png"),
                 List.of(
-                        fcs(I18n.get("entity.reignofnether.grizzly_bear_unit"), true)
+                        fcs(I18n.get("entity.reignofnether.grizzly_bear_unit"), true),
+                        fcs(""),
+                        fcs(I18n.get("entity.reignofnether.grizzly_bear_unit.tooltip1"))
                 )
         );
     }

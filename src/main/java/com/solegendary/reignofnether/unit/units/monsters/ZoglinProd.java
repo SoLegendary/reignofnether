@@ -59,7 +59,8 @@ public class ZoglinProd extends ProductionItem {
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPopAndTime(cost),
                         fcs(""),
-                        fcs(I18n.get("entity.reignofnether.zoglin_unit.tooltip1"))
+                        fcs(I18n.get("entity.reignofnether.zoglin_unit.tooltip1")),
+                        fcs(I18n.get("entity.reignofnether.zoglin_unit.tooltip2"))
                 ),
                 this
         );

@@ -32,7 +32,7 @@ public class SpiderProd extends ProductionItem {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide()) {
-                if (ResearchServerEvents.playerHasResearch(placement.ownerName, ProductionItems.RESEARCH_POISON_SPIDERS))
+                if (ResearchServerEvents.playerHasResearch(placement.ownerName, ProductionItems.RESEARCH_POISON_SPIDERS) && !(placement instanceof CustomBuildingPlacement))
                     placement.produceUnit((ServerLevel) level, EntityRegistrar.POISON_SPIDER_UNIT.get(), placement.ownerName, true);
                 else
                     placement.produceUnit((ServerLevel) level, EntityRegistrar.SPIDER_UNIT.get(), placement.ownerName, true);
@@ -40,15 +40,15 @@ public class SpiderProd extends ProductionItem {
         };
     }
 
-    private static ResourceLocation getIcon() {
-        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS))
+    private static ResourceLocation getIcon(ProductionPlacement prodBuilding) {
+        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS) && !(prodBuilding instanceof CustomBuildingPlacement))
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/poison_spider.png");
         else
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/spider.png");
     }
 
-    private static String getCancelName() {
-        if (ResearchClient.hasResearch(ProductionItems.POISON_SPIDER))
+    private static String getCancelName(ProductionPlacement prodBuilding) {
+        if (ResearchClient.hasResearch(ProductionItems.POISON_SPIDER) && !(prodBuilding instanceof CustomBuildingPlacement))
             return "Poison Spider";
         else
             return "Spider";
@@ -76,7 +76,7 @@ public class SpiderProd extends ProductionItem {
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(
             SpiderProd.itemName,
-            getIcon(),
+            getIcon(prodBuilding),
             hotkey,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS) && !(prodBuilding instanceof CustomBuildingPlacement),
             () -> true,
@@ -96,8 +96,8 @@ public class SpiderProd extends ProductionItem {
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         return new StopProductionButton(
-                ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS) ? "Poison Spider" : "Spider",
-                getIcon(),
+                getCancelName(prodBuilding),
+                getIcon(prodBuilding),
                 prodBuilding,
                 this,
                 first

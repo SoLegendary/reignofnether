@@ -42,7 +42,9 @@ public class LlamaProd extends ProductionItem {
             itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/llama.png"),
             List.of(
-                    fcs(I18n.get("entity.reignofnether.llama_unit"), true)
+                    fcs(I18n.get("entity.reignofnether.llama_unit"), true),
+                    fcs(""),
+                    fcs(I18n.get("entity.reignofnether.llama_unit.tooltip1"))
             )
         );
     }
