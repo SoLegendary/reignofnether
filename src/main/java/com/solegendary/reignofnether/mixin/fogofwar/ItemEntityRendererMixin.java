@@ -48,7 +48,7 @@ public abstract class ItemEntityRendererMixin {
             return false;
         return ItemUtil.isPreparedEdibleFood(item) ||
                 ResourceSources.getFromItem(item) != null ||
-                ItemUtil.isUnitItem(item);
+                ItemUtil.isUnitItem(itemEntity.getItem());
     }
 
     @Inject(

@@ -27,6 +27,8 @@ Shops
             - Infinite stock
             - Unique (no stacking effects with multiples held)
             - Buy cooldown
+        [❌] New small floating menu at bottom left
+            - Opened with building button or when right-clicked with in-range hero
 
 Unit Items
     [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
@@ -64,6 +66,7 @@ Bugfixes
 --------
 [❌] Cat/dog at the start should also match the TC mode
 [❌] Hide the hero items menu if there are no items picked up
+[❌] Cats and dogs should be cancelled out of sitting state if moving for any reason
 
 
 Languages

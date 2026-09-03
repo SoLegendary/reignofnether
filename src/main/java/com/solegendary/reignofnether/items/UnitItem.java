@@ -18,9 +18,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 // items that can be held and used by RTS units, especially heroes
@@ -37,6 +35,7 @@ import java.util.function.Predicate;
 public abstract class UnitItem {
 
     protected final Item item;
+    public final UUID uuid;
     public final ResourceLocation iconRl;
     public final UnitItemType type;
     public final int sellValue;
@@ -47,14 +46,15 @@ public abstract class UnitItem {
     protected final List<Pair<Enchantment, Integer>> enchantments;
     protected final List<String> pointDescs;
     public final List<AttributeModifier> getAttributeModifiers;
-    public final BiPredicate<Unit, BlockPos> onUseGround;
-    public final BiPredicate<Unit, LivingEntity> onUseEntity;
-    public final BiPredicate<Unit, BuildingPlacement> onUseBuilding;
-    public final Predicate<Unit> onUse;
+    public BiPredicate<Unit, BlockPos> onUseGround;
+    public BiPredicate<Unit, LivingEntity> onUseEntity;
+    public BiPredicate<Unit, BuildingPlacement> onUseBuilding;
+    public Predicate<Unit> onUse;
     public final boolean consumeOnUse;
 
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
+        this.uuid = builder.uuid;
         this.iconRl = builder.iconRl;
         this.type = builder.type;
         this.sellValue = builder.sellValue;
@@ -64,7 +64,7 @@ public abstract class UnitItem {
         this.enchantments = List.copyOf(builder.enchantments);
         this.pointDescs = List.copyOf(builder.pointDescs);
         this.enableTooltip = builder.enableTooltip;
-        this.getAttributeModifiers = builder.getAttributeModifiers;
+        this.getAttributeModifiers = builder.attributeModifiers;
         this.onUseGround = builder.onUseGround;
         this.onUseEntity = builder.onUseEntity;
         this.onUseBuilding = builder.onUseBuilding;

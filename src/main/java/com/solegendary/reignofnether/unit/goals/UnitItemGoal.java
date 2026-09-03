@@ -95,7 +95,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                             BuildingPlacement bpl = BuildingUtils.findBuilding(false, blockTarget);
                             if (bpl != null && bpl.getBuilding() instanceof AbstractMarket) {
                                 inv.deleteUUID(ItemUtil.getUUID(itemInHand));
-                                UnitItem unitItem = ItemUtil.getUnitItem(itemInHand.getItem());
+                                UnitItem unitItem = ItemUtil.getUnitItem(itemInHand);
                                 if (mob instanceof Unit unit) {
                                     RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(unit.getOwnerName());
                                     if (rtsPlayer != null && unitItem != null) {

@@ -1,11 +1,13 @@
 package com.solegendary.reignofnether.items;
 
+import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -27,23 +29,34 @@ public class ItemUtil {
     }
 
     public static boolean isUnitItem(ItemStack itemStack) {
-        return itemStack != null && isUnitItem(itemStack.getItem());
+        return getUnitItem(itemStack) != null;
     }
 
     public static boolean isUnitItem(ItemEntity entity) {
-        return entity != null && isUnitItem(entity.getItem().getItem());
-    }
-
-    public static boolean isUnitItem(Item item) {
-        return item != null && getUnitItem(item) != null;
+        return entity != null && isUnitItem(entity.getItem());
     }
 
     @Nullable
-    public static UnitItem getUnitItem(Item item) {
-        if (isPreparedEdibleFood(item))
-            return new EdibleFoodItem(item);
+    public static UnitItem getUnitItem(ItemStack itemStack) {
+        if (isPreparedEdibleFood(itemStack.getItem()))
+            return new EdibleFoodItem(itemStack.getItem());
+        outerLoop:
+        for (UnitItem unitItem : UnitItems.ITEMS) {
+            if (unitItem.item == itemStack.getItem()) {
+                for (Pair<Enchantment, Integer> pair : unitItem.enchantments) {
+                    if (itemStack.getEnchantmentLevel(pair.getFirst()) != pair.getSecond())
+                        continue outerLoop;
+                }
+                return unitItem;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public static UnitItem getUnitItem(UUID uuid) {
         for (UnitItem unitItem : UnitItems.ITEMS)
-            if (unitItem.item == item)
+            if (unitItem.uuid.equals(uuid))
                 return unitItem;
         return null;
     }

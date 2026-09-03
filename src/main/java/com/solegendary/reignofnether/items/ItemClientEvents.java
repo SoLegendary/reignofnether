@@ -120,7 +120,7 @@ public class ItemClientEvents {
         for (int i = 0; i < inv.getAllItems().size(); i++) {
             Keybinding hotkey = i < hotkeys.size() ? hotkeys.get(i) : null;
             ItemStack itemStack = inv.getAllItems().get(i);
-            UnitItem unitItem = ItemUtil.getUnitItem(itemStack.getItem());
+            UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
             if (unitItem instanceof EmptyUnitItem emptyItem) {
                 ItemClientEvents.renderedButtons.add(emptyItem.getEmptySlotButton(i, hasDragActionItem(), (Unit) inv));
             } else if (unitItem != null) {
@@ -314,7 +314,7 @@ public class ItemClientEvents {
 
         if (OrthoviewClientEvents.isEnabled() && MC.screen instanceof TopdownGui) {
             for (ItemEntity itemEntity : preselectedItems) {
-                UnitItem unitItem = ItemUtil.getUnitItem(itemEntity.getItem().getItem());
+                UnitItem unitItem = ItemUtil.getUnitItem(itemEntity.getItem());
                 if (unitItem != null && unitItem.enableTooltip) {
                     MyRenderer.renderItemEntityTooltip(evt.getGuiGraphics(), unitItem, itemEntity.getItem(), evt.getMouseX(), evt.getMouseY());
                     break;
