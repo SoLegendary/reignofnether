@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
@@ -59,6 +60,12 @@ public class ItemClientEvents {
 
     // items moused over
     private static final ArrayList<ItemEntity> preselectedItems = new ArrayList<>();
+
+    // TODO: set with:
+    // - Right click goal with hero on market building
+    // - Toggle button on market building
+    // - Close if the building is or the hero is deselected
+    public static BuildingPlacement openItemShop = null;
 
     public static void addPreselectedItem(ItemEntity itemEntity) {
         if (!FogOfWarClientEvents.isInBrightChunk(itemEntity))
@@ -303,7 +310,7 @@ public class ItemClientEvents {
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render evt) {
+    public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
         // clear to avoid hiding ghost renders if the player happens to mouse back over this exact pixel

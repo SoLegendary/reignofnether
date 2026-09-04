@@ -29,7 +29,7 @@ public class ItemUtil {
     }
 
     public static boolean isUnitItem(ItemStack itemStack) {
-        return getUnitItem(itemStack) != null;
+        return itemStack != null && getUnitItem(itemStack) != null;
     }
 
     public static boolean isUnitItem(ItemEntity entity) {
@@ -38,6 +38,8 @@ public class ItemUtil {
 
     @Nullable
     public static UnitItem getUnitItem(ItemStack itemStack) {
+        if (itemStack == null)
+            return null;
         if (isPreparedEdibleFood(itemStack.getItem()))
             return new EdibleFoodItem(itemStack.getItem());
         outerLoop:

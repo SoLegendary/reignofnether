@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -23,6 +24,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public interface ItemShopAddon extends BuildingAddon {
 
@@ -52,6 +56,16 @@ public interface ItemShopAddon extends BuildingAddon {
             },
             HashMap::new
     );
+
+    DataType<Unit> SERVED_UNIT_CACHE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "served_unit_cache"),
+            (nbt, server) -> null,
+            (unit -> new CompoundTag()),
+            () -> null
+    ); //Cache only, shouldn't be saved
+
+    default Unit getServedUnit(BuildingPlacement bpl) {
+        return bpl.getDataStorage().getData(ItemShopAddon.SERVED_UNIT_CACHE);
+    }
 
     default void buyItem(BuildingPlacement bpl, UnitItem item, Unit unit) {
         HashMap<UnitItem, Integer> itemsAndStock = bpl.getDataStorage().getData(ItemShopAddon.ITEMS_AND_STOCK);
@@ -85,6 +99,8 @@ public interface ItemShopAddon extends BuildingAddon {
                 ((LivingEntity) inv).take(itemEntity, itemStack.getCount());
                 itemEntity.discard();
             }
+            itemsAndStock.put(item, stock - 1);
+            bpl.getDataStorage().setData(ItemShopAddon.ITEMS_AND_STOCK, itemsAndStock);
             ResourcesServerEvents.addSubtractResources(Resources.emeralds(unit.getOwnerName(), item.buyCost));
             SoundClientboundPacket.playSoundAtPos(SoundAction.SELL_ITEM, ((LivingEntity) unit).getOnPos());
         } else {

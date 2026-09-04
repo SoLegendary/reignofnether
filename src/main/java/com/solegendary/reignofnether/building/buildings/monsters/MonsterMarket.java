@@ -6,6 +6,9 @@ import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.UnitItems;
+import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -16,9 +19,12 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
@@ -42,6 +48,13 @@ public class MonsterMarket extends AbstractMarket {
         this.startingBlockTypes.add(Blocks.DEEPSLATE_TILE_SLAB);
         this.startingBlockTypes.add(Blocks.POLISHED_DEEPSLATE_SLAB);
         this.startingBlockTypes.add(Blocks.DARK_PRISMARINE_SLAB);
+    }
+
+    @Override
+    protected HashMap<UnitItem, Integer> getStartingItemsAndStock() {
+        return new HashMap<>(Map.of(
+
+        ));
     }
 
     public Faction getFaction() { return Faction.MONSTERS; }

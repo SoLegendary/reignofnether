@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -17,7 +18,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
@@ -35,6 +38,13 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
 
         this.startingBlockTypes.add(Blocks.BLACKSTONE);
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_BRICKS);
+    }
+
+    @Override
+    protected HashMap<UnitItem, Integer> getStartingItemsAndStock() {
+        return new HashMap<>(Map.of(
+
+        ));
     }
 
     public Faction getFaction() { return Faction.PIGLINS; }

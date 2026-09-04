@@ -1,13 +1,24 @@
 package com.solegendary.reignofnether.building.buildings.shared;
 
-import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.ability.abilities.TradeResources;
 import com.solegendary.reignofnether.building.Building;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingBlockData;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
+import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Rotation;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 // AoE2-style resource trading: 6 buttons that swap 100 of one resource for the current rate of another.
 // Each trade worsens that direction's rate by RATE_STEP and improves
@@ -27,5 +38,18 @@ public abstract class AbstractMarket extends Building implements ItemShopAddon {
         this.maxHealth = 300d;
 
         setActiveAddon(ItemShopAddon.class, this, true);
+    }
+
+    public ArrayList<BuildingBlock> getRelativeBlockData(LevelAccessor level) {
+        return BuildingBlockData.getBuildingBlocksFromNbt(structureName, level);
+    }
+
+    protected abstract HashMap<UnitItem, Integer> getStartingItemsAndStock();
+
+    @Override
+    public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
+        BuildingPlacement bpl = new MarketPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation));
+        bpl.getDataStorage().setData(ItemShopAddon.ITEMS_AND_STOCK, getStartingItemsAndStock());
+        return bpl;
     }
 }

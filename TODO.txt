@@ -59,15 +59,17 @@ Balance
 
 Quality of Life
 ---------------
-[❌] Add ability to hide unit underlines (and in F1 toggle too)
-
+[❌] Hide unit underlines in F1 toggle
+[❌] Add animations for bear and panda (rolling) attacks
+[❌] NBT-driven custom building unit production
+    -
 
 Bugfixes
 --------
 [❌] Cat/dog at the start should also match the TC mode
 [❌] Hide the hero items menu if there are no items picked up
 [❌] Cats and dogs should be cancelled out of sitting state if moving for any reason
-
+[❌] Auth for hero item actions
 
 Languages
 ---------

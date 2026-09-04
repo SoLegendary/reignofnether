@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
@@ -27,6 +28,7 @@ import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientEvents;
 import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.ItemShopMenu;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -360,7 +362,6 @@ public class HudClientEvents {
             blitX += portraitRendererBuilding.frameWidth + 10;
 
             blitXStart = blitX + 20;
-
 
             // ---------------------------
             // Multiple selected buildings
@@ -1314,15 +1315,32 @@ public class HudClientEvents {
             !PlayerClientEvents.isRTSPlayer() ||
             SandboxClientEvents.isSandboxPlayer() ||
             AlliancesClient.isAllied(MC.player.getName().getString(), selPlayerName)) {
-            Pair<List<RectZone>, List<Button>> renderedElements = GlobalProductionQueueRenderer.renderQueue(evt.getGuiGraphics(),
+            Pair<RectZone, List<Button>> renderedElements = GlobalProductionQueueRenderer.renderQueue(evt.getGuiGraphics(),
                     selPlayerName,
                     queuePanelStartX,
                     queuePanelStartY,
                     mouseX,
                     mouseY
             );
-            hudZones.addAll(renderedElements.getFirst());
+            hudZones.add(renderedElements.getFirst());
             renderedButtons.addAll(renderedElements.getSecond());
+        }
+
+        // --------
+        // ItemShop
+        // --------
+        int y = queuePanelStartY + 100;
+        boolean isShopOpen = ItemClientEvents.openItemShop != null;
+        boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
+        if (isShopOpen) {
+            ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
+            boolean servedHeroSelected = isShopOpen && hudSelectedEntity == itemShop.getServedUnit(ItemClientEvents.openItemShop);
+            if (isShopSelected || servedHeroSelected) {
+                if (itemShop != null) {
+                    hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, 0, y));
+                    renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, 0, y, mouseX, mouseY));
+                }
+            }
         }
 
         // --------------------------
