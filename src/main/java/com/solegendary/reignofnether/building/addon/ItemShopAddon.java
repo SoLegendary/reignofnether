@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.addon;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
@@ -24,9 +25,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public interface ItemShopAddon extends BuildingAddon {
 
@@ -57,16 +55,6 @@ public interface ItemShopAddon extends BuildingAddon {
             HashMap::new
     );
 
-    DataType<Unit> SERVED_UNIT_CACHE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "served_unit_cache"),
-            (nbt, server) -> null,
-            (unit -> new CompoundTag()),
-            () -> null
-    ); //Cache only, shouldn't be saved
-
-    default Unit getServedUnit(BuildingPlacement bpl) {
-        return bpl.getDataStorage().getData(ItemShopAddon.SERVED_UNIT_CACHE);
-    }
-
     default void buyItem(BuildingPlacement bpl, UnitItem item, Unit unit) {
         HashMap<UnitItem, Integer> itemsAndStock = bpl.getDataStorage().getData(ItemShopAddon.ITEMS_AND_STOCK);
         if (!(unit instanceof UnitInventory inv)) return;
@@ -89,6 +77,10 @@ public interface ItemShopAddon extends BuildingAddon {
         }
         if (!ResourcesServerEvents.canAfford(unit.getOwnerName(), ResourceName.EMERALD, item.buyCost)) {
             HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "itemshop.reignofnether.error.cant_afford");
+            return;
+        }
+        if (!AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), bpl.ownerName)) {
+            HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "itemshop.reignofnether.error.hostile_shop");
             return;
         }
 

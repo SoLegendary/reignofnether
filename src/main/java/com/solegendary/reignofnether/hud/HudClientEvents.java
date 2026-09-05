@@ -12,7 +12,9 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
@@ -341,6 +343,24 @@ public class HudClientEvents {
             hudSelectedPlacement = selBuildings.get(0);
         }
 
+        // --------
+        // ItemShop
+        // --------
+        int x = blitX;
+        int y = blitY - 150;
+        boolean isShopOpen = ItemClientEvents.openItemShop != null;
+        boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
+        if (isShopOpen) {
+            ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
+            if (itemShop != null && ItemClientEvents.openItemShop instanceof ItemShopPlacement itemShopBpl) {
+                boolean servedHeroSelected = hudSelectedEntity != null && hudSelectedEntity == itemShopBpl.getServedUnit();
+                if (isShopSelected || servedHeroSelected) {
+                    hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, x, y));
+                    renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, x, y, mouseX, mouseY));
+                }
+            }
+        }
+
         if (hudSelectedPlacement != null) {
             boolean hudSelBuildingOwned =
                 BuildingClientEvents.getPlayerToBuildingRelationship(hudSelectedPlacement) == Relationship.OWNED ||
@@ -576,13 +596,32 @@ public class HudClientEvents {
                         blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
                     }
 
+                    int rowButtons = 0;
+                    if (hudSelectedPlacement.getBuilding().hasActiveAddon(ItemShopAddon.class)) {
+                        Button shopMenuButton = new ButtonBuilder("Shop Menu")
+                                .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald.png"))
+                                .tooltipLines(List.of(fcs(I18n.get("itemshop.reignofnether.toggle_menu"))))
+                                .isSelected(() -> ItemClientEvents.openItemShop == hudSelectedPlacement)
+                                .onLeftClick(() -> {
+                                    if (ItemClientEvents.openItemShop == hudSelectedPlacement)
+                                        ItemClientEvents.openItemShop = null;
+                                    else
+                                        ItemClientEvents.openItemShop = hudSelectedPlacement;
+                                })
+                                .build();
+                        shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                        productionButtons.add(shopMenuButton);
+                        renderedButtons.add(shopMenuButton);
+                        blitX += iconFrameSize;
+                        buildingProdRows += 1;
+                    }
+
                     if (hudSelectedPlacement instanceof ProductionPlacement selProdPlacement) {
                         List<Button> visibleProdButtons = selProdPlacement.productionButtons.stream()
                                 .filter(b -> !b.isHidden.get())
                                 .toList();
                         blitY -= Button.DEFAULT_ICON_FRAME_SIZE * Math.ceil(((float) visibleProdButtons.size() / (float) MAX_BUTTONS_PER_ROW) - 1);
 
-                        int rowButtons = 0;
                         for (Button prodButton : visibleProdButtons) {
                             rowButtons += 1;
                             prodButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
@@ -1324,23 +1363,6 @@ public class HudClientEvents {
             );
             hudZones.add(renderedElements.getFirst());
             renderedButtons.addAll(renderedElements.getSecond());
-        }
-
-        // --------
-        // ItemShop
-        // --------
-        int y = queuePanelStartY + 100;
-        boolean isShopOpen = ItemClientEvents.openItemShop != null;
-        boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
-        if (isShopOpen) {
-            ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
-            boolean servedHeroSelected = isShopOpen && hudSelectedEntity == itemShop.getServedUnit(ItemClientEvents.openItemShop);
-            if (isShopSelected || servedHeroSelected) {
-                if (itemShop != null) {
-                    hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, 0, y));
-                    renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, 0, y, mouseX, mouseY));
-                }
-            }
         }
 
         // --------------------------

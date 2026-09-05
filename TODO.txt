@@ -59,10 +59,10 @@ Balance
 
 Quality of Life
 ---------------
-[❌] Hide unit underlines in F1 toggle
+[❌] Hide unit underlines in F1 toggle and spectator-mode players
 [❌] Add animations for bear and panda (rolling) attacks
 [❌] NBT-driven custom building unit production
-    -
+    - read 'foodCost', 'woodCost', 'oreCost'
 
 Bugfixes
 --------

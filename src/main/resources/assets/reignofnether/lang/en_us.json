@@ -69,10 +69,12 @@
     "item.reignofnether.edible_food_item_heal.point1": "+%d \uE007",
     "item.reignofnether.edible_food_item_absorb.point1": "+%d \uE011",
 
+    "itemshop.reignofnether.toggle_menu": "Open Shop",
     "itemshop.reignofnether.error.out_of_stock": "Out of stock",
     "itemshop.reignofnether.error.full_inventory": "Inventory is full",
     "itemshop.reignofnether.error.cant_afford": "Can't afford that item",
     "itemshop.reignofnether.error.too_far_away": "Too far away",
+    "itemshop.reignofnether.error.hostile_shop": "That shop is not friendly",
     "itemshop.reignofnether.error.failed_other": "Failed to buy item",
 
     "attribute.reignofnether.attack_damage": "Attack Damage",
@@ -430,7 +432,7 @@
     "abilities.reignofnether.protective_enchantment.rank3": "Rank 3: %d max charges, %d cooldown",
     "abilities.reignofnether.march_of_progress": "March of Progress (Ultimate)",
     "abilities.reignofnether.march_of_progress.already_active": "March of Progress is already active",
-    "abilities.reignofnether.march_of_progress.stats": "\uE004  %ds   \uE005  %d   \uE008  %d per second",
+    "abilities.reignofnether.march_of_progress.stats": "\uE004  %ds   \uE005  %d   \uE008  %d   per   second",
     "abilities.reignofnether.march_of_progress.tooltip1": "Toggle an aura that doubles the effect of all enchantments.",
     "abilities.reignofnether.march_of_progress.tooltip2": "The aura drains %d mana per second while active.",
 

@@ -121,20 +121,13 @@ public class ItemShopMenu {
                 () -> false,
                 () -> false,
                 () -> true,
-                ItemShopMenu::closeMenu,
+                () -> ItemClientEvents.openItemShop = null,
                 null,
                 List.of()
         );
         closeButton.frameResource = null;
         renderButton(guiGraphics, closeButton, x + MENU_WIDTH - Button.itemIconSize - TITLE_X_OFFSET, y, mouseX, mouseY);
         return closeButton;
-    }
-
-    // MOCK: no "which shop menu is open" state was provided (CustomBuildingMenu has
-    // CustomBuildingClientEvents.setCustomBuildingToEdit(null) for this). Standing in with
-    // the closest available call so this compiles conceptually against the given code.
-    private static void closeMenu() {
-        BuildingClientEvents.clearSelectedBuildings();
     }
 
     /** Tightly-packed grid of one button per stocked item, wrapping to a new row every ITEMS_PER_ROW items. */
