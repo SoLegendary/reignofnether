@@ -49,7 +49,7 @@ public class ItemShopPlacement extends BuildingPlacement {
         }
     }
 
-    ArrayList<StockedShopItem> getStockedItems() {
+    public ArrayList<StockedShopItem> getStockedItems() {
         return getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
     }
     public void setStockedItems(ArrayList<StockedShopItem> stockedItems) {

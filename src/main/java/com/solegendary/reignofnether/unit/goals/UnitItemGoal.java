@@ -86,7 +86,11 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
             else
                 distSqr = this.mob.distanceToSqr(getMoveTarget().getCenter());
 
-            if (distSqr < RANGE * RANGE) {
+            float rangeSqr = RANGE * RANGE;
+            if (action == ItemAction.OPEN_SHOP)
+                rangeSqr = 2.25f;
+
+            if (distSqr < rangeSqr) {
                 if (!this.mob.level().isClientSide()) {
                     switch (action) {
                         case DROP -> inv.dropUUID(ItemUtil.getUUID(itemInHand), blockTarget);

@@ -600,6 +600,7 @@ public class HudClientEvents {
                         Button shopMenuButton = new ButtonBuilder("Shop Menu")
                                 .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald.png"))
                                 .tooltipLines(List.of(fcs(I18n.get("itemshop.reignofnether.toggle_menu"))))
+                                .isHidden(() -> itemShopPlacement.getStockedItems().isEmpty())
                                 .isSelected(() -> ItemClientEvents.openItemShop == hudSelectedPlacement)
                                 .onLeftClick(() -> {
                                     if (ItemClientEvents.openItemShop == hudSelectedPlacement)

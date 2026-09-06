@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
@@ -409,8 +410,8 @@ public class UnitClientEvents {
     private static void doResolveMoveAction() {
         // open shop
         if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
-                BuildingClientEvents.getPreselectedBuilding() != null && MC.player != null &&
-                BuildingClientEvents.getPreselectedBuilding().isBuilt) {
+                BuildingClientEvents.getPreselectedBuilding() instanceof ItemShopPlacement itemShop && MC.player != null &&
+                itemShop.isBuilt && !itemShop.getStockedItems().isEmpty()) {
             unit.getCheckpoints().clear();
             unit.getCheckpoints().add(new Checkpoint(BuildingClientEvents.getPreselectedBuilding().centrePos, true));
 

@@ -27,15 +27,6 @@ Shops
             - Infinite stock
             - Unique (no stacking effects with multiples held)
             - Buy cooldown
-        [❌] Replace HashMap<UnitItem, Integer>> ITEMS_AND_STOCK with class ItemShopStock
-                - int maxStock
-                - int stock
-                - UnitItem item
-                - int maxRestockTicks
-                - int restockTicks
-                - Sync ItemShopStock with ItemShopClientboundPacket
-
-            - Split UnitItemButton into inventory and shop buttons
 
 Unit Items
     [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
