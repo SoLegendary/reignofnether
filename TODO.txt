@@ -27,8 +27,15 @@ Shops
             - Infinite stock
             - Unique (no stacking effects with multiples held)
             - Buy cooldown
-        [❌] New small floating menu at bottom left
-            - Opened with building button or when right-clicked with in-range hero
+        [❌] Replace HashMap<UnitItem, Integer>> ITEMS_AND_STOCK with class ItemShopStock
+                - int maxStock
+                - int stock
+                - UnitItem item
+                - int maxRestockTicks
+                - int restockTicks
+                - Sync ItemShopStock with ItemShopClientboundPacket
+
+            - Split UnitItemButton into inventory and shop buttons
 
 Unit Items
     [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
@@ -59,7 +66,7 @@ Balance
 
 Quality of Life
 ---------------
-[❌] Hide unit underlines in F1 toggle and spectator-mode players
+[❌] Button to toggle building/unit underlines in map menu
 [❌] Add animations for bear and panda (rolling) attacks
 [❌] NBT-driven custom building unit production
     - read 'foodCost', 'woodCost', 'oreCost'
@@ -70,6 +77,7 @@ Bugfixes
 [❌] Hide the hero items menu if there are no items picked up
 [❌] Cats and dogs should be cancelled out of sitting state if moving for any reason
 [❌] Auth for hero item actions
+[❌] Sculk catalysts indestructible
 
 Languages
 ---------

@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
-import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
@@ -352,8 +351,8 @@ public class HudClientEvents {
         boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
         if (isShopOpen) {
             ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
-            if (itemShop != null && ItemClientEvents.openItemShop instanceof ItemShopPlacement itemShopBpl) {
-                boolean servedHeroSelected = hudSelectedEntity != null && hudSelectedEntity == itemShopBpl.getServedUnit();
+            if (itemShop != null) {
+                boolean servedHeroSelected = hudSelectedEntity != null && hudSelectedEntity == ItemClientEvents.openItemShop.getServedUnit();
                 if (isShopSelected || servedHeroSelected) {
                     hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, x, y));
                     renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, x, y, mouseX, mouseY));
@@ -597,7 +596,7 @@ public class HudClientEvents {
                     }
 
                     int rowButtons = 0;
-                    if (hudSelectedPlacement.getBuilding().hasActiveAddon(ItemShopAddon.class)) {
+                    if (hudSelectedPlacement instanceof ItemShopPlacement itemShopPlacement) {
                         Button shopMenuButton = new ButtonBuilder("Shop Menu")
                                 .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald.png"))
                                 .tooltipLines(List.of(fcs(I18n.get("itemshop.reignofnether.toggle_menu"))))
@@ -606,7 +605,7 @@ public class HudClientEvents {
                                     if (ItemClientEvents.openItemShop == hudSelectedPlacement)
                                         ItemClientEvents.openItemShop = null;
                                     else
-                                        ItemClientEvents.openItemShop = hudSelectedPlacement;
+                                        ItemClientEvents.openItemShop = itemShopPlacement;
                                 })
                                 .build();
                         shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);

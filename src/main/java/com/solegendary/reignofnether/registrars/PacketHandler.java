@@ -25,6 +25,7 @@ import com.solegendary.reignofnether.hud.custombutton.CustomButtonActionServerbo
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientboundPacket;
 import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerboundPacket;
+import com.solegendary.reignofnether.items.ItemShopClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerServerboundPacket;
 import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
@@ -424,6 +425,12 @@ public final class PacketHandler {
                 .encoder(ItemClientboundPacket::encode)
                 .decoder(ItemClientboundPacket::new)
                 .consumerMainThread(ItemClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ItemShopClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ItemShopClientboundPacket::encode)
+                .decoder(ItemShopClientboundPacket::new)
+                .consumerMainThread(ItemShopClientboundPacket::handle)
                 .add();
     }
 }

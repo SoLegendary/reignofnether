@@ -407,14 +407,25 @@ public class UnitClientEvents {
     }
 
     private static void doResolveMoveAction() {
-        // pickup item
+        // open shop
         if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
+                BuildingClientEvents.getPreselectedBuilding() != null && MC.player != null &&
+                BuildingClientEvents.getPreselectedBuilding().isBuilt) {
+            unit.getCheckpoints().clear();
+            unit.getCheckpoints().add(new Checkpoint(BuildingClientEvents.getPreselectedBuilding().centrePos, true));
+
+            ItemServerboundPacket.openShop(
+                    HudClientEvents.hudSelectedEntity.getId(),
+                    BuildingClientEvents.getPreselectedBuilding().originPos
+            );
+        }
+        // pickup item
+        else if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
                 !ItemClientEvents.getPreselectedItems().isEmpty() && MC.player != null) {
             unit.getCheckpoints().clear();
             unit.getCheckpoints().add(new Checkpoint(ItemClientEvents.getPreselectedItems().get(0), true));
 
             ItemServerboundPacket.pickup(
-                    MC.player.getName().getString(),
                     HudClientEvents.hudSelectedEntity.getId(),
                     ItemClientEvents.getPreselectedItems().get(0).getId()
             );

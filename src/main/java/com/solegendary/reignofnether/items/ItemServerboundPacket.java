@@ -4,9 +4,12 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.UUID;
@@ -17,7 +20,6 @@ public class ItemServerboundPacket {
 
     private static final int NO_INDEX = -1;
 
-    private final String ownerName; // player that is issuing this command
     private final ItemAction action;
     private final int unitId; // unit performing the action
     private final UUID itemUuid; // uuid of the item in the unit's inventory (unused for PICKUP/NONE/SWAP)
@@ -27,55 +29,61 @@ public class ItemServerboundPacket {
     private final int invIndex2; // SWAP: second inventory slot (-1 if unused)
 
     // client-side senders: one per ItemAction, each taking only what that action needs
-    public static void drop(String ownerName, int unitId, UUID itemUuid, BlockPos blockPos) {
-        send(ownerName, ItemAction.DROP, unitId, itemUuid, -1, blockPos);
+    public static void drop(int unitId, UUID itemUuid, BlockPos blockPos) {
+        send(ItemAction.DROP, unitId, itemUuid, -1, blockPos);
     }
 
-    public static void sell(String ownerName, int unitId, UUID itemUuid, BlockPos buildingPos) {
-        send(ownerName, ItemAction.SELL, unitId, itemUuid, -1, buildingPos);
+    public static void sell(int unitId, UUID itemUuid, BlockPos buildingPos) {
+        send(ItemAction.SELL, unitId, itemUuid, -1, buildingPos);
     }
 
-    public static void give(String ownerName, int unitId, UUID itemUuid, int targetUnitId) {
-        send(ownerName, ItemAction.GIVE, unitId, itemUuid, targetUnitId, null);
+    public static void give(int unitId, UUID itemUuid, int targetUnitId) {
+        send(ItemAction.GIVE, unitId, itemUuid, targetUnitId, null);
     }
 
-    public static void pickup(String ownerName, int unitId, int itemEntityId) {
-        send(ownerName, ItemAction.PICKUP, unitId, null, itemEntityId, null);
+    public static void pickup(int unitId, int itemEntityId) {
+        send(ItemAction.PICKUP, unitId, null, itemEntityId, null);
     }
 
-    public static void useOnBlock(String ownerName, int unitId, UUID itemUuid, BlockPos blockPos) {
-        send(ownerName, ItemAction.USE_ON_BLOCK, unitId, itemUuid, -1, blockPos);
+    public static void useOnBlock(int unitId, UUID itemUuid, BlockPos blockPos) {
+        send(ItemAction.USE_ON_BLOCK, unitId, itemUuid, -1, blockPos);
     }
 
-    public static void useOnEntity(String ownerName, int unitId, UUID itemUuid, int targetUnitId) {
-        send(ownerName, ItemAction.USE_ON_ENTITY, unitId, itemUuid, targetUnitId, null);
+    public static void useOnEntity(int unitId, UUID itemUuid, int targetUnitId) {
+        send(ItemAction.USE_ON_ENTITY, unitId, itemUuid, targetUnitId, null);
     }
 
-    public static void useOnBuilding(String ownerName, int unitId, UUID itemUuid, BlockPos buildingPos) {
-        send(ownerName, ItemAction.USE_ON_BUILDING, unitId, itemUuid, -1, buildingPos);
+    public static void useOnBuilding(int unitId, UUID itemUuid, BlockPos buildingPos) {
+        send(ItemAction.USE_ON_BUILDING, unitId, itemUuid, -1, buildingPos);
     }
 
-    public static void use(String ownerName, int unitId, UUID itemUuid) {
-        send(ownerName, ItemAction.USE, unitId, itemUuid, -1, null);
+    public static void use(int unitId, UUID itemUuid) {
+        send(ItemAction.USE, unitId, itemUuid, -1, null);
     }
 
-    public static void swap(String ownerName, int unitId, int invIndex1, int invIndex2) { // swaps two slots in the unit's inventory
-        send(ownerName, ItemAction.SWAP, unitId, null, -1, null, invIndex1, invIndex2);
+    public static void swap(int unitId, int invIndex1, int invIndex2) { // swaps two slots in the unit's inventory
+        send(ItemAction.SWAP, unitId, null, -1, null, invIndex1, invIndex2);
+    }
+
+    public static void openShop(int unitId, BlockPos buildingPos) {
+        send(ItemAction.OPEN_SHOP, unitId, null, -1, buildingPos);
+    }
+
+    public static void buy(int unitId, UUID itemUuid, BlockPos buildingPos) { // buys an item from a shop (UUID here is Item UUID, not inventory UUID)
+        send(ItemAction.BUY, unitId, itemUuid, -1, buildingPos, -1, -1);
     }
 
     private static void send(
-            String ownerName,
             ItemAction action,
             int unitId,
             UUID itemUuid,
             int targetId,
             BlockPos targetPos
     ) {
-        send(ownerName, action, unitId, itemUuid, targetId, targetPos, NO_INDEX, NO_INDEX);
+        send(action, unitId, itemUuid, targetId, targetPos, NO_INDEX, NO_INDEX);
     }
 
     private static void send(
-            String ownerName,
             ItemAction action,
             int unitId,
             UUID itemUuid,
@@ -85,12 +93,11 @@ public class ItemServerboundPacket {
             int invIndex2
     ) {
         PacketHandler.INSTANCE.sendToServer(new ItemServerboundPacket(
-                ownerName, action, unitId, itemUuid, targetId, targetPos, invIndex1, invIndex2
+                action, unitId, itemUuid, targetId, targetPos, invIndex1, invIndex2
         ));
     }
 
     public ItemServerboundPacket(
-            String ownerName,
             ItemAction action,
             int unitId,
             UUID itemUuid,
@@ -99,7 +106,6 @@ public class ItemServerboundPacket {
             int invIndex1,
             int invIndex2
     ) {
-        this.ownerName = ownerName;
         this.action = action;
         this.unitId = unitId;
         this.itemUuid = itemUuid;
@@ -110,7 +116,6 @@ public class ItemServerboundPacket {
     }
 
     public ItemServerboundPacket(FriendlyByteBuf buffer) {
-        this.ownerName = buffer.readUtf();
         this.action = buffer.readEnum(ItemAction.class);
         this.unitId = buffer.readInt();
         this.itemUuid = buffer.readBoolean() ? buffer.readUUID() : null;
@@ -127,7 +132,6 @@ public class ItemServerboundPacket {
     }
 
     public void encode(FriendlyByteBuf buffer) {
-        buffer.writeUtf(this.ownerName);
         buffer.writeEnum(this.action);
         buffer.writeInt(this.unitId);
         buffer.writeBoolean(this.itemUuid != null);
@@ -150,23 +154,37 @@ public class ItemServerboundPacket {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();
+            Unit actionableUnit = null;
+            for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+                if (le.getId() == unitId && le instanceof Unit unit) {
+                    actionableUnit = unit;
+                    break;
+                }
+            }
+
             if (player == null) {
                 ReignOfNether.LOGGER.warn("Sender for item action packet was null");
                 success.set(false);
             }
-            else if (!player.getName().getString().equals(ownerName) &&
-                    !SandboxServer.isSandboxPlayer(ownerName) &&
-                    !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
-                ReignOfNether.LOGGER.warn("ItemServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
+            else if (actionableUnit == null) {
+                ReignOfNether.LOGGER.warn("Unit for item action packet was null");
+                success.set(false);
+            }
+            else if (!player.getName().getString().equals(actionableUnit.getOwnerName()) &&
+                    !SandboxServer.isSandboxPlayer(actionableUnit.getOwnerName()) &&
+                    !AlliancesServerEvents.canControlAlly(player.getName().getString(), actionableUnit.getOwnerName())) {
+                ReignOfNether.LOGGER.warn("ItemServerboundPacket: Tried to process packet from " + player.getName() + " for " + actionableUnit.getOwnerName());
                 success.set(false);
             }
             else {
-                if (this.action == ItemAction.SWAP) {
-                    ItemServerEvents.swapItems(this.unitId, this.invIndex1, this.invIndex2);
+                if (this.action == ItemAction.BUY) {
+                    ItemServerEvents.buyItem(actionableUnit, this.itemUuid, this.targetPos);
+                } else if (this.action == ItemAction.SWAP) {
+                    ItemServerEvents.swapItems(actionableUnit, this.invIndex1, this.invIndex2);
                 } else {
                     ItemServerEvents.doAction(
                             this.action,
-                            this.unitId,
+                            actionableUnit,
                             this.itemUuid,
                             this.targetId,
                             this.targetPos

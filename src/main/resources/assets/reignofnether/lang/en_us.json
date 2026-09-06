@@ -70,7 +70,7 @@
     "item.reignofnether.edible_food_item_absorb.point1": "+%d \uE011",
 
     "itemshop.reignofnether.toggle_menu": "Open Shop",
-    "itemshop.reignofnether.error.out_of_stock": "Out of stock",
+    "itemshop.reignofnether.error.out_of_stock": "Out of stock (restock in %ds)",
     "itemshop.reignofnether.error.full_inventory": "Inventory is full",
     "itemshop.reignofnether.error.cant_afford": "Can't afford that item",
     "itemshop.reignofnether.error.too_far_away": "Too far away",

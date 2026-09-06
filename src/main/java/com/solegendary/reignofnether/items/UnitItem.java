@@ -2,7 +2,8 @@ package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
+import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
+import com.solegendary.reignofnether.hud.buttons.UnitItemShopButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -85,8 +86,8 @@ public abstract class UnitItem {
         return itemStack;
     }
 
-    public UnitItemButton getButton(int index, ItemStack itemStack, Unit unit, Keybinding hotkey) {
-        return new UnitItemButton(index, this, itemStack, unit, hotkey);
+    public UnitItemInventoryButton getInventoryButton(int index, ItemStack itemStack, Unit unit, Keybinding hotkey) {
+        return new UnitItemInventoryButton(index, this, itemStack, unit, hotkey);
     }
 
     public Component getName() {

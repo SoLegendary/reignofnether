@@ -27,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -238,7 +237,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     private void syncToClient() {
         if (!this.level().isClientSide())
-            ItemClientboundPacket.syncToAll(this.getId(), getAllItems());
+            ItemClientboundPacket.syncInventory(this.getId(), getAllItems());
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
