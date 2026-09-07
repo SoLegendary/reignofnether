@@ -11,6 +11,8 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
+import com.solegendary.reignofnether.unit.units.neutral.PandaUnit;
+import com.solegendary.reignofnether.unit.units.neutral.PolarBearUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
@@ -19,6 +21,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.PolarBear;
 import net.minecraft.world.entity.monster.Slime;
 
 import java.util.Random;
@@ -97,12 +100,17 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
                 mob instanceof HoglinUnit ||
                 mob instanceof ZoglinUnit ||
                 mob instanceof RavagerUnit ||
-                mob instanceof WardenUnit) {
+                mob instanceof WardenUnit ||
+                mob instanceof PolarBearUnit
+        ) {
             mob.handleEntityEvent((byte) 4);
             UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.NON_KEYFRAME_ATTACK, mob);
         }
         else
             this.mob.swing(InteractionHand.MAIN_HAND);
+
+        if (mob instanceof PandaUnit pandaUnit)
+            pandaUnit.roll(true);
 
         AttackerUnit unit = (AttackerUnit) mob;
         ticksToNextBlockBreak = (int) unit.getAttackCooldown();

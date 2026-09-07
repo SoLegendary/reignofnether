@@ -203,10 +203,25 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                     EntityType<?> type = spawnEgg.getType(stackNbt);
 
                     if (type.getDescriptionId().contains("reignofnether") && type.getDescriptionId().contains("_unit")) {
-                        ProductionItem prodItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
-                        if (prodItem != null && !this.productions.get().contains(prodItem)) {
+                        ProductionItem originalProdItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
+                        if (originalProdItem != null) {
+                            // TODO: can't use a copy of the prod item as it has no start button defined
+                            /*
+                            ResourceCost newCost = originalProdItem.defaultCost;
+                            if (stackNbt != null) {
+                                if (stackNbt.contains("foodCost", Tag.TAG_INT))
+                                    newCost.food = stackNbt.getInt("foodCost");
+                                if (stackNbt.contains("woodCost", Tag.TAG_INT))
+                                    newCost.wood = stackNbt.getInt("woodCost");
+                                if (stackNbt.contains("oreCost", Tag.TAG_INT))
+                                    newCost.ore = stackNbt.getInt("oreCost");
+                                if (stackNbt.contains("ticksToTrain", Tag.TAG_INT))
+                                    newCost.ticks = stackNbt.getInt("ticksToTrain");
+                            }
+                            ProductionItem prodItem = originalProdItem.copyWithNewCost(newCost);
+                             */
                             Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
-                            this.productions.add(prodItem, hotkey);
+                            this.productions.add(originalProdItem, hotkey);
                             if (stackNbt != null && stackNbt.contains("EntityTag")) {
                                 this.unitProductionNbts.put(type, stackNbt.getCompound("EntityTag"));
                             }

@@ -2,11 +2,14 @@ package com.solegendary.reignofnether.unit.units.neutral;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -15,13 +18,17 @@ import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -32,11 +39,13 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2d;
+import org.w3c.dom.Attr;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class PandaUnit extends Panda implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -198,8 +207,9 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 9.0f;
-    final static public float attacksPerSecond = 0.35f;
+    final static public float attackDamage = 7.0f;
+    final static public float pushAttackDamage = 3.5f;
+    final static public float attacksPerSecond = 0.30f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
@@ -207,7 +217,7 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
 
     final static public float maxHealth = 100.0f;
     final static public float armorValue = 0.0f;
-    final static public float movementSpeed = 0.28f;
+    final static public float movementSpeed = 0.25f;
     public int maxResources = 100;
 
     private Abilities abilities = ABILITIES.clone();
@@ -231,6 +241,8 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
                 .add(Attributes.MAX_HEALTH, PandaUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, PandaUnit.armorValue)
+                .add(Attributes.KNOCKBACK_RESISTANCE, 0.5f)
+                .add(Attributes.ATTACK_KNOCKBACK, 0.75f)
                 .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
@@ -253,11 +265,71 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
         return this.targetGoal.getTarget();
     }
 
+    public int rollingTicks = 0;
+    HashMap<Integer, Integer> recentlyHitIds = new HashMap<>();
+
     public void tick() {
         this.setCanPickUpLoot(false);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+
+        if (rollingTicks > 0) {
+            rollingTicks -= 1;
+            if (rollingTicks <= 0)
+                roll(false);
+        }
+        HashMap<Integer, Integer> newMap = new HashMap<>();
+        for (int id : recentlyHitIds.keySet()) {
+            int ticks = recentlyHitIds.get(id);
+            if (ticks > 0) {
+                newMap.put(id, recentlyHitIds.get(id) - 1);
+            }
+        }
+        recentlyHitIds = newMap;
+
+        if (!level().isClientSide()) {
+            if (isRolling()) {
+                List<Entity> touchedEntities = level().getEntities(this, this.getBoundingBox().inflate(0.1),
+                        e -> e != this && e.getBoundingBox().intersects(this.getBoundingBox()));
+                for (Entity entity : touchedEntities) {
+                    if (entity instanceof LivingEntity le && getTarget() != entity && !recentlyHitIds.containsKey(entity.getId())) {
+                        Relationship rs = UnitServerEvents.getUnitToEntityRelationship(this, entity);
+                        if (!List.of(Relationship.OWNED, Relationship.FRIENDLY).contains(rs)) {
+                            entity.hurt(damageSources().generic(), pushAttackDamage);
+                            double dx = Mth.sin(getYRot() * ((float) Math.PI / 180F));
+                            double dz = -Mth.cos(getYRot() * ((float) Math.PI / 180F));
+                            Vector2d vec2 = new Vector2d(dx, dz);
+                            vec2.normalize();
+                            ((LivingEntity) entity).knockback(this.getAttributeValue(Attributes.ATTACK_KNOCKBACK), vec2.x, vec2.y);
+                            recentlyHitIds.put(entity.getId(), 20);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void knockback(double pStrength, double pX, double pZ) {
+        if (isRolling())
+            return;
+        super.knockback(pStrength, pX, pZ);
+    }
+
+    @Override
+    public void roll(boolean pRolling) {
+        if (getTarget() != null)
+            this.lookAt(EntityAnchorArgument.Anchor.EYES, getTarget().position());
+        super.roll(pRolling);
+        if (pRolling) {
+            rollingTicks = 30;
+        }
+    }
+
+    @Override
+    public boolean isPushable() {
+        return !isRolling();
     }
 
     @Override

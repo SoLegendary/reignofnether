@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
+import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemShopClientboundPacket;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.items.UnitInventory;
@@ -46,6 +47,8 @@ public class ItemShopPlacement extends BuildingPlacement {
     public void setServedUnit(Unit unit) {
         if (canServeUnit(unit)) {
             servedUnit = unit;
+            if (!level.isClientSide())
+                ItemClientboundPacket.setShopServedUnit(((LivingEntity) unit).getId(), originPos);
         }
     }
 

@@ -349,7 +349,7 @@ public class HudClientEvents {
         int y = blitY - 150;
         boolean isShopOpen = ItemClientEvents.openItemShop != null;
         boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
-        if (isShopOpen) {
+        if (isShopOpen && ItemClientEvents.ENABLED) {
             ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
             if (itemShop != null) {
                 boolean servedHeroSelected = hudSelectedEntity != null && hudSelectedEntity == ItemClientEvents.openItemShop.getServedUnit();
@@ -596,7 +596,7 @@ public class HudClientEvents {
                     }
 
                     int rowButtons = 0;
-                    if (hudSelectedPlacement instanceof ItemShopPlacement itemShopPlacement) {
+                    if (ItemClientEvents.ENABLED && hudSelectedPlacement instanceof ItemShopPlacement itemShopPlacement) {
                         Button shopMenuButton = new ButtonBuilder("Shop Menu")
                                 .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald.png"))
                                 .tooltipLines(List.of(fcs(I18n.get("itemshop.reignofnether.toggle_menu"))))
@@ -705,7 +705,7 @@ public class HudClientEvents {
                 int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
 
-                if (unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(unit)) {
+                if (ItemClientEvents.ENABLED && unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(unit)) {
                     hudZones.add(ItemClientEvents.renderUnitInventory(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, inv));
                     renderedItemsOrResources = true;
                 }
@@ -1410,6 +1410,7 @@ public class HudClientEvents {
         Button markerModeButton = MinimapClientEvents.getMarkerModeButton();
         Button camSensitivityButton = MinimapClientEvents.getCamSensitivityButton();
         Button mapLockButton = MinimapClientEvents.getMapLockButton();
+        Button toggleUnderlinesButton = MinimapClientEvents.getToggleUnderlinesButton();
         Button highlightAnimalsButton = MinimapClientEvents.getHighlightAnimalsButton();
         Button nightCirclesButton = MinimapClientEvents.getNightCirclesModeButton();
         Button leavesHidingButton = OrthoviewClientEvents.getLeavesHidingButton();
@@ -1434,7 +1435,8 @@ public class HudClientEvents {
             int gridBottom = mmBottom + 4;                     // shifted a touch lower than the map bottom
 
             int r0y = gridBottom - frameSize;            // bottom row: frame bottom = map bottom
-            int r1y = r0y - stride;                       // top row
+            int r1y = r0y - stride;                       // 2nd-top row
+            int r2y = r1y - stride;                       // top row
             int c0x = gridRight - frameSize;             // rightmost column: frame right = map left - 4
             int c1x = c0x - stride;
             int c2x = c1x - stride;
@@ -1464,6 +1466,10 @@ public class HudClientEvents {
             }
 
             // top row: view toggles
+            if (!toggleUnderlinesButton.isHidden.get()) {
+                toggleUnderlinesButton.render(evt.getGuiGraphics(), c1x, r2y, mouseX, mouseY);
+                renderedButtons.add(toggleUnderlinesButton);
+            }
             if (!camSensitivityButton.isHidden.get()) {
                 camSensitivityButton.render(evt.getGuiGraphics(), c0x, r1y, mouseX, mouseY);
                 renderedButtons.add(camSensitivityButton);
@@ -1532,6 +1538,13 @@ public class HudClientEvents {
                         screenHeight - (mapLockButton.iconSize * 4),
                         mouseX, mouseY);
                 renderedButtons.add(mapLockButton);
+            }
+            if (!toggleUnderlinesButton.isHidden.get()) {
+                toggleUnderlinesButton.render(evt.getGuiGraphics(),
+                        screenWidth - (toggleUnderlinesButton.iconSize * 4),
+                        screenHeight - (toggleUnderlinesButton.iconSize * 6),
+                        mouseX, mouseY);
+                renderedButtons.add(toggleUnderlinesButton);
             }
             if (!highlightAnimalsButton.isHidden.get()) {
                 highlightAnimalsButton.render(evt.getGuiGraphics(),

@@ -21,11 +21,15 @@ import java.util.UUID;
 
 public class ItemServerEvents {
 
+    public static final boolean ENABLED = false;
+
     public static void buyItem(
             Unit unit,
             UUID itemUuid,
             BlockPos shopPos
     ) {
+        if (!ENABLED) return;
+
         for (BuildingPlacement bpl : BuildingServerEvents.getBuildings()) {
             if (bpl.originPos.equals(shopPos) && bpl instanceof ItemShopPlacement itemShopPlacement && bpl.isBuilt) {
                 ItemShopAddon itemShopAddon = bpl.getBuilding().getActiveAddon(ItemShopAddon.class);
@@ -42,6 +46,8 @@ public class ItemServerEvents {
             int invIndex1,
             int invIndex2
     ) {
+        if (!ENABLED) return;
+
         if (unit instanceof UnitInventory inv)
             inv.swapSlots(invIndex1, invIndex2);
     }
@@ -53,6 +59,8 @@ public class ItemServerEvents {
             int targetId, // GIVE/USE_ON_ENTITY: target unit, PICKUP: target ItemEntity (-1 if unused)
             BlockPos blockTarget // DROP/USE_ON_BLOCK: block, SELL/USE_ON_BUILDING: building pos (null if unused)) {
     ) {
+        if (!ENABLED) return;
+
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         ServerLevel level = null;
         if (server != null) level = server.getLevel(Level.OVERWORLD);

@@ -27,6 +27,7 @@ Shops
             - Infinite stock
             - Unique (no stacking effects with multiples held)
             - Buy cooldown
+        [❌] When 2+ heroes selected, switching hudSelectedEntity to another hero that passes canServeUnit() should switch via packet
 
 Unit Items
     [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
@@ -53,22 +54,28 @@ Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
 [❌] Add roof to dark watchtower
-
+[✔] Pandas now roll to attack and deal 50% splash damage to enemies hit while rolling
+[✔] Panda damage reduced from 9 to 7
+[✔] Panda attack speed reduced from 0.35 to 0.3
+[✔] Panda movespeed reduced from 28 to 25
 
 Quality of Life
 ---------------
-[❌] Button to toggle building/unit underlines in map menu
-[❌] Add animations for bear and panda (rolling) attacks
-[❌] NBT-driven custom building unit production
-    - read 'foodCost', 'woodCost', 'oreCost'
+[✔] Hero item features have been disabled until full release
+[✔] Button to toggle building/unit underlines in map menu
+[✔] Grizzly and polar bears now have an attack animation
+[❌] You can now adjust the cost of spawn eggs in custom buildings by setting these nbt tags:
+    - 'foodCost', 'woodCost', 'oreCost', 'popCost', 'ticksToTrain'
+    - You can add these to an existing spawn egg by dropping it on the ground and using:
+       /data modify entity @e[type=item,limit=1,sort=nearest] Item.tag merge value {foodCost:100,woodCost:75,oreCost:50,popCost:2,ticksToTrain:300}
 
 Bugfixes
 --------
 [❌] Cat/dog at the start should also match the TC mode
-[❌] Hide the hero items menu if there are no items picked up
-[❌] Cats and dogs should be cancelled out of sitting state if moving for any reason
-[❌] Auth for hero item actions
-[❌] Sculk catalysts indestructible
+[✔] Cats and dogs no longer appear as sitting when moving to other players
+[✔] Fixed activated sculk sensor blocks causing issues with building/repairing sculk catalysts
+[❌] Sculk catalysts indestructible - see claude investigation
+
 
 Languages
 ---------

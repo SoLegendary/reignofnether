@@ -41,6 +41,8 @@ import java.util.UUID;
 
 public class ItemClientEvents {
 
+    public static final boolean ENABLED = false;
+
     private static final Minecraft MC = Minecraft.getInstance();
 
     // UnitItem that the player right-clicked or is left-click dragging
@@ -161,7 +163,7 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onLeftMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
-        if (MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
+        if (!ENABLED || MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
 
         for (Button button : renderedButtons)
@@ -237,7 +239,7 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (!(MC.screen instanceof TopdownGui) || MC.player == null)
+        if (!ENABLED || !(MC.screen instanceof TopdownGui) || MC.player == null)
             return;
         for (Button button : renderedButtons) {
             if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
@@ -290,17 +292,19 @@ public class ItemClientEvents {
 
     private static Button getMousedOverButton() {
         for (Button button : renderedButtons)
-            if (button.isMouseOver(mouseX, mouseY)) {
+            if (button.isMouseOver(mouseX, mouseY))
                 return button;
-            }
         return null;
     }
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
+        if (!ENABLED) return;
+
         if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS ||
                 HudClientEvents.isMouseOverAnyButtonOrHud())
             return;
+
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
             for (ItemEntity itemEntity : preselectedItems) {
                 ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
@@ -319,6 +323,8 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
+        if (!ENABLED) return;
+
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
         // clear to avoid hiding ghost renders if the player happens to mouse back over this exact pixel

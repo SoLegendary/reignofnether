@@ -141,9 +141,14 @@ public class MinimapClientEvents {
 
     private static boolean lockedMap = false; // does map follow when moving offscreen?
     private static boolean highlightAnimals = false; // apply glow effect (clientside only) to animals
+    private static boolean underlineUnitsAndBuildings = true; // underline units and buildings
 
     public static boolean shouldHighlightAnimals() {
         return highlightAnimals;
+    }
+
+    public static boolean shouldUnderline() {
+        return underlineUnitsAndBuildings;
     }
 
     public static void addNeutralFogUnit(int id, Vector3f vec3fMin, Vector3f vec3fMax) {
@@ -484,6 +489,26 @@ public class MinimapClientEvents {
                 List.of(FormattedCharSequence.forward(highlightAnimals
                         ? I18n.get("hud.map.reignofnether.highlight_animals.enabled")
                         : I18n.get("hud.map.reignofnether.highlight_animals.disabled"), Style.EMPTY)
+                )
+        );
+    }
+
+    public static Button getToggleUnderlinesButton() {
+        return new Button("Toggle Underlines",
+                14,
+                underlineUnitsAndBuildings ?
+                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/dirt_green_diamond.png") :
+                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/dirt_dark.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                null,
+                () -> false,
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
+                () -> true,
+                () -> underlineUnitsAndBuildings = !underlineUnitsAndBuildings,
+                null,
+                List.of(FormattedCharSequence.forward(underlineUnitsAndBuildings
+                        ? I18n.get("hud.map.reignofnether.underlines.enabled")
+                        : I18n.get("hud.map.reignofnether.underlines.disabled"), Style.EMPTY)
                 )
         );
     }

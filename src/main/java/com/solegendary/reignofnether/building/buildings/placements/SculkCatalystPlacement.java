@@ -114,7 +114,7 @@ public class SculkCatalystPlacement extends BuildingPlacement {
         }
         Collections.shuffle(sculkBps);
     }
-
+git 
     public static boolean isSculk(Block block) {
         return block == Blocks.SCULK || block == Blocks.SCULK_VEIN || block == Blocks.SCULK_CATALYST || block == Blocks.SCULK_SENSOR || block == Blocks.SCULK_SHRIEKER || block == Blocks.CALIBRATED_SCULK_SENSOR;
     }
