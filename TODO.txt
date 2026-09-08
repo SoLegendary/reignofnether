@@ -63,7 +63,7 @@ Quality of Life
 ---------------
 [✔] Button to toggle building/unit underlines in map menu
 [✔] Grizzly and polar bears now have an attack animation
-[❌] You can now adjust spawn buttons in custom buildings by setting these nbt tags on the spawn eggs:
+[🟡] You can now adjust spawn buttons in custom buildings by setting these nbt tags on the spawn eggs:
     - Numbers: 'foodCost', 'woodCost', 'oreCost', 'popCost', 'ticksToTrain'
     - Strings: 'tooltipTitle', 'tooltipLine1', 'tooltipLine2', etc.
     - You can add these to an existing spawn egg by dropping it on the ground and using:
@@ -72,8 +72,8 @@ Quality of Life
 
 Bugfixes
 --------
-[✔] Hero item features have been disabled until full release as they were incomplete and had bugs
 [❌] Cat/dog at the start should also match the TC mode
+[✔] Hero item features have been disabled until full release as they were incomplete and had bugs
 [✔] Cats and dogs no longer appear as sitting when moving to other players
 [✔] Fixed activated sculk sensor blocks causing issues with building/repairing sculk catalysts
 [❌] Sculk catalysts indestructible - see claude investigation

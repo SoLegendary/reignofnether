@@ -53,8 +53,8 @@ public class CustomProductionItem extends ProductionItem {
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         StopProductionButton button = getCancelButton.apply(prodBuilding, first);
         button.onLeftClick = () -> BuildingProductionServerboundPacket.cancelProduction(prodBuilding.originPos, this, first);
-        if (!newTooltip.isEmpty() && !button.tooltipLines.isEmpty()) {
-            if (useOriginalTitle) {
+        if (!newTooltip.isEmpty()) {
+            if (useOriginalTitle && button.tooltipLines != null) {
                 newTooltip.set(0, button.tooltipLines.get(0));
             }
             button.tooltipLines = List.of(newTooltip.get(0));
