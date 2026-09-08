@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.unit.packets;
 
 import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,7 +26,8 @@ public class UnitPathClientboundPacket {
     private final List<BlockPos> nodes;
 
     public static void sendPath(LivingEntity entity, Path path, byte pathType) {
-        if (path == null || path.nodes.isEmpty())
+        // disallow with fog since that could be used to see hidden blocks
+        if (path == null || path.nodes.isEmpty() || FogOfWarServerEvents.isEnabled())
             return;
         List<BlockPos> bps = new ArrayList<>(path.nodes.size());
         for (var node : path.nodes)

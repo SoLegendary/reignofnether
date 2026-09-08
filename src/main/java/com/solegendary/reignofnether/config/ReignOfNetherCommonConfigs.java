@@ -245,9 +245,9 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry WILDFIRE = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.WILDFIRE, "Wildfire Config");
 
         public static final ResourceCostConfigEntry ENDERMAN = ResourceCostConfigEntry.Unit(75,75,75,35,3, ResourceCosts.ENDERMAN, "Enderman Config");
-        public static final ResourceCostConfigEntry POLAR_BEAR = ResourceCostConfigEntry.Unit(250,0,0,40,4, ResourceCosts.POLAR_BEAR, "Polar Bear Config");
-        public static final ResourceCostConfigEntry GRIZZLY_BEAR = ResourceCostConfigEntry.Unit(250,0,0,40,4, ResourceCosts.GRIZZLY_BEAR, "Grizzly Bear Config");
-        public static final ResourceCostConfigEntry PANDA = ResourceCostConfigEntry.Unit(250,0,0,40,4, ResourceCosts.PANDA, "Panda Config");
+        public static final ResourceCostConfigEntry POLAR_BEAR = ResourceCostConfigEntry.Unit(300,0,0,45,5, ResourceCosts.POLAR_BEAR, "Polar Bear Config");
+        public static final ResourceCostConfigEntry GRIZZLY_BEAR = ResourceCostConfigEntry.Unit(300,0,0,45,5, ResourceCosts.GRIZZLY_BEAR, "Grizzly Bear Config");
+        public static final ResourceCostConfigEntry PANDA = ResourceCostConfigEntry.Unit(300,0,0,45,5, ResourceCosts.PANDA, "Panda Config");
         public static final ResourceCostConfigEntry WOLF = ResourceCostConfigEntry.Unit(120,0,0,25,2, ResourceCosts.WOLF, "Wolf Config");
         public static final ResourceCostConfigEntry LLAMA = ResourceCostConfigEntry.Unit(180,0,0,25,2, ResourceCosts.LLAMA, "Llama Config");
 

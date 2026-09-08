@@ -55,9 +55,10 @@ Balance
 [❌] Slimes and magma cubes now roll on attack too
 [❌] Add roof to dark watchtower
 [✔] Pandas now roll to attack and deal 50% splash damage to enemies hit while rolling
-[✔] Panda damage reduced from 9 to 7
+[✔] Panda damage reduced from 9 to 8
 [✔] Panda attack speed reduced from 0.35 to 0.3
 [✔] Panda movespeed reduced from 28 to 25
+[✔] All bears have their health increased from 100 to 150, population from 4 to 5 and food cost from 250 to 300
 
 Quality of Life
 ---------------
@@ -69,6 +70,9 @@ Quality of Life
     - You can add these to an existing spawn egg by dropping it on the ground and using:
        /data modify entity @e[type=item,limit=1,sort=nearest] Item.tag merge value {foodCost:100,woodCost:75,oreCost:50,popCost:2,ticksToTrain:300}
        /data modify entity @e[type=item,limit=1,sort=nearest] Item.tag merge value {tooltipTitle:"Super Zombie",tooltipLine1:"An elite zombie with diamond equipment"}
+
+    No patch notes
+    [❌] Prevent sending pathfinding data if fog of war is on
 
 Bugfixes
 --------

@@ -207,15 +207,15 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
 
     // endregion
 
-    final static public float attackDamage = 7.0f;
-    final static public float pushAttackDamage = 3.5f;
+    final static public float attackDamage = 8.0f;
+    final static public float pushAttackDamage = 4.0f;
     final static public float attacksPerSecond = 0.30f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
-    final static public float maxHealth = 100.0f;
+    final static public float maxHealth = 150.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.25f;
     public int maxResources = 100;
