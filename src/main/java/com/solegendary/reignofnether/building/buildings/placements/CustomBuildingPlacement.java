@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.BuildingCommand;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
+import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -160,5 +161,13 @@ public class CustomBuildingPlacement extends ProductionPlacement {
         for (BuildingCommand command : commands) {
             command.reset();
         }
+    }
+
+    public ProductionItem getProductionItem(String itemName) {
+        if (getBuilding() instanceof ProductionBuilding prodBuilding)
+            for (ProductionItem productionItem : prodBuilding.productions.get())
+                if (productionItem.getItemName().equals(itemName))
+                    return productionItem;
+        return null;
     }
 }

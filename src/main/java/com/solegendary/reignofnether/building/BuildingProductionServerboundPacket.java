@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItem;
@@ -15,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -29,17 +31,34 @@ public class BuildingProductionServerboundPacket {
     public static void startProduction(ProductionItem item) {
         BuildingClientEvents.switchHudToIdlestBuilding();
         if (HudClientEvents.hudSelectedPlacement instanceof ProductionPlacement pp) {
-            PacketHandler.INSTANCE.sendToServer(new BuildingProductionServerboundPacket(
-                    BuildingAction.START_PRODUCTION,
-                    ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString(),
-                    pp.originPos));
+            String prodItemName;
+            if (pp instanceof CustomBuildingPlacement) {
+                prodItemName = item.getItemName();
+            } else {
+                prodItemName = ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString();
+            }
+            if (prodItemName != null) {
+                PacketHandler.INSTANCE.sendToServer(new BuildingProductionServerboundPacket(
+                        BuildingAction.START_PRODUCTION,
+                        prodItemName,
+                        pp.originPos));
+            }
         }
     }
 
     public static void cancelProduction(BlockPos buildingPos, ProductionItem item, boolean frontItem) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingProductionServerboundPacket(
-                frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
-                ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString(), buildingPos));
+        String prodItemName;
+        if (HudClientEvents.hudSelectedPlacement instanceof ProductionPlacement pp &&
+                pp instanceof CustomBuildingPlacement) {
+            prodItemName = item.getItemName();
+        } else {
+            prodItemName = ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString();
+        }
+        if (prodItemName != null) {
+            PacketHandler.INSTANCE.sendToServer(new BuildingProductionServerboundPacket(
+                    frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
+                    prodItemName, buildingPos));
+        }
     }
 
     public static void requestSync(BlockPos buildingPos) {
@@ -88,32 +107,41 @@ public class BuildingProductionServerboundPacket {
                 return;
             }
             if (building instanceof ProductionPlacement pBuilding) {
-                switch (this.action) {
-                    case START_PRODUCTION -> {
-                        boolean prodSuccess = pBuilding.startProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)));
-                        if (prodSuccess)
-                            BuildingProductionClientboundPacket.startProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)));
+                if (this.action == BuildingAction.REQUEST_PRODUCTION_SYNC) {
+                    for (ActiveProduction activeProd : pBuilding.productionQueue) {
+                        BuildingProductionClientboundPacket.startProduction(
+                                buildingPos,
+                                activeProd.item,
+                                activeProd.ticksLeft
+                        );
                     }
-                    case CANCEL_PRODUCTION -> {
-                        boolean cancelSuccess = pBuilding.cancelProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)), true);
-                        if (cancelSuccess || pBuilding.productionQueue.isEmpty())
-                            BuildingProductionClientboundPacket.cancelProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)), true);
+                } else {
+                    ProductionItem productionItem;
+                    if (pBuilding instanceof CustomBuildingPlacement cbp) {
+                        productionItem = cbp.getProductionItem(this.itemName);
+                    } else {
+                        productionItem = ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName));
                     }
-                    case CANCEL_BACK_PRODUCTION -> {
-                        boolean cancelSuccess = pBuilding.cancelProductionItem(ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName)), false);
-                        if (cancelSuccess || pBuilding.productionQueue.isEmpty())
-                            BuildingProductionClientboundPacket.cancelProduction(buildingPos, ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(itemName)), false);
-                    }
-                    case REQUEST_PRODUCTION_SYNC -> {
-                        for (ActiveProduction activeProd : pBuilding.productionQueue) {
-                            BuildingProductionClientboundPacket.startProduction(
-                                    buildingPos,
-                                    activeProd.item,
-                                    activeProd.ticksLeft
-                            );
+                    if (productionItem != null) {
+                        switch (this.action) {
+                            case START_PRODUCTION -> {
+                                boolean prodSuccess = pBuilding.startProductionItem(productionItem);
+                                if (prodSuccess)
+                                    BuildingProductionClientboundPacket.startProduction(buildingPos, this.itemName);
+                            }
+                            case CANCEL_PRODUCTION -> {
+                                boolean cancelSuccess = pBuilding.cancelProductionItem(productionItem, true);
+                                if (cancelSuccess || pBuilding.productionQueue.isEmpty())
+                                    BuildingProductionClientboundPacket.cancelProduction(buildingPos, this.itemName, true);
+                            }
+                            case CANCEL_BACK_PRODUCTION -> {
+                                boolean cancelSuccess = pBuilding.cancelProductionItem(productionItem, false);
+                                if (cancelSuccess || pBuilding.productionQueue.isEmpty())
+                                    BuildingProductionClientboundPacket.cancelProduction(buildingPos, this.itemName, false);
+                            }
+                            default -> { }
                         }
                     }
-                    default -> { }
                 }
             }
             ReignOfNether.LOGGER.info("[Building] {} performed {} (itemName: {}, pos: {})", player.getName(), this.action, this.itemName, this.buildingPos);

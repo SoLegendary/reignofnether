@@ -19,9 +19,10 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 // units and/or research tech that a ProductionBuilding can produce
-public class ProductionItem {
+public abstract class ProductionItem {
 
     public static String itemName;
 

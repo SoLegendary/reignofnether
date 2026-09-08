@@ -61,16 +61,18 @@ Balance
 
 Quality of Life
 ---------------
-[✔] Hero item features have been disabled until full release
 [✔] Button to toggle building/unit underlines in map menu
 [✔] Grizzly and polar bears now have an attack animation
-[❌] You can now adjust the cost of spawn eggs in custom buildings by setting these nbt tags:
-    - 'foodCost', 'woodCost', 'oreCost', 'popCost', 'ticksToTrain'
+[❌] You can now adjust spawn buttons in custom buildings by setting these nbt tags on the spawn eggs:
+    - Numbers: 'foodCost', 'woodCost', 'oreCost', 'popCost', 'ticksToTrain'
+    - Strings: 'tooltipTitle', 'tooltipLine1', 'tooltipLine2', etc.
     - You can add these to an existing spawn egg by dropping it on the ground and using:
        /data modify entity @e[type=item,limit=1,sort=nearest] Item.tag merge value {foodCost:100,woodCost:75,oreCost:50,popCost:2,ticksToTrain:300}
+       /data modify entity @e[type=item,limit=1,sort=nearest] Item.tag merge value {tooltipTitle:"Super Zombie",tooltipLine1:"An elite zombie with diamond equipment"}
 
 Bugfixes
 --------
+[✔] Hero item features have been disabled until full release as they were incomplete and had bugs
 [❌] Cat/dog at the start should also match the TC mode
 [✔] Cats and dogs no longer appear as sitting when moving to other players
 [✔] Fixed activated sculk sensor blocks causing issues with building/repairing sculk catalysts

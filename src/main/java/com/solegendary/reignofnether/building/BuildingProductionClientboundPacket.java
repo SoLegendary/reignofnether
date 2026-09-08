@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItem;
@@ -28,7 +29,7 @@ public class BuildingProductionClientboundPacket {
     // pos is used to identify the building object serverside
     public BuildingAction action;
     public BlockPos buildingPos;
-    public ResourceLocation itemKey;
+    public String itemName;
     public float ticksLeft;
 
     // send only to players whose fog reveals at least one corner of this building
@@ -43,10 +44,10 @@ public class BuildingProductionClientboundPacket {
         }
     }
 
-    public static void startProduction(BlockPos buildingPos, ProductionItem item) {
+    public static void startProduction(BlockPos buildingPos, String itemName) {
         sendFiltered(buildingPos,
                 new BuildingProductionClientboundPacket(BuildingAction.START_PRODUCTION,
-                        ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item),
+                        itemName,
                         buildingPos
                 )
         );
@@ -55,19 +56,19 @@ public class BuildingProductionClientboundPacket {
     public static void startProduction(BlockPos buildingPos, ProductionItem item, float ticksLeft) {
         sendFiltered(buildingPos,
                 new BuildingProductionClientboundPacket(BuildingAction.START_PRODUCTION,
-                        ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item),
+                        ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString(),
                         buildingPos,
                         ticksLeft
                 )
         );
     }
 
-    public static void cancelProduction(BlockPos buildingPos, ProductionItem item, boolean frontItem) {
+    public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
         sendFiltered(buildingPos,
                 new BuildingProductionClientboundPacket(frontItem
                         ? BuildingAction.CANCEL_PRODUCTION
                         : BuildingAction.CANCEL_BACK_PRODUCTION,
-                        ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item),
+                        itemName,
                         buildingPos
                 )
         );
@@ -75,49 +76,49 @@ public class BuildingProductionClientboundPacket {
 
     public static void clearQueue(BlockPos buildingPos) {
         sendFiltered(buildingPos,
-                new BuildingProductionClientboundPacket(BuildingAction.CLEAR_PRODUCTION, EMPTY, buildingPos)
+                new BuildingProductionClientboundPacket(BuildingAction.CLEAR_PRODUCTION, "", buildingPos)
         );
     }
 
     public static void completeProduction(BlockPos buildingPos) {
         sendFiltered(buildingPos,
-                new BuildingProductionClientboundPacket(BuildingAction.COMPLETE_PRODUCTION, EMPTY, buildingPos)
+                new BuildingProductionClientboundPacket(BuildingAction.COMPLETE_PRODUCTION, "", buildingPos)
         );
     }
 
     public BuildingProductionClientboundPacket(
             BuildingAction action,
-            ResourceLocation itemKey,
+            String itemName,
             BlockPos buildingPos
     ) {
         this.action = action;
-        this.itemKey = itemKey;
+        this.itemName = itemName;
         this.buildingPos = buildingPos;
         this.ticksLeft = -1;
     }
 
     public BuildingProductionClientboundPacket(
             BuildingAction action,
-            ResourceLocation itemKey,
+            String itemName,
             BlockPos buildingPos,
             float ticksLeft
     ) {
         this.action = action;
-        this.itemKey = itemKey;
+        this.itemName = itemName;
         this.buildingPos = buildingPos;
         this.ticksLeft = ticksLeft;
     }
 
     public BuildingProductionClientboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(BuildingAction.class);
-        this.itemKey = buffer.readResourceLocation();
+        this.itemName = buffer.readUtf();
         this.buildingPos = buffer.readBlockPos();
         this.ticksLeft = buffer.readFloat();
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
-        buffer.writeResourceLocation(this.itemKey);
+        buffer.writeUtf(this.itemName);
         buffer.writeBlockPos(this.buildingPos);
         buffer.writeFloat(this.ticksLeft);
     }
@@ -132,22 +133,30 @@ public class BuildingProductionClientboundPacket {
                 if (building == null) {
                     return;
                 }
+
+                ProductionItem productionItem;
+                if (building instanceof CustomBuildingPlacement cbp) {
+                    productionItem = cbp.getProductionItem(this.itemName);
+                } else {
+                    productionItem = ReignOfNetherRegistries.PRODUCTION_ITEM.get(ResourceLocation.tryParse(this.itemName));
+                }
+
                 switch (action) {
                     case START_PRODUCTION -> {
                         ((ProductionPlacement) building).startProductionItem(
-                                ReignOfNetherRegistries.PRODUCTION_ITEM.get(itemKey),
+                                productionItem,
                                 ticksLeft
                         );
                     }
                     case CANCEL_PRODUCTION -> {
                         ((ProductionPlacement) building).cancelProductionItem(
-                                ReignOfNetherRegistries.PRODUCTION_ITEM.get(itemKey),
+                                productionItem,
                                 true
                         );
                     }
                     case CANCEL_BACK_PRODUCTION -> {
                         ((ProductionPlacement) building).cancelProductionItem(
-                                ReignOfNetherRegistries.PRODUCTION_ITEM.get(itemKey),
+                                productionItem,
                                 false
                         );
                     }
