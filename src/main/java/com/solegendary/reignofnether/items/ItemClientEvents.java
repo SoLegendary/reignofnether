@@ -323,8 +323,6 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
-        if (!ENABLED) return;
-
         mouseX = evt.getMouseX();
         mouseY = evt.getMouseY();
         // clear to avoid hiding ghost renders if the player happens to mouse back over this exact pixel
@@ -341,7 +339,7 @@ public class ItemClientEvents {
                     break;
                 }
             }
-            if (hasDragActionItem() && HudClientEvents.hudSelectedEntity instanceof Unit unit) {
+            if (ENABLED && hasDragActionItem() && HudClientEvents.hudSelectedEntity instanceof Unit unit) {
                 actionableUnitItemDrag.getInventoryButton(0, new ItemStack(actionableUnitItemDrag.item), unit, null)
                         .renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
             }

@@ -419,15 +419,17 @@ public class UnitClientEvents {
             );
         }
         // pickup item
-        else if (ItemClientEvents.ENABLED && HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
+        else if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
                 !ItemClientEvents.getPreselectedItems().isEmpty() && MC.player != null) {
             unit.getCheckpoints().clear();
             unit.getCheckpoints().add(new Checkpoint(ItemClientEvents.getPreselectedItems().get(0), true));
 
-            ItemServerboundPacket.pickup(
-                    HudClientEvents.hudSelectedEntity.getId(),
-                    ItemClientEvents.getPreselectedItems().get(0).getId()
-            );
+            if (ItemClientEvents.ENABLED) {
+                ItemServerboundPacket.pickup(
+                        HudClientEvents.hudSelectedEntity.getId(),
+                        ItemClientEvents.getPreselectedItems().get(0).getId()
+                );
+            }
         }
         // follow friendly unit
         else if (preselectedUnits.size() == 1 && !targetingSelf()) {
