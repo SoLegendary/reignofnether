@@ -1,5 +1,5 @@
 
-1.20.1-1.4.3a
+1.20.1-1.4.4
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -72,15 +72,18 @@ Quality of Life
        /data modify entity @e[type=item,limit=1,sort=nearest] Item.tag merge value {tooltipTitle:"Super Zombie",tooltipLine1:"An elite zombie with diamond equipment"}
 
     No patch notes
-    [❌] Prevent sending pathfinding data if fog of war is on
+    [🟡] Prevent sending pathfinding data if fog of war is on
+
+[❌] Create a new homing projectile entity from the ground up
+
 
 Bugfixes
 --------
-[❌] Cat/dog at the start should also match the TC mode
+[🟡] Your starting villager scout now always matches what your Town Center makes (50/50 chance of a cat or dog)
 [✔] Hero item features have been disabled until full release as they were incomplete and had bugs
 [✔] Cats and dogs no longer appear as sitting when moving to other players
 [✔] Fixed activated sculk sensor blocks causing issues with building/repairing sculk catalysts
-[❌] Sculk catalysts indestructible - see claude investigation
+[🟡] Sculk catalysts indestructible - see claude investigation
 
 
 Languages

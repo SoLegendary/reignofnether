@@ -116,7 +116,19 @@ public class SculkCatalystPlacement extends BuildingPlacement {
     }
 
     public static boolean isSculk(Block block) {
-        return block == Blocks.SCULK || block == Blocks.SCULK_VEIN || block == Blocks.SCULK_CATALYST || block == Blocks.SCULK_SENSOR || block == Blocks.SCULK_SHRIEKER || block == Blocks.CALIBRATED_SCULK_SENSOR;
+        return isFullSculkBlock(block) || isPartialSculkBlock(block);
+    }
+
+    public static boolean isFullSculkBlock(Block block) {
+        return block == Blocks.SCULK ||
+                block == Blocks.SCULK_CATALYST ||
+                block == Blocks.SCULK_SHRIEKER;
+    }
+
+    public static boolean isPartialSculkBlock(Block block) {
+        return block == Blocks.SCULK_VEIN ||
+                block == Blocks.SCULK_SENSOR ||
+                block == Blocks.CALIBRATED_SCULK_SENSOR;
     }
 
     @Override
@@ -162,16 +174,22 @@ public class SculkCatalystPlacement extends BuildingPlacement {
             bp = sculkBps.get(i);
             bs = level.getBlockState(bp);
 
-            if (bs.getBlock() == Blocks.SCULK) {
+            if (isFullSculkBlock(bs.getBlock())) {
+                boolean restored = false;
                 for (BlockPos bpAdj : List.of(bp.below(), bp.north(), bp.south(), bp.east(), bp.west())) {
                     BlockState bsAdj = level.getBlockState(bpAdj);
                     if (!bsAdj.isAir() && !isSculk(bsAdj.getBlock())) {
                         level.setBlockAndUpdate(bp, bsAdj);
                         restoredSculk += 1;
+                        restored = true;
                         break;
                     }
                 }
-            } else if (bs.getBlock() == Blocks.SCULK_VEIN || bs.getBlock() == Blocks.SCULK_SENSOR) {
+                if (!restored) {
+                    level.destroyBlock(bp, false);
+                    restoredSculk += 1;
+                }
+            } else if (isPartialSculkBlock(bs.getBlock())) {
                 level.destroyBlock(bp, false);
                 restoredSculk += 1;
             }
