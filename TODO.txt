@@ -79,7 +79,7 @@ Quality of Life
 
 Bugfixes
 --------
-[🟡] Your starting villager scout now always matches what your Town Center makes (50/50 chance of a cat or dog)
+[🟡] Your starting villager scout can now be a cat 50% of the time and always matches what your Town Centre makes
 [✔] Hero item features have been disabled until full release as they were incomplete and had bugs
 [✔] Cats and dogs no longer appear as sitting when moving to other players
 [✔] Fixed activated sculk sensor blocks causing issues with building/repairing sculk catalysts

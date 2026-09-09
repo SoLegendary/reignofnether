@@ -207,7 +207,13 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                         ProductionItem originalProdItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
                         if (originalProdItem != null) {
 
-                            ResourceCost newCost = originalProdItem.defaultCost;
+                            ResourceCost newCost = ResourceCost.Unit(
+                                originalProdItem.defaultCost.food,
+                                originalProdItem.defaultCost.wood,
+                                originalProdItem.defaultCost.ore,
+                                originalProdItem.defaultCost.ticks,
+                                originalProdItem.defaultCost.population
+                            );
 
                             FormattedCharSequence newTooltipTitle = null;
                             ArrayList<FormattedCharSequence> newTooltipLines = new ArrayList<>();

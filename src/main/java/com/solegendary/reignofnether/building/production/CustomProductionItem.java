@@ -4,16 +4,10 @@ import com.solegendary.reignofnether.building.BuildingProductionServerboundPacke
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.resources.ResourceCosts;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
-
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // used for Custom buildings, eg. spawn eggs in chests
 // we can't use the original ProductionItems items since we can't modify their costs
