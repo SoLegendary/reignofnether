@@ -68,7 +68,7 @@ Quality of Life
     - Numbers: 'foodCost', 'woodCost', 'oreCost', 'popCost', 'ticksToTrain'
     - Strings: 'tooltipTitle', 'tooltipLine1', 'tooltipLine2', etc.
     - You can add these to an existing spawn egg by dropping it on the ground and using:
-       /data modify entity @e[type=item,limit=1,sort=nearest] Item.tag merge value {foodCost:100,woodCost:75,oreCost:50,popCost:2,ticksToTrain:300}
+       /data modify entity @e[type=item,limit=1,sort=nearest] Item.tag merge value {foodCost:100,woodCost:75,oreCost:50,popCost:2,ticksToTrain:600}
        /data modify entity @e[type=item,limit=1,sort=nearest] Item.tag merge value {tooltipTitle:"Super Zombie",tooltipLine1:"An elite zombie with diamond equipment"}
 
     No patch notes

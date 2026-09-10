@@ -429,10 +429,11 @@ public class UnitClientEvents {
                         HudClientEvents.hudSelectedEntity.getId(),
                         ItemClientEvents.getPreselectedItems().get(0).getId()
                 );
+                return;
             }
         }
         // follow friendly unit
-        else if (preselectedUnits.size() == 1 && !targetingSelf()) {
+        if (preselectedUnits.size() == 1 && !targetingSelf()) {
             if (hudSelectedEntity instanceof WitchUnit) {
                 sendUnitCommand(UnitAction.THROW_LINGERING_REGEN_POTION);
             } else {

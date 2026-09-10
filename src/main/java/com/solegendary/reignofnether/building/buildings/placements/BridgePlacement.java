@@ -55,7 +55,7 @@ public class BridgePlacement extends BuildingPlacement {
     public int getHealth() {
         if (getBlocksPlaced() >= getSolidBlocks().size() && partialBlocksDestroyed <= 0)
             return getMaxHealth();
-        return super.getHealth();
+        return (int) (super.getMaxHealth() * ((double) this.getBlocksPlaced() / getFullSolidBlockCount()));
     }
 
     @Override

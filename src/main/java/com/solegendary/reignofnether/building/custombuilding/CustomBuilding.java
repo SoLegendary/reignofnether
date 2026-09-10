@@ -211,7 +211,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                                 originalProdItem.defaultCost.food,
                                 originalProdItem.defaultCost.wood,
                                 originalProdItem.defaultCost.ore,
-                                originalProdItem.defaultCost.ticks,
+                                originalProdItem.defaultCost.ticks / 20, // actually is in seconds
                                 originalProdItem.defaultCost.population
                             );
 
