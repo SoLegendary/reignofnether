@@ -1543,6 +1543,7 @@
     "entity.reignofnether.marauder_unit.tooltip1": "A burly piglin that slams enemies with a flail arm.",
     "entity.reignofnether.marauder_unit.tooltip2": "Every 3rd attack stuns and knocks away its target.",
     "entity.reignofnether.marauder_unit.tooltip3": "Requires a Bastion.",
+    "entity.reignofnether.armoured_hoglin_unit": "Armoured Hoglin",
     "entity.reignofnether.hoglin_unit": "Hoglin",
     "entity.reignofnether.hoglin_unit.tooltip1": "A beast trained for war. Deals double damage to buildings",
     "entity.reignofnether.hoglin_unit.tooltip2": "and can be upgraded to be mountable by Headhunters.",
