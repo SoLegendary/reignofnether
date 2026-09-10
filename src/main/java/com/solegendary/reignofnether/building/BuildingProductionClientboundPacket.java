@@ -33,19 +33,20 @@ public class BuildingProductionClientboundPacket {
     public float ticksLeft;
 
     // send only to players whose fog reveals at least one corner of this building
-    private static void sendFiltered(BlockPos buildingPos, BuildingProductionClientboundPacket packet) {
+    private static void sendFiltered(String ownerName, BlockPos buildingPos, BuildingProductionClientboundPacket packet) {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
         BuildingPlacement b = findBuilding(false, buildingPos);
         for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
-            if (b != null && FogOfWarServerEvents.canPlayerSeeBuilding(sp, b)) {
+            if (ownerName.equals(sp.getName().getString()) ||
+                (b != null && FogOfWarServerEvents.canPlayerSeeBuilding(sp, b))) {
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
             }
         }
     }
 
-    public static void startProduction(BlockPos buildingPos, String itemName) {
-        sendFiltered(buildingPos,
+    public static void startProduction(String ownerName, BlockPos buildingPos, String itemName) {
+        sendFiltered(ownerName, buildingPos,
                 new BuildingProductionClientboundPacket(BuildingAction.START_PRODUCTION,
                         itemName,
                         buildingPos
@@ -53,8 +54,8 @@ public class BuildingProductionClientboundPacket {
         );
     }
 
-    public static void startProduction(BlockPos buildingPos, ProductionItem item, float ticksLeft) {
-        sendFiltered(buildingPos,
+    public static void startProduction(String ownerName, BlockPos buildingPos, ProductionItem item, float ticksLeft) {
+        sendFiltered(ownerName, buildingPos,
                 new BuildingProductionClientboundPacket(BuildingAction.START_PRODUCTION,
                         ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString(),
                         buildingPos,
@@ -63,8 +64,8 @@ public class BuildingProductionClientboundPacket {
         );
     }
 
-    public static void cancelProduction(BlockPos buildingPos, String itemName, boolean frontItem) {
-        sendFiltered(buildingPos,
+    public static void cancelProduction(String ownerName, BlockPos buildingPos, String itemName, boolean frontItem) {
+        sendFiltered(ownerName, buildingPos,
                 new BuildingProductionClientboundPacket(frontItem
                         ? BuildingAction.CANCEL_PRODUCTION
                         : BuildingAction.CANCEL_BACK_PRODUCTION,
@@ -74,15 +75,15 @@ public class BuildingProductionClientboundPacket {
         );
     }
 
-    public static void clearQueue(BlockPos buildingPos) {
-        sendFiltered(buildingPos,
+    public static void clearQueue(String ownerName, BlockPos buildingPos) {
+        sendFiltered(ownerName, buildingPos,
                 new BuildingProductionClientboundPacket(BuildingAction.CLEAR_PRODUCTION, "", buildingPos)
         );
     }
 
-    public static void completeProduction(BlockPos buildingPos) {
-        sendFiltered(buildingPos,
-                new BuildingProductionClientboundPacket(BuildingAction.COMPLETE_PRODUCTION, "", buildingPos)
+    public static void completeProduction(String ownerName, BlockPos buildingPos, String itemName) {
+        sendFiltered(ownerName, buildingPos,
+                new BuildingProductionClientboundPacket(BuildingAction.COMPLETE_PRODUCTION, itemName, buildingPos)
         );
     }
 
@@ -168,12 +169,13 @@ public class BuildingProductionClientboundPacket {
                     case COMPLETE_PRODUCTION -> {
                         if (building instanceof ProductionPlacement pBuilding) {
                             if (!pBuilding.productionQueue.isEmpty()) {
-                                ActiveProduction pItem = pBuilding.productionQueue.get(0);
-                                if (!pItem.completed) {
-                                    pItem.completed = true;
-                                    pItem.item.onComplete.accept(pBuilding.level, pBuilding);
+                                for (ActiveProduction pItem : pBuilding.productionQueue) {
+                                    if (pItem.item.getItemName().equals(this.itemName) && !pItem.completed) {
+                                        pItem.completed = true;
+                                        pItem.item.onComplete.accept(pBuilding.level, pBuilding);
+                                    }
                                 }
-                                pBuilding.productionQueue.remove(pItem);
+                                pBuilding.productionQueue.removeIf(pItem -> pItem.completed);
                             }
                         }
                     }

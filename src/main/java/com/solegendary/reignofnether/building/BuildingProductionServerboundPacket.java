@@ -110,6 +110,7 @@ public class BuildingProductionServerboundPacket {
                 if (this.action == BuildingAction.REQUEST_PRODUCTION_SYNC) {
                     for (ActiveProduction activeProd : pBuilding.productionQueue) {
                         BuildingProductionClientboundPacket.startProduction(
+                                pBuilding.ownerName,
                                 buildingPos,
                                 activeProd.item,
                                 activeProd.ticksLeft
@@ -127,17 +128,17 @@ public class BuildingProductionServerboundPacket {
                             case START_PRODUCTION -> {
                                 boolean prodSuccess = pBuilding.startProductionItem(productionItem);
                                 if (prodSuccess)
-                                    BuildingProductionClientboundPacket.startProduction(buildingPos, this.itemName);
+                                    BuildingProductionClientboundPacket.startProduction(pBuilding.ownerName, buildingPos, this.itemName);
                             }
                             case CANCEL_PRODUCTION -> {
                                 boolean cancelSuccess = pBuilding.cancelProductionItem(productionItem, true);
                                 if (cancelSuccess || pBuilding.productionQueue.isEmpty())
-                                    BuildingProductionClientboundPacket.cancelProduction(buildingPos, this.itemName, true);
+                                    BuildingProductionClientboundPacket.cancelProduction(pBuilding.ownerName, buildingPos, this.itemName, true);
                             }
                             case CANCEL_BACK_PRODUCTION -> {
                                 boolean cancelSuccess = pBuilding.cancelProductionItem(productionItem, false);
                                 if (cancelSuccess || pBuilding.productionQueue.isEmpty())
-                                    BuildingProductionClientboundPacket.cancelProduction(buildingPos, this.itemName, false);
+                                    BuildingProductionClientboundPacket.cancelProduction(pBuilding.ownerName, buildingPos, this.itemName, false);
                             }
                             default -> { }
                         }
