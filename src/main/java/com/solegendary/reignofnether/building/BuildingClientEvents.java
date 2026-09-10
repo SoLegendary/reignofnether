@@ -264,7 +264,7 @@ public class BuildingClientEvents {
         var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         for (BuildingBlock block : blocks) {
             if (isBridge(buildingToPlace)
-                    && MC.level != null && AbstractBridge.shouldCullBlock(originPos.offset(0, 1, 0), block, MC.level)) {
+                    && MC.level != null && AbstractBridge.shouldCullBlock(originPos.offset(0, 1, 0), block, MC.level, true)) {
                 continue;
             }
             BlockRenderDispatcher renderer = MC.getBlockRenderer();

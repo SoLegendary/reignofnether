@@ -230,7 +230,7 @@ public class BuildingValidators {
         BlockPos minPos = BuildingUtils.getMinCorner(blocks);
         int placeableBlocks = 0;
         for (BuildingBlock block : blocks)
-            if (!AbstractBridge.shouldCullBlock(originPos, block, level) && !block.getBlockState()
+            if (!AbstractBridge.shouldCullBlock(originPos, block, level, true) && !block.getBlockState()
                     .isAir()) {
                 placeableBlocks += 1;
             }

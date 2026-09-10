@@ -84,7 +84,8 @@ Bugfixes
 [✔] Cats and dogs no longer appear as sitting when moving to other players
 [✔] Fixed activated sculk sensor blocks causing issues with building/repairing sculk catalysts
 [🟡] Sculk catalysts indestructible - see claude investigation
-
+[❌] Bridges never fully build
+[❌] /rtsapi-set-alliance doesn't work for FPV players
 
 Languages
 ---------

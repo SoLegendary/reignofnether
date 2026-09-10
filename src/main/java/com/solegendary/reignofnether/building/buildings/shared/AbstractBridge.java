@@ -59,13 +59,17 @@ public abstract class AbstractBridge extends Building {
     }
 
     public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level) {
+        return shouldCullBlock(originPos, b, level, false);
+    }
+
+    public static boolean shouldCullBlock(BlockPos originPos, BuildingBlock b, Level level, boolean isRelativePos) {
         BlockState bs = b.getBlockState();
 
         boolean isFenceOrAir = b.getBlockState().getBlock() instanceof AirBlock ||
                 b.getBlockState().getBlock() instanceof FenceBlock;
         BlockPos bp = b.getBlockPos();
 
-        if (level.isClientSide)
+        if (isRelativePos)
             bp = bp.offset(originPos);
 
         // if the block in the world matches this exactly, don't cull it, instead just consider it to be our block too

@@ -16,10 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BridgePlacement extends BuildingPlacement {
+
     public BridgePlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName,
                            ArrayList<BuildingBlock> blocks, boolean isCapitol, boolean isDiagonal) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
         this.isDiagonalBridge = isDiagonal;
+    }
+
+    private int getFullSolidBlockCount() {
+        return ((AbstractBridge) getBuilding()).getRelativeBlockData(level, this.isDiagonalBridge)
+                .stream().filter(b -> b.getBlockState().isSolid())
+                .toList()
+                .size();
     }
 
     @Override
@@ -33,11 +41,35 @@ public class BridgePlacement extends BuildingPlacement {
         }
     }
 
-    // todo: fix
+    private List<BuildingBlock> getSolidBlocks() {
+        return blocks.stream().filter(b -> b.getBlockState().isSolid()).toList();
+    }
+
+    @Override
+    public double getHealthPerBlock() {
+        int solidBlocks = getSolidBlocks().size();
+        return (double) (getMaxHealth() / solidBlocks) * 2;
+    }
+
+    @Override
+    public int getHealth() {
+        if (getBlocksPlaced() >= getSolidBlocks().size() && partialBlocksDestroyed <= 0)
+            return getMaxHealth();
+        return super.getHealth();
+    }
+
+    @Override
+    public int getMaxHealth() {
+        return (int) (super.getMaxHealth() * ((double) this.getSolidBlocks().size() / getFullSolidBlockCount()));
+    }
+
     @Override
     protected void setBlocks(ArrayList<BuildingBlock> blocks) {
         super.setBlocks(blocks);
-        this.blocks = getCulledBlocks(blocks);
+        this.blocks = new ArrayList<>(
+            getCulledBlocks(blocks).stream().filter(b -> b.getBlockState().isSolid()).toList()
+        );
+        this.totalBlocks = this.blocks.size();
     }
 
     private ArrayList<BuildingBlock> getCulledBlocks(ArrayList<BuildingBlock> blocks) {
