@@ -103,22 +103,22 @@ public class GlobalProductionQueueRenderer {
         return btn;
     }
 
-    public static Pair<List<RectZone>, List<Button>> renderQueue(GuiGraphics guiGraphics, String playerName, int baseX, int baseY, int mouseX, int mouseY) {
+    public static Pair<RectZone, List<Button>> renderQueue(GuiGraphics guiGraphics, String playerName, int baseX, int baseY, int mouseX, int mouseY) {
         List<ProductionQueueGroup> groupedQueue = groupPlayerProductionQueues(playerName);
 
-        List<RectZone> hudZones = new ArrayList<>();
+        RectZone hudZone = RectZone.getZoneByLW(0,0,0,0);
         List<Button> renderedButtons = new ArrayList<>();
 
         if (groupedQueue.isEmpty())
-            return new Pair<>(hudZones, renderedButtons);
+            return new Pair<>(hudZone, renderedButtons);
 
         int iconFrameSize = Button.DEFAULT_ICON_FRAME_SIZE;
         int iconsPerRow = 5;
         int rows = (int) Math.ceil((double) groupedQueue.size() / iconsPerRow);
 
-        hudZones.add(MyRenderer.renderFrameWithBg(guiGraphics, baseX, baseY,
+        hudZone = MyRenderer.renderFrameWithBg(guiGraphics, baseX, baseY,
                 iconFrameSize * Math.min(groupedQueue.size(), iconsPerRow) + 10,
-                iconFrameSize * rows + 10, 0xA0000000));
+                iconFrameSize * rows + 10, 0xA0000000);
 
         int startX = baseX + 5, startY = baseY + 5;
         for (int i = 0; i < groupedQueue.size(); i++) {
@@ -133,6 +133,6 @@ public class GlobalProductionQueueRenderer {
 
             if (btn.isMouseOver(mouseX, mouseY)) btn.renderTooltip(guiGraphics, mouseX, mouseY);
         }
-        return new Pair<>(hudZones, renderedButtons);
+        return new Pair<>(hudZone, renderedButtons);
     }
 }

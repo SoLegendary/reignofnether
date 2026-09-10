@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.CustomProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -203,8 +204,55 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                     EntityType<?> type = spawnEgg.getType(stackNbt);
 
                     if (type.getDescriptionId().contains("reignofnether") && type.getDescriptionId().contains("_unit")) {
-                        ProductionItem prodItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
-                        if (prodItem != null && !this.productions.get().contains(prodItem)) {
+                        ProductionItem originalProdItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
+                        if (originalProdItem != null) {
+
+                            ResourceCost newCost = ResourceCost.Unit(
+                                originalProdItem.defaultCost.food,
+                                originalProdItem.defaultCost.wood,
+                                originalProdItem.defaultCost.ore,
+                                originalProdItem.defaultCost.ticks / 20, // actually is in seconds
+                                originalProdItem.defaultCost.population
+                            );
+
+                            FormattedCharSequence newTooltipTitle = null;
+                            ArrayList<FormattedCharSequence> newTooltipLines = new ArrayList<>();
+                            ArrayList<FormattedCharSequence> newToolTip = new ArrayList<>();
+
+                            if (stackNbt != null) {
+                                if (stackNbt.contains("foodCost", Tag.TAG_INT))
+                                    newCost.food = stackNbt.getInt("foodCost");
+                                if (stackNbt.contains("woodCost", Tag.TAG_INT))
+                                    newCost.wood = stackNbt.getInt("woodCost");
+                                if (stackNbt.contains("oreCost", Tag.TAG_INT))
+                                    newCost.ore = stackNbt.getInt("oreCost");
+                                if (stackNbt.contains("ticksToTrain", Tag.TAG_INT))
+                                    newCost.ticks = stackNbt.getInt("ticksToTrain");
+
+                                if (stackNbt.contains("tooltipTitle", Tag.TAG_STRING))
+                                    newTooltipTitle = fcs(stackNbt.getString("tooltipTitle"), true);
+
+                                for (int i = 0; i <= 9; i++) {
+                                    if (stackNbt.contains("tooltipLine" + i, Tag.TAG_STRING))
+                                        newTooltipLines.add(fcs(stackNbt.getString("tooltipLine" + i)));
+                                };
+                            }
+
+                            if (newTooltipTitle != null || !newTooltipLines.isEmpty()) {
+                                newToolTip = new ArrayList<>(List.of(
+                                        newTooltipTitle != null ? newTooltipTitle : fcs(""),
+                                        ResourceCosts.getFormattedCost(newCost),
+                                        ResourceCosts.getFormattedTime(newCost)
+                                ));
+                                if (!newTooltipLines.isEmpty()) {
+                                    newToolTip.add(fcs(""));
+                                    newToolTip.addAll(newTooltipLines);
+                                }
+                            }
+
+                            String newItemName = originalProdItem.getItemName() + "-" + "custom" + "-" + hotkeyIndex;
+                            ProductionItem prodItem = new CustomProductionItem(newCost, newItemName, originalProdItem, newToolTip, newTooltipTitle == null);
+
                             Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
                             this.productions.add(prodItem, hotkey);
                             if (stackNbt != null && stackNbt.contains("EntityTag")) {
@@ -248,7 +296,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         attributesNbt.putInt("garrisonRange", this.garrisonRange);
         attributesNbt.putInt("maxHealth", (int) this.maxHealth);
     }
-	
+
 	private void unpackAttributesNbt() {
 		this.setIconAndPortrait(attributesNbt.getString("portraitBlockRegistryKey"));
 		this.capturable = attributesNbt.getBoolean("capturable");

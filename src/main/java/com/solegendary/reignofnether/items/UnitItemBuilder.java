@@ -7,7 +7,6 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -15,9 +14,8 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.UUID;
 import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -47,6 +45,7 @@ import java.util.function.Predicate;
 public class UnitItemBuilder {
 
     final Item item;
+    UUID uuid = UUID.randomUUID();
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
     int sellValue = 0;
@@ -56,7 +55,7 @@ public class UnitItemBuilder {
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     final List<String> pointDescs = new ArrayList<>();
-    final List<AttributeModifier> getAttributeModifiers = new ArrayList<>();
+    final List<AttributeModifier> attributeModifiers = new ArrayList<>();
     BiPredicate<Unit, BlockPos> onUseGround = null;
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
     BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
@@ -71,6 +70,11 @@ public class UnitItemBuilder {
 
     public static UnitItemBuilder of(Item item) {
         return new UnitItemBuilder(item);
+    }
+
+    public UnitItemBuilder uuid(String uuid) {
+        this.uuid = UUID.fromString(uuid);
+        return this;
     }
 
     /** Optional override icon; if null the button renders the ItemStack itself. */
@@ -136,7 +140,7 @@ public class UnitItemBuilder {
     /** Adds one attribute modifier applied while the item is held; call once per modifier. */
     public UnitItemBuilder attributeModifier(AttributeModifier modifier) {
         if (modifier != null)
-            this.getAttributeModifiers.add(modifier);
+            this.attributeModifiers.add(modifier);
         return this;
     }
 

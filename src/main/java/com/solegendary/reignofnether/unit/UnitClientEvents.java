@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
@@ -45,6 +46,7 @@ import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.neutral.PolarBearUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
@@ -58,7 +60,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
@@ -71,10 +72,8 @@ import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -407,20 +406,34 @@ public class UnitClientEvents {
     }
 
     private static void doResolveMoveAction() {
+        // open shop
+        if (ItemClientEvents.ENABLED && HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
+                BuildingClientEvents.getPreselectedBuilding() instanceof ItemShopPlacement itemShop && MC.player != null &&
+                itemShop.isBuilt && !itemShop.getStockedItems().isEmpty()) {
+            unit.getCheckpoints().clear();
+            unit.getCheckpoints().add(new Checkpoint(BuildingClientEvents.getPreselectedBuilding().centrePos, true));
+
+            ItemServerboundPacket.openShop(
+                    HudClientEvents.hudSelectedEntity.getId(),
+                    BuildingClientEvents.getPreselectedBuilding().originPos
+            );
+        }
         // pickup item
-        if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
+        else if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
                 !ItemClientEvents.getPreselectedItems().isEmpty() && MC.player != null) {
             unit.getCheckpoints().clear();
             unit.getCheckpoints().add(new Checkpoint(ItemClientEvents.getPreselectedItems().get(0), true));
 
-            ItemServerboundPacket.pickup(
-                    MC.player.getName().getString(),
-                    HudClientEvents.hudSelectedEntity.getId(),
-                    ItemClientEvents.getPreselectedItems().get(0).getId()
-            );
+            if (ItemClientEvents.ENABLED) {
+                ItemServerboundPacket.pickup(
+                        HudClientEvents.hudSelectedEntity.getId(),
+                        ItemClientEvents.getPreselectedItems().get(0).getId()
+                );
+                return;
+            }
         }
         // follow friendly unit
-        else if (preselectedUnits.size() == 1 && !targetingSelf()) {
+        if (preselectedUnits.size() == 1 && !targetingSelf()) {
             if (hudSelectedEntity instanceof WitchUnit) {
                 sendUnitCommand(UnitAction.THROW_LINGERING_REGEN_POTION);
             } else {
@@ -998,54 +1011,56 @@ public class UnitClientEvents {
                     }
                 }
             } else if (evt.getStage() == AFTER_CUTOUT_BLOCKS) {
-                var selectedEntityIds = new HashSet<>();
-                for (LivingEntity selectedUnit : selectedUnits) {
-                    Integer id = selectedUnit.getId();
-                    selectedEntityIds.add(id);
-                }
-                var vc = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_UNDER_ENTITIES);
-
-                for (LivingEntity entity : allUnits) {
-                    if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
-                            entity.isPassenger())
-                        continue;
-
-                    float alpha = 0.5f;
-                    if (selectedEntityIds.contains(entity.getId()))
-                        alpha = 1.0f;
-
-                    // draw only the bottom of the outline boxes
-                    AABB entityAABB = entity.getBoundingBox();
-                    if (entity instanceof Unit unit) {
-                        entityAABB = unit.getInflatedSelectionBox();
+                if (MinimapClientEvents.shouldUnderline()) {
+                    var selectedEntityIds = new HashSet<>();
+                    for (LivingEntity selectedUnit : selectedUnits) {
+                        Integer id = selectedUnit.getId();
+                        selectedEntityIds.add(id);
                     }
-                    entityAABB = entityAABB.setMaxY(entityAABB.minY);
-                    boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
+                    var vc = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_UNDER_ENTITIES);
 
-                    Color colorHex;
-                    if (entity instanceof Unit unit) {
-                        if (PlayerClientEvents.isRTSPlayer(unit.getOwnerName())) {
-                            colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(unit.getOwnerName()));
-                        } else {
-                            colorHex = new Color(PlayerColors.COLOR_GRAY.hexCode, false);
+                    for (LivingEntity entity : allUnits) {
+                        if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
+                                entity.isPassenger())
+                            continue;
+
+                        float alpha = 0.5f;
+                        if (selectedEntityIds.contains(entity.getId()))
+                            alpha = 1.0f;
+
+                        // draw only the bottom of the outline boxes
+                        AABB entityAABB = entity.getBoundingBox();
+                        if (entity instanceof Unit unit) {
+                            entityAABB = unit.getInflatedSelectionBox();
                         }
-                    } else {
-                        colorHex = new Color(0xFFFFFF, false);
+                        entityAABB = entityAABB.setMaxY(entityAABB.minY);
+                        boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
+
+                        Color colorHex;
+                        if (entity instanceof Unit unit) {
+                            if (PlayerClientEvents.isRTSPlayer(unit.getOwnerName())) {
+                                colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(unit.getOwnerName()));
+                            } else {
+                                colorHex = new Color(PlayerColors.COLOR_GRAY.hexCode, false);
+                            }
+                        } else {
+                            colorHex = new Color(0xFFFFFF, false);
+                        }
+
+                        float r = colorHex.getRed() / 255.0f;
+                        float g = colorHex.getGreen() / 255.0f;
+                        float b = colorHex.getBlue() / 255.0f;
+
+                        // always-shown highlights to indicate unit relationships
+                        if (OrthoviewClientEvents.isEnabled()) {
+                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
+                        }
+
+                        MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);
                     }
-
-                    float r = colorHex.getRed() / 255.0f;
-                    float g = colorHex.getGreen() / 255.0f;
-                    float b = colorHex.getBlue() / 255.0f;
-
-                    // always-shown highlights to indicate unit relationships
-                    if (OrthoviewClientEvents.isEnabled()) {
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
-                    }
-
-                    MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);
+                    MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack(), vc);
+                    MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
                 }
-                MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack(), vc);
-                MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
             }
 
             // render items in front of face for eating units
@@ -1404,6 +1419,8 @@ public class UnitClientEvents {
                     entity instanceof RavagerUnit ||
                     entity instanceof WardenUnit) {
                     entity.handleEntityEvent((byte) 4);
+                } else if (entity instanceof PolarBearUnit polarBearUnit) {
+                    polarBearUnit.doAttackAnimationAndSound();
                 }
             }
         }

@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.ability.BuildingAbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.EquipAbility;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.Dungeon;
@@ -196,6 +197,11 @@ public class BuildingServerEvents {
         getBuildings().forEach(b -> {
             b.getDataStorage().setData(BUILDING_TAGS, b.tags);
             b.getDataStorage().setData(BUILDING_COMMANDS, b.commands);
+
+            ItemShopAddon itemShopAddon = b.getBuilding().getActiveAddon(ItemShopAddon.class);
+            if (itemShopAddon != null) {
+                b.getDataStorage().setData(ItemShopAddon.STOCKED_ITEMS, b.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS));
+            }
             
             PortalPlacement.PortalType portalType = null;
             if (b instanceof PortalPlacement portal) {

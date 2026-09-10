@@ -9,6 +9,8 @@ import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -75,6 +77,9 @@ public class ScoutDogProd extends ProductionItem {
         button.onRightClick = () -> {
             if (prodBuilding instanceof TownCentrePlacement tcp) {
                 tcp.trainsDogs = !tcp.trainsDogs;
+                RTSPlayer rtsPlayer = PlayerClientEvents.getRTSPlayer(prodBuilding.ownerName);
+                if (rtsPlayer != null)
+                    rtsPlayer.isDogPerson = tcp.trainsDogs;
                 tcp.updateButtons();
             }
         };

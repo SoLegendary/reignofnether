@@ -179,10 +179,12 @@ public class ScoutCatUnit extends Cat implements Unit {
         Unit.tick(this);
         PromoteIllager.checkAndApplyBuff(this);
 
-        if (getDeltaMovement().length() > 0)
+        if (getDeltaMovement().length() > 0) {
             ticksStationary = 0;
-        else
+            setInSittingPose(false);
+        } else {
             ticksStationary += 1;
+        }
 
         if (ticksStationary >= TICKS_TO_SIT && !isInSittingPose())
             setInSittingPose(true);

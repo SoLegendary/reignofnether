@@ -22,7 +22,6 @@ import com.solegendary.reignofnether.entities.GhastUnitFireball;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.items.ItemClientboundPacket;
-import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -762,7 +761,7 @@ public class UnitServerEvents {
                     UnitSyncWorkerClientBoundPacket.sendSyncWorkerPacket(entity);
                 }
                 if (entity instanceof UnitInventory inv) {
-                    ItemClientboundPacket.syncToAll(entity.getId(), inv.getAllItems());
+                    ItemClientboundPacket.syncInventory(entity.getId(), inv.getAllItems());
                 }
 
                 // remove old chunk // add current chunk

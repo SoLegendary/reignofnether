@@ -248,9 +248,9 @@ public class PlayerClientEvents {
         MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 
-    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId) {
+    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson) {
         if (!isRTSPlayer(playerName)) {
-            rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId));
+            rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId, isDogPerson));
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
@@ -265,7 +265,7 @@ public class PlayerClientEvents {
 
     public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
         if (!isRTSPlayer(playerName)) {
-            RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0);
+            RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0, true);
             rtsPlayer.scenarioRoleIndex = scenarioRoleIndex;
             rtsPlayers.add(rtsPlayer);
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();

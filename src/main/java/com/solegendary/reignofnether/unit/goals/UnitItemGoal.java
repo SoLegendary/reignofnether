@@ -3,10 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
-import com.solegendary.reignofnether.items.ItemAction;
-import com.solegendary.reignofnether.items.ItemUtil;
-import com.solegendary.reignofnether.items.UnitInventory;
-import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.resources.Resources;
@@ -60,6 +57,8 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
             return ItemAction.GIVE;
         } else if (ItemUtil.isUnitItem(itemTarget)) {
             return ItemAction.PICKUP;
+        } else if (buildingTarget != null) {
+            return ItemAction.OPEN_SHOP;
         }
         return ItemAction.NONE;
     }
@@ -68,10 +67,10 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
     private BlockPos getMoveTargetForAction(ItemAction action) {
         return switch (action) {
             case DROP, USE_ON_BLOCK -> blockTarget;
-            case SELL, USE_ON_BUILDING -> buildingTarget.getClosestGroundPos(mob.getOnPos(), 1);
+            case SELL, USE_ON_BUILDING, OPEN_SHOP -> buildingTarget.getClosestGroundPos(mob.getOnPos(), 1);
             case GIVE, USE_ON_ENTITY -> leTarget.getOnPos();
             case PICKUP -> itemTarget.getOnPos();
-            case USE, NONE, SWAP -> null;
+            case USE, NONE, SWAP, BUY -> null;
         };
     }
 
@@ -81,13 +80,17 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
         this.setMoveTarget(getMoveTargetForAction(action));
 
         if (getMoveTarget() != null && this.mob instanceof UnitInventory inv) {
-            double distSqr = 0;
+            double distSqr;
             if (leTarget != null)
                 distSqr = this.mob.distanceToSqr(leTarget);
             else
                 distSqr = this.mob.distanceToSqr(getMoveTarget().getCenter());
 
-            if (distSqr < RANGE * RANGE) {
+            float rangeSqr = RANGE * RANGE;
+            if (action == ItemAction.OPEN_SHOP)
+                rangeSqr = 2.25f;
+
+            if (distSqr < rangeSqr) {
                 if (!this.mob.level().isClientSide()) {
                     switch (action) {
                         case DROP -> inv.dropUUID(ItemUtil.getUUID(itemInHand), blockTarget);
@@ -95,7 +98,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                             BuildingPlacement bpl = BuildingUtils.findBuilding(false, blockTarget);
                             if (bpl != null && bpl.getBuilding() instanceof AbstractMarket) {
                                 inv.deleteUUID(ItemUtil.getUUID(itemInHand));
-                                UnitItem unitItem = ItemUtil.getUnitItem(itemInHand.getItem());
+                                UnitItem unitItem = ItemUtil.getUnitItem(itemInHand);
                                 if (mob instanceof Unit unit) {
                                     RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(unit.getOwnerName());
                                     if (rtsPlayer != null && unitItem != null) {
@@ -121,6 +124,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                         case USE_ON_BLOCK -> inv.useOnGround(ItemUtil.getUUID(itemInHand), blockTarget);
                         case USE_ON_ENTITY -> inv.useOnEntity(ItemUtil.getUUID(itemInHand), leTarget);
                         case USE_ON_BUILDING -> inv.useOnBuilding(ItemUtil.getUUID(itemInHand), buildingTarget);
+                        case OPEN_SHOP -> ItemClientboundPacket.setShopServedUnit(this.mob.getId(), buildingTarget.originPos);
                         case NONE, SWAP, USE -> { }
                     }
                 }

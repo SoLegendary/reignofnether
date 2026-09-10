@@ -1,11 +1,10 @@
 package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -23,28 +22,40 @@ public class ItemClientboundPacket {
 
     private final int unitId;
     private final List<ItemStack> items;
+    private final BlockPos shopPos;
 
-    // server-side senders
-    public static void syncToAll(int unitId, List<ItemStack> items) {
+    public static void syncInventory(int unitId, List<ItemStack> items) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new ItemClientboundPacket(unitId, items));
     }
 
-    // packet-handler functions
+    public static void setShopServedUnit(int unitId, BlockPos shopPos) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new ItemClientboundPacket(unitId, shopPos));
+    }
+
     public ItemClientboundPacket(int unitId, List<ItemStack> items) {
         this.unitId = unitId;
         this.items = new ArrayList<>(items.size());
         for (ItemStack stack : items) // copy so later server-side mutation can't race the encode
             this.items.add(stack.copy());
+        this.shopPos = new BlockPos(0,0,0);
+    }
+
+    public ItemClientboundPacket(int unitId, BlockPos shopPos) {
+        this.unitId = unitId;
+        this.items = List.of();
+        this.shopPos = shopPos;
     }
 
     public ItemClientboundPacket(FriendlyByteBuf buffer) {
         this.unitId = buffer.readInt();
         this.items = buffer.readList(ItemClientboundPacket::readStack);
+        this.shopPos = buffer.readBlockPos();
     }
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeInt(this.unitId);
         buffer.writeCollection(this.items, ItemClientboundPacket::writeStack);
+        buffer.writeBlockPos(this.shopPos);
     }
 
     // full-fidelity ItemStack (de)serialisation: item id, count and the entire tag compound
@@ -67,9 +78,11 @@ public class ItemClientboundPacket {
                 ReignOfNether.LOGGER.warn("ItemClientboundPacket: no items for unitId " + this.unitId);
                 success.set(false);
             }
-            else {
+            else if (!this.items.isEmpty()) {
                 ItemClientEvents.syncInventory(this.unitId, this.items);
                 success.set(true);
+            } else {
+                ItemClientEvents.setShopServedUnit(this.unitId, this.shopPos);
             }
         }));
         ctx.get().setPacketHandled(true);

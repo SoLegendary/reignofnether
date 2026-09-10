@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 // units and/or research tech that a ProductionBuilding can produce
 public abstract class ProductionItem {
@@ -28,6 +29,12 @@ public abstract class ProductionItem {
     public ResourceCost defaultCost;
     public BiConsumer<Level, ProductionPlacement> onComplete;
     public ProdDupeRule dupeRule;
+
+    public ProductionItem(ResourceCost cost, ProdDupeRule dupeRule, BiConsumer<Level, ProductionPlacement> onComplete) {
+        this.defaultCost = cost;
+        this.dupeRule = dupeRule;
+        this.onComplete = onComplete;
+    }
 
     public ProductionItem(ResourceCost cost, ProdDupeRule dupeRule) {
         this.defaultCost = cost;

@@ -11,7 +11,6 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
@@ -146,7 +145,7 @@ public class PolarBearUnit extends PolarBear implements Unit, AttackerUnit {
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
-    final static public float maxHealth = 100.0f;
+    final static public float maxHealth = 150.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
     public int maxResources = 100;
@@ -188,11 +187,32 @@ public class PolarBearUnit extends PolarBear implements Unit, AttackerUnit {
         return this.targetGoal.getTarget();
     }
 
+    public int standingTicks = 0;
+
     public void tick() {
         this.setCanPickUpLoot(false);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+
+        if (standingTicks > 0) {
+            standingTicks -= 1;
+            if (standingTicks <= 0)
+                setStanding(false);
+        }
+    }
+
+    @Override
+    public boolean doHurtTarget(Entity pEntity) {
+        boolean result = super.doHurtTarget(pEntity);
+        doAttackAnimationAndSound();
+        return result;
+    }
+
+    public void doAttackAnimationAndSound() {
+        playWarningSound();
+        setStanding(true);
+        standingTicks = 10;
     }
 
     @Override

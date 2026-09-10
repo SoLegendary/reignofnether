@@ -28,6 +28,7 @@ public class RTSPlayer {
     public RTSPlayerScores scores = new RTSPlayerScores();
     public int scenarioRoleIndex = -1;
     public Map<TradeAction, Integer> tradeRates = new HashMap<>();
+    public boolean isDogPerson = true;
 
     private RTSPlayer(String playerName, Faction faction, int id) {
         this.name = playerName;
@@ -36,11 +37,12 @@ public class RTSPlayer {
         initTradeRates();
     }
 
-    private RTSPlayer(String playerName, Faction faction, int id, int startPosColorId) {
+    private RTSPlayer(String playerName, Faction faction, int id, int startPosColorId, boolean isDogPerson) {
         this.name = playerName;
         this.id = id;
         this.faction = faction;
         this.startPosColorId = startPosColorId;
+        this.isDogPerson = isDogPerson;
         initTradeRates();
     }
 
@@ -92,8 +94,8 @@ public class RTSPlayer {
         return new RTSPlayer(playerName, faction, id);
     }
 
-    public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id, int startPosColorId) {
-        return new RTSPlayer(playerName, faction, id, startPosColorId);
+    public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id, int startPosColorId, boolean isDogPerson) {
+        return new RTSPlayer(playerName, faction, id, startPosColorId, isDogPerson);
     }
 
     public static RTSPlayer getNewScenarioPlayer(String playerName, Faction faction, int id, int scenarioRoleIndex) {

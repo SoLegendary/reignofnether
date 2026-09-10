@@ -13,7 +13,8 @@ import net.minecraft.server.level.ServerLevel;
 import javax.annotation.Nullable;
 
 public interface NetherConvertingAddon extends BuildingAddon {
-    DataType<NetherZone> NETHER_ZONE_DATA_TYPE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "nether_converting_addon"), (nbt, server) -> null, (netherZone -> new CompoundTag())); //Save and load is handeled extern
+    DataType<NetherZone> NETHER_ZONE_DATA_TYPE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "nether_converting_addon"),
+            (nbt, server) -> null, (netherZone -> new CompoundTag())); //Save and load is handeled extern
 
     double getMaxNetherRange(BuildingPlacement placement);
 

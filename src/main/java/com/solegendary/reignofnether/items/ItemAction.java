@@ -10,5 +10,7 @@ public enum ItemAction {
     USE_ON_BUILDING,
     USE,
     SWAP,
+    BUY,
+    OPEN_SHOP,
     NONE
 }

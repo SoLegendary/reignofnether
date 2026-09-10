@@ -349,9 +349,9 @@ public class ProductionPlacement extends BuildingPlacement {
                 if (!tickLevel.isClientSide()) {
                     productionQueue.remove(0);
                     if (productionQueue.isEmpty())
-                        BuildingProductionClientboundPacket.clearQueue(this.originPos);
+                        BuildingProductionClientboundPacket.clearQueue(this.ownerName, this.originPos);
                     else
-                        BuildingProductionClientboundPacket.completeProduction(this.originPos);
+                        BuildingProductionClientboundPacket.completeProduction(this.ownerName, this.originPos, nextItem.item.getItemName());
                 }
             }
         }
@@ -377,7 +377,7 @@ public class ProductionPlacement extends BuildingPlacement {
             for (ActiveProduction activeProd : new ArrayList<>(productionQueue)) {
                 cancelProductionItem(activeProd.item, true);
             }
-            BuildingProductionClientboundPacket.clearQueue(this.originPos);
+            BuildingProductionClientboundPacket.clearQueue(this.ownerName, this.originPos);
             this.ownerName = newOwner;
         }
         return captured;
