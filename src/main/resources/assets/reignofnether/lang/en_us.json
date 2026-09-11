@@ -1045,6 +1045,11 @@
     "hud.hero.reignofnether.max_level": "Max Level!",
     "hud.hero.reignofnether.death": "%s's %s (Lvl %d) has fallen!",
     "hud.hero.reignofnether.revival": "%s's %s (Lvl %d) has been revived!",
+    "hud.hero.reignofnether.error.duplicate": "You already have that hero!",
+    "hud.hero.reignofnether.error.too_many_heroes": "You have too many heroes!",
+    "hud.hero.reignofnether.error.no_dead_hero": "That hero is not dead!",
+
+    "hud.research.reignofnether.error.duplicate": "You already have this upgrade!",
 
     "server.reignofnether.is_defeated": "%s has %s and is defeated!",
     "server.reignofnether.lost_buildings": "lost all their buildings",

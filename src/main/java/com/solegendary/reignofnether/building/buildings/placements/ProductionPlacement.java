@@ -2,11 +2,10 @@ package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.production.*;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
@@ -15,8 +14,6 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -245,7 +242,10 @@ public class ProductionPlacement extends BuildingPlacement {
                     case ALLOW -> true;
                 };
 
-                if (allow && prodItem.canAfford(this)) {
+                if (!prodItem.canProduce(level, ownerName)) {
+                    HudClientboundPacket.showTempMessageI18n(ownerName, prodItem.getProduceErrorMsg(level, ownerName));
+                }
+                else if (allow && prodItem.canAfford(this)) {
                     ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);
                     productionQueue.add(activeProduction);
                     ResourcesServerEvents.addSubtractResources(new Resources(

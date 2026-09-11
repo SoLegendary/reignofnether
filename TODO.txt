@@ -1,5 +1,5 @@
 
-1.20.1-1.4.4a
+1.20.1-1.4.4b
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -53,14 +53,11 @@ Balance
 Quality of Life
 ---------------
 [❌] Create a new homing projectile entity from the ground up
-[✔] The official network is now able stop logins if there is a version mismatch
+
 
 Bugfixes
 --------
-[🟡] /rtsapi-set-alliance now works for FPV players
-[✔] Ghasts are no longer disarmed when flying over structure void blocks
-[✔] Fixed sometimes being able to produce duplicate heroes
-[✔] The spawn point for villager heroes are no longer inside solid blocks
+- Servers will no longer produce a
 
 Languages
 ---------
