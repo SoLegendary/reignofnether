@@ -80,6 +80,10 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
         };
     }
 
+    public String getItemName() {
+        return itemName;
+    }
+
     // can't make this a member as we can't refer to other registered objects at init time
     protected EntityType<? extends HeroUnit> getHeroEntityType() {
         return null;

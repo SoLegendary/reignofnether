@@ -1014,14 +1014,6 @@ public class CommandsServerEvents {
 			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.ally_self"));
 			return 0;
 		}
-		if (!PlayerServerEvents.isRTSPlayer(playerName1)) {
-			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.unknown", playerName1));
-			return 0;
-		}
-		if (!PlayerServerEvents.isRTSPlayer(playerName2)) {
-			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.unknown", playerName2));
-			return 0;
-		}
 
 		boolean alreadyAllied = AlliancesServerEvents.isAllied(playerName1, playerName2);
 

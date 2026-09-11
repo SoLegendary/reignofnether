@@ -53,11 +53,13 @@ Balance
 Quality of Life
 ---------------
 [❌] Create a new homing projectile entity from the ground up
-
+[✔] The official network is now able stop logins if there is a version mismatch
 
 Bugfixes
 --------
-[❌] /rtsapi-set-alliance doesn't work for FPV players
+[🟡] /rtsapi-set-alliance now works for FPV players
+[✔] Ghasts are no longer disarmed when flying over structure void blocks
+[✔] Fixed sometimes being able to produce duplicate heroes
 
 
 Languages
