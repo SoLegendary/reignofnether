@@ -24,8 +24,6 @@ import java.util.function.BiFunction;
 // units and/or research tech that a ProductionBuilding can produce
 public abstract class ProductionItem {
 
-    public static String itemName;
-
     public ResourceCost defaultCost;
     public BiConsumer<Level, ProductionPlacement> onComplete;
     public ProdDupeRule dupeRule;
@@ -51,9 +49,7 @@ public abstract class ProductionItem {
         return defaultCost;
     }
 
-    public String getItemName() {
-        return itemName;
-    }
+    public abstract String getItemName();
 
     public boolean canAfford(ProductionPlacement pp) {
         for (Resources resources : ResourcesServerEvents.resourcesList)

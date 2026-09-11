@@ -53,6 +53,7 @@ import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.debug.RtsDebugChunksClientboundPacket;
 import com.solegendary.reignofnether.debug.RtsDebugStatsClientboundPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -60,7 +61,10 @@ import net.minecraftforge.network.simple.SimpleChannel;
 // Initialises all of the client-server packet-sending classes
 
 public final class PacketHandler {
-    private static final String PROTOCOL_VERSION = "1";
+    private static final String PROTOCOL_VERSION = ModList.get()
+            .getModContainerById("reignofnether")
+            .map(c -> c.getModInfo().getVersion().toString())
+            .orElse("dev");
 
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals,
