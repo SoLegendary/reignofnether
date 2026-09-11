@@ -60,7 +60,7 @@ Bugfixes
 [🟡] /rtsapi-set-alliance now works for FPV players
 [✔] Ghasts are no longer disarmed when flying over structure void blocks
 [✔] Fixed sometimes being able to produce duplicate heroes
-
+[✔] The spawn point for villager heroes are no longer inside solid blocks
 
 Languages
 ---------

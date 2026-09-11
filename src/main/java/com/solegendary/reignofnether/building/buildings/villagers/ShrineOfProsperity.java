@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -20,6 +17,7 @@ import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -79,5 +77,11 @@ public class ShrineOfProsperity extends ProductionBuilding {
                 ),
                 this
         );
+    }
+
+    @Override
+    public BlockPos getIndoorSpawnPoint(ServerLevel level, BuildingPlacement placement) {
+        return super.getIndoorSpawnPoint(level, placement)
+                .offset(BuildingUtils.altRotatePos(new BlockPos(0,-1,2), placement.rotation));
     }
 }
