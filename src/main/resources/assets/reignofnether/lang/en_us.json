@@ -69,10 +69,10 @@
     "item.reignofnether.edible_food_item_heal.point1": "+%d \uE007",
     "item.reignofnether.edible_food_item_absorb.point1": "+%d \uE011",
 
-    "item.reignofnether.error": "Open Shop",
-    "item.reignofnether.error": "Open Shop",
-    "item.reignofnether.error": "Open Shop",
-    "item.reignofnether.error": "Open Shop",
+    "item.reignofnether.error.use": "Can't use that item right now",
+    "item.reignofnether.error.use_on_entity": "Can't use on that unit",
+    "item.reignofnether.error.use_on_building": "Can't use on that building",
+    "item.reignofnether.error.use_on_ground": "Can't use that item there",
 
     "itemshop.reignofnether.toggle_menu": "Open Shop",
     "itemshop.reignofnether.error.out_of_stock": "Out of stock (restock in %ds)",

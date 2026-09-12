@@ -2,12 +2,14 @@ package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -60,6 +62,11 @@ public class ItemUtil {
         for (UnitItem unitItem : UnitItems.ITEMS)
             if (unitItem.uuid.equals(uuid))
                 return unitItem;
+
+        for (Item item : ForgeRegistries.ITEMS) {
+            if (item.isEdible() && EdibleFoodItem.getFoodUUID(item).equals(uuid))
+                return new EdibleFoodItem(item);
+        }
         return null;
     }
 

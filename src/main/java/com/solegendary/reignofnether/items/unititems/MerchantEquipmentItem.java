@@ -1,5 +1,8 @@
-package com.solegendary.reignofnether.items;
+package com.solegendary.reignofnether.items.unititems;
 
+import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.UnitItemBuilder;
+import com.solegendary.reignofnether.items.UnitItemType;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -12,7 +15,7 @@ public class MerchantEquipmentItem extends UnitItem {
 
     Predicate<LivingEntity> isCompatibleTarget;
 
-    protected MerchantEquipmentItem(UnitItemBuilder builder, Predicate<LivingEntity> isCompatibleTarget) {
+    public MerchantEquipmentItem(UnitItemBuilder builder, Predicate<LivingEntity> isCompatibleTarget) {
         super(builder
             .type(UnitItemType.UPGRADE)
             .sellValue(50)

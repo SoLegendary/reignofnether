@@ -2,14 +2,19 @@ package com.solegendary.reignofnether.items.unititems;
 
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 
 import static com.solegendary.reignofnether.items.UnitItems.descStr;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
@@ -21,10 +26,13 @@ public class EdibleFoodItem extends UnitItem {
 
     public EdibleFoodItem(Item item) {
          super(UnitItemBuilder.of(item)
+             .uuid(getFoodUUID(item).toString())
              .type(UnitItemType.CONSUMABLE)
              .desc(descStr("item.reignofnether.edible_food_item.desc"))
              .pointDesc(getPointDesc(item))
              .consumeOnUse()
+             .buyCost(50)
+             .sellValue(10)
              .onUse(unit -> {
                  Mob mob = (Mob) unit;
                  boolean isApple = item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE;
@@ -37,6 +45,11 @@ public class EdibleFoodItem extends UnitItem {
                  return false;
              })
          );
+    }
+
+    public static UUID getFoodUUID(Item item) {
+        ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
+        return UUID.nameUUIDFromBytes(("edible_food_item:" + id).getBytes(StandardCharsets.UTF_8));
     }
 
     private static String getPointDesc(Item item) {

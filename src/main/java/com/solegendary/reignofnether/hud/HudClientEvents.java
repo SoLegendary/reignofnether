@@ -358,7 +358,7 @@ public class HudClientEvents {
         if (isShopOpen && ItemClientEvents.ENABLED) {
             ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
             if (itemShop != null) {
-                if (isShopSelected || ItemClientEvents.openItemShop.getServedUnit() != null) {
+                if (isShopSelected || ItemClientEvents.openItemShop.getServedUnit() == HudClientEvents.hudSelectedEntity) {
                     hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, x, y));
                     renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, x, y, mouseX, mouseY));
                 }

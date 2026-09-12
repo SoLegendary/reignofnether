@@ -77,7 +77,7 @@ public interface ItemShopAddon extends BuildingAddon {
         if (((Entity) unit).level().isClientSide()) return;
 
         for (StockedShopItem shopStock : shopStocks) {
-            if (item.uuid == shopStock.item.uuid) {
+            if (item.uuid.equals(shopStock.item.uuid)) {
 
                 if (!bpl.isPosInsideBuilding(((LivingEntity) unit).getOnPos(), ItemShopPlacement.UNIT_SERVE_RANGE)) {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "itemshop.reignofnether.error.too_far_away");

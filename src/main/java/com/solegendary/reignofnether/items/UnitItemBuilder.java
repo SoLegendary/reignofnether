@@ -60,6 +60,10 @@ public class UnitItemBuilder {
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
     BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
     Predicate<Unit> onUse = null;
+    public String onUseGroundError = "item.reignofnether.error.use_on_ground";
+    public String onUseEntityError = "item.reignofnether.error.use_on_entity";
+    public String onUseBuildingError = "item.reignofnether.error.use_on_building";
+    public String onUseError = "item.reignofnether.error.use";
     boolean consumeOnUse = false;
 
     private UnitItemBuilder(Item item) {
@@ -105,6 +109,26 @@ public class UnitItemBuilder {
     /** I18n key for the short description line(s) in the tooltip's middle band. */
     public UnitItemBuilder desc(String desc) {
         this.desc = desc == null ? "" : desc;
+        return this;
+    }
+
+    public UnitItemBuilder onUseError(String onUseError) {
+        this.onUseError = onUseError == null ? "" : onUseError;
+        return this;
+    }
+
+    public UnitItemBuilder onUseEntityError(String onUseEntityError) {
+        this.onUseEntityError = onUseEntityError == null ? "" : onUseEntityError;
+        return this;
+    }
+
+    public UnitItemBuilder onUseBuildingError(String onUseBuildingError) {
+        this.onUseBuildingError = onUseBuildingError == null ? "" : onUseBuildingError;
+        return this;
+    }
+
+    public UnitItemBuilder onUseGroundError(String onUseGroundError) {
+        this.onUseGroundError = onUseGroundError == null ? "" : onUseGroundError;
         return this;
     }
 

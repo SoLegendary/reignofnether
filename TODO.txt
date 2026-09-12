@@ -18,28 +18,18 @@ Emerald Resource
     [❌] Neutrals now give emerald bounties
 
 Shops
-    [❌] Shop buy screen
-        - New floating menu opened from bottom left OR by right-clicking with hero (once in range)
-        - Add building addon - ItemShop
-        - Hero served == hudSelectedUnit
-        - Stock == items in chest in structure
+    [❌] Custom Item Shops
+        - Items placed in container blocks in a custom building's structure stocks that building as a shop
         - Custom tags:
-            - Infinite stock
-            - Unique (no stacking effects with multiples held)
+            - Max Stock
+            - Restock
             - Buy cooldown
-        [❌] When 2+ heroes selected, switching hudSelectedEntity to another hero that passes canServeUnit() should switch via packet
 
 Unit Items
     [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
         [❌] Should be visible to all players
     [❌] Add attribute modifications
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
-
-    [❌] Error messages on different usage types:
-        - use -> "Can't use that item right now"
-        - useOnEntity -> "Can't use on that unit"
-        - useOnBuilding -> "Can't use on that building"
-        - useOnGround -> "Can't use that item there"
     [❌] Mana costs
     [❌] Cooldown
 
@@ -57,7 +47,9 @@ Quality of Life
 
 Bugfixes
 --------
-
+[❌] Production items don't complete clientside when the building is unloaded?
+    - Or at least, the unit supply is not taken up clientside
+[❌] Grass blocks are tinted weirdly even when fog of war is off
 
 Languages
 ---------

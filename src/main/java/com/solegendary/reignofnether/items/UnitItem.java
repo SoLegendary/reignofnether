@@ -53,6 +53,10 @@ public abstract class UnitItem {
     public BiPredicate<Unit, LivingEntity> onUseEntity;
     public BiPredicate<Unit, BuildingPlacement> onUseBuilding;
     public Predicate<Unit> onUse;
+    public String onUseGroundError;
+    public String onUseEntityError;
+    public String onUseBuildingError;
+    public String onUseError;
     public final boolean consumeOnUse;
 
     protected UnitItem(UnitItemBuilder builder) {
@@ -72,6 +76,10 @@ public abstract class UnitItem {
         this.onUseEntity = builder.onUseEntity;
         this.onUseBuilding = builder.onUseBuilding;
         this.onUse = builder.onUse;
+        this.onUseGroundError = builder.onUseGroundError;
+        this.onUseEntityError = builder.onUseEntityError;
+        this.onUseBuildingError = builder.onUseBuildingError;
+        this.onUseError = builder.onUseError;
         this.consumeOnUse = builder.consumeOnUse;
     }
 
@@ -98,6 +106,22 @@ public abstract class UnitItem {
 
     public String getDescription() {
         return desc;
+    }
+
+    public String getUseError() {
+        return onUseError;
+    }
+
+    public String getOnUseGroundError() {
+        return onUseGroundError;
+    }
+
+    public String getOnUseEntityError() {
+        return onUseEntityError;
+    }
+
+    public String getOnUseBuildingError() {
+        return onUseBuildingError;
     }
 
     /** One string per bullet in the tooltip's passive stat list. */

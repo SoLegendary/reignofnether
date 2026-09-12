@@ -30,7 +30,7 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 null,
                 () -> ItemClientEvents.actionableUnitItemDrag == unitItem &&
                         ItemClientEvents.actionableInvIndex == invIndex &&
-                        ItemClientEvents.actionableInvUUID == ItemUtil.getUUID(itemStack),
+                        ItemClientEvents.actionableInvUUID.equals(ItemUtil.getUUID(itemStack)),
                 () -> false,
                 () -> true,
                 () -> {
