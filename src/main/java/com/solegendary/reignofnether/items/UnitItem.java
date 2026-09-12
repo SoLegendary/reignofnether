@@ -35,7 +35,7 @@ import java.util.function.Predicate;
 
 public abstract class UnitItem {
 
-    public static final boolean ENABLED = true;
+    public static final boolean ENABLED = false;
 
     protected final Item item;
     public final UUID uuid;
@@ -58,6 +58,8 @@ public abstract class UnitItem {
     public String onUseBuildingError;
     public String onUseError;
     public final boolean consumeOnUse;
+    public int manaCost;
+    public int cooldownTicks;
 
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
@@ -81,6 +83,8 @@ public abstract class UnitItem {
         this.onUseBuildingError = builder.onUseBuildingError;
         this.onUseError = builder.onUseError;
         this.consumeOnUse = builder.consumeOnUse;
+        this.manaCost = builder.manaCost;
+        this.cooldownTicks = builder.cooldownTicks;
     }
 
     public Item getItem() {

@@ -20,6 +20,8 @@ public enum BuildingAction {
     CANCEL_BACK_PRODUCTION, // remove ProductionItem from back of queue
     CHECK_STOCKPILE_CHEST, // check stockpile chests for resources to consume
     CHANGE_PORTAL, // changes a portal clientside to match server when another player upgrades it
+    CHANGE_BEACON,
+    CHANGE_STRUCTURE,
     REQUEST_REPLACEMENT, // if the client is missing a building for some reason, ask the server to resend a PLACE packet
     REQUEST_PRODUCTION_SYNC, // request that any-in progress production be resynced to client
     CLEAR_PRODUCTION // run when a serverside building completes its last production item to resync the client's queue

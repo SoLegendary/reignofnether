@@ -28,10 +28,13 @@ Shops
 Unit Items
     [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
         [❌] Should be visible to all players
-    [❌] Add attribute modifications
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
+
     [❌] Mana costs
     [❌] Cooldown
+        - Tie cooldown to item slot and prevent inventory actions on that slot if there is a cooldown active
+    [❌] Attribute modifiers
+        - Ensure attack animations match bonus attack speeds
 
 
 Balance

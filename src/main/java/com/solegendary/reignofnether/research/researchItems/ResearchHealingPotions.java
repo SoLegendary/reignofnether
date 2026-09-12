@@ -27,11 +27,9 @@ public class ResearchHealingPotions extends ProductionItem {
 
     public ResearchHealingPotions() {
         super(cost, ProdDupeRule.DISALLOW);
-        this.onComplete = (Level level, ProductionPlacement building) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(building.ownerName, ProductionItems.RESEARCH_HEALING_POTIONS);
-            } else {
-                ResearchServerEvents.addResearch(building.ownerName, ProductionItems.RESEARCH_HEALING_POTIONS);
+        this.onComplete = (Level level, ProductionPlacement placement) -> {
+            if (!level.isClientSide()) {
+                ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_HEALING_POTIONS);
             }
         };
     }

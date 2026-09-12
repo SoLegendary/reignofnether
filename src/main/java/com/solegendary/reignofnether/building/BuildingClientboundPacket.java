@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
@@ -123,6 +124,46 @@ public class BuildingClientboundPacket {
                         0,
                         false,
                         type,
+                        new BlockPos(0,0,0)
+                )
+        );
+    }
+
+    public static void changeBeacon(BlockPos buildingPos, int upgradeLevel) {
+        sendFiltered(buildingPos,
+                new BuildingClientboundPacket(BuildingAction.CHANGE_BEACON,
+                        EMPTY,
+                        "",
+                        buildingPos,
+                        Rotation.NONE,
+                        "",
+                        0,
+                        0,
+                        0,
+                        false,
+                        upgradeLevel,
+                        false,
+                        PortalPlacement.PortalType.BASIC,
+                        new BlockPos(0,0,0)
+                )
+        );
+    }
+
+    public static void changeStructure(BlockPos buildingPos, String structureName) {
+        sendFiltered(buildingPos,
+                new BuildingClientboundPacket(BuildingAction.CHANGE_BEACON,
+                        EMPTY,
+                        structureName,
+                        buildingPos,
+                        Rotation.NONE,
+                        "",
+                        0,
+                        0,
+                        0,
+                        false,
+                        0,
+                        false,
+                        PortalPlacement.PortalType.BASIC,
                         new BlockPos(0,0,0)
                 )
         );
@@ -276,6 +317,14 @@ public class BuildingClientboundPacket {
                         if (building instanceof PortalPlacement portal) {
                             portal.changePortalStructure(portalType);
                         }
+                    }
+                    case CHANGE_BEACON -> {
+                        if (building instanceof BeaconPlacement beacon) {
+                            beacon.changeBeaconStructure(upgradeLevel);
+                        }
+                    }
+                    case CHANGE_STRUCTURE -> {
+                        building.changeStructure(itemName);
                     }
                     case REMOVE -> {
                         BuildingClientEvents.removeBuilding(buildingPos);

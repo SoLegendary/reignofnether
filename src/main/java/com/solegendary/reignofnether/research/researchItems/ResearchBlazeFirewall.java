@@ -28,9 +28,7 @@ public class ResearchBlazeFirewall extends ProductionItem {
     public ResearchBlazeFirewall() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_BLAZE_FIREWALL);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_BLAZE_FIREWALL);
             }
         };

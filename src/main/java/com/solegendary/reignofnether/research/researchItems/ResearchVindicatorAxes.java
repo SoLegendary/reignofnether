@@ -31,9 +31,7 @@ public class ResearchVindicatorAxes extends ProductionItem {
     public ResearchVindicatorAxes() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_VINDICATOR_AXES);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_VINDICATOR_AXES);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
                     if (unit instanceof VindicatorUnit vUnit && vUnit.getOwnerName().equals(placement.ownerName)) {

@@ -28,9 +28,7 @@ public class ResearchWitherClouds extends ProductionItem {
     public ResearchWitherClouds() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_WITHER_CLOUDS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_WITHER_CLOUDS);
             }
         };

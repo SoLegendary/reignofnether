@@ -28,9 +28,7 @@ public class ResearchHoglinCavalry extends ProductionItem {
     public ResearchHoglinCavalry() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_HOGLIN_CAVALRY);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_HOGLIN_CAVALRY);
             }
         };

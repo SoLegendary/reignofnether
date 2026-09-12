@@ -34,9 +34,7 @@ public class ResearchSculkAmplifiers extends ProductionItem {
     public ResearchSculkAmplifiers() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide())
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_SCULK_AMPLIFIERS);
-            else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_SCULK_AMPLIFIERS);
             }
         };

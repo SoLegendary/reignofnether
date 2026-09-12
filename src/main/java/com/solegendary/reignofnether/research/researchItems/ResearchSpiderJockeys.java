@@ -30,9 +30,7 @@ public class ResearchSpiderJockeys extends ProductionItem {
     public ResearchSpiderJockeys() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_SPIDER_JOCKEYS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_SPIDER_JOCKEYS);
             }
         };

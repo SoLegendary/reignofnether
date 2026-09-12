@@ -33,13 +33,7 @@ public class ResearchResourceCapacity extends ProductionItem {
     public ResearchResourceCapacity() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_RESOURCE_CAPACITY);
-                for (LivingEntity unit : UnitClientEvents.getAllUnits())
-                    if (unit instanceof WorkerUnit) {
-                        ((Unit) unit).setupEquipmentAndUpgradesClient();
-                    }
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_RESOURCE_CAPACITY);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
                     if (unit instanceof WorkerUnit) {

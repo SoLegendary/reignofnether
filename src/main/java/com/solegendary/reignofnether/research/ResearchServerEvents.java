@@ -77,6 +77,7 @@ public class ResearchServerEvents {
 
     public static void addResearch(String playerName, ResourceLocation researchItemName) {
         researchItems.add(new Pair<>(playerName, researchItemName));
+        ResearchClientboundPacket.addResearch(playerName, researchItemName.toString());
         saveResearch();
     }
 

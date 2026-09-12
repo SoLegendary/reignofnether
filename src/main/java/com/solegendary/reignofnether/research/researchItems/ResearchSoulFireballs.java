@@ -28,9 +28,7 @@ public class ResearchSoulFireballs extends ProductionItem {
     public ResearchSoulFireballs() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_SOUL_FIREBALLS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_SOUL_FIREBALLS);
             }
         };

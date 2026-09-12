@@ -35,9 +35,7 @@ public class ResearchHusks extends ProductionItem {
     public ResearchHusks() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_HUSKS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_HUSKS);
 
                 // convert all zombies into husks with the same stats/inventory/etc.

@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProdDupeRule;
@@ -26,11 +27,10 @@ public class ResearchBeaconLevel2 extends ProductionItem {
     public ResearchBeaconLevel2() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (placement instanceof BeaconPlacement beacon) {
+            if (!level.isClientSide() && placement instanceof BeaconPlacement beacon) {
                 beacon.changeBeaconStructure(2);
-                if (!level.isClientSide()) {
-                    beacon.sendWarning("upgraded_warning");
-                }
+                beacon.sendWarning("upgraded_warning");
+                BuildingClientboundPacket.changeBeacon(beacon.originPos, 2);
             }
         };
     }

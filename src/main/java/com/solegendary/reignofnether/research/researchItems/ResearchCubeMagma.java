@@ -28,9 +28,7 @@ public class ResearchCubeMagma extends ProductionItem {
     public ResearchCubeMagma() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_CUBE_MAGMA);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_CUBE_MAGMA);
             }
         };

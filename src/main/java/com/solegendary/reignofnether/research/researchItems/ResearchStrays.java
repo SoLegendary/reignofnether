@@ -35,9 +35,7 @@ public class ResearchStrays extends ProductionItem {
     public ResearchStrays() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_STRAYS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_STRAYS);
 
                 // convert all skeletons into strays with the same stats/inventory/etc.

@@ -28,9 +28,7 @@ public class ResearchEvokerVexes extends ProductionItem {
     public ResearchEvokerVexes() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_EVOKER_VEXES);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_EVOKER_VEXES);
             }
         };
