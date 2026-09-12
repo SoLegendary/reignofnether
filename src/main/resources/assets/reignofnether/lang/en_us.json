@@ -69,6 +69,11 @@
     "item.reignofnether.edible_food_item_heal.point1": "+%d \uE007",
     "item.reignofnether.edible_food_item_absorb.point1": "+%d \uE011",
 
+    "item.reignofnether.error": "Open Shop",
+    "item.reignofnether.error": "Open Shop",
+    "item.reignofnether.error": "Open Shop",
+    "item.reignofnether.error": "Open Shop",
+
     "itemshop.reignofnether.toggle_menu": "Open Shop",
     "itemshop.reignofnether.error.out_of_stock": "Out of stock (restock in %ds)",
     "itemshop.reignofnether.error.full_inventory": "Inventory is full",

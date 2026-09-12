@@ -35,6 +35,8 @@ import java.util.function.Predicate;
 
 public abstract class UnitItem {
 
+    public static final boolean ENABLED = true;
+
     protected final Item item;
     public final UUID uuid;
     public final ResourceLocation iconRl;

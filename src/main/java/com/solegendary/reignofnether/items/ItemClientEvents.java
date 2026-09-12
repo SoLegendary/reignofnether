@@ -41,7 +41,7 @@ import java.util.UUID;
 
 public class ItemClientEvents {
 
-    public static final boolean ENABLED = false;
+    public static final boolean ENABLED = UnitItem.ENABLED;
 
     private static final Minecraft MC = Minecraft.getInstance();
 

@@ -111,6 +111,7 @@ public interface ItemShopAddon extends BuildingAddon {
                     shopStock.stock -= 1;
                     ResourcesServerEvents.addSubtractResources(Resources.emeralds(unit.getOwnerName(), item.buyCost));
                     SoundClientboundPacket.playSoundAtPos(SoundAction.SELL_ITEM, ((LivingEntity) unit).getOnPos());
+                    ItemShopClientboundPacket.syncItemShopStock(bpl.originPos, bpl.getStockedItems());
                 } else {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "itemshop.reignofnether.error.failed_other");
                 }

@@ -1,5 +1,5 @@
 
-1.20.1-1.4.4b
+1.20.1-1.4.4c
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -57,7 +57,7 @@ Quality of Life
 
 Bugfixes
 --------
-- Servers will no longer produce a
+
 
 Languages
 ---------

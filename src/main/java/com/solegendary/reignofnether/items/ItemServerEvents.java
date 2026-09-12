@@ -21,7 +21,7 @@ import java.util.UUID;
 
 public class ItemServerEvents {
 
-    public static final boolean ENABLED = false;
+    public static final boolean ENABLED = UnitItem.ENABLED;
 
     public static void buyItem(
             Unit unit,

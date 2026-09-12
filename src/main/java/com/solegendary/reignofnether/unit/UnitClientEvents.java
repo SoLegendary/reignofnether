@@ -417,6 +417,7 @@ public class UnitClientEvents {
                     HudClientEvents.hudSelectedEntity.getId(),
                     BuildingClientEvents.getPreselectedBuilding().originPos
             );
+            return;
         }
         // pickup item
         else if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&

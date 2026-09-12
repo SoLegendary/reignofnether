@@ -174,8 +174,14 @@ public class HudClientEvents {
 
     public static void setHudSelectedEntity(LivingEntity entity) {
         hudSelectedEntity = entity;
-    }
 
+        // if in range of an itemshop, switch that shop to serve this unit
+        if (ItemClientEvents.ENABLED && ItemClientEvents.openItemShop != null && hudSelectedEntity instanceof HeroUnit heroUnit)
+            for (BuildingPlacement bpl : BuildingClientEvents.getBuildings())
+                if (bpl instanceof ItemShopPlacement shopBpl)
+                    if (shopBpl.setServedUnit(heroUnit))
+                        break;
+    }
 
     // not to be used for resource paths
     public static String getModifiedEntityName(LivingEntity entity) {
@@ -352,8 +358,7 @@ public class HudClientEvents {
         if (isShopOpen && ItemClientEvents.ENABLED) {
             ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
             if (itemShop != null) {
-                boolean servedHeroSelected = hudSelectedEntity != null && hudSelectedEntity == ItemClientEvents.openItemShop.getServedUnit();
-                if (isShopSelected || servedHeroSelected) {
+                if (isShopSelected || ItemClientEvents.openItemShop.getServedUnit() != null) {
                     hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, x, y));
                     renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, x, y, mouseX, mouseY));
                 }
@@ -1991,7 +1996,7 @@ public class HudClientEvents {
     // hudSelectedEntity and portraitRendererUnit should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Post<? extends LivingEntity, ? extends Model> evt) {
         if (hudSelectedEntity != null && hudSelectedEntity.isRemoved())
-            hudSelectedEntity = null;
+            setHudSelectedEntity(null);
 
         ArrayList<LivingEntity> units = UnitClientEvents.getSortedSelectedUnits();
 
