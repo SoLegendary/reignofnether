@@ -17,9 +17,9 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 // units and/or research tech that a ProductionBuilding can produce
 public abstract class ProductionItem {
@@ -42,6 +42,16 @@ public abstract class ProductionItem {
     public ProductionItem(ResourceCost cost) {
         this.defaultCost = cost;
         this.dupeRule = ProdDupeRule.ALLOW;
+    }
+
+    // is the player allowed to start this production item?
+    public boolean canProduce(Level level, String ownerName) {
+        return getProduceErrorMsg(level, ownerName) == null;
+    }
+
+    @Nullable
+    public String getProduceErrorMsg(Level level, String ownerName) {
+        return null;
     }
 
     // allows for dynamic costs in subclasses
