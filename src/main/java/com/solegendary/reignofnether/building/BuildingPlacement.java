@@ -1259,7 +1259,8 @@ public class BuildingPlacement {
         ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocksFromNbt(newStructureName, this.getLevel());
         setBlocks(getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation));
         refreshBlocks();
-        BuildingClientboundPacket.changeStructure(originPos, newStructureName);
+        if (!level.isClientSide())
+            BuildingClientboundPacket.changeStructure(originPos, newStructureName);
     }
 
     protected boolean checkAndDoCapture(ServerLevel serverLevel) {
