@@ -151,7 +151,7 @@ public class BuildingClientboundPacket {
 
     public static void changeStructure(BlockPos buildingPos, String structureName) {
         sendFiltered(buildingPos,
-                new BuildingClientboundPacket(BuildingAction.CHANGE_BEACON,
+                new BuildingClientboundPacket(BuildingAction.CHANGE_STRUCTURE,
                         EMPTY,
                         structureName,
                         buildingPos,

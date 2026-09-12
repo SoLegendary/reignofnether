@@ -50,6 +50,7 @@ Quality of Life
 
 Bugfixes
 --------
+[✔] Improved syncing of upgrades between server and client
 [❌] Production items don't complete clientside when the building is unloaded?
     - Or at least, the unit supply is not taken up clientside
 [❌] Grass blocks are tinted weirdly even when fog of war is off
