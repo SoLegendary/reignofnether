@@ -7,10 +7,13 @@ import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.List;
+import java.util.UUID;
 
 public class UnitItems {
 
@@ -55,7 +58,7 @@ public class UnitItems {
     public static final UnitItem DIAMOND_SWORD = UnitItemBuilder.of(Items.DIAMOND_SWORD)
             .uuid("ff7b52b8-2689-452e-8ac1-2527b11aa9f7")
             .type(UnitItemType.PASSIVE)
-            .enchant(Enchantments.SHARPNESS, 1)
+            .attribute(Attributes.MOVEMENT_SPEED, 0.05)
             .buyCost(300)
             .sellValue(150)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/diamond_sword.png"))

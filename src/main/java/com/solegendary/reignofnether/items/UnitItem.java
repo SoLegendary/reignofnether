@@ -10,12 +10,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiPredicate;
@@ -50,7 +52,7 @@ public abstract class UnitItem {
     public boolean enableTooltip;
     protected final List<Pair<Enchantment, Integer>> enchantments;
     protected final List<String> pointDescs;
-    public final List<AttributeModifier> getAttributeModifiers;
+    public final HashMap<Attribute, AttributeModifier> attributes;
     public BiPredicate<Unit, BlockPos> onUseGround;
     public BiPredicate<Unit, LivingEntity> onUseEntity;
     public BiPredicate<Unit, BuildingPlacement> onUseBuilding;
@@ -74,7 +76,7 @@ public abstract class UnitItem {
         this.enchantments = List.copyOf(builder.enchantments);
         this.pointDescs = List.copyOf(builder.pointDescs);
         this.enableTooltip = builder.enableTooltip;
-        this.getAttributeModifiers = builder.attributeModifiers;
+        this.attributes = builder.attributes;
         this.onUseGround = builder.onUseGround;
         this.onUseEntity = builder.onUseEntity;
         this.onUseBuilding = builder.onUseBuilding;

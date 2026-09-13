@@ -113,7 +113,7 @@ public class ResourcesServerEvents {
                 r.food + r.foodToAdd + unitFood + prodFood,
                 r.wood + r.woodToAdd + unitWood + prodWood,
                 r.ore + r.oreToAdd + unitOre + prodOre,
-                r.emerald + r.emerald + unitEmerald + prodEmerald
+                r.emerald + r.emeraldToAdd + unitEmerald + prodEmerald
             ));
             //ReignOfNether.LOGGER.info("saved resources in serverevents: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
         });

@@ -295,6 +295,7 @@ public abstract class AbstractUnitItemButton extends Button {
     // draws an icon + number footer stat at (x, y), vertically centred on the icon; returns its on-screen width
     protected static int drawStat(GuiGraphics guiGraphics, Font font, ResourceLocation icon,
                                   String text, Style style, int x, int y, float scale) {
+        if (text == null) return 0;
         guiGraphics.blit(icon, x, y - 1, 0, 0, STAT_ICON_SIZE, STAT_ICON_SIZE, STAT_ICON_SIZE, STAT_ICON_SIZE);
         int textX = x + STAT_ICON_SIZE + STAT_ICON_GAP;
         FormattedCharSequence seq = Component.literal(text).withStyle(style).getVisualOrderText();

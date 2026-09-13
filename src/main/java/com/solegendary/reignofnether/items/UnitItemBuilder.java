@@ -7,12 +7,14 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiPredicate;
@@ -56,7 +58,7 @@ public class UnitItemBuilder {
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     final List<String> pointDescs = new ArrayList<>();
-    final List<AttributeModifier> attributeModifiers = new ArrayList<>();
+    final HashMap<Attribute, AttributeModifier> attributes = new HashMap<>();
     BiPredicate<Unit, BlockPos> onUseGround = null;
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
     BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
@@ -179,15 +181,13 @@ public class UnitItemBuilder {
     }
 
     /** Adds one attribute modifier applied while the item is held; call once per modifier. */
-    public UnitItemBuilder attributeModifier(AttributeModifier modifier) {
-        if (modifier != null)
-            this.attributeModifiers.add(modifier);
+    public UnitItemBuilder attribute(Attribute attribute, double amount, AttributeModifier.Operation operation) {
+        this.attributes.put(attribute, new AttributeModifier(UUID.randomUUID().toString(), amount, operation));
         return this;
     }
 
-    public UnitItemBuilder attributeModifiers(AttributeModifier... modifiers) {
-        for (AttributeModifier modifier : modifiers)
-            attributeModifier(modifier);
+    public UnitItemBuilder attribute(Attribute attribute, double amount) {
+        this.attributes.put(attribute, new AttributeModifier(UUID.randomUUID().toString(), amount, AttributeModifier.Operation.ADDITION));
         return this;
     }
 

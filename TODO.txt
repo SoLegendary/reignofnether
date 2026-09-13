@@ -15,6 +15,7 @@ Emerald Resource
     [❌] Markets can be built at the start of the game, but upgraded to unlock resource buying
     [🟡] Neutrals now give emerald bounties
 
+
 Shops
     [❌] Custom Item Shops
         - Items placed in container blocks in a custom building's structure stocks that building as a shop

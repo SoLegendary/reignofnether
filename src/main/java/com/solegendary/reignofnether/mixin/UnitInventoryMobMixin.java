@@ -14,10 +14,12 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -85,12 +88,16 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Override
     public void set(int index, ItemStack stack) {
+        ItemStack old = this.unitItems.get(index);
+        if (!old.isEmpty()) ron$removeItemAttributes(old);
         if (stack != null) {
             CompoundTag tag = stack.getOrCreateTag();
             if (!tag.hasUUID("uuid"))
                 tag.putUUID("uuid", UUID.randomUUID());
         }
-        this.unitItems.set(index, stack == null ? ItemStack.EMPTY : stack);
+        ItemStack newStack = stack == null ? ItemStack.EMPTY : stack;
+        this.unitItems.set(index, newStack);
+        if (!newStack.isEmpty()) ron$applyItemAttributes(newStack);
         syncToClient();
     }
 
@@ -279,6 +286,51 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         return true;
     }
 
+    @Unique
+    private void ron$applyItemAttributes(ItemStack stack) {
+        if (this.level().isClientSide() || stack.isEmpty()) return;
+        UnitItem unitItem = ItemUtil.getUnitItem(stack);
+        if (unitItem == null || unitItem.attributes.isEmpty()) return;
+
+        UUID itemUuid = stack.getOrCreateTag().getUUID("uuid");
+        int i = 0;
+        for (Attribute attr : unitItem.attributes.keySet()) {
+            AttributeModifier modifier =  unitItem.attributes.get(attr);
+            AttributeInstance instance = this.getAttribute(attr);
+            if (instance != null) {
+                UUID modUuid = ron$deriveModifierUUID(itemUuid, i);
+                if (instance.getModifier(modUuid) == null) { // idempotency guard
+                    instance.addTransientModifier(new AttributeModifier(
+                            modUuid, "reignofnether:item:" + i,
+                            modifier.getAmount(), modifier.getOperation()));
+                }
+            }
+            i++;
+        }
+    }
+
+    @Unique
+    private void ron$removeItemAttributes(ItemStack stack) {
+        if (this.level().isClientSide() || stack.isEmpty()) return;
+        UnitItem unitItem = ItemUtil.getUnitItem(stack);
+        CompoundTag tag = stack.getTag();
+        if (unitItem == null || tag == null || !tag.hasUUID("uuid")) return;
+
+        UUID itemUuid = tag.getUUID("uuid");
+        int i = 0;
+        for (Attribute attribute : unitItem.attributes.keySet()) {
+            AttributeInstance instance = this.getAttribute(attribute);
+            if (instance != null)
+                instance.removeModifier(ron$deriveModifierUUID(itemUuid, i));
+            i++;
+        }
+    }
+
+    @Unique
+    private static UUID ron$deriveModifierUUID(UUID itemUuid, int modifierIndex) {
+        return UUID.nameUUIDFromBytes((itemUuid + "#" + modifierIndex).getBytes(StandardCharsets.UTF_8));
+    }
+
     private boolean canAffordManaCost(UnitItem unitItem) {
         if (unitItem.manaCost <= 0)
             return true;
@@ -318,9 +370,9 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         if (!tag.contains(RON$UNIT_ITEMS_KEY, Tag.TAG_LIST)) return;
         ListTag list = tag.getList(RON$UNIT_ITEMS_KEY, Tag.TAG_COMPOUND);
         for (int i = 0; i < this.unitItems.size(); i++) {
-            this.unitItems.set(i, i < list.size()
-                    ? ItemStack.of(list.getCompound(i))
-                    : ItemStack.EMPTY);
+            ItemStack stack = i < list.size() ? ItemStack.of(list.getCompound(i)) : ItemStack.EMPTY;
+            this.unitItems.set(i, stack);
+            if (!stack.isEmpty()) ron$applyItemAttributes(stack);
         }
     }
 
