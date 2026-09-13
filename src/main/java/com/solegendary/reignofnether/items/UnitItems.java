@@ -2,20 +2,15 @@ package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
+import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
-import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.List;
-import java.util.UUID;
 
 public class UnitItems {
 

@@ -24,9 +24,7 @@ public class ResearchUpgradedWindcallers extends ProductionItem {
     public ResearchUpgradedWindcallers() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_UPGRADED_WINDCALLERS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_UPGRADED_WINDCALLERS);
             }
         };

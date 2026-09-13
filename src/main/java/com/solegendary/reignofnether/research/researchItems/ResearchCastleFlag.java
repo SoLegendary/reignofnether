@@ -27,7 +27,7 @@ public class ResearchCastleFlag extends ProductionItem {
     public ResearchCastleFlag() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (placement.getBuilding() instanceof Castle) {
+            if (!level.isClientSide() && placement.getBuilding() instanceof Castle) {
                 placement.changeStructure(Castle.upgradedStructureName);
             }
         };

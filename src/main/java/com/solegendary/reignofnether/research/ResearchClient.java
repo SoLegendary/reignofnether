@@ -30,7 +30,7 @@ public class ResearchClient {
 
     public static void addResearch(String ownerName, ResourceLocation researchItemName) {
         synchronized (researchItems) {
-            if (MC.player != null && MC.player.getName().getString().equals(ownerName)) {
+            if (MC.player != null && MC.player.getName().getString().equals(ownerName) && !researchItems.contains(researchItemName)) {
                 researchItems.add(researchItemName);
                 HudClientEvents.showTemporaryMessage(I18n.get(
                     "research.reignofnether.upgrade_completed",

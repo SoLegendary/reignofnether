@@ -31,9 +31,7 @@ public class ResearchBruteShields extends ProductionItem {
     public ResearchBruteShields() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_BRUTE_SHIELDS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_BRUTE_SHIELDS);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
                     if (unit instanceof BruteUnit vUnit && vUnit.getOwnerName().equals(placement.ownerName)) {

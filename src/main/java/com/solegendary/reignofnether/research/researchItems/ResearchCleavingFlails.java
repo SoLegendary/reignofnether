@@ -24,9 +24,7 @@ public class ResearchCleavingFlails extends ProductionItem {
     public ResearchCleavingFlails() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_CLEAVING_FLAILS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_CLEAVING_FLAILS);
             }
         };

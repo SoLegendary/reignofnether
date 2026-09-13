@@ -4,15 +4,23 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.hud.buttons.UnitItemShopButton;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.*;
+
+import static com.solegendary.reignofnether.util.MiscUtil.capitaliseAndSpace;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 /**
  * Renders the HUD menu for a building implementing {@link ItemShopAddon}: a title, a close
@@ -80,13 +88,13 @@ public class ItemShopMenu {
         ArrayList<Button> allButtons = new ArrayList<>();
         int contentX = x + PANEL_INSET;
         int contentY = y + PANEL_INSET;
-        allButtons.add(renderTitleAndCloseButton(guiGraphics, contentX, contentY, mouseX, mouseY));
+        allButtons.addAll(renderTitleAndButtons(guiGraphics, bpl, contentX, contentY, mouseX, mouseY));
         allButtons.addAll(renderShopItemButtons(guiGraphics, bpl, shop, stocks, contentX, contentY + HEADER_HEIGHT, mouseX, mouseY));
         return allButtons;
     }
 
-    /** Draws the "Item Shop" title top-left and a close button top-right; returns the close button. */
-    private static Button renderTitleAndCloseButton(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
+    /** Draws the "Item Shop" title top-left, served unit and close button top-right; returns the buttons. */
+    private static List<Button> renderTitleAndButtons(GuiGraphics guiGraphics, ItemShopPlacement bpl, int x, int y, int mouseX, int mouseY) {
         guiGraphics.drawString(
                 MC.font,
                 "Item Shop", // title text as specified; not pulled through I18n since no lang key was given for it
@@ -94,6 +102,30 @@ public class ItemShopMenu {
                 y + TITLE_Y_OFFSET,
                 0xFFFFFF
         );
+
+        List<Button> buttons = new ArrayList<>();
+        int closeButtonX = x + MENU_WIDTH - Button.itemIconSize - TITLE_X_OFFSET;
+
+        // served-unit button (same mobhead-icon pattern as HudClientEvents' unit icon buttons)
+        Unit servedUnit = bpl.getServedUnit();
+        if (servedUnit instanceof LivingEntity servedEntity) {
+            String unitName = MiscUtil.getEntityIconName(servedEntity);
+            ResourceLocation iconRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,
+                    "textures/mobheads/" + unitName + (servedEntity.isVehicle() ? "_half.png" : ".png"));
+
+            Button servingButton = new ButtonBuilder("Serving Unit")
+                    .iconSize(Button.itemIconSize)
+                    .iconResource(iconRl)
+                    .onLeftClick(bpl::cycleServedUnit)
+                    .tooltipLines(List.of(fcs("Serving: " + capitaliseAndSpace(HudClientEvents.getModifiedEntityName(servedEntity)))))
+                    .build();
+
+            servingButton.frameResource = null;
+
+            int servingButtonX = closeButtonX - Button.itemIconSize - TITLE_X_OFFSET - 2;
+            renderButton(guiGraphics, servingButton, servingButtonX, y, mouseX, mouseY);
+            buttons.add(servingButton);
+        }
 
         Button closeButton = new Button(
                 "Close Item Shop Menu",
@@ -108,8 +140,10 @@ public class ItemShopMenu {
                 List.of()
         );
         closeButton.frameResource = null;
-        renderButton(guiGraphics, closeButton, x + MENU_WIDTH - Button.itemIconSize - TITLE_X_OFFSET, y, mouseX, mouseY);
-        return closeButton;
+        renderButton(guiGraphics, closeButton, closeButtonX, y, mouseX, mouseY);
+        buttons.add(closeButton);
+
+        return buttons;
     }
 
     /** Tightly-packed grid of one button per stocked item, wrapping to a new row every ITEMS_PER_ROW items. */

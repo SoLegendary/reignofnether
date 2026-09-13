@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -10,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -173,11 +175,15 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
             if (unitItem != null && unitItem.onUseGround != null) {
-                if (unitItem.onUseGround.test(unit, blockPos) && unitItem.consumeOnUse) {
-                    itemStack.setCount(itemStack.getCount() - 1);
-                    if (itemStack.isEmpty())
-                        this.deleteUUID(uuid);
+                if (unitItem.onUseGround.test(unit, blockPos)) {
+                    if (unitItem.consumeOnUse) {
+                        itemStack.setCount(itemStack.getCount() - 1);
+                        if (itemStack.isEmpty())
+                            this.deleteUUID(uuid);
+                    }
                     return true;
+                } else if (!this.level().isClientSide()) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseGroundError);
                 }
             }
         }
@@ -190,11 +196,15 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
             if (unitItem != null && entity.isAlive() && unitItem.onUseEntity != null) {
-                if (unitItem.onUseEntity.test(unit, entity) && unitItem.consumeOnUse) {
-                    itemStack.setCount(itemStack.getCount() - 1);
-                    if (itemStack.isEmpty())
-                        this.deleteUUID(uuid);
+                if (unitItem.onUseEntity.test(unit, entity)) {
+                    if (unitItem.consumeOnUse) {
+                        itemStack.setCount(itemStack.getCount() - 1);
+                        if (itemStack.isEmpty())
+                            this.deleteUUID(uuid);
+                    }
                     return true;
+                } else if (!this.level().isClientSide()) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseEntityError);
                 }
             }
         }
@@ -207,11 +217,15 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
             if (unitItem != null && !building.shouldBeDestroyed() && unitItem.onUseBuilding != null) {
-                if (unitItem.onUseBuilding.test(unit, building) && unitItem.consumeOnUse) {
-                    itemStack.setCount(itemStack.getCount() - 1);
-                    if (itemStack.isEmpty())
-                        this.deleteUUID(uuid);
+                if (unitItem.onUseBuilding.test(unit, building)) {
+                    if (unitItem.consumeOnUse) {
+                        itemStack.setCount(itemStack.getCount() - 1);
+                        if (itemStack.isEmpty())
+                            this.deleteUUID(uuid);
+                    }
                     return true;
+                } else if (!this.level().isClientSide()) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseBuildingError);
                 }
             }
         }
@@ -224,11 +238,15 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
             if (unitItem != null) {
-                if (unitItem.onUse.test(unit) && unitItem.consumeOnUse) {
-                    itemStack.setCount(itemStack.getCount() - 1);
-                    if (itemStack.isEmpty())
-                        this.deleteUUID(uuid);
+                if (unitItem.onUse.test(unit)) {
+                    if (unitItem.consumeOnUse) {
+                        itemStack.setCount(itemStack.getCount() - 1);
+                        if (itemStack.isEmpty())
+                            this.deleteUUID(uuid);
+                    }
                     return true;
+                } else if (!this.level().isClientSide()) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseError);
                 }
             }
         }

@@ -60,7 +60,13 @@ public class UnitItemBuilder {
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
     BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
     Predicate<Unit> onUse = null;
+    String onUseGroundError = "item.reignofnether.error.use_on_ground";
+    String onUseEntityError = "item.reignofnether.error.use_on_entity";
+    String onUseBuildingError = "item.reignofnether.error.use_on_building";
+    String onUseError = "item.reignofnether.error.use";
     boolean consumeOnUse = false;
+    int cooldownTicks = 0;
+    int manaCost = 0;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -98,13 +104,49 @@ public class UnitItemBuilder {
 
     /** Emerald cost at shops */
     public UnitItemBuilder buyCost(int buyCost) {
+        if (sellValue < 0)
+            throw new IllegalArgumentException("sellValue must be >= 0, was " + sellValue);
         this.buyCost = buyCost;
+        return this;
+    }
+
+    public UnitItemBuilder cooldownTicks(int cooldownTicks) {
+        if (cooldownTicks < 0)
+            throw new IllegalArgumentException("cooldownTicks must be >= 0, was " + cooldownTicks);
+        this.cooldownTicks = cooldownTicks;
+        return this;
+    }
+
+    public UnitItemBuilder manaCost(int manaCost) {
+        if (manaCost < 0)
+            throw new IllegalArgumentException("manaCost must be >= 0, was " + manaCost);
+        this.manaCost = manaCost;
         return this;
     }
 
     /** I18n key for the short description line(s) in the tooltip's middle band. */
     public UnitItemBuilder desc(String desc) {
         this.desc = desc == null ? "" : desc;
+        return this;
+    }
+
+    public UnitItemBuilder onUseError(String onUseError) {
+        this.onUseError = onUseError == null ? "" : onUseError;
+        return this;
+    }
+
+    public UnitItemBuilder onUseEntityError(String onUseEntityError) {
+        this.onUseEntityError = onUseEntityError == null ? "" : onUseEntityError;
+        return this;
+    }
+
+    public UnitItemBuilder onUseBuildingError(String onUseBuildingError) {
+        this.onUseBuildingError = onUseBuildingError == null ? "" : onUseBuildingError;
+        return this;
+    }
+
+    public UnitItemBuilder onUseGroundError(String onUseGroundError) {
+        this.onUseGroundError = onUseGroundError == null ? "" : onUseGroundError;
         return this;
     }
 

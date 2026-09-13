@@ -28,9 +28,7 @@ public class ResearchLingeringPotions extends ProductionItem {
     public ResearchLingeringPotions() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_LINGERING_POTIONS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_LINGERING_POTIONS);
             }
         };

@@ -5,10 +5,13 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemShopClientboundPacket;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -25,6 +28,8 @@ public class ItemShopPlacement extends BuildingPlacement {
 
     public static final int UNIT_SERVE_RANGE = 3;
 
+    // only really needs to be used clientside
+    // server doesn't care who buys as long as they pass canServeUnit()
     private Unit servedUnit = null;
 
     public ItemShopPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks) {
@@ -44,11 +49,43 @@ public class ItemShopPlacement extends BuildingPlacement {
         return false;
     }
 
-    public void setServedUnit(Unit unit) {
+    public boolean setServedUnit(Unit unit) {
         if (canServeUnit(unit)) {
             servedUnit = unit;
             if (!level.isClientSide())
                 ItemClientboundPacket.setShopServedUnit(((LivingEntity) unit).getId(), originPos);
+            return true;
+        }
+        return false;
+    }
+
+    // all units currently in range that this shop is allowed to serve
+    public List<Unit> getServableUnits() {
+        List<Mob> mobs = MiscUtil.getEntitiesWithinAABB(
+                getAABB().inflate(UNIT_SERVE_RANGE),
+                Mob.class,
+                this.level);
+        List<Unit> servable = new ArrayList<>();
+        for (Mob mob : mobs)
+            if (mob instanceof Unit unit && canServeUnit(unit))
+                servable.add(unit);
+        return servable;
+    }
+
+    public void cycleServedUnit() {
+        List<Unit> servable = getServableUnits();
+        if (servable.isEmpty()) {
+            servedUnit = null;
+            return;
+        }
+        int curIndex = servedUnit == null ? -1 : servable.indexOf(servedUnit);
+        Unit next = servable.get((curIndex + 1) % servable.size());
+        setServedUnit(next);
+
+        if (level.isClientSide() && next instanceof LivingEntity le) {
+            Relationship rs = UnitClientEvents.getPlayerToEntityRelationship(le);
+            if (rs == Relationship.OWNED || (rs == Relationship.FRIENDLY && AlliancesClient.canControlAlly(servedUnit.getOwnerName())))
+                HudClientEvents.setHudSelectedEntity(le);
         }
     }
 

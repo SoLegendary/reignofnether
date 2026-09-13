@@ -28,9 +28,7 @@ public class ResearchAdvancedPortals extends ProductionItem {
     public ResearchAdvancedPortals() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_ADVANCED_PORTALS);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_ADVANCED_PORTALS);
             }
         };
