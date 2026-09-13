@@ -22,6 +22,7 @@ import com.solegendary.reignofnether.entities.GhastUnitFireball;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.items.ItemClientboundPacket;
+import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -90,8 +91,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
-import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_UNIT_BOUNTY_PERCENT;
-import static com.solegendary.reignofnether.resources.ResourcesServerEvents.UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
+import static com.solegendary.reignofnether.resources.ResourcesServerEvents.*;
+import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_BUILDING_BOUNTY_PERCENT;
 
 public class UnitServerEvents {
 
@@ -599,12 +600,17 @@ public class UnitServerEvents {
                 bountyPercent = lootingLevel * UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
             }
             if (bountyPercent > 0) {
+
                 ResourceCost cost = unitKilled.getCost();
-                Resources resources = new Resources(unit.getOwnerName(),
-                        (int) (cost.food * bountyPercent),
-                        (int) (cost.wood * bountyPercent),
-                        (int) (cost.ore * bountyPercent)
-                );
+                Resources resources;
+                int food = (int) (cost.food * bountyPercent);
+                int wood = (int) (cost.wood * bountyPercent);
+                int ore =  (int) (cost.ore * bountyPercent);
+                if (ItemServerEvents.ENABLED) {
+                    resources = Resources.emeralds(unit.getOwnerName(), food + wood + ore);
+                } else {
+                    resources = new Resources(unit.getOwnerName(), food, wood, ore);
+                }
                 if (resources.getTotalValue() > 0) {
                     ResourcesClientboundPacket.showFloatingText(resources, evt.getEntity().getOnPos());
                     ResourcesServerEvents.addSubtractResources(resources);

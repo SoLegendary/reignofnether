@@ -83,6 +83,30 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
             this.greyPercent = 0;
         }
         super.render(guiGraphics, x, y, mouseX, mouseY);
+        renderStackCount(guiGraphics);
+    }
+
+    private void renderStackCount(GuiGraphics guiGraphics) {
+        if (this.itemStack.getCount() > 1) {
+            String countStr = String.valueOf(this.itemStack.getCount());
+
+            int drawX = x + 8 - (countStr.length() * 4);
+            int drawY = y + iconSize;
+
+            guiGraphics.pose().pushPose();
+
+            guiGraphics.pose().translate(drawX, drawY, 0);
+            guiGraphics.pose().scale(SMALL_SCALE, SMALL_SCALE, 1.0f);
+            guiGraphics.pose().translate(-drawX, -drawY, 5);
+
+            guiGraphics.drawCenteredString(MC.font,
+                    countStr,
+                    drawX,
+                    drawY,
+                    0xFFFFFF);
+
+            guiGraphics.pose().popPose();
+        }
     }
 
     // render a translucent version of this button

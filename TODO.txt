@@ -13,9 +13,7 @@ Hero Items
 Emerald Resource
     [❌] Market trading all has to go via emeralds
     [❌] Markets can be built at the start of the game, but upgraded to unlock resource buying
-    [❌] Used to buy items from shops
-    [❌] Show in top left if you have any
-    [❌] Neutrals now give emerald bounties
+    [🟡] Neutrals now give emerald bounties
 
 Shops
     [❌] Custom Item Shops
@@ -30,8 +28,6 @@ Unit Items
         [❌] Should be visible to all players
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
-    [🟡] Mana costs
-    [🟡] Cooldown
     [❌] Attribute modifiers
         - Ensure attack animations match bonus attack speeds
 

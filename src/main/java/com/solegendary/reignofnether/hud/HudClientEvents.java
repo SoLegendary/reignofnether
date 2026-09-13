@@ -1182,13 +1182,18 @@ public class HudClientEvents {
         int resourceBlitYStart = blitY;
         int resourcePanelBottomY = blitY;
 
+        String[] resourceNames;
+        if (ItemClientEvents.ENABLED) {
+            resourceNames = new String[] { "food", "wood", "ore", "emerald", "pop" };
+        } else {
+            resourceNames = new String[] { "food", "wood", "ore", "pop" };
+        }
+
         if (resources != null && MC.player != null) {
-            for (String resourceName : new String[] { "food", "wood", "ore", "pop" }) {
+            for (String resourceName : resourceNames) {
                 ResourceLocation rl;
                 String resValueStr = "";
                 ResourceName resName;
-
-                List<FormattedCharSequence> tooltip;
 
                 switch (resourceName) {
                     case "food" -> {
@@ -1205,6 +1210,11 @@ public class HudClientEvents {
                         rl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
                         resValueStr = String.valueOf(resources.ore);
                         resName = ResourceName.ORE;
+                    }
+                    case "emerald" -> {
+                        rl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald.png");
+                        resValueStr = String.valueOf(resources.emerald);
+                        resName = ResourceName.EMERALD;
                     }
                     default -> {
                         rl = PlayerColors.getPlayerColorBedIcon(selPlayerName);
@@ -1312,8 +1322,13 @@ public class HudClientEvents {
 
             blitY = resourceBlitYStart;
             final String finalSelPlayerName = selPlayerName;
-            for (String resourceName : new String[] { "food", "wood", "ore", "population" }) {
-                String locName = I18n.get("resources.reignofnether." + resourceName);
+            String[] resourceNames2;
+            if (ItemClientEvents.ENABLED) {
+                resourceNames2 = new String[] { "food", "wood", "ore", "emerald", "population" };
+            } else {
+                resourceNames2 = new String[] { "food", "wood", "ore", "population" };
+            }
+            for (String resourceName : resourceNames2) {
                 List<FormattedCharSequence> tooltip;
                 String key = String.format("resources.reignofnether.%s", resourceName);
                 if (resourceName.equals("population")) {
@@ -1347,9 +1362,8 @@ public class HudClientEvents {
                             List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.workers_on_" + resourceName
                         ), Style.EMPTY));
                     }
-                    MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipWorkersAssigned, mouseX + 5, mouseY);
-
-
+                    if (!resourceName.equals("emerald"))
+                        MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipWorkersAssigned, mouseX + 5, mouseY);
                 }
                 blitY += iconFrameSize - 1;
             }

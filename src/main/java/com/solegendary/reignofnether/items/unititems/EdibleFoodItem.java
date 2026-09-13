@@ -33,6 +33,8 @@ public class EdibleFoodItem extends UnitItem {
              .consumeOnUse()
              .buyCost(50)
              .sellValue(10)
+             .cooldownTicks(100)
+             .defaultStackCount(3)
              .onUse(unit -> {
                  Mob mob = (Mob) unit;
                  boolean isApple = item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE;

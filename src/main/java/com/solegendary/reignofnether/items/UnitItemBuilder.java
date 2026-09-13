@@ -45,6 +45,7 @@ import java.util.function.Predicate;
 public class UnitItemBuilder {
 
     final Item item;
+    int defaultStackCount = 1;
     UUID uuid = UUID.randomUUID();
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
@@ -78,6 +79,14 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder uuid(String uuid) {
         this.uuid = UUID.fromString(uuid);
+        return this;
+    }
+
+    /** Emerald cost returned when the item is sold; 0 means unsellable. */
+    public UnitItemBuilder defaultStackCount(int defaultStackCount) {
+        if (defaultStackCount < 1)
+            throw new IllegalArgumentException("sellValue must be >= 1, was " + defaultStackCount);
+        this.defaultStackCount = defaultStackCount;
         return this;
     }
 

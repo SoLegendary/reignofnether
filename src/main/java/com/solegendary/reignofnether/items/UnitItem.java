@@ -39,6 +39,7 @@ public abstract class UnitItem {
     public static final String RON$COOLDOWN_KEY = "reignofnether:CooldownEndTick";
 
     protected final Item item;
+    public final int defaultStackCount;
     public final UUID uuid;
     public final ResourceLocation iconRl;
     public final UnitItemType type;
@@ -62,6 +63,7 @@ public abstract class UnitItem {
 
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
+        this.defaultStackCount = builder.defaultStackCount;
         this.uuid = builder.uuid;
         this.iconRl = builder.iconRl;
         this.type = builder.type;
@@ -94,6 +96,7 @@ public abstract class UnitItem {
             itemStack.enchant(pair.getFirst(), pair.getSecond());
         }
         itemStack.getOrCreateTag().putUUID("uuid", UUID.randomUUID());
+        itemStack.setCount(defaultStackCount);
         return itemStack;
     }
 
