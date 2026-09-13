@@ -60,12 +60,10 @@ public class UnitItemBuilder {
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
     BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
     Predicate<Unit> onUse = null;
-    String onUseGroundError = "item.reignofnether.error.use_on_ground";
-    String onUseEntityError = "item.reignofnether.error.use_on_entity";
-    String onUseBuildingError = "item.reignofnether.error.use_on_building";
-    String onUseError = "item.reignofnether.error.use";
+    boolean suppressDefaultError = false;
     boolean consumeOnUse = false;
-    int cooldownTicks = 0;
+    int cooldownTicksMax = 0;
+    int channelTicks = 0;
     int manaCost = 0;
 
     private UnitItemBuilder(Item item) {
@@ -113,7 +111,14 @@ public class UnitItemBuilder {
     public UnitItemBuilder cooldownTicks(int cooldownTicks) {
         if (cooldownTicks < 0)
             throw new IllegalArgumentException("cooldownTicks must be >= 0, was " + cooldownTicks);
-        this.cooldownTicks = cooldownTicks;
+        this.cooldownTicksMax = cooldownTicks;
+        return this;
+    }
+
+    public UnitItemBuilder channelTicks(int channelTicks) {
+        if (channelTicks < 0)
+            throw new IllegalArgumentException("channelTicks must be >= 0, was " + channelTicks);
+        this.channelTicks = channelTicks;
         return this;
     }
 
@@ -130,23 +135,8 @@ public class UnitItemBuilder {
         return this;
     }
 
-    public UnitItemBuilder onUseError(String onUseError) {
-        this.onUseError = onUseError == null ? "" : onUseError;
-        return this;
-    }
-
-    public UnitItemBuilder onUseEntityError(String onUseEntityError) {
-        this.onUseEntityError = onUseEntityError == null ? "" : onUseEntityError;
-        return this;
-    }
-
-    public UnitItemBuilder onUseBuildingError(String onUseBuildingError) {
-        this.onUseBuildingError = onUseBuildingError == null ? "" : onUseBuildingError;
-        return this;
-    }
-
-    public UnitItemBuilder onUseGroundError(String onUseGroundError) {
-        this.onUseGroundError = onUseGroundError == null ? "" : onUseGroundError;
+    public UnitItemBuilder suppressDefaultError(boolean suppressDefaultError) {
+        this.suppressDefaultError = suppressDefaultError;
         return this;
     }
 

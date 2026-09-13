@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.items.StockedShopItem;
@@ -26,11 +27,13 @@ public class UnitItemShopButton extends AbstractUnitItemButton {
                 () -> false,
                 () -> true,
                 () -> {
-                    if (ItemClientEvents.openItemShop != null) {
+                    if (ItemClientEvents.openItemShop != null && !ItemClientEvents.openItemShop.isDestroyedServerside) {
                         ItemShopPlacement bpl = ItemClientEvents.openItemShop;
                         ItemShopAddon itemShop = bpl.getBuilding().getActiveAddon(ItemShopAddon.class);
                         if (itemShop != null && bpl.getServedUnit() instanceof LivingEntity le) {
                             ItemServerboundPacket.buy(le.getId(), stockedShopItem.item.uuid, bpl.originPos);
+                        } else if (itemShop != null) {
+                            HudClientEvents.showTempMessageI18n("itemshop.reignofnether.error.no_buyers");
                         }
                     }
                 },

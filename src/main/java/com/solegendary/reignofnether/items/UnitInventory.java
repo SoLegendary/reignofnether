@@ -26,4 +26,5 @@ public interface UnitInventory {
     boolean useOnEntity(UUID uuid, LivingEntity entity);
     boolean useOnBuilding(UUID uuid, BuildingPlacement building);
     boolean use(UUID uuid);
+    boolean checkManaCostAndCooldown(UnitItem unitItem, ItemStack itemStack);
 }

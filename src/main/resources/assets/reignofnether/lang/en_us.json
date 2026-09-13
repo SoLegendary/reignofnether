@@ -73,6 +73,8 @@
     "item.reignofnether.error.use_on_entity": "Can't use on that unit",
     "item.reignofnether.error.use_on_building": "Can't use on that building",
     "item.reignofnether.error.use_on_ground": "Can't use that item there",
+    "item.reignofnether.error.on_cooldown": "Item is on cooldown (%ds)",
+    "item.reignofnether.error.not_enough_mana": "Not enough mana",
 
     "itemshop.reignofnether.toggle_menu": "Open Shop",
     "itemshop.reignofnether.error.out_of_stock": "Out of stock (restock in %ds)",
@@ -80,6 +82,7 @@
     "itemshop.reignofnether.error.cant_afford": "Can't afford that item",
     "itemshop.reignofnether.error.too_far_away": "Too far away",
     "itemshop.reignofnether.error.hostile_shop": "That shop is not friendly",
+    "itemshop.reignofnether.error.no_buyers": "No nearby patron",
     "itemshop.reignofnether.error.failed_other": "Failed to buy item",
 
     "attribute.reignofnether.attack_damage": "Attack Damage",
@@ -888,7 +891,7 @@
     "fogofwar.reignofnether.cpu_usage": "- Ups CPU usage (lower chunk render distance to help)",
     "fogofwar.reignofnether.to_confirm": "Use /rts-fog enable again to confirm.",
 
-    "hud.buttons.reignofnether.on_cooldown": "This ability is still on cooldown (%ds)",
+    "hud.buttons.reignofnether.on_cooldown": "Ability is on cooldown (%ds)",
     "hud.buttons.reignofnether.not_enough_mana": "Not enough mana",
 
     "hud.control_group.reignofnether.control_group": "Control Group %s (Shift + right click to remove)",

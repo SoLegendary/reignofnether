@@ -45,8 +45,19 @@ public abstract class AbstractUnitItemButton extends Button {
             .withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"))
             .withColor(TextColor.fromRgb(0x97C459));
     protected static final Style SELL_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x5DCAA5));
+    protected static final Style MANA_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x6EA8D9));
+    protected static final Style COOLDOWN_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD9C46E));
 
     protected static final String EMERALD_ICON = "\uE010";
+
+    // footer stat icons (plain textures, not font glyphs)
+    protected static final ResourceLocation MANA_ICON_RL =
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/lapis.png");
+    protected static final ResourceLocation COOLDOWN_ICON_RL =
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/clock.png");
+    protected static final int STAT_ICON_SIZE = 8; // on-screen size of footer stat icons
+    protected static final int STAT_ICON_GAP = 2; // between an icon and its number
+    protected static final int STAT_GAP = 6; // between mana stat and cooldown stat
 
     protected UnitItem unitItem;
     protected ItemStack itemStack;
@@ -155,7 +166,7 @@ public abstract class AbstractUnitItemButton extends Button {
 
         boolean hasDescGap = descLineCount > 0 && bodyLines.size() > descLineCount;
 
-        // ---- band 3: sell value ----
+        // ---- band 3: mana cost + cooldown (left) | sell value (right) ----
         FormattedCharSequence emeraldSeq = null;
         if (this.emeraldValue > 0)
             emeraldSeq = Component.literal(EMERALD_ICON).withStyle(MyRenderer.iconStyle)
@@ -163,15 +174,34 @@ public abstract class AbstractUnitItemButton extends Button {
                             .withStyle(SELL_STYLE.withFont(Style.DEFAULT_FONT)))
                     .getVisualOrderText();
 
+        boolean hasMana = unitItem.manaCost > 0;
+        boolean hasCooldown = unitItem.cooldownTicksMax > 0;
+        String manaText = hasMana ? String.valueOf(unitItem.manaCost) : null;
+        String cooldownText = hasCooldown ? (unitItem.cooldownTicksMax / 20) + "s" : null;
+
+        int footerRightWidth = emeraldSeq != null ? MyRenderer.scaledWidth(font, emeraldSeq, SMALL_SCALE) : 0;
+        int footerLeftWidth = 0;
+        if (hasMana)
+            footerLeftWidth += statWidth(font, manaText, SMALL_SCALE);
+        if (hasCooldown) {
+            if (hasMana)
+                footerLeftWidth += STAT_GAP;
+            footerLeftWidth += statWidth(font, cooldownText, SMALL_SCALE);
+        }
+
         boolean hasBody = !bodyLines.isEmpty();
-        boolean hasFooter = emeraldSeq != null;
+        boolean hasFooter = footerLeftWidth > 0 || footerRightWidth > 0;
+
+        int footerWidth = footerLeftWidth + footerRightWidth;
+        if (footerLeftWidth > 0 && footerRightWidth > 0)
+            footerWidth += MIN_COLUMN_GAP;
 
         // ---- measure (in on-screen px, so scaled lines count as scaled) ----
         int width = rowWidth(font, nameSeq, 1.0f, typeSeq, SMALL_SCALE);
         for (FormattedCharSequence line : bodyLines)
             width = Math.max(width, MyRenderer.scaledWidth(font, line, SMALL_SCALE));
         if (hasFooter)
-            width = Math.max(width, rowWidth(font, emeraldSeq, SMALL_SCALE, fcs(""), SMALL_SCALE));
+            width = Math.max(width, footerWidth);
 
         int height = LINE_HEIGHT;
         if (hasBody)
@@ -216,7 +246,22 @@ public abstract class AbstractUnitItemButton extends Button {
         if (hasFooter) {
             MyRenderer.renderTooltipDivider(guiGraphics, x, lineY, width);
             lineY += DIVIDER_HEIGHT;
-            MyRenderer.renderJustifiedRow(guiGraphics, emeraldSeq, SMALL_SCALE, fcs(""), SMALL_SCALE, x, lineY, width);
+
+            if (footerLeftWidth > 0) {
+                int statX = x;
+                if (hasMana)
+                    statX += drawStat(guiGraphics, font, COOLDOWN_ICON_RL, cooldownText, COOLDOWN_STYLE, statX, lineY, SMALL_SCALE);
+                if (hasCooldown) {
+                    if (hasMana)
+                        statX += STAT_GAP;
+                    drawStat(guiGraphics, font, MANA_ICON_RL, manaText, MANA_STYLE, statX, lineY, SMALL_SCALE);
+                }
+            }
+
+            if (emeraldSeq != null) {
+                int emeraldX = x + width - footerRightWidth;
+                MyRenderer.drawScaledString(guiGraphics, font, emeraldSeq, emeraldX, lineY, 0xFFFFFF, SMALL_SCALE);
+            }
         }
         guiGraphics.pose().popPose();
     }
@@ -240,5 +285,20 @@ public abstract class AbstractUnitItemButton extends Button {
         if (left != null && right != null)
             w += MIN_COLUMN_GAP;
         return w;
+    }
+
+    // on-screen width of an icon + number footer stat (icon, gap, then text at the given scale)
+    protected static int statWidth(Font font, String text, float scale) {
+        return STAT_ICON_SIZE + STAT_ICON_GAP + MyRenderer.scaledWidth(font, fcs(text), scale);
+    }
+
+    // draws an icon + number footer stat at (x, y), vertically centred on the icon; returns its on-screen width
+    protected static int drawStat(GuiGraphics guiGraphics, Font font, ResourceLocation icon,
+                                  String text, Style style, int x, int y, float scale) {
+        guiGraphics.blit(icon, x, y - 1, 0, 0, STAT_ICON_SIZE, STAT_ICON_SIZE, STAT_ICON_SIZE, STAT_ICON_SIZE);
+        int textX = x + STAT_ICON_SIZE + STAT_ICON_GAP;
+        FormattedCharSequence seq = Component.literal(text).withStyle(style).getVisualOrderText();
+        MyRenderer.drawScaledString(guiGraphics, font, seq, textX, y, 0xFFFFFF, scale);
+        return STAT_ICON_SIZE + STAT_ICON_GAP + MyRenderer.scaledWidth(font, seq, scale);
     }
 }

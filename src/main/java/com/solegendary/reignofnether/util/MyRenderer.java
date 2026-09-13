@@ -654,7 +654,7 @@ public class MyRenderer {
         if (!pStack.isEmpty()) {
             BakedModel bakedmodel = MC.getItemRenderer().getModel(pStack, null, null, 0);
             guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(pX + (9 * scale), pY + (9 * scale), (float)(150));
+            guiGraphics.pose().translate(pX + (9 * scale), pY + (9 * scale), 0);
             try {
                 guiGraphics.pose().mulPoseMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
                 guiGraphics.pose().scale(16.0F * scale, 16.0F * scale, 16.0F * scale);

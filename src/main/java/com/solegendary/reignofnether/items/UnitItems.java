@@ -48,7 +48,7 @@ public class UnitItems {
             .type(UnitItemType.CONSUMABLE)
             .buyCost(100)
             .sellValue(50)
-            .icon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,"textures/item/thrown_hero_experience_bottle.png"))
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft","textures/item/experience_bottle.png"))
             .desc(descStr("item.reignofnether.hero_experience_bottle.desc", EXPERIENCE_BOTTLE_EXP_VALUE))
             .build();
 

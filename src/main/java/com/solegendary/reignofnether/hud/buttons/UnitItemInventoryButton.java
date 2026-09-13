@@ -1,18 +1,21 @@
 package com.solegendary.reignofnether.hud.buttons;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.solegendary.reignofnether.items.ItemClientEvents;
-import com.solegendary.reignofnether.items.ItemServerboundPacket;
-import com.solegendary.reignofnether.items.ItemUtil;
-import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.mixin.UnitInventoryMobMixin;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -21,6 +24,8 @@ import java.util.List;
 public class UnitItemInventoryButton extends AbstractUnitItemButton {
 
     private static final float GHOST_ALPHA = 0.45f;
+
+    private Unit unit;
 
     public UnitItemInventoryButton(int invIndex, UnitItem unitItem, ItemStack itemStack, Unit unit, Keybinding hotkey) {
         super(
@@ -46,9 +51,12 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
         );
         this.iconItem = itemStack;
         this.invIndex = invIndex;
+        this.unit = unit;
 
         this.onLeftClickRelease = () -> { // actual item use actions
-            if (!ItemClientEvents.hasDragActionItem()) {
+            if (!ItemClientEvents.hasDragActionItem() && this.unit instanceof UnitInventory inv &&
+                    inv.checkManaCostAndCooldown(unitItem, itemStack)) {
+
                 if (unitItem.onUse != null) {
                     ItemServerboundPacket.use(((Entity) unit).getId(), invUUID);
                 } else if (unitItem.onUseEntity != null ||
@@ -66,7 +74,17 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
             this.hotkey = hotkey;
     }
 
-    // TODO: remove alpha, hide original button and render to move the actual button away when dragging
+    @Override
+    public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
+        if (MC.level != null && unitItem.cooldownTicksMax > 0) {
+            Long cooldownTicksLeft = ItemUtil.getCooldownTicksLeft(itemStack, ((Entity) unit).level());
+            this.greyPercent = 1 - Math.min(1f, (float) cooldownTicksLeft / unitItem.cooldownTicksMax);
+        } else {
+            this.greyPercent = 0;
+        }
+        super.render(guiGraphics, x, y, mouseX, mouseY);
+    }
+
     // render a translucent version of this button
     public void renderGhost(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         int x = mouseX - (DEFAULT_ICON_SIZE / 2);

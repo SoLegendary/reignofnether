@@ -225,10 +225,15 @@ public class UnitClientEvents {
     public static int getCurrentPopulation(String playerName) {
         int currentPopulation = 0;
         if (MC.level != null) {
+            List<Integer> allUnitIds = allUnits.stream().map(Entity::getId).toList();
             for (LivingEntity entity : allUnits) {
                 if (entity instanceof Unit unit)
                     if (unit.getOwnerName().equals(playerName))
                         currentPopulation += unit.getCost().population;
+            }
+            for (VirtualUnit virtualUnit : MinimapClientEvents.virtualUnits) {
+                if (virtualUnit.ownerName.equals(playerName) && !allUnitIds.contains(virtualUnit.id))
+                    currentPopulation += virtualUnit.population;
             }
             for (BuildingPlacement building : BuildingClientEvents.getBuildings())
                 if (building.ownerName.equals(playerName))
@@ -472,21 +477,26 @@ public class UnitClientEvents {
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view
      */
-    public static void syncUnitStats(int entityId, float health, float absorb, Vec3 pos, String ownerName) {
+    public static void syncUnitStats(int entityId, float health, float absorb, Vec3 pos, String ownerName, int population) {
+        if (MC.level == null)
+            return;
+        boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
+
         for (LivingEntity entity : allUnits) {
-            if (entity.getId() == entityId && MC.level != null) {
-                boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
+            if (entity.getId() == entityId) {
                 if (!isLoadedClientside) {
                     entity.setHealth(health);
                     entity.setPos(pos);
-                    // if the unit doesn't exist at all clientside, create a MinimapUnit to at least track its minimap position
-                    MinimapClientEvents.syncMinimapUnits(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), entityId, ownerName);
-                } else {
-                    MinimapClientEvents.removeMinimapUnit(entityId);
                 }
                 entity.setAbsorptionAmount(absorb);
                 return;
             }
+        }
+        // if the unit doesn't exist at all clientside, create a VirtualUnit to track its minimap position and population usage
+        if (!isLoadedClientside) {
+            MinimapClientEvents.syncVirtualUnits(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), entityId, ownerName, population);
+        } else {
+            MinimapClientEvents.removeVirtualUnit(entityId);
         }
     }
 
@@ -613,7 +623,7 @@ public class UnitClientEvents {
         //System.out.println("preselectedUnits removed entity: " + entityId);
         allUnits.removeIf(e -> e.getId() == entityId);
         //System.out.println("allUnits removed entity: " + entityId);
-        MinimapClientEvents.removeMinimapUnit(entityId);
+        MinimapClientEvents.removeVirtualUnit(entityId);
         markSelectedUnitsChanged();
     }
     /**
@@ -643,6 +653,7 @@ public class UnitClientEvents {
                 HeroServerboundPacket.requestHeroSync(entity.getId());
         }
         markSelectedUnitsChanged();
+        MinimapClientEvents.removeVirtualUnit(entity.getId());
     }
 
     @SuppressWarnings("SequencedCollectionMethodCanBeUsed")

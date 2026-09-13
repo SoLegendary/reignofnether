@@ -176,7 +176,10 @@ public class HudClientEvents {
         hudSelectedEntity = entity;
 
         // if in range of an itemshop, switch that shop to serve this unit
-        if (ItemClientEvents.ENABLED && ItemClientEvents.openItemShop != null && hudSelectedEntity instanceof HeroUnit heroUnit)
+        if (ItemClientEvents.ENABLED &&
+                ItemClientEvents.openItemShop != null &&
+                !ItemClientEvents.openItemShop.isDestroyedServerside &&
+                hudSelectedEntity instanceof HeroUnit heroUnit)
             for (BuildingPlacement bpl : BuildingClientEvents.getBuildings())
                 if (bpl instanceof ItemShopPlacement shopBpl)
                     if (shopBpl.setServedUnit(heroUnit))
@@ -353,7 +356,7 @@ public class HudClientEvents {
         // --------
         int x = blitX;
         int y = blitY - 150;
-        boolean isShopOpen = ItemClientEvents.openItemShop != null;
+        boolean isShopOpen = ItemClientEvents.openItemShop != null && !ItemClientEvents.openItemShop.isDestroyedServerside;
         boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
         if (isShopOpen && ItemClientEvents.ENABLED) {
             ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);

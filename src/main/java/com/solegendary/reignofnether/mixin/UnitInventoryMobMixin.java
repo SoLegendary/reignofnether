@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -10,6 +12,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -23,6 +26,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,6 +38,8 @@ import java.util.UUID;
 
 @Mixin(Mob.class)
 public abstract class UnitInventoryMobMixin extends LivingEntity implements UnitInventory {
+
+    @Shadow public abstract void restrictTo(BlockPos pPos, int pDistance);
 
     @Unique
     private static final String RON$UNIT_ITEMS_KEY = "reignofnether:UnitItems";
@@ -174,16 +180,12 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null && unitItem.onUseGround != null) {
+            if (unitItem != null && unitItem.onUseGround != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUseGround.test(unit, blockPos)) {
-                    if (unitItem.consumeOnUse) {
-                        itemStack.setCount(itemStack.getCount() - 1);
-                        if (itemStack.isEmpty())
-                            this.deleteUUID(uuid);
-                    }
+                    afterUse(unitItem, itemStack, uuid);
                     return true;
-                } else if (!this.level().isClientSide()) {
-                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseGroundError);
+                } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use_on_ground");
                 }
             }
         }
@@ -195,16 +197,12 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null && entity.isAlive() && unitItem.onUseEntity != null) {
+            if (unitItem != null && entity.isAlive() && unitItem.onUseEntity != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUseEntity.test(unit, entity)) {
-                    if (unitItem.consumeOnUse) {
-                        itemStack.setCount(itemStack.getCount() - 1);
-                        if (itemStack.isEmpty())
-                            this.deleteUUID(uuid);
-                    }
+                    afterUse(unitItem, itemStack, uuid);
                     return true;
-                } else if (!this.level().isClientSide()) {
-                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseEntityError);
+                } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use_on_entity");
                 }
             }
         }
@@ -216,16 +214,12 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null && !building.shouldBeDestroyed() && unitItem.onUseBuilding != null) {
+            if (unitItem != null && !building.shouldBeDestroyed() && unitItem.onUseBuilding != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUseBuilding.test(unit, building)) {
-                    if (unitItem.consumeOnUse) {
-                        itemStack.setCount(itemStack.getCount() - 1);
-                        if (itemStack.isEmpty())
-                            this.deleteUUID(uuid);
-                    }
+                    afterUse(unitItem, itemStack, uuid);
                     return true;
-                } else if (!this.level().isClientSide()) {
-                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseBuildingError);
+                } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use_on_building");
                 }
             }
         }
@@ -237,20 +231,68 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null) {
+            if (unitItem != null && unitItem.onUse != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUse.test(unit)) {
-                    if (unitItem.consumeOnUse) {
-                        itemStack.setCount(itemStack.getCount() - 1);
-                        if (itemStack.isEmpty())
-                            this.deleteUUID(uuid);
-                    }
+                    afterUse(unitItem, itemStack, uuid);
                     return true;
-                } else if (!this.level().isClientSide()) {
-                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), unitItem.onUseError);
+                } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use");
                 }
             }
         }
         return false;
+    }
+
+    private void afterUse(UnitItem unitItem, ItemStack itemStack, UUID uuid) {
+        if (unitItem.consumeOnUse) {
+            itemStack.setCount(itemStack.getCount() - 1);
+            if (itemStack.isEmpty())
+                this.deleteUUID(uuid);
+        }
+        if (this instanceof HeroUnit heroUnit && unitItem.manaCost > 0)
+            heroUnit.setMana(heroUnit.getMana() - unitItem.manaCost);
+        if (unitItem.cooldownTicksMax > 0)
+            itemStack.getOrCreateTag().putLong(UnitItem.RON$COOLDOWN_KEY, this.level().getGameTime() + unitItem.cooldownTicksMax);
+        syncToClient();
+    }
+
+    @Override
+    public boolean checkManaCostAndCooldown(UnitItem unitItem, ItemStack itemStack) {
+        if (!canAffordManaCost(unitItem)) {
+            if (!level().isClientSide()) {
+                HudClientboundPacket.showTempMessageI18n(((Unit) this).getOwnerName(), "item.reignofnether.error.not_enough_mana");
+            } else {
+                HudClientEvents.showTempMessageI18n("item.reignofnether.error.not_enough_mana");
+            }
+            return false;
+        }
+        if (!isOffCooldown(unitItem, itemStack)) {
+            long cooldownSecondsLeft = ItemUtil.getCooldownTicksLeft(itemStack, level()) / 20;
+            String str = Component.translatable("item.reignofnether.error.on_cooldown", cooldownSecondsLeft).getString();
+            if (!level().isClientSide()) {
+                HudClientboundPacket.showTempMessageI18n(((Unit) this).getOwnerName(), str);
+            } else {
+                HudClientEvents.showTemporaryMessage(str);
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private boolean canAffordManaCost(UnitItem unitItem) {
+        if (unitItem.manaCost <= 0)
+            return true;
+        return this instanceof HeroUnit heroUnit && heroUnit.getMana() >= unitItem.manaCost;
+    }
+
+    private boolean isOffCooldown(UnitItem unitItem, ItemStack itemStack) {
+        if (unitItem.cooldownTicksMax <= 0)
+            return true;
+        CompoundTag tag = itemStack.getTag();
+        if (tag == null || !tag.contains(UnitItem.RON$COOLDOWN_KEY))
+            return true;
+        long gameTime = this.level().isClientSide() ? TimeClientEvents.serverGameTime : this.level().getGameTime();
+        return gameTime >= tag.getLong(UnitItem.RON$COOLDOWN_KEY);
     }
 
     private void syncToClient() {

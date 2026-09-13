@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.items;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
-import com.solegendary.reignofnether.hud.buttons.UnitItemShopButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -35,7 +34,9 @@ import java.util.function.Predicate;
 
 public abstract class UnitItem {
 
-    public static final boolean ENABLED = false;
+    public static final boolean ENABLED = true;
+
+    public static final String RON$COOLDOWN_KEY = "reignofnether:CooldownEndTick";
 
     protected final Item item;
     public final UUID uuid;
@@ -53,13 +54,11 @@ public abstract class UnitItem {
     public BiPredicate<Unit, LivingEntity> onUseEntity;
     public BiPredicate<Unit, BuildingPlacement> onUseBuilding;
     public Predicate<Unit> onUse;
-    public String onUseGroundError;
-    public String onUseEntityError;
-    public String onUseBuildingError;
-    public String onUseError;
     public final boolean consumeOnUse;
     public int manaCost;
-    public int cooldownTicks;
+    public int cooldownTicksMax;
+    public int channelTicks;
+    public boolean suppressDefaultError;
 
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
@@ -78,13 +77,11 @@ public abstract class UnitItem {
         this.onUseEntity = builder.onUseEntity;
         this.onUseBuilding = builder.onUseBuilding;
         this.onUse = builder.onUse;
-        this.onUseGroundError = builder.onUseGroundError;
-        this.onUseEntityError = builder.onUseEntityError;
-        this.onUseBuildingError = builder.onUseBuildingError;
-        this.onUseError = builder.onUseError;
         this.consumeOnUse = builder.consumeOnUse;
         this.manaCost = builder.manaCost;
-        this.cooldownTicks = builder.cooldownTicks;
+        this.cooldownTicksMax = builder.cooldownTicksMax;
+        this.channelTicks = builder.channelTicks;
+        this.suppressDefaultError = builder.suppressDefaultError;
     }
 
     public Item getItem() {
@@ -110,22 +107,6 @@ public abstract class UnitItem {
 
     public String getDescription() {
         return desc;
-    }
-
-    public String getUseError() {
-        return onUseError;
-    }
-
-    public String getOnUseGroundError() {
-        return onUseGroundError;
-    }
-
-    public String getOnUseEntityError() {
-        return onUseEntityError;
-    }
-
-    public String getOnUseBuildingError() {
-        return onUseBuildingError;
     }
 
     /** One string per bullet in the tooltip's passive stat list. */

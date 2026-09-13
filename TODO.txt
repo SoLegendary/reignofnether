@@ -1,5 +1,5 @@
 
-1.20.1-1.4.4c
+1.20.1-1.4.4d
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -30,9 +30,8 @@ Unit Items
         [❌] Should be visible to all players
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
-    [❌] Mana costs
-    [❌] Cooldown
-        - Tie cooldown to item slot and prevent inventory actions on that slot if there is a cooldown active
+    [🟡] Mana costs
+    [🟡] Cooldown
     [❌] Attribute modifiers
         - Ensure attack animations match bonus attack speeds
 
@@ -50,8 +49,8 @@ Quality of Life
 
 Bugfixes
 --------
-[❌] Units don't show clientside population until loaded the first time
 [❌] Grass blocks are tinted weirdly even when fog of war is off
+[🟡] Units that spawn outside of client render range are now still counted to population totals
 
 Languages
 ---------

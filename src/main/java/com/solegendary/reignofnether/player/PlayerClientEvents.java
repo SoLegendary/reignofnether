@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.player;
 
-import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -17,7 +16,6 @@ import com.solegendary.reignofnether.hud.buttons.HelperButtons;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
@@ -317,7 +315,7 @@ public class PlayerClientEvents {
         CustomBuildingClientEvents.setCustomBuildingToEdit(null);
         AlliancesClient.resetAllAlliances();
         RTSMapInfoClientEvents.reset();
-        MinimapClientEvents.clearMinimapUnits();
+        MinimapClientEvents.clearVirtualUnits();
         PlayerDisplayClientEvents.clearAll();
         rtsPlayers.clear();
     }
