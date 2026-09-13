@@ -197,14 +197,12 @@ public abstract class ProductionItem {
             if (active.ticksLeft < 0)
                 active.ticksLeft = 0;
         }
-        if (active.ticksLeft <= 0 && isBelowPopulationSupply(placement)) {
-            this.recordScore(placement);
-            if (!active.completed) {
-                onComplete.accept(placement.getLevel(), placement);
-                active.completed = true;
-                return true;
-            }
+        if (!placement.level.isClientSide() && active.ticksLeft <= 0 && isBelowPopulationSupply(placement) && !active.completed) {
+            active.complete(placement);
+            return true;
         }
         return false;
     }
+
+
 }

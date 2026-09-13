@@ -171,8 +171,8 @@ public class BuildingProductionClientboundPacket {
                             if (!pBuilding.productionQueue.isEmpty()) {
                                 for (ActiveProduction pItem : pBuilding.productionQueue) {
                                     if (pItem.item.getItemName().equals(this.itemName) && !pItem.completed) {
-                                        pItem.completed = true;
-                                        pItem.item.onComplete.accept(pBuilding.level, pBuilding);
+                                        pItem.complete(pBuilding);
+                                        break;
                                     }
                                 }
                                 pBuilding.productionQueue.removeIf(pItem -> pItem.completed);
