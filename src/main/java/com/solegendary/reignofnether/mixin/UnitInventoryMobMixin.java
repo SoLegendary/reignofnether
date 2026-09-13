@@ -125,6 +125,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     if (!stack.isEmpty()) {
                         BehaviorUtils.throwItem(this, stack, bp.getCenter(), new Vec3(0.25f,0.25f,0.25f), 0.3F);
                     }
+                    ron$removeItemAttributes(stack);
                     this.unitItems.set(i, ItemStack.EMPTY);
                     syncToClient();
                     return true;
@@ -144,6 +145,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     if (EnchantmentHelper.hasBindingCurse(stack)) {
                         return false;
                     }
+                    ron$removeItemAttributes(stack);
                     this.unitItems.set(i, ItemStack.EMPTY);
                     syncToClient();
                     return true;
