@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,6 +16,9 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -60,7 +64,7 @@ public abstract class AbstractUnitItemButton extends Button {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/bow.png");
     protected static final int STAT_ICON_SIZE = 8; // on-screen size of footer stat icons
     protected static final int STAT_ICON_GAP = 2; // between an icon and its number
-    protected static final int STAT_GAP = 6; // between mana stat and cooldown stat
+    protected static final int STAT_GAP = 5; // between mana stat and cooldown stat
 
     protected UnitItem unitItem;
     protected ItemStack itemStack;
@@ -163,6 +167,7 @@ public abstract class AbstractUnitItemButton extends Button {
 
         List<String> points = new ArrayList<>(unitItem.getPointDescs());
         points.addAll(getEnchantmentDescs(itemStack));
+        points.addAll(getAttributeDescs(unitItem));
         for (String point : points)
             bodyLines.addAll(font.split(
                     MyRenderer.styledWithIcons(point.replace(" ", "   "), POINTS_STYLE), smallWrapWidth));
@@ -263,7 +268,7 @@ public abstract class AbstractUnitItemButton extends Button {
                     statX += drawStat(guiGraphics, font, COOLDOWN_ICON_RL, cooldownText, COOLDOWN_STYLE, statX, lineY, SMALL_SCALE);
                 if (hasCooldown) {
                     if (hasMana)
-                        statX += STAT_GAP;
+                        statX += STAT_GAP - 1;
                     statX += drawStat(guiGraphics, font, MANA_ICON_RL, manaText, MANA_STYLE, statX, lineY, SMALL_SCALE);
                 }
                 if (hasRange) {
@@ -287,6 +292,35 @@ public abstract class AbstractUnitItemButton extends Button {
         for (Map.Entry<Enchantment, Integer> entry : EnchantmentHelper.getEnchantments(itemStack).entrySet())
             descs.add(entry.getKey().getFullname(entry.getValue()).getString());
         return descs;
+    }
+
+    // "+5 Attack Damage", "+10% Movement Speed", ... from an item's flat attribute modifiers
+    private static List<String> getAttributeDescs(UnitItem unitItem) {
+        List<String> descs = new ArrayList<>();
+        for (Map.Entry<Attribute, AttributeModifier> entry : unitItem.attributes.entrySet()) {
+            Attribute attribute = entry.getKey();
+            AttributeModifier modifier = entry.getValue();
+            String descId = attribute.getDescriptionId();
+            boolean isMoveSpeed = attribute == Attributes.MOVEMENT_SPEED;
+            if (isMoveSpeed) {
+                descId = "attribute.reignofnether.tooltip.movement_speed";
+            }
+            String attrName = Component.translatable(descId).getString();
+            String valueStr = switch (modifier.getOperation()) {
+                case ADDITION -> formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
+                case MULTIPLY_BASE, MULTIPLY_TOTAL -> formatSigned(modifier.getAmount() * 100) + "%";
+            };
+            descs.add(valueStr + " " + attrName);
+        }
+        return descs;
+    }
+
+    // drops trailing ".0" on whole numbers, always shows a sign
+    private static String formatSigned(double value) {
+        String num = (value == Math.floor(value))
+                ? String.valueOf((int) value)
+                : String.valueOf(value);
+        return (value >= 0 ? "+" : "") + num;
     }
 
     // on-screen width needed to fit both halves of a justified row without them touching

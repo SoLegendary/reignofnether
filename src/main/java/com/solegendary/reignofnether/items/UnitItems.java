@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.items;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -12,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -20,6 +20,8 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 import java.util.UUID;
+
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.*;
 
 public class UnitItems {
 
@@ -58,17 +60,6 @@ public class UnitItems {
             .sellValue(50)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft","textures/item/experience_bottle.png"))
             .desc(descStr("item.reignofnether.hero_experience_bottle.desc", EXPERIENCE_BOTTLE_EXP_VALUE))
-            .build();
-
-    public static final UnitItem DIAMOND_SWORD = UnitItemBuilder.of(Items.DIAMOND_SWORD)
-            .uuid("ff7b52b8-2689-452e-8ac1-2527b11aa9f7")
-            .type(UnitItemType.PASSIVE)
-            .attribute(Attributes.MOVEMENT_SPEED, 0.05)
-            .buyCost(300)
-            .sellValue(150)
-            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/diamond_sword.png"))
-            .desc(descStr("item.reignofnether.diamond_sword.desc"))
-            .pointDesc(descStr("item.reignofnether.diamond_sword.point1"))
             .build();
 
     public static final UnitItem TOTEM_OF_UNDYING = UnitItemBuilder.of(Items.TOTEM_OF_UNDYING)

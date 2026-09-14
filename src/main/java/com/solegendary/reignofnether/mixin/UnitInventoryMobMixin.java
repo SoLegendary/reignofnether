@@ -20,6 +20,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -295,14 +296,21 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         UUID itemUuid = stack.getOrCreateTag().getUUID("uuid");
         int i = 0;
         for (Attribute attr : unitItem.attributes.keySet()) {
-            AttributeModifier modifier =  unitItem.attributes.get(attr);
+            AttributeModifier modifier = unitItem.attributes.get(attr);
             AttributeInstance instance = this.getAttribute(attr);
             if (instance != null) {
-                UUID modUuid = ron$deriveModifierUUID(itemUuid, i);
-                if (instance.getModifier(modUuid) == null) { // idempotency guard
-                    instance.addTransientModifier(new AttributeModifier(
-                            modUuid, "reignofnether:item:" + i,
-                            modifier.getAmount(), modifier.getOperation()));
+                boolean hasMovespeedMod = false;
+                for (AttributeModifier mod : instance.getModifiers())
+                    if (mod.getName().startsWith("reignofnether:item:"))
+                        hasMovespeedMod = true;
+
+                if (attr != Attributes.MOVEMENT_SPEED || !hasMovespeedMod) {
+                    UUID modUuid = ron$deriveModifierUUID(itemUuid, i);
+                    if (instance.getModifier(modUuid) == null) { // idempotency guard
+                        instance.addTransientModifier(new AttributeModifier(
+                                modUuid, "reignofnether:item:" + i,
+                                modifier.getAmount(), modifier.getOperation()));
+                    }
                 }
             }
             i++;

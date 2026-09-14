@@ -30,8 +30,7 @@ Unit Items
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
     [❌] Attribute modifiers
-        - Ensure attack animations match bonus attack speeds
-        - Automated tooltips
+        - Only allow the first movespeed modifier at a time
 
     [❌] Drinking sound/animation for potions like food
 

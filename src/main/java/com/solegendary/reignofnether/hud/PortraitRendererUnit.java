@@ -47,11 +47,9 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.AbstractIllager;
-import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
@@ -416,7 +414,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             DecimalFormat df2 = new DecimalFormat("###.##");
 
             int atkSpdColour = LIGHT_BLUE;
-            float attacksPerSecond = Math.round(attackerUnit.getAttacksPerSecond() * 100f) / 100f;
+            float attacksPerSecond = Math.round(attackerUnit.getNonBaseAttacksPerSecond() * 100f) / 100f;
             float baseAttacksPerSecond = Math.round(attackerUnit.getBaseAttacksPerSecond() * 100f) / 100f;
 
             if (attacksPerSecond > baseAttacksPerSecond) {

@@ -163,7 +163,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
     public ResourceCost getCost() {return ResourceCosts.MILITIA;}
     public boolean getWillRetaliate() {return willRetaliate;}
     public float getAttackCooldown() {return ((20 / (isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond)) * getAttackCooldownMultiplier());}
-    public float getBaseAttacksPerSecond() {return isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond;}
+    public float getNonBaseAttacksPerSecond() {return isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return isUsingBow() ? AttackerUnit.super.getAttackRange() : 2;}
     public float getUnitAttackDamage() {

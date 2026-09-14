@@ -610,6 +610,6 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     @Override
     public boolean hasBonusRange() {
-        return hasLongshot();
+        return AttackerUnit.super.hasBonusRange() || hasLongshot();
     }
 }
