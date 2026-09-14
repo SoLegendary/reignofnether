@@ -109,7 +109,6 @@ public class UnitItems {
         MERCHANT_SWORD,
         MERCHANT_CHESTPLATE,
         HERO_EXPERIENCE_BOTTLE,
-        DIAMOND_SWORD,
         TOTEM_OF_UNDYING,
         STAFF_OF_LIGHTNING
     );

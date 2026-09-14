@@ -29,9 +29,6 @@ Unit Items
         [❌] Should be visible to all players
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
-    [❌] Attribute modifiers
-        - Only allow the first movespeed modifier at a time
-
     [❌] Drinking sound/animation for potions like food
 
 
