@@ -42,8 +42,6 @@ import java.util.UUID;
 @Mixin(Mob.class)
 public abstract class UnitInventoryMobMixin extends LivingEntity implements UnitInventory {
 
-    @Shadow public abstract void restrictTo(BlockPos pPos, int pDistance);
-
     @Unique
     private static final String RON$UNIT_ITEMS_KEY = "reignofnether:UnitItems";
 

@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.FancyF
 import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.GreedIsGoodPassive;
 import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.LootExplosion;
 import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.ThrowTNT;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -374,7 +374,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }

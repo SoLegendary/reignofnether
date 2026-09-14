@@ -31,6 +31,9 @@ Unit Items
 
     [❌] Attribute modifiers
         - Ensure attack animations match bonus attack speeds
+        - Automated tooltips
+
+    [❌] Drinking sound/animation for potions like food
 
 
 Balance

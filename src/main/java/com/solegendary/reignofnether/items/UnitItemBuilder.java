@@ -13,10 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -68,6 +65,11 @@ public class UnitItemBuilder {
     int cooldownTicksMax = 0;
     int channelTicks = 0;
     int manaCost = 0;
+    float range = 0;
+    float radius = 0;
+    boolean showRangeCircle = true;
+    boolean showRangeLine = false;
+    boolean showRadiusCircle = false;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -137,6 +139,20 @@ public class UnitItemBuilder {
         if (manaCost < 0)
             throw new IllegalArgumentException("manaCost must be >= 0, was " + manaCost);
         this.manaCost = manaCost;
+        return this;
+    }
+
+    public UnitItemBuilder range(float range) {
+        if (range < 0)
+            throw new IllegalArgumentException("range must be >= 0, was " + range);
+        this.range = range;
+        return this;
+    }
+
+    public UnitItemBuilder radius(int radius) {
+        if (radius < 0)
+            throw new IllegalArgumentException("radius must be >= 0, was " + radius);
+        this.radius = radius;
         return this;
     }
 
@@ -215,6 +231,37 @@ public class UnitItemBuilder {
         this.consumeOnUse = true;
         return this;
     }
+
+    public UnitItemBuilder showRangeLine() {
+        this.showRangeLine = true;
+        return this;
+    }
+
+    public UnitItemBuilder showRadiusCircle() {
+        this.showRadiusCircle = true;
+        return this;
+    }
+
+    public UnitItemBuilder showRangeCircle(boolean show) {
+        this.showRangeCircle = show;
+        return this;
+    }
+
+    public UnitItemBuilder showRangeLine(boolean show) {
+        this.showRangeLine = show;
+        return this;
+    }
+
+    public UnitItemBuilder showRadiusCircle(boolean show) {
+        this.showRadiusCircle = show;
+        return this;
+    }
+
+    public UnitItemBuilder showRangeCircle() {
+        this.showRangeCircle = true;
+        return this;
+    }
+
 
     public UnitItem build() {
         return new BuiltUnitItem(this);

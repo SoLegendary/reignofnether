@@ -24,6 +24,7 @@ import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.custombutton.CustomButton;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientEvents;
 import com.solegendary.reignofnether.hud.buttons.*;
@@ -89,7 +90,9 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.hud.buttons.HelperButtons.*;
@@ -173,6 +176,10 @@ public class HudClientEvents {
     }
 
     public static void setHudSelectedEntity(LivingEntity entity) {
+        if (entity != hudSelectedEntity) {
+            CursorClientEvents.setLeftClickAction(null);
+            ItemClientEvents.resetActions();
+        }
         hudSelectedEntity = entity;
 
         // if in range of an itemshop, switch that shop to serve this unit

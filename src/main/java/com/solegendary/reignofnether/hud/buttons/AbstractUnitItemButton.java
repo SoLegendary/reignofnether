@@ -47,6 +47,7 @@ public abstract class AbstractUnitItemButton extends Button {
     protected static final Style SELL_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x5DCAA5));
     protected static final Style MANA_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x6EA8D9));
     protected static final Style COOLDOWN_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD9C46E));
+    protected static final Style RANGE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xC97A4A));
 
     protected static final String EMERALD_ICON = "\uE010";
 
@@ -55,6 +56,8 @@ public abstract class AbstractUnitItemButton extends Button {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/lapis.png");
     protected static final ResourceLocation COOLDOWN_ICON_RL =
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/clock.png");
+    protected static final ResourceLocation RANGE_ICON_RL =
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/bow.png");
     protected static final int STAT_ICON_SIZE = 8; // on-screen size of footer stat icons
     protected static final int STAT_ICON_GAP = 2; // between an icon and its number
     protected static final int STAT_GAP = 6; // between mana stat and cooldown stat
@@ -176,8 +179,10 @@ public abstract class AbstractUnitItemButton extends Button {
 
         boolean hasMana = unitItem.manaCost > 0;
         boolean hasCooldown = unitItem.cooldownTicksMax > 0;
+        boolean hasRange = unitItem.range > 0;
         String manaText = hasMana ? String.valueOf(unitItem.manaCost) : null;
         String cooldownText = hasCooldown ? (unitItem.cooldownTicksMax / 20) + "s" : null;
+        String rangeText = hasRange ? String.valueOf((int) unitItem.range) : null;
 
         int footerRightWidth = emeraldSeq != null ? MyRenderer.scaledWidth(font, emeraldSeq, SMALL_SCALE) : 0;
         int footerLeftWidth = 0;
@@ -187,6 +192,11 @@ public abstract class AbstractUnitItemButton extends Button {
             if (hasMana)
                 footerLeftWidth += STAT_GAP;
             footerLeftWidth += statWidth(font, cooldownText, SMALL_SCALE);
+        }
+        if (hasRange) {
+            if (hasMana || hasCooldown)
+                footerLeftWidth += STAT_GAP;
+            footerLeftWidth += statWidth(font, rangeText, SMALL_SCALE);
         }
 
         boolean hasBody = !bodyLines.isEmpty();
@@ -254,7 +264,12 @@ public abstract class AbstractUnitItemButton extends Button {
                 if (hasCooldown) {
                     if (hasMana)
                         statX += STAT_GAP;
-                    drawStat(guiGraphics, font, MANA_ICON_RL, manaText, MANA_STYLE, statX, lineY, SMALL_SCALE);
+                    statX += drawStat(guiGraphics, font, MANA_ICON_RL, manaText, MANA_STYLE, statX, lineY, SMALL_SCALE);
+                }
+                if (hasRange) {
+                    if (hasMana || hasCooldown)
+                        statX += STAT_GAP;
+                    drawStat(guiGraphics, font, RANGE_ICON_RL, rangeText, RANGE_STYLE, statX, lineY, SMALL_SCALE);
                 }
             }
 

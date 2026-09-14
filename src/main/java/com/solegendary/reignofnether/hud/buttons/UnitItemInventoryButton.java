@@ -40,6 +40,7 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 () -> true,
                 () -> {
                     ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableUnitItem.updateHighlightBps(((LivingEntity) unit).level());
                     ItemClientEvents.actionableUnitItemDrag = unitItem;
                     ItemClientEvents.actionableInvIndex = invIndex;
                     ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
@@ -63,6 +64,7 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                         unitItem.onUseBuilding != null ||
                         unitItem.onUseGround != null) {
                     ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableUnitItem.updateHighlightBps(((LivingEntity) unit).level());
                     ItemClientEvents.actionableInvIndex = invIndex;
                     ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
                     ItemClientEvents.leftClickUseItem = true;

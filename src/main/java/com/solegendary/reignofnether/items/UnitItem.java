@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -16,10 +17,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -34,7 +32,7 @@ import java.util.function.Predicate;
 
 // construct via UnitItemBuilder, eg. UnitItemBuilder.of(Items.IRON_SWORD).sellValue(25).build()
 
-public abstract class UnitItem {
+public abstract class UnitItem implements RangeIndicator {
 
     public static final boolean ENABLED = true;
 
@@ -61,7 +59,17 @@ public abstract class UnitItem {
     public int manaCost;
     public int cooldownTicksMax;
     public int channelTicks;
+    public float range;
+    public float radius;
+    public boolean showRangeCircle;
+    public boolean showRangeLine;
+    public boolean showRadiusCircle;
     public boolean suppressDefaultError;
+
+    private Set<BlockPos> highlightBps = new HashSet<>();
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
@@ -85,6 +93,11 @@ public abstract class UnitItem {
         this.manaCost = builder.manaCost;
         this.cooldownTicksMax = builder.cooldownTicksMax;
         this.channelTicks = builder.channelTicks;
+        this.range = builder.range;
+        this.radius = builder.radius;
+        this.showRangeCircle = builder.showRangeCircle;
+        this.showRangeLine = builder.showRangeLine;
+        this.showRadiusCircle = builder.showRadiusCircle;
         this.suppressDefaultError = builder.suppressDefaultError;
     }
 
