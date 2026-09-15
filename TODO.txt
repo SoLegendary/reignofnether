@@ -31,6 +31,14 @@ Unit Items
 
     [❌] Drinking sound/animation for potions like food
 
+Item drops
+    [❌] Track population amount killed for every RTS player
+        - Double check kill credits for things like TNT and fire
+    [❌] On match start, create a random list of items dropped at each kill credit threshold (same for each player)
+    [❌] Whenever a player reaches enough kill credit, the next enemy killed drops an item
+
+
+
 
 Balance
 -------

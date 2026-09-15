@@ -23,7 +23,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class WindcallerModel<T extends Entity> extends KeyframeHierarchicalModel<T> {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ReignOfNether.MOD_ID, "windcaller_layer"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "windcaller_layer"), "main");
 	private final ModelPart bone;
 	private final ModelPart Body;
 	private final ModelPart Cape;
