@@ -36,7 +36,11 @@ Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
 [❌] Add roof to dark watchtower
-
+[❌] Villager reworks
+    - Free-attacking vexes
+    - Siege tank mode for ravager artillery (by burrowing them partially into the ground)
+    - Reduce cost of iron armor
+    - Reduce cost of militia archers
 
 Quality of Life
 ---------------
@@ -47,6 +51,8 @@ Bugfixes
 --------
 [❌] Grass blocks are tinted weirdly even when fog of war is off
 [🟡] Units that spawn outside of client render range are now still counted to population totals
+[❌] Bridges don't work on snow/ice?
+    - Test on villagers campaign #3
 
 Languages
 ---------
