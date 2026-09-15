@@ -34,7 +34,7 @@ import java.util.function.Predicate;
 
 public abstract class UnitItem implements RangeIndicator {
 
-    public static final boolean ENABLED = true;
+    public static final boolean ENABLED = false;
 
     public static final String RON$COOLDOWN_KEY = "reignofnether:CooldownEndTick";
 
