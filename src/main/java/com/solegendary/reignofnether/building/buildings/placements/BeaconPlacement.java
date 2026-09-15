@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
 import com.solegendary.reignofnether.building.buildings.neutral.CapturableBeacon;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -153,7 +154,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
     public void tick(Level tickLevel) {
         super.tick(tickLevel);
         if (tickLevel.isClientSide && tickAgeAfterBuilt > 0 && tickAgeAfterBuilt % 100 == 0)
-            updateHighlightBps();
+            updateHighlightBps(level);
 
         if (isBeaconActive() && tickAgeAfterBuilt > 0 && tickAgeAfterBuilt % 20 == 0 &&
                 !this.level.isClientSide()) {
@@ -233,7 +234,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
     }
 
     @Override
-    public void updateHighlightBps() {
+    public void updateHighlightBps(Level level) {
         if (!level.isClientSide())
             return;
         this.borderBps.clear();

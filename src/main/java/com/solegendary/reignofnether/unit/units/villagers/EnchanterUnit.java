@@ -6,8 +6,7 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.*;
-import com.solegendary.reignofnether.building.RangeIndicator;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -37,11 +36,9 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -433,7 +430,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         }
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }
@@ -463,17 +460,10 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
     @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
-    @Override public void updateHighlightBps() {
+    @Override
+    public void updateHighlightBps(Level level) {
+        RangeIndicator.super.updateHighlightBps(level());
         if (level().isClientSide()) {
-            highlightBps.clear();
-            for (Ability ability : getAbilities().get()) {
-                if (CursorClientEvents.getLeftClickAction() == ability.action) {
-                    setHighlightBps(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(),
-                            (int) (ability.range - 1),
-                            level()
-                    ));
-                }
-            }
             if (isAuraEnabled()) {
                 int radius = MarchOfProgress.RADIUS;
                 this.highlightBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(),
@@ -652,7 +642,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public void toggleAura() {
         setAuraEnabled(!isAuraEnabled());
         if (level().isClientSide) {
-            updateHighlightBps();
+            updateHighlightBps(level());
         } else {
             if (isAuraEnabled()) {
                 AbilityClientboundPacket.doAbility(getId(), UnitAction.MARCH_OF_PROGRESS_SET, 1f);

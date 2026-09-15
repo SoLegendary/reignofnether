@@ -37,6 +37,9 @@ public class MoltenBomb extends HeroAbility {
 
     public MoltenBomb() {
         super(3, 50, UnitAction.MOLTEN_BOMB, 30 * ResourceCost.TICKS_PER_SECOND, RANGE, RADIUS_RANK_1, false);
+        this.showRangeLine = true;
+        this.showRadiusCircle = true;
+        this.showRangeCircle = false;
     }
 
     @Override

@@ -22,45 +22,17 @@ import java.util.*;
 import static com.solegendary.reignofnether.util.MiscUtil.capitaliseAndSpace;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-/**
- * Renders the HUD menu for a building implementing {@link ItemShopAddon}: a title, a close
- * button, and a tightly-packed grid of purchasable-item buttons whose panel grows/shrinks
- * to fit however many items the shop is currently stocked with.
- *
- * Modeled directly on CustomBuildingMenu's layout/structure (renderXButton(evt, x, y) methods
- * that return the Button(s) they created, plus a private renderButton() helper that also
- * handles tooltip rendering).
- *
- * ------------------------------------------------------------------------------------------
- * INTENDED INTEGRATION (not wired up here, since ItemClientEvents' screen-render/mouse-press
- * plumbing for shop buildings wasn't provided) -- this mirrors how CustomBuildingMenu is
- * presumably driven from its own client-events class:
- *
- *   // in some ItemShopClientEvents (MOCK - does not exist yet):
- *   //   - track which BuildingPlacement's shop menu is currently open (like
- *   //     CustomBuildingClientEvents.getCustomBuildingToEdit())
- *   //   - on ScreenEvent.Render.Post: call ItemShopMenu.render(evt, bpl, x, y) and collect
- *   //     the returned buttons into a list
- *   //   - on ScreenEvent.MouseButtonPressed.Post / KeyPressed: call
- *   //     button.checkClicked(...) / checkPressed(...) on that collected list, exactly as
- *   //     ItemClientEvents.onMousePress()/onKeyRelease() do for `renderedButtons`
- * ------------------------------------------------------------------------------------------
- */
 public class ItemShopMenu {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
-    // ---- layout constants (MOCK: exact panel dimensions/positioning were not specified) ----
     private static final int TITLE_X_OFFSET = 6;
     private static final int TITLE_Y_OFFSET = 6;
-    private static final int HEADER_HEIGHT = 22;               // space reserved for the title row before items start
-    private static final int ITEM_SLOT_SIZE = Button.DEFAULT_ICON_FRAME_SIZE; // 22px - buttons placed edge-to-edge, i.e. "tightly-packed"
-    private static final int MENU_WIDTH = ITEM_SLOT_SIZE * 6;  // MOCK: fits 6 items per row; not specified, pick a sensible grid width
+    private static final int HEADER_HEIGHT = 22;
+    private static final int ITEM_SLOT_SIZE = Button.DEFAULT_ICON_FRAME_SIZE;
+    private static final int MENU_WIDTH = ITEM_SLOT_SIZE * 6;
     private static final int ITEMS_PER_ROW = MENU_WIDTH / ITEM_SLOT_SIZE;
 
-    // panel background matches GlobalProductionQueueRenderer.renderQueue(): a MyRenderer
-    // frame-with-bg (proper corner/edge frame texture, not a flat fill), same bg colour,
-    // and the same 5px-per-side inset ("+10" total) between the frame and its contents.
     private static final int PANEL_BG_COLOUR = 0xA0000000;
     private static final int PANEL_PADDING = 10;
     private static final int PANEL_INSET = PANEL_PADDING / 2;

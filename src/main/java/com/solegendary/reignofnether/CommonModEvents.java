@@ -145,9 +145,10 @@ public class CommonModEvents {
             event.accept(ItemRegistrar.STRIDER_UNIT_SPAWN_EGG);
             event.accept(ItemRegistrar.BAT_UNIT_SPAWN_EGG);
         }
-        if(BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab())==CreativeModeTabs.TOOLS_AND_UTILITIES.location()){
+        if (BuiltInRegistries.CREATIVE_MODE_TAB.getKey(event.getTab())==CreativeModeTabs.TOOLS_AND_UTILITIES.location()){
             event.accept(ItemRegistrar.THROWABLE_TNT);
             event.accept(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE);
+            event.accept(ItemRegistrar.STAFF_OF_LIGHTNING);
         }
     }
 }

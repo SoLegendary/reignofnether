@@ -6,6 +6,7 @@
 package com.solegendary.reignofnether.unit.modelling.renderers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.modelling.models.BatUnitModel;
 import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -19,7 +20,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class BatUnitRenderer extends MobRenderer<BatUnit, BatUnitModel> {
-    private static final ResourceLocation BAT_LOCATION = new ResourceLocation("textures/entity/bat.png");
+    private static final ResourceLocation BAT_LOCATION = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/bat.png");
 
     public BatUnitRenderer(EntityRendererProvider.Context p_173929_) {
         super(p_173929_, new BatUnitModel(p_173929_.bakeLayer(ModelLayers.BAT)), 0.25F);

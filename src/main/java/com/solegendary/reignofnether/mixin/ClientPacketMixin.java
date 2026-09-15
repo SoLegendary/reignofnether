@@ -39,12 +39,13 @@ public class ClientPacketMixin {
 
         ci.cancel();
 
-        TimeClientEvents.serverTime = TimeUtils.normaliseTime(pPacket.getDayTime());
+        TimeClientEvents.serverNormDayTime = TimeUtils.normaliseTime(pPacket.getDayTime());
+        TimeClientEvents.serverGameTime = pPacket.getGameTime();
 
         if (NightUtils.isInRangeOfNightSource(pos, true))
             TimeClientEvents.targetClientTime = 18000; // midnight
         else
-            TimeClientEvents.targetClientTime = TimeClientEvents.serverTime;
+            TimeClientEvents.targetClientTime = TimeClientEvents.serverNormDayTime;
 
     }
 }

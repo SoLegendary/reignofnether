@@ -593,7 +593,7 @@ public class MyRenderer {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 3000);
         if (unitItem.iconRl != null)
-            guiGraphics.blit(unitItem.iconRl, mouseX + 18, textY - 16, 0, 0, iconSize, iconSize, iconSize, iconSize);
+            guiGraphics.blit(unitItem.iconRl, mouseX + 19, textY - 15, 0, 0, iconSize-2, iconSize-2, iconSize-2, iconSize-2);
         guiGraphics.pose().translate(0, 0, -1500);
         guiGraphics.renderTooltip(MC.font, lines, mouseX + 8, textY);
         guiGraphics.pose().translate(0, 0, -1500);
@@ -654,7 +654,7 @@ public class MyRenderer {
         if (!pStack.isEmpty()) {
             BakedModel bakedmodel = MC.getItemRenderer().getModel(pStack, null, null, 0);
             guiGraphics.pose().pushPose();
-            guiGraphics.pose().translate(pX + (9 * scale), pY + (9 * scale), (float)(150));
+            guiGraphics.pose().translate(pX + (9 * scale), pY + (9 * scale), 0);
             try {
                 guiGraphics.pose().mulPoseMatrix((new Matrix4f()).scaling(1.0F, -1.0F, 1.0F));
                 guiGraphics.pose().scale(16.0F * scale, 16.0F * scale, 16.0F * scale);

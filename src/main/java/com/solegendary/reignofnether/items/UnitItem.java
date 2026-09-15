@@ -1,9 +1,9 @@
 package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
-import com.solegendary.reignofnether.hud.buttons.UnitItemShopButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
@@ -11,14 +11,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -33,11 +32,14 @@ import java.util.function.Predicate;
 
 // construct via UnitItemBuilder, eg. UnitItemBuilder.of(Items.IRON_SWORD).sellValue(25).build()
 
-public abstract class UnitItem {
+public abstract class UnitItem implements RangeIndicator {
 
     public static final boolean ENABLED = false;
 
+    public static final String RON$COOLDOWN_KEY = "reignofnether:CooldownEndTick";
+
     protected final Item item;
+    public final int defaultStackCount;
     public final UUID uuid;
     public final ResourceLocation iconRl;
     public final UnitItemType type;
@@ -48,21 +50,30 @@ public abstract class UnitItem {
     public boolean enableTooltip;
     protected final List<Pair<Enchantment, Integer>> enchantments;
     protected final List<String> pointDescs;
-    public final List<AttributeModifier> getAttributeModifiers;
+    public final HashMap<Attribute, AttributeModifier> attributes;
     public BiPredicate<Unit, BlockPos> onUseGround;
     public BiPredicate<Unit, LivingEntity> onUseEntity;
     public BiPredicate<Unit, BuildingPlacement> onUseBuilding;
     public Predicate<Unit> onUse;
-    public String onUseGroundError;
-    public String onUseEntityError;
-    public String onUseBuildingError;
-    public String onUseError;
     public final boolean consumeOnUse;
     public int manaCost;
-    public int cooldownTicks;
+    public int cooldownTicksMax;
+    public int channelTicks;
+    public float range;
+    public float radius;
+    public boolean showRangeCircle;
+    public boolean showRangeLine;
+    public boolean showRadiusCircle;
+    public boolean suppressDefaultError;
+
+    private Set<BlockPos> highlightBps = new HashSet<>();
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
+        this.defaultStackCount = builder.defaultStackCount;
         this.uuid = builder.uuid;
         this.iconRl = builder.iconRl;
         this.type = builder.type;
@@ -73,18 +84,21 @@ public abstract class UnitItem {
         this.enchantments = List.copyOf(builder.enchantments);
         this.pointDescs = List.copyOf(builder.pointDescs);
         this.enableTooltip = builder.enableTooltip;
-        this.getAttributeModifiers = builder.attributeModifiers;
+        this.attributes = builder.attributes;
         this.onUseGround = builder.onUseGround;
         this.onUseEntity = builder.onUseEntity;
         this.onUseBuilding = builder.onUseBuilding;
         this.onUse = builder.onUse;
-        this.onUseGroundError = builder.onUseGroundError;
-        this.onUseEntityError = builder.onUseEntityError;
-        this.onUseBuildingError = builder.onUseBuildingError;
-        this.onUseError = builder.onUseError;
         this.consumeOnUse = builder.consumeOnUse;
         this.manaCost = builder.manaCost;
-        this.cooldownTicks = builder.cooldownTicks;
+        this.cooldownTicksMax = builder.cooldownTicksMax;
+        this.channelTicks = builder.channelTicks;
+        this.range = builder.range;
+        this.radius = builder.radius;
+        this.showRangeCircle = builder.showRangeCircle;
+        this.showRangeLine = builder.showRangeLine;
+        this.showRadiusCircle = builder.showRadiusCircle;
+        this.suppressDefaultError = builder.suppressDefaultError;
     }
 
     public Item getItem() {
@@ -97,6 +111,7 @@ public abstract class UnitItem {
             itemStack.enchant(pair.getFirst(), pair.getSecond());
         }
         itemStack.getOrCreateTag().putUUID("uuid", UUID.randomUUID());
+        itemStack.setCount(defaultStackCount);
         return itemStack;
     }
 
@@ -110,22 +125,6 @@ public abstract class UnitItem {
 
     public String getDescription() {
         return desc;
-    }
-
-    public String getUseError() {
-        return onUseError;
-    }
-
-    public String getOnUseGroundError() {
-        return onUseGroundError;
-    }
-
-    public String getOnUseEntityError() {
-        return onUseEntityError;
-    }
-
-    public String getOnUseBuildingError() {
-        return onUseBuildingError;
     }
 
     /** One string per bullet in the tooltip's passive stat list. */

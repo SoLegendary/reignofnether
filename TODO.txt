@@ -1,5 +1,5 @@
 
-1.20.1-1.4.4c
+1.20.1-1.4.4d
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -13,9 +13,8 @@ Hero Items
 Emerald Resource
     [❌] Market trading all has to go via emeralds
     [❌] Markets can be built at the start of the game, but upgraded to unlock resource buying
-    [❌] Used to buy items from shops
-    [❌] Show in top left if you have any
-    [❌] Neutrals now give emerald bounties
+    [🟡] Neutrals now give emerald bounties
+
 
 Shops
     [❌] Custom Item Shops
@@ -30,18 +29,26 @@ Unit Items
         [❌] Should be visible to all players
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
-    [❌] Mana costs
-    [❌] Cooldown
-        - Tie cooldown to item slot and prevent inventory actions on that slot if there is a cooldown active
-    [❌] Attribute modifiers
-        - Ensure attack animations match bonus attack speeds
+    [❌] Drinking sound/animation for potions like food
+
+Item drops
+    [❌] Track population amount killed for every RTS player
+        - Double check kill credits for things like TNT and fire
+    [❌] On match start, create a random list of items dropped at each kill credit threshold (same for each player)
+    [❌] Whenever a player reaches enough kill credit, the next enemy killed drops an item
+
+
 
 
 Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
 [❌] Add roof to dark watchtower
-
+[❌] Villager reworks
+    - Free-attacking vexes
+    - Siege tank mode for ravager artillery (by burrowing them partially into the ground)
+    - Reduce cost of iron armor
+    - Reduce cost of militia archers
 
 Quality of Life
 ---------------
@@ -50,8 +57,10 @@ Quality of Life
 
 Bugfixes
 --------
-[❌] Units don't show clientside population until loaded the first time
 [❌] Grass blocks are tinted weirdly even when fog of war is off
+[🟡] Units that spawn outside of client render range are now still counted to population totals
+[❌] Bridges don't work on snow/ice?
+    - Test on villagers campaign #3
 
 Languages
 ---------

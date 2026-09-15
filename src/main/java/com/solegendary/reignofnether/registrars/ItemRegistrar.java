@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.HeroExperienceBottleItem;
+import com.solegendary.reignofnether.items.StaffOfLightning;
 import com.solegendary.reignofnether.items.ThrowableTnt;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeSpawnEggItem;
@@ -207,6 +208,9 @@ public class ItemRegistrar {
 
     public static final RegistryObject<Item> THROWN_HERO_EXPERIENCE_BOTTLE =
             ITEMS.register("thrown_hero_experience_bottle", () -> new HeroExperienceBottleItem(new Item.Properties()));
+
+    public static final RegistryObject<Item> STAFF_OF_LIGHTNING =
+            ITEMS.register("staff_of_lightning", () -> new StaffOfLightning(new Item.Properties()));
 
     public static void init(FMLJavaModLoadingContext context) {
         ITEMS.register(context.getModEventBus());

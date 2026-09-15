@@ -35,6 +35,7 @@ import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
@@ -755,11 +756,15 @@ public class BuildingPlacement {
     private void awardBounty() {
         if (lastAttacker instanceof Unit unit && !unit.getOwnerName().isEmpty()) {
             ResourceCost cost = building.cost;
-            Resources resources = new Resources(unit.getOwnerName(),
-                (int) (cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT),
-                (int) (cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT),
-                (int) (cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT)
-            );
+            Resources resources;
+            int food = (int) (cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT);
+            int wood = (int) (cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT);
+            int ore =  (int) (cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT);
+            if (ItemServerEvents.ENABLED) {
+                resources = Resources.emeralds(unit.getOwnerName(), food + wood + ore);
+            } else {
+                resources = new Resources(unit.getOwnerName(), food, wood, ore);
+            }
             if (resources.getTotalValue() > 0) {
                 ResourcesClientboundPacket.showFloatingText(resources, centrePos);
                 ResourcesServerEvents.addSubtractResources(resources);

@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -87,11 +88,19 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                 distSqr = this.mob.distanceToSqr(getMoveTarget().getCenter());
 
             float rangeSqr = RANGE * RANGE;
-            if (action == ItemAction.OPEN_SHOP)
+            if (action == ItemAction.OPEN_SHOP) {
                 rangeSqr = 2.25f;
+            } else if (useItem) {
+                UnitItem unitItem = ItemUtil.getUnitItem(itemInHand);
+                if (unitItem != null)
+                    rangeSqr = Math.max(rangeSqr, unitItem.range * unitItem.range);
+            }
 
             if (distSqr < rangeSqr) {
                 if (!this.mob.level().isClientSide()) {
+                    if (useItem) {
+                        this.mob.lookAt(EntityAnchorArgument.Anchor.EYES, getMoveTarget().getCenter());
+                    }
                     switch (action) {
                         case DROP -> inv.dropUUID(ItemUtil.getUUID(itemInHand), blockTarget);
                         case SELL -> {

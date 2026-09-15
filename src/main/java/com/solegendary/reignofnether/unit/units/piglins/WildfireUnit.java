@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.ability.heroAbilities.wildfire.IntenseHeatP
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.MoltenBomb;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.SoulsAflame;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.entities.MoltenBombProjectile;
@@ -408,7 +408,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
             lastCursorPos = CursorClientEvents.getPreselectedBlockPos();
@@ -468,24 +468,6 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
     @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
-
-    @Override public void updateHighlightBps() {
-        if (!level().isClientSide())
-            return;
-        this.highlightBps.clear();
-        if (CursorClientEvents.getLeftClickAction() == UnitAction.MOLTEN_BOMB) {
-            BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(getOnPos(), CursorClientEvents.getPreselectedBlockPos(), MoltenBomb.RANGE);
-            for (BlockPos pos : MiscUtil.getLine2D(getOnPos(), limitedBp)) {
-                this.highlightBps.add(MiscUtil.getHighestGroundBlock(level(), pos).above());
-            }
-            this.highlightBps.addAll(MiscUtil.getRangeIndicatorFilledCircleBlocks(limitedBp, (int) getMoltenBomb().radius - 1, level()));
-        } else if (CursorClientEvents.getLeftClickAction() == UnitAction.SCORCHING_GAZE) {
-            setHighlightBps(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(),
-                    ScorchingGaze.RANGE - 1,
-                    level()
-            ));
-        }
-    }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {

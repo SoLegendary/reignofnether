@@ -32,12 +32,11 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class ItemClientEvents {
 
@@ -57,6 +56,10 @@ public class ItemClientEvents {
     private static int mouseY = 0;
     private static int mouseLeftDownX = 0;
     private static int mouseLeftDownY = 0;
+
+    // last positions of hudSelectedEntity and cursor for use by UnitItem as RangeIndicator
+    private static BlockPos lastOnPos = new BlockPos(0,0,0);
+    private static BlockPos lastCursorPos = new BlockPos(0,0,0);
 
     public static final ArrayList<Button> renderedButtons = new ArrayList<>();
 
@@ -159,6 +162,22 @@ public class ItemClientEvents {
                 button.renderTooltip(guiGraphics, mouseX, mouseY);
 
         return RectZone.getZoneByLW(x, y, INV_WIDTH, INV_HEIGHT);
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (HudClientEvents.hudSelectedEntity != null && actionableUnitItem != null &&
+                (actionableUnitItem.showRadiusCircle ||
+                 actionableUnitItem.showRangeCircle ||
+                 actionableUnitItem.showRangeLine) &&
+                (actionableUnitItem.range > 0 || actionableUnitItem.radius > 0)) {
+            LivingEntity le = HudClientEvents.hudSelectedEntity;
+            if (!lastOnPos.equals(le.getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
+                actionableUnitItem.updateHighlightBps(MC.level);
+            }
+            lastOnPos = le.getOnPos();
+            lastCursorPos = CursorClientEvents.getPreselectedBlockPos();
+        }
     }
 
     @SubscribeEvent

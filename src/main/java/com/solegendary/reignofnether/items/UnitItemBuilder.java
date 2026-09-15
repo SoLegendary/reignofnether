@@ -7,14 +7,13 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -45,6 +44,7 @@ import java.util.function.Predicate;
 public class UnitItemBuilder {
 
     final Item item;
+    int defaultStackCount = 1;
     UUID uuid = UUID.randomUUID();
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
@@ -55,18 +55,21 @@ public class UnitItemBuilder {
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
     final List<String> pointDescs = new ArrayList<>();
-    final List<AttributeModifier> attributeModifiers = new ArrayList<>();
+    final HashMap<Attribute, AttributeModifier> attributes = new HashMap<>();
     BiPredicate<Unit, BlockPos> onUseGround = null;
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
     BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
     Predicate<Unit> onUse = null;
-    String onUseGroundError = "item.reignofnether.error.use_on_ground";
-    String onUseEntityError = "item.reignofnether.error.use_on_entity";
-    String onUseBuildingError = "item.reignofnether.error.use_on_building";
-    String onUseError = "item.reignofnether.error.use";
+    boolean suppressDefaultError = false;
     boolean consumeOnUse = false;
-    int cooldownTicks = 0;
+    int cooldownTicksMax = 0;
+    int channelTicks = 0;
     int manaCost = 0;
+    float range = 0;
+    float radius = 0;
+    boolean showRangeCircle = true;
+    boolean showRangeLine = false;
+    boolean showRadiusCircle = false;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -80,6 +83,14 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder uuid(String uuid) {
         this.uuid = UUID.fromString(uuid);
+        return this;
+    }
+
+    /** Emerald cost returned when the item is sold; 0 means unsellable. */
+    public UnitItemBuilder defaultStackCount(int defaultStackCount) {
+        if (defaultStackCount < 1)
+            throw new IllegalArgumentException("sellValue must be >= 1, was " + defaultStackCount);
+        this.defaultStackCount = defaultStackCount;
         return this;
     }
 
@@ -113,7 +124,14 @@ public class UnitItemBuilder {
     public UnitItemBuilder cooldownTicks(int cooldownTicks) {
         if (cooldownTicks < 0)
             throw new IllegalArgumentException("cooldownTicks must be >= 0, was " + cooldownTicks);
-        this.cooldownTicks = cooldownTicks;
+        this.cooldownTicksMax = cooldownTicks;
+        return this;
+    }
+
+    public UnitItemBuilder channelTicks(int channelTicks) {
+        if (channelTicks < 0)
+            throw new IllegalArgumentException("channelTicks must be >= 0, was " + channelTicks);
+        this.channelTicks = channelTicks;
         return this;
     }
 
@@ -124,29 +142,28 @@ public class UnitItemBuilder {
         return this;
     }
 
+    public UnitItemBuilder range(float range) {
+        if (range < 0)
+            throw new IllegalArgumentException("range must be >= 0, was " + range);
+        this.range = range;
+        return this;
+    }
+
+    public UnitItemBuilder radius(int radius) {
+        if (radius < 0)
+            throw new IllegalArgumentException("radius must be >= 0, was " + radius);
+        this.radius = radius;
+        return this;
+    }
+
     /** I18n key for the short description line(s) in the tooltip's middle band. */
     public UnitItemBuilder desc(String desc) {
         this.desc = desc == null ? "" : desc;
         return this;
     }
 
-    public UnitItemBuilder onUseError(String onUseError) {
-        this.onUseError = onUseError == null ? "" : onUseError;
-        return this;
-    }
-
-    public UnitItemBuilder onUseEntityError(String onUseEntityError) {
-        this.onUseEntityError = onUseEntityError == null ? "" : onUseEntityError;
-        return this;
-    }
-
-    public UnitItemBuilder onUseBuildingError(String onUseBuildingError) {
-        this.onUseBuildingError = onUseBuildingError == null ? "" : onUseBuildingError;
-        return this;
-    }
-
-    public UnitItemBuilder onUseGroundError(String onUseGroundError) {
-        this.onUseGroundError = onUseGroundError == null ? "" : onUseGroundError;
+    public UnitItemBuilder suppressDefaultError(boolean suppressDefaultError) {
+        this.suppressDefaultError = suppressDefaultError;
         return this;
     }
 
@@ -180,15 +197,13 @@ public class UnitItemBuilder {
     }
 
     /** Adds one attribute modifier applied while the item is held; call once per modifier. */
-    public UnitItemBuilder attributeModifier(AttributeModifier modifier) {
-        if (modifier != null)
-            this.attributeModifiers.add(modifier);
+    public UnitItemBuilder attribute(Attribute attribute, double amount, AttributeModifier.Operation operation) {
+        this.attributes.put(attribute, new AttributeModifier(UUID.randomUUID().toString(), amount, operation));
         return this;
     }
 
-    public UnitItemBuilder attributeModifiers(AttributeModifier... modifiers) {
-        for (AttributeModifier modifier : modifiers)
-            attributeModifier(modifier);
+    public UnitItemBuilder attribute(Attribute attribute, double amount) {
+        this.attributes.put(attribute, new AttributeModifier(UUID.randomUUID().toString(), amount, AttributeModifier.Operation.ADDITION));
         return this;
     }
 
@@ -216,6 +231,37 @@ public class UnitItemBuilder {
         this.consumeOnUse = true;
         return this;
     }
+
+    public UnitItemBuilder showRangeLine() {
+        this.showRangeLine = true;
+        return this;
+    }
+
+    public UnitItemBuilder showRadiusCircle() {
+        this.showRadiusCircle = true;
+        return this;
+    }
+
+    public UnitItemBuilder showRangeCircle(boolean show) {
+        this.showRangeCircle = show;
+        return this;
+    }
+
+    public UnitItemBuilder showRangeLine(boolean show) {
+        this.showRangeLine = show;
+        return this;
+    }
+
+    public UnitItemBuilder showRadiusCircle(boolean show) {
+        this.showRadiusCircle = show;
+        return this;
+    }
+
+    public UnitItemBuilder showRangeCircle() {
+        this.showRangeCircle = true;
+        return this;
+    }
+
 
     public UnitItem build() {
         return new BuiltUnitItem(this);

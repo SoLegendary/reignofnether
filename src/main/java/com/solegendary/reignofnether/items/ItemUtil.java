@@ -2,13 +2,16 @@ package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
+import com.solegendary.reignofnether.time.TimeClientEvents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
@@ -68,6 +71,15 @@ public class ItemUtil {
                 return new EdibleFoodItem(item);
         }
         return null;
+    }
+
+    public static Long getCooldownTicksLeft(ItemStack itemStack, Level level) {
+        long gameTime = level.isClientSide() ? TimeClientEvents.serverGameTime : level.getGameTime();
+        CompoundTag tag = itemStack.getTag();
+        if (tag != null) {
+            return Math.max(0, tag.getLong(UnitItem.RON$COOLDOWN_KEY) - gameTime);
+        }
+        return 0L;
     }
 
     private static List<Item> edibleFoods = List.of(

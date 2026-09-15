@@ -59,6 +59,7 @@ public class ResourcesServerEvents {
     public static final int STARTING_FOOD_SANDBOX = 999999;
     public static final int STARTING_WOOD_SANDBOX = 999999;
     public static final int STARTING_ORE_SANDBOX = 999999;
+    public static final int STARTING_EMERALD_SANDBOX = 999999;
     public static final int STARTING_FOOD = 150;
     public static final int STARTING_WOOD = 500;
     public static final int STARTING_ORE = 300;
@@ -112,7 +113,7 @@ public class ResourcesServerEvents {
                 r.food + r.foodToAdd + unitFood + prodFood,
                 r.wood + r.woodToAdd + unitWood + prodWood,
                 r.ore + r.oreToAdd + unitOre + prodOre,
-                r.emerald + r.emerald + unitEmerald + prodEmerald
+                r.emerald + r.emeraldToAdd + unitEmerald + prodEmerald
             ));
             //ReignOfNether.LOGGER.info("saved resources in serverevents: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
         });
@@ -168,6 +169,7 @@ public class ResourcesServerEvents {
                     resources.food = STARTING_FOOD_SANDBOX;
                     resources.wood = STARTING_WOOD_SANDBOX;
                     resources.ore = STARTING_ORE_SANDBOX;
+                    resources.emerald = STARTING_EMERALD_SANDBOX;
                 } else if (readiedStart) {
                     resources.food = STARTING_FOOD_READIED;
                     resources.wood = STARTING_WOOD_READIED;

@@ -49,12 +49,16 @@ public interface AttackerUnit {
         return 20f / getAttackCooldown();
     }
     public default float getAttackCooldown() {
-        return ((20 / getBaseAttacksPerSecond()) * getAttackCooldownMultiplier());
+        return ((20 / getNonBaseAttacksPerSecond()) * getAttackCooldownMultiplier());
     }
     public boolean getAggressiveWhenIdle();
-    public default float getBaseAttacksPerSecond() {
+    public default float getNonBaseAttacksPerSecond() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACKS_PER_SECOND.get().getDefaultValue());
+    }
+    public default float getBaseAttacksPerSecond() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
+        return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACKS_PER_SECOND.get().getDefaultValue());
     }
     public default float getAggroRange() {
         float attackRange = getAttackRange();
@@ -66,16 +70,26 @@ public interface AttackerUnit {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
     }
+    public default float getBaseAttackRange() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
+        return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
+    }
     public default float getBaseUnitAttackDamage() {
         float bonus = 0;
         if (this instanceof HeroUnit heroUnit) {
             bonus = heroUnit.getAttackBonusPerLevel() * heroUnit.getHeroLevel();
         }
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
-        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
+        return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
     }
     public default float getUnitAttackDamage() {
-        float value = getBaseUnitAttackDamage();
+        float bonus = 0;
+        if (this instanceof HeroUnit heroUnit) {
+            bonus = heroUnit.getAttackBonusPerLevel() * heroUnit.getHeroLevel();
+        }
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        float value = (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
+
         MobEffectInstance weakMei = ((LivingEntity) this).getEffect(MobEffects.WEAKNESS);
         float weak = 0;
         if (weakMei != null && weakMei.getDuration() > 0) {
@@ -371,7 +385,7 @@ public interface AttackerUnit {
     }
 
     public default boolean hasBonusRange() {
-        return false;
+        return getAttackRange() > getBaseAttackRange();
     }
 
     public default float getAttackCooldownMultiplier() {

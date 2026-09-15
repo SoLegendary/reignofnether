@@ -30,6 +30,9 @@ public class FirewallShot extends Ability {
 
     public FirewallShot() {
         super(UnitAction.SHOOT_FIREWALL, CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND, RANGE, 0, true, true);
+        this.showRangeLine = true;
+        this.showRadiusCircle = false;
+        this.showRangeCircle = false;
     }
 
     @Override
