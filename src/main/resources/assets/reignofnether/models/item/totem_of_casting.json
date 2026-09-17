@@ -1,0 +1,6 @@
+{
+    "parent": "minecraft:item/generated",
+    "textures": {
+        "layer0": "reignofnether:item/totem_of_casting"
+    }
+}

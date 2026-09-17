@@ -25,7 +25,7 @@ public class ItemServerEvents {
 
     public static void buyItem(
             Unit unit,
-            UUID itemUuid,
+            String descId,
             BlockPos shopPos
     ) {
         if (!ENABLED) return;
@@ -34,7 +34,7 @@ public class ItemServerEvents {
             if (bpl.originPos.equals(shopPos) && bpl instanceof ItemShopPlacement itemShopPlacement && bpl.isBuilt) {
                 ItemShopAddon itemShopAddon = bpl.getBuilding().getActiveAddon(ItemShopAddon.class);
                 if (itemShopAddon != null && unit instanceof UnitInventory) {
-                    itemShopAddon.buyItem(unit, itemShopPlacement, ItemUtil.getUnitItem(itemUuid));
+                    itemShopAddon.buyItem(unit, itemShopPlacement, ItemUtil.getUnitItem(descId));
                     break;
                 }
             }

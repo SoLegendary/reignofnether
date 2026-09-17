@@ -35,7 +35,7 @@ public interface ItemShopAddon extends BuildingAddon {
                 ListTag ltag = nbt.getList("list", Tag.TAG_COMPOUND);
                 for (int i = 0; i < ltag.size(); i++) {
                     CompoundTag tag = ltag.getCompound(i);
-                    UnitItem unitItem = ItemUtil.getUnitItem(tag.getUUID("uuid"));
+                    UnitItem unitItem = ItemUtil.getUnitItem(tag.getString("descId"));
                     if (unitItem != null) {
                         StockedShopItem stock = new StockedShopItem(
                                 unitItem,
@@ -55,7 +55,7 @@ public interface ItemShopAddon extends BuildingAddon {
                 ListTag ltag = new ListTag();
                 for (StockedShopItem stockedShopItem : itemsAndStock) {
                     CompoundTag tag2 = new CompoundTag();
-                    tag2.putUUID("uuid", stockedShopItem.item.uuid);
+                    tag2.putString("descId", stockedShopItem.item.descId);
                     tag2.putInt("buyCost", stockedShopItem.getBuyCost());
                     tag2.putInt("maxStock", stockedShopItem.maxStock);
                     tag2.putInt("stock", stockedShopItem.stock);
@@ -77,7 +77,7 @@ public interface ItemShopAddon extends BuildingAddon {
         if (((Entity) unit).level().isClientSide()) return;
 
         for (StockedShopItem shopStock : shopStocks) {
-            if (item.uuid.equals(shopStock.item.uuid)) {
+            if (item.descId.equals(shopStock.item.descId)) {
 
                 if (!bpl.isPosInsideBuilding(((LivingEntity) unit).getOnPos(), ItemShopPlacement.UNIT_SERVE_RANGE)) {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "itemshop.reignofnether.error.too_far_away");

@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.HeroExperienceBottleItem;
-import com.solegendary.reignofnether.items.StaffOfLightning;
 import com.solegendary.reignofnether.items.ThrowableTnt;
+import com.solegendary.reignofnether.items.UnitGiveableItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -209,8 +209,39 @@ public class ItemRegistrar {
     public static final RegistryObject<Item> THROWN_HERO_EXPERIENCE_BOTTLE =
             ITEMS.register("thrown_hero_experience_bottle", () -> new HeroExperienceBottleItem(new Item.Properties()));
 
-    public static final RegistryObject<Item> STAFF_OF_LIGHTNING =
-            ITEMS.register("staff_of_lightning", () -> new StaffOfLightning(new Item.Properties()));
+    public static final RegistryObject<Item> HEART_MEDALLION = ITEMS.register("heart_medallion", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> AZURE_MEDALLION = ITEMS.register("azure_medallion", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> SOUL_COLLECTOR = ITEMS.register("soul_collector", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> BROADSWORD = ITEMS.register("broadsword", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> KATANA = ITEMS.register("katana", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> HEARTSTEALER = ITEMS.register("heartstealer", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> SOUL_SCYTHE = ITEMS.register("soul_scythe", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> POWERSHAKER = ITEMS.register("powershaker", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> BOOTS_OF_SWIFTNESS = ITEMS.register("boots_of_swiftness", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> SPARKLER = ITEMS.register("sparkler", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> IRON_HIDE_AMULET = ITEMS.register("iron_hide_amulet", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> LIGHT_FEATHER = ITEMS.register("light_feather", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> FROST_WALKER_BOOTS = ITEMS.register("frost_walker_boots", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> MAGMA_WALKER_BOOTS = ITEMS.register("magma_walker_boots", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> BELL_OF_ARMS = ITEMS.register("bell_of_arms", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> SATCHEL_OF_SNACKS = ITEMS.register("satchel_of_snacks", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> BUZZY_NEST = ITEMS.register("buzzy_nest", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> HEALTH_POTION = ITEMS.register("health_potion", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> MANA_POTION = ITEMS.register("mana_potion", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> GHOST_CLOAK = ITEMS.register("ghost_cloak", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> GONG_OF_WEAKENING = ITEMS.register("gong_of_weakening", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> ICE_WAND = ITEMS.register("ice_wand", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> STAFF_OF_LIGHTNING = ITEMS.register("staff_of_lightning", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> UPDRAFT_TOME = ITEMS.register("updraft_tome", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> TOME_OF_DUPLICATION = ITEMS.register("tome_of_duplication", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> SHADOW_SHIFTER = ITEMS.register("shadow_shifter", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> POCKET_PORTAL = ITEMS.register("pocket_portal", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> WAR_HORN = ITEMS.register("war_horn", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> TOTEM_OF_REGENERATION = ITEMS.register("totem_of_regeneration", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> TOTEM_OF_SHIELDING = ITEMS.register("totem_of_shielding", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> TOTEM_OF_PROTECTION = ITEMS.register("totem_of_protection", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> TOTEM_OF_CASTING = ITEMS.register("totem_of_casting", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> SCROLL_OF_RECALL = ITEMS.register("scroll_of_recall", () -> new UnitGiveableItem(new Item.Properties()));
 
     public static void init(FMLJavaModLoadingContext context) {
         ITEMS.register(context.getModEventBus());

@@ -3,7 +3,6 @@ package com.solegendary.reignofnether.items;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.time.TimeClientEvents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.food.FoodProperties;
@@ -61,13 +60,13 @@ public class ItemUtil {
     }
 
     @Nullable
-    public static UnitItem getUnitItem(UUID uuid) {
+    public static UnitItem getUnitItem(String descId) {
         for (UnitItem unitItem : UnitItems.ITEMS)
-            if (unitItem.uuid.equals(uuid))
+            if (unitItem.descId.equals(descId))
                 return unitItem;
 
         for (Item item : ForgeRegistries.ITEMS) {
-            if (item.isEdible() && EdibleFoodItem.getFoodUUID(item).equals(uuid))
+            if (item.isEdible() && EdibleFoodItem.getFoodDescId(item).equals(descId))
                 return new EdibleFoodItem(item);
         }
         return null;

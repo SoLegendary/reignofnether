@@ -1,11 +1,13 @@
 package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -34,22 +36,22 @@ import java.util.function.Predicate;
 
 public abstract class UnitItem implements RangeIndicator {
 
-    public static final boolean ENABLED = false;
+    public static final boolean ENABLED = true;
 
     public static final String RON$COOLDOWN_KEY = "reignofnether:CooldownEndTick";
 
     protected final Item item;
     public final int defaultStackCount;
-    public final UUID uuid;
-    public final ResourceLocation iconRl;
+    public final String descId;
+    public ResourceLocation iconRl;
     public final UnitItemType type;
     public final int sellValue;
     public final int buyCost;
-    public final String desc;
+    public final LocalizedText desc;
+    protected final List<LocalizedText> pointDescs;
     public final Keybinding hotkey;
     public boolean enableTooltip;
     protected final List<Pair<Enchantment, Integer>> enchantments;
-    protected final List<String> pointDescs;
     public final HashMap<Attribute, AttributeModifier> attributes;
     public BiPredicate<Unit, BlockPos> onUseGround;
     public BiPredicate<Unit, LivingEntity> onUseEntity;
@@ -74,12 +76,25 @@ public abstract class UnitItem implements RangeIndicator {
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
         this.defaultStackCount = builder.defaultStackCount;
-        this.uuid = builder.uuid;
-        this.iconRl = builder.iconRl;
+        if (builder.descId == null || builder.descId.isBlank()) {
+            throw new IllegalArgumentException("UnitItemBuilder descId is null or blank!");
+        }
+        this.descId = builder.descId;
+        if (builder.iconRl == null) {
+            try {
+                this.iconRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/item/" + descId + ".png");
+            } catch (ResourceLocationException exception) {
+                this.iconRl = null;
+            }
+        } else {
+            this.iconRl = builder.iconRl;
+        }
         this.type = builder.type;
         this.sellValue = builder.sellValue;
         this.buyCost = builder.buyCost;
-        this.desc = builder.desc;
+        this.desc = builder.desc != null
+                ? builder.desc
+                : new LocalizedText("item.reignofnether." + descId + ".desc");
         this.hotkey = builder.hotkey;
         this.enchantments = List.copyOf(builder.enchantments);
         this.pointDescs = List.copyOf(builder.pointDescs);
@@ -124,15 +139,17 @@ public abstract class UnitItem implements RangeIndicator {
     }
 
     public String getDescription() {
-        return desc;
+        return desc.resolve();
     }
 
     /** One string per bullet in the tooltip's passive stat list. */
-    public List<String> getPointDescs() {
+    public List<String> getPointDescriptions() {
         List<String> lines = new ArrayList<>();
-        for (String desc : pointDescs)
-            if (!desc.isBlank())
-                lines.add(desc);
+        for (LocalizedText text : pointDescs) {
+            String line = text.resolve();
+            if (!line.isBlank())
+                lines.add(line);
+        }
         return lines;
     }
 

@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -165,7 +164,7 @@ public abstract class AbstractUnitItemButton extends Button {
 
         int descLineCount = bodyLines.size(); // marks where desc ends and points begin
 
-        List<String> points = new ArrayList<>(unitItem.getPointDescs());
+        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
         points.addAll(getEnchantmentDescs(itemStack));
         points.addAll(getAttributeDescs(unitItem));
         for (String point : points)

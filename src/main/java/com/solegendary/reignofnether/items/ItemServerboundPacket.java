@@ -22,9 +22,10 @@ public class ItemServerboundPacket {
 
     private final ItemAction action;
     private final int unitId; // unit performing the action
-    private final UUID itemUuid; // uuid of the item in the unit's inventory (unused for PICKUP/NONE/SWAP)
+    private final UUID itemUuid; // uuid of the item in the unit's inventory (unused for BUY/PICKUP/NONE/SWAP)
+    private final String itemDescId; // BUY: descriptor id of the item to buy from the shop (unused otherwise)
     private final int targetId; // GIVE/USE_ON_ENTITY: target unit, PICKUP: target ItemEntity (-1 if unused)
-    private final BlockPos targetPos; // DROP/USE_ON_BLOCK: block, SELL/USE_ON_BUILDING: building pos (null if unused)
+    private final BlockPos targetPos; // DROP/USE_ON_BLOCK: block, SELL/USE_ON_BUILDING/BUY: building pos (null if unused)
     private final int invIndex1; // SWAP: first inventory slot (-1 if unused)
     private final int invIndex2; // SWAP: second inventory slot (-1 if unused)
 
@@ -62,15 +63,15 @@ public class ItemServerboundPacket {
     }
 
     public static void swap(int unitId, int invIndex1, int invIndex2) { // swaps two slots in the unit's inventory
-        send(ItemAction.SWAP, unitId, null, -1, null, invIndex1, invIndex2);
+        send(ItemAction.SWAP, unitId, null, null, -1, null, invIndex1, invIndex2);
     }
 
     public static void openShop(int unitId, BlockPos buildingPos) {
         send(ItemAction.OPEN_SHOP, unitId, null, -1, buildingPos);
     }
 
-    public static void buy(int unitId, UUID itemUuid, BlockPos buildingPos) { // buys an item from a shop (UUID here is Item UUID, not inventory UUID)
-        send(ItemAction.BUY, unitId, itemUuid, -1, buildingPos, -1, -1);
+    public static void buy(int unitId, String descId, BlockPos buildingPos) { // buys an item from a shop
+        send(ItemAction.BUY, unitId, null, descId, -1, buildingPos, -1, -1);
     }
 
     private static void send(
@@ -80,20 +81,21 @@ public class ItemServerboundPacket {
             int targetId,
             BlockPos targetPos
     ) {
-        send(action, unitId, itemUuid, targetId, targetPos, NO_INDEX, NO_INDEX);
+        send(action, unitId, itemUuid, null, targetId, targetPos, NO_INDEX, NO_INDEX);
     }
 
     private static void send(
             ItemAction action,
             int unitId,
             UUID itemUuid,
+            String itemDescId,
             int targetId,
             BlockPos targetPos,
             int invIndex1,
             int invIndex2
     ) {
         PacketHandler.INSTANCE.sendToServer(new ItemServerboundPacket(
-                action, unitId, itemUuid, targetId, targetPos, invIndex1, invIndex2
+                action, unitId, itemUuid, itemDescId, targetId, targetPos, invIndex1, invIndex2
         ));
     }
 
@@ -101,6 +103,7 @@ public class ItemServerboundPacket {
             ItemAction action,
             int unitId,
             UUID itemUuid,
+            String itemDescId,
             int targetId,
             BlockPos targetPos,
             int invIndex1,
@@ -109,6 +112,7 @@ public class ItemServerboundPacket {
         this.action = action;
         this.unitId = unitId;
         this.itemUuid = itemUuid;
+        this.itemDescId = itemDescId;
         this.targetId = targetId;
         this.targetPos = targetPos;
         this.invIndex1 = invIndex1;
@@ -119,13 +123,13 @@ public class ItemServerboundPacket {
         this.action = buffer.readEnum(ItemAction.class);
         this.unitId = buffer.readInt();
         this.itemUuid = buffer.readBoolean() ? buffer.readUUID() : null;
+        this.itemDescId = buffer.readBoolean() ? buffer.readUtf() : null;
         this.targetId = buffer.readInt();
         this.targetPos = buffer.readBoolean() ? buffer.readBlockPos() : null;
         if (buffer.readBoolean()) {
             this.invIndex1 = buffer.readInt();
             this.invIndex2 = buffer.readInt();
-        }
-        else {
+        } else {
             this.invIndex1 = NO_INDEX;
             this.invIndex2 = NO_INDEX;
         }
@@ -137,6 +141,9 @@ public class ItemServerboundPacket {
         buffer.writeBoolean(this.itemUuid != null);
         if (this.itemUuid != null)
             buffer.writeUUID(this.itemUuid);
+        buffer.writeBoolean(this.itemDescId != null);
+        if (this.itemDescId != null)
+            buffer.writeUtf(this.itemDescId);
         buffer.writeInt(this.targetId);
         buffer.writeBoolean(this.targetPos != null);
         if (this.targetPos != null)
@@ -178,7 +185,7 @@ public class ItemServerboundPacket {
             }
             else {
                 if (this.action == ItemAction.BUY) {
-                    ItemServerEvents.buyItem(actionableUnit, this.itemUuid, this.targetPos);
+                    ItemServerEvents.buyItem(actionableUnit, this.itemDescId, this.targetPos);
                 } else if (this.action == ItemAction.SWAP) {
                     ItemServerEvents.swapItems(actionableUnit, this.invIndex1, this.invIndex2);
                 } else {

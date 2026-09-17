@@ -45,16 +45,16 @@ public class UnitItemBuilder {
 
     final Item item;
     int defaultStackCount = 1;
-    UUID uuid = UUID.randomUUID();
+    String descId;
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
     int sellValue = 0;
     int buyCost = 0;
-    String desc = "";
+    LocalizedText desc = null;
     Keybinding hotkey = null;
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
-    final List<String> pointDescs = new ArrayList<>();
+    final List<LocalizedText> pointDescs = new ArrayList<>();
     final HashMap<Attribute, AttributeModifier> attributes = new HashMap<>();
     BiPredicate<Unit, BlockPos> onUseGround = null;
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
@@ -81,8 +81,8 @@ public class UnitItemBuilder {
         return new UnitItemBuilder(item);
     }
 
-    public UnitItemBuilder uuid(String uuid) {
-        this.uuid = UUID.fromString(uuid);
+    public UnitItemBuilder descId(String descId) {
+        this.descId = descId;
         return this;
     }
 
@@ -157,8 +157,9 @@ public class UnitItemBuilder {
     }
 
     /** I18n key for the short description line(s) in the tooltip's middle band. */
-    public UnitItemBuilder desc(String desc) {
-        this.desc = desc == null ? "" : desc;
+    public UnitItemBuilder desc(String i18nKey, Object... args) {
+        if (i18nKey != null && !i18nKey.isBlank())
+            this.desc = new LocalizedText(i18nKey, args);
         return this;
     }
 
@@ -168,15 +169,9 @@ public class UnitItemBuilder {
     }
 
     /** Adds one bullet to the passive stat list; call once per bullet, in display order. */
-    public UnitItemBuilder pointDesc(String i18nKey) {
+    public UnitItemBuilder pointDesc(String i18nKey, Object... args) {
         if (i18nKey != null && !i18nKey.isBlank())
-            this.pointDescs.add(i18nKey);
-        return this;
-    }
-
-    public UnitItemBuilder pointDescs(String... descs) {
-        for (String desc : descs)
-            pointDesc(desc);
+            this.pointDescs.add(new LocalizedText(i18nKey, args));
         return this;
     }
 

@@ -1,0 +1,53 @@
+
+[✔] Done and tested
+[🟡] Partially done and/or needs testing
+[❌] Not done, including unmerged PRs
+
+
+Passives
+--------
+[❌] Heart Medallion - Raises max HP
+[❌] Azure Medallion - Raises max Mana
+[❌] Soul Collector - Grants health and mana when nearby units die (proportional to their population)
+[❌] Broadsword - Raises attack damage
+[❌] Katana - Grants a critical hit chance
+[❌] Heartstealer - Grants lifesteal
+[❌] Soul Scythe - Grants mana on hit
+[❌] Powershaker - Grants an explosion on hit chance
+[❌] Boots of Swiftness - Raises move speed (does not stack)
+[❌] Sparkler - Raises attack speed
+[❌] Iron Hide Amulet - Raises armour
+[❌] Light Feather - Grants evasion chance
+[❌] Spyglass (only with fog of war enabled) - Raises sight range
+[❌] Frost Walker Boots (villagers & monsters only) - Grants frostwalker (does not work on lava)
+[❌] Magma Walker Boots (piglins only) - Grants magmawalker (like frostwalker but converts lava into magma)
+[❌] Bell of Arms (villagers only) - Allows villagers to call to arms on the hero holding the bell and prevents militia converting back into villagers
+[❌] Satchel of Snacks - Periodically spawns a piece of bread your hero automatically eats when hurt
+
+[❌] Hero's Armour + - Increases armour, whenever you drink a potion, heals nearby allies by a portion of the amount
+[❌] Evocation Robe + - Reduces the cooldown and mana cost of spells
+[❌] Gilded Glory + - Feed it emeralds on a cooldown to gain stacking max health
+[❌] Emerald Edge + - Feed it emeralds on a cooldown to gain stacking damage
+[❌] Buzzy Nest ++ - Whenever you cast a spell, summon a friendly bee with limited lifespan to attack nearby enemies
+
+
+Actives
+-------
+[❌] Health Potion (1-click use, consumable)  - Restores health instantly
+[❌] Mana Potion (1-click use, consumable) - Restores mana instantly
+[❌] Ghost Cloak (1-click use) - Grants phasing movement and knockback immunity (like wraiths)
+[❌] Gong of Weakening (1-click use) - Applies temporary weakening and armor reduction to all nearby enemies
+[❌] Ice Wand (unit-targeted) - Freezes an enemy in a block of ice (like the wretched wraith ultimate)
+[✔] Staff of Lightning (ground-targeted) - Summons a bolt of lightning at the target location
+[❌] Updraft Tome (ground-targeted) - Applies levitation to enemies in a small radius
+[❌] Tome of Duplication  (1-click use, consumable) - Refreshes the cooldown on all items and spells (except ultimates)
+[❌] Shadow Shifter (monsters only, 1-click-use) - Creates a temporary night aura around the hero
+[❌] Pocket Portal (piglins only, consumable, ground-targeted) - Creates a tiny portal that spreads nether terrain
+[❌] War Horn (1-click-use) - Grants temporary strength to nearby friendly units
+
+[❌] Totem of Regeneration + (ground-targeted, consumable) - Summons an immobile attackable totem that grants regeneration to nearby friendly units
+[❌] Totem of Shielding + (ground-targeted, consumable) - Summons an immobile attackable totem that grants absorption to nearby friendly units
+[❌] Totem of Protection + (ground-targeted, consumable) - Summons an immobile attackable totem that grants resistance to nearby friendly units
+[❌] Totem of Casting + (ground-targeted, consumable) - Summons an immobile attackable totem that grants mana regen and cooldown reduction to nearby friendly units
+
+[❌] Scroll of Recall ++ (building-targeted, consumable)  - Channel for a few seconds to teleport your hero and all nearby friendly units back to the targeted capitol building
