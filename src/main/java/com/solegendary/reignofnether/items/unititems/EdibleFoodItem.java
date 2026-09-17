@@ -24,7 +24,9 @@ public class EdibleFoodItem extends UnitItem {
          super(UnitItemBuilder.of(item)
              .descId(getFoodDescId(item))
              .type(UnitItemType.CONSUMABLE)
-             .desc("item.reignofnether.edible_food_item.desc")
+             .desc(item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE ?
+                     "item.reignofnether.edible_food_item.desc.golden_apple" :
+                     "item.reignofnether.edible_food_item.desc")
              .pointDesc(getPointDescKey(item), getPointDescArg(item))
              .consumeOnUse()
              .buyCost(50)

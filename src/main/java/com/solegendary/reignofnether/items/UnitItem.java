@@ -144,11 +144,26 @@ public abstract class UnitItem implements RangeIndicator {
 
     /** One string per bullet in the tooltip's passive stat list. */
     public List<String> getPointDescriptions() {
+        if (!pointDescs.isEmpty()) {
+            List<String> lines = new ArrayList<>();
+            for (LocalizedText text : pointDescs) {
+                String line = text.resolve();
+                if (!line.isBlank())
+                    lines.add(line);
+            }
+            return lines;
+        }
+        return autoDiscoverPointDescs();
+    }
+
+    private List<String> autoDiscoverPointDescs() {
         List<String> lines = new ArrayList<>();
-        for (LocalizedText text : pointDescs) {
-            String line = text.resolve();
-            if (!line.isBlank())
-                lines.add(line);
+        for (int i = 1; i <= 20; i++) {
+            String key = "item.reignofnether." + descId + ".point" + i;
+            String resolved = Component.translatable(key).getString();
+            if (resolved.equals(key))
+                break;
+            lines.add(resolved);
         }
         return lines;
     }

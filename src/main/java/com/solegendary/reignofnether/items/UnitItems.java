@@ -58,7 +58,6 @@ public class UnitItems {
             .buyCost(500)
             .sellValue(250)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
-            .pointDesc("item.reignofnether.totem_of_undying.point1")
             .build();
 
     public static final UnitItem STAFF_OF_LIGHTNING = UnitItemBuilder.of(ItemRegistrar.STAFF_OF_LIGHTNING.get())
@@ -66,7 +65,6 @@ public class UnitItems {
             .type(UnitItemType.ACTIVE)
             .buyCost(600)
             .sellValue(300)
-            .pointDesc("item.reignofnether.staff_of_lightning.point1")
             .cooldownTicks(600)
             .manaCost(10)
             .range(10)
