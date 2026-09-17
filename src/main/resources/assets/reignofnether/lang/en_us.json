@@ -63,7 +63,6 @@
     "item.reignofnether.merchant_trident.desc": "An enchanted netherite trident that headhunters can equip",
     "item.reignofnether.merchant_sword.desc": "An enchanted netherite sword that brutes can equip",
     "item.reignofnether.merchant_chestplate.desc": "A netherite chestplate that piglins and hoglins can equip",
-    "item.reignofnether.merchant_chestplate.point1": "+30%% physical \uE014",
     "item.reignofnether.edible_food_item.desc": "A filling piece of food eaten for healing",
     "item.reignofnether.edible_food_item.desc.golden_apple": "A delicious golden fruit eaten for absorption",
     "item.reignofnether.edible_food_item_heal.point1": "+%d \uE007",

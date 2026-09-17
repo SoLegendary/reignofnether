@@ -36,8 +36,7 @@ public class UnitItems {
 
     public static final UnitItem MERCHANT_CHESTPLATE = new MerchantEquipmentItem(UnitItemBuilder.of(Items.NETHERITE_CHESTPLATE)
             .descId("merchant_chestplate")
-            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_chestplate.png"))
-            .pointDesc("item.reignofnether.merchant_chestplate.point1"),
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_chestplate.png")),
             le -> (le instanceof BruteUnit bruteUnit && !bruteUnit.hasNetheriteChestplate()) ||
                     (le instanceof HeadhunterUnit headhunterUnit && !headhunterUnit.hasNetheriteChestplate()) ||
                     (le instanceof MarauderUnit marauderUnit && !marauderUnit.hasNetheriteChestplate()) ||
