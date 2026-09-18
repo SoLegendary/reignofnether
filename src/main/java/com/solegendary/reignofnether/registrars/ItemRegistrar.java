@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.HeroExperienceBottleItem;
-import com.solegendary.reignofnether.items.StaffOfLightning;
 import com.solegendary.reignofnether.items.ThrowableTnt;
 import com.solegendary.reignofnether.items.UnitGiveableItem;
 import net.minecraft.world.item.Item;
