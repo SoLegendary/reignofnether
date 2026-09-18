@@ -46,8 +46,12 @@ public class VillagerMarket extends AbstractMarket {
     @Override
     protected ArrayList<StockedShopItem> getStartingItemsAndStock() {
         return new ArrayList<>(List.of(
+<<<<<<< HEAD
                 new StockedShopItem(UnitItems.TOTEM_OF_UNDYING, 1, 60 * 20),
                 new StockedShopItem(UnitItems.STAFF_OF_LIGHTNING, 1, 60 * 20),
+=======
+            new StockedShopItem(UnitItems.TOTEM_OF_UNDYING, 1, 60 * 20),
+>>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
             new StockedShopItem(new EdibleFoodItem(Items.GOLDEN_APPLE), 3, 20 * 20)
         ));
     }

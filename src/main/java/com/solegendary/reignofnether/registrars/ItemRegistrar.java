@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.HeroExperienceBottleItem;
+import com.solegendary.reignofnether.items.StaffOfLightning;
 import com.solegendary.reignofnether.items.ThrowableTnt;
 import com.solegendary.reignofnether.items.UnitGiveableItem;
 import net.minecraft.world.item.Item;
@@ -209,6 +210,7 @@ public class ItemRegistrar {
     public static final RegistryObject<Item> THROWN_HERO_EXPERIENCE_BOTTLE =
             ITEMS.register("thrown_hero_experience_bottle", () -> new HeroExperienceBottleItem(new Item.Properties()));
 
+<<<<<<< HEAD
     public static final RegistryObject<Item> HEART_MEDALLION = ITEMS.register("heart_medallion", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> AZURE_MEDALLION = ITEMS.register("azure_medallion", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> IRON_HIDE_AMULET = ITEMS.register("iron_hide_amulet", () -> new UnitGiveableItem(new Item.Properties()));
@@ -240,6 +242,10 @@ public class ItemRegistrar {
     public static final RegistryObject<Item> TOTEM_OF_SHIELDING = ITEMS.register("totem_of_shielding", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> TOTEM_OF_PROTECTION = ITEMS.register("totem_of_protection", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> TOTEM_OF_CASTING = ITEMS.register("totem_of_casting", () -> new UnitGiveableItem(new Item.Properties()));
+=======
+    public static final RegistryObject<Item> STAFF_OF_LIGHTNING =
+            ITEMS.register("staff_of_lightning", () -> new StaffOfLightning(new Item.Properties()));
+>>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
 
     public static void init(FMLJavaModLoadingContext context) {
         ITEMS.register(context.getModEventBus());

@@ -45,7 +45,11 @@ public class UnitItemBuilder {
 
     final Item item;
     int defaultStackCount = 1;
+<<<<<<< HEAD
     String descId;
+=======
+    UUID uuid = UUID.randomUUID();
+>>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
     int sellValue = 0;
@@ -54,7 +58,11 @@ public class UnitItemBuilder {
     Keybinding hotkey = null;
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
+<<<<<<< HEAD
     final List<LocalizedText> pointDescs = new ArrayList<>();
+=======
+    final List<String> pointDescs = new ArrayList<>();
+>>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
     final HashMap<Attribute, AttributeModifier> attributes = new HashMap<>();
     BiPredicate<Unit, BlockPos> onUseGround = null;
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
@@ -83,6 +91,14 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder descId(String descId) {
         this.descId = descId;
+        return this;
+    }
+
+    /** Emerald cost returned when the item is sold; 0 means unsellable. */
+    public UnitItemBuilder defaultStackCount(int defaultStackCount) {
+        if (defaultStackCount < 1)
+            throw new IllegalArgumentException("sellValue must be >= 1, was " + defaultStackCount);
+        this.defaultStackCount = defaultStackCount;
         return this;
     }
 

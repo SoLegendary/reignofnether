@@ -3,6 +3,10 @@ package com.solegendary.reignofnether.items;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.time.TimeClientEvents;
+<<<<<<< HEAD
+=======
+import net.minecraft.core.registries.BuiltInRegistries;
+>>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.food.FoodProperties;

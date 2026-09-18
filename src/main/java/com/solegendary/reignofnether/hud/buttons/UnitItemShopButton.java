@@ -31,7 +31,11 @@ public class UnitItemShopButton extends AbstractUnitItemButton {
                         ItemShopPlacement bpl = ItemClientEvents.openItemShop;
                         ItemShopAddon itemShop = bpl.getBuilding().getActiveAddon(ItemShopAddon.class);
                         if (itemShop != null && bpl.getServedUnit() instanceof LivingEntity le) {
+<<<<<<< HEAD
                             ItemServerboundPacket.buy(le.getId(), stockedShopItem.item.descId, bpl.originPos);
+=======
+                            ItemServerboundPacket.buy(le.getId(), stockedShopItem.item.uuid, bpl.originPos);
+>>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
                         } else if (itemShop != null) {
                             HudClientEvents.showTempMessageI18n("itemshop.reignofnether.error.no_buyers");
                         }
