@@ -29,7 +29,6 @@ public class CreativeModeTabsRegistrar {
                         output.accept(BlockRegistrar.GARRISON_ZONE_BLOCK.get());
                         output.accept(BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get());
                         output.accept(BlockRegistrar.WALKABLE_MAGMA_BLOCK.get());
-
                         for (RegistryObject<Block> block : BlockRegistrar.BLOCKS.getEntries())
                             if (block.get() instanceof RTSStartBlock)
                                 output.accept(block.get());
@@ -54,6 +53,7 @@ public class CreativeModeTabsRegistrar {
                     .icon(() -> new ItemStack(ItemRegistrar.HEART_MEDALLION.get()))
                     .title(Component.translatable("creativetab.reignofnether.unit_items"))
                     .displayItems((parameters, output) -> {
+                        output.accept(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get());
                         for (RegistryObject<Item> item : ItemRegistrar.ITEMS.getEntries())
                             if (item.get() instanceof UnitGiveableItem)
                                 output.accept(item.get());

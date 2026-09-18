@@ -55,7 +55,10 @@ Balance
 Quality of Life
 ---------------
 [❌] Create a new homing projectile entity from the ground up
-
+[✔] Added creative tabs for all RTS-related blocks and items:
+    - RTS Mapmaker Blocks
+    - RTS Unit Spawn Eggs
+    - RTS Hero Items
 
 Bugfixes
 --------

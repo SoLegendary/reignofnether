@@ -289,7 +289,6 @@ public class UnitItems {
 
     public static final UnitItem POCKET_PORTAL = UnitItemBuilder.of(ItemRegistrar.POCKET_PORTAL.get())
             .descId("pocket_portal")
-            .icon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"))
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
