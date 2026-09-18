@@ -26,8 +26,6 @@ Passives
 
 [❌] Hero's Armour + - Increases armour, whenever you drink a potion, heals nearby allies by a portion of the amount
 [❌] Evocation Robe + - Reduces the cooldown and mana cost of spells
-[❌] Gilded Glory + - Feed it emeralds on a cooldown to gain stacking max health
-[❌] Emerald Edge + - Feed it emeralds on a cooldown to gain stacking damage
 [❌] Buzzy Nest ++ - Whenever you cast a spell, summon a friendly bee with limited lifespan to attack nearby enemies
 
 

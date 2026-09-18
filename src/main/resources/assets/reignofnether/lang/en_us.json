@@ -104,10 +104,10 @@
     "item.reignofnether.light_feather.desc": "Breeze past attacks like the wind itself",
     "item.reignofnether.telescope": "Telescope",
     "item.reignofnether.telescope.desc": "Sharpens your sight in the fog of war",
-    "item.reignofnether.frost_walker_boots": "Frost Walker Boots",
+    "item.reignofnether.frost_walker_boots": "Boots of Frost",
     "item.reignofnether.frost_walker_boots.desc": "Water transforms into frosty ice beneath you",
     "item.reignofnether.frost_walker_boots.point1": "Grants Frostwalker",
-    "item.reignofnether.magma_walker_boots": "Magma Walker Boots",
+    "item.reignofnether.magma_walker_boots": "Boots of Magma",
     "item.reignofnether.magma_walker_boots.desc": "Lava transforms into toasty magma beneath you",
     "item.reignofnether.magma_walker_boots.point1": "Grants Magmawalker",
     "item.reignofnether.bell_of_arms": "Bell of Arms",
@@ -201,8 +201,8 @@
 
     "attribute.reignofnether.tooltip.movement_speed": "Move Speed",
 
-    "attribute.reignofnether.base_max_health": "Base Max Health",
-    "attribute.reignofnether.base_max_mana": "Base Max Mana",
+    "attribute.reignofnether.base_max_health": "Max Health",
+    "attribute.reignofnether.base_max_mana": "Max Mana",
     "attribute.reignofnether.mana_regen_per_second": "Mana Regen per Second",
     "attribute.reignofnether.max_mana_bonus_per_level": "Max Mana Bonus per Level",
     "attribute.reignofnether.max_health_bonus_per_level": "Max Health Bonus per Level",

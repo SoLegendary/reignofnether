@@ -31,6 +31,9 @@ Unit Items
 
     [❌] Drinking sound/animation for potions like food
 
+    [❌] New creative tab
+    [❌] Render UnitItem tooltip even in FPV
+
 Item drops
     [❌] Track population amount killed for every RTS player
         - Double check kill credits for things like TNT and fire
@@ -61,6 +64,7 @@ Bugfixes
 [🟡] Units that spawn outside of client render range are now still counted to population totals
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
+[❌] Evasion chance only works on wraiths
 
 Languages
 ---------
