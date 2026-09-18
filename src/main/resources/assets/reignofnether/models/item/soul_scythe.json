@@ -1,6 +1,6 @@
 {
     "parent": "minecraft:item/generated",
     "textures": {
-        "layer0": "reignofnether:item/frost_walker_boots"
+        "layer0": "reignofnether:item/soul_scythe"
     }
 }

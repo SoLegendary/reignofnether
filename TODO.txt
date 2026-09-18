@@ -31,7 +31,6 @@ Unit Items
 
     [❌] Drinking sound/animation for potions like food
 
-    [❌] New creative tab
     [❌] Render UnitItem tooltip even in FPV
 
 Item drops

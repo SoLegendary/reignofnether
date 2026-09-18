@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
@@ -288,6 +289,7 @@ public class UnitItems {
 
     public static final UnitItem POCKET_PORTAL = UnitItemBuilder.of(ItemRegistrar.POCKET_PORTAL.get())
             .descId("pocket_portal")
+            .icon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/portal.png"))
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
@@ -323,13 +325,6 @@ public class UnitItems {
 
     public static final UnitItem TOTEM_OF_CASTING = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_CASTING.get())
             .descId("totem_of_casting")
-            .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
-            .build();
-
-    public static final UnitItem SCROLL_OF_RECALL = UnitItemBuilder.of(ItemRegistrar.SCROLL_OF_RECALL.get())
-            .descId("scroll_of_recall")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
@@ -374,7 +369,6 @@ public class UnitItems {
             TOTEM_OF_REGENERATION,
             TOTEM_OF_SHIELDING,
             TOTEM_OF_PROTECTION,
-            TOTEM_OF_CASTING,
-            SCROLL_OF_RECALL
+            TOTEM_OF_CASTING
     );
 }

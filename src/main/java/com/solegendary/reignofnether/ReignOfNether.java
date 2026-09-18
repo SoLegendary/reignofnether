@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.hud.custombutton.CustomButton;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonActions;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonMappingManager;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonServerEvents;
+import com.solegendary.reignofnether.items.CreativeModeTabsRegistrar;
 import com.solegendary.reignofnether.mixin.DownloadPackSourceAccessor;
 import com.solegendary.reignofnether.network.S2CReset;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -91,9 +92,7 @@ public class ReignOfNether {
     public static SimpleChannel handshakeChannel;
     
     public ReignOfNether(FMLJavaModLoadingContext mlctx) {
-        // Registering all components
         EnchantmentRegistrar.init(mlctx);
-        
         AttributeRegistrar.init(mlctx);
         ItemRegistrar.init(mlctx);
         EntityRegistrar.init(mlctx);
@@ -111,6 +110,7 @@ public class ReignOfNether {
         CustomButtonActions.init(mlctx);
         BuildingSelectorOptions.bootStrap();
         ResourceObjectiveCriteria.init();
+        CreativeModeTabsRegistrar.init(mlctx);
         
         final ClientEventRegistrar clientRegistrar = new ClientEventRegistrar();
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> clientRegistrar::registerClientEvents);

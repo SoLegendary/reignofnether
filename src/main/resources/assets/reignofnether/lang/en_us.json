@@ -53,6 +53,10 @@
     "unititemtype.reignofnether.quest": "Quest",
     "unititemtype.reignofnether.upgrade": "Upgrade",
 
+    "creativetab.reignofnether.custom_buildings": "RTS Custom Buildings",
+    "creativetab.reignofnether.unit_spawn_eggs": "RTS Unit Spawn Eggs",
+    "creativetab.reignofnether.unit_items": "RTS Hero Items",
+
     "item.reignofnether.throwable_tnt": "Throwable TNT",
     "item.reignofnether.thrown_hero_experience_bottle": "Bottle O'Hero Experience",
     "item.reignofnether.hero_experience_bottle.desc": "Filled to the brim with pure knowledge",

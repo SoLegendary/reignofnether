@@ -240,7 +240,6 @@ public class ItemRegistrar {
     public static final RegistryObject<Item> TOTEM_OF_SHIELDING = ITEMS.register("totem_of_shielding", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> TOTEM_OF_PROTECTION = ITEMS.register("totem_of_protection", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> TOTEM_OF_CASTING = ITEMS.register("totem_of_casting", () -> new UnitGiveableItem(new Item.Properties()));
-    public static final RegistryObject<Item> SCROLL_OF_RECALL = ITEMS.register("scroll_of_recall", () -> new UnitGiveableItem(new Item.Properties()));
 
     public static void init(FMLJavaModLoadingContext context) {
         ITEMS.register(context.getModEventBus());
