@@ -9,29 +9,19 @@ import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-<<<<<<< HEAD
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-=======
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
-<<<<<<< HEAD
 import net.minecraft.world.level.Level;
-=======
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
-import java.util.UUID;
-
-import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.*;
 
 import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.*;
 
@@ -68,7 +58,6 @@ public class UnitItems {
             .buyCost(100)
             .sellValue(50)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft","textures/item/experience_bottle.png"))
-<<<<<<< HEAD
             .onUse(unit -> {
                 Level level = ((Entity) unit).level();
                 ThrownHeroExperienceBottle bottle = new ThrownHeroExperienceBottle(level, ((LivingEntity) unit));
@@ -333,11 +322,6 @@ public class UnitItems {
             .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 4, ADDITION)
             .build();
 
-=======
-            .desc(descStr("item.reignofnether.hero_experience_bottle.desc", EXPERIENCE_BOTTLE_EXP_VALUE))
-            .build();
-
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
     public static final UnitItem TOTEM_OF_UNDYING = UnitItemBuilder.of(Items.TOTEM_OF_UNDYING)
             .descId("totem_of_undying")
             .type(UnitItemType.CONSUMABLE)
@@ -346,7 +330,6 @@ public class UnitItems {
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
             .build();
 
-<<<<<<< HEAD
     public static final List<UnitItem> ITEMS = List.of(
             EMPTY,
             MERCHANT_TRIDENT,
@@ -387,46 +370,5 @@ public class UnitItems {
             TOTEM_OF_SHIELDING,
             TOTEM_OF_PROTECTION,
             TOTEM_OF_CASTING
-=======
-    public static final UnitItem STAFF_OF_LIGHTNING = UnitItemBuilder.of(ItemRegistrar.STAFF_OF_LIGHTNING.get())
-            .uuid("8db987aa-3099-4eac-92a2-9227425c50be")
-            .type(UnitItemType.ACTIVE)
-            .buyCost(600)
-            .sellValue(300)
-            .icon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/item/staff_of_lightning.png"))
-            .desc(descStr("item.reignofnether.staff_of_lightning.desc"))
-            .pointDesc(descStr("item.reignofnether.staff_of_lightning.point1"))
-            .cooldownTicks(600)
-            .manaCost(10)
-            .range(10)
-            .onUseGround(((unit, blockPos) -> {
-                LivingEntity le = (LivingEntity) unit;
-                BlockPos bp = MiscUtil.getHighestNonAirBlock(le.level(), blockPos);
-                LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(le.level());
-                if (bolt != null) {
-                    bolt.moveTo(bp.getX(), bp.getY(), bp.getZ());
-                    le.level().addFreshEntity(bolt);
-                    if (le.level().getBlockState(blockPos.above()).isAir())
-                        le.level().setBlockAndUpdate(blockPos.above(), Blocks.FIRE.defaultBlockState());
-                    return true;
-                }
-                return false;
-            }))
-            .build();
-
-
-    public static String descStr(String descKey, Object... pArgs) {
-        return Component.translatable(descKey, pArgs).getString();
-    }
-
-    public static final List<UnitItem> ITEMS = List.of(
-        EMPTY,
-        MERCHANT_TRIDENT,
-        MERCHANT_SWORD,
-        MERCHANT_CHESTPLATE,
-        HERO_EXPERIENCE_BOTTLE,
-        TOTEM_OF_UNDYING,
-        STAFF_OF_LIGHTNING
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
     );
 }

@@ -1,10 +1,7 @@
 package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
-<<<<<<< HEAD
 import com.solegendary.reignofnether.ReignOfNether;
-=======
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
 import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
@@ -43,17 +40,10 @@ public abstract class UnitItem implements RangeIndicator {
 
     public static final String RON$COOLDOWN_KEY = "reignofnether:CooldownEndTick";
 
-    public static final String RON$COOLDOWN_KEY = "reignofnether:CooldownEndTick";
-
     protected final Item item;
     public final int defaultStackCount;
-<<<<<<< HEAD
     public final String descId;
     public ResourceLocation iconRl;
-=======
-    public final UUID uuid;
-    public final ResourceLocation iconRl;
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
     public final UnitItemType type;
     public final int sellValue;
     public final int buyCost;
@@ -62,10 +52,6 @@ public abstract class UnitItem implements RangeIndicator {
     public final Keybinding hotkey;
     public boolean enableTooltip;
     protected final List<Pair<Enchantment, Integer>> enchantments;
-<<<<<<< HEAD
-=======
-    protected final List<String> pointDescs;
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
     public final HashMap<Attribute, AttributeModifier> attributes;
     public BiPredicate<Unit, BlockPos> onUseGround;
     public BiPredicate<Unit, LivingEntity> onUseEntity;
@@ -90,7 +76,6 @@ public abstract class UnitItem implements RangeIndicator {
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
         this.defaultStackCount = builder.defaultStackCount;
-<<<<<<< HEAD
         if (builder.descId == null || builder.descId.isBlank()) {
             throw new IllegalArgumentException("UnitItemBuilder descId is null or blank!");
         }
@@ -104,10 +89,6 @@ public abstract class UnitItem implements RangeIndicator {
         } else {
             this.iconRl = builder.iconRl;
         }
-=======
-        this.uuid = builder.uuid;
-        this.iconRl = builder.iconRl;
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
         this.type = builder.type;
         this.sellValue = builder.sellValue;
         this.buyCost = builder.buyCost;
@@ -158,11 +139,7 @@ public abstract class UnitItem implements RangeIndicator {
     }
 
     public String getDescription() {
-<<<<<<< HEAD
         return desc.resolve();
-=======
-        return desc;
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
     }
 
     /** One string per bullet in the tooltip's passive stat list. */

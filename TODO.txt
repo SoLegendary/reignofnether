@@ -30,12 +30,8 @@ Unit Items
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
     [❌] Drinking sound/animation for potions like food
-
-<<<<<<< HEAD
     [❌] Render UnitItem tooltip even in FPV
 
-=======
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
 Item drops
     [❌] Track population amount killed for every RTS player
         - Double check kill credits for things like TNT and fire
@@ -69,10 +65,7 @@ Bugfixes
 [🟡] Units that spawn outside of client render range are now still counted to population totals
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
-<<<<<<< HEAD
 [❌] Evasion chance only works on wraiths
-=======
->>>>>>> 918672b73971eb87df5c33546072a6f1f635c7b6
 
 Languages
 ---------
