@@ -66,14 +66,6 @@ public class UnitItems {
             })
             .build();
 
-    public static final UnitItem TOTEM_OF_UNDYING = UnitItemBuilder.of(Items.TOTEM_OF_UNDYING)
-            .descId("totem_of_undying")
-            .type(UnitItemType.CONSUMABLE)
-            .buyCost(500)
-            .sellValue(250)
-            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
-            .build();
-
     public static final UnitItem STAFF_OF_LIGHTNING = UnitItemBuilder.of(ItemRegistrar.STAFF_OF_LIGHTNING.get())
             .descId("staff_of_lightning")
             .type(UnitItemType.ACTIVE)
@@ -111,6 +103,14 @@ public class UnitItems {
             .buyCost(400)
             .sellValue(200)
             .attribute(AttributeRegistrar.BASE_MAX_MANA.get(), 50, ADDITION)
+            .build();
+
+    public static final UnitItem IRON_HIDE_AMULET = UnitItemBuilder.of(ItemRegistrar.IRON_HIDE_AMULET.get())
+            .descId("iron_hide_amulet")
+            .type(UnitItemType.PASSIVE)
+            .buyCost(400)
+            .sellValue(200)
+            .attribute(Attributes.ARMOR, 5, ADDITION)
             .build();
 
     public static final UnitItem SOUL_COLLECTOR = UnitItemBuilder.of(ItemRegistrar.SOUL_COLLECTOR.get())
@@ -156,28 +156,12 @@ public class UnitItems {
             .sellValue(250) // TODO
             .build();
 
-    public static final UnitItem BOOTS_OF_SWIFTNESS = UnitItemBuilder.of(ItemRegistrar.BOOTS_OF_SWIFTNESS.get())
-            .descId("boots_of_swiftness")
-            .type(UnitItemType.PASSIVE)
-            .buyCost(500)
-            .sellValue(250)
-            .attribute(Attributes.MOVEMENT_SPEED, 0.04, ADDITION)
-            .build();
-
     public static final UnitItem SPARKLER = UnitItemBuilder.of(ItemRegistrar.SPARKLER.get())
             .descId("sparkler")
             .type(UnitItemType.PASSIVE)
             .buyCost(400)
             .sellValue(200)
             .attribute(Attributes.ATTACK_SPEED, 0.20, MULTIPLY_BASE)
-            .build();
-
-    public static final UnitItem IRON_HIDE_AMULET = UnitItemBuilder.of(ItemRegistrar.IRON_HIDE_AMULET.get())
-            .descId("iron_hide_amulet")
-            .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(200)
-            .attribute(Attributes.ARMOR, 5, ADDITION)
             .build();
 
     public static final UnitItem LIGHT_FEATHER = UnitItemBuilder.of(ItemRegistrar.LIGHT_FEATHER.get())
@@ -188,12 +172,12 @@ public class UnitItems {
             .attribute(AttributeRegistrar.EVASION_CHANCE.get(), 0.15, ADDITION)
             .build();
 
-    public static final UnitItem SPYGLASS = UnitItemBuilder.of(Items.SPYGLASS)
-            .descId("spyglass")
+    public static final UnitItem BOOTS_OF_SWIFTNESS = UnitItemBuilder.of(ItemRegistrar.BOOTS_OF_SWIFTNESS.get())
+            .descId("boots_of_swiftness")
             .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(200)
-            .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 4, ADDITION)
+            .buyCost(500)
+            .sellValue(250)
+            .attribute(Attributes.MOVEMENT_SPEED, 0.04, ADDITION)
             .build();
 
     public static final UnitItem FROST_WALKER_BOOTS = UnitItemBuilder.of(ItemRegistrar.FROST_WALKER_BOOTS.get())
@@ -220,13 +204,6 @@ public class UnitItems {
     public static final UnitItem BUZZY_NEST = UnitItemBuilder.of(ItemRegistrar.BUZZY_NEST.get())
             .descId("buzzy_nest")
             .type(UnitItemType.PASSIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
-            .build();
-
-    public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(Items.BELL)
-            .descId("bell_of_arms")
-            .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
             .build();
@@ -329,6 +306,29 @@ public class UnitItems {
             .sellValue(0) // TODO
             .build();
 
+    public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(Items.BELL)
+            .descId("bell_of_arms")
+            .type(UnitItemType.ACTIVE)
+            .buyCost(0)
+            .sellValue(0) // TODO
+            .build();
+
+    public static final UnitItem SPYGLASS = UnitItemBuilder.of(Items.SPYGLASS)
+            .descId("spyglass")
+            .type(UnitItemType.PASSIVE)
+            .buyCost(400)
+            .sellValue(200)
+            .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 4, ADDITION)
+            .build();
+
+    public static final UnitItem TOTEM_OF_UNDYING = UnitItemBuilder.of(Items.TOTEM_OF_UNDYING)
+            .descId("totem_of_undying")
+            .type(UnitItemType.CONSUMABLE)
+            .buyCost(500)
+            .sellValue(250)
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
+            .build();
+
     public static final List<UnitItem> ITEMS = List.of(
             EMPTY,
             MERCHANT_TRIDENT,
@@ -339,17 +339,17 @@ public class UnitItems {
             STAFF_OF_LIGHTNING,
             HEART_MEDALLION,
             AZURE_MEDALLION,
+            IRON_HIDE_AMULET,
             SOUL_COLLECTOR,
             BROADSWORD,
             KATANA,
             HEARTSTEALER,
             SOUL_SCYTHE,
             POWERSHAKER,
-            BOOTS_OF_SWIFTNESS,
             SPARKLER,
-            IRON_HIDE_AMULET,
             LIGHT_FEATHER,
             SPYGLASS,
+            BOOTS_OF_SWIFTNESS,
             FROST_WALKER_BOOTS,
             MAGMA_WALKER_BOOTS,
             BELL_OF_ARMS,

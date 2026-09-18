@@ -53,10 +53,13 @@ public class CreativeModeTabsRegistrar {
                     .icon(() -> new ItemStack(ItemRegistrar.HEART_MEDALLION.get()))
                     .title(Component.translatable("creativetab.reignofnether.unit_items"))
                     .displayItems((parameters, output) -> {
-                        output.accept(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get());
                         for (RegistryObject<Item> item : ItemRegistrar.ITEMS.getEntries())
                             if (item.get() instanceof UnitGiveableItem)
                                 output.accept(item.get());
+                        output.accept(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get());
+                        output.accept(Items.BELL);
+                        output.accept(Items.SPYGLASS);
+                        output.accept(Items.TOTEM_OF_UNDYING);
                     })
                     .build());
 

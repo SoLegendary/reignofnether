@@ -211,16 +211,16 @@ public class ItemRegistrar {
 
     public static final RegistryObject<Item> HEART_MEDALLION = ITEMS.register("heart_medallion", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> AZURE_MEDALLION = ITEMS.register("azure_medallion", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> IRON_HIDE_AMULET = ITEMS.register("iron_hide_amulet", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> SOUL_COLLECTOR = ITEMS.register("soul_collector", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> BROADSWORD = ITEMS.register("broadsword", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> KATANA = ITEMS.register("katana", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> HEARTSTEALER = ITEMS.register("heartstealer", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> SOUL_SCYTHE = ITEMS.register("soul_scythe", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> POWERSHAKER = ITEMS.register("powershaker", () -> new UnitGiveableItem(new Item.Properties()));
-    public static final RegistryObject<Item> BOOTS_OF_SWIFTNESS = ITEMS.register("boots_of_swiftness", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> SPARKLER = ITEMS.register("sparkler", () -> new UnitGiveableItem(new Item.Properties()));
-    public static final RegistryObject<Item> IRON_HIDE_AMULET = ITEMS.register("iron_hide_amulet", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> LIGHT_FEATHER = ITEMS.register("light_feather", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> BOOTS_OF_SWIFTNESS = ITEMS.register("boots_of_swiftness", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> FROST_WALKER_BOOTS = ITEMS.register("frost_walker_boots", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> MAGMA_WALKER_BOOTS = ITEMS.register("magma_walker_boots", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> SATCHEL_OF_SNACKS = ITEMS.register("satchel_of_snacks", () -> new UnitGiveableItem(new Item.Properties()));
