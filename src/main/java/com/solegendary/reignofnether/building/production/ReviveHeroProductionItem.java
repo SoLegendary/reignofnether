@@ -42,7 +42,7 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide()) {
                 HeroUnitSave oldHero = HeroUnit.getFallenHero(false, placement.ownerName, getHeroEntityType().getDescriptionId());
-                if (oldHero == null || !canProduce(level, placement.ownerName))
+                if (oldHero == null || !canProduce(placement))
                     return;
                 EntityType<? extends HeroUnit> entityType = getHeroEntityType();
                 Entity entity = null;
@@ -87,12 +87,12 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
 
     @Override
     @Nullable
-    public String getProduceErrorMsg(Level level, String ownerName) {
-        if (level.isClientSide()) return null;
+    public String getProduceErrorMsg(ProductionPlacement pp) {
+        if (pp.level.isClientSide()) return null;
 
         String heroName = getHeroEntityType().getDescriptionId();
-        boolean liveHeroOwned = !HeroUnit.getHeroes(level.isClientSide(), ownerName, heroName).isEmpty();
-        boolean fallenHeroOwned = HeroUnit.getFallenHero(level.isClientSide(), ownerName, heroName) != null;
+        boolean liveHeroOwned = !HeroUnit.getHeroes(pp.level.isClientSide(), pp.ownerName, heroName).isEmpty();
+        boolean fallenHeroOwned = HeroUnit.getFallenHero(pp.level.isClientSide(), pp.ownerName, heroName) != null;
 
         if (liveHeroOwned)
             return "hud.hero.reignofnether.error.duplicate";
@@ -100,9 +100,9 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
         if (!fallenHeroOwned)
             return "hud.hero.reignofnether.error.no_dead_hero";
 
-        int allowedHeroes = level.getGameRules().getInt(GameRuleRegistrar.ALLOWED_HEROES);
-        int liveHeroes = HeroUnit.getHeroes(level.isClientSide(), ownerName, heroName).size();
-        int trainingHeroes = HeroUnit.getHeroesInTraining(level.isClientSide(), ownerName).size();
+        int allowedHeroes = pp.level.getGameRules().getInt(GameRuleRegistrar.ALLOWED_HEROES);
+        int liveHeroes = HeroUnit.getHeroes(pp.level.isClientSide(), pp.ownerName, heroName).size();
+        int trainingHeroes = HeroUnit.getHeroesInTraining(pp.level.isClientSide(), pp.ownerName).size();
         if ((liveHeroes + trainingHeroes) >= allowedHeroes)
             return "hud.hero.reignofnether.error.too_many_heroes";
 

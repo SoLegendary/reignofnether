@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ItemShopPlacement extends BuildingPlacement {
+public class ItemShopPlacement extends ProductionPlacement {
 
     public static final int UNIT_SERVE_RANGE = 3;
 

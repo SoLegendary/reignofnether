@@ -15,7 +15,7 @@ import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import java.util.*;
 
 import static com.solegendary.reignofnether.ability.TradeAction.*;
-import static com.solegendary.reignofnether.ability.abilities.TradeResources.START_RATE;
+import static com.solegendary.reignofnether.ability.abilities.TradeResources.*;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.TICKS_TO_REVEAL;
 
 public class RTSPlayer {
@@ -47,12 +47,12 @@ public class RTSPlayer {
     }
 
     private void initTradeRates() {
-        tradeRates.put(FOOD_FOR_WOOD, START_RATE);
-        tradeRates.put(FOOD_FOR_ORE, START_RATE);
-        tradeRates.put(WOOD_FOR_FOOD, START_RATE);
-        tradeRates.put(WOOD_FOR_ORE, START_RATE);
-        tradeRates.put(ORE_FOR_FOOD, START_RATE);
-        tradeRates.put(ORE_FOR_WOOD, START_RATE);
+        tradeRates.put(FOOD_FOR_EMERALD, START_BUY_RATE);
+        tradeRates.put(WOOD_FOR_EMERALD, START_BUY_RATE);
+        tradeRates.put(ORE_FOR_EMERALD, START_BUY_RATE);
+        tradeRates.put(EMERALD_FOR_FOOD, START_SELL_RATE);
+        tradeRates.put(EMERALD_FOR_WOOD, START_SELL_RATE);
+        tradeRates.put(EMERALD_FOR_ORE, START_SELL_RATE);
     }
 
     // bot

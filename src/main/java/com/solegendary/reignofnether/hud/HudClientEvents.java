@@ -368,7 +368,8 @@ public class HudClientEvents {
         if (isShopOpen && ItemClientEvents.ENABLED) {
             ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
             if (itemShop != null) {
-                if (isShopSelected || ItemClientEvents.openItemShop.getServedUnit() == HudClientEvents.hudSelectedEntity) {
+                boolean isServedUnitSelected = ItemClientEvents.openItemShop.getServedUnit() == HudClientEvents.hudSelectedEntity && HudClientEvents.hudSelectedEntity != null;
+                if (isShopSelected || isServedUnitSelected) {
                     hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, x, y));
                     renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, x, y, mouseX, mouseY));
                 }
@@ -623,6 +624,7 @@ public class HudClientEvents {
                                     else
                                         ItemClientEvents.openItemShop = itemShopPlacement;
                                 })
+                                .hotkey(Keybindings.openShop)
                                 .build();
                         shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
                         productionButtons.add(shopMenuButton);

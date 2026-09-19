@@ -1,13 +1,14 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.items.StockedShopItem;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -25,7 +26,8 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class MonsterMarket extends AbstractMarket {
 
     public static final String buildingName = "Conversion Crucible";
-    public static final String structureName = "market_monsters";
+    public static final String structureName = "market_monsters1";
+    public static final String upgradedStructureName = "market_monsters2";
     public static final ResourceCost cost = ResourceCosts.MONSTER_MARKET;
 
     public MonsterMarket() {
@@ -42,11 +44,30 @@ public class MonsterMarket extends AbstractMarket {
         this.startingBlockTypes.add(Blocks.DEEPSLATE_TILE_SLAB);
         this.startingBlockTypes.add(Blocks.POLISHED_DEEPSLATE_SLAB);
         this.startingBlockTypes.add(Blocks.DARK_PRISMARINE_SLAB);
+
+        this.productions.add(ProductionItems.RESEARCH_MARKET_UPGRADE_MONSTERS, Keybindings.abilitySlot4);
+    }
+
+    @Override
+    public String getUpgradedStructureName(int upgradeLevel) {
+        return upgradeLevel > 0 ? upgradedStructureName : structureName;
+    }
+
+    @Override
+    public int getUpgradeLevel(BuildingPlacement placement) {
+        for (BuildingBlock block : placement.getBlocks())
+            if (block.getBlockState().getBlock() == Blocks.BREWING_STAND) {
+                return 1;
+            }
+        return 0;
     }
 
     @Override
     protected ArrayList<StockedShopItem> getStartingItemsAndStock() {
-        return new ArrayList<>();
+        return new ArrayList<>(List.of(
+                new StockedShopItem(UnitItems.HEALTH_POTION, 1, 60 * 20),
+                new StockedShopItem(UnitItems.MANA_POTION, 1, 60 * 20)
+        ));
     }
 
     public Faction getFaction() { return Faction.MONSTERS; }
@@ -60,8 +81,7 @@ public class MonsterMarket extends AbstractMarket {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
-                () -> BuildingClientEvents.numFinishedBuildings(Buildings.SCULK_CATALYST) >= 5 ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
+                () -> true,
                 List.of(
                         fcs(I18n.get("buildings.reignofnether.monster_market"), true),
                         ResourceCosts.getFormattedCost(cost),

@@ -7,6 +7,8 @@ import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
+import com.solegendary.reignofnether.building.production.ProductionBuilding;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -23,19 +25,20 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 // AoE2-style resource trading: 6 buttons that swap 100 of one resource for the current rate of another.
 // Each trade worsens that direction's rate by RATE_STEP and improves
 // the opposite by the same. Rates are stored on RTSPlayer so they survive rebuilding the market.
-public abstract class AbstractMarket extends Building implements ItemShopAddon {
+public abstract class AbstractMarket extends ProductionBuilding implements ItemShopAddon {
 
     public AbstractMarket(String structureName, ResourceCost cost) {
         super(structureName, cost, false);
 
-        this.abilities.add(new TradeResources(UnitAction.TRADE_FOOD_FOR_WOOD), Keybindings.abilitySlot1);
-        this.abilities.add(new TradeResources(UnitAction.TRADE_FOOD_FOR_ORE),  Keybindings.abilitySlot2);
-        this.abilities.add(new TradeResources(UnitAction.TRADE_WOOD_FOR_FOOD), Keybindings.abilitySlot3);
-        this.abilities.add(new TradeResources(UnitAction.TRADE_WOOD_FOR_ORE),  Keybindings.abilitySlot4);
-        this.abilities.add(new TradeResources(UnitAction.TRADE_ORE_FOR_FOOD), Keybindings.abilitySlot5);
-        this.abilities.add(new TradeResources(UnitAction.TRADE_ORE_FOR_WOOD), Keybindings.abilitySlot6);
+        this.abilities.add(new TradeResources(UnitAction.SELL_FOOD),  Keybindings.abilitySlot1);
+        this.abilities.add(new TradeResources(UnitAction.SELL_WOOD), Keybindings.abilitySlot2);
+        this.abilities.add(new TradeResources(UnitAction.SELL_ORE), Keybindings.abilitySlot3);
+        this.abilities.add(new TradeResources(UnitAction.BUY_FOOD), Keybindings.abilitySlot4);
+        this.abilities.add(new TradeResources(UnitAction.BUY_WOOD),  Keybindings.abilitySlot5);
+        this.abilities.add(new TradeResources(UnitAction.BUY_ORE), Keybindings.abilitySlot6);
 
         this.maxHealth = 300d;
+        this.maxHealthBonusPerUpgradeLevel = 50d;
 
         setActiveAddon(ItemShopAddon.class, this, true);
     }

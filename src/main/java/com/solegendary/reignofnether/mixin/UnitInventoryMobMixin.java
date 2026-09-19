@@ -97,6 +97,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack newStack = stack == null ? ItemStack.EMPTY : stack;
         this.unitItems.set(index, newStack);
         if (!newStack.isEmpty()) ron$applyItemAttributes(newStack);
+        if (this instanceof HeroUnit heroUnit) heroUnit.setStatsForLevel();
         syncToClient();
     }
 
@@ -126,6 +127,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     }
                     ron$removeItemAttributes(stack);
                     this.unitItems.set(i, ItemStack.EMPTY);
+                    if (this instanceof HeroUnit heroUnit) heroUnit.setStatsForLevel();
                     syncToClient();
                     return true;
                 }
@@ -146,6 +148,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     }
                     ron$removeItemAttributes(stack);
                     this.unitItems.set(i, ItemStack.EMPTY);
+                    if (this instanceof HeroUnit heroUnit) heroUnit.setStatsForLevel();
                     syncToClient();
                     return true;
                 }

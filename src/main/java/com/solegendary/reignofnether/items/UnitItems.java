@@ -209,18 +209,22 @@ public class UnitItems {
             .sellValue(0) // TODO
             .build();
 
+    private static final float HEALTH_POTION_RESTORE_AMOUNT = 50f;
     public static final UnitItem HEALTH_POTION = UnitItemBuilder.of(ItemRegistrar.HEALTH_POTION.get())
             .descId("health_potion")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(150)
+            .sellValue(75) // TODO
+            .pointDesc("item.reignofnether.health_potion.point1", HEALTH_POTION_RESTORE_AMOUNT)
             .build();
 
+    private static final float MANA_POTION_RESTORE_AMOUNT = 50f;
     public static final UnitItem MANA_POTION = UnitItemBuilder.of(ItemRegistrar.MANA_POTION.get())
             .descId("mana_potion")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(150)
+            .sellValue(75) // TODO
+            .pointDesc("item.reignofnether.mana_potion.point1", MANA_POTION_RESTORE_AMOUNT)
             .build();
 
     public static final UnitItem GHOST_CLOAK = UnitItemBuilder.of(ItemRegistrar.GHOST_CLOAK.get())

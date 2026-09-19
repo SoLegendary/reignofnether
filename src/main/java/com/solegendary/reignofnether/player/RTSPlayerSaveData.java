@@ -54,12 +54,12 @@ public class RTSPlayerSaveData extends SavedData {
                 int scenarioRoleIndex = ptag.getInt("scenarioRoleIndex");
 
                 Map<TradeAction, Integer> tradeRates = new HashMap<>();
-                tradeRates.put(TradeAction.FOOD_FOR_WOOD, ptag.contains("foodWoodRate") ? ptag.getInt("foodWoodRate") : TradeResources.START_RATE);
-                tradeRates.put(TradeAction.FOOD_FOR_ORE, ptag.contains("foodOreRate") ? ptag.getInt("foodOreRate") : TradeResources.START_RATE);
-                tradeRates.put(TradeAction.WOOD_FOR_FOOD, ptag.contains("woodFoodRate") ? ptag.getInt("woodFoodRate") : TradeResources.START_RATE);
-                tradeRates.put(TradeAction.WOOD_FOR_ORE, ptag.contains("woodOreRate") ? ptag.getInt("woodOreRate") : TradeResources.START_RATE);
-                tradeRates.put(TradeAction.ORE_FOR_FOOD, ptag.contains("oreFoodRate") ? ptag.getInt("oreFoodRate") : TradeResources.START_RATE);
-                tradeRates.put(TradeAction.ORE_FOR_WOOD, ptag.contains("oreWoodRate") ? ptag.getInt("oreWoodRate") : TradeResources.START_RATE);
+                tradeRates.put(TradeAction.FOOD_FOR_EMERALD, ptag.contains("foodEmeraldRate") ? ptag.getInt("foodEmeraldRate") : TradeResources.START_SELL_RATE);
+                tradeRates.put(TradeAction.EMERALD_FOR_FOOD, ptag.contains("emeraldFoodRate") ? ptag.getInt("emeraldFoodRate") : TradeResources.START_BUY_RATE);
+                tradeRates.put(TradeAction.WOOD_FOR_EMERALD, ptag.contains("woodEmeraldRate") ? ptag.getInt("woodEmeraldRate") : TradeResources.START_SELL_RATE);
+                tradeRates.put(TradeAction.EMERALD_FOR_WOOD, ptag.contains("emeraldWoodRate") ? ptag.getInt("emeraldWoodRate") : TradeResources.START_BUY_RATE);
+                tradeRates.put(TradeAction.ORE_FOR_EMERALD, ptag.contains("oreEmeraldRate") ? ptag.getInt("oreEmeraldRate") : TradeResources.START_SELL_RATE);
+                tradeRates.put(TradeAction.EMERALD_FOR_ORE, ptag.contains("emeraldOreRate") ? ptag.getInt("emeraldOreRate") : TradeResources.START_BUY_RATE);
 
                 data.rtsPlayers.add(RTSPlayer.getFromSave(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores, scenarioRoleIndex, tradeRates));
 
@@ -83,12 +83,12 @@ public class RTSPlayerSaveData extends SavedData {
             cTag.putString("faction", p.faction.name());
             cTag.putIntArray("scores", p.scores.getScoreListAsArray());
             cTag.putInt("scenarioRoleIndex", p.scenarioRoleIndex);
-            cTag.putInt("foodWoodRate", p.tradeRates.get(TradeAction.FOOD_FOR_WOOD));
-            cTag.putInt("foodOreRate", p.tradeRates.get(TradeAction.FOOD_FOR_ORE));
-            cTag.putInt("woodFoodRate", p.tradeRates.get(TradeAction.WOOD_FOR_FOOD));
-            cTag.putInt("woodOreRate", p.tradeRates.get(TradeAction.WOOD_FOR_ORE));
-            cTag.putInt("oreFoodRate", p.tradeRates.get(TradeAction.ORE_FOR_FOOD));
-            cTag.putInt("oreWoodRate", p.tradeRates.get(TradeAction.ORE_FOR_WOOD));
+            cTag.putInt("foodEmeraldRate", p.tradeRates.get(TradeAction.FOOD_FOR_EMERALD));
+            cTag.putInt("emeraldFoodRate", p.tradeRates.get(TradeAction.EMERALD_FOR_FOOD));
+            cTag.putInt("woodEmeraldRate", p.tradeRates.get(TradeAction.WOOD_FOR_EMERALD));
+            cTag.putInt("emeraldWoodRate", p.tradeRates.get(TradeAction.EMERALD_FOR_WOOD));
+            cTag.putInt("oreEmeraldRate", p.tradeRates.get(TradeAction.ORE_FOR_EMERALD));
+            cTag.putInt("emeraldOreRate", p.tradeRates.get(TradeAction.EMERALD_FOR_ORE));
             list.add(cTag);
 
             //ReignOfNether.LOGGER.info("RTSPlayerSaveData.save: " + p.name + "|" + p.id + "|" + p.faction);

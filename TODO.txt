@@ -11,12 +11,13 @@
 Hero Items
 ----------
 Emerald Resource
-    [❌] Market trading all has to go via emeralds
-    [❌] Markets can be built at the start of the game, but upgraded to unlock resource buying
+    [🟡] Market trading all has to go via emeralds
+    [🟡] Markets can be built at the start of the game, but upgraded to unlock resource buying
     [🟡] Neutrals now give emerald bounties
 
 
 Shops
+    [❌] Neutral market building selling expensive items
     [❌] Custom Item Shops
         - Items placed in container blocks in a custom building's structure stocks that building as a shop
         - Custom tags:

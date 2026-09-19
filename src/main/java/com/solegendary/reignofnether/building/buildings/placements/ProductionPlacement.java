@@ -242,8 +242,11 @@ public class ProductionPlacement extends BuildingPlacement {
                     case ALLOW -> true;
                 };
 
-                if (!prodItem.canProduce(level, ownerName)) {
-                    HudClientboundPacket.showTempMessageI18n(ownerName, prodItem.getProduceErrorMsg(level, ownerName));
+                if (!prodItem.canProduce(this)) {
+                    String errorMsg = prodItem.getProduceErrorMsg(this);
+                    if (errorMsg != null) {
+                        HudClientboundPacket.showTempMessageI18n(ownerName, errorMsg);
+                    }
                 }
                 else if (allow && prodItem.canAfford(this)) {
                     ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);

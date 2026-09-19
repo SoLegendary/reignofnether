@@ -4,9 +4,12 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.items.StockedShopItem;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -24,7 +27,8 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class PiglinMarket extends AbstractMarket implements NetherConvertingAddon {
 
     public static final String buildingName = "Commercial Portal";
-    public static final String structureName = "market_piglins";
+    public static final String structureName = "market_piglins1";
+    public static final String upgradedStructureName = "market_piglins2";
     public static final ResourceCost cost = ResourceCosts.PIGLIN_MARKET;
 
     public PiglinMarket() {
@@ -35,11 +39,30 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
 
         this.startingBlockTypes.add(Blocks.BLACKSTONE);
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_BRICKS);
+
+        this.productions.add(ProductionItems.RESEARCH_MARKET_UPGRADE_PIGLINS, Keybindings.abilitySlot4);
+    }
+
+    @Override
+    public String getUpgradedStructureName(int upgradeLevel) {
+        return upgradeLevel > 0 ? upgradedStructureName : structureName;
+    }
+
+    @Override
+    public int getUpgradeLevel(BuildingPlacement placement) {
+        for (BuildingBlock block : placement.getBlocks())
+            if (block.getBlockState().getBlock() == Blocks.YELLOW_WOOL) {
+                return 1;
+            }
+        return 0;
     }
 
     @Override
     protected ArrayList<StockedShopItem> getStartingItemsAndStock() {
-        return new ArrayList<>();
+        return new ArrayList<>(List.of(
+                new StockedShopItem(UnitItems.HEALTH_POTION, 1, 60 * 20),
+                new StockedShopItem(UnitItems.MANA_POTION, 1, 60 * 20)
+        ));
     }
 
     public Faction getFaction() { return Faction.PIGLINS; }
@@ -53,8 +76,7 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
-                () -> BuildingClientEvents.numFinishedBuildings(Buildings.PORTAL_CIVILIAN) >= 4 ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
+                () -> true,
                 List.of(
                         fcs(I18n.get("buildings.reignofnether.piglin_market"), true),
                         ResourceCosts.getFormattedCost(cost),

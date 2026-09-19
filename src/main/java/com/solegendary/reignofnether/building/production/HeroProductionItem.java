@@ -29,7 +29,7 @@ public abstract class HeroProductionItem extends ProductionItem {
         this.dupeRule = ProdDupeRule.DISALLOW;
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide()) {
-                if (canProduce(level, placement.ownerName)) {
+                if (canProduce(placement)) {
                     placement.produceUnit((ServerLevel) level, getHeroEntityType(), placement.ownerName, true);
                 }
             }
@@ -40,17 +40,17 @@ public abstract class HeroProductionItem extends ProductionItem {
 
     @Override
     @Nullable
-    public String getProduceErrorMsg(Level level, String ownerName) {
-        if (level.isClientSide()) return null;
+    public String getProduceErrorMsg(ProductionPlacement pp) {
+        if (pp.level.isClientSide()) return null;
 
-        if (heroOwned(level.isClientSide(), ownerName))
+        if (heroOwned(pp.level.isClientSide(), pp.ownerName))
             return "hud.hero.reignofnether.error.duplicate";
 
-        int allowedHeroes = level.getGameRules().getInt(GameRuleRegistrar.ALLOWED_HEROES);
-        if (!BuildingUtils.castleOwned(level.isClientSide(), ownerName)) {
+        int allowedHeroes = pp.level.getGameRules().getInt(GameRuleRegistrar.ALLOWED_HEROES);
+        if (!BuildingUtils.castleOwned(pp.level.isClientSide(), pp.ownerName)) {
             allowedHeroes = Math.min(1, allowedHeroes);
         }
-        if (HeroUnit.getNumHeroesOwnedOrInTraining(level.isClientSide(), ownerName) >= allowedHeroes)
+        if (HeroUnit.getNumHeroesOwnedOrInTraining(pp.level.isClientSide(), pp.ownerName) >= allowedHeroes)
             return "hud.hero.reignofnether.error.too_many_heroes";
 
         return null;

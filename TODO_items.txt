@@ -24,8 +24,7 @@ Passives
 [❌] Bell of Arms (villagers only) - Allows villagers to call to arms on the hero holding the bell and prevents militia converting back into villagers
 [❌] Satchel of Snacks - Periodically spawns a piece of bread your hero automatically eats when hurt
 
-[❌] Hero's Armour + - Increases armour, whenever you drink a potion, heals nearby allies by a portion of the amount
-[❌] Evocation Robe + - Reduces the cooldown and mana cost of spells
+
 [❌] Buzzy Nest ++ - Whenever you cast a spell, summon a friendly bee with limited lifespan to attack nearby enemies
 
 
@@ -48,4 +47,20 @@ Actives
 [❌] Totem of Protection + (ground-targeted, consumable) - Summons an immobile attackable totem that grants resistance to nearby friendly units
 [❌] Totem of Casting + (ground-targeted, consumable) - Summons an immobile attackable totem that grants mana regen and cooldown reduction to nearby friendly units
 
-[❌] Scroll of Recall ++ (building-targeted, consumable)  - Channel for a few seconds to teleport your hero and all nearby friendly units back to the targeted capitol building
+
+Later ideas:
+------------
+Hero's Armour + - Increases armour, whenever you drink a potion, heals nearby allies by a portion of the amount
+Evocation Robe + - Reduces the cooldown and mana cost of spells
+Scroll of Recall ++ (building-targeted, consumable)  - Channel for a few seconds to teleport your hero and all nearby friendly units back to the targeted capitol building
+Orbs for each faction
+    - Particle effects on hit
+    - Custom projectiles for ranged heroes
+
+Staff of Purging / Devour Magic?
+
+Great hammer: 3x damage against buildings
+
+Vanilla items:
+    - Ender pearl
+    - Book of Knowledge (to level up)

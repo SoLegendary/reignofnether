@@ -45,12 +45,12 @@ public abstract class ProductionItem {
     }
 
     // is the player allowed to start this production item?
-    public boolean canProduce(Level level, String ownerName) {
-        return getProduceErrorMsg(level, ownerName) == null;
+    public boolean canProduce(ProductionPlacement pp) {
+        return getProduceErrorMsg(pp) == null;
     }
 
     @Nullable
-    public String getProduceErrorMsg(Level level, String ownerName) {
+    public String getProduceErrorMsg(ProductionPlacement pp) {
         return null;
     }
 
