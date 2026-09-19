@@ -69,8 +69,9 @@ public class BlockClientEvents {
                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, yOffset, bp, 0f, 0.8f, 0f, 0.3f);
             }
         }
-        for (LivingEntity le : UnitClientEvents.getSelectedUnits()) {
-            if (le instanceof RangeIndicator ri) {
+        for (LivingEntity le : UnitClientEvents.getAllUnits()) {
+            boolean selected = UnitClientEvents.getSelectedUnits().contains(le);
+            if (le instanceof RangeIndicator ri && (selected || !ri.showOnlyWhenSelected())) {
                 for (BlockPos bp : ri.getHighlightBps()) {
                     int snowLayers = BlockUtils.getSnowLayers(le.level().getBlockState(bp.above()));
                     float yOffset = snowLayers * 0.125f;

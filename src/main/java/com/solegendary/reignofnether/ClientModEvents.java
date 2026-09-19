@@ -6,9 +6,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.entities.models.MagicProjectileModel;
-import com.solegendary.reignofnether.entities.renderers.NecromancerProjectileRenderer;
-import com.solegendary.reignofnether.entities.renderers.ThrowableTntRenderer;
-import com.solegendary.reignofnether.entities.renderers.WindcallerProjectileRenderer;
+import com.solegendary.reignofnether.entities.renderers.*;
 import com.solegendary.reignofnether.fogofwar.FogTintingBakedModel;
 import com.solegendary.reignofnether.fogofwar.FogTintingBlockColor;
 import com.solegendary.reignofnether.mixin.fogofwar.BlockColorsAccessor;
@@ -171,6 +169,10 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.WINDCALLER_PROJECTILE.get(), WindcallerProjectileRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WRAITH_SNOWBALL.get(), ThrownItemRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.MOLTEN_BOMB_PROJECTILE.get(), (ctx) -> new ThrownItemRenderer<>(ctx, 3.0F, true));
+        evt.registerEntityRenderer(EntityRegistrar.TOTEM_OF_REGNERATION.get(), TotemOfRegenerationRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.TOTEM_OF_CASTING.get(), TotemOfCastingRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.TOTEM_OF_PROTECTION.get(), TotemOfProtectionRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.TOTEM_OF_SHIELDING.get(), TotemOfShieldingRenderer::new);
     }
 
     @SubscribeEvent
@@ -259,6 +261,10 @@ public class ClientModEvents {
         event.registerLayerDefinition(WildfireModel.LAYER_LOCATION, WildfireModel::createBodyLayer);
         event.registerLayerDefinition(WindcallerModel.LAYER_LOCATION, WindcallerModel::createBodyLayer);
         event.registerLayerDefinition(WraithModel.LAYER_LOCATION, WraithModel::createBodyLayer);
+        event.registerLayerDefinition(TotemOfRegenerationModel.LAYER_LOCATION, TotemOfRegenerationModel::createBodyLayer);
+        event.registerLayerDefinition(TotemOfCastingModel.LAYER_LOCATION, TotemOfCastingModel::createBodyLayer);
+        event.registerLayerDefinition(TotemOfShieldingModel.LAYER_LOCATION, TotemOfShieldingModel::createBodyLayer);
+        event.registerLayerDefinition(TotemOfProtectionModel.LAYER_LOCATION, TotemOfProtectionModel::createBodyLayer);
         event.registerLayerDefinition(AbstractVillagerUnitRenderer.VILLAGER_ARMOR_OUTER_LAYER, IllagerArmorModel::createOuterArmorLayer);
         event.registerLayerDefinition(AbstractVillagerUnitRenderer.VILLAGER_ARMOR_INNER_LAYER, IllagerArmorModel::createInnerArmorLayer);
     }

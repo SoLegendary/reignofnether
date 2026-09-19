@@ -316,8 +316,4 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
             }
         }
     }
-
-
-
-
 }
