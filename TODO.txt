@@ -60,7 +60,7 @@ Quality of Life
     - RTS Unit Spawn Eggs
     - RTS Hero Items
 
-[❌] Unit armour tooltips now show their highest type % with a + if they have more than one type of armour
+[❌] Reworked the unit armour tooltip for mixed armour types
 
 Bugfixes
 --------

@@ -181,6 +181,13 @@
     "item.reignofnether.error.on_cooldown": "Item is on cooldown (%ds)",
     "item.reignofnether.error.not_enough_mana": "Not enough mana",
 
+    "item.reignofnether.hud.expand_hint": "Hold Shift for details",
+    "item.reignofnether.hud.mana": "Mana: %d",
+    "item.reignofnether.hud.cooldown": "Cooldown: %ds",
+    "item.reignofnether.hud.range": "Range: %d",
+    "item.reignofnether.hud.buy": "Buy: %d",
+    "item.reignofnether.hud.sell": "Sell: %d",
+
     "itemshop.reignofnether.toggle_menu": "Open Shop",
     "itemshop.reignofnether.error.out_of_stock": "Out of stock (restock in %ds)",
     "itemshop.reignofnether.error.full_inventory": "Inventory is full",

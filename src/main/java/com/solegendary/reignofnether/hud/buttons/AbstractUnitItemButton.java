@@ -41,17 +41,17 @@ public abstract class AbstractUnitItemButton extends Button {
     protected static final int DIVIDER_HEIGHT = 5; // 2px pad + 1px rule + 2px pad
     protected static final int MIN_COLUMN_GAP = 8; // between left and right halves of a row
 
-    protected static final Style NAME_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
-    protected static final Style QTY_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xB4B2A9));
-    protected static final Style TYPE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFAC775));
-    protected static final Style DESC_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD3D1C7));
-    protected static final Style POINTS_STYLE = Style.EMPTY
+    public static final Style NAME_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
+    public static final Style QTY_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xB4B2A9));
+    public static final Style TYPE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFAC775));
+    public static final Style DESC_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD3D1C7));
+    public static final Style POINTS_STYLE = Style.EMPTY
             .withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"))
             .withColor(TextColor.fromRgb(0x97C459));
-    protected static final Style SELL_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x5DCAA5));
-    protected static final Style MANA_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x6EA8D9));
-    protected static final Style COOLDOWN_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD9C46E));
-    protected static final Style RANGE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xC97A4A));
+    public static final Style SELL_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x5DCAA5));
+    public static final Style MANA_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x6EA8D9));
+    public static final Style COOLDOWN_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD9C46E));
+    public static final Style RANGE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xC97A4A));
 
     protected static final String EMERALD_ICON = "\uE010";
 
@@ -295,7 +295,7 @@ public abstract class AbstractUnitItemButton extends Button {
     }
 
     // "+5 Attack Damage", "+10% Movement Speed", ... from an item's flat attribute modifiers
-    private static List<String> getAttributeDescs(UnitItem unitItem) {
+    public static List<String> getAttributeDescs(UnitItem unitItem) {
         List<String> descs = new ArrayList<>();
         for (Map.Entry<Attribute, AttributeModifier> entry : unitItem.attributes.entrySet()) {
             Attribute attribute = entry.getKey();
