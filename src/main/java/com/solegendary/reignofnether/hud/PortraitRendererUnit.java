@@ -451,7 +451,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         double rangedArmour = unit.getUnitRangedArmorPercentage();
         double magicArmour = unit.getUnitMagicArmorPercentage();
         double resistArmour = unit.getUnitResistPercentage();
-        double avgArmourInv = 1;
+        double highestArmour = 0;
 
         String armourStr = "0%";
         int nonZeroArmourTypes = 0;
@@ -459,44 +459,45 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         if (physicalArmour != 0) {
             armourStr = (int) (physicalArmour * 100) + "%";
             armourColor = GREEN;
-            avgArmourInv *= (1 - physicalArmour);
+            if (physicalArmour > highestArmour) highestArmour = physicalArmour;
             nonZeroArmourTypes += 1;
         }
         if (rangedArmour != 0) {
             armourStr = (int) (rangedArmour * 100) + "%";
             armourColor = YELLOW;
-            avgArmourInv *= (1 - rangedArmour);
+            if (rangedArmour > highestArmour) highestArmour = rangedArmour;
             nonZeroArmourTypes += 1;
         }
         if (resistArmour != 0) {
             armourStr = (int) (resistArmour * 100) + "%";
             armourColor = LIGHT_BLUE;
-            avgArmourInv *= (1 - resistArmour);
+            if (resistArmour > highestArmour) highestArmour = resistArmour;
             nonZeroArmourTypes += 1;
         }
         if (magicArmour != 0 && resistArmour <= 0) { // resistArmour includes magicArmour
             armourStr = (int) (magicArmour * 100) + "%";
             armourColor = DARK_BLUE;
-            avgArmourInv *= (1 - magicArmour);
+            if (magicArmour > highestArmour) highestArmour = magicArmour;
             nonZeroArmourTypes += 1;
         }
-        if (nonZeroArmourTypes > 1) {
-            armourStr = "~" + (int) ((1 - avgArmourInv) * 100) + "%";
+        if (nonZeroArmourTypes > 1 && highestArmour > 0) {
+            armourStr = (int) (highestArmour * 100) + "%+";
             armourColor = LIGHT_BLUE;
-        }
-        if (armourStr.contains("~") && armourStr.contains("-")) {
-            armourStr = armourStr.replace("~", "");
         }
         if (armourStr.contains("-")) {
             armourColor = RED;
         }
+
+        int xOffset = 0;
+        if (armourStr.endsWith("+")) xOffset = -2;
+        if (armourStr.startsWith("-")) xOffset = -4;
 
         renderedStats.add(new RenderedStat(
                 ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/chestplate.png"),
                 armourStr,
                 UnitStatType.ARMOUR,
                 armourColor,
-                armourStr.startsWith("~") || armourStr.startsWith("-") ? -4 : 0
+                xOffset
         ));
 
         if (((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED) != null) {

@@ -371,7 +371,7 @@ public class ItemClientEvents {
 
     private static final int WRAP_WIDTH = 200;
     private static final Style HINT_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x888780));
-    private static final Style COST_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x704930));
+    private static final Style COST_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x945a35));
 
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent evt) {
