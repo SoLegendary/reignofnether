@@ -30,6 +30,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
@@ -149,7 +151,6 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
     public AbstractTotem(EntityType<? extends Mob> entityType, Level level) {
         super(entityType, level);
         updateAbilityButtons();
-        updateHighlightBps(level);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -178,8 +179,12 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
         super.tick();
         Unit.tick(this);
 
+        if (level().isClientSide && highlightBps.isEmpty()) {
+            updateHighlightBps(level());
+        }
+
         if (!level().isClientSide && tickCount % 20 == 0) {
-            SoundClientboundPacket.playSoundAtPos(SoundAction.BEACON_AMBIENT, blockPosition(), 1.0f);
+            SoundClientboundPacket.playSoundAtPos(SoundAction.BEACON_AMBIENT, blockPosition(), 1.5f);
             for (Mob mob : MiscUtil.getEntitiesWithinRange(position(), AURA_RANGE, Mob.class, level())) {
                 if (mob instanceof Unit unit && AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), getOwnerName()) && !(unit instanceof AbstractTotem)) {
                     for (MobEffect mobEffect : auraEffects.keySet())
@@ -232,8 +237,8 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
 
     @Override
     public AABB getInflatedSelectionBox() {
-        AABB aabb = this.getBoundingBox().inflate(0.1f, 0, 0.1f);
-        aabb.setMaxY(aabb.maxY + 0.2f);
+        AABB aabb = this.getBoundingBox().inflate(0.05f, 0, 0.05f);
+        aabb.setMaxY(aabb.maxY + 0.4f);
         return aabb;
     }
 }

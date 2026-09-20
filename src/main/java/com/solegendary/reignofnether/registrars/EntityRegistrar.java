@@ -420,7 +420,7 @@ public class EntityRegistrar {
     public static final RegistryObject<EntityType<TotemOfRegeneration>> TOTEM_OF_REGNERATION = ENTITIES.register("totem_of_regeneration",
             () -> EntityType.Builder.of(TotemOfRegeneration::new, MobCategory.MISC)
                     .fireImmune()
-                    .sized(0.75f, 0.75f)
+                    .sized(0.75f, 1.25f)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .updateInterval(10)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "totem_of_regeneration").toString()));
@@ -428,7 +428,7 @@ public class EntityRegistrar {
     public static final RegistryObject<EntityType<TotemOfCasting>> TOTEM_OF_CASTING = ENTITIES.register("totem_of_casting",
             () -> EntityType.Builder.of(TotemOfCasting::new, MobCategory.MISC)
                     .fireImmune()
-                    .sized(0.75f, 0.75f)
+                    .sized(0.75f, 1.25f)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .updateInterval(10)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "totem_of_casting").toString()));
@@ -436,7 +436,7 @@ public class EntityRegistrar {
     public static final RegistryObject<EntityType<TotemOfProtection>> TOTEM_OF_PROTECTION = ENTITIES.register("totem_of_protection",
             () -> EntityType.Builder.of(TotemOfProtection::new, MobCategory.MISC)
                     .fireImmune()
-                    .sized(0.75f, 0.75f)
+                    .sized(0.75f, 1.25f)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .updateInterval(10)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "totem_of_protection").toString()));
@@ -444,7 +444,7 @@ public class EntityRegistrar {
     public static final RegistryObject<EntityType<TotemOfShielding>> TOTEM_OF_SHIELDING = ENTITIES.register("totem_of_shielding",
             () -> EntityType.Builder.of(TotemOfShielding::new, MobCategory.MISC)
                     .fireImmune()
-                    .sized(0.75f, 0.75f)
+                    .sized(0.75f, 1.25f)
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .updateInterval(10)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "totem_of_shielding").toString()));

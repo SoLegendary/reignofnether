@@ -19,6 +19,10 @@ public class TotemOfShieldingRenderer extends MobRenderer<AbstractTotem, TotemOf
         super(context, new TotemOfShieldingModel<>(context.bakeLayer(TotemOfShieldingModel.LAYER_LOCATION)), 0.5F);
     }
 
+    protected float getFlipDegrees(AbstractTotem pLivingEntity) {
+        return 0; // don't rotate when dying
+    }
+
     @Override
     public @NotNull ResourceLocation getTextureLocation(@NotNull AbstractTotem totem) {
         return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/entities/totem_of_shielding.png");

@@ -60,6 +60,8 @@ Quality of Life
     - RTS Unit Spawn Eggs
     - RTS Hero Items
 
+[❌] Unit armour tooltips now show their highest type % with a + if they have more than one type of armour
+
 Bugfixes
 --------
 [❌] Grass blocks are tinted weirdly even when fog of war is off
