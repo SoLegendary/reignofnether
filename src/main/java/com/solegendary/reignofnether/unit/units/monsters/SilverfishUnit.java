@@ -171,7 +171,7 @@ public class SilverfishUnit extends Silverfish implements Unit, AttackerUnit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, SilverfishUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, SilverfishUnit.attackDamage)
                 .add(Attributes.ARMOR, SilverfishUnit.armorValue)

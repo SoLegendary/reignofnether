@@ -403,7 +403,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WindcallerUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WindcallerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WindcallerUnit.maxHealth)

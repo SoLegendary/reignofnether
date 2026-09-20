@@ -204,7 +204,7 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, CreeperUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, CreeperUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())

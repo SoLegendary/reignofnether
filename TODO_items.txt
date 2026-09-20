@@ -6,24 +6,23 @@
 
 Passives
 --------
-[❌] Heart Medallion - Raises max HP
-[❌] Azure Medallion - Raises max Mana
+[✔] Heart Medallion - Raises max HP
+[✔] Azure Medallion - Raises max Mana
 [❌] Soul Collector - Grants health and mana when nearby units die (proportional to their population)
 [❌] Broadsword - Raises attack damage
 [❌] Katana - Grants a critical hit chance
 [❌] Heartstealer - Grants lifesteal
 [❌] Soul Scythe - Grants mana on hit
 [❌] Powershaker - Grants an explosion on hit chance
-[❌] Boots of Swiftness - Raises move speed (does not stack)
-[❌] Sparkler - Raises attack speed
-[❌] Iron Hide Amulet - Raises armour
-[❌] Light Feather - Grants evasion chance
+[✔] Boots of Swiftness - Raises move speed (does not stack)
+[✔] Sparkler - Raises attack speed
+[✔] Iron Hide Amulet - Raises armour
+[✔] Light Feather - Grants evasion chance
 [❌] Spyglass (only with fog of war enabled) - Raises sight range
 [❌] Frost Walker Boots (villagers & monsters only) - Grants frostwalker (does not work on lava)
 [❌] Magma Walker Boots (piglins only) - Grants magmawalker (like frostwalker but converts lava into magma)
 [❌] Bell of Arms (villagers only) - Allows villagers to call to arms on the hero holding the bell and prevents militia converting back into villagers
 [❌] Satchel of Snacks - Periodically spawns a piece of bread your hero automatically eats when hurt
-
 
 [❌] Buzzy Nest ++ - Whenever you cast a spell, summon a friendly bee with limited lifespan to attack nearby enemies
 
@@ -42,10 +41,10 @@ Actives
 [❌] Pocket Portal (piglins only, consumable, ground-targeted) - Creates a tiny portal that spreads nether terrain
 [❌] War Horn (1-click-use) - Grants temporary strength to nearby friendly units
 
-[❌] Totem of Regeneration + (ground-targeted, consumable) - Summons an immobile attackable totem that grants regeneration to nearby friendly units
-[❌] Totem of Shielding + (ground-targeted, consumable) - Summons an immobile attackable totem that grants absorption to nearby friendly units
-[❌] Totem of Protection + (ground-targeted, consumable) - Summons an immobile attackable totem that grants resistance to nearby friendly units
-[❌] Totem of Casting + (ground-targeted, consumable) - Summons an immobile attackable totem that grants mana regen and cooldown reduction to nearby friendly units
+[🟡] Totem of Regeneration + (ground-targeted, consumable) - Summons an immobile attackable totem that grants regeneration to nearby friendly units
+[🟡] Totem of Shielding + (ground-targeted, consumable) - Summons an immobile attackable totem that grants absorption to nearby friendly units
+[🟡] Totem of Protection + (ground-targeted, consumable) - Summons an immobile attackable totem that grants resistance to nearby friendly units
+[🟡] Totem of Casting + (ground-targeted, consumable) - Summons an immobile attackable totem that grants mana regen and cooldown reduction to nearby friendly units
 
 
 Later ideas:

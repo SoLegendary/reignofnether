@@ -20,12 +20,15 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.HeroUnitSave;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,6 +49,16 @@ public interface HeroUnit extends Unit {
         if (((LivingEntity) heroUnit).tickCount % 20 == 0) {
             heroUnit.setMana(heroUnit.getMana() + heroUnit.getManaRegenPerSecond());
         }
+    }
+
+    public static AttributeSupplier.Builder createDefaultAttributes() {
+        return Unit.createDefaultAttributes()
+                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), 1)
+                .add(AttributeRegistrar.BASE_MAX_MANA.get(), 0)
+                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), 0)
+                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), 0)
+                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), 0)
+                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), 0);
     }
 
     public boolean needsStatSync();

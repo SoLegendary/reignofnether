@@ -202,7 +202,7 @@ public class ZoglinUnit extends Zoglin implements Unit, AttackerUnit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, ZoglinUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, ZoglinUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, ZoglinUnit.maxHealth)

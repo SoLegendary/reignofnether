@@ -431,7 +431,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, RoyalGuardUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, RoyalGuardUnit.attackDamage)
                 .add(Attributes.ARMOR, RoyalGuardUnit.armorValue)

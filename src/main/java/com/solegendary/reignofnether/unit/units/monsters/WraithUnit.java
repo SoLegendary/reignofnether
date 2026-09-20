@@ -285,7 +285,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WraithUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WraithUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WraithUnit.maxHealth)

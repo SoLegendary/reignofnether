@@ -152,7 +152,7 @@ public class StriderUnit extends Strider implements Unit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, StriderUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, StriderUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())

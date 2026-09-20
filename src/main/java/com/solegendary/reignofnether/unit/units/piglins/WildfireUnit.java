@@ -370,7 +370,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMobAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WildfireUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WildfireUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WildfireUnit.maxHealth)

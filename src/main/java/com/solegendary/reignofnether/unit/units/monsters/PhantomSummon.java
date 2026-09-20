@@ -50,7 +50,7 @@ public class PhantomSummon extends Phantom {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, InsomniaCurse.PHANTOM_DAMAGE)
                 .add(Attributes.MAX_HEALTH, PhantomSummon.maxHealth);
     }

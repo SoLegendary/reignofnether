@@ -162,7 +162,7 @@ public class ScoutCatUnit extends Cat implements Unit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, ScoutCatUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, ScoutCatUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())

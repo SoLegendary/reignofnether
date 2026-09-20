@@ -198,7 +198,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, WardenUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, WardenUnit.attackDamage)
                 .add(Attributes.ARMOR, WardenUnit.armorValue)

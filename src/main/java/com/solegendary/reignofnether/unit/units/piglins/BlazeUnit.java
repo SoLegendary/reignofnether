@@ -198,7 +198,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, BlazeUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, BlazeUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, BlazeUnit.maxHealth)

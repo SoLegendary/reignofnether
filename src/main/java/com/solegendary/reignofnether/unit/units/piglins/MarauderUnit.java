@@ -260,7 +260,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, MarauderUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, MarauderUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, MarauderUnit.maxHealth)

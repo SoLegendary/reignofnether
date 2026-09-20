@@ -59,7 +59,10 @@ Quality of Life
     - RTS Unit Spawn Eggs
     - RTS Hero Items
 
-[❌] Reworked the unit armour tooltip for mixed armour types
+[✔] Reworked the unit armour tooltip for mixed armour types
+
+
+
 
 Bugfixes
 --------
@@ -67,7 +70,8 @@ Bugfixes
 [🟡] Units that spawn outside of client render range are now still counted to population totals
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
-[❌] Evasion chance only works on wraiths
+[🟡] Evasion chance only works on wraiths
+[🟡] Soulfire Blazes no longer add the soulfire buff to enemy blazes
 
 Languages
 ---------

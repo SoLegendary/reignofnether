@@ -208,7 +208,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MAX_HEALTH, RavagerUnit.maxHealth)
                 .add(Attributes.MOVEMENT_SPEED, RavagerUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, RavagerUnit.attackDamage)

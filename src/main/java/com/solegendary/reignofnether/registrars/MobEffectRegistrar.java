@@ -89,6 +89,16 @@ public class MobEffectRegistrar {
     // for striders to maintain visuals slightly off terrain
     public static final RegistryObject<MobEffect> WARM = MOB_EFFECTS.register("warm", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
 
+    // cooldown reduction
+    public static final RegistryObject<MobEffect> VIGOR = MOB_EFFECTS.register("vigor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFFFFFF));
+
+    // no knockback taken or received, not pushable
+    public static final RegistryObject<MobEffect> PHASING = MOB_EFFECTS.register("phasing", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x0000FF));
+
+    // temporary night zone
+    public static final RegistryObject<MobEffect> NIGHT_WARPING = MOB_EFFECTS.register("night_warping", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000));
+
+
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||
                 mobEffect == UNCONTROLLABLE.get();

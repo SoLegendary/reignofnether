@@ -326,7 +326,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, PiglinMerchantUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, PiglinMerchantUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, PiglinMerchantUnit.maxHealth)

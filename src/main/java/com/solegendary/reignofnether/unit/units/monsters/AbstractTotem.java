@@ -154,7 +154,7 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, 0)
                 .add(Attributes.MOVEMENT_SPEED, 0)
                 .add(Attributes.MAX_HEALTH, AbstractTotem.MAX_HEALTH)

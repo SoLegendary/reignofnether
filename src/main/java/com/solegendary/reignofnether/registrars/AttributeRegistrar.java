@@ -95,6 +95,18 @@ public class AttributeRegistrar {
                             .setSyncable(true)
             );
 
+    public static final RegistryObject<Attribute> CRITICAL_HIT_CHANCE =
+            ATTRIBUTES.register("critical_hit_chance",
+                    () -> new RangedAttribute("attribute.reignofnether.attack_damage_bonus_per_level", 0.0, 0.0, 1.0)
+                            .setSyncable(true)
+            );
+
+    public static final RegistryObject<Attribute> EXPLOSIVE_HIT_CHANCE =
+            ATTRIBUTES.register("attack_damage_bonus_per_level",
+                    () -> new RangedAttribute("attribute.reignofnether.attack_damage_bonus_per_level", 0.0, 0.0, 1.0)
+                            .setSyncable(true)
+            );
+
     public static void init(FMLJavaModLoadingContext context) {
         ATTRIBUTES.register(context.getModEventBus());
     }

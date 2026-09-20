@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.*;
 
 // Shared base for UnitItemInventoryButton and UnitItemShopButton.
 public abstract class AbstractUnitItemButton extends Button {
@@ -302,14 +303,18 @@ public abstract class AbstractUnitItemButton extends Button {
             AttributeModifier modifier = entry.getValue();
             String descId = attribute.getDescriptionId();
             boolean isMoveSpeed = attribute == Attributes.MOVEMENT_SPEED;
+            boolean isEvasion = attribute == AttributeRegistrar.EVASION_CHANCE.get();
             if (isMoveSpeed) {
                 descId = "attribute.reignofnether.tooltip.movement_speed";
             }
             String attrName = Component.translatable(descId).getString();
-            String valueStr = switch (modifier.getOperation()) {
-                case ADDITION -> formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
-                case MULTIPLY_BASE, MULTIPLY_TOTAL -> formatSigned(modifier.getAmount() * 100) + "%";
-            };
+
+            String valueStr;
+            if (List.of(MULTIPLY_BASE, MULTIPLY_TOTAL).contains(modifier.getOperation()) || isEvasion) {
+                valueStr = formatSigned(modifier.getAmount() * 100) + "%";
+            } else {
+                valueStr = formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
+            }
             descs.add(valueStr + " " + attrName);
         }
         return descs;

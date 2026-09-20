@@ -409,7 +409,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WretchedWraithUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WretchedWraithUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WretchedWraithUnit.maxHealth)

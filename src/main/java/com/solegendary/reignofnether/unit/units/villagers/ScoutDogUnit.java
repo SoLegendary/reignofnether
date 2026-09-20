@@ -163,7 +163,7 @@ public class ScoutDogUnit extends Wolf implements Unit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, ScoutDogUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, ScoutDogUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
