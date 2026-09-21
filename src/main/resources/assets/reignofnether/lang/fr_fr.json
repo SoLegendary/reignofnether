@@ -1468,7 +1468,7 @@
     "startpos.reignofnether.max_positions": "Max emplacements de départ atteints (16)",
 
     "unitstats.reignofnether.attack_damage": "Dégâts d'attaque",
-    "unitstats.reignofnether.attack_damage_bonus_buildings": "+%s aux bâtiments",
+    "unitstats.reignofnether.attack_damage_bonus_buildings": "%s aux bâtiments",
     "unitstats.reignofnether.attack_damage_bonus_animals": "+%s aux animaux",
     "unitstats.reignofnether.attack_speed": "Attaques par seconde",
     "unitstats.reignofnether.ghast_disarmed": "Ne peut attaquer hors limite",

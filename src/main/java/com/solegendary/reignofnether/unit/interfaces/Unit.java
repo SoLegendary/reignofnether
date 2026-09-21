@@ -111,7 +111,7 @@ public interface Unit {
 
 
     public static AttributeSupplier.Builder createDefaultAttributes() {
-        return Unit.createDefaultAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, 0)
                 .add(Attributes.MOVEMENT_SPEED, 0.25)
                 .add(Attributes.MAX_HEALTH, 1)
@@ -127,7 +127,10 @@ public interface Unit {
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.EVASION_CHANCE.get(), 0)
                 .add(AttributeRegistrar.CRITICAL_HIT_CHANCE.get(), 0)
-                .add(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(), 0);
+                .add(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(), 0)
+                .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 0)
+                .add(AttributeRegistrar.LIFESTEAL.get(), 0)
+                .add(AttributeRegistrar.MANA_ON_HIT.get(), 0);
     }
 
     static Object2ObjectArrayMap<Ability, Float> createCooldownMap() {
@@ -204,15 +207,6 @@ public interface Unit {
     public default int getSightRange() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.SIGHT_RANGE.get());
         return (int) Math.round(attr != null ? attr.getValue() : AttributeRegistrar.SIGHT_RANGE.get().getDefaultValue());
-    }
-
-    public default float getCriticalChance() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.CRITICAL_HIT_CHANCE.get());
-        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.CRITICAL_HIT_CHANCE.get().getDefaultValue());
-    }
-    public default float getExplosiveChance() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get());
-        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get().getDefaultValue());
     }
 
     public ResourceCost getCost();

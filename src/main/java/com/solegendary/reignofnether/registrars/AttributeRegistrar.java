@@ -97,13 +97,31 @@ public class AttributeRegistrar {
 
     public static final RegistryObject<Attribute> CRITICAL_HIT_CHANCE =
             ATTRIBUTES.register("critical_hit_chance",
-                    () -> new RangedAttribute("attribute.reignofnether.attack_damage_bonus_per_level", 0.0, 0.0, 1.0)
+                    () -> new RangedAttribute("attribute.reignofnether.critical_hit_chance", 0.0, 0.0, 1.0)
                             .setSyncable(true)
             );
 
     public static final RegistryObject<Attribute> EXPLOSIVE_HIT_CHANCE =
-            ATTRIBUTES.register("attack_damage_bonus_per_level",
-                    () -> new RangedAttribute("attribute.reignofnether.attack_damage_bonus_per_level", 0.0, 0.0, 1.0)
+            ATTRIBUTES.register("explosive_hit_chance",
+                    () -> new RangedAttribute("attribute.reignofnether.explosive_hit_chance", 0.0, 0.0, 1.0)
+                            .setSyncable(true)
+            );
+
+    public static final RegistryObject<Attribute> BUILDING_DAMAGE_BONUS =
+            ATTRIBUTES.register("building_damage_bonus",
+                    () -> new RangedAttribute("attribute.reignofnether.building_damage_bonus", 0.0, 0.0, 9999.0)
+                            .setSyncable(true)
+            );
+
+    public static final RegistryObject<Attribute> LIFESTEAL =
+            ATTRIBUTES.register("lifesteal",
+                    () -> new RangedAttribute("attribute.reignofnether.lifesteal", 0.0, 0.0, 9999.0)
+                            .setSyncable(true)
+            );
+
+    public static final RegistryObject<Attribute> MANA_ON_HIT =
+            ATTRIBUTES.register("mana_on_hit",
+                    () -> new RangedAttribute("attribute.reignofnether.mana_on_hit", 0.0, 0.0, 9999.0)
                             .setSyncable(true)
             );
 

@@ -251,6 +251,73 @@
             "reignofnether:windcaller_yell_02",
             "reignofnether:windcaller_yell_03"
         ]
+    },
+    "item_drop_common": {
+        "subtitle": "sounds.reignofnether.item_drop_common",
+        "sounds": [ "reignofnether:item_drop_common" ]
+    },
+    "item_drop_rare": {
+        "subtitle": "sounds.reignofnether.item_drop_rare",
+        "sounds": [ "reignofnether:item_drop_rare" ]
+    },
+    "item_drop_legendary": {
+        "subtitle": "sounds.reignofnether.item_drop_legendary",
+        "sounds": [ "reignofnether:item_drop_legendary" ]
+    },
+    "building_smash": {
+        "subtitle": "sounds.reignofnether.building_smash",
+        "sounds": [ "reignofnether:building_smash" ]
+    },
+    "buzzy_nest": {
+        "subtitle": "sounds.reignofnether.buzzy_nest",
+        "sounds": [
+            "reignofnether:buzzy_nest_01",
+            "reignofnether:buzzy_nest_02",
+            "reignofnether:buzzy_nest_03"
+        ]
+    },
+    "critical_hit": {
+        "subtitle": "sounds.reignofnether.critical_hit",
+        "sounds": [ "reignofnether:critical_hit" ]
+    },
+    "ghost_cloak": {
+        "subtitle": "sounds.reignofnether.ghost_cloak",
+        "sounds": [ "reignofnether:ghost_cloak" ]
+    },
+    "gong_of_weakning": {
+        "subtitle": "sounds.reignofnether.gong_of_weakning",
+        "sounds": [
+            "reignofnether:gong_of_weakning_01",
+            "reignofnether:gong_of_weakning_02"
+        ]
+    },
+    "ice_wand": {
+        "subtitle": "sounds.reignofnether.ice_wand",
+        "sounds": [ "reignofnether:ice_wand" ]
+    },
+    "shadow_shifter": {
+        "subtitle": "sounds.reignofnether.shadow_shifter",
+        "sounds": [
+            "reignofnether:shadow_shifter_01",
+            "reignofnether:shadow_shifter_02",
+            "reignofnether:shadow_shifter_03"
+        ]
+    },
+    "tome_of_duplication": {
+        "subtitle": "sounds.reignofnether.tome_of_duplication",
+        "sounds": [
+            "reignofnether:tome_of_duplication_01",
+            "reignofnether:tome_of_duplication_02",
+            "reignofnether:tome_of_duplication_03"
+        ]
+    },
+    "totem_place": {
+        "subtitle": "sounds.reignofnether.totem_place",
+        "sounds": [ "reignofnether:totem_place" ]
+    },
+    "war_horn": {
+        "subtitle": "sounds.reignofnether.war_horn",
+        "sounds": [ "reignofnether:war_horn" ]
     }
 }
 

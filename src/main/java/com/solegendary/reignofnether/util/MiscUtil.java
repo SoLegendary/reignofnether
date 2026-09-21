@@ -17,11 +17,8 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
+import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.blocks.NightCircleMode;
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -49,6 +46,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -63,6 +61,10 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -96,6 +98,8 @@ import static com.solegendary.reignofnether.blocks.BlockUtils.isLeafBlock;
 import static com.solegendary.reignofnether.blocks.BlockUtils.isLogBlock;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE;
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL;
 
 
 public class MiscUtil {
@@ -1065,5 +1069,39 @@ public class MiscUtil {
             throw new IllegalArgumentException("List must not be null or empty");
         }
         return list.get(RANDOM.nextInt(list.size()));
+    }
+
+    public static String getAttrString(Attribute attr, AttributeModifier modifier) {
+        String descId = attr.getDescriptionId();
+        boolean isMoveSpeed = attr == Attributes.MOVEMENT_SPEED;
+        if (isMoveSpeed) {
+            descId = "attribute.reignofnether.tooltip.movement_speed";
+        }
+        String attrName = Component.translatable(descId).getString();
+
+        boolean isPercentStat = List.of(
+                AttributeRegistrar.EVASION_CHANCE.get(),
+                AttributeRegistrar.CRITICAL_HIT_CHANCE.get(),
+                AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(),
+                AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(),
+                AttributeRegistrar.LIFESTEAL.get(),
+                AttributeRegistrar.MANA_ON_HIT.get()
+        ).contains(attr);
+
+        String valueStr;
+        if (List.of(MULTIPLY_BASE, MULTIPLY_TOTAL).contains(modifier.getOperation()) || isPercentStat) {
+            valueStr = formatSigned(modifier.getAmount() * 100) + "%";
+        } else {
+            valueStr = formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
+        }
+        return valueStr + " " + attrName;
+    }
+
+    // drops trailing ".0" on whole numbers, always shows a sign
+    public static String formatSigned(double value) {
+        String num = (value == Math.floor(value))
+                ? String.valueOf((int) value)
+                : String.valueOf(value);
+        return (value >= 0 ? "+" : "") + num;
     }
 }

@@ -200,6 +200,61 @@ public class SoundRegistrar {
             SOUND_EVENTS.register("windcaller_yell", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "windcaller_yell")));
 
+    public static final RegistryObject<SoundEvent> ITEM_DROP_COMMON =
+            SOUND_EVENTS.register("item_drop_common", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "item_drop_common")));
+
+    public static final RegistryObject<SoundEvent> ITEM_DROP_RARE =
+            SOUND_EVENTS.register("item_drop_rare", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "item_drop_rare")));
+
+    public static final RegistryObject<SoundEvent> ITEM_DROP_LEGENDARY =
+            SOUND_EVENTS.register("item_drop_legendary", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "item_drop_legendary")));
+
+    public static final RegistryObject<SoundEvent> BUILDING_SMASH =
+            SOUND_EVENTS.register("building_smash", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "building_smash")));
+
+    public static final RegistryObject<SoundEvent> BUZZY_NEST =
+            SOUND_EVENTS.register("buzzy_nest", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "buzzy_nest")));
+
+    public static final RegistryObject<SoundEvent> CRITICAL_HIT =
+            SOUND_EVENTS.register("critical_hit", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "critical_hit")));
+
+    public static final RegistryObject<SoundEvent> GHOST_CLOAK =
+            SOUND_EVENTS.register("ghost_cloak", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ghost_cloak")));
+
+    public static final RegistryObject<SoundEvent> GONG_OF_WEAKNING =
+            SOUND_EVENTS.register("gong_of_weakning", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "gong_of_weakning")));
+
+    public static final RegistryObject<SoundEvent> ICE_WAND =
+            SOUND_EVENTS.register("ice_wand", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ice_wand")));
+
+    public static final RegistryObject<SoundEvent> SHADOW_SHIFTER =
+            SOUND_EVENTS.register("shadow_shifter", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "shadow_shifter")));
+
+    public static final RegistryObject<SoundEvent> TOME_OF_DUPLICATION =
+            SOUND_EVENTS.register("tome_of_duplication", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "tome_of_duplication")));
+
+    public static final RegistryObject<SoundEvent> TOTEM_PLACE =
+            SOUND_EVENTS.register("totem_place", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "totem_place")));
+
+    public static final RegistryObject<SoundEvent> WAR_HORN =
+            SOUND_EVENTS.register("war_horn", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "war_horn")));
+
+
+
+
     public static void init(FMLJavaModLoadingContext context) {
         SOUND_EVENTS.register(context.getModEventBus());
     }

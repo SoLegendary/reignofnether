@@ -1405,7 +1405,7 @@
     "startpos.reignofnether.ready_button.unready": "آماده نیست",
 
     "unitstats.reignofnether.attack_damage": "قدرت حمله",
-    "unitstats.reignofnether.attack_damage_bonus_buildings": "+%s به ساختمان ها",
+    "unitstats.reignofnether.attack_damage_bonus_buildings": "%s به ساختمان ها",
     "unitstats.reignofnether.attack_speed": "حمله بر ثانیه",
     "unitstats.reignofnether.range": "برد",
     "unitstats.reignofnether.armour": "زره",

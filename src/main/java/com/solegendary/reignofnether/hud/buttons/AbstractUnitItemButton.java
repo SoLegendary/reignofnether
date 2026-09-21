@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -299,33 +300,12 @@ public abstract class AbstractUnitItemButton extends Button {
     public static List<String> getAttributeDescs(UnitItem unitItem) {
         List<String> descs = new ArrayList<>();
         for (Map.Entry<Attribute, AttributeModifier> entry : unitItem.attributes.entrySet()) {
-            Attribute attribute = entry.getKey();
+            Attribute attr = entry.getKey();
             AttributeModifier modifier = entry.getValue();
-            String descId = attribute.getDescriptionId();
-            boolean isMoveSpeed = attribute == Attributes.MOVEMENT_SPEED;
-            boolean isEvasion = attribute == AttributeRegistrar.EVASION_CHANCE.get();
-            if (isMoveSpeed) {
-                descId = "attribute.reignofnether.tooltip.movement_speed";
-            }
-            String attrName = Component.translatable(descId).getString();
-
-            String valueStr;
-            if (List.of(MULTIPLY_BASE, MULTIPLY_TOTAL).contains(modifier.getOperation()) || isEvasion) {
-                valueStr = formatSigned(modifier.getAmount() * 100) + "%";
-            } else {
-                valueStr = formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
-            }
-            descs.add(valueStr + " " + attrName);
+            String attrStr = MiscUtil.getAttrString(attr, modifier);
+            descs.add(attrStr);
         }
         return descs;
-    }
-
-    // drops trailing ".0" on whole numbers, always shows a sign
-    private static String formatSigned(double value) {
-        String num = (value == Math.floor(value))
-                ? String.valueOf((int) value)
-                : String.valueOf(value);
-        return (value >= 0 ? "+" : "") + num;
     }
 
     // on-screen width needed to fit both halves of a justified row without them touching

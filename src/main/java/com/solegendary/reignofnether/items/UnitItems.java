@@ -133,7 +133,8 @@ public class UnitItems {
             .descId("katana")
             .type(UnitItemType.PASSIVE)
             .buyCost(500)
-            .sellValue(250) // TODO
+            .sellValue(250)
+            .attribute(AttributeRegistrar.CRITICAL_HIT_CHANCE.get(), 0.17, ADDITION)
             .build();
 
     public static final UnitItem HEARTSTEALER = UnitItemBuilder.of(ItemRegistrar.HEARTSTEALER.get())
@@ -141,20 +142,31 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .buyCost(500)
             .sellValue(250)
+            .attribute(AttributeRegistrar.LIFESTEAL.get(), 0.15, ADDITION)
             .build();
 
     public static final UnitItem SOUL_SCYTHE = UnitItemBuilder.of(ItemRegistrar.SOUL_SCYTHE.get())
             .descId("soul_scythe")
             .type(UnitItemType.PASSIVE)
             .buyCost(500)
-            .sellValue(250) // TODO
+            .sellValue(250)
+            .attribute(AttributeRegistrar.MANA_ON_HIT.get(), 0.25, ADDITION)
             .build();
 
     public static final UnitItem POWERSHAKER = UnitItemBuilder.of(ItemRegistrar.POWERSHAKER.get())
             .descId("powershaker")
             .type(UnitItemType.PASSIVE)
             .buyCost(500)
-            .sellValue(250) // TODO
+            .sellValue(250)
+            .attribute(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(), 0.2, ADDITION)
+            .build();
+
+    public static final UnitItem GREAT_HAMMER = UnitItemBuilder.of(ItemRegistrar.GREAT_HAMMER.get())
+            .descId("great_hammer")
+            .type(UnitItemType.PASSIVE)
+            .buyCost(500)
+            .sellValue(250)
+            .attribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 2.0, ADDITION)
             .build();
 
     public static final UnitItem SPARKLER = UnitItemBuilder.of(ItemRegistrar.SPARKLER.get())
@@ -351,6 +363,7 @@ public class UnitItems {
             HEARTSTEALER,
             SOUL_SCYTHE,
             POWERSHAKER,
+            GREAT_HAMMER,
             SPARKLER,
             LIGHT_FEATHER,
             SPYGLASS,

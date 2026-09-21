@@ -1885,7 +1885,7 @@
     "message.reignofnether.rts_map_info_modes_command": "Cambia modos con /rtsapi-teams-mode",
 
     "unitstats.reignofnether.attack_damage": "Daño de ataque",
-    "unitstats.reignofnether.attack_damage_bonus_buildings": "+%s a construcciones",
+    "unitstats.reignofnether.attack_damage_bonus_buildings": "%s a construcciones",
     "unitstats.reignofnether.attack_damage_bonus_poison_damage": "+%d daño de veneno durante %d segundos",
     "unitstats.reignofnether.attack_damage_bonus_fire_damage": "+%d daño de fuego durante %d segundos",
     "unitstats.reignofnether.attack_damage_bonus_animals": "+%s a animales",

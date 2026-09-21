@@ -264,5 +264,18 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.WINDCALLER_LIFT, SoundRegistrar.WINDCALLER_LIFT.get());
         SOUND_MAP.put(SoundAction.WINDCALLER_YELL, SoundRegistrar.WINDCALLER_YELL.get());
         SOUND_MAP.put(SoundAction.WINDCALLER_WIND_ATTACK, SoundRegistrar.WINDCALLER_WIND_ATTACK.get());
+        SOUND_MAP.put(SoundAction.ITEM_DROP_COMMON, SoundRegistrar.ITEM_DROP_COMMON.get());
+        SOUND_MAP.put(SoundAction.ITEM_DROP_RARE, SoundRegistrar.ITEM_DROP_RARE.get());
+        SOUND_MAP.put(SoundAction.ITEM_DROP_LEGENDARY, SoundRegistrar.ITEM_DROP_LEGENDARY.get());
+        SOUND_MAP.put(SoundAction.BUILDING_SMASH, SoundRegistrar.BUILDING_SMASH.get());
+        SOUND_MAP.put(SoundAction.BUZZY_NEST, SoundRegistrar.BUZZY_NEST.get());
+        SOUND_MAP.put(SoundAction.CRITICAL_HIT, SoundRegistrar.CRITICAL_HIT.get());
+        SOUND_MAP.put(SoundAction.GHOST_CLOAK, SoundRegistrar.GHOST_CLOAK.get());
+        SOUND_MAP.put(SoundAction.GONG_OF_WEAKNING, SoundRegistrar.GONG_OF_WEAKNING.get());
+        SOUND_MAP.put(SoundAction.ICE_WAND, SoundRegistrar.ICE_WAND.get());
+        SOUND_MAP.put(SoundAction.SHADOW_SHIFTER, SoundRegistrar.SHADOW_SHIFTER.get());
+        SOUND_MAP.put(SoundAction.TOME_OF_DUPLICATION, SoundRegistrar.TOME_OF_DUPLICATION.get());
+        SOUND_MAP.put(SoundAction.TOTEM_PLACE, SoundRegistrar.TOTEM_PLACE.get());
+        SOUND_MAP.put(SoundAction.WAR_HORN, SoundRegistrar.WAR_HORN.get());
     }
 }

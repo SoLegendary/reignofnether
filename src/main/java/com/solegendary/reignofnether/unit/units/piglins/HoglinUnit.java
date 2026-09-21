@@ -24,6 +24,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
+import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
@@ -39,6 +40,8 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -186,10 +189,6 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
     final static public float movementSpeed = 0.31f;
     public int maxResources = 100;
 
-    public float getBuildingDamageMultiplier() {
-        return 2.0f;
-    }
-
     private Abilities abilities = ABILITIES.clone();
     private final List<ItemStack> items = new ArrayList<>();
 
@@ -247,7 +246,8 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 1.0);
     }
 
     @Override // prevent vanilla logic for picking up items
@@ -369,9 +369,10 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
 
     @Override
     public List<FormattedCharSequence> getAttackDamageStatTooltip() {
+        String attrStr = MiscUtil.formatSigned(getBuildingDamageBonus() * 100) + "%";
         return List.of(
                 fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
-                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", "100%"))
+                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", attrStr))
         );
     }
     @Override

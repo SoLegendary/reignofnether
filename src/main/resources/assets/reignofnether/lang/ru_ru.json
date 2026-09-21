@@ -1937,7 +1937,7 @@
     "message.reignofnether.rts_map_info_modes": "Режимы: %s",
     "message.reignofnether.rts_map_info_modes_command": "Смена режима: /rtsapi-teams-mode",
     "unitstats.reignofnether.attack_damage": "Урон",
-    "unitstats.reignofnether.attack_damage_bonus_buildings": "+%s зданиям",
+    "unitstats.reignofnether.attack_damage_bonus_buildings": "%s зданиям",
     "unitstats.reignofnether.attack_damage_bonus_poison_damage": "+%d урона ядом в течение %d сек.",
     "unitstats.reignofnether.attack_damage_bonus_fire_damage": "+%d урона огнём в течение %d сек.",
     "unitstats.reignofnether.attack_damage_bonus_animals": "+%s животным",
