@@ -239,32 +239,42 @@ public class UnitItems {
             .pointDesc("item.reignofnether.mana_potion.point1", MANA_POTION_RESTORE_AMOUNT)
             .build();
 
+    private static final int GHOST_CLOAK_DURATION_SECONDS = 10;
     public static final UnitItem GHOST_CLOAK = UnitItemBuilder.of(ItemRegistrar.GHOST_CLOAK.get())
             .descId("ghost_cloak")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.ghost_cloak.point1", GHOST_CLOAK_DURATION_SECONDS)
             .build();
 
+    private static final int GONG_OF_WEAKENING_DURATION_SECONDS = 10;
     public static final UnitItem GONG_OF_WEAKENING = UnitItemBuilder.of(ItemRegistrar.GONG_OF_WEAKENING.get())
             .descId("gong_of_weakening")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.gong_of_weakning.point1", GONG_OF_WEAKENING_DURATION_SECONDS)
             .build();
 
+    private static final int ICE_WAND_DURATION_SECONDS = 8;
     public static final UnitItem ICE_WAND = UnitItemBuilder.of(ItemRegistrar.ICE_WAND.get())
             .descId("ice_wand")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.ice_wand.point1", ICE_WAND_DURATION_SECONDS)
+            .pointDesc("item.reignofnether.ice_wand.point2")
             .build();
 
+    private static final int UPDRAFT_TOME_DURATION_SECONDS = 6;
     public static final UnitItem UPDRAFT_TOME = UnitItemBuilder.of(ItemRegistrar.UPDRAFT_TOME.get())
             .descId("updraft_tome")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.updraft_tome.point1", UPDRAFT_TOME_DURATION_SECONDS)
+            .pointDesc("item.reignofnether.updraft_tome.point2")
             .build();
 
     public static final UnitItem TOME_OF_DUPLICATION = UnitItemBuilder.of(ItemRegistrar.TOME_OF_DUPLICATION.get())
@@ -274,11 +284,13 @@ public class UnitItems {
             .sellValue(0) // TODO
             .build();
 
+    private static final int SHADOW_SHIFTER_DURATION_SECONDS = 45;
     public static final UnitItem SHADOW_SHIFTER = UnitItemBuilder.of(ItemRegistrar.SHADOW_SHIFTER.get())
             .descId("shadow_shifter")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.shadow_shifter.point1", SHADOW_SHIFTER_DURATION_SECONDS)
             .build();
 
     public static final UnitItem POCKET_PORTAL = UnitItemBuilder.of(ItemRegistrar.POCKET_PORTAL.get())
@@ -288,39 +300,49 @@ public class UnitItems {
             .sellValue(0) // TODO
             .build();
 
+    private static final int WAR_HORN_DURATION_SECONDS = 30;
     public static final UnitItem WAR_HORN = UnitItemBuilder.of(ItemRegistrar.WAR_HORN.get())
             .descId("war_horn")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.war_horn.point1", WAR_HORN_DURATION_SECONDS)
             .build();
 
+    private static final int TOTEM_OF_REGENERATION_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_REGENERATION = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_REGENERATION.get())
             .descId("totem_of_regeneration")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.totem_of_regeneration.point1", TOTEM_OF_REGENERATION_DURATION_SECONDS)
             .build();
 
+    private static final int TOTEM_OF_SHIELDING_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_SHIELDING = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
             .descId("totem_of_shielding")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.totem_of_shielding.point1", TOTEM_OF_SHIELDING_DURATION_SECONDS)
             .build();
 
+    private static final int TOTEM_OF_PROTECTION_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_PROTECTION = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_PROTECTION.get())
             .descId("totem_of_protection")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.totem_of_protection.point1", TOTEM_OF_PROTECTION_DURATION_SECONDS)
             .build();
 
+    private static final int TOTEM_OF_CASTING_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_CASTING = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_CASTING.get())
             .descId("totem_of_casting")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
+            .pointDesc("item.reignofnether.totem_of_casting.point1", TOTEM_OF_CASTING_DURATION_SECONDS)
             .build();
 
     public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(Items.BELL)

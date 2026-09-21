@@ -31,6 +31,7 @@ Unit Items
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
     [❌] Drinking sound/animation for potions like food
+    [❌] Show radius on hover for items like war horn (has >0 range and non-null onUse)
 
 Item drops
     [❌] Track population amount killed for every RTS player
@@ -50,6 +51,7 @@ Balance
     - Siege tank mode for ravager artillery (by burrowing them partially into the ground)
     - Reduce cost of iron armor
     - Reduce cost of militia archers
+    - Rework enchanter absorption to be like MC dungeons (active linked buff)
 
 Quality of Life
 ---------------
