@@ -31,6 +31,7 @@ public class UnitItems {
 
     public static final UnitItem MERCHANT_TRIDENT = new MerchantEquipmentItem(UnitItemBuilder.of(Items.TRIDENT)
             .descId("merchant_trident")
+            .type(UnitItemType.UPGRADE)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/trident.png"))
             .enchant(Enchantments.FLAMING_ARROWS, 1)
             .enchant(Enchantments.MOB_LOOTING, 1),
@@ -38,12 +39,14 @@ public class UnitItems {
 
     public static final UnitItem MERCHANT_SWORD = new MerchantEquipmentItem(UnitItemBuilder.of(Items.NETHERITE_SWORD)
             .descId("merchant_sword")
+            .type(UnitItemType.UPGRADE)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_sword.png"))
             .enchant(Enchantments.FIRE_ASPECT, 1),
             le -> le instanceof BruteUnit bruteUnit && !bruteUnit.hasEnchantedNetheriteSword());
 
     public static final UnitItem MERCHANT_CHESTPLATE = new MerchantEquipmentItem(UnitItemBuilder.of(Items.NETHERITE_CHESTPLATE)
             .descId("merchant_chestplate")
+            .type(UnitItemType.UPGRADE)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/netherite_chestplate.png")),
             le -> (le instanceof BruteUnit bruteUnit && !bruteUnit.hasNetheriteChestplate()) ||
                     (le instanceof HeadhunterUnit headhunterUnit && !headhunterUnit.hasNetheriteChestplate()) ||
@@ -185,6 +188,14 @@ public class UnitItems {
             .attribute(AttributeRegistrar.EVASION_CHANCE.get(), 0.15, ADDITION)
             .build();
 
+    public static final UnitItem SPYGLASS = UnitItemBuilder.of(Items.SPYGLASS)
+            .descId("spyglass")
+            .type(UnitItemType.PASSIVE)
+            .buyCost(400)
+            .sellValue(200)
+            .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 4, ADDITION)
+            .build();
+
     public static final UnitItem BOOTS_OF_SWIFTNESS = UnitItemBuilder.of(ItemRegistrar.BOOTS_OF_SWIFTNESS.get())
             .descId("boots_of_swiftness")
             .type(UnitItemType.PASSIVE)
@@ -224,7 +235,7 @@ public class UnitItems {
     private static final float HEALTH_POTION_RESTORE_AMOUNT = 50f;
     public static final UnitItem HEALTH_POTION = UnitItemBuilder.of(ItemRegistrar.HEALTH_POTION.get())
             .descId("health_potion")
-            .type(UnitItemType.ACTIVE)
+            .type(UnitItemType.CONSUMABLE)
             .buyCost(150)
             .sellValue(75) // TODO
             .pointDesc("item.reignofnether.health_potion.point1", HEALTH_POTION_RESTORE_AMOUNT)
@@ -233,7 +244,7 @@ public class UnitItems {
     private static final float MANA_POTION_RESTORE_AMOUNT = 50f;
     public static final UnitItem MANA_POTION = UnitItemBuilder.of(ItemRegistrar.MANA_POTION.get())
             .descId("mana_potion")
-            .type(UnitItemType.ACTIVE)
+            .type(UnitItemType.CONSUMABLE)
             .buyCost(150)
             .sellValue(75) // TODO
             .pointDesc("item.reignofnether.mana_potion.point1", MANA_POTION_RESTORE_AMOUNT)
@@ -254,7 +265,7 @@ public class UnitItems {
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
             .sellValue(0) // TODO
-            .pointDesc("item.reignofnether.gong_of_weakning.point1", GONG_OF_WEAKENING_DURATION_SECONDS)
+            .pointDesc("item.reignofnether.gong_of_weakening.point1", GONG_OF_WEAKENING_DURATION_SECONDS)
             .build();
 
     private static final int ICE_WAND_DURATION_SECONDS = 8;
@@ -279,7 +290,7 @@ public class UnitItems {
 
     public static final UnitItem TOME_OF_DUPLICATION = UnitItemBuilder.of(ItemRegistrar.TOME_OF_DUPLICATION.get())
             .descId("tome_of_duplication")
-            .type(UnitItemType.ACTIVE)
+            .type(UnitItemType.CONSUMABLE)
             .buyCost(0)
             .sellValue(0) // TODO
             .build();
@@ -312,7 +323,7 @@ public class UnitItems {
     private static final int TOTEM_OF_REGENERATION_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_REGENERATION = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_REGENERATION.get())
             .descId("totem_of_regeneration")
-            .type(UnitItemType.ACTIVE)
+            .type(UnitItemType.CONSUMABLE)
             .buyCost(0)
             .sellValue(0) // TODO
             .pointDesc("item.reignofnether.totem_of_regeneration.point1", TOTEM_OF_REGENERATION_DURATION_SECONDS)
@@ -321,7 +332,7 @@ public class UnitItems {
     private static final int TOTEM_OF_SHIELDING_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_SHIELDING = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
             .descId("totem_of_shielding")
-            .type(UnitItemType.ACTIVE)
+            .type(UnitItemType.CONSUMABLE)
             .buyCost(0)
             .sellValue(0) // TODO
             .pointDesc("item.reignofnether.totem_of_shielding.point1", TOTEM_OF_SHIELDING_DURATION_SECONDS)
@@ -330,7 +341,7 @@ public class UnitItems {
     private static final int TOTEM_OF_PROTECTION_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_PROTECTION = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_PROTECTION.get())
             .descId("totem_of_protection")
-            .type(UnitItemType.ACTIVE)
+            .type(UnitItemType.CONSUMABLE)
             .buyCost(0)
             .sellValue(0) // TODO
             .pointDesc("item.reignofnether.totem_of_protection.point1", TOTEM_OF_PROTECTION_DURATION_SECONDS)
@@ -339,7 +350,7 @@ public class UnitItems {
     private static final int TOTEM_OF_CASTING_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_CASTING = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_CASTING.get())
             .descId("totem_of_casting")
-            .type(UnitItemType.ACTIVE)
+            .type(UnitItemType.CONSUMABLE)
             .buyCost(0)
             .sellValue(0) // TODO
             .pointDesc("item.reignofnether.totem_of_casting.point1", TOTEM_OF_CASTING_DURATION_SECONDS)
@@ -352,20 +363,14 @@ public class UnitItems {
             .sellValue(0) // TODO
             .build();
 
-    public static final UnitItem SPYGLASS = UnitItemBuilder.of(Items.SPYGLASS)
-            .descId("spyglass")
-            .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(200)
-            .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 4, ADDITION)
-            .build();
-
+    private static final int TOTEM_OF_CASTING_INVINCIBILITY_DURATION_SECONDS = 5;
     public static final UnitItem TOTEM_OF_UNDYING = UnitItemBuilder.of(Items.TOTEM_OF_UNDYING)
             .descId("totem_of_undying")
             .type(UnitItemType.CONSUMABLE)
             .buyCost(500)
             .sellValue(250)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
+            .pointDesc("item.reignofnether.totem_of_undying.point1", TOTEM_OF_CASTING_INVINCIBILITY_DURATION_SECONDS)
             .build();
 
     public static final List<UnitItem> ITEMS = List.of(
