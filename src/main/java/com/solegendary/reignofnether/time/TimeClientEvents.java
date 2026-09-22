@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
+import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -26,6 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -47,6 +49,7 @@ public class TimeClientEvents {
     // actual time on the server
     public static long serverNormDayTime = 0;
     public static long serverGameTime = 0;
+    public static double ticksSinceLastUpdate = 0; // for counting partial ticks since serverGameTime is only updated once per second
 
     public static boolean showClockTooltip = false;
 
@@ -65,6 +68,7 @@ public class TimeClientEvents {
     private static Button bloodMoonButton = getBloodMoonButton();
     private static int bloodMoonTicksLeft = 0;
     private static BlockPos bloodMoonPos = null;
+
     public static void resetBloodMoon() {
         bloodMoonTicksLeft = 0;
         bloodMoonPos = null;
@@ -111,7 +115,7 @@ public class TimeClientEvents {
     @SubscribeEvent
     public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
-            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
+                || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
             return;
         }
 
@@ -147,7 +151,7 @@ public class TimeClientEvents {
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
-            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
+                || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
             return;
         }
 
@@ -158,8 +162,7 @@ public class TimeClientEvents {
             bloodMoonButton.render(evt.getGuiGraphics(), xPos - 3, yPos - 3, evt.getMouseX(), evt.getMouseY());
             if (bloodMoonButton.isMouseOver(evt.getMouseX(), evt.getMouseY()))
                 bloodMoonButton.renderTooltip(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
-        }
-        else if (!clockButton.isHidden.get() && evt.getScreen() instanceof TopdownGui)
+        } else if (!clockButton.isHidden.get() && evt.getScreen() instanceof TopdownGui)
             clockButton.render(evt.getGuiGraphics(), xPos - 3, yPos - 3, evt.getMouseX(), evt.getMouseY());
     }
 
@@ -168,8 +171,7 @@ public class TimeClientEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             clockButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
             bloodMoonButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-        }
-        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+        } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             clockButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
             bloodMoonButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
         }
@@ -178,7 +180,7 @@ public class TimeClientEvents {
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render evt) {
         if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) ||
-            !(MC.screen instanceof TopdownGui) || !HudClientEvents.enabled) {
+                !(MC.screen instanceof TopdownGui) || !HudClientEvents.enabled) {
             return;
         }
 
@@ -197,12 +199,12 @@ public class TimeClientEvents {
             String timeStr = get12HourTimeStr(serverNormDayTime);
 
             FormattedCharSequence timeUntilStr =
-                FormattedCharSequence.forward(
-                    isDay ? I18n.get("time.reignofnether.time_until_night",
-                        getTimeUntilStr(serverNormDayTime, DUSK)) :
-                        I18n.get("time.reignofnether.time_until_day",
-                        getTimeUntilStr(serverNormDayTime, DAWN)),
-                    Style.EMPTY);
+                    FormattedCharSequence.forward(
+                            isDay ? I18n.get("time.reignofnether.time_until_night",
+                                    getTimeUntilStr(serverNormDayTime, DUSK)) :
+                                    I18n.get("time.reignofnether.time_until_day",
+                                            getTimeUntilStr(serverNormDayTime, DAWN)),
+                            Style.EMPTY);
 
             ArrayList<FormattedCharSequence> tooltip = new ArrayList<>();
 
@@ -235,6 +237,12 @@ public class TimeClientEvents {
                 MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltip, evt.getMouseX(), evt.getMouseY());
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END)
+            ticksSinceLastUpdate += RtsDebugClientEvents.getCappedTPS() / 20D;
     }
 }
 

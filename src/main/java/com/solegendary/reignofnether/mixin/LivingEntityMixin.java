@@ -219,4 +219,40 @@ public abstract class LivingEntityMixin extends Entity {
             }
         }
     }
+
+    @Inject(
+            method = "isPushable",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void isPushable(CallbackInfoReturnable<Boolean> cir) {
+        LivingEntity le = (LivingEntity) (Object) this;
+        if (le.hasEffect(MobEffectRegistrar.PHASING.get())) {
+            cir.setReturnValue(false);
+        }
+    }
+
+    @Inject(
+            method = "push",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void push(Entity entity, CallbackInfo ci) {
+        LivingEntity le = (LivingEntity) (Object) this;
+        if (le.hasEffect(MobEffectRegistrar.PHASING.get())) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(
+            method = "doPush",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void doPush(Entity entity, CallbackInfo ci) {
+        LivingEntity le = (LivingEntity) (Object) this;
+        if (le.hasEffect(MobEffectRegistrar.PHASING.get())) {
+            ci.cancel();
+        }
+    }
 }

@@ -41,6 +41,7 @@ public class ClientPacketMixin {
 
         TimeClientEvents.serverNormDayTime = TimeUtils.normaliseTime(pPacket.getDayTime());
         TimeClientEvents.serverGameTime = pPacket.getGameTime();
+        TimeClientEvents.ticksSinceLastUpdate = 0;
 
         if (NightUtils.isInRangeOfNightSource(pos, true))
             TimeClientEvents.targetClientTime = 18000; // midnight

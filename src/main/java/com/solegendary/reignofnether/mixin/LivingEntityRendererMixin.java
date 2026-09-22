@@ -70,7 +70,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/client/model/EntityModel;renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;IIFFFF)V")
     )
-    private void wm$renderWithAlpha(EntityModel<T> model, PoseStack poseStack, VertexConsumer buffer,
+    private void ron$renderWithAlpha(EntityModel<T> model, PoseStack poseStack, VertexConsumer buffer,
                                     int packedLight, int packedOverlay,
                                     float red, float green, float blue, float alpha) {
         float finalAlpha = ron$currentEntity != null && isTransparent(ron$currentEntity) ? alpha * ALPHA : alpha;
@@ -85,7 +85,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
                     ordinal = 0,
                     shift = At.Shift.AFTER)
     )
-    private void wm$applyScale(T entity, float entityYaw, float partialTicks,
+    private void ron$applyScale(T entity, float entityYaw, float partialTicks,
                                PoseStack poseStack, MultiBufferSource buffer, int packedLight,
                                CallbackInfo ci) {
         if (entity instanceof Unit unit) {

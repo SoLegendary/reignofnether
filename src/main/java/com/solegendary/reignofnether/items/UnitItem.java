@@ -67,6 +67,8 @@ public abstract class UnitItem implements RangeIndicator {
     public boolean showRangeLine;
     public boolean showRadiusCircle;
     public boolean suppressDefaultError;
+    public boolean doCastAnimation;
+    public boolean resetBehaviours;
 
     private Set<BlockPos> highlightBps = new HashSet<>();
 
@@ -114,6 +116,8 @@ public abstract class UnitItem implements RangeIndicator {
         this.showRangeLine = builder.showRangeLine;
         this.showRadiusCircle = builder.showRadiusCircle;
         this.suppressDefaultError = builder.suppressDefaultError;
+        this.doCastAnimation = builder.doCastAnimation;
+        this.resetBehaviours = builder.resetBehaviours;
     }
 
     public Item getItem() {

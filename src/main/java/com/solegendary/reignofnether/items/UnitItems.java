@@ -1,17 +1,19 @@
 package com.solegendary.reignofnether.items;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -23,7 +25,8 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
-import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.*;
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION;
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE;
 
 public class UnitItems {
 
@@ -75,9 +78,10 @@ public class UnitItems {
             .type(UnitItemType.ACTIVE)
             .buyCost(600)
             .sellValue(300)
-            .cooldownTicks(600)
+            .cooldownTicks(60)
             .manaCost(10)
             .range(10)
+            .doCastAnimation()
             .onUseGround(((unit, blockPos) -> {
                 LivingEntity le = (LivingEntity) unit;
                 BlockPos bp = MiscUtil.getHighestNonAirBlock(le.level(), blockPos);
@@ -250,13 +254,24 @@ public class UnitItems {
             .pointDesc("item.reignofnether.mana_potion.point1", MANA_POTION_RESTORE_AMOUNT)
             .build();
 
-    private static final int GHOST_CLOAK_DURATION_SECONDS = 10;
+    private static final int GHOST_CLOAK_DURATION_SECONDS = 15;
     public static final UnitItem GHOST_CLOAK = UnitItemBuilder.of(ItemRegistrar.GHOST_CLOAK.get())
             .descId("ghost_cloak")
             .type(UnitItemType.ACTIVE)
             .buyCost(0)
-            .sellValue(0) // TODO
+            .sellValue(0)
             .pointDesc("item.reignofnether.ghost_cloak.point1", GHOST_CLOAK_DURATION_SECONDS)
+            .manaCost(25)
+            .cooldownTicks(60 * 20)
+            .noBehaviourReset()
+            .onUse(unit -> {
+                LivingEntity le = (LivingEntity) unit;
+                boolean result = le.addEffect(new MobEffectInstance(MobEffectRegistrar.PHASING.get(), GHOST_CLOAK_DURATION_SECONDS * 20, 0, false, true));
+                le.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SPEED.get(), GHOST_CLOAK_DURATION_SECONDS * 20, 1, true, false));
+                if (result && !le.level().isClientSide())
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.GHOST_CLOAK, le.blockPosition(), 1.5f);
+                return result;
+            })
             .build();
 
     private static final int GONG_OF_WEAKENING_DURATION_SECONDS = 10;

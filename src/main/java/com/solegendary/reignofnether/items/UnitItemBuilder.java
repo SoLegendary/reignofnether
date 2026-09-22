@@ -70,6 +70,8 @@ public class UnitItemBuilder {
     boolean showRangeCircle = true;
     boolean showRangeLine = false;
     boolean showRadiusCircle = false;
+    boolean doCastAnimation = false;
+    boolean resetBehaviours = true;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -254,6 +256,16 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder showRangeCircle() {
         this.showRangeCircle = true;
+        return this;
+    }
+
+    public UnitItemBuilder doCastAnimation() {
+        this.doCastAnimation = true;
+        return this;
+    }
+
+    public UnitItemBuilder noBehaviourReset() {
+        this.resetBehaviours = false;
         return this;
     }
 
