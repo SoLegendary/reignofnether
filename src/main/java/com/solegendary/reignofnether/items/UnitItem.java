@@ -104,7 +104,7 @@ public abstract class UnitItem implements RangeIndicator {
         this.onUseEntity = builder.onUseEntity;
         this.onUseBuilding = builder.onUseBuilding;
         this.onUse = builder.onUse;
-        this.consumeOnUse = builder.consumeOnUse;
+        this.consumeOnUse = type == UnitItemType.CONSUMABLE || builder.consumeOnUse;
         this.manaCost = builder.manaCost;
         this.cooldownTicksMax = builder.cooldownTicksMax;
         this.channelTicks = builder.channelTicks;

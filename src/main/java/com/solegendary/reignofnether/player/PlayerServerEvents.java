@@ -273,7 +273,8 @@ public class PlayerServerEvents {
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                 UnitSyncClientboundPacket.sendSyncOwnerNamePacket(unit);
                 UnitSyncClientboundPacket.sendSyncScenarioRoleIndexPacket(unit);
-                UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
+                if (unit.getAnchor() != null)
+                    UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
             }
             if (entity instanceof HeroUnit hero) {
                 HeroClientboundPacket.setExperience(entity.getId(), hero.getExperience());

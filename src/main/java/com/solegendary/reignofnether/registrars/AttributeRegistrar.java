@@ -125,6 +125,12 @@ public class AttributeRegistrar {
                             .setSyncable(true)
             );
 
+    public static final RegistryObject<Attribute> SCALE =
+            ATTRIBUTES.register("scale",
+                    () -> new RangedAttribute("attribute.reignofnether.scale", 1.0, 0.0, 9999.0)
+                            .setSyncable(true)
+            );
+
     public static void init(FMLJavaModLoadingContext context) {
         ATTRIBUTES.register(context.getModEventBus());
     }

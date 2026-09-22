@@ -130,7 +130,8 @@ public interface Unit {
                 .add(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(), 0)
                 .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 0)
                 .add(AttributeRegistrar.LIFESTEAL.get(), 0)
-                .add(AttributeRegistrar.MANA_ON_HIT.get(), 0);
+                .add(AttributeRegistrar.MANA_ON_HIT.get(), 0)
+                .add(AttributeRegistrar.SCALE.get(), 1.0f);
     }
 
     static Object2ObjectArrayMap<Ability, Float> createCooldownMap() {
@@ -253,6 +254,11 @@ public interface Unit {
     public default float getEvasionChance() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.EVASION_CHANCE.get());
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.EVASION_CHANCE.get().getDefaultValue());
+    }
+
+    public default float getScaleAttribute() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.SCALE.get());
+        return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.SCALE.get().getDefaultValue());
     }
 
     // SOURCE: resistance mob effect

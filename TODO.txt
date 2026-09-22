@@ -64,15 +64,15 @@ Quality of Life
 [✔] Reworked the unit armour tooltip for mixed armour types
 
 [✔] Added new attributes:
-    - critical_hit_chance (2x damage)
+    - critical_hit_chance (2.5x damage)
     - explosive_hit_chance
     - building_damage_bonus
+    - scale (visual only)
 
 [✔] Added new mob effects:
     - vigor (-25% cooldown reduction per level)
     - phasing (can walk through mobs and ignore knockback)
     - night_warping (+2 night radius per level)
-    -
 
 Bugfixes
 --------
