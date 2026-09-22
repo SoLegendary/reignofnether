@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.SoulSiphonPassive;
+import com.solegendary.reignofnether.ability.heroAbilities.royalguard.Avatar;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -25,10 +26,7 @@ import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
-import com.solegendary.reignofnether.registrars.BlockRegistrar;
-import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
@@ -56,6 +54,8 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -1031,16 +1031,52 @@ public class UnitServerEvents {
             evt.setAmount(evt.getAmount() * 2);
         }
 
-        if (evt.getEntity().hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) && evt.getSource().is(DamageTypes.ON_FIRE)) {
-            evt.setAmount(evt.getAmount() * 2);
-        }
-
         if (evt.getEntity() instanceof HeroUnit && evt.getSource().getEntity() instanceof PhantomSummon) {
             evt.setAmount(evt.getAmount() * PhantomSummon.HERO_DAMAGE_MULT);
         }
 
         if (evt.getSource().getDirectEntity() instanceof GhastUnitFireball) {
             evt.setAmount(evt.getAmount() / 2);
+        }
+
+        if (evt.getSource().getEntity() instanceof AttackerUnit attackerUnit) {
+            if (RANDOM.nextFloat() < attackerUnit.getExplosiveChance()) {
+                doExplosiveHit((LivingEntity) attackerUnit, evt.getEntity());
+            }
+            if (RANDOM.nextFloat() < attackerUnit.getCriticalChance()) {
+                evt.setAmount(evt.getAmount() * CRITICAL_HIT_MULTIPLIER);
+                SoundClientboundPacket.playSoundAtPos(SoundAction.CRITICAL_HIT, evt.getEntity().blockPosition());
+            }
+        }
+    }
+
+    private static final float CRITICAL_HIT_MULTIPLIER = 2.5f;
+
+    private static final float EXPLOSIVE_HIT_SPLASH_MULT = 0.5f;
+    private static final float EXPLOSIVE_HIT_SPLASH_RADIUS = 2.5f;
+    private static final float EXPLOSIVE_HIT_KNOCKBACK = 0.5f;
+
+    private static void doExplosiveHit(LivingEntity attacker, LivingEntity pEntity) {
+        attacker.level().explode(null, null, null, pEntity.getX(), pEntity.getEyeY(), pEntity.getZ(),
+                1.0f, false, Level.ExplosionInteraction.NONE);
+        AttributeInstance ai = attacker.getAttribute(Attributes.ATTACK_DAMAGE);
+
+        if (ai != null) {
+            for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(pEntity.getEyePosition(), EXPLOSIVE_HIT_SPLASH_RADIUS, LivingEntity.class, attacker.level())) {
+                if (hitEntity instanceof Unit unit) {
+                    var relationShip = UnitServerEvents.getUnitToEntityRelationship(unit, attacker);
+                    if (relationShip.equals(Relationship.OWNED)) continue;
+                    if (relationShip.equals(Relationship.FRIENDLY)) continue;
+                }
+                if (hitEntity == pEntity)
+                    continue;
+                boolean hurt = hitEntity.hurt(attacker.damageSources().generic(), (float) ai.getValue() * EXPLOSIVE_HIT_SPLASH_MULT);
+                if (hurt) {
+                    hitEntity.knockback(EXPLOSIVE_HIT_KNOCKBACK, Mth.sin(attacker.getYRot() * 0.017453292F), -Mth.cos(attacker.getYRot() * 0.017453292F));
+                    attacker.setDeltaMovement(attacker.getDeltaMovement().multiply(0.6, 1.0, 0.6));
+                    attacker.setLastHurtMob(hitEntity);
+                }
+            }
         }
     }
 

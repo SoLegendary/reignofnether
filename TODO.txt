@@ -65,15 +65,15 @@ Quality of Life
 [✔] Reworked the unit armour tooltip for mixed armour types
 
 [✔] Added new attributes:
-    - critical_hit_chance (2.5x damage)
-    - explosive_hit_chance
+    [🟡] - critical_hit_chance (2.5x damage)
+    [🟡] - explosive_hit_chance
     - building_damage_bonus
     - scale (visual only)
 
 [✔] Added new mob effects:
-    - vigor (-25% cooldown reduction per level)
+    [🟡] - vigor (-25% cooldown reduction per level)
     - phasing (can walk through mobs and ignore knockback)
-    - night_warping (+2 night radius per level)
+    [❌] - night_warping (+2 night radius per level)
 
 Bugfixes
 --------
@@ -81,9 +81,10 @@ Bugfixes
 [🟡] Units that spawn outside of client render range are now still counted to population totals
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
-[🟡] Evasion chance only works on wraiths
-[🟡] Evasion chance doesn't work against bears
+[🟡] Evasion chance attribute now works on all units
+[🟡] Bears and Zoglins now respect evasion chance
 [🟡] Soulfire Blazes no longer add the soulfire buff to enemy blazes
+[🟡] Souls Aflame from the Wildfire was incorrectly dealing 4x fire damage instead of 2x
 [❌] Iron golems still sometimes attack allies
 
 

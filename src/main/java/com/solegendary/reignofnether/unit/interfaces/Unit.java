@@ -292,10 +292,19 @@ public interface Unit {
             Ability ability = cooldownEntry.getKey();
             float cooldown = cooldownEntry.getValue();
             if (cooldown > 0 || unit.getCharges(ability) < ability.maxCharges) {
-                if (((Entity) unit).level().isClientSide())
-                    unit.getCooldowns().put(ability, (float) (cooldown - (RtsDebugClientEvents.getCappedTPS() / 20D)));
-                else
-                    unit.getCooldowns().put(ability, cooldown - 1);
+
+                int extraCdTicks = 0;
+                if (unitMob.tickCount % 2 == 0) {
+                    MobEffectInstance mei = unitMob.getEffect(MobEffectRegistrar.VIGOR.get());
+                    extraCdTicks = mei == null ? 0 : mei.getAmplifier() + 1;
+                }
+
+                for (int i = 0; i < extraCdTicks + 1; i++) {
+                    if (((Entity) unit).level().isClientSide())
+                        unit.getCooldowns().put(ability, (float) (cooldown - (RtsDebugClientEvents.getCappedTPS() / 20D)));
+                    else
+                        unit.getCooldowns().put(ability, cooldown - 1);
+                }
 
                 if (cooldown <= 0 && ability.usesCharges() && unit.getCharges(ability) < ability.maxCharges) {
                     unit.setCharges(ability, unit.getCharges(ability) + 1);
