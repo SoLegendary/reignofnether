@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -202,9 +203,13 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
         Unit.tick(this);
         AttackerUnit.tick(this);
 
-        // for some reason iron golems like to attack friendly illagers, so force them off
-        if (lastTarget != null && getTarget() instanceof Unit unit && unit.getOwnerName().equals(getOwnerName()))
+        // due to vanilla AI, iron golems like to attack friendly illagers, so force them off unless it was intentional
+        if (!level().isClientSide() &&
+            !getTargetGoal().forced &&
+            getTarget() instanceof Unit unit &&
+            AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), getOwnerName()))
             setTarget(lastTarget);
+
         lastTarget = getTarget();
     }
 

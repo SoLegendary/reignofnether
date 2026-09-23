@@ -53,5 +53,10 @@ Bugfixes
 [❌] Units don't show clientside population until loaded the first time
 [❌] Grass blocks are tinted weirdly even when fog of war is off
 
+[✔] Fixed soulfire dealing 4x damage instead of 2x
+[✔] Soulfire blazes and wildfires no longer spread their buff to enemy blazes on attack
+[✔] Fixed iron golems sometimes attacking allied illager units
+[✔] Slimes and Drowned no longer infect allied units
+
 Languages
 ---------
