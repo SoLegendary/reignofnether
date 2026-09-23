@@ -62,6 +62,7 @@ public class ButtonBuilder {
     private int bgColour = 0x64000000;
     private ItemStack iconItem = null;
     private float iconItemScale = 1.0f;
+    private Supplier<String> bottomLeftText = null;
 
     /**
      * Creates a new builder with the two required fields.
@@ -209,6 +210,11 @@ public class ButtonBuilder {
         return this;
     }
 
+    public ButtonBuilder bottomLeftText(Supplier<String> bottomLeftText) {
+        this.bottomLeftText = bottomLeftText;
+        return this;
+    }
+
     // -------------------------------------------------------------------------
     // Build
     // -------------------------------------------------------------------------
@@ -258,6 +264,7 @@ public class ButtonBuilder {
         button.bgColour = bgColour;
         button.iconItem = iconItem;
         button.iconItemScale = iconItemScale;
+        button.bottomLeftText = bottomLeftText;
 
         return button;
     }

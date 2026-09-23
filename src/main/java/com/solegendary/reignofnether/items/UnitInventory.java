@@ -27,4 +27,5 @@ public interface UnitInventory {
     boolean useOnBuilding(UUID uuid, BuildingPlacement building);
     boolean use(UUID uuid);
     boolean checkManaCostAndCooldown(UnitItem unitItem, ItemStack itemStack);
+    boolean isHolding(UnitItem unitItem);
 }

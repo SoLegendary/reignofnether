@@ -1049,6 +1049,14 @@ public class UnitServerEvents {
                 evt.setAmount(evt.getAmount() * CRITICAL_HIT_MULTIPLIER);
                 SoundClientboundPacket.playSoundAtPos(SoundAction.CRITICAL_HIT, evt.getEntity().blockPosition());
             }
+            float lifeDmgPerc = attackerUnit.getLifeStealPercent();
+            if (lifeDmgPerc > 0) {
+                ((LivingEntity) attackerUnit).heal(evt.getAmount() * lifeDmgPerc);
+            }
+            float manaDmgPerc = attackerUnit.getManaOnHitPercent();
+            if (manaDmgPerc > 0 && attackerUnit instanceof HeroUnit heroUnit) {
+                heroUnit.setMana(heroUnit.getMana() + (evt.getAmount() * manaDmgPerc));
+            }
         }
     }
 

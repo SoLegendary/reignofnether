@@ -14,9 +14,10 @@ import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
 import com.solegendary.reignofnether.hud.buttons.Button;
-import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
-import com.solegendary.reignofnether.hud.passives.PassiveIcons;
+import com.solegendary.reignofnether.hud.effecticons.EnchantmentIcon;
+import com.solegendary.reignofnether.hud.effecticons.EnchantmentIcons;
 import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -37,8 +38,6 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
-import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
-import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
@@ -89,7 +88,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static com.ibm.icu.impl.ValidIdentifiers.Datatype.unit;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // Defines method bodies for Units
@@ -760,9 +758,6 @@ public interface Unit {
     default void setupEquipmentAndUpgradesClient() { }
 
     static float getSpeedModifier(Unit unit) {
-        if (unit instanceof BruteUnit brute && brute.isHoldingUpShield()) {
-            return 0.5f;
-        }
         return 1.0f;
     }
 
@@ -921,7 +916,7 @@ public interface Unit {
     default List<EnchantmentIcon> getPassiveIcons() {
         ArrayList<EnchantmentIcon> icons = new ArrayList<>();
         LivingEntity entity = (LivingEntity) this;
-        for (EnchantmentIcon enchantIcon : PassiveIcons.ENCHANTMENT_ICONS) {
+        for (EnchantmentIcon enchantIcon : EnchantmentIcons.ENCHANTMENT_ICONS) {
             ItemStack itemStack = entity.getItemBySlot(enchantIcon.slot);
             for (Enchantment enchant : itemStack.getAllEnchantments().keySet()) {
                 if (enchant == enchantIcon.enchantment) {
@@ -930,10 +925,10 @@ public interface Unit {
             }
         }
         if (((LivingEntity) this).hasEffect(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
-            icons.add(PassiveIcons.EFFICIENCY);
+            icons.add(EnchantmentIcons.EFFICIENCY);
         }
         if (hasAnyEnchants() && entity.hasEffect(MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get())) {
-            icons.add(PassiveIcons.ENCHANTMENT_AMPLIFIER);
+            icons.add(EnchantmentIcons.ENCHANTMENT_AMPLIFIER);
         }
         return icons;
     }
@@ -1016,5 +1011,10 @@ public interface Unit {
     @Nullable
     public default UnitItemGoal getItemGoal() {
         return null;
+    }
+
+    public default boolean isHolding(UnitItem unitItem) {
+        if (!(this instanceof UnitInventory inv)) return false;
+        return inv.isHolding(unitItem);
     }
 }

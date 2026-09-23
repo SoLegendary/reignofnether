@@ -1,4 +1,4 @@
-package com.solegendary.reignofnether.hud.passives;
+package com.solegendary.reignofnether.hud.effecticons;
 
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;

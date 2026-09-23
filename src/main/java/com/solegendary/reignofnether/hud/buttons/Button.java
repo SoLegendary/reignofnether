@@ -41,6 +41,8 @@ public class Button {
     public boolean stretchIconToBorders = false;
     public String playerNameForHeadIcon = "";
     public int bgColour = 0x64000000;
+    public Supplier<String> bottomLeftText = null;
+    public int bottomLeftTextColor = 0xFFFFFF;
 
     public ResourceLocation iconResource;
     public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
@@ -75,6 +77,8 @@ public class Button {
     // @ 0.5, bottom half is greyed out
     // @ 1.0, whole button is greyed out
     public float greyPercent = 0.0f;
+
+    public Supplier<Float> getGreyPercent = null;
 
     public boolean greyWhenDisabled = true;
     public boolean showSelectedFrameWhenDisabled = false;
@@ -234,6 +238,9 @@ public class Button {
                     0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
 
+        if (getGreyPercent != null) {
+            greyPercent = getGreyPercent.get();
+        }
         if (greyPercent > 0 || (!isEnabled.get() && greyWhenDisabled)) {
             int greyHeightPx = Math.round(greyPercent * iconFrameSize);
             if (!isEnabled.get())
@@ -254,6 +261,26 @@ public class Button {
                 y + iconFrameSize,
                 (0xFFFFFF | ((int) (0x80 * MiscUtil.getOscillatingFloat(0,1)) << 24))
             ); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+        }
+
+        if (bottomLeftText != null) {
+            String blText = bottomLeftText.get();
+            int drawX = x + 4 + ((blText.length() - 1) * 2);
+            int drawY = y + iconSize;
+
+            guiGraphics.pose().pushPose();
+
+            guiGraphics.pose().translate(drawX, drawY, 0);
+            guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
+            guiGraphics.pose().translate(-drawX, -drawY, 5);
+
+            guiGraphics.drawCenteredString(MC.font,
+                    blText,
+                    drawX,
+                    drawY,
+                    bottomLeftTextColor);
+
+            guiGraphics.pose().popPose();
         }
     }
 

@@ -244,6 +244,10 @@ public class TimeClientEvents {
         if (evt.phase != TickEvent.Phase.END)
             ticksSinceLastUpdate += RtsDebugClientEvents.getCappedTPS() / 20D;
     }
+
+    public static Long getClientTime() {
+        return TimeClientEvents.serverGameTime + (long) TimeClientEvents.ticksSinceLastUpdate;
+    }
 }
 
 

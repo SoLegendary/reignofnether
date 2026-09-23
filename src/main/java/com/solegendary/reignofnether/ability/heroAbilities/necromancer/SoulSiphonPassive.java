@@ -80,13 +80,13 @@ public class SoulSiphonPassive extends HeroAbility {
             this,
             necro
         );
-        button.extraLabel = String.valueOf(necro.souls);
+        button.bottomLeftText = () -> String.valueOf(necro.souls);
         if ((necro.souls) <= 0)
-            button.extraLabelColour = 0xFF0000;
+            button.bottomLeftTextColor = 0xFF0000;
         else if ((necro.souls) >= ((int) soulsMax))
-            button.extraLabelColour = 0x00FF00;
+            button.bottomLeftTextColor = 0x00FF00;
         else if ((necro.souls) <= ((int) soulsPerCast))
-            button.extraLabelColour = 0xFFFF00;
+            button.bottomLeftTextColor = 0xFFFF00;
         button.stretchIconToBorders = true;
         return button;
     }

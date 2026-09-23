@@ -33,6 +33,7 @@ Unit Items
     [❌] Drinking sound/animation for potions like food
     [❌] Show radius on hover for items like war horn (has >0 range)
     [❌] don't cancel cast animation
+    [❌] show unit effects above portrait
 
 Item drops
     [❌] Track population amount killed for every RTS player
@@ -68,6 +69,8 @@ Quality of Life
     [🟡] - critical_hit_chance (2.5x damage)
     [🟡] - explosive_hit_chance
     [✔] - building_damage_bonus
+    [🟡] - lifesteal
+    [🟡] - mana_on_hit
     [✔] - scale (visual only)
 
 [✔] Added new mob effects:
@@ -83,7 +86,7 @@ Bugfixes
     - Test on villagers campaign #3
 [🟡] Evasion chance attribute now works on all units
 [🟡] Bears and Zoglins now respect evasion chance
-
+[✔] Fixed Brutes moving at 1/4 speed instead of 1/2 speed when holding up shields
 
 Languages
 ---------

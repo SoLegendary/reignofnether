@@ -73,7 +73,7 @@ public class ItemUtil {
     }
 
     public static Long getCooldownTicksLeft(ItemStack itemStack, Level level) {
-        long gameTime = level.isClientSide() ? TimeClientEvents.serverGameTime + (long) TimeClientEvents.ticksSinceLastUpdate : level.getGameTime();
+        long gameTime = level.isClientSide() ? TimeClientEvents.getClientTime() : level.getGameTime();
         CompoundTag tag = itemStack.getTag();
         if (tag != null) {
             return Math.max(0, tag.getLong(UnitItem.RON$COOLDOWN_KEY) - gameTime);

@@ -11,7 +11,7 @@ import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
-import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
+import com.solegendary.reignofnether.hud.effecticons.EnchantmentIcon;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;

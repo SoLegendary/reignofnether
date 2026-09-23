@@ -1,8 +1,6 @@
-package com.solegendary.reignofnether.hud.passives;
+package com.solegendary.reignofnether.hud.effecticons;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.ability.abilities.EnchantMaiming;
-import com.solegendary.reignofnether.ability.abilities.EnchantVigor;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -18,7 +16,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 
 
-public class PassiveIcons {
+public class EnchantmentIcons {
 
     private static ItemStack getEnchantedItemStack(Item item) {
         ItemStack itemStack = new ItemStack(item);

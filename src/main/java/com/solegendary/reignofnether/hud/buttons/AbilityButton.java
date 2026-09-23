@@ -22,8 +22,6 @@ public class AbilityButton extends Button {
     // can be null for stuff like production buttons (handled separately)
     // or simple abilities with no cooldown and the logic can be handled entirely in onLeftClick()
     public Ability ability;
-    public String extraLabel = "";
-    public int extraLabelColour = 0xFFFFFF;
     @Nullable private Unit unit;
     @Nullable private BuildingPlacement placement;
 
@@ -108,13 +106,6 @@ public class AbilityButton extends Button {
                     colour);
 
             super.renderHotkey(guiGraphics, x, y);
-        } else if (this.ability != null && !extraLabel.isBlank()) {
-            guiGraphics.pose().translate(0,0,2);
-            guiGraphics.drawCenteredString(MC.font,
-                    extraLabel,
-                    x + iconSize - 7 - (extraLabel.length() >= 1 ? 0 : 5),
-                    y + iconSize - 1,
-                    extraLabelColour);
         }
     }
 }

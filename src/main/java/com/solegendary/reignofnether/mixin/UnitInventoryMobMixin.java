@@ -256,6 +256,16 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         return false;
     }
 
+    @Override
+    public boolean isHolding(UnitItem unitItem) {
+        for (ItemStack itemStack : getAllItems()) {
+            UnitItem heldUnitItem = ItemUtil.getUnitItem(itemStack);
+            if (heldUnitItem != null && heldUnitItem.descId.equals(unitItem.descId))
+                return true;
+        }
+        return false;
+    }
+
     private void afterUse(UnitItem unitItem, ItemStack itemStack, UUID uuid) {
         if (unitItem.consumeOnUse) {
             itemStack.setCount(itemStack.getCount() - 1);
