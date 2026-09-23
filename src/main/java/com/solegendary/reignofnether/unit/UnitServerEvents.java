@@ -543,8 +543,10 @@ public class UnitServerEvents {
                 lastHurtByMob instanceof DrownedUnit;
         boolean slimeInfected = (evt.getEntity().getActiveEffectsMap().containsKey(MobEffectRegistrar.SLIME_INFECTED.get()) ||
                 ((lastHurtByMob instanceof SlimeUnit) && !(lastHurtByMob instanceof MagmaCubeUnit)));
+        boolean lastHurtByAlly = lastHurtByMob instanceof Unit unit && evt.getEntity() instanceof Unit unit2 &&
+                AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), unit2.getOwnerName());
 
-        if (lastHurtByMob instanceof Unit unit && (drownedInfected || slimeInfected)) {
+        if (lastHurtByMob instanceof Unit unit && (drownedInfected || slimeInfected) && !lastHurtByAlly) {
 
             EntityType<? extends Unit> entityType = null;
 
