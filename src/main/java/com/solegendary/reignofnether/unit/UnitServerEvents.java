@@ -1025,10 +1025,6 @@ public class UnitServerEvents {
             evt.setAmount(evt.getAmount() * 2);
         }
 
-        if (evt.getEntity().hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) && evt.getSource().is(DamageTypes.ON_FIRE)) {
-            evt.setAmount(evt.getAmount() * 2);
-        }
-
         if (evt.getEntity() instanceof HeroUnit && evt.getSource().getEntity() instanceof PhantomSummon) {
             evt.setAmount(evt.getAmount() * PhantomSummon.HERO_DAMAGE_MULT);
         }
