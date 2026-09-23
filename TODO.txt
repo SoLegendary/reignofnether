@@ -1,5 +1,5 @@
 
-1.20.1-1.4.4d
+1.20.1-1.5.0-beta-1
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -67,12 +67,12 @@ Quality of Life
 [✔] Added new attributes:
     [🟡] - critical_hit_chance (2.5x damage)
     [🟡] - explosive_hit_chance
-    - building_damage_bonus
-    - scale (visual only)
+    [✔] - building_damage_bonus
+    [✔] - scale (visual only)
 
 [✔] Added new mob effects:
     [🟡] - vigor (-25% cooldown reduction per level)
-    - phasing (can walk through mobs and ignore knockback)
+    [✔] - phasing (can walk through mobs and ignore knockback)
     [❌] - night_warping (+2 night radius per level)
 
 Bugfixes
@@ -83,9 +83,6 @@ Bugfixes
     - Test on villagers campaign #3
 [🟡] Evasion chance attribute now works on all units
 [🟡] Bears and Zoglins now respect evasion chance
-[🟡] Soulfire Blazes no longer add the soulfire buff to enemy blazes
-[🟡] Souls Aflame from the Wildfire was incorrectly dealing 4x fire damage instead of 2x
-[❌] Iron golems still sometimes attack allies
 
 
 Languages
