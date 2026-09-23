@@ -23,6 +23,8 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcon;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcons;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.items.ItemUtil;
@@ -88,6 +90,7 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
@@ -120,6 +123,8 @@ public class UnitClientEvents {
     private static boolean sortedSelectedUnitsChanged = true;
     // tracking of all existing units
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
+
+    public static final Map<Integer, HashMap<MobEffect, MobEffectIcon>> mobEffectIcons = new ConcurrentHashMap<>();
 
     @Nullable
     private static UnitActionItem lastClientUAIActioned = null;
@@ -1512,13 +1517,19 @@ public class UnitClientEvents {
     }
 
     public static void syncMobEffect(int entityId, int effectId, int amplifier, int duration) {
-        for (LivingEntity entity : getAllUnits()) {
-            MobEffect effect = MobEffect.byId(effectId);
-            if (effect != null && entityId == entity.getId() && entity instanceof Unit) {
-                if (duration > 0) {
-                    entity.addEffect(new MobEffectInstance(effect, duration, amplifier));
-                } else if (entity.getEffect(effect) != null) {
-                    entity.removeEffect(effect);
+        synchronized (mobEffectIcons) {
+            for (LivingEntity entity : getAllUnits()) {
+                MobEffect effect = MobEffect.byId(effectId);
+                if (effect != null && entityId == entity.getId() && entity instanceof Unit) {
+                    if (duration > 0) {
+                        MobEffectInstance mei = new MobEffectInstance(effect, duration, amplifier);
+                        entity.addEffect(mei);
+                        if (!mobEffectIcons.containsKey(entityId))
+                            mobEffectIcons.put(entityId, new HashMap<>());
+                        mobEffectIcons.get(entityId).put(mei.getEffect(), MobEffectIcons.getIcon(mei));
+                    } else if (entity.getEffect(effect) != null) {
+                        entity.removeEffect(effect);
+                    }
                 }
             }
         }

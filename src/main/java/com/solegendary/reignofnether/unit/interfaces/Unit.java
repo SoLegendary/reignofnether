@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.debug.RtsDebugPathPreview;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.effecticons.EnchantmentIcon;
 import com.solegendary.reignofnether.hud.effecticons.EnchantmentIcons;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcon;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
@@ -83,10 +84,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
@@ -913,8 +911,8 @@ public interface Unit {
     }
     Object2ObjectArrayMap<Ability,Integer> getCharges();
 
-    default List<EnchantmentIcon> getPassiveIcons() {
-        ArrayList<EnchantmentIcon> icons = new ArrayList<>();
+    default List<Button> getPassiveIcons() {
+        ArrayList<Button> icons = new ArrayList<>();
         LivingEntity entity = (LivingEntity) this;
         for (EnchantmentIcon enchantIcon : EnchantmentIcons.ENCHANTMENT_ICONS) {
             ItemStack itemStack = entity.getItemBySlot(enchantIcon.slot);
@@ -930,6 +928,10 @@ public interface Unit {
         if (hasAnyEnchants() && entity.hasEffect(MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get())) {
             icons.add(EnchantmentIcons.ENCHANTMENT_AMPLIFIER);
         }
+        HashMap<MobEffect, MobEffectIcon> mobEffects = UnitClientEvents.mobEffectIcons.get(entity.getId());
+        if (mobEffects != null)
+            for (MobEffect effect : mobEffects.keySet())
+                icons.add(mobEffects.get(effect));
         return icons;
     }
 

@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.effecticons.EnchantmentIcon;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.resources.ResourceSource;
@@ -223,7 +224,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         }
         int xOrig = x;
         if (entity instanceof Unit unit) {
-            for (EnchantmentIcon passiveIcon : unit.getPassiveIcons()) {
+            for (Button passiveIcon : unit.getPassiveIcons()) {
                 passiveIcon.render(guiGraphics, x - 2, y - 16, mouseX, mouseY);
                 if (passiveIcon.isMouseOver(mouseX, mouseY))
                     passiveIcon.renderTooltip(guiGraphics, mouseX, mouseY);
