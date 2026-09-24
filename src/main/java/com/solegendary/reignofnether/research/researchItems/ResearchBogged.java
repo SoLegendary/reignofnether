@@ -31,9 +31,7 @@ public class ResearchBogged extends ProductionItem {
     public ResearchBogged() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_BOGGED);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_BOGGED);
 
                 // convert all skeletons into bogged with the same stats/inventory/etc.

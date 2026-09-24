@@ -124,10 +124,12 @@ public class BuildRepairGoal extends MoveToTargetBlockGoal {
         if (GarrisonableBuildingAddon.getGarrison((Unit) this.mob) != null)
             return false;
 
-        if (buildingTarget != null && this.moveTarget != null)
-            if (BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget) == Relationship.OWNED ||
-                buildingTarget.getBuilding() instanceof AbstractBridge)
-                return MiscUtil.isMobInRangeOfPos(moveTarget, mob, 2); // buildingTarget.isPosInsideBuilding(mob.getOnPos())
+        if (buildingTarget != null) {
+            Relationship rs = BuildingServerEvents.getUnitToBuildingRelationship((Unit) this.mob, buildingTarget);
+            if (rs == Relationship.OWNED || buildingTarget.getBuilding() instanceof AbstractBridge) {
+                return buildingTarget.isPosInsideBuilding(mob.getOnPos(), 2);
+            }
+        }
         return false;
     }
 

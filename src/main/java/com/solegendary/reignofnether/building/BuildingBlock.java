@@ -32,7 +32,7 @@ public class BuildingBlock {
         else if (state.is(Tags.Blocks.GLASS)) isIgnored = true;
         else if (SculkCatalystPlacement.isSculk(state.getBlock())) isIgnored = true;
         ignoredCache.put(state, isIgnored);
-        return false;
+        return isIgnored;
     }
 
     public BuildingBlock(BlockPos blockPos, BlockState blockState) {

@@ -21,8 +21,8 @@ public class BlockUtils {
     private static final Random RANDOM = new Random();
 
     public static boolean isLogBlock(BlockState bs) {
-        return List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG,
-                        Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD, Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD,
+        return List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG, Blocks.CHERRY_LOG,
+                        Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD, Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD, Blocks.CHERRY_WOOD,
                         Blocks.CRIMSON_STEM, Blocks.WARPED_STEM, Blocks.MUSHROOM_STEM, Blocks.RED_MUSHROOM_BLOCK, Blocks.BROWN_MUSHROOM_BLOCK, Blocks.CRIMSON_HYPHAE, Blocks.WARPED_HYPHAE)
                 .contains(bs.getBlock()) || bs.getTags().collect(Collectors.toSet()).contains(BlockTags.LOGS);
     }
@@ -35,6 +35,7 @@ public class BlockUtils {
                         BlockRegistrar.FALLING_JUNGLE_LOG.get(),
                         BlockRegistrar.FALLING_MANGROVE_LOG.get(),
                         BlockRegistrar.FALLING_SPRUCE_LOG.get(),
+                        BlockRegistrar.FALLING_CHERRY_LOG.get(),
                         BlockRegistrar.FALLING_CRIMSON_STEM.get(),
                         BlockRegistrar.FALLING_WARPED_STEM.get())
                 .contains(bs.getBlock());
@@ -49,6 +50,7 @@ public class BlockUtils {
         else if (bs.getBlock() == BlockRegistrar.FALLING_JUNGLE_LOG.get()) nonFallingLogBlock = Blocks.JUNGLE_LOG.defaultBlockState();
         else if (bs.getBlock() == BlockRegistrar.FALLING_MANGROVE_LOG.get()) nonFallingLogBlock = Blocks.MANGROVE_LOG.defaultBlockState();
         else if (bs.getBlock() == BlockRegistrar.FALLING_SPRUCE_LOG.get()) nonFallingLogBlock = Blocks.SPRUCE_LOG.defaultBlockState();
+        else if (bs.getBlock() == BlockRegistrar.FALLING_CHERRY_LOG.get()) nonFallingLogBlock = Blocks.CHERRY_LOG.defaultBlockState();
         else if (bs.getBlock() == BlockRegistrar.FALLING_CRIMSON_STEM.get()) nonFallingLogBlock = Blocks.CRIMSON_STEM.defaultBlockState();
         else if (bs.getBlock() == BlockRegistrar.FALLING_WARPED_STEM.get()) nonFallingLogBlock = Blocks.WARPED_STEM.defaultBlockState();
         return nonFallingLogBlock;
@@ -57,7 +59,7 @@ public class BlockUtils {
     public static boolean isLeafBlock(BlockState bs) {
         if (bs.is(BlockTags.LEAVES))
             return true;
-        return List.of(Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES,
+        return List.of(Blocks.OAK_LEAVES, Blocks.BIRCH_LEAVES, Blocks.ACACIA_LEAVES, Blocks.DARK_OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.MANGROVE_LEAVES, Blocks.SPRUCE_LEAVES, Blocks.CHERRY_LEAVES,
                         BlockRegistrar.DECAYABLE_NETHER_WART_BLOCK.get(), BlockRegistrar.DECAYABLE_WARPED_WART_BLOCK.get(),
                         Blocks.RED_MUSHROOM_BLOCK, Blocks.BROWN_MUSHROOM_BLOCK)
                 .contains(bs.getBlock());

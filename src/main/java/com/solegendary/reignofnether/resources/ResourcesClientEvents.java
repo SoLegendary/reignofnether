@@ -179,6 +179,10 @@ public class ResourcesClientEvents {
         }
         if (res.ore > 0) {
             floatingTexts.add(new FloatingText("+" + res.ore + "  \uE002", pos, tickAge));
+            tickAge -= 25;
+        }
+        if (res.emerald > 0) {
+            floatingTexts.add(new FloatingText("+" + res.emerald + "  \uE010", pos, tickAge));
         }
     }
 

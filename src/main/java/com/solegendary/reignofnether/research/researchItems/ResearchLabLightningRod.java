@@ -28,7 +28,9 @@ public class ResearchLabLightningRod extends ProductionItem {
     public ResearchLabLightningRod() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            placement.changeStructure(Laboratory.upgradedStructureName);
+            if (!level.isClientSide() && placement.getBuilding() instanceof Laboratory) {
+                placement.changeStructure(Laboratory.upgradedStructureName);
+            }
         };
     }
 

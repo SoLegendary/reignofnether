@@ -90,6 +90,10 @@ public class BlockRegistrar {
             () -> fallingLog(MapColor.COLOR_RED, MapColor.PODZOL),
             CreativeModeTabs.BUILDING_BLOCKS
     );
+    public static final RegistryObject<Block> FALLING_CHERRY_LOG = registerBlock("falling_cherry_log",
+            () -> fallingLog(MapColor.TERRACOTTA_WHITE, MapColor.TERRACOTTA_GRAY),
+            CreativeModeTabs.BUILDING_BLOCKS
+    );
     public static final RegistryObject<Block> FALLING_WARPED_STEM = registerBlock("falling_warped_stem",
             () -> fallingNetherStem(MapColor.WARPED_STEM),
             CreativeModeTabs.BUILDING_BLOCKS
@@ -189,6 +193,7 @@ public class BlockRegistrar {
             new RTSStructureBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY).requiresCorrectToolForDrops()
                     .strength(-1.0F, 3600000.0F).noLootTable()), CreativeModeTabs.FUNCTIONAL_BLOCKS);
 
+    // marks where units teleport to when entering a garrison
     public static final RegistryObject<Block> GARRISON_ENTRY_BLOCK = registerBlock("garrison_entry_block", () ->
                     new GarrisonEntryBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
                             .strength(-1.0F, 3600000.0F)
@@ -197,6 +202,7 @@ public class BlockRegistrar {
                             .noCollission()),
             CreativeModeTabs.FUNCTIONAL_BLOCKS);
 
+    // marks where units teleport to when exiting a garrison
     public static final RegistryObject<Block> GARRISON_EXIT_BLOCK = registerBlock("garrison_exit_block", () ->
                     new GarrisonExitBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
                             .strength(-1.0F, 3600000.0F)
@@ -205,8 +211,18 @@ public class BlockRegistrar {
                             .noCollission()),
             CreativeModeTabs.FUNCTIONAL_BLOCKS);
 
+    // marks where units are considered to be inside the garrison
     public static final RegistryObject<Block> GARRISON_ZONE_BLOCK = registerBlock("garrison_zone_block", () ->
                     new GarrisonZoneBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
+                            .strength(-1.0F, 3600000.0F)
+                            .noLootTable()
+                            .noOcclusion()
+                            .noCollission()),
+            CreativeModeTabs.FUNCTIONAL_BLOCKS);
+
+    // marks where units spawn when trained from a building
+    public static final RegistryObject<Block> PRODUCTION_SPAWN_BLOCK = registerBlock("production_spawn_block", () ->
+                    new ProductionSpawnBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_LIGHT_GRAY)
                             .strength(-1.0F, 3600000.0F)
                             .noLootTable()
                             .noOcclusion()

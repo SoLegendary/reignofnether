@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.Blizza
 import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.ChillingScreech;
 import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.FrostBlink;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.entities.WraithSnowball;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -108,6 +108,9 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
 
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
@@ -466,7 +469,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         tickBlizzard();
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }
@@ -543,6 +546,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
@@ -582,6 +586,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
+        this.goalSelector.addGoal(2, itemGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
     }

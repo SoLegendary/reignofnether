@@ -136,12 +136,14 @@ public class Button {
         if (this.hotkey != null) {
             String hotkeyStr = hotkey.getCurrentLabel();
             hotkeyStr = hotkeyStr.substring(0,Math.min(3, hotkeyStr.length()));
-            guiGraphics.pose().translate(0,0,1);
+
+            guiGraphics.pose().pushPose();
             guiGraphics.drawCenteredString(MC.font,
                     hotkeyStr,
                     x + iconSize + 8 - (hotkeyStr.length() * 4),
                     y + iconSize - 1,
                     0xFFFFFF);
+            guiGraphics.pose().popPose();
         }
     }
 
@@ -202,8 +204,6 @@ public class Button {
             MyRenderer.renderItem(guiGraphics, iconItem, x+offset + (7 - xyDiff - iconSize/2), y+offset + (7 - xyDiff - iconSize/2), iconItemScale);
         }
 
-        renderHotkey(guiGraphics, x, y);
-
         // user is holding click or hotkey down over the button and render frame if so
         if ((isEnabled.get() || showSelectedFrameWhenDisabled) &&
             (isSelected.get() || (hotkey != null && hotkey.isDown()) || (isMouseOver(mouseX, mouseY) &&
@@ -222,6 +222,8 @@ public class Button {
                 );
             }
         }
+        renderHotkey(guiGraphics, x, y);
+
         // light up on hover
         if (isEnabled.get() && isMouseOver(mouseX, mouseY) && lightUpOnHover) {
             guiGraphics.pose().translate(0,0,1);

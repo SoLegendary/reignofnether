@@ -16,6 +16,7 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.faction.Faction;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
@@ -157,12 +158,12 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     // combat stats
     public boolean getWillRetaliate() { return willRetaliate; }
-    public float getAttackCooldown() {return ((20 / AttackerUnit.super.getBaseAttacksPerSecond()) * getAttackCooldownMultiplier());}
+    public float getAttackCooldown() {return ((20 / AttackerUnit.super.getNonBaseAttacksPerSecond()) * getAttackCooldownMultiplier());}
     public float getAttacksPerSecond() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
         return 20f / (getAttackCooldown() + (CrossbowItem.getChargeDuration(itemStack)));
     }
-    public float getBaseAttacksPerSecond() {
+    public float getNonBaseAttacksPerSecond() {
         return 20f / (getAttackCooldown() + 35);
     }
     public boolean getAggressiveWhenIdle() { return aggressiveWhenIdle && !isVehicle(); }

@@ -27,9 +27,7 @@ public class ResearchMassBurials extends ProductionItem {
     public ResearchMassBurials() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_MASS_BURIAL);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_MASS_BURIAL);
             }
         };

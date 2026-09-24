@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.blocks.GarrisonBlockEntity;
+import com.solegendary.reignofnether.blocks.InvisibleBlockEntity;
 import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import com.solegendary.reignofnether.blocks.WraithSnowBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -24,12 +24,13 @@ public class BlockEntityRegistrar {
                             BlockRegistrar.RTS_STRUCTURE_BLOCK.get()).build(null)
             );
 
-    public static final RegistryObject<BlockEntityType<GarrisonBlockEntity>> GARRISON_BLOCK_ENTITY =
+    public static final RegistryObject<BlockEntityType<InvisibleBlockEntity>> INVISIBLE_BLOCK_ENTITY =
             register("garrison_entry_block_entity",
-                    () -> BlockEntityType.Builder.of(GarrisonBlockEntity::new,
-                            BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
-                            BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
-                            BlockRegistrar.GARRISON_ZONE_BLOCK.get())
+                    () -> BlockEntityType.Builder.of(InvisibleBlockEntity::new,
+                                    BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
+                                    BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
+                                    BlockRegistrar.GARRISON_ZONE_BLOCK.get(),
+                                    BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get())
                             .build(null)
             );
 

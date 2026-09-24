@@ -4,19 +4,25 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.StartProductionButton;
+import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
+public class ZombiePiglinProd extends ProductionItem {
 public class ZombiePiglinProd extends ProductionItem implements UnitProductionItem {
 
     public final static String itemName = "Zombie Piglin";
@@ -42,6 +48,35 @@ public class ZombiePiglinProd extends ProductionItem implements UnitProductionIt
                 List.of(
                         Component.translatable("entity.reignofnether.zombie_piglin_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText()
                 )
+        );
+    }
+
+    public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
+        return new StartProductionButton(
+                itemName,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie_piglin.png"),
+                hotkey,
+                () -> false,
+                () -> true,
+                List.of(
+                        fcs(I18n.get("entity.reignofnether.zombie_piglin_unit"), true),
+                        ResourceCosts.getFormattedCost(cost),
+                        ResourceCosts.getFormattedPopAndTime(cost),
+                        fcs(""),
+                        fcs(I18n.get("entity.reignofnether.zombie_piglin_unit.tooltip1")),
+                        fcs(I18n.get("entity.reignofnether.zombie_piglin_unit.tooltip2"))
+                ),
+                this
+        );
+    }
+
+    public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
+        return new StopProductionButton(
+                itemName,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie_piglin.png"),
+                prodBuilding,
+                this,
+                first
         );
     }
 }

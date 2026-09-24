@@ -118,7 +118,7 @@ public class CustomBuildingClientEvents {
             int blitX = 120;
             int blitY = 30;
             int width = 315;
-            int height = 225;
+            int height = 240;
             MyRenderer.renderFrameWithBg(evt.getGuiGraphics(), blitX, blitY, width, height, 0xA0000000);
 
             renderedButtons.add(CustomBuildingMenu.renderIconButtonNameAndPortrait(evt, customBuildingToEdit, blitX + 18, blitY + 18));

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
@@ -70,7 +71,7 @@ public class WitherSkeletonProd extends ProductionItem implements UnitProduction
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/wither_skeleton.png"),
                 hotkey,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(Buildings.WITHER_SHRINE),
+                () -> BuildingClientEvents.hasFinishedBuilding(Buildings.WITHER_SHRINE) || prodBuilding instanceof CustomBuildingPlacement,
                 tooltipLines,
                 this
         );

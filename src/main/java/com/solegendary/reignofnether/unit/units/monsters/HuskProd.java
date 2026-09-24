@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.*;
@@ -62,7 +63,7 @@ public class HuskProd extends GraveyardUnitProductionItem implements UnitProduct
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/husk.png"),
             hotkey,
             () -> false,
-            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS),
+            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_HUSKS) || prodBuilding instanceof CustomBuildingPlacement,
             List.of(
                 Component.translatable("entity.reignofnether.husk_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),

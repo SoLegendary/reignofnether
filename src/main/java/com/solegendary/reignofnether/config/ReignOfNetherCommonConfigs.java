@@ -212,8 +212,8 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry NECROMANCER = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.NECROMANCER, "Necromancer Config");
         public static final ResourceCostConfigEntry WRETCHED_WRAITH = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.WRETCHED_WRAITH, "Wretched Wraith Config");
 
-        public static final ResourceCostConfigEntry ZOMBIE_PIGLIN = ResourceCostConfigEntry.Unit(0,0,0,10,1, ResourceCosts.ZOMBIE_PIGLIN, "Zombie Piglin Config");
-        public static final ResourceCostConfigEntry ZOGLIN = ResourceCostConfigEntry.Unit(0,0,0,10,2, ResourceCosts.ZOGLIN, "Zoglin Config");
+        public static final ResourceCostConfigEntry ZOMBIE_PIGLIN = ResourceCostConfigEntry.Unit(75,0,0,18,1, ResourceCosts.ZOMBIE_PIGLIN, "Zombie Piglin Config");
+        public static final ResourceCostConfigEntry ZOGLIN = ResourceCostConfigEntry.Unit(100,0,40,25,2, ResourceCosts.ZOGLIN, "Zoglin Config");
 
         // VillagersFaction
         public static final ResourceCostConfigEntry VILLAGER = ResourceCostConfigEntry.Unit(50,0,0,15,1, ResourceCosts.VILLAGER, "Villager Config");
@@ -245,14 +245,14 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry WILDFIRE = ResourceCostConfigEntry.Unit(0,0,0,30, 5, ResourceCosts.WILDFIRE, "Wildfire Config");
 
         public static final ResourceCostConfigEntry ENDERMAN = ResourceCostConfigEntry.Unit(75,75,75,35,3, ResourceCosts.ENDERMAN, "Enderman Config");
-        public static final ResourceCostConfigEntry POLAR_BEAR = ResourceCostConfigEntry.Unit(250,0,0,40,4, ResourceCosts.POLAR_BEAR, "Polar Bear Config");
-        public static final ResourceCostConfigEntry GRIZZLY_BEAR = ResourceCostConfigEntry.Unit(250,0,0,40,4, ResourceCosts.GRIZZLY_BEAR, "Grizzly Bear Config");
-        public static final ResourceCostConfigEntry PANDA = ResourceCostConfigEntry.Unit(250,0,0,40,4, ResourceCosts.PANDA, "Panda Config");
+        public static final ResourceCostConfigEntry POLAR_BEAR = ResourceCostConfigEntry.Unit(300,0,0,45,5, ResourceCosts.POLAR_BEAR, "Polar Bear Config");
+        public static final ResourceCostConfigEntry GRIZZLY_BEAR = ResourceCostConfigEntry.Unit(300,0,0,45,5, ResourceCosts.GRIZZLY_BEAR, "Grizzly Bear Config");
+        public static final ResourceCostConfigEntry PANDA = ResourceCostConfigEntry.Unit(300,0,0,45,5, ResourceCosts.PANDA, "Panda Config");
         public static final ResourceCostConfigEntry WOLF = ResourceCostConfigEntry.Unit(120,0,0,25,2, ResourceCosts.WOLF, "Wolf Config");
         public static final ResourceCostConfigEntry LLAMA = ResourceCostConfigEntry.Unit(180,0,0,25,2, ResourceCosts.LLAMA, "Llama Config");
 
         public static final ResourceCostConfigEntry KILLER_RABBIT = ResourceCostConfigEntry.Unit(150,0,0,30,2, ResourceCosts.KILLER_RABBIT, "Killer Rabbit Config");
-        public static final ResourceCostConfigEntry SILVERFISH = ResourceCostConfigEntry.Unit(0,0,0,0,0, ResourceCosts.SILVERFISH, "Silverfish Config");
+        public static final ResourceCostConfigEntry SILVERFISH = ResourceCostConfigEntry.Unit(25,0,0,0,0, ResourceCosts.SILVERFISH, "Silverfish Config");
 
         public static final ResourceCostConfigEntry HERO_BASE_REVIVE_COST = ResourceCostConfigEntry.Unit(100,0,0,30, 5, ResourceCosts.HERO_BASE_REVIVE_COST, "Hero Base Revive Cost Config");
         public static final ResourceCostConfigEntry HERO_EXTRA_REVIVE_COST_PER_LEVEL = ResourceCostConfigEntry.Unit(50,0,0,5, 0, ResourceCosts.HERO_EXTRA_REVIVE_COST_PER_LEVEL, "Hero Extra Revive Cost Per Level Config");

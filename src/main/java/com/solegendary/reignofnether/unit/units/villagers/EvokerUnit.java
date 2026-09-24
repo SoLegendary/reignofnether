@@ -24,7 +24,7 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.models.VillagerUnitModel;
-
+import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
@@ -171,7 +171,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
     public float getAttackCooldown() {
-        return (int) ((20 * (Math.pow(VigorEnchantment.CD_MULTIPLIER, getVigorLevel())) / getBaseAttacksPerSecond())
+        return (int) ((20 * (Math.pow(VigorEnchantment.CD_MULTIPLIER, getVigorLevel())) / getNonBaseAttacksPerSecond())
                 * getAttackCooldownMultiplier());
     }
     public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);}

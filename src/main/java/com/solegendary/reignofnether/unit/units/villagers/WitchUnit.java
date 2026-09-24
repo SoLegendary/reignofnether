@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
@@ -229,7 +230,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
 
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }

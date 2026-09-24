@@ -64,7 +64,7 @@ public class Resources {
         this.food += food;
         this.wood += wood;
         this.ore += ore;
-        this.emerald = emerald;
+        this.emerald += emerald;
     }
 
     // drain ToAdd fields into totals so that we get the appearance of change over time on the HUD
@@ -107,6 +107,4 @@ public class Resources {
         }
         return resources;
     }
-
-
 }

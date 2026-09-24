@@ -29,10 +29,7 @@ import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
-import com.solegendary.reignofnether.unit.FormationDragMove;
-import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.unit.UnitActionItem;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.util.ArrayUtil;
@@ -68,11 +65,9 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-import org.joml.Vector3d;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
-import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -130,38 +125,43 @@ public class MinimapClientEvents {
     private static int zc_world = 0; // world pos zcentre, maps to yc
     private static float xl, xc, xr, yt, yc, yb;
 
-    public static final ArrayList<MinimapUnit> minimapUnits = new ArrayList<>();
+    public static final ArrayList<VirtualUnit> virtualUnits = new ArrayList<>();
     public static final ArrayList<MapMarker> mapMarkers = new ArrayList<>();
 
     // last known position of neutral units in fog
-    public static ArrayList<MinimapUnit> neutralFogUnits = new ArrayList<>();
+    public static final ArrayList<VirtualUnit> neutralFogUnits = new ArrayList<>();
 
     private static final float DARK = 0.40f;
     private static final float EXTRA_DARK = 0.10f;
 
     private static boolean lockedMap = false; // does map follow when moving offscreen?
     private static boolean highlightAnimals = false; // apply glow effect (clientside only) to animals
+    private static boolean underlineUnitsAndBuildings = true; // underline units and buildings
 
     public static boolean shouldHighlightAnimals() {
         return highlightAnimals;
     }
 
+    public static boolean shouldUnderline() {
+        return underlineUnitsAndBuildings;
+    }
+
     public static void addNeutralFogUnit(int id, Vector3f vec3fMin, Vector3f vec3fMax) {
         Vec3 vec3Min = new Vec3(vec3fMin.x, vec3fMin.y, vec3fMin.z);
         Vec3 vec3Max = new Vec3(vec3fMax.x, vec3fMax.y, vec3fMax.z);
-        minimapUnits.removeIf(mu -> mu.id == id);
+        virtualUnits.removeIf(mu -> mu.id == id);
         neutralFogUnits.removeIf(mu -> mu.id == id);
-        neutralFogUnits.add(new MinimapUnit(id, new AABB(vec3Min, vec3Max)));
+        neutralFogUnits.add(new VirtualUnit(id, new AABB(vec3Min, vec3Max)));
     }
 
     public static void removeNeutralFogUnit(int id) {
-        neutralFogUnits.removeIf(minimapUnit -> minimapUnit.id == id);
+        neutralFogUnits.removeIf(virtualUnit -> virtualUnit.id == id);
     }
 
     public static void highlightNeutralFogUnits(PoseStack pose, VertexConsumer vertexConsumer) {
         if (!FogOfWarClientEvents.isEnabled())
             return;
-        for (MinimapUnit mu : neutralFogUnits) {
+        for (VirtualUnit mu : neutralFogUnits) {
             if (MC.level != null) {
                 Entity entity = MC.level.getEntity(mu.id);
                 if (!FogOfWarClientEvents.isBlockVisible(mu.pos) && (entity == null || !FogOfWarClientEvents.isBlockVisible(entity.getOnPos()))) {
@@ -175,31 +175,9 @@ public class MinimapClientEvents {
         }
     }
 
-    public static void clearMinimapUnits() {
-        minimapUnits.clear();
+    public static void clearVirtualUnits() {
+        virtualUnits.clear();
         neutralFogUnits.clear();
-    }
-
-    // for tracking serverside Units that don't yet exist on clientside
-    private static class MinimapUnit {
-        public BlockPos pos;
-        public final int id;
-        public final String ownerName;
-        public final AABB aabb;
-
-        public MinimapUnit(BlockPos pos, int id, String ownerName) {
-            this.pos = pos;
-            this.id = id;
-            this.ownerName = ownerName;
-            this.aabb = null;
-        }
-
-        public MinimapUnit(int id, AABB aabb) { // neutral unit
-            this.pos = new BlockPos((int) aabb.getCenter().x, (int) aabb.minY, (int) aabb.getCenter().z);
-            this.id = id;
-            this.ownerName = "";
-            this.aabb = aabb;
-        }
     }
 
     private static class MapMarker {
@@ -242,18 +220,18 @@ public class MinimapClientEvents {
         }
     }
 
-    public static void removeMinimapUnit(int id) {
-        minimapUnits.removeIf(u -> u.id == id);
+    public static void removeVirtualUnit(int id) {
+        virtualUnits.removeIf(u -> u.id == id);
     }
 
-    public static void syncMinimapUnits(BlockPos pos, int id, String ownerName) {
-        for (MinimapUnit unit : minimapUnits) {
+    public static void syncVirtualUnits(BlockPos pos, int id, String ownerName, int population) {
+        for (VirtualUnit unit : virtualUnits) {
             if (unit.id == id) {
                 unit.pos = pos;
                 return;
             }
         }
-        minimapUnits.add(new MinimapUnit(pos, id, ownerName));
+        virtualUnits.add(new VirtualUnit(pos, id, ownerName, population));
     }
 
     public static void setMapCentre(double x, double z) {
@@ -484,6 +462,26 @@ public class MinimapClientEvents {
                 List.of(FormattedCharSequence.forward(highlightAnimals
                         ? I18n.get("hud.map.reignofnether.highlight_animals.enabled")
                         : I18n.get("hud.map.reignofnether.highlight_animals.disabled"), Style.EMPTY)
+                )
+        );
+    }
+
+    public static Button getToggleUnderlinesButton() {
+        return new Button("Toggle Underlines",
+                14,
+                underlineUnitsAndBuildings ?
+                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/dirt_green_diamond.png") :
+                        ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/dirt_dark.png"),
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
+                null,
+                () -> false,
+                () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || !largeMap,
+                () -> true,
+                () -> underlineUnitsAndBuildings = !underlineUnitsAndBuildings,
+                null,
+                List.of(FormattedCharSequence.forward(underlineUnitsAndBuildings
+                        ? I18n.get("hud.map.reignofnether.underlines.enabled")
+                        : I18n.get("hud.map.reignofnether.underlines.disabled"), Style.EMPTY)
                 )
         );
     }
@@ -832,18 +830,18 @@ public class MinimapClientEvents {
                     colorHex
             );
         }
-        for (MinimapUnit minimapUnit : minimapUnits) {
-            if (!FogOfWarClientEvents.isInBrightChunk(minimapUnit.pos) || MC.player == null)
+        for (VirtualUnit virtualUnit : virtualUnits) {
+            if (!FogOfWarClientEvents.isInBrightChunk(virtualUnit.pos) || MC.player == null)
                 continue;
-            String unitOwnerName = minimapUnit.ownerName;
+            String unitOwnerName = virtualUnit.ownerName;
             var colorHex = PlayerColors.getPlayerDisplayColorHex(unitOwnerName);
             drawUnitOnMap(
-                    minimapUnit.pos.getX(),
-                    minimapUnit.pos.getZ(),
+                    virtualUnit.pos.getX(),
+                    virtualUnit.pos.getZ(),
                     colorHex
             );
         }
-        for (MinimapUnit neutralFogUnit : neutralFogUnits) {
+        for (VirtualUnit neutralFogUnit : neutralFogUnits) {
             Entity entity = MC.level.getEntity(neutralFogUnit.id);
             if (FogOfWarClientEvents.isInBrightChunk(neutralFogUnit.pos) || MC.player == null ||
                 (entity != null && FogOfWarClientEvents.isInBrightChunk(entity)))

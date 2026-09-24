@@ -16,7 +16,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public interface RangeIndicatorAddon extends BuildingAddon {
-    DataType<Set<BlockPos>> HIGHLIGHT_BPS_CACHE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "highlight_bps_cache"), (nbt, server) -> new HashSet<>(), (netherZone -> new CompoundTag()), () -> new HashSet<>()); //Cache only, shouldn't be saved
+    DataType<Set<BlockPos>> HIGHLIGHT_BPS_CACHE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "highlight_bps_cache"),
+            (nbt, server) -> new HashSet<>(),
+            (netherZone -> new CompoundTag()),
+            () -> new HashSet<>()
+    ); //Cache only, shouldn't be saved
 
     int getRange(BuildingPlacement placement);
     //void updateBorderBps(BuildingPlacement placement);

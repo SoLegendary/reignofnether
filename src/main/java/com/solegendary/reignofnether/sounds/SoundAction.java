@@ -7,6 +7,7 @@ public enum SoundAction {
     ALLY,
     CHAT,
     ENEMY,
+    SELL_ITEM,
     DAWN_ROOSTER,
     DUSK_WOLF,
     BELL,

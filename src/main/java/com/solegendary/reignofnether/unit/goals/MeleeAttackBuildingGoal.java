@@ -1,13 +1,18 @@
 package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
+import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZoglinUnit;
+import com.solegendary.reignofnether.unit.units.neutral.PandaUnit;
+import com.solegendary.reignofnether.unit.units.neutral.PolarBearUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemUnit;
@@ -16,6 +21,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.animal.PolarBear;
 import net.minecraft.world.entity.monster.Slime;
 
 import java.util.Random;
@@ -94,12 +100,17 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
                 mob instanceof HoglinUnit ||
                 mob instanceof ZoglinUnit ||
                 mob instanceof RavagerUnit ||
-                mob instanceof WardenUnit) {
+                mob instanceof WardenUnit ||
+                mob instanceof PolarBearUnit
+        ) {
             mob.handleEntityEvent((byte) 4);
             UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.NON_KEYFRAME_ATTACK, mob);
         }
         else
             this.mob.swing(InteractionHand.MAIN_HAND);
+
+        if (mob instanceof PandaUnit pandaUnit)
+            pandaUnit.roll(true);
 
         AttackerUnit unit = (AttackerUnit) mob;
         ticksToNextBlockBreak = (int) unit.getAttackCooldown();
@@ -122,8 +133,8 @@ public class MeleeAttackBuildingGoal extends MoveToTargetBlockGoal {
 
     // only count as building if in range of the target - building is actioned in Building.tick()
     public boolean isAttacking() {
-        if (buildingTarget != null && this.moveTarget != null)
-            return MiscUtil.isMobInRangeOfPos(moveTarget, mob, 2);
+        if (buildingTarget != null)
+            return buildingTarget.isPosInsideBuilding(mob.getOnPos(), 2);
         return false;
     }
 

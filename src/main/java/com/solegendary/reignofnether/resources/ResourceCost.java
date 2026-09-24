@@ -20,11 +20,11 @@ public class ResourceCost {
     public int population; // for a building, indicates supply, for a unit, indicates usage
     public String id;
 
-    private ResourceCost(int food, int wood, int ore, int seconds, int population) { // units
+    private ResourceCost(int food, int wood, int ore, int ticks, int population) { // units
         this.food = food;
         this.wood = wood;
         this.ore = ore;
-        this.ticks = seconds * TICKS_PER_SECOND;
+        this.ticks = ticks * TICKS_PER_SECOND;
         this.population = population;
     }
 

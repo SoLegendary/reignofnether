@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.FirewallShot;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
@@ -15,7 +15,6 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
-import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
@@ -230,7 +229,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
         AttackerUnit.tick(this);
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
             lastCursorPos = CursorClientEvents.getPreselectedBlockPos();
@@ -261,18 +260,6 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
     @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
-
-    @Override public void updateHighlightBps() {
-        if (!level().isClientSide())
-            return;
-        this.highlightBps.clear();
-        if (CursorClientEvents.getLeftClickAction() == UnitAction.SHOOT_FIREWALL) {
-            BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(getOnPos(), CursorClientEvents.getPreselectedBlockPos(), FirewallShot.RANGE + 1);
-            for (BlockPos pos : MiscUtil.getLine2D(getOnPos(), limitedBp)) {
-                this.highlightBps.add(MiscUtil.getHighestGroundBlock(level(), pos).above());
-            }
-        }
-    }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {

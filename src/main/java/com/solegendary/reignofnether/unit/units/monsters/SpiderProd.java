@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -32,7 +33,7 @@ public class SpiderProd extends ProductionItem implements UnitProductionItem {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide()) {
-                if (ResearchServerEvents.playerHasResearch(placement.ownerName, ProductionItems.RESEARCH_POISON_SPIDERS))
+                if (ResearchServerEvents.playerHasResearch(placement.ownerName, ProductionItems.RESEARCH_POISON_SPIDERS) && !(placement instanceof CustomBuildingPlacement))
                     placement.produceUnit((ServerLevel) level, EntityRegistrar.POISON_SPIDER_UNIT.get(), placement.ownerName, true);
                 else
                     placement.produceUnit((ServerLevel) level, EntityRegistrar.SPIDER_UNIT.get(), placement.ownerName, true);
@@ -40,15 +41,15 @@ public class SpiderProd extends ProductionItem implements UnitProductionItem {
         };
     }
 
-    private static ResourceLocation getIcon() {
-        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS))
+    private static ResourceLocation getIcon(ProductionPlacement prodBuilding) {
+        if (ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS) && !(prodBuilding instanceof CustomBuildingPlacement))
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/poison_spider.png");
         else
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/spider.png");
     }
 
-    private static String getCancelName() {
-        if (ResearchClient.hasResearch(ProductionItems.POISON_SPIDER))
+    private static String getCancelName(ProductionPlacement prodBuilding) {
+        if (ResearchClient.hasResearch(ProductionItems.POISON_SPIDER) && !(prodBuilding instanceof CustomBuildingPlacement))
             return "Poison Spider";
         else
             return "Spider";
@@ -76,9 +77,9 @@ public class SpiderProd extends ProductionItem implements UnitProductionItem {
     public StartProductionButton getStartButton(ProductionPlacement prodBuilding, Keybinding hotkey) {
         return new StartProductionButton(
             SpiderProd.itemName,
-            getIcon(),
+            getIcon(prodBuilding),
             hotkey,
-            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS),
+            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS) && !(prodBuilding instanceof CustomBuildingPlacement),
             () -> true,
             List.of(
                 Component.translatable("entity.reignofnether.spider_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
@@ -96,8 +97,8 @@ public class SpiderProd extends ProductionItem implements UnitProductionItem {
 
     public StopProductionButton getCancelButton(ProductionPlacement prodBuilding, boolean first) {
         return new StopProductionButton(
-                ResearchClient.hasResearch(ProductionItems.RESEARCH_POISON_SPIDERS) ? "Poison Spider" : "Spider",
-                getIcon(),
+                getCancelName(prodBuilding),
+                getIcon(prodBuilding),
                 prodBuilding,
                 this,
                 first

@@ -1,6 +1,6 @@
 package com.solegendary.reignofnether;
 
-import com.solegendary.reignofnether.blocks.GarrisonBlockRenderer;
+import com.solegendary.reignofnether.blocks.InvisibleBlockRenderer;
 import com.solegendary.reignofnether.blocks.SkullTypes;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -242,7 +242,7 @@ public class ClientModEvents {
 
     @SubscribeEvent
     public static void registerBlockEntityRenderers(EntityRenderersEvent.RegisterRenderers evt) {
-        evt.registerBlockEntityRenderer(BlockEntityRegistrar.GARRISON_BLOCK_ENTITY.get(), GarrisonBlockRenderer::new);
+        evt.registerBlockEntityRenderer(BlockEntityRegistrar.INVISIBLE_BLOCK_ENTITY.get(), InvisibleBlockRenderer::new);
     }
 
     @SubscribeEvent

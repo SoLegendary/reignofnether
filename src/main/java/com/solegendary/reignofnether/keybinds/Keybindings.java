@@ -62,6 +62,13 @@ public class Keybindings {
     public static final Keybinding deselect    = new Keybinding("key.reignofnether.deselect",     GLFW.GLFW_KEY_GRAVE_ACCENT,  CATEGORY_RTS, "~");
     public static final Keybinding tab         = new Keybinding("key.reignofnether.tab",          GLFW.GLFW_KEY_TAB,           CATEGORY_RTS, "");
 
+    public static final Keybinding item1 = new Keybinding("key.reignofnether.item1", GLFW.GLFW_KEY_T, CATEGORY_RTS, "T");
+    public static final Keybinding item2 = new Keybinding("key.reignofnether.item2", GLFW.GLFW_KEY_Y, CATEGORY_RTS, "Y");
+    public static final Keybinding item3 = new Keybinding("key.reignofnether.item3", GLFW.GLFW_KEY_F, CATEGORY_RTS, "F");
+    public static final Keybinding item4 = new Keybinding("key.reignofnether.item4", GLFW.GLFW_KEY_G, CATEGORY_RTS, "G");
+    public static final Keybinding item5 = new Keybinding("key.reignofnether.item5", GLFW.GLFW_KEY_C, CATEGORY_RTS, "C");
+    public static final Keybinding item6 = new Keybinding("key.reignofnether.item6", GLFW.GLFW_KEY_B, CATEGORY_RTS, "V");
+
     public static final Keybinding[] nums = {
         new Keybinding("key.reignofnether.control_group_0", GLFW.GLFW_KEY_0, CATEGORY_RTS, "0"),
         new Keybinding("key.reignofnether.control_group_1", GLFW.GLFW_KEY_1, CATEGORY_RTS, "1"),
@@ -91,21 +98,20 @@ public class Keybindings {
 
     private static final List<Keybinding> ALL;
     static {
-        List<Keybinding> list = new ArrayList<>();
-        list.add(pause);
-        list.add(shiftMod); list.add(ctrlMod); list.add(altMod);
-        list.add(zoomIn); list.add(zoomOut);
-        list.add(panPlusX); list.add(panMinusX); list.add(panPlusZ); list.add(panMinusZ);
-        list.add(rotCW); list.add(rotCCW); list.add(reset);
-        list.add(cancelBuild);
-        list.add(abilitySlot1); list.add(abilitySlot2); list.add(abilitySlot3); list.add(abilitySlot4); list.add(abilitySlot5);
-        list.add(abilitySlot6); list.add(abilitySlot7); list.add(abilitySlot8); list.add(abilitySlot9); list.add(abilitySlot10);
-        list.add(hotkey1); list.add(hotkey2); list.add(minimapToggle); list.add(hotkey3); list.add(hotkey4);
-        list.add(hotkey5); list.add(hotkey6); list.add(hotkey7);
-        list.add(attack); list.add(stop); list.add(hold);
-        list.add(build); list.add(gather); list.add(garrison);
-        list.add(chat); list.add(deselect); list.add(tab);
-        list.add(hotkey8); list.add(hotkey9);
+        List<Keybinding> list = new ArrayList<>(List.of(
+            pause, shiftMod, ctrlMod, altMod,
+            zoomIn, zoomOut,
+            panPlusX, panMinusX, panPlusZ, panMinusZ,
+            rotCW, rotCCW, reset,
+            cancelBuild,
+            abilitySlot1, abilitySlot2, abilitySlot3, abilitySlot4, abilitySlot5,
+            abilitySlot6, abilitySlot7, abilitySlot8, abilitySlot9, abilitySlot10,
+            hotkey1, hotkey2, minimapToggle, hotkey3, hotkey4, hotkey5, hotkey6, hotkey7, hotkey8, hotkey9,
+            attack, stop, hold,
+            build, gather, garrison,
+            chat, deselect, tab,
+            item1, item2, item3, item4, item5, item6
+        ));
         Collections.addAll(list, nums);
         Collections.addAll(list, fnums);
         ALL = Collections.unmodifiableList(list);

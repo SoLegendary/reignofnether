@@ -7,9 +7,7 @@ import com.solegendary.reignofnether.ability.BuildingAbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.BuildingAbilityServerboundPacket;
 import com.solegendary.reignofnether.alliance.*;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
-import com.solegendary.reignofnether.building.BuildingClientboundPacket;
-import com.solegendary.reignofnether.building.BuildingServerboundPacket;
-import com.solegendary.reignofnether.building.FogBuildingClientboundPacket;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientboundPacket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerboundPacket;
 import com.solegendary.reignofnether.config.ClientboundSyncResourceCostPacket;
@@ -25,6 +23,9 @@ import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonActionServerboundPacket;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientboundPacket;
+import com.solegendary.reignofnether.items.ItemClientboundPacket;
+import com.solegendary.reignofnether.items.ItemServerboundPacket;
+import com.solegendary.reignofnether.items.ItemShopClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerClientboundPacket;
 import com.solegendary.reignofnether.minimap.MapMarkerServerboundPacket;
 import com.solegendary.reignofnether.orthoview.CameraClientboundPacket;
@@ -52,6 +53,7 @@ import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.debug.RtsDebugChunksClientboundPacket;
 import com.solegendary.reignofnether.debug.RtsDebugStatsClientboundPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -59,7 +61,10 @@ import net.minecraftforge.network.simple.SimpleChannel;
 // Initialises all of the client-server packet-sending classes
 
 public final class PacketHandler {
-    private static final String PROTOCOL_VERSION = "1";
+    private static final String PROTOCOL_VERSION = ModList.get()
+            .getModContainerById("reignofnether")
+            .map(c -> c.getModInfo().getVersion().toString())
+            .orElse("dev");
 
     public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "main"), () -> PROTOCOL_VERSION, PROTOCOL_VERSION::equals,
@@ -164,6 +169,14 @@ public final class PacketHandler {
         INSTANCE.messageBuilder(BuildingClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(BuildingClientboundPacket::encode).decoder(BuildingClientboundPacket::new)
                 .consumerMainThread(BuildingClientboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(BuildingProductionServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(BuildingProductionServerboundPacket::encode).decoder(BuildingProductionServerboundPacket::new)
+                .consumerMainThread(BuildingProductionServerboundPacket::handle).add();
+
+        INSTANCE.messageBuilder(BuildingProductionClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(BuildingProductionClientboundPacket::encode).decoder(BuildingProductionClientboundPacket::new)
+                .consumerMainThread(BuildingProductionClientboundPacket::handle).add();
 
         INSTANCE.messageBuilder(ResourcesClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(ResourcesClientboundPacket::encode).decoder(ResourcesClientboundPacket::new)
@@ -393,16 +406,35 @@ public final class PacketHandler {
                 .decoder(FogBuildingClientboundPacket::new)
                 .consumerMainThread(FogBuildingClientboundPacket::handle)
                 .add();
-        
+
         INSTANCE.messageBuilder(CustomButtonActionServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(CustomButtonActionServerboundPacket::encode)
                 .decoder(CustomButtonActionServerboundPacket::decode)
                 .consumerMainThread(CustomButtonActionServerboundPacket::handle)
                 .add();
+
         INSTANCE.messageBuilder(CustomButtonClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(CustomButtonClientboundPacket::encode)
                 .decoder(CustomButtonClientboundPacket::decode)
                 .consumerMainThread(CustomButtonClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ItemServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ItemServerboundPacket::encode)
+                .decoder(ItemServerboundPacket::new)
+                .consumerMainThread(ItemServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ItemClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ItemClientboundPacket::encode)
+                .decoder(ItemClientboundPacket::new)
+                .consumerMainThread(ItemClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(ItemShopClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ItemShopClientboundPacket::encode)
+                .decoder(ItemShopClientboundPacket::new)
+                .consumerMainThread(ItemShopClientboundPacket::handle)
                 .add();
     }
 }

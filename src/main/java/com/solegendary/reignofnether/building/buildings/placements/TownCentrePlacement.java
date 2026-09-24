@@ -2,6 +2,19 @@ package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.monsters.Graveyard;
+import com.solegendary.reignofnether.building.production.ActiveProduction;
+import com.solegendary.reignofnether.building.production.GraveyardUnitProductionItem;
+import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -12,10 +25,17 @@ import java.util.Random;
 
 public class TownCentrePlacement extends ProductionPlacement {
 
-    public boolean trainsDogs; // if false, trains cats
+    public boolean trainsDogs = true; // if false, trains cats
 
     public TownCentrePlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks) {
         super(building, level, originPos, rotation, ownerName, blocks, true);
-        trainsDogs = new Random().nextBoolean();
+        RTSPlayer rtsPlayer;
+        if (level.isClientSide()) {
+            rtsPlayer = PlayerClientEvents.getRTSPlayer(ownerName);
+        } else {
+            rtsPlayer = PlayerServerEvents.getRTSPlayer(ownerName);
+        }
+        if (rtsPlayer != null)
+            trainsDogs = rtsPlayer.isDogPerson;
     }
 }

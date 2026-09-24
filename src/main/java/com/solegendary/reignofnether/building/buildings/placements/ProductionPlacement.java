@@ -14,7 +14,12 @@ import com.solegendary.reignofnether.building.production.ProdDupeRule;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.production.*;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -45,8 +50,8 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 public class ProductionPlacement extends BuildingPlacement {
-    private ArrayList<BlockPos> rallyPoints = new ArrayList<>();
-    private LivingEntity rallyPointEntity;
+    protected ArrayList<BlockPos> rallyPoints = new ArrayList<>();
+    protected LivingEntity rallyPointEntity;
     public List<Button> productionButtons;
     public final List<ActiveProduction> productionQueue = new ArrayList<>();
     public boolean attackRally = false;
@@ -141,12 +146,9 @@ public class ProductionPlacement extends BuildingPlacement {
 
     public Entity produceUnit(ServerLevel level, EntityType<? extends Unit> entityType, String ownerName, boolean spawnIndoors, Vec3i spawnOffset) {
         ProductionBuilding building = (ProductionBuilding) getBuilding();
-        LivingEntity rallyEntity = getRallyPointEntity();
         BlockPos spawnPoint;
         if (spawnIndoors) {
             spawnPoint = getIndoorSpawnPoint(level);
-            if (entityType == EntityRegistrar.GHAST_UNIT.get())
-                spawnPoint = spawnPoint.offset(0,5,0);
         }
         else if (!rallyPoints.isEmpty())
             spawnPoint = getClosestGroundPos(rallyPoints.get(0), (int) building.spawnRadiusOffset);
@@ -164,70 +166,79 @@ public class ProductionPlacement extends BuildingPlacement {
                 true,
                 false
         );
-        BlockPos defaultRallyPoint = getDefaultOutdoorSpawnPoint();
-
-        final List<BlockPos> fRallyPoints = this.rallyPoints.isEmpty() ? List.of(defaultRallyPoint) : this.rallyPoints;
-
         if (entity instanceof Unit unit) {
             unit.setOwnerName(ownerName);
             unit.setupEquipmentAndUpgradesServer();
-
-            if (rallyEntity != null && rallyEntity.isAlive()) {
-                if (isRallyEntityAttackable()) {
-                    CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                        if (!fRallyPoints.isEmpty()) {
-                            UnitServerEvents.addActionItem(
-                                    this.ownerName,
-                                    UnitAction.ATTACK,
-                                    rallyEntity.getId(),
-                                    new int[] { entity.getId() },
-                                    fRallyPoints.get(0),
-                                    new BlockPos(0,0,0)
-                            );
-                        }
-                    });
-                } else {
-                    CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
-                        if (!fRallyPoints.isEmpty()) {
-                            UnitServerEvents.addActionItem(
-                                    this.ownerName,
-                                    UnitAction.FOLLOW,
-                                    rallyEntity.getId(),
-                                    new int[] { entity.getId() },
-                                    fRallyPoints.get(0),
-                                    new BlockPos(0,0,0)
-                            );
-                        }
-                    });
-                }
-            } else {
-                for (int i = 0; i < fRallyPoints.size(); i++) {
-                    final int fi = i;
-                    CompletableFuture.delayedExecutor(500L * fi, TimeUnit.MILLISECONDS).execute(() -> {
-                        if (fRallyPoints.size() > fi)
-                            UnitServerEvents.addActionItem(
-                                    this.ownerName,
-                                    attackRally ? UnitAction.ATTACK_MOVE : UnitAction.MOVE,
-                                    -1,
-                                    new int[] { entity.getId() },
-                                    fRallyPoints.get(fi),
-                                    new BlockPos(0,0,0),
-                                    fi > 0
-                            );
-                    });
-                    CompletableFuture.delayedExecutor(750, TimeUnit.MILLISECONDS).execute(() -> {
-                        if (!attackRally && unit instanceof WorkerUnit workerUnit)
-                            if (rallyResourceName != ResourceName.NONE)
-                                workerUnit.getGatherResourceGoal().setTargetResourceName(rallyResourceName);
-                    });
-                }
-            }
+            setDelayedRally(unit);
         }
         return entity;
     }
 
+    protected void setDelayedRally(Unit unit) {
+        Entity entity = (Entity) unit;
+        LivingEntity rallyEntity = getRallyPointEntity();
+        BlockPos defaultRallyPoint = getDefaultOutdoorSpawnPoint();
+        final List<BlockPos> fRallyPoints = this.rallyPoints.isEmpty() ? List.of(defaultRallyPoint) : this.rallyPoints;
+
+        if (rallyEntity != null && rallyEntity.isAlive()) {
+            if (isRallyEntityAttackable()) {
+                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                    if (!fRallyPoints.isEmpty()) {
+                        UnitServerEvents.addActionItem(
+                                this.ownerName,
+                                UnitAction.ATTACK,
+                                rallyEntity.getId(),
+                                new int[] { entity.getId() },
+                                fRallyPoints.get(0),
+                                new BlockPos(0,0,0)
+                        );
+                    }
+                });
+            } else {
+                CompletableFuture.delayedExecutor(500, TimeUnit.MILLISECONDS).execute(() -> {
+                    if (!fRallyPoints.isEmpty()) {
+                        UnitServerEvents.addActionItem(
+                                this.ownerName,
+                                UnitAction.FOLLOW,
+                                rallyEntity.getId(),
+                                new int[] { entity.getId() },
+                                fRallyPoints.get(0),
+                                new BlockPos(0,0,0)
+                        );
+                    }
+                });
+            }
+        } else {
+            for (int i = 0; i < fRallyPoints.size(); i++) {
+                final int fi = i;
+                CompletableFuture.delayedExecutor(500L * fi, TimeUnit.MILLISECONDS).execute(() -> {
+                    if (fRallyPoints.size() > fi)
+                        UnitServerEvents.addActionItem(
+                                this.ownerName,
+                                attackRally ? UnitAction.ATTACK_MOVE : UnitAction.MOVE,
+                                -1,
+                                new int[] { entity.getId() },
+                                fRallyPoints.get(fi),
+                                new BlockPos(0,0,0),
+                                fi > 0
+                        );
+                });
+                CompletableFuture.delayedExecutor(750, TimeUnit.MILLISECONDS).execute(() -> {
+                    if (!attackRally && unit instanceof WorkerUnit workerUnit)
+                        if (rallyResourceName != ResourceName.NONE)
+                            workerUnit.getGatherResourceGoal().setTargetResourceName(rallyResourceName);
+                });
+            }
+        }
+    }
+
     // return true if successful
     public boolean startProductionItem(ProductionItem prodItem) {
+        return startProductionItem(prodItem, -1);
+    }
+
+    // if ticksLeft <= 0, just use default cost ticks
+    public boolean startProductionItem(ProductionItem prodItem, float ticksLeft) {
         boolean success = false;
 
         if (getBuilding() instanceof ProductionBuilding pb && !pb.productions.get().contains(prodItem)) {
@@ -238,6 +249,8 @@ public class ProductionPlacement extends BuildingPlacement {
             // only worry about checking affordability on serverside
             if (getLevel().isClientSide()) {
                 ActiveProduction activeProduction = new ActiveProduction(prodItem, true, ownerName);
+                if (ticksLeft > 0)
+                    activeProduction.ticksLeft = ticksLeft;
                 productionQueue.add(activeProduction);
                 success = true;
             }
@@ -248,7 +261,10 @@ public class ProductionPlacement extends BuildingPlacement {
                     case ALLOW -> true;
                 };
 
-                if (allow && prodItem.canAfford(this)) {
+                if (!prodItem.canProduce(level, ownerName)) {
+                    HudClientboundPacket.showTempMessageI18n(ownerName, prodItem.getProduceErrorMsg(level, ownerName));
+                }
+                else if (allow && prodItem.canAfford(this)) {
                     ActiveProduction activeProduction = new ActiveProduction(prodItem, false, ownerName);
                     productionQueue.add(activeProduction);
                     ResourcesServerEvents.addSubtractResources(new Resources(
@@ -352,9 +368,9 @@ public class ProductionPlacement extends BuildingPlacement {
                 if (!tickLevel.isClientSide()) {
                     productionQueue.remove(0);
                     if (productionQueue.isEmpty())
-                        BuildingClientboundPacket.clearQueue(this.originPos);
+                        BuildingProductionClientboundPacket.clearQueue(this.ownerName, this.originPos);
                     else
-                        BuildingClientboundPacket.completeProduction(this.originPos);
+                        BuildingProductionClientboundPacket.completeProduction(this.ownerName, this.originPos, nextItem.item.getItemName());
                 }
             }
         }
@@ -368,5 +384,21 @@ public class ProductionPlacement extends BuildingPlacement {
                 productionButtons = productionBuilding.productions.getButtons(this);
             }
         }
+    }
+
+    @Override
+    protected boolean checkAndDoCapture(ServerLevel serverLevel) {
+        String oldOwner = this.ownerName;
+        boolean captured = super.checkAndDoCapture(serverLevel);
+        String newOwner = this.ownerName;
+        if (captured) {
+            this.ownerName = oldOwner;
+            for (ActiveProduction activeProd : new ArrayList<>(productionQueue)) {
+                cancelProductionItem(activeProd.item, true);
+            }
+            BuildingProductionClientboundPacket.clearQueue(this.ownerName, this.originPos);
+            this.ownerName = newOwner;
+        }
+        return captured;
     }
 }

@@ -1,11 +1,13 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -58,7 +60,7 @@ public class StriderProd extends ProductionItem implements UnitProductionItem {
             StriderProd.itemName,
             TEXTURE_LOCATION,
             hotkey,
-            () -> false,
+            () -> !FogOfWarClientEvents.isEnabled(),
             () -> true,
             List.of(
                 Component.translatable("entity.reignofnether.strider_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),

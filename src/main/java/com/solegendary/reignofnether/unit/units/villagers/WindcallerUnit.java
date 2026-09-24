@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ToggleFlying;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
@@ -427,7 +427,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         }
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }
@@ -608,6 +608,6 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     @Override
     public boolean hasBonusRange() {
-        return hasLongshot();
+        return AttackerUnit.super.hasBonusRange() || hasLongshot();
     }
 }

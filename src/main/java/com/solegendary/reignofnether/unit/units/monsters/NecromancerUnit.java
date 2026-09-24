@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.ability.heroAbilities.necromancer.InsomniaC
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.SoulSiphonPassive;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.entities.NecromancerProjectile;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
@@ -114,6 +114,9 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
 
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
@@ -380,7 +383,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }
@@ -452,6 +455,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new UnitRangedAttackGoal<>(this, ATTACK_WINDUP_TICKS);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
         this.castRaiseDeadGoal = new GenericUntargetedSpellGoal(
@@ -499,6 +503,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
+        this.goalSelector.addGoal(2, itemGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
     }

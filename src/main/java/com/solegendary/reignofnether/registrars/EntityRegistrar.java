@@ -17,6 +17,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import javax.annotation.Nullable;
+
 
 public class EntityRegistrar {
 
@@ -236,8 +238,8 @@ public class EntityRegistrar {
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "hoglin_unit").toString()));
 
-    public static final RegistryObject<EntityType<HoglinUnit>> ARMOURED_HOGLIN_UNIT = ENTITIES.register("armoured_hoglin_unit",
-            () -> EntityType.Builder.of(HoglinUnit::new, MobCategory.CREATURE)
+    public static final RegistryObject<EntityType<ArmouredHoglinUnit>> ARMOURED_HOGLIN_UNIT = ENTITIES.register("armoured_hoglin_unit",
+            () -> EntityType.Builder.of(ArmouredHoglinUnit::new, MobCategory.CREATURE)
                     .sized(EntityType.HOGLIN.getWidth(), EntityType.HOGLIN.getHeight())
                     .clientTrackingRange(UNIT_CLIENT_TRACKING_RANGE)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "armoured_hoglin_unit").toString()));
@@ -419,6 +421,7 @@ public class EntityRegistrar {
         ENTITIES.register(context.getModEventBus());
     }
 
+    @Nullable
     public static EntityType<? extends Mob> getEntityType(String unitName) {
         return switch(unitName) {
             case CreeperProd.itemName -> EntityRegistrar.CREEPER_UNIT.get();

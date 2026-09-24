@@ -74,7 +74,7 @@ public class DogUnitRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
         if (pEntity instanceof ScoutDogUnit scoutDogUnit) {
             return getDogTexture(scoutDogUnit);
         } else {
-            return new ResourceLocation("textures/entity/wolf/wolf_tame.png");
+            return ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/wolf/wolf_tame.png");
         }
     }
 }

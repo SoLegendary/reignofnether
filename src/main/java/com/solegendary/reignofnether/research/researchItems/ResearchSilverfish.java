@@ -32,9 +32,7 @@ public class ResearchSilverfish extends ProductionItem {
     public ResearchSilverfish() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_SILVERFISH);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_SILVERFISH);
             }
         };

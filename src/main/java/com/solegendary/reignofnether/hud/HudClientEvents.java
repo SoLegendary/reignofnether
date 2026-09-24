@@ -10,7 +10,9 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
+import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
@@ -22,11 +24,13 @@ import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.custombutton.CustomButton;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientEvents;
 import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.ItemShopMenu;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -86,7 +90,9 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.hud.buttons.HelperButtons.*;
@@ -170,9 +176,22 @@ public class HudClientEvents {
     }
 
     public static void setHudSelectedEntity(LivingEntity entity) {
+        if (entity != hudSelectedEntity) {
+            CursorClientEvents.setLeftClickAction(null);
+            ItemClientEvents.resetActions();
+        }
         hudSelectedEntity = entity;
-    }
 
+        // if in range of an itemshop, switch that shop to serve this unit
+        if (ItemClientEvents.ENABLED &&
+                ItemClientEvents.openItemShop != null &&
+                !ItemClientEvents.openItemShop.isDestroyedServerside &&
+                hudSelectedEntity instanceof HeroUnit heroUnit)
+            for (BuildingPlacement bpl : BuildingClientEvents.getBuildings())
+                if (bpl instanceof ItemShopPlacement shopBpl)
+                    if (shopBpl.setServedUnit(heroUnit))
+                        break;
+    }
 
     // not to be used for resource paths
     public static String getModifiedEntityName(LivingEntity entity) {
@@ -339,6 +358,23 @@ public class HudClientEvents {
             hudSelectedPlacement = selBuildings.get(0);
         }
 
+        // --------
+        // ItemShop
+        // --------
+        int x = blitX;
+        int y = blitY - 150;
+        boolean isShopOpen = ItemClientEvents.openItemShop != null && !ItemClientEvents.openItemShop.isDestroyedServerside;
+        boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
+        if (isShopOpen && ItemClientEvents.ENABLED) {
+            ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
+            if (itemShop != null) {
+                if (isShopSelected || ItemClientEvents.openItemShop.getServedUnit() == HudClientEvents.hudSelectedEntity) {
+                    hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, x, y));
+                    renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, x, y, mouseX, mouseY));
+                }
+            }
+        }
+
         if (hudSelectedPlacement != null) {
             boolean hudSelBuildingOwned =
                 BuildingClientEvents.getPlayerToBuildingRelationship(hudSelectedPlacement) == Relationship.OWNED ||
@@ -360,7 +396,6 @@ public class HudClientEvents {
             blitX += portraitRendererBuilding.frameWidth + 10;
 
             blitXStart = blitX + 20;
-
 
             // ---------------------------
             // Multiple selected buildings
@@ -575,13 +610,33 @@ public class HudClientEvents {
                         blitY -= Button.DEFAULT_ICON_FRAME_SIZE;
                     }
 
+                    int rowButtons = 0;
+                    if (ItemClientEvents.ENABLED && hudSelectedPlacement instanceof ItemShopPlacement itemShopPlacement) {
+                        Button shopMenuButton = new ButtonBuilder("Shop Menu")
+                                .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald.png"))
+                                .tooltipLines(List.of(fcs(I18n.get("itemshop.reignofnether.toggle_menu"))))
+                                .isHidden(() -> itemShopPlacement.getStockedItems().isEmpty())
+                                .isSelected(() -> ItemClientEvents.openItemShop == hudSelectedPlacement)
+                                .onLeftClick(() -> {
+                                    if (ItemClientEvents.openItemShop == hudSelectedPlacement)
+                                        ItemClientEvents.openItemShop = null;
+                                    else
+                                        ItemClientEvents.openItemShop = itemShopPlacement;
+                                })
+                                .build();
+                        shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                        productionButtons.add(shopMenuButton);
+                        renderedButtons.add(shopMenuButton);
+                        blitX += iconFrameSize;
+                        buildingProdRows += 1;
+                    }
+
                     if (hudSelectedPlacement instanceof ProductionPlacement selProdPlacement) {
                         List<Button> visibleProdButtons = selProdPlacement.productionButtons.stream()
                                 .filter(b -> !b.isHidden.get())
                                 .toList();
                         blitY -= Button.DEFAULT_ICON_FRAME_SIZE * Math.ceil(((float) visibleProdButtons.size() / (float) MAX_BUTTONS_PER_ROW) - 1);
 
-                        int rowButtons = 0;
                         for (Button prodButton : visibleProdButtons) {
                             rowButtons += 1;
                             prodButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
@@ -665,7 +720,7 @@ public class HudClientEvents {
                 int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
 
-                if (unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(unit)) {
+                if (ItemClientEvents.ENABLED && unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(unit)) {
                     hudZones.add(ItemClientEvents.renderUnitInventory(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, inv));
                     renderedItemsOrResources = true;
                 }
@@ -1134,13 +1189,18 @@ public class HudClientEvents {
         int resourceBlitYStart = blitY;
         int resourcePanelBottomY = blitY;
 
+        String[] resourceNames;
+        if (ItemClientEvents.ENABLED) {
+            resourceNames = new String[] { "food", "wood", "ore", "emerald", "pop" };
+        } else {
+            resourceNames = new String[] { "food", "wood", "ore", "pop" };
+        }
+
         if (resources != null && MC.player != null) {
-            for (String resourceName : new String[] { "food", "wood", "ore", "pop" }) {
+            for (String resourceName : resourceNames) {
                 ResourceLocation rl;
                 String resValueStr = "";
                 ResourceName resName;
-
-                List<FormattedCharSequence> tooltip;
 
                 switch (resourceName) {
                     case "food" -> {
@@ -1157,6 +1217,11 @@ public class HudClientEvents {
                         rl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore.png");
                         resValueStr = String.valueOf(resources.ore);
                         resName = ResourceName.ORE;
+                    }
+                    case "emerald" -> {
+                        rl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald.png");
+                        resValueStr = String.valueOf(resources.emerald);
+                        resName = ResourceName.EMERALD;
                     }
                     default -> {
                         rl = PlayerColors.getPlayerColorBedIcon(selPlayerName);
@@ -1264,8 +1329,13 @@ public class HudClientEvents {
 
             blitY = resourceBlitYStart;
             final String finalSelPlayerName = selPlayerName;
-            for (String resourceName : new String[] { "food", "wood", "ore", "population" }) {
-                String locName = I18n.get("resources.reignofnether." + resourceName);
+            String[] resourceNames2;
+            if (ItemClientEvents.ENABLED) {
+                resourceNames2 = new String[] { "food", "wood", "ore", "emerald", "population" };
+            } else {
+                resourceNames2 = new String[] { "food", "wood", "ore", "population" };
+            }
+            for (String resourceName : resourceNames2) {
                 List<FormattedCharSequence> tooltip;
                 String key = String.format("resources.reignofnether.%s", resourceName);
                 if (resourceName.equals("population")) {
@@ -1299,9 +1369,8 @@ public class HudClientEvents {
                             List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.workers_on_" + resourceName
                         ), Style.EMPTY));
                     }
-                    MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipWorkersAssigned, mouseX + 5, mouseY);
-
-
+                    if (!resourceName.equals("emerald"))
+                        MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipWorkersAssigned, mouseX + 5, mouseY);
                 }
                 blitY += iconFrameSize - 1;
             }
@@ -1314,14 +1383,14 @@ public class HudClientEvents {
             !PlayerClientEvents.isRTSPlayer() ||
             SandboxClientEvents.isSandboxPlayer() ||
             AlliancesClient.isAllied(MC.player.getName().getString(), selPlayerName)) {
-            Pair<List<RectZone>, List<Button>> renderedElements = GlobalProductionQueueRenderer.renderQueue(evt.getGuiGraphics(),
+            Pair<RectZone, List<Button>> renderedElements = GlobalProductionQueueRenderer.renderQueue(evt.getGuiGraphics(),
                     selPlayerName,
                     queuePanelStartX,
                     queuePanelStartY,
                     mouseX,
                     mouseY
             );
-            hudZones.addAll(renderedElements.getFirst());
+            hudZones.add(renderedElements.getFirst());
             renderedButtons.addAll(renderedElements.getSecond());
         }
 
@@ -1370,6 +1439,7 @@ public class HudClientEvents {
         Button markerModeButton = MinimapClientEvents.getMarkerModeButton();
         Button camSensitivityButton = MinimapClientEvents.getCamSensitivityButton();
         Button mapLockButton = MinimapClientEvents.getMapLockButton();
+        Button toggleUnderlinesButton = MinimapClientEvents.getToggleUnderlinesButton();
         Button highlightAnimalsButton = MinimapClientEvents.getHighlightAnimalsButton();
         Button nightCirclesButton = MinimapClientEvents.getNightCirclesModeButton();
         Button leavesHidingButton = OrthoviewClientEvents.getLeavesHidingButton();
@@ -1394,7 +1464,8 @@ public class HudClientEvents {
             int gridBottom = mmBottom + 4;                     // shifted a touch lower than the map bottom
 
             int r0y = gridBottom - frameSize;            // bottom row: frame bottom = map bottom
-            int r1y = r0y - stride;                       // top row
+            int r1y = r0y - stride;                       // 2nd-top row
+            int r2y = r1y - stride;                       // top row
             int c0x = gridRight - frameSize;             // rightmost column: frame right = map left - 4
             int c1x = c0x - stride;
             int c2x = c1x - stride;
@@ -1424,6 +1495,10 @@ public class HudClientEvents {
             }
 
             // top row: view toggles
+            if (!toggleUnderlinesButton.isHidden.get()) {
+                toggleUnderlinesButton.render(evt.getGuiGraphics(), c1x, r2y, mouseX, mouseY);
+                renderedButtons.add(toggleUnderlinesButton);
+            }
             if (!camSensitivityButton.isHidden.get()) {
                 camSensitivityButton.render(evt.getGuiGraphics(), c0x, r1y, mouseX, mouseY);
                 renderedButtons.add(camSensitivityButton);
@@ -1492,6 +1567,13 @@ public class HudClientEvents {
                         screenHeight - (mapLockButton.iconSize * 4),
                         mouseX, mouseY);
                 renderedButtons.add(mapLockButton);
+            }
+            if (!toggleUnderlinesButton.isHidden.get()) {
+                toggleUnderlinesButton.render(evt.getGuiGraphics(),
+                        screenWidth - (toggleUnderlinesButton.iconSize * 4),
+                        screenHeight - (toggleUnderlinesButton.iconSize * 6),
+                        mouseX, mouseY);
+                renderedButtons.add(toggleUnderlinesButton);
             }
             if (!highlightAnimalsButton.isHidden.get()) {
                 highlightAnimalsButton.render(evt.getGuiGraphics(),
@@ -1938,7 +2020,7 @@ public class HudClientEvents {
     // hudSelectedEntity and portraitRendererUnit should be assigned in the same event to avoid desyncs
     public static void onRenderLivingEntity(RenderLivingEvent.Post<? extends LivingEntity, ? extends Model> evt) {
         if (hudSelectedEntity != null && hudSelectedEntity.isRemoved())
-            hudSelectedEntity = null;
+            setHudSelectedEntity(null);
 
         ArrayList<LivingEntity> units = UnitClientEvents.getSortedSelectedUnits();
 

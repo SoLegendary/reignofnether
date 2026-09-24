@@ -36,15 +36,13 @@ public class ResearchResourceCapacity extends ProductionItem {
             if (level.isClientSide()) {
                 ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_RESOURCE_CAPACITY);
                 for (LivingEntity unit : UnitClientEvents.getAllUnits())
-                    if (unit instanceof WorkerUnit) {
+                    if (unit instanceof WorkerUnit)
                         ((Unit) unit).setupEquipmentAndUpgradesClient();
-                    }
             } else {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_RESOURCE_CAPACITY);
                 for (LivingEntity unit : UnitServerEvents.getAllUnits())
-                    if (unit instanceof WorkerUnit) {
+                    if (unit instanceof WorkerUnit)
                         ((Unit) unit).setupEquipmentAndUpgradesServer();
-                    }
             }
         };
     }

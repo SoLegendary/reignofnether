@@ -1,0 +1,170 @@
+package com.solegendary.reignofnether.items;
+
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.addon.ItemShopAddon;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
+import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.RectZone;
+import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
+import com.solegendary.reignofnether.hud.buttons.UnitItemShopButton;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+
+import java.util.*;
+
+import static com.solegendary.reignofnether.util.MiscUtil.capitaliseAndSpace;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+
+public class ItemShopMenu {
+
+    private static final Minecraft MC = Minecraft.getInstance();
+
+    private static final int TITLE_X_OFFSET = 6;
+    private static final int TITLE_Y_OFFSET = 6;
+    private static final int HEADER_HEIGHT = 22;
+    private static final int ITEM_SLOT_SIZE = Button.DEFAULT_ICON_FRAME_SIZE;
+    private static final int MENU_WIDTH = ITEM_SLOT_SIZE * 6;
+    private static final int ITEMS_PER_ROW = MENU_WIDTH / ITEM_SLOT_SIZE;
+
+    private static final int PANEL_BG_COLOUR = 0xA0000000;
+    private static final int PANEL_PADDING = 10;
+    private static final int PANEL_INSET = PANEL_PADDING / 2;
+
+    public static RectZone renderFrame(GuiGraphics guiGraphics, ItemShopAddon shop, int x, int y) {
+        ItemShopPlacement bpl = ItemClientEvents.openItemShop;
+        ArrayList<StockedShopItem> stocks = bpl.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
+        if (stocks == null)
+            stocks = new ArrayList<>();
+
+        int contentHeight = getMenuHeight(stocks.size());
+        int panelWidth = MENU_WIDTH + PANEL_PADDING;
+        int panelHeight = contentHeight + PANEL_PADDING;
+
+        MyRenderer.renderFrameWithBg(guiGraphics, x, y, panelWidth, panelHeight, PANEL_BG_COLOUR);
+        return RectZone.getZoneByLW(x, y, panelWidth, panelHeight);
+    }
+
+    public static List<Button> renderButtons(GuiGraphics guiGraphics, ItemShopAddon shop, int x, int y, int mouseX, int mouseY) {
+        ItemShopPlacement bpl = ItemClientEvents.openItemShop;
+        ArrayList<StockedShopItem> stocks = bpl.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
+        if (stocks == null)
+            stocks = new ArrayList<>();
+
+        ArrayList<Button> allButtons = new ArrayList<>();
+        int contentX = x + PANEL_INSET;
+        int contentY = y + PANEL_INSET;
+        allButtons.addAll(renderTitleAndButtons(guiGraphics, bpl, contentX, contentY, mouseX, mouseY));
+        allButtons.addAll(renderShopItemButtons(guiGraphics, bpl, shop, stocks, contentX, contentY + HEADER_HEIGHT, mouseX, mouseY));
+        return allButtons;
+    }
+
+    /** Draws the "Item Shop" title top-left, served unit and close button top-right; returns the buttons. */
+    private static List<Button> renderTitleAndButtons(GuiGraphics guiGraphics, ItemShopPlacement bpl, int x, int y, int mouseX, int mouseY) {
+        guiGraphics.drawString(
+                MC.font,
+                "Item Shop", // title text as specified; not pulled through I18n since no lang key was given for it
+                x + TITLE_X_OFFSET,
+                y + TITLE_Y_OFFSET,
+                0xFFFFFF
+        );
+
+        List<Button> buttons = new ArrayList<>();
+        int closeButtonX = x + MENU_WIDTH - Button.itemIconSize - TITLE_X_OFFSET;
+
+        // served-unit button (same mobhead-icon pattern as HudClientEvents' unit icon buttons)
+        Unit servedUnit = bpl.getServedUnit();
+        if (servedUnit instanceof LivingEntity servedEntity) {
+            String unitName = MiscUtil.getEntityIconName(servedEntity);
+            ResourceLocation iconRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,
+                    "textures/mobheads/" + unitName + (servedEntity.isVehicle() ? "_half.png" : ".png"));
+
+            Button servingButton = new ButtonBuilder("Serving Unit")
+                    .iconSize(Button.itemIconSize)
+                    .iconResource(iconRl)
+                    .onLeftClick(bpl::cycleServedUnit)
+                    .tooltipLines(List.of(fcs("Serving: " + capitaliseAndSpace(HudClientEvents.getModifiedEntityName(servedEntity)))))
+                    .build();
+
+            servingButton.frameResource = null;
+
+            int servingButtonX = closeButtonX - Button.itemIconSize - TITLE_X_OFFSET - 2;
+            renderButton(guiGraphics, servingButton, servingButtonX, y, mouseX, mouseY);
+            buttons.add(servingButton);
+        }
+
+        Button closeButton = new Button(
+                "Close Item Shop Menu",
+                Button.itemIconSize,
+                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross_square.png"),
+                null,
+                () -> false,
+                () -> false,
+                () -> true,
+                () -> ItemClientEvents.openItemShop = null,
+                null,
+                List.of()
+        );
+        closeButton.frameResource = null;
+        renderButton(guiGraphics, closeButton, closeButtonX, y, mouseX, mouseY);
+        buttons.add(closeButton);
+
+        return buttons;
+    }
+
+    /** Tightly-packed grid of one button per stocked item, wrapping to a new row every ITEMS_PER_ROW items. */
+    private static List<Button> renderShopItemButtons(
+            GuiGraphics guiGraphics,
+            BuildingPlacement bpl,
+            ItemShopAddon shop,
+            ArrayList<StockedShopItem> stocks,
+            int x,
+            int y,
+            int mouseX,
+            int mouseY
+    ) {
+        ArrayList<Button> buttons = new ArrayList<>();
+
+        int i = 0;
+        for (StockedShopItem stockedItem : stocks) {
+
+            int col = i % ITEMS_PER_ROW;
+            int row = i / ITEMS_PER_ROW;
+            int buttonX = x + col * ITEM_SLOT_SIZE;
+            int buttonY = y + row * ITEM_SLOT_SIZE;
+
+            Button itemButton = new UnitItemShopButton(stockedItem);
+            renderButton(guiGraphics, itemButton, buttonX, buttonY, mouseX, mouseY);
+            buttons.add(itemButton);
+
+            i += 1;
+        }
+        return buttons;
+    }
+
+    /** Total panel height needed to fit itemCount items in the grid, plus the header row. */
+    public static int getMenuHeight(int itemCount) {
+        int rows = Math.max(1, (int) Math.ceil(itemCount / (double) ITEMS_PER_ROW));
+        return HEADER_HEIGHT + rows * ITEM_SLOT_SIZE;
+    }
+
+    public static int getMenuWidth() {
+        return MENU_WIDTH;
+    }
+
+    // same helper pattern as CustomBuildingMenu.renderButton(): renders a button unless
+    // hidden, and renders its tooltip when moused over
+    private static void renderButton(GuiGraphics guiGraphics, Button button, int x, int y, int mouseX, int mouseY) {
+        if (!button.isHidden.get()) {
+            button.render(guiGraphics, x, y, mouseX, mouseY);
+            if (button.isMouseOver(mouseX, mouseY) && button.tooltipLines != null)
+                button.renderTooltip(guiGraphics, mouseX, mouseY);
+        }
+    }
+}

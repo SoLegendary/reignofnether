@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.units.piglins;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
@@ -32,7 +33,7 @@ public class GhastProd extends ProductionItem implements UnitProductionItem {
         super(cost);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide())
-                placement.produceUnit((ServerLevel) level, EntityRegistrar.GHAST_UNIT.get(), placement.ownerName, true);
+                placement.produceUnit((ServerLevel) level, EntityRegistrar.GHAST_UNIT.get(), placement.ownerName, false, new Vec3i(0,5,0));
         };
     }
 
@@ -72,7 +73,7 @@ public class GhastProd extends ProductionItem implements UnitProductionItem {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/ghast.png"),
                 hotkey,
                 () -> false,
-                () -> BuildingClientEvents.hasFinishedBuilding(Buildings.FORTRESS),
+                () -> BuildingClientEvents.hasFinishedBuilding(Buildings.FORTRESS) || prodBuilding instanceof CustomBuildingPlacement,
                 tooltipLines,
                 this
         );

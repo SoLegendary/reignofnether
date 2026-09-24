@@ -6,8 +6,8 @@ import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.*;
-import com.solegendary.reignofnether.building.RangeIndicator;
-import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -112,6 +112,9 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
 
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
@@ -426,7 +429,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         }
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }
@@ -456,17 +459,10 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
     @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
-    @Override public void updateHighlightBps() {
+    @Override
+    public void updateHighlightBps(Level level) {
+        RangeIndicator.super.updateHighlightBps(level());
         if (level().isClientSide()) {
-            highlightBps.clear();
-            for (Ability ability : getAbilities().get()) {
-                if (CursorClientEvents.getLeftClickAction() == ability.action) {
-                    setHighlightBps(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(),
-                            (int) (ability.range - 1),
-                            level()
-                    ));
-                }
-            }
             if (isAuraEnabled()) {
                 int radius = MarchOfProgress.RADIUS;
                 this.highlightBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(),
@@ -506,6 +502,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
@@ -555,6 +552,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         this.goalSelector.addGoal(2, attackBuildingGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
+        this.goalSelector.addGoal(2, itemGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.targetSelector.addGoal(3, moveGoal);
     }
@@ -643,7 +641,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public void toggleAura() {
         setAuraEnabled(!isAuraEnabled());
         if (level().isClientSide) {
-            updateHighlightBps();
+            updateHighlightBps(level());
         } else {
             if (isAuraEnabled()) {
                 AbilityClientboundPacket.doAbility(getId(), UnitAction.MARCH_OF_PROGRESS_SET, 1f);

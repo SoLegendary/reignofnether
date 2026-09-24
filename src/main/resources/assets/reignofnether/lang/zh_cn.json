@@ -2041,14 +2041,5 @@
   "matchstart.reignofnether.hint.close": "点击返回以离开 · 按 F12 键以重新进入。",
   "matchstart.reignofnether.settings.title": "游戏设置",
   "matchstart.reignofnether.settings.mode": "模式",
-  "matchstart.reignofnether.settings.op_only": "修改游戏规则需要管理员权限。",
-  "matchstart.reignofnether.gr.lock_alliances": "锁定结盟",
-  "matchstart.reignofnether.gr.coop_mode": "合作模式",
-  "matchstart.reignofnether.gr.allow_beacons": "允许信标取胜",
-  "matchstart.reignofnether.gr.max_population": "最大人口供给：%d（鼠标右击减少）",
-  "matchstart.reignofnether.gr.max_population.tip": "鼠标左击 +10 / 鼠标右击 −10",
-  "matchstart.reignofnether.gr.beacon_win": "信标取胜所需时间：%d 分钟",
-  "matchstart.reignofnether.gr.beacon_win.tip": "鼠标左击 +1 / 鼠标右击 −1",
-  "matchstart.reignofnether.gr.allowed_heroes": "可用的英雄单位：%d",
-  "matchstart.reignofnether.gr.allowed_heroes.tip": "循环切换 0 → 1 → 2"
+  "matchstart.reignofnether.settings.op_only": "修改游戏规则需要管理员权限。"
 }

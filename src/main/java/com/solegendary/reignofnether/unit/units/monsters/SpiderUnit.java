@@ -7,7 +7,7 @@ import com.solegendary.reignofnether.ability.abilities.Eject;
 import com.solegendary.reignofnether.ability.abilities.ToggleSpiderClimbing;
 import com.solegendary.reignofnether.ability.abilities.SpinWebs;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -20,6 +20,7 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.ConvertableUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
@@ -271,7 +272,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
         }
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
         }

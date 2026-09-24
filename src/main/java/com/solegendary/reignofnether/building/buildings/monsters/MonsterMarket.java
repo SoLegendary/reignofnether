@@ -5,6 +5,8 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -18,6 +20,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MonsterMarket extends AbstractMarket {
@@ -41,6 +44,13 @@ public class MonsterMarket extends AbstractMarket {
         this.startingBlockTypes.add(Blocks.POLISHED_DEEPSLATE_SLAB);
         this.startingBlockTypes.add(Blocks.DARK_PRISMARINE_SLAB);
     }
+
+    @Override
+    protected ArrayList<StockedShopItem> getStartingItemsAndStock() {
+        return new ArrayList<>();
+    }
+
+    public Faction getFaction() { return Faction.MONSTERS; }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);

@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -137,10 +137,13 @@ public class CursorClientEvents {
 
         RangeIndicatorAddon hudSelectedRIA;
         if (HudClientEvents.hudSelectedEntity instanceof RangeIndicator ri) {
-            ri.updateHighlightBps();
-        } else if (HudClientEvents.hudSelectedPlacement != null && (hudSelectedRIA = HudClientEvents.hudSelectedPlacement.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
+            ri.updateHighlightBps(MC.level);
+        } else if (HudClientEvents.hudSelectedPlacement != null &&
+                (hudSelectedRIA = HudClientEvents.hudSelectedPlacement.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
             hudSelectedRIA.updateHighlightBps(HudClientEvents.hudSelectedPlacement);
         }
+        if (actionName != null)
+            ItemClientEvents.resetActions();
     }
 
     public static void setLeftClickSandboxAction(SandboxAction actionName) {
@@ -203,7 +206,7 @@ public class CursorClientEvents {
         } else if (leftClickAction != null && leftClickAction.equals(UnitAction.BUILD_REPAIR)) {
             RenderSystem.setShaderTexture(0, TEXTURE_SHOVEL);
             texture = TEXTURE_SHOVEL;
-        } else if (leftClickAction != null || leftClickSandboxAction != null) {
+        } else if (leftClickAction != null || leftClickSandboxAction != null || ItemClientEvents.hasLeftClickAction()) {
             RenderSystem.setShaderTexture(0, TEXTURE_CROSS);
             texture = TEXTURE_CROSS;
             cursorXoffset = -8;

@@ -59,6 +59,7 @@ public class ResourcesServerEvents {
     public static final int STARTING_FOOD_SANDBOX = 999999;
     public static final int STARTING_WOOD_SANDBOX = 999999;
     public static final int STARTING_ORE_SANDBOX = 999999;
+    public static final int STARTING_EMERALD_SANDBOX = 999999;
     public static final int STARTING_FOOD = 150;
     public static final int STARTING_WOOD = 500;
     public static final int STARTING_ORE = 300;
@@ -112,7 +113,7 @@ public class ResourcesServerEvents {
                 r.food + r.foodToAdd + unitFood + prodFood,
                 r.wood + r.woodToAdd + unitWood + prodWood,
                 r.ore + r.oreToAdd + unitOre + prodOre,
-                r.emerald + r.emerald + unitEmerald + prodEmerald
+                r.emerald + r.emeraldToAdd + unitEmerald + prodEmerald
             ));
             //ReignOfNether.LOGGER.info("saved resources in serverevents: " + r.ownerName + "|" + r.food + "|" + r.wood + "|" + r.ore);
         });
@@ -168,6 +169,7 @@ public class ResourcesServerEvents {
                     resources.food = STARTING_FOOD_SANDBOX;
                     resources.wood = STARTING_WOOD_SANDBOX;
                     resources.ore = STARTING_ORE_SANDBOX;
+                    resources.emerald = STARTING_EMERALD_SANDBOX;
                 } else if (readiedStart) {
                     resources.food = STARTING_FOOD_READIED;
                     resources.wood = STARTING_WOOD_READIED;
@@ -464,6 +466,7 @@ public class ResourcesServerEvents {
         FALLING_LOGS.put(Blocks.ACACIA_LOG, BlockRegistrar.FALLING_ACACIA_LOG.get());
         FALLING_LOGS.put(Blocks.DARK_OAK_LOG, BlockRegistrar.FALLING_DARK_OAK_LOG.get());
         FALLING_LOGS.put(Blocks.MANGROVE_LOG, BlockRegistrar.FALLING_MANGROVE_LOG.get());
+        FALLING_LOGS.put(Blocks.CHERRY_LOG, BlockRegistrar.FALLING_CHERRY_LOG.get());
         FALLING_LOGS.put(Blocks.OAK_WOOD, BlockRegistrar.FALLING_OAK_LOG.get());
         FALLING_LOGS.put(Blocks.SPRUCE_WOOD, BlockRegistrar.FALLING_SPRUCE_LOG.get());
         FALLING_LOGS.put(Blocks.BIRCH_WOOD, BlockRegistrar.FALLING_BIRCH_LOG.get());
@@ -471,6 +474,7 @@ public class ResourcesServerEvents {
         FALLING_LOGS.put(Blocks.ACACIA_WOOD, BlockRegistrar.FALLING_ACACIA_LOG.get());
         FALLING_LOGS.put(Blocks.DARK_OAK_WOOD, BlockRegistrar.FALLING_DARK_OAK_LOG.get());
         FALLING_LOGS.put(Blocks.MANGROVE_WOOD, BlockRegistrar.FALLING_MANGROVE_LOG.get());
+        FALLING_LOGS.put(Blocks.CHERRY_WOOD, BlockRegistrar.FALLING_CHERRY_LOG.get());
         FALLING_LOGS.put(Blocks.WARPED_STEM, BlockRegistrar.FALLING_WARPED_STEM.get());
         FALLING_LOGS.put(Blocks.WARPED_HYPHAE, BlockRegistrar.FALLING_WARPED_STEM.get());
         FALLING_LOGS.put(Blocks.CRIMSON_STEM, BlockRegistrar.FALLING_CRIMSON_STEM.get());

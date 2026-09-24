@@ -1,11 +1,14 @@
 package com.solegendary.reignofnether.building.production;
 
 import com.solegendary.reignofnether.ability.HeroAbility;
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.HeroUnitSave;
@@ -17,6 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,11 +42,13 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide()) {
                 HeroUnitSave oldHero = HeroUnit.getFallenHero(false, placement.ownerName, getHeroEntityType().getDescriptionId());
+                if (oldHero == null || !canProduce(level, placement.ownerName))
+                    return;
                 EntityType<? extends HeroUnit> entityType = getHeroEntityType();
                 Entity entity = null;
                 if (entityType != null)
                     entity = placement.produceUnit((ServerLevel) level, entityType, placement.ownerName, true);
-                if (entity instanceof HeroUnit newHero && oldHero != null) {
+                if (entity instanceof HeroUnit newHero) {
                     newHero.setExperience(oldHero.experience);
                     HeroClientboundPacket.setExperience(entity.getId(), oldHero.experience);
                     newHero.setSkillPoints(oldHero.skillPoints);
@@ -66,6 +72,10 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                     }
                     for (HeroAbility abl : newHero.getHeroAbilities())
                         abl.updateStatsForRank(newHero);
+
+                    if (newHero instanceof UnitInventory inv)
+                        for (int i = 0; i < inv.getAllItems().size() && i < oldHero.items.size(); i++)
+                            inv.set(i, oldHero.items.get(i));
                 }
                 HeroServerEvents.fallenHeroes.remove(oldHero);
             } else {
@@ -73,6 +83,34 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                 HeroClientEvents.fallenHeroes.remove(oldHero);
             }
         };
+    }
+
+    @Override
+    @Nullable
+    public String getProduceErrorMsg(Level level, String ownerName) {
+        if (level.isClientSide()) return null;
+
+        String heroName = getHeroEntityType().getDescriptionId();
+        boolean liveHeroOwned = !HeroUnit.getHeroes(level.isClientSide(), ownerName, heroName).isEmpty();
+        boolean fallenHeroOwned = HeroUnit.getFallenHero(level.isClientSide(), ownerName, heroName) != null;
+
+        if (liveHeroOwned)
+            return "hud.hero.reignofnether.error.duplicate";
+
+        if (!fallenHeroOwned)
+            return "hud.hero.reignofnether.error.no_dead_hero";
+
+        int allowedHeroes = level.getGameRules().getInt(GameRuleRegistrar.ALLOWED_HEROES);
+        int liveHeroes = HeroUnit.getHeroes(level.isClientSide(), ownerName, heroName).size();
+        int trainingHeroes = HeroUnit.getHeroesInTraining(level.isClientSide(), ownerName).size();
+        if ((liveHeroes + trainingHeroes) >= allowedHeroes)
+            return "hud.hero.reignofnether.error.too_many_heroes";
+
+        return null;
+    }
+
+    public String getItemName() {
+        return itemName;
     }
 
     // can't make this a member as we can't refer to other registered objects at init time
@@ -90,7 +128,6 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
 
     @Override
     public ResourceCost getCost(boolean isClientSide, String ownerName) {
-        ArrayList<HeroUnitSave> heroSaves = isClientSide ? HeroClientEvents.fallenHeroes : HeroServerEvents.fallenHeroes;
         HeroUnitSave heroSave = HeroUnit.getFallenHero(isClientSide, ownerName, getHeroEntityType().getDescriptionId());
         if (heroSave != null)
             return HeroUnit.getReviveCost(HeroUnit.getHeroLevel(heroSave.experience));

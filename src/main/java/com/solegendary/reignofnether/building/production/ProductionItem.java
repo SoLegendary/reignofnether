@@ -17,17 +17,22 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.BiConsumer;
 
 // units and/or research tech that a ProductionBuilding can produce
 public abstract class ProductionItem {
 
-    public static String itemName;
-
     public ResourceCost defaultCost;
     public BiConsumer<Level, ProductionPlacement> onComplete;
     public ProdDupeRule dupeRule;
+
+    public ProductionItem(ResourceCost cost, ProdDupeRule dupeRule, BiConsumer<Level, ProductionPlacement> onComplete) {
+        this.defaultCost = cost;
+        this.dupeRule = dupeRule;
+        this.onComplete = onComplete;
+    }
 
     public ProductionItem(ResourceCost cost, ProdDupeRule dupeRule) {
         this.defaultCost = cost;
@@ -39,14 +44,22 @@ public abstract class ProductionItem {
         this.dupeRule = ProdDupeRule.ALLOW;
     }
 
+    // is the player allowed to start this production item?
+    public boolean canProduce(Level level, String ownerName) {
+        return getProduceErrorMsg(level, ownerName) == null;
+    }
+
+    @Nullable
+    public String getProduceErrorMsg(Level level, String ownerName) {
+        return null;
+    }
+
     // allows for dynamic costs in subclasses
     public ResourceCost getCost(boolean isClientSide, String ownerName) {
         return defaultCost;
     }
 
-    public String getItemName() {
-        return itemName;
-    }
+    public abstract String getItemName();
 
     public boolean canAfford(ProductionPlacement pp) {
         for (Resources resources : ResourcesServerEvents.resourcesList)
@@ -184,14 +197,12 @@ public abstract class ProductionItem {
             if (active.ticksLeft < 0)
                 active.ticksLeft = 0;
         }
-        if (active.ticksLeft <= 0 && isBelowPopulationSupply(placement)) {
-            this.recordScore(placement);
-            if (!active.completed) {
-                onComplete.accept(placement.getLevel(), placement);
-                active.completed = true;
-                return true;
-            }
+        if (!placement.level.isClientSide() && active.ticksLeft <= 0 && isBelowPopulationSupply(placement) && !active.completed) {
+            active.complete(placement);
+            return true;
         }
         return false;
     }
+
+
 }

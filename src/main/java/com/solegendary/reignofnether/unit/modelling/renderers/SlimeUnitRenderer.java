@@ -7,6 +7,7 @@ package com.solegendary.reignofnether.unit.modelling.renderers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import net.minecraft.client.model.SlimeModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -21,7 +22,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class SlimeUnitRenderer extends MobRenderer<SlimeUnit, SlimeModel<SlimeUnit>> {
-    private static final ResourceLocation SLIME_LOCATION = new ResourceLocation("textures/entity/slime/slime.png");
+    private static final ResourceLocation SLIME_LOCATION = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/slime/slime.png");
 
     public SlimeUnitRenderer(EntityRendererProvider.Context p_174391_) {
         super(p_174391_, new SlimeModel(p_174391_.bakeLayer(ModelLayers.SLIME)), 0.25F);

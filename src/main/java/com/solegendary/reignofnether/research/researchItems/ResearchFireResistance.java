@@ -28,9 +28,7 @@ public class ResearchFireResistance extends ProductionItem {
     public ResearchFireResistance() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_FIRE_RESISTANCE);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_FIRE_RESISTANCE);
             }
         };

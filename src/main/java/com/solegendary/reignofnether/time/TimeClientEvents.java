@@ -45,7 +45,8 @@ public class TimeClientEvents {
     // setting this value causes the time of day to smoothly move towards it regardless of the server time
     public static long targetClientTime = 0;
     // actual time on the server
-    public static long serverTime = 0;
+    public static long serverNormDayTime = 0;
+    public static long serverGameTime = 0;
 
     public static boolean showClockTooltip = false;
 
@@ -192,21 +193,21 @@ public class TimeClientEvents {
 
             // 'day' is when undead start burning, ~500
             // 'night' is when undead stop burning, ~12500
-            boolean isDay = isDay(serverTime);
-            String timeStr = get12HourTimeStr(serverTime);
+            boolean isDay = isDay(serverNormDayTime);
+            String timeStr = get12HourTimeStr(serverNormDayTime);
 
             FormattedCharSequence timeUntilStr =
                 FormattedCharSequence.forward(
                     isDay ? I18n.get("time.reignofnether.time_until_night",
-                        getTimeUntilStr(serverTime, DUSK)) :
+                        getTimeUntilStr(serverNormDayTime, DUSK)) :
                         I18n.get("time.reignofnether.time_until_day",
-                        getTimeUntilStr(serverTime, DAWN)),
+                        getTimeUntilStr(serverNormDayTime, DAWN)),
                     Style.EMPTY);
 
             ArrayList<FormattedCharSequence> tooltip = new ArrayList<>();
 
             if (!showClockTooltip) {
-                if (targetClientTime != serverTime) {
+                if (targetClientTime != serverNormDayTime) {
                     tooltip.add(FormattedCharSequence.forward(I18n.get("time.reignofnether.time_is_distorted"), Style.EMPTY.withBold(true)));
                     tooltip.add(FormattedCharSequence.forward(I18n.get("time.reignofnether.real_time", timeStr), Style.EMPTY));
                 } else {
@@ -218,7 +219,7 @@ public class TimeClientEvents {
             if (SurvivalClientEvents.isEnabled) {
                 long timeOffset = -getWaveSurvivalTimeModifier(SurvivalClientEvents.difficulty);
                 tooltip.add(FormattedCharSequence.forward(I18n.get("time.reignofnether.time_until_next_wave",
-                        getTimeUntilStrWithOffset(serverTime, DUSK, isDay ? 0 : timeOffset)), Style.EMPTY));
+                        getTimeUntilStrWithOffset(serverNormDayTime, DUSK, isDay ? 0 : timeOffset)), Style.EMPTY));
             }
 
             if (PlayerClientEvents.isRTSPlayer() && !SurvivalClientEvents.isEnabled) {

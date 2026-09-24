@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractFarm;
@@ -24,6 +25,8 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -46,6 +49,7 @@ import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.UnitActionServerboundPacket;
 import com.solegendary.reignofnether.unit.packets.UnitSyncServerboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.neutral.PolarBearUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
@@ -224,10 +228,15 @@ public class UnitClientEvents {
     public static int getCurrentPopulation(String playerName) {
         int currentPopulation = 0;
         if (MC.level != null) {
+            List<Integer> allUnitIds = allUnits.stream().map(Entity::getId).toList();
             for (LivingEntity entity : allUnits) {
                 if (entity instanceof Unit unit)
                     if (unit.getOwnerName().equals(playerName))
                         currentPopulation += unit.getCost().population;
+            }
+            for (VirtualUnit virtualUnit : MinimapClientEvents.virtualUnits) {
+                if (virtualUnit.ownerName.equals(playerName) && !allUnitIds.contains(virtualUnit.id))
+                    currentPopulation += virtualUnit.population;
             }
             for (BuildingPlacement building : BuildingClientEvents.getBuildings())
                 if (building.ownerName.equals(playerName))
@@ -405,9 +414,36 @@ public class UnitClientEvents {
     }
 
     private static void doResolveMoveAction() {
+        // open shop
+        if (ItemClientEvents.ENABLED && HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
+                BuildingClientEvents.getPreselectedBuilding() instanceof ItemShopPlacement itemShop && MC.player != null &&
+                itemShop.isBuilt && !itemShop.getStockedItems().isEmpty()) {
+            unit.getCheckpoints().clear();
+            unit.getCheckpoints().add(new Checkpoint(BuildingClientEvents.getPreselectedBuilding().centrePos, true));
+
+            ItemServerboundPacket.openShop(
+                    HudClientEvents.hudSelectedEntity.getId(),
+                    BuildingClientEvents.getPreselectedBuilding().originPos
+            );
+            return;
+        }
+        // pickup item
+        else if (HudClientEvents.hudSelectedEntity instanceof Unit unit && unit.getItemGoal() != null &&
+                !ItemClientEvents.getPreselectedItems().isEmpty() && MC.player != null) {
+            unit.getCheckpoints().clear();
+            unit.getCheckpoints().add(new Checkpoint(ItemClientEvents.getPreselectedItems().get(0), true));
+
+            if (ItemClientEvents.ENABLED) {
+                ItemServerboundPacket.pickup(
+                        HudClientEvents.hudSelectedEntity.getId(),
+                        ItemClientEvents.getPreselectedItems().get(0).getId()
+                );
+                return;
+            }
+        }
         // follow friendly unit
         if (preselectedUnits.size() == 1 && !targetingSelf()) {
-            if (hudSelectedEntity instanceof WitchUnit witchUnit) {
+            if (hudSelectedEntity instanceof WitchUnit) {
                 sendUnitCommand(UnitAction.THROW_LINGERING_REGEN_POTION);
             } else {
                 sendUnitCommand(UnitAction.FOLLOW);
@@ -444,21 +480,26 @@ public class UnitClientEvents {
      * Update data on a unit from serverside, mainly to ensure unit HUD data is up-to-date
      * Only try to update health and pos if out of view
      */
-    public static void syncUnitStats(int entityId, float health, float absorb, Vec3 pos, String ownerName) {
+    public static void syncUnitStats(int entityId, float health, float absorb, Vec3 pos, String ownerName, int population) {
+        if (MC.level == null)
+            return;
+        boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
+
         for (LivingEntity entity : allUnits) {
-            if (entity.getId() == entityId && MC.level != null) {
-                boolean isLoadedClientside = MC.level.getEntity(entityId) != null;
+            if (entity.getId() == entityId) {
                 if (!isLoadedClientside) {
                     entity.setHealth(health);
                     entity.setPos(pos);
-                    // if the unit doesn't exist at all clientside, create a MinimapUnit to at least track its minimap position
-                    MinimapClientEvents.syncMinimapUnits(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), entityId, ownerName);
-                } else {
-                    MinimapClientEvents.removeMinimapUnit(entityId);
                 }
                 entity.setAbsorptionAmount(absorb);
                 return;
             }
+        }
+        // if the unit doesn't exist at all clientside, create a VirtualUnit to track its minimap position and population usage
+        if (!isLoadedClientside) {
+            MinimapClientEvents.syncVirtualUnits(new BlockPos((int) pos.x, (int) pos.y, (int) pos.z), entityId, ownerName, population);
+        } else {
+            MinimapClientEvents.removeVirtualUnit(entityId);
         }
     }
 
@@ -585,7 +626,7 @@ public class UnitClientEvents {
         //System.out.println("preselectedUnits removed entity: " + entityId);
         allUnits.removeIf(e -> e.getId() == entityId);
         //System.out.println("allUnits removed entity: " + entityId);
-        MinimapClientEvents.removeMinimapUnit(entityId);
+        MinimapClientEvents.removeVirtualUnit(entityId);
         markSelectedUnitsChanged();
     }
     /**
@@ -615,6 +656,7 @@ public class UnitClientEvents {
                 HeroServerboundPacket.requestHeroSync(entity.getId());
         }
         markSelectedUnitsChanged();
+        MinimapClientEvents.removeVirtualUnit(entity.getId());
     }
 
     @SuppressWarnings("SequencedCollectionMethodCanBeUsed")
@@ -723,7 +765,9 @@ public class UnitClientEvents {
                     NonUnitClientEvents.canControlAllMobs())) {
                         addSelectedUnit(preselectedUnits.get(0));
                 }
-                else if (!deselected) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
+                else if (!deselected &&
+                        CursorClientEvents.getLeftClickAction() == null &&
+                        !ItemClientEvents.hasLeftClickAction()) { // select a single unit - this should be the only code path that allows you to select a non-owned unit
                     clearSelectedUnits();
                     addSelectedUnit(preselectedUnits.get(0));
                 }
@@ -982,54 +1026,56 @@ public class UnitClientEvents {
                     }
                 }
             } else if (evt.getStage() == AFTER_CUTOUT_BLOCKS) {
-                var selectedEntityIds = new HashSet<>();
-                for (LivingEntity selectedUnit : selectedUnits) {
-                    Integer id = selectedUnit.getId();
-                    selectedEntityIds.add(id);
-                }
-                var vc = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_UNDER_ENTITIES);
-
-                for (LivingEntity entity : allUnits) {
-                    if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
-                            entity.isPassenger())
-                        continue;
-
-                    float alpha = 0.5f;
-                    if (selectedEntityIds.contains(entity.getId()))
-                        alpha = 1.0f;
-
-                    // draw only the bottom of the outline boxes
-                    AABB entityAABB = entity.getBoundingBox();
-                    if (entity instanceof Unit unit) {
-                        entityAABB = unit.getInflatedSelectionBox();
+                if (MinimapClientEvents.shouldUnderline()) {
+                    var selectedEntityIds = new HashSet<>();
+                    for (LivingEntity selectedUnit : selectedUnits) {
+                        Integer id = selectedUnit.getId();
+                        selectedEntityIds.add(id);
                     }
-                    entityAABB = entityAABB.setMaxY(entityAABB.minY);
-                    boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
+                    var vc = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_UNDER_ENTITIES);
 
-                    Color colorHex;
-                    if (entity instanceof Unit unit) {
-                        if (PlayerClientEvents.isRTSPlayer(unit.getOwnerName())) {
-                            colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(unit.getOwnerName()));
-                        } else {
-                            colorHex = new Color(PlayerColors.COLOR_GRAY.hexCode, false);
+                    for (LivingEntity entity : allUnits) {
+                        if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
+                                entity.isPassenger())
+                            continue;
+
+                        float alpha = 0.5f;
+                        if (selectedEntityIds.contains(entity.getId()))
+                            alpha = 1.0f;
+
+                        // draw only the bottom of the outline boxes
+                        AABB entityAABB = entity.getBoundingBox();
+                        if (entity instanceof Unit unit) {
+                            entityAABB = unit.getInflatedSelectionBox();
                         }
-                    } else {
-                        colorHex = new Color(0xFFFFFF, false);
+                        entityAABB = entityAABB.setMaxY(entityAABB.minY);
+                        boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
+
+                        Color colorHex;
+                        if (entity instanceof Unit unit) {
+                            if (PlayerClientEvents.isRTSPlayer(unit.getOwnerName())) {
+                                colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(unit.getOwnerName()));
+                            } else {
+                                colorHex = new Color(PlayerColors.COLOR_GRAY.hexCode, false);
+                            }
+                        } else {
+                            colorHex = new Color(0xFFFFFF, false);
+                        }
+
+                        float r = colorHex.getRed() / 255.0f;
+                        float g = colorHex.getGreen() / 255.0f;
+                        float b = colorHex.getBlue() / 255.0f;
+
+                        // always-shown highlights to indicate unit relationships
+                        if (OrthoviewClientEvents.isEnabled()) {
+                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
+                        }
+
+                        MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);
                     }
-
-                    float r = colorHex.getRed() / 255.0f;
-                    float g = colorHex.getGreen() / 255.0f;
-                    float b = colorHex.getBlue() / 255.0f;
-
-                    // always-shown highlights to indicate unit relationships
-                    if (OrthoviewClientEvents.isEnabled()) {
-                        MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
-                    }
-
-                    MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);
+                    MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack(), vc);
+                    MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
                 }
-                MinimapClientEvents.highlightNeutralFogUnits(evt.getPoseStack(), vc);
-                MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
             }
 
             // render items in front of face for eating units
@@ -1388,6 +1434,8 @@ public class UnitClientEvents {
                     entity instanceof RavagerUnit ||
                     entity instanceof WardenUnit) {
                     entity.handleEntityEvent((byte) 4);
+                } else if (entity instanceof PolarBearUnit polarBearUnit) {
+                    polarBearUnit.doAttackAnimationAndSound();
                 }
             }
         }

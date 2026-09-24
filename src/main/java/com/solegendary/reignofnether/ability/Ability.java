@@ -31,6 +31,10 @@ public class Ability {
     public boolean isAutocasting(BuildingPlacement placement) { return placement.hasAutocast(this); }
     protected Keybinding defaultHotkey = Keybindings.abilitySlot1;
 
+    public boolean showRangeLine = false;
+    public boolean showRadiusCircle = false;
+    public boolean showRangeCircle = true;
+
     public Ability(UnitAction action, int cooldownMax, float range, float radius, boolean canTargetEntities) {
         this.action = action;
         this.cooldownMax = cooldownMax;

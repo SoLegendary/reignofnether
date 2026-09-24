@@ -114,6 +114,9 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
+
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
@@ -551,6 +554,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
@@ -590,6 +594,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         this.goalSelector.addGoal(2, attackBuildingGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
+        this.goalSelector.addGoal(2, itemGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.targetSelector.addGoal(3, moveGoal);
     }

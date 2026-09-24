@@ -26,7 +26,9 @@ public class ProductionItemList {
         List<Button> buttons = new ArrayList<>();
         if (FMLEnvironment.dist == Dist.CLIENT) {
             for (Map.Entry<ProductionItem, Keybinding> production : productions.entrySet()) {
-                buttons.add(production.getKey().getStartButton(placement, production.getValue()));
+                StartProductionButton button = production.getKey().getStartButton(placement, production.getValue());
+                if (button != null)
+                    buttons.add(button);
             }
         }
         return buttons;

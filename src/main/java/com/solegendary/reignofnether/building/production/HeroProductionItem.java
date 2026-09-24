@@ -4,17 +4,17 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -29,15 +29,31 @@ public abstract class HeroProductionItem extends ProductionItem {
         this.dupeRule = ProdDupeRule.DISALLOW;
         this.onComplete = (Level level, ProductionPlacement placement) -> {
             if (!level.isClientSide()) {
-                int heroesOwned = HeroUnit.getNumHeroesOwnedOrInTraining(false, placement.ownerName);
-                if (heroesOwned < GameruleClient.allowedHeroes &&
-                    (heroesOwned == 0 || BuildingUtils.castleOwned(false, placement.ownerName))) {
+                if (canProduce(level, placement.ownerName)) {
                     placement.produceUnit((ServerLevel) level, getHeroEntityType(), placement.ownerName, true);
                 }
             }
         };
         this.itemName = itemName;
         this.iconRl = iconRl;
+    }
+
+    @Override
+    @Nullable
+    public String getProduceErrorMsg(Level level, String ownerName) {
+        if (level.isClientSide()) return null;
+
+        if (heroOwned(level.isClientSide(), ownerName))
+            return "hud.hero.reignofnether.error.duplicate";
+
+        int allowedHeroes = level.getGameRules().getInt(GameRuleRegistrar.ALLOWED_HEROES);
+        if (!BuildingUtils.castleOwned(level.isClientSide(), ownerName)) {
+            allowedHeroes = Math.min(1, allowedHeroes);
+        }
+        if (HeroUnit.getNumHeroesOwnedOrInTraining(level.isClientSide(), ownerName) >= allowedHeroes)
+            return "hud.hero.reignofnether.error.too_many_heroes";
+
+        return null;
     }
 
     public String getItemName() {

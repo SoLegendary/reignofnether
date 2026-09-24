@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.ability.heroAbilities.wildfire.IntenseHeatP
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.MoltenBomb;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.SoulsAflame;
-import com.solegendary.reignofnether.building.RangeIndicator;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.entities.MoltenBombProjectile;
@@ -118,6 +118,9 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
+
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
 
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
@@ -403,7 +406,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
         if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
             if (!lastOnPos.equals(getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
-                updateHighlightBps();
+                updateHighlightBps(level());
             }
             lastOnPos = getOnPos();
             lastCursorPos = CursorClientEvents.getPreselectedBlockPos();
@@ -464,24 +467,6 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
     @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
-    @Override public void updateHighlightBps() {
-        if (!level().isClientSide())
-            return;
-        this.highlightBps.clear();
-        if (CursorClientEvents.getLeftClickAction() == UnitAction.MOLTEN_BOMB) {
-            BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(getOnPos(), CursorClientEvents.getPreselectedBlockPos(), MoltenBomb.RANGE);
-            for (BlockPos pos : MiscUtil.getLine2D(getOnPos(), limitedBp)) {
-                this.highlightBps.add(MiscUtil.getHighestGroundBlock(level(), pos).above());
-            }
-            this.highlightBps.addAll(MiscUtil.getRangeIndicatorFilledCircleBlocks(limitedBp, (int) getMoltenBomb().radius - 1, level()));
-        } else if (CursorClientEvents.getLeftClickAction() == UnitAction.SCORCHING_GAZE) {
-            setHighlightBps(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(),
-                    ScorchingGaze.RANGE - 1,
-                    level()
-            ));
-        }
-    }
-
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
@@ -511,6 +496,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new UnitRangedAttackGoal<>(this, ATTACK_WINDUP_TICKS);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
         this.castMoltenBombGoal = new GenericTargetedSpellGoal(
@@ -577,6 +563,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, garrisonGoal);
+        this.goalSelector.addGoal(2, itemGoal);
         this.targetSelector.addGoal(2, targetGoal);
         this.goalSelector.addGoal(3, moveGoal);
     }

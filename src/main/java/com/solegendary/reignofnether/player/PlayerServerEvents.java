@@ -77,6 +77,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static com.solegendary.reignofnether.building.BuildingServerEvents.random;
 import static com.solegendary.reignofnether.building.BuildingServerEvents.saveBuildings;
 import static com.solegendary.reignofnether.time.TimeUtils.getWaveSurvivalTimeModifier;
 import static net.minecraft.world.level.GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK;
@@ -370,7 +371,7 @@ public class PlayerServerEvents {
             PlayerClientboundPacket.removeRTSPlayer(playerName);
         }
         for (RTSPlayer rtsPlayer : rtsPlayers) {
-            PlayerClientboundPacket.addRTSPlayer(rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id, rtsPlayer.startPosColorId);
+            PlayerClientboundPacket.addRTSPlayer(rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id, rtsPlayer.startPosColorId, rtsPlayer.isDogPerson);
         }
 
         if (rtsLocked) {
@@ -436,9 +437,11 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 return;
             }
+            boolean isDogPerson = random.nextBoolean();
 
             EntityType<?> workerEntityType = ForgeRegistries.ENTITY_TYPES.getValue(faction.workerEntityType);
 	        EntityType<?> scoutEntityType = ForgeRegistries.ENTITY_TYPES.getValue(faction.scoutEntityType);
+			if (faction.equals(Factions.VILLAGERS) && !isDogPerson) scoutEntityType = EntityRegistrar.SCOUT_CAT_UNIT.get()
             // first RTS join into a fresh game: snapshot the playable area for late joiners
             if (rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
                 FogChunkSnapshot.captureFogChunks((ServerLevel) serverPlayer.level());
@@ -448,14 +451,15 @@ public class PlayerServerEvents {
             }
             rtsPlayers.add(RTSPlayer.getNewPlayer(
                     serverPlayer.getName().getString(),
-	            faction,
+                    faction,
                     serverPlayer.getId(),
-                    startPosColorId
+                    startPosColorId,
+                    isDogPerson
             ));
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignResources(playerName);
-            PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId);
+            PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId, isDogPerson);
 
             ServerLevel level = (ServerLevel) serverPlayer.level();
             ArrayList<Entity> startingWorkers = new ArrayList<>();
@@ -656,7 +660,7 @@ public class PlayerServerEvents {
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignScenarioResources(rtsPlayer);
-            PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0);
+            PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0, true);
 
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building.scenarioRoleIndex == roleIndex) {

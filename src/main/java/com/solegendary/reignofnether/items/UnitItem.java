@@ -1,20 +1,25 @@
 package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
-import com.solegendary.reignofnether.hud.buttons.UnitItemButton;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 // items that can be held and used by RTS units, especially heroes
 // they are still registered as actual Minecraft items
@@ -27,78 +32,112 @@ import java.util.List;
 
 // construct via UnitItemBuilder, eg. UnitItemBuilder.of(Items.IRON_SWORD).sellValue(25).build()
 
-public abstract class UnitItem {
+public abstract class UnitItem implements RangeIndicator {
+
+    public static final boolean ENABLED = false;
+
+    public static final String RON$COOLDOWN_KEY = "reignofnether:CooldownEndTick";
 
     protected final Item item;
+    public final int defaultStackCount;
+    public final UUID uuid;
     public final ResourceLocation iconRl;
     public final UnitItemType type;
     public final int sellValue;
-    public final String descKey;
+    public final int buyCost;
+    public final String desc;
     public final Keybinding hotkey;
     public boolean enableTooltip;
-
     protected final List<Pair<Enchantment, Integer>> enchantments;
-    protected final List<String> pointKeys;
+    protected final List<String> pointDescs;
+    public final HashMap<Attribute, AttributeModifier> attributes;
+    public BiPredicate<Unit, BlockPos> onUseGround;
+    public BiPredicate<Unit, LivingEntity> onUseEntity;
+    public BiPredicate<Unit, BuildingPlacement> onUseBuilding;
+    public Predicate<Unit> onUse;
+    public final boolean consumeOnUse;
+    public int manaCost;
+    public int cooldownTicksMax;
+    public int channelTicks;
+    public float range;
+    public float radius;
+    public boolean showRangeCircle;
+    public boolean showRangeLine;
+    public boolean showRadiusCircle;
+    public boolean suppressDefaultError;
 
-    private final boolean canUnitPickup;
-    private final boolean canUnitAutopickup;
+    private Set<BlockPos> highlightBps = new HashSet<>();
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
 
     protected UnitItem(UnitItemBuilder builder) {
         this.item = builder.item;
+        this.defaultStackCount = builder.defaultStackCount;
+        this.uuid = builder.uuid;
         this.iconRl = builder.iconRl;
         this.type = builder.type;
         this.sellValue = builder.sellValue;
-        this.descKey = builder.descKey;
+        this.buyCost = builder.buyCost;
+        this.desc = builder.desc;
         this.hotkey = builder.hotkey;
         this.enchantments = List.copyOf(builder.enchantments);
-        this.pointKeys = List.copyOf(builder.pointKeys);
-        this.canUnitPickup = builder.canUnitPickup;
-        this.canUnitAutopickup = builder.canUnitAutopickup;
+        this.pointDescs = List.copyOf(builder.pointDescs);
         this.enableTooltip = builder.enableTooltip;
+        this.attributes = builder.attributes;
+        this.onUseGround = builder.onUseGround;
+        this.onUseEntity = builder.onUseEntity;
+        this.onUseBuilding = builder.onUseBuilding;
+        this.onUse = builder.onUse;
+        this.consumeOnUse = builder.consumeOnUse;
+        this.manaCost = builder.manaCost;
+        this.cooldownTicksMax = builder.cooldownTicksMax;
+        this.channelTicks = builder.channelTicks;
+        this.range = builder.range;
+        this.radius = builder.radius;
+        this.showRangeCircle = builder.showRangeCircle;
+        this.showRangeLine = builder.showRangeLine;
+        this.showRadiusCircle = builder.showRadiusCircle;
+        this.suppressDefaultError = builder.suppressDefaultError;
     }
 
     public Item getItem() {
         return item;
     }
 
-    public UnitItemButton getButton(int index, ItemStack itemStack, Unit unit) {
-        return new UnitItemButton(index, this, itemStack, unit);
+    public ItemStack getNewItemStack() {
+        ItemStack itemStack = new ItemStack(item);
+        for (Pair<Enchantment, Integer> pair : enchantments) {
+            itemStack.enchant(pair.getFirst(), pair.getSecond());
+        }
+        itemStack.getOrCreateTag().putUUID("uuid", UUID.randomUUID());
+        itemStack.setCount(defaultStackCount);
+        return itemStack;
+    }
+
+    public UnitItemInventoryButton getInventoryButton(int index, ItemStack itemStack, Unit unit, Keybinding hotkey) {
+        return new UnitItemInventoryButton(index, this, itemStack, unit, hotkey);
     }
 
     public Component getName() {
         return new ItemStack(item).getHoverName();
     }
 
-    @Nullable
     public String getDescription() {
-        return descKey.isBlank() ? null : I18n.get(descKey);
+        return desc;
     }
 
     /** One string per bullet in the tooltip's passive stat list. */
-    public List<String> getPointLines() {
+    public List<String> getPointDescs() {
         List<String> lines = new ArrayList<>();
-        for (String key : pointKeys)
-            lines.add(I18n.get(key));
+        for (String desc : pointDescs)
+            if (!desc.isBlank())
+                lines.add(desc);
         return lines;
     }
 
-    public boolean canUnitPickup() {
-        return canUnitPickup;
-    }
-
-    // usually for stuff like resources and piglin merchant loot
-    public boolean canUnitAutopickup() {
-        return canUnitAutopickup;
-    }
-
-    // legacy flat tooltip; UnitItemButton renders the banded tooltip instead
-    public List<FormattedCharSequence> getTooltip(ItemStack itemStack) {
+    // tooltip rendered when mousing over a ground item entity
+    public List<FormattedCharSequence> getEntityTooltip(ItemStack itemStack) {
         return List.of();
     }
-
-    // TODO:
-    // - onUse() // (on left click release)
-    // - getAttributeModifiers()
-
-
 }

@@ -36,6 +36,7 @@ import com.solegendary.reignofnether.fogofwar.FrozenChunkClientboundPacket;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
@@ -404,8 +405,14 @@ public class BuildingPlacement {
 
     public boolean isPosInsideBuilding(BlockPos bp) {
         return bp.getX() <= this.maxCorner.getX() && bp.getX() >= this.minCorner.getX()
-               && bp.getY() <= this.maxCorner.getY() && bp.getY() >= this.minCorner.getY()
-               && bp.getZ() <= this.maxCorner.getZ() && bp.getZ() >= this.minCorner.getZ();
+            && bp.getY() <= this.maxCorner.getY() && bp.getY() >= this.minCorner.getY()
+            && bp.getZ() <= this.maxCorner.getZ() && bp.getZ() >= this.minCorner.getZ();
+    }
+
+    public boolean isPosInsideBuilding(BlockPos bp, int edgeModifier) {
+        return bp.getX() <= this.maxCorner.getX() + edgeModifier && bp.getX() >= this.minCorner.getX() - edgeModifier
+            && bp.getY() <= this.maxCorner.getY() + edgeModifier && bp.getY() >= this.minCorner.getY() - edgeModifier
+            && bp.getZ() <= this.maxCorner.getZ() + edgeModifier && bp.getZ() >= this.minCorner.getZ() - edgeModifier;
     }
 
     public boolean isPosPartOfBuilding(BlockPos bp, boolean onlyPlacedBlocks) {
@@ -421,6 +428,7 @@ public class BuildingPlacement {
         return getClosestGroundPos(bpTarget, radiusOffset, false);
     }
     public BlockPos getClosestGroundPos(BlockPos bpTarget, int radiusOffset, boolean avoidAllBuildings) {
+        radiusOffset = Math.max(1, radiusOffset);
         float minDist = 999999;
         BlockPos minPos = this.minCorner;
         int minX = minPos.getX() - radiusOffset;
@@ -749,11 +757,15 @@ public class BuildingPlacement {
     private void awardBounty() {
         if (lastAttacker instanceof Unit unit && !unit.getOwnerName().isEmpty()) {
             ResourceCost cost = building.cost;
-            Resources resources = new Resources(unit.getOwnerName(),
-                (int) (cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT),
-                (int) (cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT),
-                (int) (cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT)
-            );
+            Resources resources;
+            int food = (int) (cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT);
+            int wood = (int) (cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT);
+            int ore =  (int) (cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT);
+            if (ItemServerEvents.ENABLED) {
+                resources = Resources.emeralds(unit.getOwnerName(), food + wood + ore);
+            } else {
+                resources = new Resources(unit.getOwnerName(), food, wood, ore);
+            }
             if (resources.getTotalValue() > 0) {
                 ResourcesClientboundPacket.showFloatingText(resources, centrePos);
                 ResourcesServerEvents.addSubtractResources(resources);
@@ -943,11 +955,14 @@ public class BuildingPlacement {
         }
 
         // check and do animal spawns around capitols for consistent hunting sources
-        if (isCapitol && isBuilt) {
+        if (!this.level.isClientSide() && isCapitol && isBuilt) {
             ticksToSpawnAnimals += 1;
             if (ticksToSpawnAnimals >= ticksToSpawnAnimalsMax) {
                 ticksToSpawnAnimals = 0;
-                spawnHuntableAnimalsNearby(animalSpawnBlockRange);
+                if (FogOfWarServerEvents.isEnabled())
+                    spawnHuntableAnimalsNearby(animalSpawnBlockRange / 2);
+                else
+                    spawnHuntableAnimalsNearby(animalSpawnBlockRange);
             }
         }
         if (isBuilt) {
@@ -1053,7 +1068,7 @@ public class BuildingPlacement {
             buildNextBlock();
         }
         if (isBuilt && tickAgeAfterBuilt % 10 == 0 && getBuilding().capturable) {
-            checkIfCaptured(serverLevel);
+            checkAndDoCapture(serverLevel);
         }
     }
 
@@ -1170,6 +1185,7 @@ public class BuildingPlacement {
             }
         } while (!spawnBs.isSolid()
                  || spawnBs.getBlock() == Blocks.BARRIER
+                 || spawnBs.getBlock() == Blocks.OBSIDIAN
                  || spawnBs.is(BlockTags.PLANKS)
                  || ResourceSources.getBlockResourceName(spawnBp, level) != ResourceName.NONE
                  || spawnBp.distSqr(centrePos) < animalSpawnRangeMin * animalSpawnRangeMin
@@ -1249,9 +1265,11 @@ public class BuildingPlacement {
         ArrayList<BuildingBlock> newBlocks = BuildingBlockData.getBuildingBlocksFromNbt(newStructureName, this.getLevel());
         setBlocks(getAbsoluteBlockData(newBlocks, this.getLevel(), originPos, rotation));
         refreshBlocks();
+        if (!level.isClientSide())
+            BuildingClientboundPacket.changeStructure(originPos, newStructureName);
     }
 
-    protected boolean checkIfCaptured(ServerLevel serverLevel) {
+    protected boolean checkAndDoCapture(ServerLevel serverLevel) {
         if (PlayerServerEvents.rtsPlayers.isEmpty())
             return false;
 

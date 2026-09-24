@@ -348,7 +348,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
         Item item = itemStack.getItem();
         return item == Items.NETHERITE_CHESTPLATE &&
                 !hasItemInSlot(EquipmentSlot.CHEST) &&
-                !(this.getName().getString().contains("armoured"));
+                !(this instanceof ArmouredHoglinUnit);
     }
 
     @Override

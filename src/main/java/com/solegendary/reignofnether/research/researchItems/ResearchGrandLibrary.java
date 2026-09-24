@@ -27,7 +27,7 @@ public class ResearchGrandLibrary extends ProductionItem {
     public ResearchGrandLibrary() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (placement.getBuilding() instanceof Library)
+            if (!level.isClientSide() && placement.getBuilding() instanceof Library)
                 placement.changeStructure(Library.upgradedStructureName);
         };
     }

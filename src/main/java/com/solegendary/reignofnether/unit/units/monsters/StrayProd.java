@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.GraveyardPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.*;
@@ -61,7 +62,7 @@ public class StrayProd extends GraveyardUnitProductionItem implements UnitProduc
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/stray.png"),
             hotkey,
             () -> false,
-            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS),
+            () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_STRAYS) || prodBuilding instanceof CustomBuildingPlacement,
             List.of(
                 Component.translatable("entity.reignofnether.stray_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),

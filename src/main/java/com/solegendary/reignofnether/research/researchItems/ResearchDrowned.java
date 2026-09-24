@@ -35,9 +35,7 @@ public class ResearchDrowned extends ProductionItem {
     public ResearchDrowned() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
-                ResearchClient.addResearch(placement.ownerName, ProductionItems.RESEARCH_DROWNED);
-            } else {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_DROWNED);
 
                 // convert all zombies into drowned with the same stats/inventory/etc.

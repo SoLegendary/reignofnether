@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.unit.units.neutral.PandaUnit;
 import net.minecraft.world.entity.Mob;
 
 public class MeleeAttackUnitGoal extends AbstractMeleeAttackUnitGoal {
@@ -22,6 +23,11 @@ public class MeleeAttackUnitGoal extends AbstractMeleeAttackUnitGoal {
     }
 
     public void tick() {
+        if (this.mob instanceof PandaUnit pandaUnit && this.mob.getTarget() != null && ticksUntilNextAttack <= 0 &&
+                this.mob.distanceTo(this.mob.getTarget()) < 4) {
+            pandaUnit.roll(true);
+        }
+
         super.tick();
         ++this.raiseArmTicks;
         if (this.raiseArmTicks >= 5 && this.getTicksUntilNextAttack() < this.getAttackInterval() / 2) {
