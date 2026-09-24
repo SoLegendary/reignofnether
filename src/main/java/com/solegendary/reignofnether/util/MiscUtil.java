@@ -41,6 +41,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
@@ -912,7 +913,7 @@ public class MiscUtil {
             if (level.isClientSide()) {
                 level.addParticle(particleType, pos.x, pos.y, pos.z, d0, d1, d2);
             } else {
-                ((ServerLevel) level).sendParticles(particleType, pos.x, pos.y, pos.z, 1, d0, d1, d2, 0);
+                ((ServerLevel) level).sendParticles(particleType, pos.x, pos.y, pos.z, 0, d0, d1, d2, 1);
             }
         }
     }
@@ -955,7 +956,6 @@ public class MiscUtil {
             );
         }
     }
-
 
     public static ResourceLocation getTextureForBlock(@NotNull Block block) {
         if (block == Blocks.COMMAND_BLOCK)

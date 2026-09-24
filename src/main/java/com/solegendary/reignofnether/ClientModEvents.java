@@ -11,9 +11,7 @@ import com.solegendary.reignofnether.fogofwar.FogTintingBakedModel;
 import com.solegendary.reignofnether.fogofwar.FogTintingBlockColor;
 import com.solegendary.reignofnether.mixin.fogofwar.BlockColorsAccessor;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
-import com.solegendary.reignofnether.particles.BigEnchantParticle;
-import com.solegendary.reignofnether.particles.BigSoulFlameParticle;
-import com.solegendary.reignofnether.particles.LevelUpParticle;
+import com.solegendary.reignofnether.particles.*;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.unit.modelling.models.*;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
@@ -283,6 +281,18 @@ public class ClientModEvents {
         evt.registerSpriteSet(
                 ParticleRegistrar.LEVEL_UP.get(),
                 LevelUpParticle.Provider::new
+        );
+        evt.registerSpriteSet(
+                ParticleRegistrar.FLOATING_CRIT.get(),
+                AbstractFloatingParticle.Provider::new
+        );
+        evt.registerSpriteSet(
+                ParticleRegistrar.FLOATING_HEART.get(),
+                FloatingHeartParticle.Provider::new
+        );
+        evt.registerSpriteSet(
+                ParticleRegistrar.FLOATING_SOUL_FIRE.get(),
+                FloatingSoulfireParticle.Provider::new
         );
     }
 }

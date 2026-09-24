@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.SoulSiphonPassive;
-import com.solegendary.reignofnether.ability.heroAbilities.royalguard.Avatar;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.ScorchingGaze;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -92,7 +91,6 @@ import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
 import static com.solegendary.reignofnether.resources.ResourcesServerEvents.*;
-import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUTRAL_BUILDING_BOUNTY_PERCENT;
 
 public class UnitServerEvents {
 
@@ -1041,21 +1039,27 @@ public class UnitServerEvents {
             evt.setAmount(evt.getAmount() / 2);
         }
 
-        if (evt.getSource().getEntity() instanceof AttackerUnit attackerUnit) {
-            if (RANDOM.nextFloat() < attackerUnit.getExplosiveChance()) {
-                doExplosiveHit((LivingEntity) attackerUnit, evt.getEntity());
+        if (evt.getSource().getEntity() instanceof AttackerUnit aUnit) {
+            if (RANDOM.nextFloat() < aUnit.getExplosiveChance()) {
+                doExplosiveHit((LivingEntity) aUnit, evt.getEntity());
             }
-            if (RANDOM.nextFloat() < attackerUnit.getCriticalChance()) {
+            if (RANDOM.nextFloat() < aUnit.getCriticalChance()) {
                 evt.setAmount(evt.getAmount() * CRITICAL_HIT_MULTIPLIER);
                 SoundClientboundPacket.playSoundAtPos(SoundAction.CRITICAL_HIT, evt.getEntity().blockPosition());
+                MiscUtil.addParticleExplosion(ParticleRegistrar.FLOATING_CRIT.get(), 10,
+                        ((Entity) aUnit).level(), evt.getEntity().getEyePosition());
             }
-            float lifeDmgPerc = attackerUnit.getLifeStealPercent();
+            float lifeDmgPerc = aUnit.getLifeStealPercent();
             if (lifeDmgPerc > 0) {
-                ((LivingEntity) attackerUnit).heal(evt.getAmount() * lifeDmgPerc);
+                ((LivingEntity) aUnit).heal(evt.getAmount() * lifeDmgPerc);
+                MiscUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), (int) (evt.getAmount() * lifeDmgPerc) + 1,
+                        ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
             }
-            float manaDmgPerc = attackerUnit.getManaOnHitPercent();
-            if (manaDmgPerc > 0 && attackerUnit instanceof HeroUnit heroUnit) {
+            float manaDmgPerc = aUnit.getManaOnHitPercent();
+            if (manaDmgPerc > 0 && aUnit instanceof HeroUnit heroUnit) {
                 heroUnit.setMana(heroUnit.getMana() + (evt.getAmount() * manaDmgPerc));
+                MiscUtil.addParticleExplosion(ParticleRegistrar.FLOATING_SOUL_FIRE.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
+                        ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
             }
         }
     }

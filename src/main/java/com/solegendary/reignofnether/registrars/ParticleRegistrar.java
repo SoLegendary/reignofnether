@@ -25,6 +25,18 @@ public class ParticleRegistrar {
             PARTICLES.register("level_up",
                     () -> new SimpleParticleType(false));
 
+    public static final RegistryObject<SimpleParticleType> FLOATING_CRIT =
+            PARTICLES.register("floating_crit",
+                    () -> new SimpleParticleType(false));
+
+    public static final RegistryObject<SimpleParticleType> FLOATING_HEART =
+            PARTICLES.register("floating_heart",
+                    () -> new SimpleParticleType(false));
+
+    public static final RegistryObject<SimpleParticleType> FLOATING_SOUL_FIRE =
+            PARTICLES.register("floating_soul_fire",
+                    () -> new SimpleParticleType(false));
+
     public static void init(FMLJavaModLoadingContext context) {
         PARTICLES.register(context.getModEventBus());
     }
