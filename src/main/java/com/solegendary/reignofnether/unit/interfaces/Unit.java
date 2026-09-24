@@ -928,10 +928,15 @@ public interface Unit {
         if (hasAnyEnchants() && entity.hasEffect(MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get())) {
             icons.add(EnchantmentIcons.ENCHANTMENT_AMPLIFIER);
         }
-        HashMap<MobEffect, MobEffectIcon> mobEffects = UnitClientEvents.mobEffectIcons.get(entity.getId());
-        if (mobEffects != null)
-            for (MobEffect effect : mobEffects.keySet())
-                icons.add(mobEffects.get(effect));
+        synchronized (UnitClientEvents.mobEffectIcons) {
+            HashMap<MobEffect, MobEffectIcon> mobEffects = UnitClientEvents.mobEffectIcons.get(entity.getId());
+            if (mobEffects != null) {
+                for (MobEffect effect : mobEffects.keySet()) {
+                    if (mobEffects.get(effect) != null)
+                        icons.add(mobEffects.get(effect));
+                }
+            }
+        }
         return icons;
     }
 

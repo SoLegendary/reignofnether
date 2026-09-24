@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.time.TimeClientEvents;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffect;
@@ -27,12 +28,12 @@ public class MobEffectIcon extends Button {
     public int duration = 0;
 
     public MobEffectIcon(MobEffect effect, ResourceLocation iconRl, String descId) {
-        super("Passive Icon", ICON_SIZE, iconRl, (Keybinding) null, () -> false, () -> true, () -> true, null, null, List.of());
+        super("Passive Icon", ICON_SIZE, iconRl, null, () -> false, () -> true, () -> true, null, null, List.of());
         this.frameResource = getFrameRl(effect);
         this.effect = effect;
         this.tooltipLines = List.of(
-                fcs("effect.reignofnether." + descId),
-                fcs("effect.reignofnether."  + descId + ".desc")
+                fcs(I18n.get("effect.reignofnether." + descId), true),
+                fcs(I18n.get("effect.reignofnether."  + descId + ".desc"))
         );
         this.descId = descId;
         if (duration > 0) {
@@ -61,6 +62,10 @@ public class MobEffectIcon extends Button {
                 this.descId
         );
         icon.duration = instance.getDuration();
+        icon.bottomLeftText = () -> {
+            int amp = instance.getAmplifier();
+            return amp > 0 ? String.valueOf(amp + 1) : "";
+        };
         return icon;
     }
 }

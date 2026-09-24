@@ -1529,6 +1529,8 @@ public class UnitClientEvents {
                         mobEffectIcons.get(entityId).put(mei.getEffect(), MobEffectIcons.getIcon(mei));
                     } else if (entity.getEffect(effect) != null) {
                         entity.removeEffect(effect);
+                        if (mobEffectIcons.containsKey(entityId))
+                            mobEffectIcons.get(entityId).remove(effect);
                     }
                 }
             }
