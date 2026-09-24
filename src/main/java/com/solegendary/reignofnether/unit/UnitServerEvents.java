@@ -1043,12 +1043,6 @@ public class UnitServerEvents {
             if (RANDOM.nextFloat() < aUnit.getExplosiveChance()) {
                 doExplosiveHit((LivingEntity) aUnit, evt.getEntity());
             }
-            if (RANDOM.nextFloat() < aUnit.getCriticalChance()) {
-                evt.setAmount(evt.getAmount() * CRITICAL_HIT_MULTIPLIER);
-                SoundClientboundPacket.playSoundAtPos(SoundAction.CRITICAL_HIT, evt.getEntity().blockPosition());
-                MiscUtil.addParticleExplosion(ParticleRegistrar.FLOATING_CRIT.get(), 10,
-                        ((Entity) aUnit).level(), evt.getEntity().getEyePosition());
-            }
             float lifeDmgPerc = aUnit.getLifeStealPercent();
             if (lifeDmgPerc > 0) {
                 ((LivingEntity) aUnit).heal(evt.getAmount() * lifeDmgPerc);
@@ -1063,8 +1057,6 @@ public class UnitServerEvents {
             }
         }
     }
-
-    private static final float CRITICAL_HIT_MULTIPLIER = 2.5f;
 
     private static final float EXPLOSIVE_HIT_SPLASH_MULT = 0.5f;
     private static final float EXPLOSIVE_HIT_SPLASH_RADIUS = 2.5f;

@@ -99,6 +99,10 @@ public class MobEffectRegistrar {
     // temporary night zone
     public static final RegistryObject<MobEffect> NIGHT_WARPING = MOB_EFFECTS.register("night_warping", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000));
 
+    public static final RegistryObject<MobEffect> COLD = MOB_EFFECTS.register("cold", () -> new InstantenousMobEffect(MobEffectCategory.HARMFUL, 3402751)
+            .addAttributeModifier(Attributes.MOVEMENT_SPEED, "14dfe523-ff36-4744-9ba3-41937d0b8eb5", -0.1, AttributeModifier.Operation.MULTIPLY_BASE)
+            .addAttributeModifier(Attributes.ATTACK_SPEED, "0278ceb0-fc3a-456d-b40a-14be53a1aed6", -0.1, AttributeModifier.Operation.MULTIPLY_BASE));
+
 
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||

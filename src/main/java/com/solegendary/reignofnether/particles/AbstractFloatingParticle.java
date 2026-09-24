@@ -23,7 +23,7 @@ public class AbstractFloatingParticle extends TextureSheetParticle {
         this.xd += pXSpeed * 0.2;
         this.yd += pYSpeed * 0.2;
         this.zd += pZSpeed * 0.2;
-        float f = (float)(Math.random() * 0.3 + 0.6);
+        float f = (float)(Math.random() * 0.4 + 0.6);
         this.rCol = f;
         this.gCol = f;
         this.bCol = f;

@@ -2,7 +2,10 @@ package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -18,6 +21,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -132,6 +136,8 @@ public abstract class LivingEntityMixin extends Entity {
     @Shadow public float getHealth() { return 0f; }
     @Shadow public void setHealth(float pHealth) { }
 
+    private static final float CRITICAL_HIT_MULTIPLIER = 2.5f;
+
     @Inject(
             method = "actuallyHurt",
             at = @At("HEAD"),
@@ -175,6 +181,13 @@ public abstract class LivingEntityMixin extends Entity {
                 if (pDamageSource.is(DamageTypeTags.IS_PROJECTILE))
                     dmg *= (1 - unit.getUnitRangedArmorPercentage());
                 dmg *= (1 - unit.getUnitResistPercentage());
+
+                if (!this.level().isClientSide() && getRandom().nextFloat() < attackerUnit.getCriticalChance()) {
+                    dmg *= CRITICAL_HIT_MULTIPLIER;
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.CRITICAL_HIT, this.blockPosition());
+                    MiscUtil.addParticleExplosion(ParticleRegistrar.FLOATING_CRIT.get(), 10,
+                            ((Entity) attackerUnit).level(), this.getEyePosition());
+                }
             }
 
             if (!this.isInvulnerableTo(pDamageSource)) {
@@ -205,6 +218,8 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Shadow public boolean hasEffect(MobEffect pEffect) { return true; }
     @Shadow public MobEffectInstance getEffect(MobEffect pEffect) { return null; }
+
+    @Shadow public abstract RandomSource getRandom();
 
     @Inject(
             method = "baseTick",

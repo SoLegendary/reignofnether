@@ -2,17 +2,11 @@ package com.solegendary.reignofnether.hud.effecticons;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.buttons.Button;
-import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -47,7 +41,7 @@ public class MobEffectIcon extends Button {
         };
     }
 
-    public MobEffectIcon copy(MobEffectInstance instance) {
+    public MobEffectIcon copyWithInstance(MobEffectInstance instance) {
         MobEffectIcon icon = new MobEffectIcon(
                 this.effect,
                 this.iconResource,
