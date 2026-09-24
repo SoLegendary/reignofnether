@@ -36,15 +36,7 @@ public class MobEffectIcon extends Button {
                 fcs(I18n.get("effect.reignofnether."  + descId + ".desc"))
         );
         this.descId = descId;
-        if (duration > 0) {
-            this.getGreyPercent = () -> {
-                if (this.duration <= 0)
-                    return 0f;
-                long elapsed = TimeClientEvents.getClientTime() - startTime;
-                float percent = (float) elapsed / (float) this.duration;
-                return Math.max(0f, Math.min(1f, percent));
-            };
-        }
+        this.greyInverted = true;
     }
 
     private ResourceLocation getFrameRl(MobEffect effect) {
@@ -62,6 +54,15 @@ public class MobEffectIcon extends Button {
                 this.descId
         );
         icon.duration = instance.getDuration();
+        if (icon.duration >= 40) { // don't show really short effects at most of them are just auras
+            icon.getGreyPercent = () -> {
+                if (icon.duration <= 0)
+                    return 0f;
+                long elapsed = TimeClientEvents.getClientTime() - icon.startTime;
+                float percent = (float) elapsed / (float) icon.duration;
+                return Math.max(0f, Math.min(1f, percent));
+            };
+        }
         icon.bottomLeftText = () -> {
             int amp = instance.getAmplifier();
             return amp > 0 ? String.valueOf(amp + 1) : "";

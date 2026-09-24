@@ -79,8 +79,8 @@ public class Button {
     public float greyPercent = 0.0f;
 
     public Supplier<Float> getGreyPercent = null;
-
     public boolean greyWhenDisabled = true;
+    public boolean greyInverted = false;
     public boolean showSelectedFrameWhenDisabled = false;
 
     protected Minecraft MC = Minecraft.getInstance();
@@ -241,6 +241,7 @@ public class Button {
         if (getGreyPercent != null) {
             greyPercent = getGreyPercent.get();
         }
+
         if (greyPercent > 0 || (!isEnabled.get() && greyWhenDisabled)) {
             int greyHeightPx = Math.round(greyPercent * iconFrameSize);
             if (!isEnabled.get())
@@ -249,11 +250,12 @@ public class Button {
             guiGraphics.pose().translate(0,0,1);
             guiGraphics.fill( // x1,y1, x2,y2,
                     x + xyDiff,
-                    y + xyDiff + greyHeightPx,
+                    y + xyDiff + (greyInverted ? 0 : greyHeightPx),
                     x + xyDiff + iconFrameSize,
-                    y + xyDiff + iconFrameSize,
+                    y + xyDiff + (greyInverted ? greyHeightPx : iconFrameSize),
                     0x99000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
+
 
         if (isFlashing.get()) {
             guiGraphics.fill(x, y,
@@ -267,6 +269,9 @@ public class Button {
             String blText = bottomLeftText.get();
             int drawX = x + 4 + ((blText.length() - 1) * 2);
             int drawY = y + iconSize;
+
+            drawX += (DEFAULT_ICON_SIZE - iconSize) / 2;
+            drawY += (DEFAULT_ICON_SIZE - iconSize) / 2;
 
             guiGraphics.pose().pushPose();
 

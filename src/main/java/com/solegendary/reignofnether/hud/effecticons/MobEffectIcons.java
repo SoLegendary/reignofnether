@@ -87,7 +87,7 @@ public class MobEffectIcons {
 
     public static final MobEffectIcon PHASING = new MobEffectIcon(
             MobEffectRegistrar.PHASING.get(),
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/items/ghost_cloak.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/item/ghost_cloak.png"),
             "phasing"
     );
 

@@ -241,7 +241,7 @@ public class TimeClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
+        if (evt.phase != TickEvent.Phase.END && !MC.isPaused())
             ticksSinceLastUpdate += RtsDebugClientEvents.getCappedTPS() / 20D;
     }
 

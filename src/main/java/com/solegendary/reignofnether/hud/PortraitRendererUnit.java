@@ -225,7 +225,8 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         int xOrig = x;
         if (entity instanceof Unit unit) {
             for (Button passiveIcon : unit.getPassiveIcons()) {
-                passiveIcon.render(guiGraphics, x - 2, y - 16, mouseX, mouseY);
+                int yr = unit instanceof HeroUnit ? y - 18 : y - 16;
+                passiveIcon.render(guiGraphics, x - 2, yr, mouseX, mouseY);
                 if (passiveIcon.isMouseOver(mouseX, mouseY))
                     passiveIcon.renderTooltip(guiGraphics, mouseX, mouseY);
                 x += EnchantmentIcon.ICON_SIZE * 2;

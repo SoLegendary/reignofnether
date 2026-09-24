@@ -93,8 +93,7 @@ public class MobEffectRegistrar {
     public static final RegistryObject<MobEffect> VIGOR = MOB_EFFECTS.register("vigor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFFFFFF));
 
     // no knockback taken or received, not pushable
-    public static final RegistryObject<MobEffect> PHASING = MOB_EFFECTS.register("phasing", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x0000FF)
-            .addAttributeModifier(Attributes.MOVEMENT_SPEED, "9f7ddf69-4adf-4e54-ab60-1aca85bd3702", 0.1f, AttributeModifier.Operation.MULTIPLY_BASE)
+    public static final RegistryObject<MobEffect> PHASING = MOB_EFFECTS.register("phasing", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x5d105e)
             .addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE, "709b8a00-a856-4161-b32a-32c4970c1490", 1.0f, AttributeModifier.Operation.ADDITION));
 
     // temporary night zone
