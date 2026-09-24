@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
@@ -40,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Mixin(Mob.class)
@@ -305,6 +307,11 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         return true;
     }
 
+    private static final Set<Attribute> NON_STACKABLE_ATTRIBUTES = Set.of(
+            Attributes.MOVEMENT_SPEED,
+            AttributeRegistrar.EVASION_CHANCE.get()
+    );
+
     @Unique
     private void ron$applyItemAttributes(ItemStack stack) {
         if (this.level().isClientSide() || stack.isEmpty()) return;
@@ -317,14 +324,20 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             AttributeModifier modifier = unitItem.attributes.get(attr);
             AttributeInstance instance = this.getAttribute(attr);
             if (instance != null) {
-                boolean hasMovespeedMod = false;
-                for (AttributeModifier mod : instance.getModifiers())
-                    if (mod.getName().startsWith("reignofnether:item:"))
-                        hasMovespeedMod = true;
+                boolean isNonStackable = NON_STACKABLE_ATTRIBUTES.contains(attr);
+                boolean hasExistingMod = false;
 
-                if (attr != Attributes.MOVEMENT_SPEED || !hasMovespeedMod) {
+                if (isNonStackable) {
+                    for (AttributeModifier mod : instance.getModifiers()) {
+                        if (mod.getName().startsWith("reignofnether:item:")) {
+                            hasExistingMod = true;
+                            break;
+                        }
+                    }
+                }
+                if (!isNonStackable || !hasExistingMod) {
                     UUID modUuid = ron$deriveModifierUUID(itemUuid, i);
-                    if (instance.getModifier(modUuid) == null) { // idempotency guard
+                    if (instance.getModifier(modUuid) == null) {
                         instance.addTransientModifier(new AttributeModifier(
                                 modUuid, "reignofnether:item:" + i,
                                 modifier.getAmount(), modifier.getOperation()));

@@ -26,7 +26,7 @@ public class MobEffectIcons {
 
     public static final MobEffectIcon UNCONTROLLABLE = new MobEffectIcon(
             MobEffectRegistrar.UNCONTROLLABLE.get(),
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/taunting_cry.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/icons/abilities/taunting_cry.png"),
             "uncontrollable"
     );
 

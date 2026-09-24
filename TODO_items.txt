@@ -10,9 +10,9 @@ Passives
 [✔] Azure Medallion - Raises max Mana
 [❌] Soul Collector - Grants mana when nearby enemy units die (proportional to their population)
 [✔] Broadsword - Raises attack damage
-[🟡] Katana - Grants a critical hit chance
-[🟡] Heartstealer - Grants lifesteal
-[🟡] Soul Scythe - Grants mana on hit
+[✔] Katana - Grants a critical hit chance
+[✔] Heartstealer - Grants lifesteal
+[✔] Soul Scythe - Grants mana on hit
 [🟡] Powershaker - Grants an explosion on hit chance
 [✔] Boots of Swiftness - Raises move speed (does not stack)
 [✔] Sparkler - Raises attack speed

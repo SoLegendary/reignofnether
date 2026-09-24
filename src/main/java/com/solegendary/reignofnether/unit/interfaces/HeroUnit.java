@@ -199,7 +199,7 @@ public interface HeroUnit extends Unit {
             HeroClientboundPacket.setSkillPoints(((LivingEntity) this).getId(), getSkillPoints());
             SoundClientboundPacket.playSoundAtPos(SoundAction.LEVEL_UP, ((LivingEntity) this).getOnPos());
             MiscUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 10,
-                    ((LivingEntity) this).level(), ((LivingEntity) this).getEyePosition(), 0.5f);
+                    ((LivingEntity) this).level(), ((LivingEntity) this).getEyePosition());
             setStatsForLevel();
             ((LivingEntity) this).heal(levelDiff * getHealthBonusPerLevel());
         }

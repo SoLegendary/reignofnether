@@ -901,7 +901,7 @@ public class MiscUtil {
     }
 
     public static void addParticleExplosion(SimpleParticleType particleType, int amount, Level level, Vec3 pos) {
-        addParticleExplosion(particleType, amount, level, pos, 0.2f);
+        addParticleExplosion(particleType, amount, level, pos, 0.1f);
     }
 
     public static void addParticleExplosion(SimpleParticleType particleType, int amount, Level level, Vec3 pos, double velocityScale) {
