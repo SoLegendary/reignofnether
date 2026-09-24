@@ -39,67 +39,67 @@ public class PlayerClientboundPacket {
 
     public static void removeRTSPlayer(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.REMOVE_RTS_PLAYER, playerName, 0L, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.REMOVE_RTS_PLAYER, playerName, 0L));
     }
 
     public static void defeat(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.DEFEAT, playerName, 0L, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.DEFEAT, playerName, 0L));
     }
 
     public static void victory(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.VICTORY, playerName, 0L, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.VICTORY, playerName, 0L));
     }
 
     public static void resetRTS(boolean hard) {
         if (hard) {
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new PlayerClientboundPacket(PlayerAction.RESET_RTS_HARD, "", 0L, 0, Factions.NONE));
+                    new PlayerClientboundPacket(PlayerAction.RESET_RTS_HARD, "", 0L ));
         } else {
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new PlayerClientboundPacket(PlayerAction.RESET_RTS, "", 0L, 0, Factions.NONE));
+                    new PlayerClientboundPacket(PlayerAction.RESET_RTS, "", 0L));
         }
     }
 
     public static void publishScenarioMap() {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.PUBLISH_SCENARIO_MAP, "", 0L, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.PUBLISH_SCENARIO_MAP, "", 0L));
     }
 
     public static void syncRtsGameTime(Long rtsGameTicks) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.SYNC_RTS_GAME_TIME, "", rtsGameTicks, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.SYNC_RTS_GAME_TIME, "", rtsGameTicks));
     }
 
     public static void lockRTS(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.LOCK_RTS, playerName, 0L, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.LOCK_RTS, playerName, 0L));
     }
 
     public static void unlockRTS(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.UNLOCK_RTS, playerName, 0L, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.UNLOCK_RTS, playerName, 0L));
     }
 
     // prevent one particular player from joining the match
     public static void disableStartRTS(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.DISABLE_START_RTS, playerName, 0L, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.DISABLE_START_RTS, playerName, 0L));
     }
     public static void enableStartRTS(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.ENABLE_START_RTS, playerName, 0L, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.ENABLE_START_RTS, playerName, 0L));
     }
 
     public static void syncBeaconOwnerTicks(String playerName, long ticks) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.SYNC_BEACON_OWNER_TICKS, playerName, ticks, 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.SYNC_BEACON_OWNER_TICKS, playerName, ticks));
     }
 
     public static void setRTSCamera(String playerName, boolean value) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.SET_RTS_CAMERA, playerName, (long) (value ? 1 : 0), 0, Factions.NONE));
+                new PlayerClientboundPacket(PlayerAction.SET_RTS_CAMERA, playerName, (long) (value ? 1 : 0)));
     }
 
     public static void setMarketRate(TradeAction tradeAction, String playerName, int value) {
@@ -139,7 +139,7 @@ public class PlayerClientboundPacket {
         this.playerName = playerName;
         this.value1 = value1;
         this.value2 = 0;
-        this.faction = Faction.NONE;
+        this.faction = Factions.NONE;
         this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
         this.pos = new BlockPos(0,0,0);
         this.isDogPerson = true;

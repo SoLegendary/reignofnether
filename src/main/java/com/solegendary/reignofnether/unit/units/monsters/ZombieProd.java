@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ZombieProd extends GraveyardUnitProductionItem implements UnitProductionItem {
+public class ZombieProd extends GraveyardUnitProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Zombie";
     public final static ResourceCost cost = ResourceCosts.ZOMBIE;

@@ -9,7 +9,7 @@ import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -29,7 +29,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class WindcallerProd extends ProductionItem implements UnitProductionItem {
+public class WindcallerProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Windcaller";
     public final static ResourceCost cost = ResourceCosts.WINDCALLER;

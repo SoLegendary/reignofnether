@@ -4,7 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.HeroProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -22,7 +22,7 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnchanterProd extends HeroProductionItem implements UnitProductionItem {
+public class EnchanterProd extends HeroProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Enchanter";
     public final static ResourceCost cost = ResourceCosts.ENCHANTER;

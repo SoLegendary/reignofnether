@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PillagerProd extends ProductionItem implements UnitProductionItem {
+public class PillagerProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Pillager";
     public final static ResourceCost cost = ResourceCosts.PILLAGER;

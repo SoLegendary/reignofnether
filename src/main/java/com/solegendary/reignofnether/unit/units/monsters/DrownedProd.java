@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class DrownedProd extends GraveyardUnitProductionItem implements UnitProductionItem {
+public class DrownedProd extends GraveyardUnitProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Drowned";
     public final static ResourceCost cost = ResourceCosts.DROWNED;

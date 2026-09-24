@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class HuskProd extends GraveyardUnitProductionItem implements UnitProductionItem {
+public class HuskProd extends GraveyardUnitProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Husk";
     public final static ResourceCost cost = ResourceCosts.HUSK;

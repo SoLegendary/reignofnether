@@ -21,7 +21,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class SkeletonProd extends GraveyardUnitProductionItem implements UnitProductionItem {
+public class SkeletonProd extends GraveyardUnitProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Skeleton";
     public final static ResourceCost cost = ResourceCosts.SKELETON;

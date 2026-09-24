@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
@@ -17,8 +16,8 @@ import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
@@ -51,8 +50,6 @@ public class VillagerMarket extends AbstractMarket {
             new StockedShopItem(new EdibleFoodItem(Items.GOLDEN_APPLE), 3, 20 * 20)
         ));
     }
-
-    public Faction getFaction() { return Faction.VILLAGERS; }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);

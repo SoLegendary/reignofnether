@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.HeroProductionItem;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -22,7 +22,7 @@ import net.minecraft.world.level.Level;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RoyalGuardProd extends HeroProductionItem implements UnitProductionItem {
+public class RoyalGuardProd extends HeroProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Royal Guard";
     public final static ResourceCost cost = ResourceCosts.ROYAL_GUARD;

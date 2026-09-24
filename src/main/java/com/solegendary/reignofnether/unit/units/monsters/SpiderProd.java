@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -24,7 +24,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class SpiderProd extends ProductionItem implements UnitProductionItem {
+public class SpiderProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Spider";
     public final static ResourceCost cost = ResourceCosts.SPIDER;

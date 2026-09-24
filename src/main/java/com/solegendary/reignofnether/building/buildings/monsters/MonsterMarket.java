@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -49,8 +48,6 @@ public class MonsterMarket extends AbstractMarket {
     protected ArrayList<StockedShopItem> getStartingItemsAndStock() {
         return new ArrayList<>();
     }
-
-    public Faction getFaction() { return Faction.MONSTERS; }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);

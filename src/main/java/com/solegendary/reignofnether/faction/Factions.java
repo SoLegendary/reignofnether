@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -242,17 +242,17 @@ public class Factions {
 		faction.addBuilding(building, key);
 	}
 	
-	public static <T extends UnitProductionItem> void registerWorkerEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
+	public static <T extends IUnitProductionItem> void registerWorkerEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
 		registerEntity(faction, unit, productionItem);
 		faction.setWorkerEntityType(unit);
 	}
 	
-	public static <T extends UnitProductionItem> void registerScoutEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
+	public static <T extends IUnitProductionItem> void registerScoutEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
 		registerEntity(faction, unit, productionItem);
 		faction.setScoutEntityType(unit);
 	}
 	
-	public static <T extends UnitProductionItem> void registerEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
+	public static <T extends IUnitProductionItem> void registerEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
 		if (unit == EntityRegistrar.MILITIA_UNIT.get())
 			faction.addEntityButton(((VillagerProd) productionItem).getMilitiaPlaceButton());
 		else

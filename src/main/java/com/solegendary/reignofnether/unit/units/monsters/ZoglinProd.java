@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.unit.units.monsters;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
@@ -13,7 +13,6 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -22,7 +21,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class ZoglinProd extends ProductionItem {
+public class ZoglinProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Zoglin";
     public final static ResourceCost cost = ResourceCosts.ZOGLIN;
@@ -58,12 +57,12 @@ public class ZoglinProd extends ProductionItem {
                 () -> false,
                 () -> true,
                 List.of(
-                        fcs(I18n.get("entity.reignofnether.zoglin_unit"), true),
+                        Component.translatable("entity.reignofnether.zoglin_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPopAndTime(cost),
                         fcs(""),
-                        fcs(I18n.get("entity.reignofnether.zoglin_unit.tooltip1")),
-                        fcs(I18n.get("entity.reignofnether.zoglin_unit.tooltip2"))
+                        Component.translatable("entity.reignofnether.zoglin_unit.tooltip1").getVisualOrderText(),
+                        Component.translatable("entity.reignofnether.zoglin_unit.tooltip2").getVisualOrderText()
                 ),
                 this
         );

@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.building.buildings.placements.TownCentrePla
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -24,7 +24,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class ScoutDogProd extends ProductionItem implements UnitProductionItem {
+public class ScoutDogProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Scout Dog";
     public final static ResourceCost cost = ResourceCosts.SCOUT_DOG;

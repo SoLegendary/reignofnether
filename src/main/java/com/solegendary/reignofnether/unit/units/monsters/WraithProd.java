@@ -3,14 +3,12 @@ package com.solegendary.reignofnether.unit.units.monsters;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItem;
-import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Component;
@@ -22,7 +20,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class WraithProd extends ProductionItem implements UnitProductionItem {
+public class WraithProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Wraith";
     public final static ResourceCost cost = ResourceCosts.WRAITH;

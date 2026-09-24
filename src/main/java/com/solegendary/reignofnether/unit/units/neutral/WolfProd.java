@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.unit.units.neutral;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItem;
-import com.solegendary.reignofnether.building.production.UnitProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
@@ -11,7 +11,6 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +21,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class WolfProd extends ProductionItem {
+public class WolfProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Wolf";
     public final static ResourceCost cost = ResourceCosts.WOLF;
@@ -60,11 +59,11 @@ public class WolfProd extends ProductionItem {
                 () -> false,
                 () -> true,
                 List.of(
-                        fcs(I18n.get("entity.reignofnether.wolf_unit"), true),
+                        Component.translatable("entity.reignofnether.wolf_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPopAndTime(cost),
                         fcs(""),
-                        fcs(I18n.get("entity.reignofnether.wolf_unit.tooltip1"))
+                        Component.translatable("entity.reignofnether.wolf_unit.tooltip1").getVisualOrderText()
                 ),
                 this
         );
