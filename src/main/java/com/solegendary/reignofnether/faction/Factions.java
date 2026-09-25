@@ -218,7 +218,7 @@ public class Factions {
 		
 	}
 	
-	private static Faction register(String name, Faction faction) {
+	public static Faction register(String name, Faction faction) {
 		ResourceLocation key = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, name);
 		if (faction.hasCubeMap)
 			CLASSIC_FACTIONS.add(key);
