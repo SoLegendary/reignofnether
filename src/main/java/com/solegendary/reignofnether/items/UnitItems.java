@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
@@ -104,133 +106,133 @@ public class UnitItems {
     public static final UnitItem HEART_MEDALLION = UnitItemBuilder.of(ItemRegistrar.HEART_MEDALLION.get())
             .descId("heart_medallion")
             .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(200)
+            .buyCost(300)
+            .sellValue(150)
             .attribute(Attributes.MAX_HEALTH, 50, ADDITION)
             .build();
 
     public static final UnitItem AZURE_MEDALLION = UnitItemBuilder.of(ItemRegistrar.AZURE_MEDALLION.get())
             .descId("azure_medallion")
             .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(200)
+            .buyCost(300)
+            .sellValue(150)
             .attribute(AttributeRegistrar.BASE_MAX_MANA.get(), 50, ADDITION)
             .build();
 
     public static final UnitItem IRON_HIDE_AMULET = UnitItemBuilder.of(ItemRegistrar.IRON_HIDE_AMULET.get())
             .descId("iron_hide_amulet")
             .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(200)
+            .buyCost(300)
+            .sellValue(150)
             .attribute(Attributes.ARMOR, 5, ADDITION)
             .build();
 
     public static final UnitItem SOUL_COLLECTOR = UnitItemBuilder.of(ItemRegistrar.SOUL_COLLECTOR.get())
             .descId("soul_collector")
             .type(UnitItemType.PASSIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(400)
+            .sellValue(200) // TODO
             .build();
 
     public static final UnitItem BROADSWORD = UnitItemBuilder.of(ItemRegistrar.BROADSWORD.get())
             .descId("broadsword")
             .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(200)
+            .buyCost(300)
+            .sellValue(150)
             .attribute(AttributeRegistrar.ATTACK_DAMAGE.get(), 0.25, MULTIPLY_BASE)
             .build();
 
     public static final UnitItem KATANA = UnitItemBuilder.of(ItemRegistrar.KATANA.get())
             .descId("katana")
             .type(UnitItemType.PASSIVE)
-            .buyCost(500)
-            .sellValue(250)
+            .buyCost(400)
+            .sellValue(200)
             .attribute(AttributeRegistrar.CRITICAL_HIT_CHANCE.get(), 0.17, ADDITION)
             .build();
 
     public static final UnitItem HEARTSTEALER = UnitItemBuilder.of(ItemRegistrar.HEARTSTEALER.get())
             .descId("heartstealer")
             .type(UnitItemType.PASSIVE)
-            .buyCost(500)
-            .sellValue(250)
+            .buyCost(400)
+            .sellValue(200)
             .attribute(AttributeRegistrar.LIFESTEAL.get(), 0.15, ADDITION)
             .build();
 
     public static final UnitItem SOUL_SCYTHE = UnitItemBuilder.of(ItemRegistrar.SOUL_SCYTHE.get())
             .descId("soul_scythe")
             .type(UnitItemType.PASSIVE)
-            .buyCost(500)
-            .sellValue(250)
+            .buyCost(400)
+            .sellValue(200)
             .attribute(AttributeRegistrar.MANA_ON_HIT.get(), 0.25, ADDITION)
             .build();
 
     public static final UnitItem POWERSHAKER = UnitItemBuilder.of(ItemRegistrar.POWERSHAKER.get())
             .descId("powershaker")
             .type(UnitItemType.PASSIVE)
-            .buyCost(500)
-            .sellValue(250)
+            .buyCost(400)
+            .sellValue(200)
             .attribute(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(), 0.2, ADDITION)
             .build();
 
     public static final UnitItem GREAT_HAMMER = UnitItemBuilder.of(ItemRegistrar.GREAT_HAMMER.get())
             .descId("great_hammer")
             .type(UnitItemType.PASSIVE)
-            .buyCost(500)
-            .sellValue(250)
+            .buyCost(400)
+            .sellValue(200)
             .attribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 2.0, ADDITION)
             .build();
 
     public static final UnitItem SPARKLER = UnitItemBuilder.of(ItemRegistrar.SPARKLER.get())
             .descId("sparkler")
             .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(200)
+            .buyCost(300)
+            .sellValue(150)
             .attribute(Attributes.ATTACK_SPEED, 0.20, MULTIPLY_BASE)
             .build();
 
     public static final UnitItem LIGHT_FEATHER = UnitItemBuilder.of(ItemRegistrar.LIGHT_FEATHER.get())
             .descId("light_feather")
             .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(250)
+            .buyCost(300)
+            .sellValue(150)
             .attribute(AttributeRegistrar.EVASION_CHANCE.get(), 0.15, ADDITION)
             .build();
 
     public static final UnitItem SPYGLASS = UnitItemBuilder.of(Items.SPYGLASS)
             .descId("spyglass")
             .type(UnitItemType.PASSIVE)
-            .buyCost(400)
-            .sellValue(200)
+            .buyCost(300)
+            .sellValue(150)
             .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 4, ADDITION)
             .build();
 
     public static final UnitItem BOOTS_OF_SWIFTNESS = UnitItemBuilder.of(ItemRegistrar.BOOTS_OF_SWIFTNESS.get())
             .descId("boots_of_swiftness")
             .type(UnitItemType.PASSIVE)
-            .buyCost(500)
-            .sellValue(250)
+            .buyCost(300)
+            .sellValue(150)
             .attribute(Attributes.MOVEMENT_SPEED, 0.04, ADDITION)
             .build();
 
     public static final UnitItem FROST_WALKER_BOOTS = UnitItemBuilder.of(ItemRegistrar.FROST_WALKER_BOOTS.get())
             .descId("frost_walker_boots")
             .type(UnitItemType.PASSIVE)
-            .buyCost(750)
-            .sellValue(375) // TODO
+            .buyCost(500)
+            .sellValue(250) // TODO
             .build();
 
     public static final UnitItem MAGMA_WALKER_BOOTS = UnitItemBuilder.of(ItemRegistrar.MAGMA_WALKER_BOOTS.get())
             .descId("magma_walker_boots")
             .type(UnitItemType.PASSIVE)
-            .buyCost(750)
-            .sellValue(375) // TODO
+            .buyCost(500)
+            .sellValue(250) // TODO
             .build();
 
     public static final UnitItem SATCHEL_OF_SNACKS = UnitItemBuilder.of(ItemRegistrar.SATCHEL_OF_SNACKS.get())
             .descId("satchel_of_snacks")
             .type(UnitItemType.PASSIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(400)
+            .sellValue(200) // TODO
             .build();
 
     public static final UnitItem BUZZY_NEST = UnitItemBuilder.of(ItemRegistrar.BUZZY_NEST.get())
@@ -262,8 +264,8 @@ public class UnitItems {
     public static final UnitItem GHOST_CLOAK = UnitItemBuilder.of(ItemRegistrar.GHOST_CLOAK.get())
             .descId("ghost_cloak")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0)
+            .buyCost(400)
+            .sellValue(200)
             .pointDesc("item.reignofnether.ghost_cloak.point1", GHOST_CLOAK_DURATION_SECONDS)
             .manaCost(25)
             .cooldownTicks(60 * 20)
@@ -283,8 +285,8 @@ public class UnitItems {
     public static final UnitItem GONG_OF_WEAKENING = UnitItemBuilder.of(ItemRegistrar.GONG_OF_WEAKENING.get())
             .descId("gong_of_weakening")
             .type(UnitItemType.ACTIVE)
-            .buyCost(600)
-            .sellValue(300)
+            .buyCost(500)
+            .sellValue(250)
             .pointDesc("item.reignofnether.gong_of_weakening.point1", GONG_OF_WEAKENING_DURATION_SECONDS)
             .radius(10)
             //.manaCost(50)
@@ -310,8 +312,8 @@ public class UnitItems {
     public static final UnitItem ICE_WAND = UnitItemBuilder.of(ItemRegistrar.ICE_WAND.get())
             .descId("ice_wand")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(400)
+            .sellValue(200) // TODO
             .pointDesc("item.reignofnether.ice_wand.point1", ICE_WAND_DURATION_SECONDS)
             .pointDesc("item.reignofnether.ice_wand.point2")
             .build();
@@ -320,8 +322,8 @@ public class UnitItems {
     public static final UnitItem UPDRAFT_TOME = UnitItemBuilder.of(ItemRegistrar.UPDRAFT_TOME.get())
             .descId("updraft_tome")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(500)
+            .sellValue(250) // TODO
             .pointDesc("item.reignofnether.updraft_tome.point1", UPDRAFT_TOME_DURATION_SECONDS)
             .pointDesc("item.reignofnether.updraft_tome.point2")
             .build();
@@ -329,41 +331,85 @@ public class UnitItems {
     public static final UnitItem TOME_OF_DUPLICATION = UnitItemBuilder.of(ItemRegistrar.TOME_OF_DUPLICATION.get())
             .descId("tome_of_duplication")
             .type(UnitItemType.CONSUMABLE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(600)
+            .sellValue(300) // TODO
+            .onUse(unit -> {
+                boolean success = false;
+                if (unit.getAbilities() != null) {
+                    for (Ability ability : unit.getAbilities().get()) {
+                        ability.setCooldown(0, unit);
+                        success = true;
+                    }
+                }
+                if (!success && !((LivingEntity) unit).level().isClientSide()) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.tome_of_duplication.error");
+                }
+                return success;
+            })
             .build();
 
     private static final int SHADOW_SHIFTER_DURATION_SECONDS = 45;
+    private static final int SHADOW_SHIFTER_RADIUS = 20;
     public static final UnitItem SHADOW_SHIFTER = UnitItemBuilder.of(ItemRegistrar.SHADOW_SHIFTER.get())
             .descId("shadow_shifter")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(600)
+            .sellValue(300)
             .pointDesc("item.reignofnether.shadow_shifter.point1", SHADOW_SHIFTER_DURATION_SECONDS)
+            //.manaCost(25)
+            //.cooldownTicks(180 * 20)
+            .radius(SHADOW_SHIFTER_RADIUS)
+            .showRadiusCircle()
+            .onUse(unit -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide()) {
+                    le.addEffect(new MobEffectInstance(MobEffectRegistrar.NIGHT_WARPING.get(), SHADOW_SHIFTER_DURATION_SECONDS * 20, SHADOW_SHIFTER_RADIUS));
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.SHADOW_SHIFTER, le.blockPosition(), 2.0f);
+                }
+                return true;
+            })
             .build();
 
     public static final UnitItem POCKET_PORTAL = UnitItemBuilder.of(ItemRegistrar.POCKET_PORTAL.get())
             .descId("pocket_portal")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(200)
+            .sellValue(100) // TODO
             .build();
 
     private static final int WAR_HORN_DURATION_SECONDS = 30;
+    private static final int WAR_HORN_RADIUS = 15;
     public static final UnitItem WAR_HORN = UnitItemBuilder.of(ItemRegistrar.WAR_HORN.get())
             .descId("war_horn")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(500)
+            .sellValue(250) // TODO
             .pointDesc("item.reignofnether.war_horn.point1", WAR_HORN_DURATION_SECONDS)
+            //.manaCost(50)
+            //.cooldownTicks(120 * 20)
+            .radius(WAR_HORN_RADIUS)
+            .showRadiusCircle()
+            .onUse(unit -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide()) {
+                    for (Mob mob : MiscUtil.getEntitiesWithinRange(le.getEyePosition(), WAR_HORN_RADIUS, Mob.class, le.level())) {
+                        if (UnitServerEvents.getRl(unit, mob) == Relationship.FRIENDLY) {
+                            mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, WAR_HORN_DURATION_SECONDS, 0, false, true));
+                        }
+                    }
+                    ParticleUtil.spawnRadialVibrations((ServerLevel) le.level(), le.getEyePosition(), 8, 10, 40);
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.WAR_HORN, le.blockPosition(), 2.0f);
+                }
+                return true;
+            })
             .build();
 
     private static final int TOTEM_OF_REGENERATION_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_REGENERATION = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_REGENERATION.get())
             .descId("totem_of_regeneration")
             .type(UnitItemType.CONSUMABLE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(250)
+            .sellValue(125) // TODO
             .pointDesc("item.reignofnether.totem_of_regeneration.point1", TOTEM_OF_REGENERATION_DURATION_SECONDS)
             .build();
 
@@ -371,8 +417,8 @@ public class UnitItems {
     public static final UnitItem TOTEM_OF_SHIELDING = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
             .descId("totem_of_shielding")
             .type(UnitItemType.CONSUMABLE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(250)
+            .sellValue(125) // TODO
             .pointDesc("item.reignofnether.totem_of_shielding.point1", TOTEM_OF_SHIELDING_DURATION_SECONDS)
             .build();
 
@@ -380,8 +426,8 @@ public class UnitItems {
     public static final UnitItem TOTEM_OF_PROTECTION = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_PROTECTION.get())
             .descId("totem_of_protection")
             .type(UnitItemType.CONSUMABLE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(250)
+            .sellValue(125) // TODO
             .pointDesc("item.reignofnether.totem_of_protection.point1", TOTEM_OF_PROTECTION_DURATION_SECONDS)
             .build();
 
@@ -389,8 +435,8 @@ public class UnitItems {
     public static final UnitItem TOTEM_OF_CASTING = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_CASTING.get())
             .descId("totem_of_casting")
             .type(UnitItemType.CONSUMABLE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(250)
+            .sellValue(125) // TODO
             .pointDesc("item.reignofnether.totem_of_casting.point1", TOTEM_OF_CASTING_DURATION_SECONDS)
             .build();
 

@@ -32,12 +32,12 @@ Activesa
 [❌] Health Potion (1-click use, consumable)  - Restores health instantly
 [❌] Mana Potion (1-click use, consumable) - Restores mana instantly
 [✔] Ghost Cloak (1-click use) - Grants phasing movement and knockback immunity (like wraiths)
-[❌] Gong of Weakening (1-click use) - Applies temporary weakening and armor reduction to all nearby enemies
+[✔] Gong of Weakening (1-click use) - Applies temporary weakening and armor reduction to all nearby enemies
 [❌] Ice Wand (unit-targeted) - Freezes an enemy in a block of ice (like the wretched wraith ultimate)
 [✔] Staff of Lightning (ground-targeted) - Summons a bolt of lightning at the target location
 [❌] Updraft Tome (ground-targeted) - Applies levitation to enemies in a small radius
-[❌] Tome of Duplication  (1-click use, consumable) - Refreshes the cooldown on all items and spells (except ultimates)
-[❌] Shadow Shifter (monsters only, 1-click-use) - Creates a temporary night aura around the hero
+[🟡] Tome of Duplication  (1-click use, consumable) - Refreshes the cooldown on all items and spells (except ultimates)
+[🟡] Shadow Shifter (monsters only, 1-click-use) - Creates a temporary night aura around the hero
 [❌] Pocket Portal (piglins only, consumable, ground-targeted) - Creates a tiny portal that spreads nether terrain
 [❌] War Horn (1-click-use) - Grants temporary strength to nearby friendly units
 

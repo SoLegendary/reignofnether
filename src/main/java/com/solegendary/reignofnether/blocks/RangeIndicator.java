@@ -6,12 +6,15 @@ import com.solegendary.reignofnether.ability.heroAbilities.wildfire.MoltenBomb;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcon;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
@@ -31,6 +34,7 @@ public interface RangeIndicator {
         boolean showRangeCircle = false;
 
         if (this instanceof Unit unit) {
+            boolean hasAbilityWithRange = false;
             for (Ability ability : unit.getAbilities().get()) {
                 if (CursorClientEvents.getLeftClickAction() == ability.action) {
                     range = ability.range;
@@ -39,6 +43,16 @@ public interface RangeIndicator {
                     showRangeLine = ability.showRangeLine;
                     showRadiusCircle = ability.showRadiusCircle;
                     showRangeCircle = ability.showRangeCircle;
+                    hasAbilityWithRange = true;
+                    break;
+                }
+            }
+            if (!hasAbilityWithRange) {
+                MobEffectInstance mei = ((LivingEntity) unit).getEffect(MobEffectRegistrar.NIGHT_WARPING.get());
+                if (mei != null) {
+                    range = mei.getAmplifier() + 1;
+                    bp = ((LivingEntity) unit).getOnPos();
+                    showRangeCircle = true;
                 }
             }
         } else if (this instanceof BuildingPlacement bpl) {

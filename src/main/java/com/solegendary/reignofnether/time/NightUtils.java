@@ -2,9 +2,14 @@ package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -29,6 +34,18 @@ public class NightUtils {
                 BlockPos centrePos = BuildingUtils.getCentrePos(building.getBlocks());
                 Vec2 centrePos2d = new Vec2(centrePos.getX(), centrePos.getZ());
                 float nightRangeSqr = nsa.getNightRange(building) * nsa.getNightRange(building);
+                if (centrePos2d.distanceToSqr(pos2d) < nightRangeSqr) {
+                    return true;
+                }
+            }
+        }
+        List<LivingEntity> units = clientSide ? UnitClientEvents.getAllUnits() : UnitServerEvents.getAllUnits();
+        for (LivingEntity le : units) {
+            MobEffectInstance mei = le.getEffect(MobEffectRegistrar.NIGHT_WARPING.get());
+            if (mei != null) {
+                int range = mei.getAmplifier() + 1;
+                float nightRangeSqr = range * range;
+                Vec2 centrePos2d = new Vec2((float) le.position().x(), (float) le.position().z());
                 if (centrePos2d.distanceToSqr(pos2d) < nightRangeSqr) {
                     return true;
                 }
