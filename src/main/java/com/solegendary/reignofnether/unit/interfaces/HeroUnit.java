@@ -21,6 +21,7 @@ import com.solegendary.reignofnether.unit.HeroUnitSave;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
@@ -198,7 +199,7 @@ public interface HeroUnit extends Unit {
             setSkillPoints(getSkillPoints() + levelDiff);
             HeroClientboundPacket.setSkillPoints(((LivingEntity) this).getId(), getSkillPoints());
             SoundClientboundPacket.playSoundAtPos(SoundAction.LEVEL_UP, ((LivingEntity) this).getOnPos());
-            MiscUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 10,
+            ParticleUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 10,
                     ((LivingEntity) this).level(), ((LivingEntity) this).getEyePosition());
             setStatsForLevel();
             ((LivingEntity) this).heal(levelDiff * getHealthBonusPerLevel());

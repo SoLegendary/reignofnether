@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -203,7 +204,7 @@ public class ScoutDogUnit extends Wolf implements Unit {
         happiness += 25;
         this.targetSquish = -0.5f;
         if (happiness >= 100) {
-            MiscUtil.addParticleExplosion(ParticleTypes.HEART, 1, level(), getEyePosition().add(new Vec3(0,0.5,0)));
+            ParticleUtil.addParticleExplosion(ParticleTypes.HEART, 1, level(), getEyePosition().add(new Vec3(0,0.5,0)));
             happiness = 0;
         }
     }

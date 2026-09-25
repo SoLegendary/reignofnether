@@ -66,6 +66,7 @@ public class ItemClientEvents {
     private static BlockPos lastCursorPos = new BlockPos(0,0,0);
 
     public static final ArrayList<Button> renderedButtons = new ArrayList<>();
+    public static UnitItem hoveredInvItem = null;
 
     // items moused over
     private static final ArrayList<ItemEntity> preselectedItems = new ArrayList<>();
@@ -143,6 +144,7 @@ public class ItemClientEvents {
 
     public static RectZone renderUnitInventory(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, UnitInventory inv) {
         ItemClientEvents.renderedButtons.clear();
+        ItemClientEvents.hoveredInvItem = null;
         for (int i = 0; i < inv.getAllItems().size(); i++) {
             Keybinding hotkey = i < hotkeys.size() ? hotkeys.get(i) : null;
             ItemStack itemStack = inv.getAllItems().get(i);
@@ -161,10 +163,17 @@ public class ItemClientEvents {
             i += 1;
         }
 
-        for (Button button : ItemClientEvents.renderedButtons)
-            if (button.isMouseOver(mouseX, mouseY))
+        for (Button button : ItemClientEvents.renderedButtons) {
+            if (button.isMouseOver(mouseX, mouseY)) {
                 button.renderTooltip(guiGraphics, mouseX, mouseY);
-
+                if (button instanceof UnitItemInventoryButton uiInvButton) {
+                    if (hoveredInvItem == null) {
+                        hoveredInvItem = uiInvButton.unitItem;
+                        hoveredInvItem.updateHighlightBps(MC.level);
+                    }
+                }
+            }
+        }
         return RectZone.getZoneByLW(x, y, INV_WIDTH, INV_HEIGHT);
     }
 

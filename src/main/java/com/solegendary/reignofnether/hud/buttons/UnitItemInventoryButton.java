@@ -39,11 +39,13 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 () -> false,
                 () -> true,
                 () -> {
-                    ItemClientEvents.actionableUnitItem = unitItem;
-                    ItemClientEvents.actionableUnitItem.updateHighlightBps(((LivingEntity) unit).level());
-                    ItemClientEvents.actionableUnitItemDrag = unitItem;
-                    ItemClientEvents.actionableInvIndex = invIndex;
-                    ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
+                    if (unitItem.onUseEntity != null || unitItem.onUseGround != null || unitItem.onUseBuilding != null) {
+                        ItemClientEvents.actionableUnitItem = unitItem;
+                        ItemClientEvents.actionableUnitItem.updateHighlightBps(((LivingEntity) unit).level());
+                        ItemClientEvents.actionableUnitItemDrag = unitItem;
+                        ItemClientEvents.actionableInvIndex = invIndex;
+                        ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
+                    }
                 },
                 null,
                 List.of(),

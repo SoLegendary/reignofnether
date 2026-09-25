@@ -176,4 +176,6 @@ public abstract class UnitItem implements RangeIndicator {
     public List<FormattedCharSequence> getEntityTooltip(ItemStack itemStack) {
         return List.of();
     }
+
+    
 }

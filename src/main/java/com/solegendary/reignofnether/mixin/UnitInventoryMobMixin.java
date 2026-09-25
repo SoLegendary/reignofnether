@@ -307,11 +307,6 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         return true;
     }
 
-    private static final Set<Attribute> NON_STACKABLE_ATTRIBUTES = Set.of(
-            Attributes.MOVEMENT_SPEED,
-            AttributeRegistrar.EVASION_CHANCE.get()
-    );
-
     @Unique
     private void ron$applyItemAttributes(ItemStack stack) {
         if (this.level().isClientSide() || stack.isEmpty()) return;
@@ -324,6 +319,10 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             AttributeModifier modifier = unitItem.attributes.get(attr);
             AttributeInstance instance = this.getAttribute(attr);
             if (instance != null) {
+                Set<Attribute> NON_STACKABLE_ATTRIBUTES = Set.of(
+                        Attributes.MOVEMENT_SPEED,
+                        AttributeRegistrar.EVASION_CHANCE.get()
+                );
                 boolean isNonStackable = NON_STACKABLE_ATTRIBUTES.contains(attr);
                 boolean hasExistingMod = false;
 

@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -115,7 +116,7 @@ public class MoltenBombProjectile extends Fireball {
                 mob.addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), 120, 0, false, false));
             }
         }
-        MiscUtil.addParticleExplosion(ParticleTypes.LAVA, explosionRadius * 3, level(), position());
+        ParticleUtil.addParticleExplosion(ParticleTypes.LAVA, explosionRadius * 3, level(), position());
         discard();
     }
 

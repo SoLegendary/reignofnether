@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -62,7 +63,7 @@ public abstract class LivingEntityMixin extends Entity {
     public void tick(CallbackInfo ci) {
         if (this.level().isClientSide())
             if (this.hasEffect(MobEffects.LEVITATION))
-                MiscUtil.spawnFlyingCloudParticles(this);
+                ParticleUtil.spawnFlyingCloudParticles(this);
     }
 
     @Inject(
@@ -185,7 +186,7 @@ public abstract class LivingEntityMixin extends Entity {
                 if (!this.level().isClientSide() && getRandom().nextFloat() < attackerUnit.getCriticalChance()) {
                     dmg *= CRITICAL_HIT_MULTIPLIER;
                     SoundClientboundPacket.playSoundAtPos(SoundAction.CRITICAL_HIT, this.blockPosition());
-                    MiscUtil.addParticleExplosion(ParticleRegistrar.FLOATING_CRIT.get(), 10,
+                    ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_CRIT.get(), 10,
                             ((Entity) attackerUnit).level(), this.getEyePosition());
                 }
             }

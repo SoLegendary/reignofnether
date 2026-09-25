@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
@@ -8,15 +9,18 @@ import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -275,12 +279,31 @@ public class UnitItems {
             .build();
 
     private static final int GONG_OF_WEAKENING_DURATION_SECONDS = 10;
+    private static final int GONG_OF_WEAKENING_RADIUS = 10;
     public static final UnitItem GONG_OF_WEAKENING = UnitItemBuilder.of(ItemRegistrar.GONG_OF_WEAKENING.get())
             .descId("gong_of_weakening")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(600)
+            .sellValue(300)
             .pointDesc("item.reignofnether.gong_of_weakening.point1", GONG_OF_WEAKENING_DURATION_SECONDS)
+            .radius(10)
+            //.manaCost(50)
+            //.cooldownTicks(120 * 20)
+            .showRadiusCircle()
+            .onUse(unit -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide()) {
+                    for (Mob mob : MiscUtil.getEntitiesWithinRange(le.getEyePosition(), GONG_OF_WEAKENING_RADIUS, Mob.class, le.level())) {
+                        if (UnitServerEvents.getRl(unit, mob) != Relationship.FRIENDLY) {
+                            mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, GONG_OF_WEAKENING_DURATION_SECONDS, 0, false, true));
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(), GONG_OF_WEAKENING_DURATION_SECONDS, 1, true, false));
+                        }
+                    }
+                    ParticleUtil.spawnRadialVibrations((ServerLevel) le.level(), le.getEyePosition(), 8, 10, 40);
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.GONG_OF_WEAKNING, le.blockPosition(), 2.0f);
+                }
+                return true;
+            })
             .build();
 
     private static final int ICE_WAND_DURATION_SECONDS = 8;

@@ -24,6 +24,7 @@ import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.WraithAnimations;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.commands.CommandSourceStack;
@@ -509,7 +510,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
             targetEntity.removeEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get());
             unit.setOwnerName(this.getOwnerName());
             unit.setAnchor(null);
-            MiscUtil.addParticleExplosion(ParticleTypes.SCULK_SOUL, 40, level(), targetEntity.getEyePosition(), 0.15f);
+            ParticleUtil.addParticleExplosion(ParticleTypes.SCULK_SOUL, 40, level(), targetEntity.getEyePosition(), 0.15f);
             if (!this.level().isClientSide()) {
                 Unit.fullResetBehaviours(unit); // stop the unit's left_click_actions and stop all allied units from attacking it
                 for (LivingEntity entity : UnitServerEvents.getAllUnits())
@@ -526,7 +527,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
                     false,
                     true
             ));
-            MiscUtil.addParticleExplosion(ParticleTypes.SCULK_SOUL, 10, level(), targetEntity.getEyePosition(), 0.10f);
+            ParticleUtil.addParticleExplosion(ParticleTypes.SCULK_SOUL, 10, level(), targetEntity.getEyePosition(), 0.10f);
             if (!this.level().isClientSide())
                 SoundClientboundPacket.playSoundAtPos(SoundAction.WRAITH_POSSESS_PARTIAL, targetEntity.blockPosition());
         }

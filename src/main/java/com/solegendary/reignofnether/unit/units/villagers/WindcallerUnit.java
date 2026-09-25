@@ -30,6 +30,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.WindcallerAnimations;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.commands.CommandSourceStack;
@@ -337,7 +338,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     @Override
     protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
         if (!this.level().isClientSide && this.fallDistance > 3.0F && pOnGround && !pState.isAir()) {
-            MiscUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position().add(0, 0.1f, 0));
+            ParticleUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position().add(0, 0.1f, 0));
         }
         // super.super method logic (entity.class)
         if (pOnGround) {
@@ -436,7 +437,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         updateRotation();
 
         if (level().isClientSide() && isFlying()) {
-            MiscUtil.spawnFlyingCloudParticles(this);
+            ParticleUtil.spawnFlyingCloudParticles(this);
         }
 
         // Apply deferred ground target once the windcaller has actually landed

@@ -78,6 +78,7 @@ Quality of Life
     [✔] - phasing (can walk through mobs and ignore knockback)
     [❌] - night_warping (+2 night radius per level)
 
+
 Bugfixes
 --------
 [❌] Grass blocks are tinted weirdly even when fog of war is off
@@ -87,6 +88,8 @@ Bugfixes
 [🟡] Evasion chance attribute now works on all units
 [🟡] Bears and Zoglins now respect evasion chance
 [✔] Fixed Brutes moving at 1/4 speed instead of 1/2 speed when holding up shields
+[🟡] Fixed marauders being able to stun invulnerable enemies
+
 
 Languages
 ---------

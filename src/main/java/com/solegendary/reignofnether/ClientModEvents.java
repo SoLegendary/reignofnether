@@ -294,6 +294,10 @@ public class ClientModEvents {
                 ParticleRegistrar.FLOATING_SOUL_FIRE.get(),
                 FloatingSoulfireParticle.Provider::new
         );
+        evt.registerSpriteSet(
+                ParticleRegistrar.BIG_VIBRATION.get(),
+                BigVibrationParticle.Provider::new
+        );
     }
 }
 

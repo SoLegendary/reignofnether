@@ -68,7 +68,7 @@ public abstract class AbstractUnitItemButton extends Button {
     protected static final int STAT_ICON_GAP = 2; // between an icon and its number
     protected static final int STAT_GAP = 5; // between mana stat and cooldown stat
 
-    protected UnitItem unitItem;
+    public final UnitItem unitItem;
     protected ItemStack itemStack;
     public int invIndex = 0;
     public UUID invUUID;

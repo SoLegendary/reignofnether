@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -161,7 +162,7 @@ public class SoulSiphonPassive extends HeroAbility {
     }
 
     private void addUnitPoofs(int amount, Unit hero) {
-        MiscUtil.addParticleExplosion(ParticleTypes.WITCH, amount, ((Entity) hero).level(), ((Entity) hero).getEyePosition());
+        ParticleUtil.addParticleExplosion(ParticleTypes.WITCH, amount, ((Entity) hero).level(), ((Entity) hero).getEyePosition());
     }
 
     public void checkAndGainSouls(LivingEntity entityKilled, int splitAmount, NecromancerUnit necro) {

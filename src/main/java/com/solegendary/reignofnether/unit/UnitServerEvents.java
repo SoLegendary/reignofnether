@@ -38,6 +38,7 @@ import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.EnchantmentUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
@@ -174,7 +175,7 @@ public class UnitServerEvents {
     }
 
     public static void addUnitPoofs(Level level, Entity entity) {
-        MiscUtil.addParticleExplosion(ParticleTypes.POOF, 35, level, entity.position());
+        ParticleUtil.addParticleExplosion(ParticleTypes.POOF, 35, level, entity.position());
     }
 
     public static void saveFallenHeroUnits(ServerLevel level) {
@@ -333,6 +334,10 @@ public class UnitServerEvents {
 
     public static Relationship getUnitToEntityRelationship(Unit unit, Level level, int unitId) {
         return getUnitToEntityRelationship(unit, level.getEntity(unitId));
+    }
+
+    public static Relationship getRl(Unit unit, Entity entity) {
+        return getUnitToEntityRelationship(unit, entity);
     }
 
     public static Relationship getUnitToEntityRelationship(Unit unit, Entity entity) {
@@ -649,7 +654,7 @@ public class UnitServerEvents {
                 int durationSeconds = evt.getEntity().getEffect(MobEffectRegistrar.SCORCHING_FIRE.get()).getAmplifier() - 2;
                 int durationTicks = durationSeconds * 20;
                 if (durationSeconds > 0 && friendlyUnits.get(0).addEffect(new MobEffectInstance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks, durationSeconds))) {
-                    MiscUtil.addParticleExplosion(ParticleTypes.LAVA, 12, evt.getEntity().level(), evt.getEntity().position());
+                    ParticleUtil.addParticleExplosion(ParticleTypes.LAVA, 12, evt.getEntity().level(), evt.getEntity().position());
                     SoundClientboundPacket.playSoundAtPos(SoundAction.WILDFIRE_SCORCHING_GAZE_END, friendlyUnits.get(0).blockPosition());
                     friendlyUnits.get(0).addEffect(new MobEffectInstance(MobEffects.GLOWING, durationTicks,0, true, true));
                     if (evt.getEntity().hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
@@ -1046,13 +1051,13 @@ public class UnitServerEvents {
             float lifeDmgPerc = aUnit.getLifeStealPercent();
             if (lifeDmgPerc > 0) {
                 ((LivingEntity) aUnit).heal(evt.getAmount() * lifeDmgPerc);
-                MiscUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), (int) (evt.getAmount() * lifeDmgPerc) + 1,
+                ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), (int) (evt.getAmount() * lifeDmgPerc) + 1,
                         ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
             }
             float manaDmgPerc = aUnit.getManaOnHitPercent();
             if (manaDmgPerc > 0 && aUnit instanceof HeroUnit heroUnit) {
                 heroUnit.setMana(heroUnit.getMana() + (evt.getAmount() * manaDmgPerc));
-                MiscUtil.addParticleExplosion(ParticleRegistrar.FLOATING_SOUL_FIRE.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
+                ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_SOUL_FIRE.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
                         ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
             }
         }

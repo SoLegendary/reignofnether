@@ -44,6 +44,7 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
@@ -478,7 +479,7 @@ public interface Unit {
                 BlockServerEvents.addTempBlock((ServerLevel) unitMob.level(), unitMob.getOnPos(), bsMagma, bsOn, unitMob.getRandom()
                         .nextInt(ScorchingGaze.MIN_MAGMA_DURATION, ScorchingGaze.MAX_MAGMA_DURATION));
             }
-            MiscUtil.addParticleExplosion(ParticleTypes.LAVA, 1, unitMob.level(), unitMob.position());
+            ParticleUtil.addParticleExplosion(ParticleTypes.LAVA, 1, unitMob.level(), unitMob.position());
             if (!unitMob.isOnFire()) {
                 int ticks = unitMob.getEffect(MobEffectRegistrar.SCORCHING_FIRE.get()).getDuration();
                 unitMob.setRemainingFireTicks(ticks);

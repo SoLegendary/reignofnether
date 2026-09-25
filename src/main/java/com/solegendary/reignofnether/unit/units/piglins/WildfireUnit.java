@@ -29,6 +29,7 @@ import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.modelling.animations.WildfireAnimations;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.resources.language.I18n;
@@ -657,7 +658,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         if (hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()))
             return;
 
-        MiscUtil.addParticleExplosion(ParticleRegistrar.BIG_SOUL_FLAME.get(), 15, level(), position().add(0,2,0));
+        ParticleUtil.addParticleExplosion(ParticleRegistrar.BIG_SOUL_FLAME.get(), 15, level(), position().add(0,2,0));
         addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), SoulsAflame.DURATION, 0, true, true));
         if (!level().isClientSide()) {
             convertNearbyBlazes();

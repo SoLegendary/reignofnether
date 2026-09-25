@@ -53,7 +53,8 @@ public interface RangeIndicator {
                 }
             }
         } else if (this instanceof UnitItem unitItem) {
-            if (ItemClientEvents.actionableUnitItem == unitItem && HudClientEvents.hudSelectedEntity != null) {
+            if ((ItemClientEvents.hoveredInvItem == unitItem || ItemClientEvents.actionableUnitItem == unitItem) &&
+                    HudClientEvents.hudSelectedEntity != null) {
                 range = unitItem.range;
                 radius = unitItem.radius;
                 bp = HudClientEvents.hudSelectedEntity.getOnPos();

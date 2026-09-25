@@ -27,6 +27,7 @@ import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.modelling.animations.WretchedWraithAnimations;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.commands.CommandSourceStack;
@@ -706,7 +707,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
                 snowToPlace.putAll(BlockServerEvents.getSnowPositions(level(), mob.getOnPos().above(), 2));
                 mob.addEffect(new MobEffectInstance(MobEffectRegistrar.FREEZE.get(), duration));
                 mob.addEffect(new MobEffectInstance(MobEffectRegistrar.FROST_DAMAGE.get(), duration));
-                MiscUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 10, level(), mob.position());
+                ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 10, level(), mob.position());
                 break;
             }
         }

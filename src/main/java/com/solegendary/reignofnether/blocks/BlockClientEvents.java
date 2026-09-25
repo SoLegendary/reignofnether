@@ -79,8 +79,10 @@ public class BlockClientEvents {
                 }
             }
         }
-        if (HudClientEvents.hudSelectedEntity != null && ItemClientEvents.actionableUnitItem != null && MC.level != null) {
+        if (HudClientEvents.hudSelectedEntity != null && MC.level != null &&
+                (ItemClientEvents.actionableUnitItem != null || ItemClientEvents.hoveredInvItem != null)) {
             RangeIndicator ri = ItemClientEvents.actionableUnitItem;
+            if (ri == null) ri = ItemClientEvents.hoveredInvItem;
             for (BlockPos bp : ri.getHighlightBps()) {
                 int snowLayers = BlockUtils.getSnowLayers(MC.level.getBlockState(bp.above()));
                 float yOffset = snowLayers * 0.125f;
