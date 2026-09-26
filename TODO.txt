@@ -55,7 +55,7 @@ Bugfixes
 
 [✔] Fixed piglin brutes moving at 1/4 speed instead of 1/2 speed when their shield is raised
 [✔] Fixed heroes sometimes being unable to be revived
-[✔] Fixed monster units being slowed under sunlight at a different time than the day/night announcements
+[✔] Fixed monster units being slowed under sunlight before dawn was actually announced
 
 Languages
 ---------
