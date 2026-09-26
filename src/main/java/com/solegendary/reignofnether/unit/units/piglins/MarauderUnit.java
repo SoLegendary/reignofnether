@@ -325,8 +325,8 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         if (isNextHitBig()) {
             this.getAttribute(Attributes.ATTACK_KNOCKBACK).addTransientModifier(new AttributeModifier("knockback", 1.5f, AttributeModifier.Operation.ADDITION));
             result = super.doHurtTarget(pEntity);
-            if (pEntity instanceof LivingEntity le) {
-                le.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 40));
+            if (pEntity instanceof Unit unit && !unit.uninterruptable()) {
+                ((LivingEntity) unit).addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 40));
             }
             this.getAttribute(Attributes.ATTACK_KNOCKBACK).removeModifiers();
             decrementAttacks();
