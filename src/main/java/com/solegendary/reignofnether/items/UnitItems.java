@@ -1,12 +1,13 @@
 package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
+import com.solegendary.reignofnether.items.unititems.TotemItem;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -19,7 +20,6 @@ import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -30,6 +30,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION;
 import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE;
@@ -332,7 +334,8 @@ public class UnitItems {
             .descId("tome_of_duplication")
             .type(UnitItemType.CONSUMABLE)
             .buyCost(600)
-            .sellValue(300) // TODO
+            .sellValue(300)
+            .suppressDefaultError(true)
             .onUse(unit -> {
                 boolean success = false;
                 if (unit.getAbilities() != null) {
@@ -343,6 +346,8 @@ public class UnitItems {
                 }
                 if (!success && !((LivingEntity) unit).level().isClientSide()) {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.tome_of_duplication.error");
+                } else if (success) {
+                    // TODO particle effects
                 }
                 return success;
             })
@@ -383,7 +388,7 @@ public class UnitItems {
             .descId("war_horn")
             .type(UnitItemType.ACTIVE)
             .buyCost(500)
-            .sellValue(250) // TODO
+            .sellValue(250)
             .pointDesc("item.reignofnether.war_horn.point1", WAR_HORN_DURATION_SECONDS)
             //.manaCost(50)
             //.cooldownTicks(120 * 20)
@@ -405,54 +410,63 @@ public class UnitItems {
             .build();
 
     private static final int TOTEM_OF_REGENERATION_DURATION_SECONDS = 30;
-    public static final UnitItem TOTEM_OF_REGENERATION = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_REGENERATION.get())
+    public static final UnitItem TOTEM_OF_REGENERATION = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_REGENERATION.get())
             .descId("totem_of_regeneration")
-            .type(UnitItemType.CONSUMABLE)
-            .buyCost(250)
-            .sellValue(125) // TODO
-            .pointDesc("item.reignofnether.totem_of_regeneration.point1", TOTEM_OF_REGENERATION_DURATION_SECONDS)
-            .build();
+            .pointDesc("item.reignofnether.totem_of_regeneration.point1", TOTEM_OF_REGENERATION_DURATION_SECONDS),
+            EntityRegistrar.TOTEM_OF_REGENERATION.get()
+    );
 
-    private static final int TOTEM_OF_SHIELDING_DURATION_SECONDS = 30;
-    public static final UnitItem TOTEM_OF_SHIELDING = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
+    private static final int TOTEM_OF_SHIELDING_DURATION_SECONDS = 20;
+    public static final UnitItem TOTEM_OF_SHIELDING = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
             .descId("totem_of_shielding")
-            .type(UnitItemType.CONSUMABLE)
-            .buyCost(250)
-            .sellValue(125) // TODO
-            .pointDesc("item.reignofnether.totem_of_shielding.point1", TOTEM_OF_SHIELDING_DURATION_SECONDS)
-            .build();
+            .pointDesc("item.reignofnether.totem_of_shielding.point1", TOTEM_OF_SHIELDING_DURATION_SECONDS),
+            EntityRegistrar.TOTEM_OF_SHIELDING.get()
+    );
 
     private static final int TOTEM_OF_PROTECTION_DURATION_SECONDS = 30;
-    public static final UnitItem TOTEM_OF_PROTECTION = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_PROTECTION.get())
+    public static final UnitItem TOTEM_OF_PROTECTION = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
             .descId("totem_of_protection")
-            .type(UnitItemType.CONSUMABLE)
-            .buyCost(250)
-            .sellValue(125) // TODO
-            .pointDesc("item.reignofnether.totem_of_protection.point1", TOTEM_OF_PROTECTION_DURATION_SECONDS)
-            .build();
+            .pointDesc("item.reignofnether.totem_of_protection.point1", TOTEM_OF_PROTECTION_DURATION_SECONDS),
+            EntityRegistrar.TOTEM_OF_PROTECTION.get()
+    );
 
     private static final int TOTEM_OF_CASTING_DURATION_SECONDS = 30;
-    public static final UnitItem TOTEM_OF_CASTING = UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_CASTING.get())
+    public static final UnitItem TOTEM_OF_CASTING = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_CASTING.get())
             .descId("totem_of_casting")
-            .type(UnitItemType.CONSUMABLE)
-            .buyCost(250)
-            .sellValue(125) // TODO
-            .pointDesc("item.reignofnether.totem_of_casting.point1", TOTEM_OF_CASTING_DURATION_SECONDS)
-            .build();
+            .pointDesc("item.reignofnether.totem_of_casting.point1", TOTEM_OF_CASTING_DURATION_SECONDS),
+            EntityRegistrar.TOTEM_OF_CASTING.get()
+    );
 
+    // TODO: auto convert villagers in range
+    // TODO: show range when active always
+    // TODO: check circles are not shown in fog
+    public static final int BELL_OF_ARMS_RANGE = 20;
     public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(Items.BELL)
             .descId("bell_of_arms")
             .type(UnitItemType.ACTIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(600)
+            .sellValue(300)
+            .toggleActiveOnUse()
+            .range(BELL_OF_ARMS_RANGE)
+            .showRangeCircle()
+            .onUse(unit -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide()) {
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.BELL, le.blockPosition());
+                    CompletableFuture.delayedExecutor(300, TimeUnit.MILLISECONDS).execute(() -> {
+                        SoundClientboundPacket.playSoundAtPos(SoundAction.BELL, le.blockPosition());
+                    });
+                }
+                return true;
+            })
             .build();
 
-    private static final int TOTEM_OF_CASTING_INVINCIBILITY_DURATION_SECONDS = 5;
+    public static final int TOTEM_OF_CASTING_INVINCIBILITY_DURATION_SECONDS = 5;
     public static final UnitItem TOTEM_OF_UNDYING = UnitItemBuilder.of(Items.TOTEM_OF_UNDYING)
             .descId("totem_of_undying")
             .type(UnitItemType.CONSUMABLE)
             .buyCost(500)
-            .sellValue(250)
+            .sellValue(250) // Handled in HeroServerEvents.onLivingDeath
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
             .pointDesc("item.reignofnether.totem_of_undying.point1", TOTEM_OF_CASTING_INVINCIBILITY_DURATION_SECONDS)
             .build();

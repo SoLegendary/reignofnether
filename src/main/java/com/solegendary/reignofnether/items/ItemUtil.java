@@ -81,6 +81,12 @@ public class ItemUtil {
         return 0L;
     }
 
+    public static boolean isActive(ItemStack itemStack) {
+        return itemStack.getTag() != null &&
+                itemStack.getTag().contains("active") &&
+                itemStack.getTag().getBoolean("active");
+    }
+
     private static List<Item> edibleFoods = List.of(
             Items.COOKED_BEEF,
             Items.COOKED_CHICKEN,

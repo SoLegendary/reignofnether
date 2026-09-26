@@ -60,6 +60,7 @@ public class UnitItemBuilder {
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
     BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
     Predicate<Unit> onUse = null;
+    boolean toggleActiveOnUse = false;
     boolean suppressDefaultError = false;
     boolean consumeOnUse = false;
     int cooldownTicksMax = 0;
@@ -162,6 +163,11 @@ public class UnitItemBuilder {
     public UnitItemBuilder desc(String i18nKey, Object... args) {
         if (i18nKey != null && !i18nKey.isBlank())
             this.desc = new LocalizedText(i18nKey, args);
+        return this;
+    }
+
+    public UnitItemBuilder toggleActiveOnUse() {
+        this.toggleActiveOnUse = true;
         return this;
     }
 

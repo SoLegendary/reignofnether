@@ -57,6 +57,7 @@ public abstract class UnitItem implements RangeIndicator {
     public BiPredicate<Unit, LivingEntity> onUseEntity;
     public BiPredicate<Unit, BuildingPlacement> onUseBuilding;
     public Predicate<Unit> onUse;
+    public boolean toggleActiveOnUse;
     public final boolean consumeOnUse;
     public int manaCost;
     public int cooldownTicksMax;
@@ -106,6 +107,7 @@ public abstract class UnitItem implements RangeIndicator {
         this.onUseEntity = builder.onUseEntity;
         this.onUseBuilding = builder.onUseBuilding;
         this.onUse = builder.onUse;
+        this.toggleActiveOnUse = builder.toggleActiveOnUse;
         this.consumeOnUse = type == UnitItemType.CONSUMABLE || builder.consumeOnUse;
         this.manaCost = builder.manaCost;
         this.cooldownTicksMax = builder.cooldownTicksMax;

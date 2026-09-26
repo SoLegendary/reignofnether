@@ -6,11 +6,8 @@ import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.time.TimeClientEvents;
-import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
-import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +15,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -27,11 +26,13 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.lwjgl.system.CallbackI;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -81,8 +82,19 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     public ItemStack get(UUID uuid) {
         for (ItemStack itemStack : this.unitItems) {
             if (itemStack.getTag() != null &&
-                itemStack.getTag().hasUUID("uuid") &&
-                itemStack.getTag().getUUID("uuid").equals(uuid)) {
+                    itemStack.getTag().hasUUID("uuid") &&
+                    itemStack.getTag().getUUID("uuid").equals(uuid)) {
+                return itemStack;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    @Nullable
+    public ItemStack get(UnitItem unitItem) {
+        for (ItemStack itemStack : this.unitItems) {
+            if (ItemUtil.getUnitItem(itemStack) == unitItem) {
                 return itemStack;
             }
         }
@@ -141,12 +153,32 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public boolean deleteUUID(UUID uuid) {
+    public boolean deleteItem(UUID uuid) {
         for (int i = 0; i < unitItems.size(); i++) {
             ItemStack stack = get(i);
             if (stack != null && stack.getTag() != null && stack.getItem() != Items.AIR) {
                 UUID stackuuid = stack.getTag().getUUID("uuid");
                 if (stackuuid.equals(uuid) && !stack.isEmpty()) {
+                    if (EnchantmentHelper.hasBindingCurse(stack)) {
+                        return false;
+                    }
+                    ron$removeItemAttributes(stack);
+                    this.unitItems.set(i, ItemStack.EMPTY);
+                    if (this instanceof HeroUnit heroUnit) heroUnit.setStatsForLevel();
+                    syncToClient();
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteItem(UnitItem item) {
+        for (int i = 0; i < unitItems.size(); i++) {
+            ItemStack stack = get(i);
+            if (stack != null && stack.getTag() != null && stack.getItem() == item.getItem()) {
+                if (!stack.isEmpty()) {
                     if (EnchantmentHelper.hasBindingCurse(stack)) {
                         return false;
                     }
@@ -180,7 +212,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && !EnchantmentHelper.hasBindingCurse(itemStack)) {
             if (inv.tryAdding(get(uuid))) {
-                this.deleteUUID(uuid);
+                this.deleteItem(uuid);
                 ItemEntity itemEntity = this.spawnAtLocation(itemStack);
                 if (itemEntity != null) {
                     ((LivingEntity) inv).take(itemEntity, itemStack.getCount());
@@ -248,6 +280,13 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
             if (unitItem != null && unitItem.onUse != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUse.test(unit)) {
+                    CompoundTag tag = itemStack.getTag();
+                    if (itemStack.getTag() != null && unitItem.toggleActiveOnUse) {
+                        if (!tag.contains("active"))
+                            tag.putBoolean("active", true);
+                        else
+                            tag.putBoolean("active", !tag.getBoolean("active"));
+                    }
                     afterUse(unitItem, itemStack, uuid);
                     return true;
                 } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
@@ -268,19 +307,30 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         return false;
     }
 
+    @Override
+    public boolean isHoldingActive(UnitItem unitItem) {
+        for (ItemStack itemStack : getAllItems()) {
+            UnitItem heldUnitItem = ItemUtil.getUnitItem(itemStack);
+            if (heldUnitItem != null && heldUnitItem.descId.equals(unitItem.descId))
+                if (ItemUtil.isActive(itemStack))
+                    return true;
+        }
+        return false;
+    }
+
     private void afterUse(UnitItem unitItem, ItemStack itemStack, UUID uuid) {
         if (unitItem.consumeOnUse) {
             itemStack.setCount(itemStack.getCount() - 1);
             if (itemStack.isEmpty())
-                this.deleteUUID(uuid);
+                this.deleteItem(uuid);
         }
         if (this instanceof HeroUnit heroUnit && unitItem.manaCost > 0)
             heroUnit.setMana(heroUnit.getMana() - unitItem.manaCost);
         if (unitItem.cooldownTicksMax > 0)
             itemStack.getOrCreateTag().putLong(UnitItem.RON$COOLDOWN_KEY, this.level().getGameTime() + unitItem.cooldownTicksMax);
-        if (this instanceof KeyframeAnimated && unitItem.doCastAnimation) {
-            UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.CAST_SPELL, this);
-        }
+        //if (this instanceof KeyframeAnimated && unitItem.doCastAnimation) {
+        //    UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.CAST_SPELL, this);
+        //}
         syncToClient();
     }
 

@@ -2,8 +2,10 @@ package com.solegendary.reignofnether.hero;
 
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.HeroUnitSave;
@@ -14,6 +16,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +36,21 @@ public class HeroServerEvents {
     public static void onLivingDeath(LivingDeathEvent evt) {
         if (evt.getEntity().level().isClientSide())
             return;
+
+        if (evt.getEntity() instanceof HeroUnit && evt.getEntity() instanceof UnitInventory inv) {
+            ItemStack itemStack = inv.get(UnitItems.TOTEM_OF_UNDYING);
+            if (itemStack != null) {
+                evt.getEntity().setHealth(evt.getEntity().getMaxHealth() / 2);
+                evt.getEntity().addEffect(new MobEffectInstance(MobEffectRegistrar.INVINCIBLE.get(),
+                        UnitItems.TOTEM_OF_CASTING_INVINCIBILITY_DURATION_SECONDS * 20, 0, true, false));
+                itemStack.setCount(itemStack.getCount() - 1);
+                if (itemStack.isEmpty())
+                    inv.deleteItem(UnitItems.TOTEM_OF_UNDYING);
+                evt.getEntity().level().broadcastEntityEvent(evt.getEntity(), (byte) 35);
+                evt.setCanceled(true);
+                return;
+            }
+        }
 
         Level level = evt.getEntity().level();
         if (evt.getEntity() instanceof Unit deadUnit) {

@@ -103,6 +103,10 @@ public class MobEffectRegistrar {
             .addAttributeModifier(Attributes.MOVEMENT_SPEED, "14dfe523-ff36-4744-9ba3-41937d0b8eb5", -0.1, AttributeModifier.Operation.MULTIPLY_BASE)
             .addAttributeModifier(Attributes.ATTACK_SPEED, "0278ceb0-fc3a-456d-b40a-14be53a1aed6", -0.1, AttributeModifier.Operation.MULTIPLY_BASE));
 
+    public static final RegistryObject<MobEffect> INVINCIBLE = MOB_EFFECTS.register("invincible", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 5559980)
+            .addAttributeModifier(Attributes.ARMOR, "f16f1e7e-3f89-4ac8-b918-621366dc13bc", 100, AttributeModifier.Operation.ADDITION)
+            .addAttributeModifier(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), "4c9d4fd6-6354-420c-a21b-4b6810f2d07b", 100, AttributeModifier.Operation.ADDITION)
+            .addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE, "f89ff503-070c-4a85-9512-44fe0ec3b153", 1, AttributeModifier.Operation.ADDITION));
 
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||

@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
@@ -15,11 +16,13 @@ public interface UnitInventory {
     boolean isFull();
     ItemStack get(int index);
     ItemStack get(UUID uuid);
+    ItemStack get(UnitItem unitItem);
     void set(int index, ItemStack stack, UUID uuid);
     void set(int index, ItemStack stack);
     void swapSlots(int index1, int index2);
     boolean dropUUID(UUID uuid, BlockPos bp);
-    boolean deleteUUID(UUID uuid);
+    boolean deleteItem(UUID uuid);
+    boolean deleteItem(UnitItem item);
     boolean tryAdding(ItemStack itemStack);
     void giveTo(UUID uuid, UnitInventory inv);
     boolean useOnGround(UUID uuid, BlockPos blockPos);
@@ -28,4 +31,5 @@ public interface UnitInventory {
     boolean use(UUID uuid);
     boolean checkManaCostAndCooldown(UnitItem unitItem, ItemStack itemStack);
     boolean isHolding(UnitItem unitItem);
+    boolean isHoldingActive(UnitItem unitItem);
 }

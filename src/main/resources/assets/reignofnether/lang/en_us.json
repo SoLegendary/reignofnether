@@ -63,7 +63,7 @@
     "item.reignofnether.hero_experience_bottle.point1": "Grants %d experience",
     "item.reignofnether.hero_experience_bottle.error": "Already max level!",
     "item.reignofnether.totem_of_undying.desc": "A mystical totem that protects its bearer from death",
-    "item.reignofnether.totem_of_undying.point1": "Restores 50%% of life and grants %s of invincibility on death",
+    "item.reignofnether.totem_of_undying.point1": "Restores 50%% of life and grants %ss of invincibility on death",
     "item.reignofnether.merchant_trident.desc": "An enchanted netherite trident that headhunters can equip",
     "item.reignofnether.merchant_sword.desc": "An enchanted netherite sword that brutes can equip",
     "item.reignofnether.merchant_chestplate.desc": "A netherite chestplate that piglins and hoglins can equip",
@@ -2177,6 +2177,8 @@
     "effect.reignofnether.levitation.desc": "Floating uncontrollably",
     "effect.reignofnether.fire_resistance": "Fire Resistance",
     "effect.reignofnether.fire_resistance.desc": "Immune to fire damage",
+    "effect.reignofnether.invincible": "Invincible",
+    "effect.reignofnether.invincible.desc": "Immune to damage and knockback",
 
     "key.categories.reignofnether.camera": "Reign of Nether: Camera",
     "key.categories.reignofnether.rts":    "Reign of Nether: RTS Controls",

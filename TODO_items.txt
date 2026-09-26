@@ -39,7 +39,7 @@ Activesa
 [🟡] Tome of Duplication  (1-click use, consumable) - Refreshes the cooldown on all items and spells (except ultimates)
 [🟡] Shadow Shifter (monsters only, 1-click-use) - Creates a temporary night aura around the hero
 [❌] Pocket Portal (piglins only, consumable, ground-targeted) - Creates a tiny portal that spreads nether terrain
-[❌] War Horn (1-click-use) - Grants temporary strength to nearby friendly units
+[🟡] War Horn (1-click-use) - Grants temporary strength to nearby friendly units
 
 [🟡] Totem of Regeneration + (ground-targeted, consumable) - Summons an immobile attackable totem that grants regeneration to nearby friendly units
 [🟡] Totem of Shielding + (ground-targeted, consumable) - Summons an immobile attackable totem that grants absorption to nearby friendly units

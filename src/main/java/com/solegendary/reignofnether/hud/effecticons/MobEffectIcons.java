@@ -205,9 +205,15 @@ public class MobEffectIcons {
     );
 
     public static final MobEffectIcon FIRE_RESISTANCE = new MobEffectIcon(
-            MobEffects.LEVITATION,
+            MobEffects.FIRE_RESISTANCE,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/mob_effect/fire_resistance.png"),
             "fire_resistance"
+    );
+
+    public static final MobEffectIcon INVINCIBLE = new MobEffectIcon(
+            MobEffectRegistrar.INVINCIBLE.get(),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/effects/invincible.png"),
+            "invincible"
     );
 
     @Nullable
@@ -251,6 +257,7 @@ public class MobEffectIcons {
             POISON,
             WITHER,
             LEVITATION,
-            FIRE_RESISTANCE
+            FIRE_RESISTANCE,
+            INVINCIBLE
     );
 }

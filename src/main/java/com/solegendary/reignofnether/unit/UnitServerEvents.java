@@ -956,6 +956,11 @@ public class UnitServerEvents {
             return;
         }
 
+        if (evt.getEntity().hasEffect(MobEffectRegistrar.INVINCIBLE.get())) {
+            evt.setCanceled(true);
+            return;
+        }
+
         // halve direct ghast damage since they get bonus damage from launching units into the air
         if (evt.getSource().getEntity() instanceof GhastUnit) {
             // (unless its to a garrisoned unit)

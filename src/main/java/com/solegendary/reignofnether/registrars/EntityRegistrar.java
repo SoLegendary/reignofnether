@@ -417,7 +417,7 @@ public class EntityRegistrar {
                     .updateInterval(10)
                     .build(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "molten_bomb_projectile").toString()));
 
-    public static final RegistryObject<EntityType<TotemOfRegeneration>> TOTEM_OF_REGNERATION = ENTITIES.register("totem_of_regeneration",
+    public static final RegistryObject<EntityType<TotemOfRegeneration>> TOTEM_OF_REGENERATION = ENTITIES.register("totem_of_regeneration",
             () -> EntityType.Builder.of(TotemOfRegeneration::new, MobCategory.MISC)
                     .fireImmune()
                     .sized(0.75f, 1.25f)

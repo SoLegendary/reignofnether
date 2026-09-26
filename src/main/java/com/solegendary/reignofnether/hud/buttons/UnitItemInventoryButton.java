@@ -23,7 +23,7 @@ import java.util.List;
 // or arms a targeted use action (entity/building/ground).
 public class UnitItemInventoryButton extends AbstractUnitItemButton {
 
-    private static final float GHOST_ALPHA = 0.45f;
+    private static final float GHOST_ALPHA = 0.5f;
 
     private Unit unit;
 
@@ -33,9 +33,10 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 Button.DEFAULT_ICON_SIZE,
                 null,
                 null,
-                () -> ItemClientEvents.actionableUnitItemDrag == unitItem &&
+                () -> (ItemClientEvents.actionableUnitItemDrag == unitItem &&
                         ItemClientEvents.actionableInvIndex == invIndex &&
-                        ItemClientEvents.actionableInvUUID.equals(ItemUtil.getUUID(itemStack)),
+                        ItemClientEvents.actionableInvUUID.equals(ItemUtil.getUUID(itemStack))) ||
+                        ItemUtil.isActive(itemStack),
                 () -> false,
                 () -> true,
                 () -> {
