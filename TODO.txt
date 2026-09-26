@@ -90,6 +90,5 @@ Bugfixes
 [✔] Fixed Brutes moving at 1/4 speed instead of 1/2 speed when holding up shields
 [🟡] Fixed marauders being able to stun invulnerable enemies
 
-
 Languages
 ---------

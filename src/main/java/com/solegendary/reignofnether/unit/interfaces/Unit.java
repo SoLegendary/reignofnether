@@ -34,6 +34,7 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.time.NightUtils;
+import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.unit.*;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
@@ -358,7 +359,7 @@ public interface Unit {
         if (!le.level().isClientSide()) {
             if (unit.getFaction() == Faction.MONSTERS &&
                     le.tickCount % MONSTER_HEALING_TICKS == 0 &&
-                    (!le.level().isDay())) {
+                    (!TimeUtils.isDay(unitMob.level()))) {
                 le.heal(1);
             } else if (unit.getFaction() == Faction.MONSTERS &&
                     (le.tickCount + MONSTER_HEALING_TICKS / 2) % MONSTER_HEALING_TICKS == 0 &&
@@ -387,7 +388,7 @@ public interface Unit {
             unit.getSunlightEffect() == SunlightEffect.SLOWNESS_I ||
             unit.getSunlightEffect() == SunlightEffect.SLOWNESS_MINOR) {
             // apply slowness during daytime for a short time repeatedly
-            if (unitMob.tickCount % 10 == 0 && !unitMob.level().isClientSide() && unitMob.level().isDay() &&
+            if (unitMob.tickCount % 10 == 0 && !unitMob.level().isClientSide() && TimeUtils.isDay(unitMob.level()) &&
                     !NightUtils.isInRangeOfNightSource(unitMob.getEyePosition(), false) &&
                     !ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap")) {
 

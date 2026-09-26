@@ -60,7 +60,7 @@ public class NightUtils {
         if (mob instanceof Unit unit && ResearchServerEvents.playerHasCheat(unit.getOwnerName(), "slipslopslap"))
             return false;
 
-        if (mob.tickCount % 10 == 0 && TimeUtils.isDay(mob.level().getDayTime())) {
+        if (mob.tickCount % 10 == 0 && TimeUtils.isDay(mob.level())) {
             BlockPos blockpos = new BlockPos((int) mob.getX(), (int) mob.getEyeY(), (int) mob.getZ());
             boolean isProtected = mob.isInWaterRainOrBubble() || mob.isInPowderSnow || mob.wasInPowderSnow || mob.isOnFire();
             // Return early if mob is protected or sky is not visible

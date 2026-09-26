@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.NightUtils;
+import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
@@ -247,7 +248,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
 
     @Override
     public int getSightRange() {
-        boolean isNight = !level().isDay() || NightUtils.isInRangeOfNightSource(getEyePosition(), level().isClientSide);
+        boolean isNight = !TimeUtils.isDay(level()) || NightUtils.isInRangeOfNightSource(getEyePosition(), level().isClientSide);
         return Unit.super.getSightRange() + (isNight ? bonusNightSightRange : 0);
     }
 
