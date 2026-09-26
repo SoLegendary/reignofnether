@@ -1,5 +1,5 @@
 
-1.20.1-1.4.4d
+1.20.1-1.4.4e
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -53,10 +53,9 @@ Bugfixes
 [❌] Units don't show clientside population until loaded the first time
 [❌] Grass blocks are tinted weirdly even when fog of war is off
 
-[✔] Fixed soulfire dealing 4x damage instead of 2x
-[✔] Soulfire blazes and wildfires no longer spread their buff to enemy blazes on attack
-[✔] Fixed iron golems sometimes attacking allied illager units
-[✔] Slimes and Drowned no longer infect allied units
+[✔] Fixed piglin brutes moving at 1/4 speed instead of 1/2 speed when their shield is raised
+[✔] Fixed heroes sometimes being unable to be revived
+[✔] Fixed monster units being slowed under sunlight at a different time than the day/night announcements
 
 Languages
 ---------
