@@ -351,10 +351,7 @@ public class ProductionPlacement extends BuildingPlacement {
             if (nextItem.item.tick(this, nextItem)) {
                 if (!tickLevel.isClientSide()) {
                     productionQueue.remove(0);
-                    if (productionQueue.isEmpty())
-                        BuildingProductionClientboundPacket.clearQueue(this.ownerName, this.originPos);
-                    else
-                        BuildingProductionClientboundPacket.completeProduction(this.ownerName, this.originPos, nextItem.item.getItemName());
+                    BuildingProductionClientboundPacket.completeProduction(this.ownerName, this.originPos, nextItem.item.getItemName());
                 }
             }
         }
