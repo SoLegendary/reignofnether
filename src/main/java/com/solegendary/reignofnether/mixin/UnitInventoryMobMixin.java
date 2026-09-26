@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -475,5 +476,14 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             }
             this.unitItems.set(i, ItemStack.EMPTY);
         }
+    }
+
+    @Inject(
+        method = "tick",
+        at = @At("TAIL")
+    )
+    public void tick(CallbackInfo ci) {
+        if (tickCount % 20 == 0 && isHoldingActive(UnitItems.BELL_OF_ARMS))
+            addEffect(new MobEffectInstance(MobEffectRegistrar.VILLAGER_INSPIRATION.get(), 30, 0, true, false));
     }
 }

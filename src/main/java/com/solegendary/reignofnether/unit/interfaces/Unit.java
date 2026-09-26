@@ -924,12 +924,6 @@ public interface Unit {
                 }
             }
         }
-        if (((LivingEntity) this).hasEffect(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
-            icons.add(EnchantmentIcons.EFFICIENCY);
-        }
-        if (hasAnyEnchants() && entity.hasEffect(MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get())) {
-            icons.add(EnchantmentIcons.ENCHANTMENT_AMPLIFIER);
-        }
         synchronized (UnitClientEvents.mobEffectIcons) {
             HashMap<MobEffect, MobEffectIcon> mobEffects = UnitClientEvents.mobEffectIcons.get(entity.getId());
             if (mobEffects != null) {

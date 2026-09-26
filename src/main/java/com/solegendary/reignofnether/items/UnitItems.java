@@ -437,8 +437,6 @@ public class UnitItems {
             EntityRegistrar.TOTEM_OF_CASTING.get()
     );
 
-    // TODO: auto convert villagers in range
-    // TODO: show range when active always
     // TODO: check circles are not shown in fog
     public static final int BELL_OF_ARMS_RANGE = 20;
     public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(Items.BELL)
@@ -456,6 +454,7 @@ public class UnitItems {
                     CompletableFuture.delayedExecutor(300, TimeUnit.MILLISECONDS).execute(() -> {
                         SoundClientboundPacket.playSoundAtPos(SoundAction.BELL, le.blockPosition());
                     });
+                    le.addEffect(new MobEffectInstance(MobEffectRegistrar.VILLAGER_INSPIRATION.get(), 30, 0, true, false));
                 }
                 return true;
             })

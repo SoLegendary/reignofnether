@@ -108,6 +108,8 @@ public class MobEffectRegistrar {
             .addAttributeModifier(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), "4c9d4fd6-6354-420c-a21b-4b6810f2d07b", 100, AttributeModifier.Operation.ADDITION)
             .addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE, "f89ff503-070c-4a85-9512-44fe0ec3b153", 1, AttributeModifier.Operation.ADDITION));
 
+    public static final RegistryObject<MobEffect> VILLAGER_INSPIRATION = MOB_EFFECTS.register("villager_inspiration", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x66ffcc));
+
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||
                 mobEffect == UNCONTROLLABLE.get();

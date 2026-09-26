@@ -216,6 +216,12 @@ public class MobEffectIcons {
             "invincible"
     );
 
+    public static final MobEffectIcon VILLAGER_INSPIRATION = new MobEffectIcon(
+            MobEffectRegistrar.VILLAGER_INSPIRATION.get(),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/mob_effect/hero_of_the_village.png"),
+            "villager_inspiration"
+    );
+
     @Nullable
     public static MobEffectIcon getIcon(MobEffectInstance mei) {
         for (MobEffectIcon effectIcon : EFFECT_ICONS)
@@ -258,6 +264,7 @@ public class MobEffectIcons {
             WITHER,
             LEVITATION,
             FIRE_RESISTANCE,
-            INVINCIBLE
+            INVINCIBLE,
+            VILLAGER_INSPIRATION
     );
 }

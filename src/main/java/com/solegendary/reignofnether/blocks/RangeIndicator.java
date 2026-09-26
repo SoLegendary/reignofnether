@@ -56,6 +56,12 @@ public interface RangeIndicator {
                     bp = ((LivingEntity) unit).getOnPos();
                     showRangeCircle = true;
                 }
+                MobEffectInstance mei2 = ((LivingEntity) unit).getEffect(MobEffectRegistrar.VILLAGER_INSPIRATION.get());
+                if (mei2 != null) {
+                    range = UnitItems.BELL_OF_ARMS_RANGE;
+                    bp = ((LivingEntity) unit).getOnPos();
+                    showRangeCircle = true;
+                }
             }
         } else if (this instanceof BuildingPlacement bpl) {
             for (Ability ability : bpl.getAbilities()) {

@@ -69,15 +69,6 @@ public class EnchantmentIcons {
                     fcs(I18n.get("hud.enchant.reignofnether.vigor.tooltip"))
             )
     );
-    public static final EnchantmentIcon EFFICIENCY = new EnchantmentIcon(
-            Enchantments.BLOCK_EFFICIENCY,
-            EquipmentSlot.MAINHAND,
-            getEnchantedItemStack(Items.IRON_PICKAXE),
-            List.of(
-                    fcs(I18n.get("hud.enchant.reignofnether.efficiency"), true),
-                    fcs(I18n.get("hud.enchant.reignofnether.efficiency.tooltip"))
-            )
-    );
     public static final EnchantmentIcon FORTIFYING = new EnchantmentIcon(
             EnchantmentRegistrar.FORTYIFYING.get(),
             EquipmentSlot.CHEST,
@@ -175,16 +166,6 @@ public class EnchantmentIcons {
             List.of(
                     fcs(I18n.get("hud.enchant.reignofnether.flame"), true),
                     fcs(I18n.get("hud.enchant.reignofnether.flame.tooltip"))
-            )
-    );
-
-    public static final EnchantmentIcon ENCHANTMENT_AMPLIFIER = new EnchantmentIcon(
-            null,
-            EquipmentSlot.MAINHAND,
-            getEnchantedItemStack(Items.ENCHANTED_BOOK),
-            List.of(
-                    fcs(I18n.get("hud.enchant.reignofnether.march_of_progress"), true),
-                    fcs(I18n.get("hud.enchant.reignofnether.march_of_progress.tooltip"))
             )
     );
 

@@ -8,10 +8,12 @@ import com.solegendary.reignofnether.ability.heroAbilities.royalguard.Avatar;
 import com.solegendary.reignofnether.ability.heroAbilities.royalguard.BattleRagePassive;
 import com.solegendary.reignofnether.ability.heroAbilities.royalguard.MaceSlam;
 import com.solegendary.reignofnether.ability.heroAbilities.royalguard.TauntingCry;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -73,7 +75,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated {
+public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
             List.of(
                     new Pair<>(new MaceSlam(), Keybindings.abilitySlot1),
@@ -335,6 +337,12 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         }
     }
 
+    private Set<BlockPos> highlightBps = new HashSet<>();
+    private BlockPos lastOnPos = new BlockPos(0,0,0);
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
+
     public RoyalGuardUnit(EntityType<? extends Vindicator> entityType, Level level) {
         super(entityType, level);
 
@@ -485,6 +493,13 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
             double z0 = getTarget().getZ() - this.getZ();
             float f = (float) (Mth.atan2(z0, x0) * 57.2957763671875) - 90.0F;
             this.setYRot(this.rotlerp(this.getYRot(), f, 10f));
+        }
+
+        if (level().isClientSide() && HudClientEvents.hudSelectedEntity == this) {
+            if (!lastOnPos.equals(getOnPos())) {
+                updateHighlightBps(level());
+            }
+            lastOnPos = getOnPos();
         }
     }
 
