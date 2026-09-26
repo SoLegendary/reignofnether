@@ -503,19 +503,16 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         ));
 
         if (((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED) != null) {
-            float ms = unit.getMovementSpeed();
+            float ms = unit.getMovementSpeed() * unit.getSpeedModifier();
             int msInt = (int) (ms * 101);
             if (unit instanceof SlimeUnit slimeUnit && slimeUnit.isUsingJumpingMovement()) {
                 msInt /= SlimeJumpMoveControl.MOVESPEED_MULTIPLIER;
             }
-            if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield()) {
-                msInt *= ToggleShield.MOVESPEED_MULTIPLIER;
-            }
             int msColour = WHITE;
-            double msAttr = ((LivingEntity) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
-            if (msAttr < unit.getMovementSpeed()) {
+            double msBase = ((LivingEntity) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
+            if (msBase < ms) {
                 msColour = GREEN;
-            } else if (msAttr > unit.getMovementSpeed()) {
+            } else if (msBase > ms) {
                 msColour = RED;
             }
             renderedStats.add(new RenderedStat(

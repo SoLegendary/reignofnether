@@ -79,7 +79,7 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
             boolean canContinue = !(livingentity instanceof Player) || !livingentity.isSpectator() && !((Player)livingentity).isCreative();
             if (canContinue) {
                 this.path = this.mob.getNavigation().createPath(livingentity, 0);
-                this.mob.getNavigation().moveTo(this.path,  Unit.getSpeedModifier((Unit) this.mob));
+                this.mob.getNavigation().moveTo(this.path, ((Unit) this.mob).getSpeedModifier());
             }
             return canContinue;
         }
@@ -87,7 +87,7 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
 
     public void start() {
         if (!((Unit) this.mob).getHoldPosition())
-            this.mob.getNavigation().moveTo(this.path,  Unit.getSpeedModifier((Unit) this.mob));
+            this.mob.getNavigation().moveTo(this.path, ((Unit) this.mob).getSpeedModifier());
         this.mob.setAggressive(true);
     }
 
@@ -115,7 +115,7 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
             else if (!((Unit) this.mob).getHoldPosition()) {
                 if (ticksUntilNextPathRecalculation <= 0) {
                     Path path = mob.getNavigation().createPath(target.getX(), target.getY(), target.getZ(), 0);
-                    this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier((Unit) this.mob));
+                    this.mob.getNavigation().moveTo(path, ((Unit) this.mob).getSpeedModifier());
                     if (distSqr < 16)
                         ticksUntilNextPathRecalculation = tickPathRecalcMax;
                     else if (distSqr < 64)

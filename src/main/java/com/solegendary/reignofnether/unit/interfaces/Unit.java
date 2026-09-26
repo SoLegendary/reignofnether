@@ -757,7 +757,7 @@ public interface Unit {
     // equipment only needs to be done serverside, but mod-specific fields need to be done clientside too
     default void setupEquipmentAndUpgradesClient() { }
 
-    static float getSpeedModifier(Unit unit) {
+    default float getSpeedModifier() {
         return 1.0f;
     }
 
