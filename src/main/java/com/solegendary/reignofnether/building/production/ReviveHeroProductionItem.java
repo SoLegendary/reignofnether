@@ -76,8 +76,9 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                     if (newHero instanceof UnitInventory inv)
                         for (int i = 0; i < inv.getAllItems().size() && i < oldHero.items.size(); i++)
                             inv.set(i, oldHero.items.get(i));
+
+                    HeroServerEvents.fallenHeroes.remove(oldHero);
                 }
-                HeroServerEvents.fallenHeroes.remove(oldHero);
             } else {
                 HeroUnitSave oldHero = HeroUnit.getFallenHero(true, placement.ownerName, getHeroEntityType().getDescriptionId());
                 HeroClientEvents.fallenHeroes.remove(oldHero);

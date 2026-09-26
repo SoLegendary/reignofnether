@@ -117,9 +117,7 @@ public interface HeroUnit extends Unit {
     }
 
     static List<HeroUnitSave> getFallenHeroes(boolean isClientSide, String ownerName) {
-        ArrayList<HeroUnitSave> heroUnits = isClientSide ? HeroClientEvents.fallenHeroes : HeroServerEvents.fallenHeroes;
-        heroUnits.removeIf(h -> !h.ownerName.equals(ownerName));
-        return heroUnits;
+        return isClientSide ? HeroClientEvents.fallenHeroes : HeroServerEvents.fallenHeroes;
     }
 
     int MAX_LEVEL = 10;
