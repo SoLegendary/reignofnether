@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -1527,10 +1528,14 @@ public class UnitClientEvents {
                         if (!mobEffectIcons.containsKey(entityId))
                             mobEffectIcons.put(entityId, new HashMap<>());
                         mobEffectIcons.get(entityId).put(mei.getEffect(), MobEffectIcons.getIcon(mei));
+                        if (entity instanceof RangeIndicator ri)
+                            ri.updateHighlightBps(entity.level());
                     } else if (entity.getEffect(effect) != null) {
                         entity.removeEffect(effect);
                         if (mobEffectIcons.containsKey(entityId))
                             mobEffectIcons.get(entityId).remove(effect);
+                        if (entity instanceof RangeIndicator ri)
+                            ri.updateHighlightBps(entity.level());
                     }
                 }
             }

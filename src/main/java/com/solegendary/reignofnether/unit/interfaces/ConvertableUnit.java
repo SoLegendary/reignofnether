@@ -33,6 +33,8 @@ public interface ConvertableUnit {
             newEntity.addEffect(effect);
 
         newEntity.copyPosition(oldEntity);
+        newEntity.setXRot(oldEntity.getXRot());
+        newEntity.setYRot(oldEntity.getYRot());
         ((Unit) newEntity).setOwnerName(oldUnit.getOwnerName());
         level.addFreshEntity(newEntity);
 

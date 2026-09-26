@@ -15,6 +15,8 @@ import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.FactionRegistries;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -26,6 +28,7 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.UnitConvertClientboundPacket;
@@ -400,6 +403,20 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                 if (getMainHandItem().getAllEnchantments().containsKey(Enchantments.BLOCK_EFFICIENCY) &&
                     !hasEffectWithDuration(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
                     EnchantmentHelper.setEnchantments(new HashMap<>(), getMainHandItem());
+                }
+
+                boolean inRangeOfBellHolder = false;
+                for (LivingEntity le : UnitServerEvents.getAllUnits()) {
+                    if (le instanceof UnitInventory inv && inv.isHoldingActive(UnitItems.BELL_OF_ARMS)) {
+                        int range = UnitItems.BELL_OF_ARMS_RANGE;
+                        if (this.getEyePosition().distanceToSqr(le.position()) <= range * range) {
+                            inRangeOfBellHolder = true;
+                            break;
+                        }
+                    }
+                }
+                if (inRangeOfBellHolder) {
+                    convertToMilitia();
                 }
             }
         }
