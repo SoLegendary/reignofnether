@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.List;
 
-public class DrownedProd extends GraveyardUnitProductionItem {
+public class DrownedProd extends GraveyardUnitProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Drowned";
     public final static ResourceCost cost = ResourceCosts.DROWNED;
@@ -48,12 +48,12 @@ public class DrownedProd extends GraveyardUnitProductionItem {
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/drowned.png"),
                 List.of(
                         FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.EMPTY,
                         FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.EMPTY,
                         FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip3"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        FormattedCharSequence.EMPTY,
                         FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip4"), Style.EMPTY)
                 )
         );

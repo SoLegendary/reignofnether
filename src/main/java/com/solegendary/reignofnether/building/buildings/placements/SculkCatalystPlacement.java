@@ -1,11 +1,16 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.isPosInsideAnyBuilding;
+
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Sacrifice;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.monsters.SculkCatalyst;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -14,9 +19,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.*;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.isPosInsideAnyBuilding;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SculkCatalystPlacement extends BuildingPlacement {
 

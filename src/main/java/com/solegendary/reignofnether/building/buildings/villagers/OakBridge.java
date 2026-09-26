@@ -12,8 +12,8 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -50,13 +50,11 @@ public class OakBridge extends AbstractBridge {
     }
 
     @Override
-    public Faction getFaction() {
-        return Faction.VILLAGERS;
-    }
+    
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(name,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/oak_fence.png"),
             hotkey,
@@ -67,29 +65,14 @@ public class OakBridge extends AbstractBridge {
                     || BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) || ResearchClient.hasCheat(
                     "modifythephasevariance")
             ),
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.oak_bridge"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(Component.translatable("buildings.reignofnether.oak_bridge").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.oak_bridge.tooltip1"),
-                    Style.EMPTY
-                ),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.oak_bridge.tooltip2"),
-                    Style.EMPTY
-                ),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.oak_bridge.tooltip3"),
-                    Style.EMPTY
-                ),
+                Component.translatable("buildings.reignofnether.oak_bridge.tooltip1").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.oak_bridge.tooltip2").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.oak_bridge.tooltip3").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.oak_bridge.tooltip4"),
-                    Style.EMPTY
-                )
+                Component.translatable("buildings.reignofnether.oak_bridge.tooltip4").getVisualOrderText()
             ),
             this
         );

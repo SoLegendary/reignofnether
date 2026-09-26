@@ -13,8 +13,8 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -43,11 +43,10 @@ public class Barracks extends ProductionBuilding {
         this.productions.add(ProductionItems.PILLAGER, Keybindings.abilitySlot2);
     }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/fletching_table_front.png"),
@@ -57,10 +56,10 @@ public class Barracks extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.barracks"), Style.EMPTY.withBold(true)),
+                        Component.translatable("buildings.reignofnether.barracks").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.barracks.tooltip1"), Style.EMPTY)
+                        Component.translatable("buildings.reignofnether.barracks.tooltip1").getVisualOrderText()
                 ),
                 this
         );

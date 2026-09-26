@@ -24,7 +24,6 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -234,7 +233,7 @@ public class UnitCommands {
 								.executes(ctx ->
 									issueUnitAction(
 										ctx,
-										getPlayerName(ctx.getSource().getPlayer()),
+										PlayerNameArgument.getPlayerName(ctx, "ownerName"),
 										UnitArgument.getUnits(ctx, "targets", PlayerNameArgument.getPlayerName(ctx, "ownerName")),
 										StringArgumentType.getString(ctx, "action"),
 										null,
@@ -245,7 +244,7 @@ public class UnitCommands {
 									.executes(ctx ->
 										issueUnitAction(
 											ctx,
-											getPlayerName(ctx.getSource().getPlayer()),
+											PlayerNameArgument.getPlayerName(ctx, "ownerName"),
 											UnitArgument.getUnits(ctx, "targets", PlayerNameArgument.getPlayerName(ctx, "ownerName")),
 											StringArgumentType.getString(ctx, "action"),
 											BlockPosArgument.getLoadedBlockPos(ctx, ctx.getSource().getLevel(), "targetPos"),
@@ -257,7 +256,7 @@ public class UnitCommands {
 									.executes(ctx ->
 										issueUnitAction(
 											ctx,
-											getPlayerName(ctx.getSource().getPlayer()),
+											PlayerNameArgument.getPlayerName(ctx, "ownerName"),
 											UnitArgument.getUnits(ctx, "targets", PlayerNameArgument.getPlayerName(ctx, "ownerName")),
 											StringArgumentType.getString(ctx, "action"),
 											null,
@@ -285,7 +284,7 @@ public class UnitCommands {
 									))
 									.executes(ctx -> CommandsServerEvents.setUnitSearchBehaviour(
 										ctx,
-										getPlayerName(ctx.getSource().getPlayer()),
+										PlayerNameArgument.getPlayerName(ctx, "ownerName"),
 										BlockPosArgument.getLoadedBlockPos(ctx, "selectFrom"),
 										BlockPosArgument.getLoadedBlockPos(ctx, "selectTo"),
 										StringArgumentType.getString(ctx, "behaviour")
@@ -394,10 +393,5 @@ public class UnitCommands {
 		return pUnits.size();
 	}
 	
-	public static String getPlayerName(ServerPlayer player) {
-		if (player == null)
-			return "";
-		return player.getName().getString();
-	}
 }
 

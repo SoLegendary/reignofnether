@@ -4,7 +4,12 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -15,10 +20,10 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -29,8 +34,6 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 import java.util.UUID;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class Castle extends ProductionBuilding implements GarrisonableBuildingAddon {
     public final static int MAX_OCCUPANTS = 7;
@@ -82,13 +85,11 @@ public class Castle extends ProductionBuilding implements GarrisonableBuildingAd
         setActiveAddon(GarrisonableBuildingAddon.class, this, true);
     }
 
-    public Faction getFaction() {
-        return Faction.VILLAGERS;
-    }
+    
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(name,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/cobblestone.png"),
             hotkey,
@@ -99,25 +100,13 @@ public class Castle extends ProductionBuilding implements GarrisonableBuildingAd
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.BLACKSMITH)
                     && BuildingClientEvents.hasFinishedBuilding(Buildings.ARCANE_TOWER)
             ) || ResearchClient.hasCheat("modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.castle"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(Component.translatable("buildings.reignofnether.castle").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.castle.tooltip1"),
-                    Style.EMPTY
-                ),
-                FormattedCharSequence.forward(I18n.get(
-                    "buildings.reignofnether.castle.tooltip2",
-                        MAX_OCCUPANTS
-                ), Style.EMPTY),
+                Component.translatable("buildings.reignofnether.castle.tooltip1").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.castle.tooltip2", MAX_OCCUPANTS).getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.castle.tooltip3"),
-                    Style.EMPTY
-                )
+                Component.translatable("buildings.reignofnether.castle.tooltip3").getVisualOrderText()
             ),
             this
         );

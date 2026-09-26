@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.survival.spawners;
 
-import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -15,7 +14,7 @@ import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
@@ -189,6 +188,6 @@ public class IllagerWaveSpawner {
         if (remainingPop > 0) {
             PlayerServerEvents.sendMessageToAllPlayers("Failed to spawn " + remainingPop + "/" + pop + " population worth of villager units");
         }
-        lastFaction = Faction.VILLAGERS;
+        lastFaction = Factions.VILLAGERS;
     }
 }

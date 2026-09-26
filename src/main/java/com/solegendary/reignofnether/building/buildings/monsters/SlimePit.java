@@ -13,9 +13,9 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -46,11 +46,10 @@ public class SlimePit extends ProductionBuilding {
         this.productions.add(ProductionItems.SLIME, Keybindings.abilitySlot1);
     }
 
-    public Faction getFaction() {return Faction.MONSTERS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
             name,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/slime.png"),
@@ -60,12 +59,12 @@ public class SlimePit extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.GRAVEYARD) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.slime_pit"), Style.EMPTY.withBold(true)),
+                Component.translatable("buildings.reignofnether.slime_pit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.slime_pit.tooltip1"), Style.EMPTY),
+                Component.translatable("buildings.reignofnether.slime_pit.tooltip1").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.slime_pit.tooltip3"), Style.EMPTY)
+                Component.translatable("buildings.reignofnether.slime_pit.tooltip3").getVisualOrderText()
             ),
             this
         );

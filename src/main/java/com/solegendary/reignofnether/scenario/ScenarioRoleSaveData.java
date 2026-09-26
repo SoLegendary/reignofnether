@@ -1,8 +1,7 @@
 package com.solegendary.reignofnether.scenario;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.resources.Resources;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;

@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.matchstart;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
@@ -452,7 +453,7 @@ public class MatchStartScreen extends Screen {
         String drawnName = this.font.plainSubstrByWidth(name, nameMaxW);
         g.drawString(this.font, drawnName, nameX, tileY + (FRAME_SIZE - this.font.lineHeight) / 2 + 1, nameCol, false);
 
-        Faction[] order = { Faction.VILLAGERS, Faction.MONSTERS, Faction.PIGLINS, Faction.RANDOM };
+        Faction[] order = { Factions.VILLAGERS, Factions.MONSTERS, Factions.PIGLINS, Factions.RANDOM };
         int currentX = factionStartX - 6;
         for (Faction f : order) {
             renderFactionTile(g, sp, f, currentX, tileY, localName, mx, my);
@@ -481,11 +482,11 @@ public class MatchStartScreen extends Screen {
     private void renderFactionTile(GuiGraphics g, StartPos sp, Faction f,
                                    int x, int y, String localName, int mx, int my) {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(localName);
-        ResourceLocation icon = MiscUtil.getFactionIcon(f);
-        if (f == Faction.RANDOM)
+        ResourceLocation icon = f.icon;
+        if (f == Factions.RANDOM)
             icon = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/question_mark.png");
 
-        Button button = new ButtonBuilder("Faction " + f.name())
+        Button button = new ButtonBuilder("Faction " + f.getName())
                 .iconResource(icon)
                 .isSelected(() -> sp.faction == f && !sp.playerName.isBlank())
                 .isEnabled(() -> mine)
@@ -506,7 +507,7 @@ public class MatchStartScreen extends Screen {
 
         Button button = new ButtonBuilder("Ready toggle")
                 .iconResource(icon)
-                .isEnabled(() -> mine && sp.faction != Faction.NONE && sp.faction != Faction.NEUTRAL)
+                .isEnabled(() -> mine && sp.faction != Factions.NONE && sp.faction != Factions.NEUTRAL)
                 .onLeftClick(() -> toggleReady(sp))
                 .tooltipLines(List.of(fcs(sp.ready
                         ? I18n.get("startpos.reignofnether.ready_button.unready")
@@ -615,7 +616,7 @@ public class MatchStartScreen extends Screen {
         String hint;
         if (current == null) {
             hint = Component.translatable("matchstart.reignofnether.hint.pick_pos").getString();
-        } else if (current.faction == Faction.NONE) {
+        } else if (current.faction == Factions.NONE) {
             hint = Component.translatable("matchstart.reignofnether.hint.pick_faction").getString();
         } else if (!current.ready) {
             hint = Component.translatable("matchstart.reignofnether.hint.ready_up").getString();
@@ -705,7 +706,7 @@ public class MatchStartScreen extends Screen {
         StartPos current = StartPosClientEvents.getPos();
         if (current != null) {
             StartPosServerboundPacket.unreservePos(current.pos);
-            StartPosClientEvents.selectedFaction = Faction.NONE;
+            StartPosClientEvents.selectedFaction = Factions.NONE;
         }
     }
 
@@ -717,8 +718,8 @@ public class MatchStartScreen extends Screen {
             StartPosServerboundPacket.reservePos(pos.pos, faction, name);
         } else if (pos.playerName.equals(name)) {
             if (pos.faction == faction) {
-                StartPosClientEvents.selectedFaction = Faction.NONE;
-                StartPosServerboundPacket.reservePos(pos.pos, Faction.NONE, name);
+                StartPosClientEvents.selectedFaction = Factions.NONE;
+                StartPosServerboundPacket.reservePos(pos.pos, Factions.NONE, name);
             } else {
                 StartPosClientEvents.selectedFaction = faction;
                 StartPosServerboundPacket.reservePos(pos.pos, faction, name);

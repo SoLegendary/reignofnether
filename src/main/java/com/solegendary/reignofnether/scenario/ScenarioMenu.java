@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.scenario;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.MyEditBox;
@@ -21,7 +22,6 @@ import net.minecraftforge.client.event.ScreenEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.solegendary.reignofnether.faction.Faction.*;
 import static com.solegendary.reignofnether.scenario.ScenarioClientEvents.getScenarioRoleToEdit;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
@@ -234,8 +234,8 @@ public class ScenarioMenu {
                         return;
                     ScenarioRole role = getScenarioRoleToEdit();
                     if (role != null) {
-                        role.faction = NEUTRAL;
-                        ScenarioServerboundPacket.setRoleFaction(role.index, NEUTRAL);
+                        role.faction = Factions.NEUTRAL;
+                        ScenarioServerboundPacket.setRoleFaction(role.index, Factions.NEUTRAL);
                         role.startingResources.food = 0;
                         ScenarioServerboundPacket.setStartingResources(role.index, ResourceName.FOOD, 0);
                         role.startingResources.wood = 0;
@@ -272,60 +272,22 @@ public class ScenarioMenu {
         Button factionButton = new Button(
             "Toggle Faction",
             Button.itemIconSize,
-            MiscUtil.getFactionIcon(role.faction),
+            role.faction.icon,
             (Keybinding) null,
             () -> false,
             () -> false,
             () -> true,
             () -> {
-                switch (role.faction) {
-                    case VILLAGERS -> {
-                        role.faction = MONSTERS;
-                        ScenarioServerboundPacket.setRoleFaction(role.index, MONSTERS);
-                    }
-                    case MONSTERS -> {
-                        role.faction = PIGLINS;
-                        ScenarioServerboundPacket.setRoleFaction(role.index, PIGLINS);
-                    }
-                    case PIGLINS -> {
-                        role.faction = NEUTRAL;
-                        ScenarioServerboundPacket.setRoleFaction(role.index, NEUTRAL);
-                    }
-                    case NONE, NEUTRAL -> {
-                        role.faction = VILLAGERS;
-                        ScenarioServerboundPacket.setRoleFaction(role.index, VILLAGERS);
-                    }
-                }
-
+                role.faction = Factions.getFaction(MiscUtil.getNextItem(Factions.PLAYABLE_FACTIONS, role.faction.key));
+                ScenarioServerboundPacket.setRoleFaction(role.index, role.faction);
             },
             () -> {
-                switch (role.faction) {
-                    case VILLAGERS -> {
-                        role.faction = NEUTRAL;
-                        ScenarioServerboundPacket.setRoleFaction(role.index, NEUTRAL);
-                    }
-                    case MONSTERS -> {
-                        role.faction = VILLAGERS;
-                        ScenarioServerboundPacket.setRoleFaction(role.index, VILLAGERS);
-                    }
-                    case PIGLINS -> {
-                        role.faction = MONSTERS;
-                        ScenarioServerboundPacket.setRoleFaction(role.index, MONSTERS);
-                    }
-                    case NONE, NEUTRAL -> {
-                        role.faction = PIGLINS;
-                        ScenarioServerboundPacket.setRoleFaction(role.index, PIGLINS);
-                    }
-                }
+                role.faction = Factions.getFaction(MiscUtil.getLastItem(Factions.PLAYABLE_FACTIONS, role.faction.key));
+                ScenarioServerboundPacket.setRoleFaction(role.index, role.faction);
             },
             List.of()
         );
-        String factionStr = switch (role.faction) {
-            case VILLAGERS -> I18n.get("hud.faction.reignofnether.villagers");
-            case MONSTERS -> I18n.get("hud.faction.reignofnether.monsters");
-            case PIGLINS -> I18n.get("hud.faction.reignofnether.piglins");
-            default -> I18n.get("hud.faction.reignofnether.neutral");
-        };
+        String factionStr = role.faction.getName();
         String label = I18n.get("sandbox.reignofnether.faction_button1", factionStr);
         evt.getGuiGraphics().drawString(MC.font, label, x + 27, y + 7, 0xFFFFFF);
         renderButton(factionButton, x, y, evt);

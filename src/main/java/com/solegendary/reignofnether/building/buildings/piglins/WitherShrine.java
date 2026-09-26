@@ -11,8 +11,8 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -43,11 +43,10 @@ public class WitherShrine extends ProductionBuilding {
         this.productions.add(ProductionItems.RESEARCH_FIRE_RESISTANCE, Keybindings.abilitySlot2);
     }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
             name,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/gilded_blackstone.png"),
@@ -57,13 +56,13 @@ public class WitherShrine extends ProductionBuilding {
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BASTION) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wither_shrine"), Style.EMPTY.withBold(true)),
+                Component.translatable("buildings.reignofnether.wither_shrine").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wither_shrine.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wither_shrine.tooltip2"), Style.EMPTY),
+                Component.translatable("buildings.reignofnether.wither_shrine.tooltip1").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.wither_shrine.tooltip2").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wither_shrine.tooltip3"), Style.EMPTY)
+                Component.translatable("buildings.reignofnether.wither_shrine.tooltip3").getVisualOrderText()
             ),
             this
         );

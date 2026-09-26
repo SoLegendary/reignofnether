@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.neutral;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -7,12 +9,14 @@ import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.HealingFountainPlacement;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -21,8 +25,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class HealingFountain extends Building implements RangeIndicatorAddon {
 
@@ -50,7 +52,7 @@ public class HealingFountain extends Building implements RangeIndicatorAddon {
         setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
 
-    public Faction getFaction() {return Faction.NONE;}
+    public Faction getFaction() {return Factions.NEUTRAL;}
 
     @Override
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
@@ -66,10 +68,10 @@ public class HealingFountain extends Building implements RangeIndicatorAddon {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.healing_fountain"), Style.EMPTY.withBold(true)),
+                Component.translatable("buildings.reignofnether.healing_fountain").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.healing_fountain.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.healing_fountain.tooltip2"), Style.EMPTY)
+                Component.translatable("buildings.reignofnether.healing_fountain.tooltip1").getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.healing_fountain.tooltip2").getVisualOrderText()
             ),
             this
         );

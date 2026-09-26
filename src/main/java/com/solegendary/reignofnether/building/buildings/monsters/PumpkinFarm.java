@@ -9,9 +9,9 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MyRenderer;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -39,11 +39,10 @@ public class PumpkinFarm extends AbstractFarm {
         this.explodeChance = 0;
     }
 
-    public Faction getFaction() {return Faction.MONSTERS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/pumpkin_side.png"),
@@ -53,11 +52,11 @@ public class PumpkinFarm extends AbstractFarm {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.pumpkin_farm"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.pumpkin_farm.tooltip1", cost.wood), MyRenderer.iconStyle),
+                        Component.translatable("buildings.reignofnether.pumpkin_farm").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.pumpkin_farm.tooltip1", cost.wood).withStyle(MyRenderer.iconStyle).getVisualOrderText(),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.pumpkin_farm.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.pumpkin_farm.tooltip3"), Style.EMPTY)
+                        Component.translatable("buildings.reignofnether.pumpkin_farm.tooltip2").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.pumpkin_farm.tooltip3").getVisualOrderText()
                 ),
                 this
         );

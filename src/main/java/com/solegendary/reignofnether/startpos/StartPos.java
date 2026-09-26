@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.startpos;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -18,7 +19,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class StartPos {
     public BlockPos pos;
-    public Faction faction = Faction.NONE; // if != NONE, is reserved by a player
+    public Faction faction = Factions.NONE; // if != NONE, is reserved by a player
     public String playerName = ""; // name of player who has reserved this spot
     public int colorId; // is the actual hex color if it's created via MapInfo
     public boolean isFromStartBlock = true;
@@ -40,14 +41,14 @@ public class StartPos {
     }
 
     public void reset() {
-        this.faction = Faction.NONE;
+        this.faction = Factions.NONE;
         this.playerName = "";
         this.ready = false;
     }
 
     public ResourceLocation getIcon() {
-        if (!playerName.isBlank() && faction != Faction.NONE) {
-            return MiscUtil.getFactionIcon(faction);
+        if (!playerName.isBlank() && faction != Factions.NONE) {
+            return faction.icon;
         }
         return getIcon(MiscUtil.getColorName(colorId, true));
     }

@@ -11,9 +11,9 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MyRenderer;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -39,11 +39,10 @@ public class WheatFarm extends AbstractFarm {
         this.maxHealth = 65d;
     }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/hay_block_side.png"),
@@ -53,11 +52,11 @@ public class WheatFarm extends AbstractFarm {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.TOWN_CENTRE) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wheat_farm"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wheat_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST), MyRenderer.iconStyle),
+                        Component.translatable("buildings.reignofnether.wheat_farm").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.wheat_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST).withStyle(MyRenderer.iconStyle).getVisualOrderText(),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wheat_farm.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.wheat_farm.tooltip3"), Style.EMPTY)
+                        Component.translatable("buildings.reignofnether.wheat_farm.tooltip2").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.wheat_farm.tooltip3").getVisualOrderText()
                 ),
                 this
         );

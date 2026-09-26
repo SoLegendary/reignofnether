@@ -173,11 +173,7 @@ public class HelperButtons {
     }
 
     private static ResourceLocation getIdleWorkerIcon() {
-        return switch (PlayerClientEvents.getFaction()) {
-            case MONSTERS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png");
-            case PIGLINS -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png");
-            default -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
-        };
+        return PlayerClientEvents.getFaction().idleWorkerIcon;
     }
 
     private static List<FormattedCharSequence> getBeaconButtonTooltip(String ownerName) {

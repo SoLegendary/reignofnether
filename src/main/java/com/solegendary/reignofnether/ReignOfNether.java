@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.commands.rtsapi.argument.PlayerNameArgument
 import com.solegendary.reignofnether.commands.rtsapi.argument.UnitArgument;
 import com.solegendary.reignofnether.commands.rtsapi.argument.options.BuildingSelectorOptions;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
-import com.solegendary.reignofnether.faction.FactionRegistries;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.custombutton.CustomButton;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonActions;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonMappingManager;
@@ -103,7 +103,6 @@ public class ReignOfNether {
         BlockEntityRegistrar.init(mlctx);
         GameRuleRegistrar.init();
         Buildings.init();
-        FactionRegistries.register();
         ProductionItems.init();
         MobEffectRegistrar.init(mlctx);
         ParticleRegistrar.init(mlctx);
@@ -166,6 +165,8 @@ public class ReignOfNether {
         }
         ResourceCosts.deferredLoadResourceCosts();
         event.enqueueWork(() -> {
+	        Factions.register();
+			
             ArgumentTypeInfos.registerByClass(BuildingArgument.class, CommandArgumentRegistrar.BUILDING_ARGUMENT.get());
             ArgumentTypeInfos.registerByClass(PlayerNameArgument.class, CommandArgumentRegistrar.PLAYER_NAME_ARGUMENT.get());
             ArgumentTypeInfos.registerByClass(UnitArgument.class, CommandArgumentRegistrar.UNIT_ARGUMENT.get());

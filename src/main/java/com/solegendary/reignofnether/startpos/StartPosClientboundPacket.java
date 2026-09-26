@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.startpos;
 
-import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.registrars.PacketHandler;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
@@ -32,7 +34,7 @@ public class StartPosClientboundPacket {
 
     public static void removePos(BlockPos pos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new StartPosClientboundPacket(StartPosAction.REMOVE, pos, Faction.NONE, "", 0));
+                new StartPosClientboundPacket(StartPosAction.REMOVE, pos, Factions.NONE, "", 0));
     }
 
     public static void reservePos(BlockPos pos, Faction faction, String playerName) {
@@ -42,42 +44,42 @@ public class StartPosClientboundPacket {
 
     public static void unreservePos(BlockPos pos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new StartPosClientboundPacket(StartPosAction.UNRESERVE, pos, Faction.NONE, "", 0));
+                new StartPosClientboundPacket(StartPosAction.UNRESERVE, pos, Factions.NONE, "", 0));
     }
 
     public static void reset() {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new StartPosClientboundPacket(StartPosAction.RESET, new BlockPos(0,0,0), Faction.NONE, "", 0));
+                new StartPosClientboundPacket(StartPosAction.RESET, new BlockPos(0,0,0), Factions.NONE, "", 0));
     }
 
     public static void startGameCountdown() {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new StartPosClientboundPacket(StartPosAction.SET_GAME_STARTING, new BlockPos(0,0,0), Faction.NONE, "", 0));
+                new StartPosClientboundPacket(StartPosAction.SET_GAME_STARTING, new BlockPos(0,0,0), Factions.NONE, "", 0));
     }
 
     public static void cancelStartGameCountdown() {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new StartPosClientboundPacket(StartPosAction.UNSET_GAME_STARTING, new BlockPos(0,0,0), Faction.NONE, "", 0));
+                new StartPosClientboundPacket(StartPosAction.UNSET_GAME_STARTING, new BlockPos(0,0,0), Factions.NONE, "", 0));
     }
 
     public static void readyPlayer(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new StartPosClientboundPacket(StartPosAction.PLAYER_READY, new BlockPos(0,0,0), Faction.NONE, playerName, 0));
+                new StartPosClientboundPacket(StartPosAction.PLAYER_READY, new BlockPos(0,0,0), Factions.NONE, playerName, 0));
     }
 
     public static void unreadyPlayer(String playerName) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new StartPosClientboundPacket(StartPosAction.PLAYER_UNREADY, new BlockPos(0,0,0), Faction.NONE, playerName, 0));
+                new StartPosClientboundPacket(StartPosAction.PLAYER_UNREADY, new BlockPos(0,0,0), Factions.NONE, playerName, 0));
     }
 
     public static void enablePos(BlockPos pos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new StartPosClientboundPacket(StartPosAction.ENABLE, pos, Faction.NONE, "", 0));
+                new StartPosClientboundPacket(StartPosAction.ENABLE, pos, Factions.NONE, "", 0));
     }
 
     public static void disablePos(BlockPos pos) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new StartPosClientboundPacket(StartPosAction.DISABLE, pos, Faction.NONE, "", 0));
+                new StartPosClientboundPacket(StartPosAction.DISABLE, pos, Factions.NONE, "", 0));
     }
 
     public StartPosClientboundPacket(StartPosAction action, BlockPos blockPos, Faction faction, String playerName, int colorId) {
@@ -91,7 +93,7 @@ public class StartPosClientboundPacket {
     public StartPosClientboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(StartPosAction.class);
         this.blockPos = buffer.readBlockPos();
-        this.faction = buffer.readEnum(Faction.class);
+        this.faction = Factions.getFaction(buffer.readResourceLocation());
         this.playerName = buffer.readUtf();
         this.colorId = buffer.readInt();
     }
@@ -99,7 +101,7 @@ public class StartPosClientboundPacket {
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeBlockPos(this.blockPos);
-        buffer.writeEnum(this.faction);
+        buffer.writeResourceLocation(this.faction.key);
         buffer.writeUtf(this.playerName);
         buffer.writeInt(this.colorId);
     }

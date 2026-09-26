@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.gamemode;
 
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -10,7 +11,7 @@ import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.survival.WaveDifficulty;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
@@ -34,7 +35,7 @@ public class ClientGameModeHelper {
             return;
 
         if (StartPosClientEvents.hasReservedPos()) {
-            StartPosClientEvents.selectedFaction = Faction.NONE;
+            StartPosClientEvents.selectedFaction = Factions.NONE;
             StartPosServerboundPacket.unreservePos(StartPosClientEvents.getPos().pos);
         }
         switch (gameMode) {

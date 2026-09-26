@@ -1,7 +1,13 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.NetherZone;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -13,18 +19,17 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class InfernalPortal extends ProductionBuilding implements NetherConvertingAddon {
 
@@ -51,7 +56,6 @@ public class InfernalPortal extends ProductionBuilding implements NetherConverti
         setActiveAddon(NetherConvertingAddon.class, this, true);
     }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
 
     @Override
     public PortalPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
@@ -62,7 +66,7 @@ public class InfernalPortal extends ProductionBuilding implements NetherConverti
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/crying_obsidian.png"),
@@ -72,11 +76,11 @@ public class InfernalPortal extends ProductionBuilding implements NetherConverti
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.CENTRAL_PORTAL) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        fcs(I18n.get("buildings.reignofnether.infernal_portal"), true),
+                        Component.translatable("buildings.reignofnether.infernal_portal").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        fcs(""),
-                        fcs(I18n.get("buildings.reignofnether.infernal_portal.tooltip1")),
-                        fcs(I18n.get("buildings.reignofnether.infernal_portal.tooltip2"))
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("buildings.reignofnether.infernal_portal.tooltip1").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.infernal_portal.tooltip2").getVisualOrderText()
                 ),
                 this
         );

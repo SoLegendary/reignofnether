@@ -4,9 +4,9 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingClientboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -32,6 +32,7 @@ public class ScenarioServerboundPacket {
 
     public ScenarioAction action;
     public int roleIndex;
+    public Faction faction;
     public int x;
     public int y;
     public int z;
@@ -68,13 +69,7 @@ public class ScenarioServerboundPacket {
 
     public static void setRoleFaction(int roleIndex, Faction faction) {
         if (!MiscUtil.isConnected()) return;
-        ScenarioAction scenarioAction = switch (faction) {
-            case VILLAGERS -> ScenarioAction.SET_ROLE_FACTION_VILLAGER;
-            case MONSTERS -> ScenarioAction.SET_ROLE_FACTION_MONSTER;
-            case PIGLINS -> ScenarioAction.SET_ROLE_FACTION_PIGLIN;
-            default -> ScenarioAction.SET_ROLE_FACTION_NEUTRAL;
-        };
-        PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(scenarioAction, roleIndex, 0,0,0, false, 0, ""));
+        PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(SET_ROLE_FACTION, roleIndex, 0,0,0, false, 0, "", faction));
     }
 
     public static void setRoleIsNpc(int roleIndex, boolean isNpc) {
@@ -91,6 +86,19 @@ public class ScenarioServerboundPacket {
         if (!MiscUtil.isConnected()) return;
         PacketHandler.INSTANCE.sendToServer(new ScenarioServerboundPacket(ScenarioAction.SAVE_SCENARIO, 0, 0,0,0, false, 0, ""));
     }
+    
+    public ScenarioServerboundPacket(ScenarioAction action, int roleIndex, int x, int y, int z,
+                                     boolean boolValue, int intValue, String strValue, Faction faction) {
+        this.action = action;
+        this.roleIndex = roleIndex;
+        this.faction = faction;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.boolValue = boolValue;
+        this.intValue = intValue;
+        this.strValue = strValue;
+    }
 
     public ScenarioServerboundPacket(ScenarioAction action, int roleIndex, int x, int y, int z,
                                    boolean boolValue, int intValue, String strValue) {
@@ -106,6 +114,9 @@ public class ScenarioServerboundPacket {
 
     public ScenarioServerboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(ScenarioAction.class);
+        if (this.action == SET_ROLE_FACTION) {
+            this.faction = Factions.getFaction(buffer.readResourceLocation());
+        }
         this.roleIndex = buffer.readInt();
         this.x = buffer.readInt();
         this.y = buffer.readInt();
@@ -117,6 +128,8 @@ public class ScenarioServerboundPacket {
 
     public void encode(FriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
+        if (this.action == SET_ROLE_FACTION)
+            buffer.writeResourceLocation(this.faction.key);
         buffer.writeInt(this.roleIndex);
         buffer.writeInt(this.x);
         buffer.writeInt(this.y);
@@ -150,10 +163,7 @@ public class ScenarioServerboundPacket {
                 case SET_ROLE_STARTING_FOOD -> role.startingResources.food = intValue;
                 case SET_ROLE_STARTING_WOOD -> role.startingResources.wood = intValue;
                 case SET_ROLE_STARTING_ORE -> role.startingResources.ore = intValue;
-                case SET_ROLE_FACTION_VILLAGER -> role.faction = Faction.VILLAGERS;
-                case SET_ROLE_FACTION_MONSTER -> role.faction = Faction.MONSTERS;
-                case SET_ROLE_FACTION_PIGLIN -> role.faction = Faction.PIGLINS;
-                case SET_ROLE_FACTION_NEUTRAL -> role.faction = Faction.NEUTRAL;
+                case SET_ROLE_FACTION -> role.faction = Factions.getFaction(this.faction.key);
                 case SET_ROLE_NAME -> {
                     role.name = strValue;
                     // since this is sent from a text input that is updated on defocus, save here in case the user pressed close & save while still focused
