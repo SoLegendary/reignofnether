@@ -59,7 +59,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.FormattedCharSequence;
@@ -337,7 +336,7 @@ public interface Unit {
                 }
             }
         } else {
-            checkAndPickupFoodOrDrink(unit);
+            checkAndPickupFood(unit);
             checkAndPickupResources(unit);
             checkAndPickupEquipment(unit);
 
@@ -575,7 +574,7 @@ public interface Unit {
 
     static int HOSTILE_FOOD_DELAY_TICKS = 200;
 
-    private static void checkAndPickupFoodOrDrink(Unit unit) {
+    private static void checkAndPickupFood(Unit unit) {
         Mob unitMob = (Mob) unit;
         if (!unit.isHoldingEdibleFood()) {
             for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
@@ -591,7 +590,7 @@ public interface Unit {
                 Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
                 Item item = itemstack.getItem();
                 if (!itementity.isRemoved() && !itemstack.isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive() && !unit.getOwnerName().isEmpty() &&
-                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isEdibleFoodOrDrink(item)) {
+                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isEdibleFood(item)) {
 
                     boolean isApple = item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE;
                     boolean noAbsorb = unitMob.getAbsorptionAmount() <= 0;
