@@ -195,7 +195,7 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     private LivingEntity lastTarget = null;
 
     public void tick() {
-        this.setCanPickUpLoot(false);
+        this.setCanPickUpLoot(true);
 
         super.tick();
         Unit.tick(this);

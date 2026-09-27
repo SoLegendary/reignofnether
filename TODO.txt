@@ -87,6 +87,8 @@ Bugfixes
     - Test on villagers campaign #3
 [🟡] Evasion chance attribute now works on all units
 [🟡] Bears and Zoglins now respect evasion chance
+[✔] Iron golems and witches can now pick up resources
+[🟡] Clarified in the tutorial that only humanoid non-hero units can pick up resources
 
 Languages
 ---------
