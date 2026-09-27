@@ -34,6 +34,7 @@ public interface RangeIndicator {
         boolean showRangeLine = false;
         boolean showRadiusCircle = false;
         boolean showRangeCircle = false;
+        boolean showRadiusAtCursor = false;
 
         if (this instanceof Unit unit) {
             boolean hasAbilityWithRange = false;
@@ -83,6 +84,9 @@ public interface RangeIndicator {
                 showRangeLine = unitItem.showRangeLine;
                 showRadiusCircle = unitItem.showRadiusCircle;
                 showRangeCircle = unitItem.showRangeCircle;
+                if (ItemClientEvents.actionableUnitItem == unitItem) {
+                    showRadiusAtCursor = unitItem.showRadiusAtCursor;
+                }
             }
         }
         Set<BlockPos> highlightBps = new HashSet<>();
@@ -92,12 +96,15 @@ public interface RangeIndicator {
                 for (BlockPos pos : MiscUtil.getLine2D(bp, limitedBp))
                     highlightBps.add(MiscUtil.getHighestGroundBlock(level, pos).above());
             }
-            if (showRadiusCircle) {
-                BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(bp, CursorClientEvents.getPreselectedBlockPos(), range + 1);
-                highlightBps.addAll(MiscUtil.getRangeIndicatorFilledCircleBlocks(limitedBp, (int) radius - 1, level));
+            if (showRadiusCircle && !showRadiusAtCursor) {
+                highlightBps.addAll(MiscUtil.getRangeIndicatorFilledCircleBlocks(bp, (int) radius - 1, level));
             }
             if (showRangeCircle) {
                 highlightBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(bp, (int) (range - 1), level));
+            }
+            if (showRadiusAtCursor) {
+                BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(bp, CursorClientEvents.getPreselectedBlockPos(), range + 1);
+                highlightBps.addAll(MiscUtil.getRangeIndicatorFilledCircleBlocks(limitedBp, (int) radius - 1, level));
             }
         }
         setHighlightBps(highlightBps);

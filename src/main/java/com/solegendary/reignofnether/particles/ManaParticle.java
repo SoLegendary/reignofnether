@@ -9,14 +9,17 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class FloatingSoulfireParticle extends AbstractFloatingParticle {
+public class ManaParticle extends AbstractFloatingParticle {
 
-    FloatingSoulfireParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
+    ManaParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
         super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
         this.darkenOverTime = false;
         this.slowOverTime = true;
         this.lifetime *= 2.0f;
         this.quadSizeMultiplier = 2.0f;
+        this.rCol = 0.2f;
+        this.bCol = 0.8F;
+        this.gCol = 0.2f;
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -28,7 +31,7 @@ public class FloatingSoulfireParticle extends AbstractFloatingParticle {
         }
 
         public Particle createParticle(SimpleParticleType pType, ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
-            FloatingSoulfireParticle particle = new FloatingSoulfireParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
+            ManaParticle particle = new ManaParticle(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
             particle.pickSprite(this.sprite);
             return particle;
         }

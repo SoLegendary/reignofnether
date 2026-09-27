@@ -721,8 +721,7 @@ public class HudClientEvents {
 
                 int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
-
-                if (ItemClientEvents.ENABLED && unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(unit)) {
+                if (unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory((LivingEntity) unit)) {
                     hudZones.add(ItemClientEvents.renderUnitInventory(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, inv));
                     renderedItemsOrResources = true;
                 }

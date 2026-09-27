@@ -67,6 +67,7 @@ public abstract class UnitItem implements RangeIndicator {
     public boolean showRangeCircle;
     public boolean showRangeLine;
     public boolean showRadiusCircle;
+    public boolean showRadiusAtCursor;
     public boolean suppressDefaultError;
     public boolean doCastAnimation;
     public boolean resetBehaviours;
@@ -117,6 +118,7 @@ public abstract class UnitItem implements RangeIndicator {
         this.showRangeCircle = builder.showRangeCircle;
         this.showRangeLine = builder.showRangeLine;
         this.showRadiusCircle = builder.showRadiusCircle;
+        this.showRadiusAtCursor = builder.showRadiusAtCursor;
         this.suppressDefaultError = builder.suppressDefaultError;
         this.doCastAnimation = builder.doCastAnimation;
         this.resetBehaviours = builder.resetBehaviours;

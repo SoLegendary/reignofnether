@@ -57,8 +57,8 @@ public class ParticleRegistrar {
             PARTICLES.register("floating_heart",
                     () -> new SimpleParticleType(false));
 
-    public static final RegistryObject<SimpleParticleType> FLOATING_SOUL_FIRE =
-            PARTICLES.register("floating_soul_fire",
+    public static final RegistryObject<SimpleParticleType> MANA =
+            PARTICLES.register("mana",
                     () -> new SimpleParticleType(false));
 
     public static void init(FMLJavaModLoadingContext context) {

@@ -51,6 +51,7 @@ import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
+import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
@@ -140,5 +141,6 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(WorldBorderServerEvents.class);
         vanillaEventBus.register(CustomButtonServerEvents.class);
         vanillaEventBus.register(ItemServerEvents.class);
+        vanillaEventBus.register(TaskSchedulerServerEvents.class);
     }
 }

@@ -39,7 +39,7 @@ public class EdibleFoodItem extends UnitItem {
                  boolean noAbsorb = mob.getAbsorptionAmount() <= 0;
                  boolean isHurt = mob.getHealth() < ((Mob) unit).getMaxHealth();
                  if ((isApple && noAbsorb) || (!isApple && isHurt)) {
-                     Unit.startEatingFood(unit, new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), new ItemStack(item)));
+                     Unit.startEatingOrDrinking(unit, new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), new ItemStack(item)));
                      return true;
                  }
                  return false;

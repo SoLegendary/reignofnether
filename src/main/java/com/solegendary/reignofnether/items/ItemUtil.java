@@ -2,8 +2,14 @@ package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
+import com.solegendary.reignofnether.registrars.ItemRegistrar;
+import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.time.TimeClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
+import com.solegendary.reignofnether.util.ParticleUtil;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
@@ -44,7 +50,7 @@ public class ItemUtil {
     public static UnitItem getUnitItem(ItemStack itemStack) {
         if (itemStack == null)
             return null;
-        if (isPreparedEdibleFood(itemStack.getItem()))
+        if (isEdibleFood(itemStack.getItem()))
             return new EdibleFoodItem(itemStack.getItem());
         outerLoop:
         for (UnitItem unitItem : UnitItems.ITEMS) {
@@ -87,7 +93,7 @@ public class ItemUtil {
                 itemStack.getTag().getBoolean("active");
     }
 
-    private static List<Item> edibleFoods = List.of(
+    private final static List<Item> edibleFoods = List.of(
             Items.COOKED_BEEF,
             Items.COOKED_CHICKEN,
             Items.COOKED_COD,
@@ -107,8 +113,21 @@ public class ItemUtil {
             Items.GOLDEN_CARROT
     );
 
-    public static boolean isPreparedEdibleFood(Item item) {
+    private final static List<Item> edibleDrinks = List.of(
+            ItemRegistrar.MANA_POTION.get(),
+            ItemRegistrar.HEALTH_POTION.get()
+    );
+
+    public static boolean isEdibleFood(Item item) {
         return item.isEdible() && edibleFoods.contains(item);
+    }
+
+    public static boolean isEdibleDrink(Item item) {
+        return edibleDrinks.contains(item);
+    }
+
+    public static boolean isEdibleFoodOrDrink(Item item) {
+        return (item.isEdible() && edibleFoods.contains(item)) || edibleDrinks.contains(item);
     }
 
     public static float getFoodHealAmount(ItemStack itemStack) {
@@ -122,6 +141,16 @@ public class ItemUtil {
             return HEALTH_PER_BEEF;
         } else {
             return nutrition * HEAL_PER_NUTRITION;
+        }
+    }
+
+    public static void applyDrinkEffect(Item item, Mob mob) {
+        if (item == ItemRegistrar.HEALTH_POTION.get()) {
+            mob.heal(UnitItems.HEALTH_POTION_RESTORE_AMOUNT);
+            ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), 5, mob.level(), mob.getEyePosition());
+        } else if (item == ItemRegistrar.MANA_POTION.get() && mob instanceof HeroUnit heroUnit) {
+            heroUnit.setMana(heroUnit.getMana() + UnitItems.MANA_POTION_RESTORE_AMOUNT);
+            ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), 5, mob.level(), mob.getEyePosition());
         }
     }
 }

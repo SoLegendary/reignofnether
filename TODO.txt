@@ -30,10 +30,7 @@ Unit Items
         [❌] Should be visible to all players
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
-    [❌] Drinking sound/animation for potions like food
-    [❌] Show radius on hover for items like war horn (has >0 range)
-    [❌] don't cancel cast animation
-    [❌] show unit effects above portrait
+    [❌] can't drag action consumables
 
 Item drops
     [❌] Track population amount killed for every RTS player

@@ -1062,7 +1062,7 @@ public class UnitServerEvents {
             float manaDmgPerc = aUnit.getManaOnHitPercent();
             if (manaDmgPerc > 0 && aUnit instanceof HeroUnit heroUnit) {
                 heroUnit.setMana(heroUnit.getMana() + (evt.getAmount() * manaDmgPerc));
-                ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_SOUL_FIRE.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
+                ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
                         ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
             }
         }

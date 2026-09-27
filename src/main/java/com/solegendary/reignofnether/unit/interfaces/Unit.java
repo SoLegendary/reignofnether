@@ -33,6 +33,8 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.scenario.ScenarioUtils;
+import com.solegendary.reignofnether.sounds.SoundAction;
+import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.unit.*;
@@ -57,6 +59,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.FormattedCharSequence;
@@ -166,13 +169,13 @@ public interface Unit {
     public default boolean isEatingFood() { return getEatingTicksLeft() > 0; };
     public default boolean isHoldingEdibleFood() {
         for (ItemStack itemStack : getItems())
-            if (ItemUtil.isPreparedEdibleFood(itemStack.getItem()))
+            if (ItemUtil.isEdibleFoodOrDrink(itemStack.getItem()))
                 return true;
         return false;
     };
     public default Item getFoodBeingEaten() {
         for (ItemStack itemStack : getItems())
-            if (ItemUtil.isPreparedEdibleFood(itemStack.getItem()))
+            if (ItemUtil.isEdibleFoodOrDrink(itemStack.getItem()))
                 return itemStack.getItem();
         return Items.AIR;
     }
@@ -334,7 +337,7 @@ public interface Unit {
                 }
             }
         } else {
-            checkAndPickupEdibleFood(unit);
+            checkAndPickupFoodOrDrink(unit);
             checkAndPickupResources(unit);
             checkAndPickupEquipment(unit);
 
@@ -415,11 +418,13 @@ public interface Unit {
             unit.setEatingTicksLeft(unit.getEatingTicksLeft() - 1);
             if (!unit.isEatingFood()) {
                 for (ItemStack itemStack : unit.getItems()) {
-                    if (ItemUtil.isPreparedEdibleFood(itemStack.getItem())) {
-                        unitMob.level().playSound(null, unitMob.getX(), unitMob.getY(), unitMob.getZ(),
-                                SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F,
-                                unitMob.getRandom().nextFloat() * 0.1F + 0.9F
-                        );
+                    if (ItemUtil.isEdibleFoodOrDrink(itemStack.getItem())) {
+                        if (ItemUtil.isEdibleFood(itemStack.getItem())) {
+                            unitMob.level().playSound(null, unitMob.getX(), unitMob.getY(), unitMob.getZ(),
+                                    SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F,
+                                    unitMob.getRandom().nextFloat() * 0.1F + 0.9F
+                            );
+                        }
                         if (itemStack.getItem() == Items.GOLDEN_APPLE) {
                             int absorb = EdibleFoodItem.GOLDEN_APPLE_ABSORB;
                             unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, (absorb / 4) - 1));
@@ -428,22 +433,28 @@ public interface Unit {
                             int absorb = EdibleFoodItem.ENCHANTED_GOLDEN_APPLE_ABSORB;
                             unitMob.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, 999999, (absorb / 4) - 1));
                             unitMob.setAbsorptionAmount(absorb);
-                        } else {
+                        } else if (ItemUtil.isEdibleFood(itemStack.getItem())) {
                             unitMob.heal(ItemUtil.getFoodHealAmount(itemStack));
+                        } else if (ItemUtil.isEdibleDrink(itemStack.getItem())) {
+                            ItemUtil.applyDrinkEffect(itemStack.getItem(), unitMob);
                         }
                         itemStack.setCount(itemStack.getCount() - 1);
                         break;
                     }
                 }
             } else if (unit.getEatingTicksLeft() % 4 == 0) {
+                boolean isFood = false;
+                for (ItemStack itemStack : unit.getItems())
+                    if (ItemUtil.isEdibleFood(itemStack.getItem()))
+                        isFood = true;
                 unitMob.level().playSound(null, unitMob.getX(), unitMob.getY(), unitMob.getZ(),
-                        SoundEvents.GENERIC_EAT, SoundSource.PLAYERS, 0.5F,
+                        isFood ? SoundEvents.GENERIC_EAT : SoundEvents.GENERIC_DRINK, SoundSource.PLAYERS, 0.5F,
                         unitMob.getRandom().nextFloat() * 0.1F + 0.9F
                 );
             }
         } else {
             for (ItemStack itemStack : unit.getItems()) {
-                if (ItemUtil.isPreparedEdibleFood(itemStack.getItem())) {
+                if (ItemUtil.isEdibleFoodOrDrink(itemStack.getItem())) {
                     unit.setEatingTicksLeft(40);
                     break;
                 }
@@ -564,7 +575,7 @@ public interface Unit {
 
     static int HOSTILE_FOOD_DELAY_TICKS = 200;
 
-    private static void checkAndPickupEdibleFood(Unit unit) {
+    private static void checkAndPickupFoodOrDrink(Unit unit) {
         Mob unitMob = (Mob) unit;
         if (!unit.isHoldingEdibleFood()) {
             for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
@@ -580,13 +591,13 @@ public interface Unit {
                 Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
                 Item item = itemstack.getItem();
                 if (!itementity.isRemoved() && !itemstack.isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive() && !unit.getOwnerName().isEmpty() &&
-                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isPreparedEdibleFood(item)) {
+                    (rl != Relationship.HOSTILE || itementity.tickCount > HOSTILE_FOOD_DELAY_TICKS) && ItemUtil.isEdibleFoodOrDrink(item)) {
 
                     boolean isApple = item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE;
                     boolean noAbsorb = unitMob.getAbsorptionAmount() <= 0;
                     boolean isHurt = unitMob.getHealth() < ((Mob) unit).getMaxHealth();
                     if ((isApple && noAbsorb) || (!isApple && isHurt)) {
-                        startEatingFood(unit, itementity);
+                        startEatingOrDrinking(unit, itementity);
                         break;
                     }
                 }
@@ -594,7 +605,10 @@ public interface Unit {
         }
     }
 
-    public static void startEatingFood(Unit unit, ItemEntity itemEntity) {
+    public static void startEatingOrDrinking(Unit unit, ItemEntity itemEntity) {
+        if (ItemUtil.isEdibleDrink(itemEntity.getItem().getItem())) {
+            SoundClientboundPacket.playSoundAtPos(SoundAction.POTION_POP, ((LivingEntity) unit).blockPosition(), 2.0f);
+        }
         ItemStack itemStack = itemEntity.getItem();
         ((LivingEntity) unit).onItemPickup(itemEntity);
         ((LivingEntity) unit).take(itemEntity, 1);

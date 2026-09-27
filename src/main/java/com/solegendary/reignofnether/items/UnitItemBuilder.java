@@ -71,6 +71,7 @@ public class UnitItemBuilder {
     boolean showRangeCircle = true;
     boolean showRangeLine = false;
     boolean showRadiusCircle = false;
+    boolean showRadiusAtCursor = false;
     boolean doCastAnimation = false;
     boolean resetBehaviours = true;
 
@@ -171,8 +172,8 @@ public class UnitItemBuilder {
         return this;
     }
 
-    public UnitItemBuilder suppressDefaultError(boolean suppressDefaultError) {
-        this.suppressDefaultError = suppressDefaultError;
+    public UnitItemBuilder suppressDefaultError() {
+        this.suppressDefaultError = true;
         return this;
     }
 
@@ -245,23 +246,18 @@ public class UnitItemBuilder {
         return this;
     }
 
+    public UnitItemBuilder showRangeCircle() {
+        this.showRangeCircle = true;
+        return this;
+    }
+
     public UnitItemBuilder showRangeCircle(boolean show) {
         this.showRangeCircle = show;
         return this;
     }
 
-    public UnitItemBuilder showRangeLine(boolean show) {
-        this.showRangeLine = show;
-        return this;
-    }
-
-    public UnitItemBuilder showRadiusCircle(boolean show) {
-        this.showRadiusCircle = show;
-        return this;
-    }
-
-    public UnitItemBuilder showRangeCircle() {
-        this.showRangeCircle = true;
+    public UnitItemBuilder showRadiusAtCursor() {
+        this.showRadiusAtCursor = true;
         return this;
     }
 

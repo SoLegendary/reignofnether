@@ -291,8 +291,8 @@ public class ClientModEvents {
                 FloatingHeartParticle.Provider::new
         );
         evt.registerSpriteSet(
-                ParticleRegistrar.FLOATING_SOUL_FIRE.get(),
-                FloatingSoulfireParticle.Provider::new
+                ParticleRegistrar.MANA.get(),
+                ManaParticle.Provider::new
         );
         evt.registerSpriteSet(
                 ParticleRegistrar.BIG_VIBRATION.get(),

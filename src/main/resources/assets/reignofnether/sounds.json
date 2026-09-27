@@ -318,6 +318,14 @@
     "war_horn": {
         "subtitle": "sounds.reignofnether.war_horn",
         "sounds": [ "reignofnether:war_horn" ]
+    },
+    "potion_pop": {
+        "subtitle": "sounds.reignofnether.potion_pop",
+        "sounds": [
+            "reignofnether:potion_pop_01",
+            "reignofnether:potion_pop_02",
+            "reignofnether:potion_pop_03"
+        ]
     }
 }
 

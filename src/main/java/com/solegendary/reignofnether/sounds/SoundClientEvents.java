@@ -277,5 +277,6 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.TOME_OF_DUPLICATION, SoundRegistrar.TOME_OF_DUPLICATION.get());
         SOUND_MAP.put(SoundAction.TOTEM_PLACE, SoundRegistrar.TOTEM_PLACE.get());
         SOUND_MAP.put(SoundAction.WAR_HORN, SoundRegistrar.WAR_HORN.get());
+        SOUND_MAP.put(SoundAction.POTION_POP, SoundRegistrar.POTION_POP.get());
     }
 }

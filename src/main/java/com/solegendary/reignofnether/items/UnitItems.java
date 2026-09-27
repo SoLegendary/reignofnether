@@ -1,34 +1,41 @@
 package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.Blizzard;
+import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
 import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
 import com.solegendary.reignofnether.items.unititems.TotemItem;
-import com.solegendary.reignofnether.registrars.AttributeRegistrar;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
-import com.solegendary.reignofnether.registrars.ItemRegistrar;
-import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -244,22 +251,62 @@ public class UnitItems {
             .sellValue(0) // TODO
             .build();
 
-    private static final float HEALTH_POTION_RESTORE_AMOUNT = 50f;
+    public static final float HEALTH_POTION_RESTORE_AMOUNT = 50f;
     public static final UnitItem HEALTH_POTION = UnitItemBuilder.of(ItemRegistrar.HEALTH_POTION.get())
             .descId("health_potion")
             .type(UnitItemType.CONSUMABLE)
             .buyCost(150)
-            .sellValue(75) // TODO
+            .sellValue(75)
             .pointDesc("item.reignofnether.health_potion.point1", HEALTH_POTION_RESTORE_AMOUNT)
+            .suppressDefaultError()
+            .onUse(unit -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide()) {
+                    if (unit.isEatingFood()) {
+                        HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.potion.error2");
+                        return false;
+                    }
+                    boolean fullHealth = le.getHealth() >= le.getMaxHealth();
+                    if (!fullHealth) {
+                        Unit.startEatingOrDrinking(unit, new ItemEntity(le.level(), le.getX(), le.getY(), le.getZ(),
+                                new ItemStack(ItemRegistrar.HEALTH_POTION.get())));
+                        return true;
+                    } else {
+                        HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.health_potion.error");
+                        return false;
+                    }
+                }
+                return true;
+            })
             .build();
 
-    private static final float MANA_POTION_RESTORE_AMOUNT = 50f;
+    public static final float MANA_POTION_RESTORE_AMOUNT = 50f;
     public static final UnitItem MANA_POTION = UnitItemBuilder.of(ItemRegistrar.MANA_POTION.get())
             .descId("mana_potion")
             .type(UnitItemType.CONSUMABLE)
             .buyCost(150)
-            .sellValue(75) // TODO
+            .sellValue(75)
             .pointDesc("item.reignofnether.mana_potion.point1", MANA_POTION_RESTORE_AMOUNT)
+            .suppressDefaultError()
+            .onUse(unit -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide()) {
+                    if (unit.isEatingFood()) {
+                        HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.potion.error2");
+                        return false;
+                    }
+                    boolean fullMana = le instanceof HeroUnit heroUnit && heroUnit.getMana() >= heroUnit.getMaxMana();
+                    if (!fullMana) {
+                        Unit.startEatingOrDrinking(unit, new ItemEntity(le.level(), le.getX(), le.getY(), le.getZ(),
+                                new ItemStack(ItemRegistrar.MANA_POTION.get())));
+                        return true;
+                    } else {
+                        HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.mana_potion.error");
+                        return false;
+                    }
+                }
+                return true;
+            })
             .build();
 
     private static final int GHOST_CLOAK_DURATION_SECONDS = 15;
@@ -310,24 +357,93 @@ public class UnitItems {
             })
             .build();
 
-    private static final int ICE_WAND_DURATION_SECONDS = 8;
+    private static final int ICE_WAND_DURATION_SECONDS = 12;
     public static final UnitItem ICE_WAND = UnitItemBuilder.of(ItemRegistrar.ICE_WAND.get())
             .descId("ice_wand")
             .type(UnitItemType.ACTIVE)
             .buyCost(400)
-            .sellValue(200) // TODO
+            .sellValue(200)
             .pointDesc("item.reignofnether.ice_wand.point1", ICE_WAND_DURATION_SECONDS)
             .pointDesc("item.reignofnether.ice_wand.point2")
+            //.cooldownTicks(60 * 20)
+            //.manaCost(35)
+            .range(10)
+            .showRangeCircle()
+            .onUseEntity((unit, entity) -> {
+                LivingEntity le = entity;
+                if (!le.level().isClientSide()) {
+                    if (!le.level().isClientSide()) {
+                        if (le.onGround() && !(le instanceof WretchedWraithUnit) &&
+                                !le.hasEffect(MobEffectRegistrar.FREEZE.get())) {
+
+                            SoundClientboundPacket.playSoundAtPos(SoundAction.ICE_WAND, le.blockPosition());
+                            int duration = ICE_WAND_DURATION_SECONDS * 20;
+                            if (le instanceof HeroUnit) duration /= 2;
+                            BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above(),
+                                    Blocks.PACKED_ICE.defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                            BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above(),
+                                    Blocks.PACKED_ICE.defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                            BlockServerEvents.addTempBlock((ServerLevel) le.level(), le.getOnPos().above().above().above(),
+                                    BlockRegistrar.WRAITH_SNOW_LAYER.get().defaultBlockState(), Blocks.AIR.defaultBlockState(), duration, true);
+                            ServerLevel serverLevel = (ServerLevel) le.level();
+                            int entityId = le.getId();
+                            BlockServerEvents.getSnowPositions(le.level(), le.getOnPos().above(), 2)
+                                    .forEach((pos, delay) -> TaskSchedulerServerEvents.schedule(delay, () -> {
+                                        BlockServerEvents.placeWraithSnow(serverLevel, pos, entityId);
+                                    }));
+                            le.addEffect(new MobEffectInstance(MobEffectRegistrar.FREEZE.get(), duration));
+                            le.addEffect(new MobEffectInstance(MobEffectRegistrar.FROST_DAMAGE.get(), duration));
+                            ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 10, le.level(), le.position());
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            })
             .build();
 
-    private static final int UPDRAFT_TOME_DURATION_SECONDS = 6;
+    private static final int UPDRAFT_TOME_DURATION_SECONDS = 8;
+    private static final int UPDRAFT_TOME_RADIUS = 3;
+    private static final int UPDRAFT_TOME_MAX_TARGETS = 5;
     public static final UnitItem UPDRAFT_TOME = UnitItemBuilder.of(ItemRegistrar.UPDRAFT_TOME.get())
             .descId("updraft_tome")
             .type(UnitItemType.ACTIVE)
             .buyCost(500)
-            .sellValue(250) // TODO
+            .sellValue(250)
             .pointDesc("item.reignofnether.updraft_tome.point1", UPDRAFT_TOME_DURATION_SECONDS)
             .pointDesc("item.reignofnether.updraft_tome.point2")
+            //.cooldownTicks(90 * 20)
+            //.manaCost(50)
+            .range(10)
+            .radius(UPDRAFT_TOME_RADIUS)
+            .showRadiusAtCursor()
+            .showRadiusCircle()
+            .onUseGround((unit, bp) -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide()) {
+                    int numAffectedUnits = 0;
+                    List<Mob> mobs = MiscUtil.getEntitiesWithinRange(bp.above().getCenter(), UPDRAFT_TOME_RADIUS, Mob.class, le.level())
+                            .stream()
+                            .sorted(Comparator.comparing(mob -> mob.distanceToSqr(bp.getCenter())))
+                            .toList();
+                    for (Mob mob : mobs) {
+                        if (UnitServerEvents.getRl(unit, mob) != Relationship.FRIENDLY) {
+                            mob.addEffect(new MobEffectInstance(MobEffects.LEVITATION, UPDRAFT_TOME_DURATION_SECONDS * 20, 0, true, false));
+                            numAffectedUnits += 1;
+                        }
+                        if (numAffectedUnits >= UPDRAFT_TOME_MAX_TARGETS)
+                            break;
+                    }
+                    for (int i = 0; i < Math.max(1, numAffectedUnits); i++) {
+                        CompletableFuture.delayedExecutor(300 * i, TimeUnit.MILLISECONDS).execute(() -> {
+                            SoundClientboundPacket.playSoundAtPos(SoundAction.WINDCALLER_LIFT, le.blockPosition());
+                        });
+                    }
+                }
+                return true;
+            })
             .build();
 
     public static final UnitItem TOME_OF_DUPLICATION = UnitItemBuilder.of(ItemRegistrar.TOME_OF_DUPLICATION.get())
@@ -335,8 +451,9 @@ public class UnitItems {
             .type(UnitItemType.CONSUMABLE)
             .buyCost(600)
             .sellValue(300)
-            .suppressDefaultError(true)
+            .suppressDefaultError()
             .onUse(unit -> {
+                LivingEntity le = (LivingEntity) unit;
                 boolean success = false;
                 if (unit.getAbilities() != null) {
                     for (Ability ability : unit.getAbilities().get()) {
@@ -344,10 +461,13 @@ public class UnitItems {
                         success = true;
                     }
                 }
-                if (!success && !((LivingEntity) unit).level().isClientSide()) {
-                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.tome_of_duplication.error");
-                } else if (success) {
-                    // TODO particle effects
+                if (!le.level().isClientSide()) {
+                    if (!success) {
+                        HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.tome_of_duplication.error");
+                    } else {
+                        ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), 30, le.level(),le.getEyePosition());
+                        SoundClientboundPacket.playSoundAtPos(SoundAction.TOME_OF_DUPLICATION, le.blockPosition());
+                    }
                 }
                 return success;
             })
@@ -424,7 +544,7 @@ public class UnitItems {
     );
 
     private static final int TOTEM_OF_PROTECTION_DURATION_SECONDS = 30;
-    public static final UnitItem TOTEM_OF_PROTECTION = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
+    public static final UnitItem TOTEM_OF_PROTECTION = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_PROTECTION.get())
             .descId("totem_of_protection")
             .pointDesc("item.reignofnether.totem_of_protection.point1", TOTEM_OF_PROTECTION_DURATION_SECONDS),
             EntityRegistrar.TOTEM_OF_PROTECTION.get()

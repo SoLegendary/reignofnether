@@ -49,5 +49,6 @@ public enum SoundAction {
     SHADOW_SHIFTER,
     TOME_OF_DUPLICATION,
     TOTEM_PLACE,
-    WAR_HORN
+    WAR_HORN,
+    POTION_POP
 }

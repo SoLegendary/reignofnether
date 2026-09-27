@@ -89,8 +89,10 @@ public class ItemClientEvents {
         return actionableUnitItemDrag != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) && !hasLeftClickAction();
     }
 
-    public static boolean shouldRenderUnitInventory(Unit unit) {
-        return unit instanceof UnitInventory &&
+    public static boolean shouldRenderUnitInventory(LivingEntity le) {
+        return ENABLED &&
+                le instanceof UnitInventory &&
+                le instanceof Unit unit &&
                 unit.getItemGoal() != null;
     }
 
@@ -182,7 +184,8 @@ public class ItemClientEvents {
         if (HudClientEvents.hudSelectedEntity != null && actionableUnitItem != null &&
                 (actionableUnitItem.showRadiusCircle ||
                  actionableUnitItem.showRangeCircle ||
-                 actionableUnitItem.showRangeLine) &&
+                 actionableUnitItem.showRangeLine ||
+                 actionableUnitItem.showRadiusAtCursor) &&
                 (actionableUnitItem.range > 0 || actionableUnitItem.radius > 0)) {
             LivingEntity le = HudClientEvents.hudSelectedEntity;
             if (!lastOnPos.equals(le.getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
@@ -195,7 +198,7 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onLeftMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
-        if (!ENABLED || MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
+        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity) || MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
 
         for (Button button : renderedButtons)
@@ -265,14 +268,17 @@ public class ItemClientEvents {
     // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
+        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity))
+            return;
         for (Button button : renderedButtons)
             button.checkPressed(evt.getKeyCode());
     }
 
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (!ENABLED || !(MC.screen instanceof TopdownGui) || MC.player == null)
+        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity) || !(MC.screen instanceof TopdownGui) || MC.player == null)
             return;
+
         for (Button button : renderedButtons) {
             if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
                 button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
@@ -341,7 +347,7 @@ public class ItemClientEvents {
             for (ItemEntity itemEntity : preselectedItems) {
                 ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
                 boolean isResourceItem = res != null && res.resourceValue > 0;
-                if (ItemUtil.isUnitItem(itemEntity) || isResourceItem || ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
+                if (ItemUtil.isUnitItem(itemEntity) || isResourceItem || ItemUtil.isEdibleFoodOrDrink(itemEntity.getItem().getItem())) {
                     MyRenderer.drawBoxBottom(
                             evt.getPoseStack(),
                             itemEntity.getBoundingBox().inflate(0.25, 0, 0.25),
