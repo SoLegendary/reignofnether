@@ -20,6 +20,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -212,9 +213,10 @@ public class Factions {
 		registerBuilding(NEUTRAL, Buildings.END_PORTAL, Keybindings.abilitySlot3);
 		registerBuilding(NEUTRAL, Buildings.NEUTRAL_TRANSPORT_PORTAL, Keybindings.abilitySlot4);
 		
-		for (ResourceLocation faction : PLAYABLE_FACTIONS) {
-			getFaction(faction).addCustomBuildings();
-		}
+		if (FMLEnvironment.dist.isClient())
+			for (ResourceLocation faction : PLAYABLE_FACTIONS) {
+				getFaction(faction).addCustomBuildings();
+			}
 		
 	}
 	
@@ -239,7 +241,8 @@ public class Factions {
 	
 	public static void registerBuilding(Faction faction, Building building, Keybinding key) {
 		building.setFaction(faction.key);
-		faction.addBuilding(building, key);
+		if (FMLEnvironment.dist.isClient())
+			faction.addBuilding(building, key);
 	}
 	
 	public static <T extends IUnitProductionItem> void registerWorkerEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
@@ -253,10 +256,11 @@ public class Factions {
 	}
 	
 	public static <T extends IUnitProductionItem> void registerEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
-		if (unit == EntityRegistrar.MILITIA_UNIT.get())
-			faction.addEntityButton(((VillagerProd) productionItem).getMilitiaPlaceButton());
-		else
-			faction.addEntityButton(productionItem.getPlaceButton());
+		if (FMLEnvironment.dist.isClient())
+			if (unit == EntityRegistrar.MILITIA_UNIT.get())
+				faction.addEntityButton(((VillagerProd) productionItem).getMilitiaPlaceButton());
+			else
+				faction.addEntityButton(productionItem.getPlaceButton());
 		ENTITY_FACTION.put(EntityType.getKey(unit), faction.key);
 	}
 	
