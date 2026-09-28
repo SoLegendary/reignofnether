@@ -209,10 +209,11 @@ public class UnitItems {
 
     public static final UnitItem SPYGLASS = UnitItemBuilder.of(Items.SPYGLASS)
             .descId("spyglass")
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/spyglass.png"))
             .type(UnitItemType.PASSIVE)
             .buyCost(300)
             .sellValue(150)
-            .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 4, ADDITION)
+            .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 6, ADDITION)
             .build();
 
     public static final UnitItem BOOTS_OF_SWIFTNESS = UnitItemBuilder.of(ItemRegistrar.BOOTS_OF_SWIFTNESS.get())
@@ -241,7 +242,28 @@ public class UnitItems {
             .descId("satchel_of_snacks")
             .type(UnitItemType.PASSIVE)
             .buyCost(400)
-            .sellValue(200) // TODO
+            .sellValue(200)
+            .noBehaviourReset()
+            .suppressDefaultError()
+            .cooldownTicks(10 * 20)
+            .forceAutocast()
+            .onUse(unit -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide()) {
+                    if (unit.isEatingFood()) {
+                        return false;
+                    }
+                    boolean fullHealth = le.getHealth() >= le.getMaxHealth();
+                    if (!fullHealth) {
+                        Unit.startEatingOrDrinking(unit, new ItemEntity(le.level(), le.getX(), le.getY(), le.getZ(),
+                                new ItemStack(Items.COOKIE)));
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            })
             .build();
 
     public static final UnitItem BUZZY_NEST = UnitItemBuilder.of(ItemRegistrar.BUZZY_NEST.get())
@@ -565,12 +587,14 @@ public class UnitItems {
     public static final int BELL_OF_ARMS_RANGE = 20;
     public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(Items.BELL)
             .descId("bell_of_arms")
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/bell.png"))
             .type(UnitItemType.ACTIVE)
             .buyCost(600)
             .sellValue(300)
             .toggleActiveOnUse()
             .range(BELL_OF_ARMS_RANGE)
             .showRangeCircle()
+            .noBehaviourReset()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
@@ -587,6 +611,7 @@ public class UnitItems {
     public static final int TOTEM_OF_CASTING_INVINCIBILITY_DURATION_SECONDS = 5;
     public static final UnitItem TOTEM_OF_UNDYING = UnitItemBuilder.of(Items.TOTEM_OF_UNDYING)
             .descId("totem_of_undying")
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
             .type(UnitItemType.CONSUMABLE)
             .buyCost(500)
             .sellValue(250) // Handled in HeroServerEvents.onLivingDeath

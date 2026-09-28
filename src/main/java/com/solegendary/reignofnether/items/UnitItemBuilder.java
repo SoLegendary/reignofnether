@@ -74,6 +74,7 @@ public class UnitItemBuilder {
     boolean showRadiusAtCursor = false;
     boolean doCastAnimation = false;
     boolean resetBehaviours = true;
+    boolean forceAutocast = false;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -271,6 +272,10 @@ public class UnitItemBuilder {
         return this;
     }
 
+    public UnitItemBuilder forceAutocast() {
+        this.forceAutocast = true;
+        return this;
+    }
 
     public UnitItem build() {
         return new BuiltUnitItem(this);

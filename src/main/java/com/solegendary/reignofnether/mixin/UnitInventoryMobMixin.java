@@ -483,7 +483,21 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         at = @At("TAIL")
     )
     public void tick(CallbackInfo ci) {
-        if (tickCount % 20 == 0 && isHoldingActive(UnitItems.BELL_OF_ARMS))
+        if (tickCount % 20 == 0 && isHoldingActive(UnitItems.BELL_OF_ARMS)) {
             addEffect(new MobEffectInstance(MobEffectRegistrar.VILLAGER_INSPIRATION.get(), 30, 0, true, false));
+        }
+        if (tickCount % 20 == 0) {
+            for (ItemStack itemStack : getAllItems()) {
+                if (itemStack.getTag() != null && itemStack.getTag().hasUUID("uuid")) {
+                    UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
+                    if (unitItem != null && unitItem.forceAutocast &&
+                        isOffCooldown(unitItem, itemStack) && canAffordManaCost(unitItem)) {
+                        UUID itemUUID = itemStack.getTag().getUUID("uuid");
+                        if (use(itemUUID))
+                            afterUse(unitItem, itemStack, itemUUID);
+                    }
+                }
+            }
+        }
     }
 }
