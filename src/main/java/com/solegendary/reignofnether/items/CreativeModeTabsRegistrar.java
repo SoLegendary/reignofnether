@@ -29,6 +29,7 @@ public class CreativeModeTabsRegistrar {
                         output.accept(BlockRegistrar.GARRISON_ZONE_BLOCK.get());
                         output.accept(BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get());
                         output.accept(BlockRegistrar.WALKABLE_MAGMA_BLOCK.get());
+                        output.accept(BlockRegistrar.TEMPORARY_WALKABLE_MAGMA_BLOCK.get());
                         for (RegistryObject<Block> block : BlockRegistrar.BLOCKS.getEntries())
                             if (block.get() instanceof RTSStartBlock)
                                 output.accept(block.get());

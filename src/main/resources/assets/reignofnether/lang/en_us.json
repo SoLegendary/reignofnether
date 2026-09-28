@@ -113,6 +113,7 @@
     "item.reignofnether.magma_walker_boots": "Boots of Magma",
     "item.reignofnether.magma_walker_boots.desc": "Lava transforms into toasty magma beneath you",
     "item.reignofnether.magma_walker_boots.point1": "Grants Magmawalker",
+    "item.reignofnether.magma_walker_boots.point2": "Magma is temporary and deals less damage",
     "item.reignofnether.bell_of_arms": "Bell of Arms",
     "item.reignofnether.bell_of_arms.desc": "Inspire the humble might of villagers",
     "item.reignofnether.bell_of_arms.point1": "Converts all nearby villagers into militia",

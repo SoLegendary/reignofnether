@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.mixin;
 
-import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitItems;
+import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -13,7 +15,6 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
-import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.CombatTracker;
@@ -30,12 +32,14 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.BlockSnapshot;
@@ -46,8 +50,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Iterator;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -68,64 +70,84 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(
             method = "onChangedBlock",
-            at = @At("TAIL"),
-            cancellable = true
+            at = @At("TAIL")
     )
     protected void onChangedBlock(BlockPos pPos, CallbackInfo ci) {
-        Entity entity = this.level().getEntity(this.getId());
+        LivingEntity le = (LivingEntity) (Object) this;
 
-        if (!this.level().isClientSide() && entity instanceof Unit unit)
+        if (!this.level().isClientSide() && le instanceof Unit unit) {
+            boolean canFrost = false;
+            boolean canMagma = false;
+            boolean canNetherrack = false;
+
             if (SurvivalServerEvents.isEnabled() && SurvivalServerEvents.ENEMY_OWNER_NAME.equals(unit.getOwnerName())) {
-                ci.cancel();
-                FrostWalkerOnEntityMoved((LivingEntity) entity, this.level(), pPos, 1);
+                canFrost = true;
+                canNetherrack = true;
             }
+            if (le instanceof UnitInventory inv) {
+                if (inv.isHolding(UnitItems.FROST_WALKER_BOOTS))
+                    canFrost = true;
+                if (inv.isHolding(UnitItems.MAGMA_WALKER_BOOTS))
+                    canMagma = true;
+            }
+            liquidWalkerOnEntityMoved(le, pPos, 1, canFrost, canMagma, canNetherrack);
+        }
     }
 
-    // copied from FrostWalkerEnchantment.onEntityMoved
-    private void FrostWalkerOnEntityMoved(LivingEntity pLiving, Level pLevel, BlockPos pPos, int pLevelConflicting) {
-        if (pLiving.onGround()) {
+    private void liquidWalkerOnEntityMoved(LivingEntity pLiving, BlockPos pPos, int pWalkerLevel,
+                                           boolean doFrost, boolean doMagma, boolean doNetherrack) {
+        if (!doFrost && !doMagma && !doNetherrack)
+            return;
+        if (!pLiving.onGround())
+            return;
+        Level pLevel = pLiving.level();
 
-            float f = (float)Math.min(16, 2 + pLevelConflicting);
-            BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-            Iterator var7 = BlockPos.betweenClosed(pPos.offset((int) -f, (int) -1.0, (int) -f), pPos.offset((int) f, (int) -1.0, (int) f)).iterator();
+        float f = (float) Math.min(16, 2 + pWalkerLevel);
+        int r = (int) f;
+        BlockPos.MutableBlockPos above = new BlockPos.MutableBlockPos();
+        Vec3 livingPos = pLiving.position();
 
-            while(true) {
-                BlockPos blockpos;
-                BlockState blockstate1;
-                do {
-                    do {
-                        if (!var7.hasNext()) {
-                            return;
-                        }
-                        blockpos = (BlockPos)var7.next();
-                    } while(!blockpos.closerToCenterThan(pLiving.position(), f));
+        for (BlockPos blockpos : BlockPos.betweenClosed(pPos.offset(-r, -1, -r), pPos.offset(r, -1, r))) {
+            if (!blockpos.closerToCenterThan(livingPos, f))
+                continue;
 
-                    blockpos$mutableblockpos.set(blockpos.getX(), blockpos.getY() + 1, blockpos.getZ());
-                    blockstate1 = pLevel.getBlockState(blockpos$mutableblockpos);
-                } while(!blockstate1.isAir());
+            // only convert liquid that has open air above it
+            above.set(blockpos.getX(), blockpos.getY() + 1, blockpos.getZ());
+            if (!pLevel.getBlockState(above).isAir())
+                continue;
 
-                BlockState blockstate2 = pLevel.getBlockState(blockpos);
-                boolean isFull = blockstate2.getBlock() == Blocks.WATER && blockstate2.getValue(LiquidBlock.LEVEL) == 0;
+            BlockState state = pLevel.getBlockState(blockpos);
+            Block block = state.getBlock();
 
-                BlockState iceState = Blocks.FROSTED_ICE.defaultBlockState();
-                if (blockstate2.getFluidState().is(FluidTags.WATER) && isFull && iceState.canSurvive(pLevel, blockpos) &&
-                        pLevel.isUnobstructed(iceState, blockpos, CollisionContext.empty()) &&
-                        !ForgeEventFactory.onBlockPlace(pLiving, BlockSnapshot.create(pLevel.dimension(), pLevel, blockpos), Direction.UP)) {
+            // cheap early-out: only source liquid blocks are ever converted
+            if (block != Blocks.WATER && block != Blocks.LAVA)
+                continue;
+            if (state.getValue(LiquidBlock.LEVEL) != 0)
+                continue;
 
-                    pLevel.setBlockAndUpdate(blockpos, iceState);
-                    pLevel.scheduleTick(blockpos, Blocks.FROSTED_ICE, Mth.nextInt(pLiving.getRandom(), 60, 120));
-                }
+            if (doFrost && block == Blocks.WATER)
+                tryReplaceLiquid(pLiving, pLevel, blockpos, state, FluidTags.WATER,
+                        Blocks.FROSTED_ICE);
+            else if (doMagma && block == Blocks.LAVA)
+                tryReplaceLiquid(pLiving, pLevel, blockpos, state, FluidTags.LAVA,
+                        BlockRegistrar.TEMPORARY_WALKABLE_MAGMA_BLOCK.get());
+            else if (doNetherrack && block == Blocks.LAVA)
+                tryReplaceLiquid(pLiving, pLevel, blockpos, state, FluidTags.LAVA,
+                        Blocks.NETHERRACK);
+        }
+    }
 
-                isFull = blockstate2.getBlock() == Blocks.LAVA && blockstate2.getValue(LiquidBlock.LEVEL) == 0;
-                BlockState magmaState = Blocks.NETHERRACK.defaultBlockState();
-                if (blockstate2.getFluidState().is(FluidTags.LAVA) && isFull && magmaState.canSurvive(pLevel, blockpos) &&
-                        pLevel.isUnobstructed(magmaState, blockpos, CollisionContext.empty()) &&
-                        !ForgeEventFactory.onBlockPlace(pLiving, BlockSnapshot.create(pLevel.dimension(), pLevel, blockpos), Direction.UP)) {
+    private void tryReplaceLiquid(LivingEntity pLiving, Level pLevel, BlockPos pos, BlockState liquidState,
+                                  TagKey<Fluid> fluidTag, Block replacement) {
+        BlockState newState = replacement.defaultBlockState();
+        if (liquidState.getFluidState().is(fluidTag) &&
+                newState.canSurvive(pLevel, pos) &&
+                pLevel.isUnobstructed(newState, pos, CollisionContext.empty()) &&
+                !ForgeEventFactory.onBlockPlace(pLiving,
+                        BlockSnapshot.create(pLevel.dimension(), pLevel, pos), Direction.UP)) {
 
-                    pLevel.setBlockAndUpdate(blockpos, magmaState);
-                    pLevel.scheduleTick(blockpos, Blocks.NETHERRACK, Mth.nextInt(pLiving.getRandom(), 60, 120));
-                }
-            }
+            pLevel.setBlockAndUpdate(pos, newState);
+            pLevel.scheduleTick(pos, replacement, Mth.nextInt(pLiving.getRandom(), 60, 120));
         }
     }
 

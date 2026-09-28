@@ -227,14 +227,14 @@ public class UnitItems {
             .descId("frost_walker_boots")
             .type(UnitItemType.PASSIVE)
             .buyCost(500)
-            .sellValue(250) // TODO
+            .sellValue(250)
             .build();
 
     public static final UnitItem MAGMA_WALKER_BOOTS = UnitItemBuilder.of(ItemRegistrar.MAGMA_WALKER_BOOTS.get())
             .descId("magma_walker_boots")
             .type(UnitItemType.PASSIVE)
             .buyCost(500)
-            .sellValue(250) // TODO
+            .sellValue(250)
             .build();
 
     public static final UnitItem SATCHEL_OF_SNACKS = UnitItemBuilder.of(ItemRegistrar.SATCHEL_OF_SNACKS.get())

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.pathfinding;
 
+import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.StriderUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
@@ -12,9 +14,11 @@ public enum MobilityClass {
     HUMANOID, AQUATIC, LARGE, FIRE_IMMUNE;
 
     public static MobilityClass of(Unit unit) {
-        if (unit instanceof StriderUnit) return FIRE_IMMUNE;
+        boolean hasMagmaBoots = unit instanceof UnitInventory inv && inv.isHolding(UnitItems.MAGMA_WALKER_BOOTS);
+        if (unit instanceof StriderUnit || hasMagmaBoots) return FIRE_IMMUNE;
         if (!(unit instanceof Mob mob)) return HUMANOID;
-        if (mob instanceof Drowned || mob instanceof ScoutDogUnit || mob instanceof ScoutCatUnit || mob instanceof WaterAnimal) return AQUATIC;
+        boolean hasFrostBoots = unit instanceof UnitInventory inv && inv.isHolding(UnitItems.FROST_WALKER_BOOTS);
+        if (mob instanceof Drowned || mob instanceof ScoutDogUnit || mob instanceof ScoutCatUnit || mob instanceof WaterAnimal || hasFrostBoots) return AQUATIC;
         // Wider than a full block spans multiple cells and needs a multi-cell footprint; narrower fits one cell.
         if (mob.getBbWidth() > 1.0f) return LARGE;
         return HUMANOID;
