@@ -75,6 +75,7 @@ Quality of Life
     [✔] - phasing (can walk through mobs and ignore knockback)
     [🟡] - night_warping (+2 night radius per level)
 
+[❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
 
 Bugfixes
 --------

@@ -393,7 +393,9 @@ public class UnitItems {
                                     }));
                             le.addEffect(new MobEffectInstance(MobEffectRegistrar.FREEZE.get(), duration));
                             le.addEffect(new MobEffectInstance(MobEffectRegistrar.FROST_DAMAGE.get(), duration));
-                            ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 10, le.level(), le.position());
+                            ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 15, le.level(), le.position());
+
+                            ParticleUtil.addParticleExplosion(ParticleTypes.SNOWFLAKE, 10, le.level(), ((LivingEntity) unit).getEyePosition());
                             return true;
                         } else {
                             return false;
@@ -441,6 +443,8 @@ public class UnitItems {
                             SoundClientboundPacket.playSoundAtPos(SoundAction.WINDCALLER_LIFT, le.blockPosition());
                         });
                     }
+                    ParticleUtil.addParticleExplosion(ParticleTypes.POOF, 30, le.level(), bp.getCenter());
+                    ParticleUtil.addParticleExplosion(ParticleTypes.POOF, 15, le.level(), le.getEyePosition());
                 }
                 return true;
             })

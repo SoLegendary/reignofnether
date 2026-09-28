@@ -11,7 +11,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class AbstractFloatingParticle extends TextureSheetParticle {
 
-    public boolean darkenOverTime = true;
     public boolean slowOverTime = false;
     public float quadSizeMultiplier = 1.0f;
 
@@ -23,10 +22,9 @@ public class AbstractFloatingParticle extends TextureSheetParticle {
         this.xd += pXSpeed * 0.2;
         this.yd += pYSpeed * 0.2;
         this.zd += pZSpeed * 0.2;
-        float f = (float)(Math.random() * 0.6 + 0.6);
-        this.rCol = f;
-        this.gCol = f;
-        this.bCol = f;
+        this.rCol = 1.0f;
+        this.gCol = 1.0f;
+        this.bCol = 1.0f;
         this.quadSize *= 0.75F;
         this.lifetime = (Math.max((int)(15.0 / (Math.random() * 0.8 + 0.6)), 7));
         this.hasPhysics = false;
@@ -45,10 +43,6 @@ public class AbstractFloatingParticle extends TextureSheetParticle {
 
     public void tick() {
         super.tick();
-        if (darkenOverTime) {
-            this.gCol *= 0.96F;
-            this.bCol *= 0.9F;
-        }
         if (slowOverTime) {
             this.xd *= 0.95;
             this.yd *= 0.95;

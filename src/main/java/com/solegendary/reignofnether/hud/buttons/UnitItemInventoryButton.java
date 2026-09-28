@@ -35,17 +35,16 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 null,
                 () -> (ItemClientEvents.actionableUnitItemDrag == unitItem &&
                         ItemClientEvents.actionableInvIndex == invIndex &&
+                        ItemClientEvents.actionableInvUUID != null &&
                         ItemClientEvents.actionableInvUUID.equals(ItemUtil.getUUID(itemStack))) ||
                         ItemUtil.isActive(itemStack),
                 () -> false,
                 () -> true,
                 () -> { // onLeftClick
-                    if (unitItem.onUseEntity != null || unitItem.onUseGround != null || unitItem.onUseBuilding != null) {
-                        ItemClientEvents.actionableUnitItem = unitItem;
-                        ItemClientEvents.actionableUnitItem.updateHighlightBps(((LivingEntity) unit).level());
-                        ItemClientEvents.actionableInvIndex = invIndex;
-                        ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
-                    }
+                    ItemClientEvents.actionableUnitItem = unitItem;
+                    ItemClientEvents.actionableUnitItem.updateHighlightBps(((LivingEntity) unit).level());
+                    ItemClientEvents.actionableInvUUID = ItemUtil.getUUID(itemStack);
+                    ItemClientEvents.actionableInvIndex = invIndex;
                     ItemClientEvents.actionableUnitItemDrag = unitItem;
                 },
                 null,
@@ -63,7 +62,8 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
 
                 if (unitItem.onUse != null) {
                     ItemServerboundPacket.use(((Entity) unit).getId(), invUUID);
-                } else if (unitItem.onUseEntity != null ||
+                }
+                else if (unitItem.onUseEntity != null ||
                         unitItem.onUseBuilding != null ||
                         unitItem.onUseGround != null) {
                     ItemClientEvents.actionableUnitItem = unitItem;

@@ -20,7 +20,7 @@ public class MobEffectIcons {
 
     public static final MobEffectIcon FREEZE = new MobEffectIcon(
             MobEffectRegistrar.FREEZE.get(),
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/block/ice.png"),
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/ice.png"),
             "freeze"
     );
 

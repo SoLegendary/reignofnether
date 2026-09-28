@@ -13,7 +13,6 @@ public class FloatingHeartParticle extends AbstractFloatingParticle {
 
     FloatingHeartParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
         super(pLevel, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
-        this.darkenOverTime = false;
         this.slowOverTime = true;
         this.lifetime *= 2.0f;
         this.quadSizeMultiplier = 2.0f;

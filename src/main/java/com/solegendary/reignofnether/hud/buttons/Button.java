@@ -338,7 +338,10 @@ public class Button {
         if (hotkey != null && hotkey.getKey() == key) {
             if (MC.player != null)
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-            this.onLeftClick.run();
+            if (this.onLeftClick != null)
+                this.onLeftClick.run();
+            if (this.onLeftClickRelease != null)
+                this.onLeftClickRelease.run();
         }
     }
 }

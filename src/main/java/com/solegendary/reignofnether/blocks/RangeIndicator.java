@@ -84,9 +84,7 @@ public interface RangeIndicator {
                 showRangeLine = unitItem.showRangeLine;
                 showRadiusCircle = unitItem.showRadiusCircle;
                 showRangeCircle = unitItem.showRangeCircle;
-                if (ItemClientEvents.actionableUnitItem == unitItem) {
-                    showRadiusAtCursor = unitItem.showRadiusAtCursor;
-                }
+                showRadiusAtCursor = unitItem.showRadiusAtCursor;
             }
         }
         Set<BlockPos> highlightBps = new HashSet<>();
