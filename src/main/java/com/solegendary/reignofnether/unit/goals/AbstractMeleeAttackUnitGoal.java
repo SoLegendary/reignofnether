@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
+import com.solegendary.reignofnether.unit.units.neutral.BeeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinMerchantUnit;
 import net.minecraft.world.InteractionHand;
@@ -111,7 +112,12 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
                 this.mob.getNavigation().stop();
             else if (!((Unit) this.mob).getHoldPosition()) {
                 if (ticksUntilNextPathRecalculation <= 0) {
-                    Path path = mob.getNavigation().createPath(target.getX(), target.getY(), target.getZ(), 0);
+                    Path path;
+                    if (((Unit) this.mob).isFlyingUnit()) {
+                        path = mob.getNavigation().createPath(target.blockPosition().above(), 0);
+                    } else {
+                        path = mob.getNavigation().createPath(target, 0);
+                    }
                     this.mob.getNavigation().moveTo(path, ((Unit) this.mob).getSpeedModifier());
                     if (distSqr < 16)
                         ticksUntilNextPathRecalculation = tickPathRecalcMax;

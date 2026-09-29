@@ -156,6 +156,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.PANDA_UNIT.get(), PandaRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WOLF_UNIT.get(), WolfRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.LLAMA_UNIT.get(), LlamaUnitRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.BEE_UNIT.get(), BeeRenderer::new);
 
         evt.registerEntityRenderer(EntityRegistrar.PHANTOM_SUMMON.get(), PhantomRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.KILLER_RABBIT_UNIT.get(), RabbitRenderer::new);

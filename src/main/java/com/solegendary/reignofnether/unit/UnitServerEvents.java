@@ -92,6 +92,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.player.PlayerServerEvents.isRTSPlayer;
+import static com.solegendary.reignofnether.player.PlayerServerEvents.serverLevel;
 import static com.solegendary.reignofnether.resources.ResourcesServerEvents.*;
 
 public class UnitServerEvents {
@@ -1073,6 +1074,29 @@ public class UnitServerEvents {
                 heroUnit.setMana(heroUnit.getMana() + (evt.getAmount() * manaDmgPerc));
                 ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
                         ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
+            }
+        }
+
+        if (evt.getEntity() instanceof UnitInventory inv && evt.getEntity() instanceof Unit unit && inv.isHolding(UnitItems.BEENEST_ARMOUR)) {
+            for (ItemStack itemStack : inv.getAllItems()) {
+                if (itemStack.getItem() == ItemRegistrar.BEENEST_ARMOUR.get()) {
+                    CompoundTag tag = itemStack.getTag();
+                    if (tag != null) {
+                        if (!tag.contains("damageTaken")) {
+                            tag.putFloat("damageTaken", 0f);
+                        }
+                        float dmg = evt.getAmount() + tag.getFloat("damageTaken");
+                        if (dmg > UnitItems.BEENEST_ARMOUR_DAMAGE_PER_BEE) {
+                            Entity entity = UnitServerEvents.spawnMob(EntityRegistrar.BEE_UNIT.get(),
+                                    serverLevel, evt.getEntity().blockPosition().above(), unit.getOwnerName());
+                            if (entity != null) {
+                                tag.putFloat("damageTaken", 0f);
+                            }
+                        } else {
+                            tag.putFloat("damageTaken", dmg);
+                        }
+                    }
+                }
             }
         }
     }

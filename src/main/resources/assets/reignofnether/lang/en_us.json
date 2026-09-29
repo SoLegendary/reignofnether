@@ -46,6 +46,7 @@
     "item.reignofnether.grizzly_bear_unit_spawn_egg": "Spawn Grizzly Bear Unit",
     "item.reignofnether.panda_unit_spawn_egg": "Spawn Panda Unit",
     "item.reignofnether.llama_unit_spawn_egg": "Spawn Llama Unit",
+    "item.reignofnether.bee_unit_spawn_egg": "Spawn Bee Unit",
 
     "unititemtype.reignofnether.consumable": "Consumable",
     "unititemtype.reignofnether.passive": "Passive",
@@ -125,7 +126,7 @@
     "item.reignofnether.buzzy_nest.point1": "Summons a bee with every spell cast",
     "item.reignofnether.beenest_armour": "Beenest Armour",
     "item.reignofnether.beenest_armour.desc": "Just buzzing with excitement!",
-    "item.reignofnether.beenest_armour.point1": "Summons a bee for every %ss damage taken from enemies",
+    "item.reignofnether.beenest_armour.point1": "Summons a bee for every %s damage taken from enemies",
     "item.reignofnether.health_potion": "Health Potion",
     "item.reignofnether.health_potion.desc": "A refreshing healing brew",
     "item.reignofnether.health_potion.point1": "+%s \uE007",
@@ -1768,6 +1769,8 @@
     "entity.reignofnether.panda_unit.tooltip1": "A deceptively cute panda bear with a rolling melee attack.",
     "entity.reignofnether.llama_unit": "Llama",
     "entity.reignofnether.llama_unit.tooltip1": "A wooly llama with a fast knockback ranged spit attack.",
+    "entity.reignofnether.bee_unit": "Bee",
+    "entity.reignofnether.bee_unit.tooltip1": "A buzzy bee with a limited lifespan and a fast weak attack",
     "entity.reignofnether.silverfish_unit": "Silverfish",
     "entity.reignofnether.silverfish_unit.tooltip1": "A tiny arthropod that swarms and overwhelms enemies",
 

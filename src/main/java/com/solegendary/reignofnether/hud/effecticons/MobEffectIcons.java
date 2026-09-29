@@ -222,6 +222,12 @@ public class MobEffectIcons {
             "villager_inspiration"
     );
 
+    public static final MobEffectIcon LIMITED_LIFESPAN = new MobEffectIcon(
+            MobEffectRegistrar.LIMITED_LIFESPAN.get(),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/clock.png"),
+            "limited_lifespan"
+    );
+
     @Nullable
     public static MobEffectIcon getIcon(MobEffectInstance mei) {
         for (MobEffectIcon effectIcon : EFFECT_ICONS)
@@ -265,6 +271,7 @@ public class MobEffectIcons {
             LEVITATION,
             FIRE_RESISTANCE,
             INVINCIBLE,
-            VILLAGER_INSPIRATION
+            VILLAGER_INSPIRATION,
+            LIMITED_LIFESPAN
     );
 }

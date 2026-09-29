@@ -110,6 +110,7 @@ public class MobEffectRegistrar {
 
     public static final RegistryObject<MobEffect> VILLAGER_INSPIRATION = MOB_EFFECTS.register("villager_inspiration", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x66ffcc));
 
+    // visual only
     public static final RegistryObject<MobEffect> LIMITED_LIFESPAN = MOB_EFFECTS.register("limited_lifespan", () -> new InstantenousMobEffect(MobEffectCategory.NEUTRAL, 0xffffff));
 
     public static boolean isInterrupt(MobEffect mobEffect) {

@@ -71,6 +71,7 @@ public class ReignOfNetherCommonConfigs {
         UnitCosts.PANDA.define(BUILDER);
         UnitCosts.WOLF.define(BUILDER);
         UnitCosts.LLAMA.define(BUILDER);
+        UnitCosts.BEE.define(BUILDER);
         UnitCosts.KILLER_RABBIT.define(BUILDER);
         UnitCosts.SILVERFISH.define(BUILDER);
 
@@ -251,6 +252,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry PANDA = ResourceCostConfigEntry.Unit(300,0,0,45,5, ResourceCosts.PANDA, "Panda Config");
         public static final ResourceCostConfigEntry WOLF = ResourceCostConfigEntry.Unit(120,0,0,25,2, ResourceCosts.WOLF, "Wolf Config");
         public static final ResourceCostConfigEntry LLAMA = ResourceCostConfigEntry.Unit(180,0,0,25,2, ResourceCosts.LLAMA, "Llama Config");
+        public static final ResourceCostConfigEntry BEE = ResourceCostConfigEntry.Unit(25,0,0,7,0, ResourceCosts.BEE, "Bee Config");
 
         public static final ResourceCostConfigEntry KILLER_RABBIT = ResourceCostConfigEntry.Unit(150,0,0,30,2, ResourceCosts.KILLER_RABBIT, "Killer Rabbit Config");
         public static final ResourceCostConfigEntry SILVERFISH = ResourceCostConfigEntry.Unit(25,0,0,0,0, ResourceCosts.SILVERFISH, "Silverfish Config");

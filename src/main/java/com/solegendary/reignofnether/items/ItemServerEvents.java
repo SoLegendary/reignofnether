@@ -79,8 +79,7 @@ public class ItemServerEvents {
                 LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
                 BuildingPlacement buildingTarget = blockTarget != null ? BuildingUtils.findBuilding(false, blockTarget) : null;
                 boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
-                if (unitItem != null && unitItem.resetBehaviours)
-                    Unit.fullResetBehaviours(unit);
+                Unit.fullResetBehaviours(unit);
                 unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
             }
         }

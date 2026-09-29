@@ -64,6 +64,7 @@ public class ResourceCosts {
     public static final ResourceCost PANDA = new ResourceCost(ID, "PANDA");
     public static final ResourceCost WOLF = new ResourceCost(ID, "WOLF");
     public static final ResourceCost LLAMA = new ResourceCost(ID, "LLAMA");
+    public static final ResourceCost BEE = new ResourceCost(ID, "BEE");
     public static final ResourceCost KILLER_RABBIT = new ResourceCost(ID, "KILLER_RABBIT");
     public static final ResourceCost SILVERFISH = new ResourceCost(ID, "SILVERFISH");
 
@@ -270,6 +271,7 @@ public class ResourceCosts {
         PANDA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PANDA);
         WOLF.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WOLF);
         LLAMA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.LLAMA);
+        BEE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BEE);
         KILLER_RABBIT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.KILLER_RABBIT);
         SILVERFISH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SILVERFISH);
 

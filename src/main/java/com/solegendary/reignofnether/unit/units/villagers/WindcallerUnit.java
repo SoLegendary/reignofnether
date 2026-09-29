@@ -542,16 +542,16 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         this.goalSelector.addGoal(3, flyingMoveGoal);
     }
 
-    public int getAttackerRangeBonus(Mob attacker) {
+    public double getAttackerRangeBonus(Mob attacker) {
         Vec2 attackerPos = new Vec2((float) attacker.getX(), (float) attacker.getZ());
         Vec2 ghastPos = new Vec2((float) this.getX(), (float) this.getZ());
         double horizDist = Math.sqrt(attackerPos.distanceToSqr(ghastPos));
         double vertiDist = Math.max(0, this.getY() - attacker.getY());
 
         if (horizDist < 4)
-            return (int) (vertiDist * 0.5f);
+            return vertiDist * 0.5f;
         else
-            return (int) (vertiDist * 0.25f);
+            return vertiDist * 0.25f;
     }
 
     @Override

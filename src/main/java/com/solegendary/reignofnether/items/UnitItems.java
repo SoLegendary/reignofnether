@@ -93,8 +93,8 @@ public class UnitItems {
             .type(UnitItemType.ACTIVE)
             .buyCost(600)
             .sellValue(300)
-            .cooldownTicks(60)
-            .manaCost(10)
+            .cooldownTicks(60 * 20)
+            .manaCost(50)
             .range(10)
             .doCastAnimation()
             .onUseGround(((unit, blockPos) -> {
@@ -268,7 +268,7 @@ public class UnitItems {
             })
             .build();
 
-    public static final float BEENEST_ARMOUR_DAMAGE_PER_BEE = 30f; // TODO
+    public static final float BEENEST_ARMOUR_DAMAGE_PER_BEE = 40f;
     public static final UnitItem BEENEST_ARMOUR = UnitItemBuilder.of(ItemRegistrar.BEENEST_ARMOUR.get())
             .descId("beenest_armour")
             .type(UnitItemType.PASSIVE)
@@ -391,8 +391,8 @@ public class UnitItems {
             .sellValue(200)
             .pointDesc("item.reignofnether.ice_wand.point1", ICE_WAND_DURATION_SECONDS)
             .pointDesc("item.reignofnether.ice_wand.point2")
-            //.cooldownTicks(60 * 20)
-            //.manaCost(35)
+            .cooldownTicks(45 * 20)
+            .manaCost(35)
             .range(10)
             .showRangeCircle()
             .onUseEntity((unit, entity) -> {
@@ -442,8 +442,8 @@ public class UnitItems {
             .sellValue(250)
             .pointDesc("item.reignofnether.updraft_tome.point1", UPDRAFT_TOME_DURATION_SECONDS)
             .pointDesc("item.reignofnether.updraft_tome.point2")
-            //.cooldownTicks(90 * 20)
-            //.manaCost(50)
+            .cooldownTicks(60 * 20)
+            .manaCost(50)
             .range(10)
             .radius(UPDRAFT_TOME_RADIUS)
             .showRadiusAtCursor()
@@ -580,7 +580,7 @@ public class UnitItems {
             EntityRegistrar.TOTEM_OF_PROTECTION.get()
     );
 
-    private static final int TOTEM_OF_CASTING_DURATION_SECONDS = 30;
+    private static final int TOTEM_OF_CASTING_DURATION_SECONDS = 40;
     public static final UnitItem TOTEM_OF_CASTING = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_CASTING.get())
             .descId("totem_of_casting")
             .pointDesc("item.reignofnether.totem_of_casting.point1", TOTEM_OF_CASTING_DURATION_SECONDS),

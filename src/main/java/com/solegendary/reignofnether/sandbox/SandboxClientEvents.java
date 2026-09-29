@@ -170,7 +170,8 @@ public class SandboxClientEvents {
                 ProductionItems.GRIZZLY_BEAR.getPlaceButton(),
                 ProductionItems.PANDA.getPlaceButton(),
                 ProductionItems.WOLF.getPlaceButton(),
-                ProductionItems.LLAMA.getPlaceButton()
+                ProductionItems.LLAMA.getPlaceButton(),
+                ProductionItems.BEE.getPlaceButton()
             );
         };
     }

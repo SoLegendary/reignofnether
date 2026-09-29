@@ -203,6 +203,10 @@ public class ItemRegistrar {
             ITEMS.register("llama_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.LLAMA_UNIT,
                     0xa6896c, 0x6e442e, new Item.Properties()));
 
+    public static final RegistryObject<ForgeSpawnEggItem> BEE_UNIT_SPAWN_EGG =
+            ITEMS.register("bee_unit_spawn_egg", () -> new ForgeSpawnEggItem(EntityRegistrar.BEE_UNIT,
+                    0xdbb544, 0x2a1711, new Item.Properties()));
+
     public static final RegistryObject<Item> THROWABLE_TNT =
             ITEMS.register("throwable_tnt", () -> new ThrowableTnt(new Item.Properties()));
 

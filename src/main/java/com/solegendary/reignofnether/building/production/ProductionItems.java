@@ -73,6 +73,7 @@ public class ProductionItems {
     public static final PandaProd PANDA = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "panda"), new PandaProd());
     public static final WolfProd WOLF = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "wolf"), new WolfProd());
     public static final LlamaProd LLAMA = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "llama"), new LlamaProd());
+    public static final BeeProd BEE = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "bee"), new BeeProd());
 
     public static final ResearchVindicatorAxes RESEARCH_VINDICATOR_AXES = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "vindicator_axes"), new ResearchVindicatorAxes());
     public static final ResearchPillagerCrossbows RESEARCH_PILLAGER_CROSSBOWS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "pillager_crossbows"), new ResearchPillagerCrossbows());

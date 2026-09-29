@@ -297,6 +297,9 @@ public interface Unit {
                 if (unitMob.tickCount % 2 == 0) {
                     MobEffectInstance mei = unitMob.getEffect(MobEffectRegistrar.VIGOR.get());
                     extraCdTicks = mei == null ? 0 : mei.getAmplifier() + 1;
+                    if (unit instanceof HeroUnit heroUnit && unitMob.tickCount % 20 == 0) {
+                        heroUnit.setMana(heroUnit.getMana() + 0.5f);
+                    }
                 }
 
                 for (int i = 0; i < extraCdTicks + 1; i++) {
@@ -1032,5 +1035,9 @@ public interface Unit {
     public default boolean isHolding(UnitItem unitItem) {
         if (!(this instanceof UnitInventory inv)) return false;
         return inv.isHolding(unitItem);
+    }
+
+    public default double getAttackerRangeBonus(Mob attacker) {
+        return 0f;
     }
 }

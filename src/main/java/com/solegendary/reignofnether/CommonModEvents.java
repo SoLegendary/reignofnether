@@ -33,6 +33,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.PANDA_UNIT.get(), PandaUnit.createAttributes().build());
         evt.put(EntityRegistrar.WOLF_UNIT.get(), WolfUnit.createAttributes().build());
         evt.put(EntityRegistrar.LLAMA_UNIT.get(), LlamaUnit.createAttributes().build());
+        evt.put(EntityRegistrar.BEE_UNIT.get(), BeeUnit.createAttributes().build());
         evt.put(EntityRegistrar.PHANTOM_SUMMON.get(), PhantomSummon.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get(), ZombiePiglinUnit.createAttributes().build());

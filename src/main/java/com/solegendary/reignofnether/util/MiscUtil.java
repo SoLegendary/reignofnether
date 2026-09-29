@@ -29,6 +29,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.BoggedUnit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
+import com.solegendary.reignofnether.unit.units.neutral.BeeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
@@ -351,7 +352,7 @@ public class MiscUtil {
             e -> {
                 double dist = e.position().distanceTo(pos); // deprioritise over actual enemy units
                 boolean isMeleeAgainstFlyer = isMelee && e instanceof Unit unit && unit.isFlyingUnit();
-                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer)
+                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer || (e instanceof BeeUnit))
                     dist += 100;
                 return dist;
             }
