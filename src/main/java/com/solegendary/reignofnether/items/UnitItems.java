@@ -364,16 +364,16 @@ public class UnitItems {
             .sellValue(250)
             .pointDesc("item.reignofnether.gong_of_weakening.point1", GONG_OF_WEAKENING_DURATION_SECONDS)
             .radius(10)
-            //.manaCost(50)
-            //.cooldownTicks(120 * 20)
+            .manaCost(50)
+            .cooldownTicks(120 * 20)
             .showRadiusCircle()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
                     for (Mob mob : MiscUtil.getEntitiesWithinRange(le.getEyePosition(), GONG_OF_WEAKENING_RADIUS, Mob.class, le.level())) {
                         if (UnitServerEvents.getRl(unit, mob) != Relationship.FRIENDLY) {
-                            mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, GONG_OF_WEAKENING_DURATION_SECONDS, 0, false, true));
-                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(), GONG_OF_WEAKENING_DURATION_SECONDS, 1, true, false));
+                            mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, GONG_OF_WEAKENING_DURATION_SECONDS * 20, 0, false, true));
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(), GONG_OF_WEAKENING_DURATION_SECONDS * 20, 1, true, false));
                         }
                     }
                     ParticleUtil.spawnRadialVibrations((ServerLevel) le.level(), le.getEyePosition(), 8, 10, 40);

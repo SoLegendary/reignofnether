@@ -126,7 +126,7 @@
     "item.reignofnether.buzzy_nest.point1": "Summons a bee with every spell cast",
     "item.reignofnether.beenest_armour": "Beenest Armour",
     "item.reignofnether.beenest_armour.desc": "Just buzzing with excitement!",
-    "item.reignofnether.beenest_armour.point1": "Summons a bee for every %s damage taken from enemies",
+    "item.reignofnether.beenest_armour.point1": "Summons a bee for every %s damage taken",
     "item.reignofnether.health_potion": "Health Potion",
     "item.reignofnether.health_potion.desc": "A refreshing healing brew",
     "item.reignofnether.health_potion.point1": "+%s \uE007",
