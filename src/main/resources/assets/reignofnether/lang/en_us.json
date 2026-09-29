@@ -113,7 +113,6 @@
     "item.reignofnether.magma_walker_boots": "Boots of Magma",
     "item.reignofnether.magma_walker_boots.desc": "Lava transforms into toasty magma beneath you",
     "item.reignofnether.magma_walker_boots.point1": "Grants Magmawalker",
-    "item.reignofnether.magma_walker_boots.point2": "Magma is temporary and deals less damage",
     "item.reignofnether.bell_of_arms": "Bell of Arms",
     "item.reignofnether.bell_of_arms.desc": "Inspire the humble might of villagers",
     "item.reignofnether.bell_of_arms.point1": "Converts all nearby villagers into militia",
@@ -2184,6 +2183,10 @@
     "effect.reignofnether.invincible.desc": "Immune to damage and knockback",
     "effect.reignofnether.villager_inspiration": "Villager Inspiration",
     "effect.reignofnether.villager_inspiration.desc": "Nearby villagers become militia",
+    "effect.reignofnether.limited_lifespan": "Limited Lifespan",
+    "effect.reignofnether.limited_lifespan.desc": "Dies once this timer runs out",
+
+    "effect.reignofnether.duration": "(%ds)",
 
     "key.categories.reignofnether.camera": "Reign of Nether: Camera",
     "key.categories.reignofnether.rts":    "Reign of Nether: RTS Controls",

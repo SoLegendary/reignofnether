@@ -77,7 +77,7 @@ public class BloodMoon extends HeroAbility {
             this,
             hero
         );
-        button.stretchIconToBorders = true;
+        button.innerIconSizeModifier = 1;
         return button;
     }
 

@@ -88,7 +88,7 @@ public class SoulSiphonPassive extends HeroAbility {
             button.bottomLeftTextColor = 0x00FF00;
         else if ((necro.souls) <= ((int) soulsPerCast))
             button.bottomLeftTextColor = 0xFFFF00;
-        button.stretchIconToBorders = true;
+        button.innerIconSizeModifier = 1;
         return button;
     }
 

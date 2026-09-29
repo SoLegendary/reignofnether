@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -38,7 +39,7 @@ public class Button {
     public int tooltipOffsetY = 0;
     public int imageSize = DEFAULT_ICON_SIZE;
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
-    public boolean stretchIconToBorders = false;
+    public int innerIconSizeModifier = 0;
     public String playerNameForHeadIcon = "";
     public int bgColour = 0x64000000;
     public Supplier<String> bottomLeftText = null;
@@ -169,18 +170,14 @@ public class Button {
             guiGraphics.pose().translate(0,0,1);
             int iconX = x+4 + (7 - xyDiff - iconSize/2);
             int iconY = y+4 + (7 - xyDiff - iconSize/2);
-            if (stretchIconToBorders) {
-                iconX -= 1;
-                iconY -= 1;
-            }
-            iconX += (DEFAULT_ICON_SIZE - imageSize) / 2;
-            iconY += (DEFAULT_ICON_SIZE - imageSize) / 2;
+            iconX += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
+            iconY += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
             MyRenderer.renderIcon(
                     guiGraphics,
                     bgIconResource,
                     iconX,
                     iconY,
-                    stretchIconToBorders ? imageSize + 2 : imageSize
+                    imageSize + (innerIconSizeModifier * 2)
             );
         }
 
@@ -188,18 +185,14 @@ public class Button {
         if (iconResource != null) {
             int iconX = x+4 + (7 - xyDiff - iconSize/2);
             int iconY = y+4 + (7 - xyDiff - iconSize/2);
-            if (stretchIconToBorders) {
-                iconX -= 1;
-                iconY -= 1;
-            }
-            iconX += (DEFAULT_ICON_SIZE - imageSize) / 2;
-            iconY += (DEFAULT_ICON_SIZE - imageSize) / 2;
+            iconX += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
+            iconY += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
             guiGraphics.pose().translate(0,0,1);
             MyRenderer.renderIcon(
                     guiGraphics,
                     iconResource,
                     iconX, iconY,
-                    stretchIconToBorders ? imageSize + 2 : imageSize
+                    imageSize + (innerIconSizeModifier * 2)
             );
         }
         if (iconItem != null) {

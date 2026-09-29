@@ -24,7 +24,7 @@ Passives
 [✔] Bell of Arms (villagers only) - Allows villagers to call to arms on the hero holding the bell and prevents militia converting back into villagers
 [✔] Satchel of Snacks - Periodically spawns a piece of bread your hero automatically eats when hurt
 
-[❌] Buzzy Armour ++ - Whenever you cast a spell, summon a friendly bee with limited lifespan to attack nearby enemies
+[❌] Beenest Armour ++ - Whenever you take X damage, summon a bee
 
 
 Activesa

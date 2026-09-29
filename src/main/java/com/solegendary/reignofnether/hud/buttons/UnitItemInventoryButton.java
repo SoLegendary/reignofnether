@@ -125,13 +125,13 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
             guiGraphics.pose().translate(0, 0, 1);
             MyRenderer.renderIcon(guiGraphics, bgIconResource,
                     ghostIconX(x, xyDiff), ghostIconY(y, xyDiff),
-                    stretchIconToBorders ? imageSize + 2 : imageSize);
+                    imageSize + (innerIconSizeModifier * 2));
         }
         if (iconResource != null) {
             guiGraphics.pose().translate(0, 0, 1);
             MyRenderer.renderIcon(guiGraphics, iconResource,
                     ghostIconX(x, xyDiff), ghostIconY(y, xyDiff),
-                    stretchIconToBorders ? imageSize + 2 : imageSize);
+                    imageSize + (innerIconSizeModifier * 2));
         }
 
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -158,13 +158,13 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
 
     private int ghostIconX(int x, int xyDiff) {
         int iconX = x + 4 + (7 - xyDiff - iconSize / 2);
-        if (stretchIconToBorders) iconX -= 1;
+        iconX -= innerIconSizeModifier;
         return iconX + (DEFAULT_ICON_SIZE - imageSize) / 2;
     }
 
     private int ghostIconY(int y, int xyDiff) {
         int iconY = y + 4 + (7 - xyDiff - iconSize / 2);
-        if (stretchIconToBorders) iconY -= 1;
+        iconY -= innerIconSizeModifier;
         return iconY + (DEFAULT_ICON_SIZE - imageSize) / 2;
     }
 }

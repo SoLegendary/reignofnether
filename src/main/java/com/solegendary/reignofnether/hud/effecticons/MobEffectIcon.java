@@ -3,6 +3,8 @@ package com.solegendary.reignofnether.hud.effecticons;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.time.TimeClientEvents;
+import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
@@ -20,6 +22,7 @@ public class MobEffectIcon extends Button {
     private final String descId;
     private final Long startTime = TimeClientEvents.getClientTime();
     public int duration = 0;
+    private static final int MIN_DURATION_SHOWN = 40; // don't show really short effects as most of them are just auras
 
     public MobEffectIcon(MobEffect effect, ResourceLocation iconRl, String descId) {
         super("Passive Icon", ICON_SIZE, iconRl, null, () -> false, () -> true, () -> true, null, null, List.of());
@@ -31,6 +34,7 @@ public class MobEffectIcon extends Button {
         );
         this.descId = descId;
         this.greyInverted = true;
+        this.innerIconSizeModifier = -1;
     }
 
     private ResourceLocation getFrameRl(MobEffect effect) {
@@ -48,7 +52,7 @@ public class MobEffectIcon extends Button {
                 this.descId
         );
         icon.duration = instance.getDuration();
-        if (icon.duration >= 40) { // don't show really short effects at most of them are just auras
+        if (icon.duration >= MIN_DURATION_SHOWN) {
             icon.getGreyPercent = () -> {
                 if (icon.duration <= 0)
                     return 0f;
@@ -62,5 +66,26 @@ public class MobEffectIcon extends Button {
             return amp > 0 ? String.valueOf(amp + 1) : "";
         };
         return icon;
+    }
+
+    private int getSecondsRemaining() {
+        long elapsed = TimeClientEvents.getClientTime() - startTime;
+        long remainingTicks = Math.max(0, duration - elapsed);
+        return (int) Math.ceil(remainingTicks / 20d);
+    }
+
+    @Override
+    public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
+        String name = I18n.get("effect.reignofnether." + descId);
+        String desc = I18n.get("effect.reignofnether." + descId + ".desc");
+
+        if (duration >= MIN_DURATION_SHOWN) {
+            name += " " + I18n.get("effect.reignofnether.duration", getSecondsRemaining());
+        }
+        this.tooltipLines = List.of(
+                fcs(name, true),
+                fcs(desc)
+        );
+        MyRenderer.renderTooltip(guiGraphics, this.tooltipLines, mouseX, mouseY);
     }
 }
