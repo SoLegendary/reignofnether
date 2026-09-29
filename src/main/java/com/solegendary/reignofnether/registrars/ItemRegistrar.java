@@ -225,7 +225,7 @@ public class ItemRegistrar {
     public static final RegistryObject<Item> FROST_WALKER_BOOTS = ITEMS.register("frost_walker_boots", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> MAGMA_WALKER_BOOTS = ITEMS.register("magma_walker_boots", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> SATCHEL_OF_SNACKS = ITEMS.register("satchel_of_snacks", () -> new UnitGiveableItem(new Item.Properties()));
-    public static final RegistryObject<Item> BUZZY_NEST = ITEMS.register("buzzy_nest", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> BEENEST_ARMOUR = ITEMS.register("beenest_armour", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> HEALTH_POTION = ITEMS.register("health_potion", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> MANA_POTION = ITEMS.register("mana_potion", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> GHOST_CLOAK = ITEMS.register("ghost_cloak", () -> new UnitGiveableItem(new Item.Properties()));

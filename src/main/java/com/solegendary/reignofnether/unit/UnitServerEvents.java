@@ -24,6 +24,7 @@ import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -664,7 +665,15 @@ public class UnitServerEvents {
             }
         }
 
-        //worker drops
+        if (evt.getEntity() instanceof Unit unit) {
+            for (Mob mob : MiscUtil.getEntitiesWithinRange(evt.getEntity().position(), UnitItems.SOUL_COLLECTOR_RADIUS, Mob.class, evt.getEntity().level())) {
+                if (mob instanceof HeroUnit heroUnit && mob instanceof UnitInventory inv && inv.isHolding(UnitItems.SOUL_COLLECTOR)) {
+                    float manaRestored = (unit.getCost().population * 2) + 3;
+                    heroUnit.setMana(heroUnit.getMana() + manaRestored);
+                    ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), (int) (manaRestored / 3), mob.level(), mob.getEyePosition());
+                }
+            }
+        }
     }
 
     // prevent onDropItem firing twice if the same animal is killed by two workers on the same tick

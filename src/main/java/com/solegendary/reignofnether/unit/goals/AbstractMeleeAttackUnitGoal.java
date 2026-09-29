@@ -21,9 +21,6 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
     protected final Mob mob;
     private final boolean followingTargetEvenIfNotSeen;
     private Path path;
-    private double pathedTargetX;
-    private double pathedTargetY;
-    private double pathedTargetZ;
     protected int ticksUntilNextPathRecalculation;
     protected final int tickPathRecalcMax = 5;
     protected int ticksUntilNextAttack;

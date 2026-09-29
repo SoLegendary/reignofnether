@@ -8,7 +8,7 @@ Passives
 --------
 [✔] Heart Medallion - Raises max HP
 [✔] Azure Medallion - Raises max Mana
-[❌] Soul Collector - Grants mana when nearby enemy units die (proportional to their population)
+[🟡] Soul Collector - Grants mana when nearby enemy units die (proportional to their population)
 [✔] Broadsword - Raises attack damage
 [✔] Katana - Grants a critical hit chance
 [✔] Heartstealer - Grants lifesteal
@@ -22,9 +22,9 @@ Passives
 [🟡] Frost Walker Boots (villagers & monsters only) - Grants frostwalker (does not work on lava)
 [🟡] Magma Walker Boots (piglins only) - Grants magmawalker (like frostwalker but converts lava into magma)
 [✔] Bell of Arms (villagers only) - Allows villagers to call to arms on the hero holding the bell and prevents militia converting back into villagers
-[❌] Satchel of Snacks - Periodically spawns a piece of bread your hero automatically eats when hurt
+[✔] Satchel of Snacks - Periodically spawns a piece of bread your hero automatically eats when hurt
 
-[❌] Buzzy Nest ++ - Whenever you cast a spell, summon a friendly bee with limited lifespan to attack nearby enemies
+[❌] Buzzy Armour ++ - Whenever you cast a spell, summon a friendly bee with limited lifespan to attack nearby enemies
 
 
 Activesa

@@ -165,7 +165,6 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         if (maxHealth <= 0)
             setToDefaultMaxHealth();
 
-        //TODO made this toggelable
         setActiveAddon(GarrisonableBuildingAddon.class, this, true);
         setActiveAddon(NetherConvertingAddon.class, this, true);
         setActiveAddon(NightSourceAddon.class, this, true);

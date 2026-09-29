@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -47,6 +48,7 @@ public class BlockClientEvents {
         }
         // draw range indicators for buildings with abilities and monster night sources
         for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
+            if (!FogOfWarClientEvents.isBuildingInBrightChunk(building)) continue;
             RangeIndicatorAddon ria;
             if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
                 for (BlockPos bp : ria.getHighlightBps(building)) {
@@ -70,6 +72,7 @@ public class BlockClientEvents {
             }
         }
         for (LivingEntity le : UnitClientEvents.getAllUnits()) {
+            if (!FogOfWarClientEvents.isBlockVisible(le.getOnPos())) continue;
             boolean selected = UnitClientEvents.getSelectedUnits().contains(le);
             if (le instanceof RangeIndicator ri && (selected || !ri.showOnlyWhenSelected())) {
                 for (BlockPos bp : ri.getHighlightBps()) {

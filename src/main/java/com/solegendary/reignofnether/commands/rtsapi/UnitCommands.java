@@ -372,7 +372,7 @@ public class UnitCommands {
 		);
 		item.action(ctx.getSource().getLevel());
 		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.unit.action.issue.success", action.name().toLowerCase(), unitIds.length),  // TODO translatable action name
+			() -> Component.translatable("commands.reignofnether.unit.action.issue.success", action.name().toLowerCase(), unitIds.length),
 			true);
 		return unitIds.length;
 	}

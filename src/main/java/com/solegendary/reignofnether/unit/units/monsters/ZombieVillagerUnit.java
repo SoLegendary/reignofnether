@@ -212,7 +212,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         List<BuildingPlaceButton> buttons = new ArrayList<>();
         buttons.addAll(FactionRegistries.MONSTERS.getBuildingButtons());
 
-        //TODO Add to register
         CustomBuildingClientEvents.customBuildings.forEach(cb -> {
             if (cb.buildableByMonsters)
                 buttons.add(cb.getWorkerBuildButton(null));

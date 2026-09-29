@@ -136,11 +136,13 @@ public class UnitItems {
             .attribute(Attributes.ARMOR, 5, ADDITION)
             .build();
 
+    public static final int SOUL_COLLECTOR_RADIUS = 20;
     public static final UnitItem SOUL_COLLECTOR = UnitItemBuilder.of(ItemRegistrar.SOUL_COLLECTOR.get())
             .descId("soul_collector")
             .type(UnitItemType.PASSIVE)
             .buyCost(400)
             .sellValue(200) // TODO
+            .radius(SOUL_COLLECTOR_RADIUS)
             .build();
 
     public static final UnitItem BROADSWORD = UnitItemBuilder.of(ItemRegistrar.BROADSWORD.get())
@@ -213,7 +215,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .buyCost(300)
             .sellValue(150)
-            .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 6, ADDITION)
+            .attribute(AttributeRegistrar.SIGHT_RANGE.get(), 8, ADDITION)
             .build();
 
     public static final UnitItem BOOTS_OF_SWIFTNESS = UnitItemBuilder.of(ItemRegistrar.BOOTS_OF_SWIFTNESS.get())
@@ -266,11 +268,13 @@ public class UnitItems {
             })
             .build();
 
-    public static final UnitItem BUZZY_NEST = UnitItemBuilder.of(ItemRegistrar.BUZZY_NEST.get())
-            .descId("buzzy_nest")
+    public static final float BEENEST_ARMOUR_DAMAGE_PER_BEE = 30f; // TODO
+    public static final UnitItem BEENEST_ARMOUR = UnitItemBuilder.of(ItemRegistrar.BEENEST_ARMOUR.get())
+            .descId("beenest_armour")
             .type(UnitItemType.PASSIVE)
-            .buyCost(0)
-            .sellValue(0) // TODO
+            .buyCost(500)
+            .sellValue(250)
+            .pointDesc("item.reignofnether.beenest_armour.point1", BEENEST_ARMOUR_DAMAGE_PER_BEE)
             .build();
 
     public static final float HEALTH_POTION_RESTORE_AMOUNT = 50f;
@@ -583,7 +587,6 @@ public class UnitItems {
             EntityRegistrar.TOTEM_OF_CASTING.get()
     );
 
-    // TODO: check circles are not shown in fog
     public static final int BELL_OF_ARMS_RANGE = 20;
     public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(Items.BELL)
             .descId("bell_of_arms")
@@ -645,7 +648,7 @@ public class UnitItems {
             MAGMA_WALKER_BOOTS,
             BELL_OF_ARMS,
             SATCHEL_OF_SNACKS,
-            BUZZY_NEST,
+            BEENEST_ARMOUR,
             HEALTH_POTION,
             MANA_POTION,
             GHOST_CLOAK,

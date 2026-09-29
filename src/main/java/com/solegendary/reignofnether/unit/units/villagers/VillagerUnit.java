@@ -338,7 +338,6 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
         List<BuildingPlaceButton> buttons = new ArrayList<>();
         buttons.addAll(FactionRegistries.VILLAGERS.getBuildingButtons());
 
-        //TODO Add to register
         CustomBuildingClientEvents.customBuildings.forEach(cb -> {
             if (cb.buildableByVillagers)
                 buttons.add(cb.getWorkerBuildButton(null));

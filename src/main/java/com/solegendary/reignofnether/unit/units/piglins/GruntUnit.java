@@ -206,7 +206,6 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
         List<BuildingPlaceButton> buttons = new ArrayList<>();
         buttons.addAll(FactionRegistries.PIGLINS.getBuildingButtons());
 
-        //TODO Add to Register
         CustomBuildingClientEvents.customBuildings.forEach(cb -> {
             if (cb.buildableByPiglins)
                 buttons.add(cb.getWorkerBuildButton(null));
