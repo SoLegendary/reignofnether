@@ -177,6 +177,11 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
     }
 
     @Override
+    protected float getSoundVolume() {
+        return 1.0F;
+    }
+
+    @Override
     public boolean isPushable() {
         return false;
     }

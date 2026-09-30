@@ -1,9 +1,7 @@
 package com.solegendary.reignofnether.entities.renderers;
 
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.modelling.models.TotemOfCastingModel;
-import com.solegendary.reignofnether.unit.modelling.models.TotemOfRegenerationModel;
 import com.solegendary.reignofnether.unit.units.monsters.AbstractTotem;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
