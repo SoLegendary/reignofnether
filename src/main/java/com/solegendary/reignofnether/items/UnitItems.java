@@ -206,7 +206,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .buyCost(300)
             .sellValue(150)
-            .attribute(AttributeRegistrar.EVASION_CHANCE.get(), 0.15, ADDITION)
+            .attribute(AttributeRegistrar.EVASION_CHANCE.get(), 0.17, ADDITION)
             .build();
 
     public static final UnitItem SPYGLASS = UnitItemBuilder.of(Items.SPYGLASS)
@@ -365,7 +365,7 @@ public class UnitItems {
             .pointDesc("item.reignofnether.gong_of_weakening.point1", GONG_OF_WEAKENING_DURATION_SECONDS)
             .radius(10)
             .manaCost(50)
-            .cooldownTicks(120 * 20)
+            .cooldownTicks(90 * 20)
             .showRadiusCircle()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
@@ -532,7 +532,7 @@ public class UnitItems {
             .sellValue(100) // TODO
             .build();
 
-    private static final int WAR_HORN_DURATION_SECONDS = 30;
+    private static final int WAR_HORN_DURATION_SECONDS = 20;
     private static final int WAR_HORN_RADIUS = 15;
     public static final UnitItem WAR_HORN = UnitItemBuilder.of(ItemRegistrar.WAR_HORN.get())
             .descId("war_horn")
@@ -540,8 +540,8 @@ public class UnitItems {
             .buyCost(500)
             .sellValue(250)
             .pointDesc("item.reignofnether.war_horn.point1", WAR_HORN_DURATION_SECONDS)
-            //.manaCost(50)
-            //.cooldownTicks(120 * 20)
+            .manaCost(50)
+            .cooldownTicks(90 * 20)
             .radius(WAR_HORN_RADIUS)
             .showRadiusCircle()
             .onUse(unit -> {
@@ -549,7 +549,7 @@ public class UnitItems {
                 if (!le.level().isClientSide()) {
                     for (Mob mob : MiscUtil.getEntitiesWithinRange(le.getEyePosition(), WAR_HORN_RADIUS, Mob.class, le.level())) {
                         if (UnitServerEvents.getRl(unit, mob) == Relationship.FRIENDLY) {
-                            mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, WAR_HORN_DURATION_SECONDS, 0, false, true));
+                            mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, WAR_HORN_DURATION_SECONDS * 20, 0, false, true));
                         }
                     }
                     ParticleUtil.spawnRadialVibrations((ServerLevel) le.level(), le.getEyePosition(), 8, 10, 40);
