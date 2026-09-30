@@ -26,7 +26,7 @@ Passives
 [✔] Beenest Armour ++ - Whenever you take X damage, summon a bee
 
 
-Activesa
+Actives
 -------
 [✔] Health Potion (1-click use, consumable)  - Restores health instantly
 [✔] Mana Potion (1-click use, consumable) - Restores mana instantly
