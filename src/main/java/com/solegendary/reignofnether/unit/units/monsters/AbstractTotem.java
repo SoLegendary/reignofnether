@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
@@ -28,6 +29,9 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -163,7 +167,13 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
                 .add(Attributes.KNOCKBACK_RESISTANCE, 9999.0f)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), rangedDamageResist)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
+    }
 
+    @Override protected SoundEvent getHurtSound(DamageSource pDamageSource) {
+        return SoundEvents.WOOD_HIT;
+    }
+    @Override protected SoundEvent getDeathSound() {
+        return SoundEvents.WOOD_BREAK;
     }
 
     @Override
