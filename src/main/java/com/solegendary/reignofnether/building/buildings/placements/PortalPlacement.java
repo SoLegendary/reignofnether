@@ -82,9 +82,13 @@ public class PortalPlacement extends ProductionPlacement {
 
     @Override
     public boolean canDestroyBlock(BlockPos relativeBp) {
-        BlockPos worldBp = relativeBp.offset(this.originPos);
-        Block block = this.getLevel().getBlockState(worldBp).getBlock();
-        return block != Blocks.OBSIDIAN && block != Blocks.NETHER_PORTAL;
+        if (getBuilding() == Buildings.PORTAL_POCKET) {
+            return true;
+        } else {
+            BlockPos worldBp = relativeBp.offset(this.originPos);
+            Block block = this.getLevel().getBlockState(worldBp).getBlock();
+            return block != Blocks.OBSIDIAN && block != Blocks.NETHER_PORTAL;
+        }
     }
 
     public void changePortalStructure(PortalType portalType) {

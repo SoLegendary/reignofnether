@@ -293,6 +293,15 @@ public class BlockRegistrar {
                     .noOcclusion()
             ), CreativeModeTabs.BUILDING_BLOCKS);
 
+    public static final RegistryObject<Block> HORIZONTAL_PORTAL = registerBlock("horizontal_portal",
+            () -> new HorizontalPortalBlock(BlockBehaviour.Properties.of()
+                    .noCollission()
+                    .noOcclusion()
+                    .strength(-1F)
+                    .lightLevel(s -> 11)
+                    .sound(SoundType.GLASS)
+            ), CreativeModeTabs.BUILDING_BLOCKS);
+
     private static boolean always(BlockState p_50775_, BlockGetter p_50776_, BlockPos p_50777_) {
         return true;
     }

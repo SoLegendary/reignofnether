@@ -15,7 +15,7 @@ public class TotemOfProtection extends AbstractTotem {
     public TotemOfProtection(EntityType<? extends Mob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.auraEffects.put(MobEffects.DAMAGE_RESISTANCE, 0);
-        this.lifeTimeTicks = UnitItems.TOTEM_OF_PROTECTION_DURATION_SECONDS;
+        this.lifeTimeTicks = UnitItems.TOTEM_OF_PROTECTION_DURATION_SECONDS * 20;
     }
 
     @Override protected SoundEvent getHurtSound(DamageSource pDamageSource) {

@@ -3,6 +3,9 @@ package com.solegendary.reignofnether.items;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.Blizzard;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.BuildingValidators;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
@@ -16,6 +19,7 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.packets.UnitSyncAbilityClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -34,6 +38,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
 
 import java.util.Comparator;
 import java.util.List;
@@ -466,7 +471,7 @@ public class UnitItems {
                     }
                     for (int i = 0; i < Math.max(1, numAffectedUnits); i++) {
                         CompletableFuture.delayedExecutor(300 * i, TimeUnit.MILLISECONDS).execute(() -> {
-                            SoundClientboundPacket.playSoundAtPos(SoundAction.WINDCALLER_LIFT, le.blockPosition());
+                            SoundClientboundPacket.playSoundAtPos(SoundAction.WINDCALLER_LIFT, le.blockPosition(), 1.5f);
                         });
                     }
                     ParticleUtil.addParticleExplosion(ParticleTypes.POOF, 30, le.level(), bp.getCenter());
@@ -496,7 +501,8 @@ public class UnitItems {
                         HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.tome_of_duplication.error");
                     } else {
                         ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), 30, le.level(),le.getEyePosition());
-                        SoundClientboundPacket.playSoundAtPos(SoundAction.TOME_OF_DUPLICATION, le.blockPosition());
+                        SoundClientboundPacket.playSoundAtPos(SoundAction.TOME_OF_DUPLICATION, le.blockPosition(), 1.5f);
+                        UnitSyncAbilityClientboundPacket.sendSyncAbilitiesPacket(le);
                     }
                 }
                 return success;
@@ -511,25 +517,62 @@ public class UnitItems {
             .buyCost(600)
             .sellValue(300)
             .pointDesc("item.reignofnether.shadow_shifter.point1", SHADOW_SHIFTER_DURATION_SECONDS)
-            //.manaCost(25)
-            //.cooldownTicks(180 * 20)
-            .radius(SHADOW_SHIFTER_RADIUS)
-            .showRadiusCircle()
+            .manaCost(50)
+            .cooldownTicks(180 * 20)
+            .range(SHADOW_SHIFTER_RADIUS)
+            .showRangeCircle()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
-                    le.addEffect(new MobEffectInstance(MobEffectRegistrar.NIGHT_WARPING.get(), SHADOW_SHIFTER_DURATION_SECONDS * 20, SHADOW_SHIFTER_RADIUS));
-                    SoundClientboundPacket.playSoundAtPos(SoundAction.SHADOW_SHIFTER, le.blockPosition(), 2.0f);
+                    le.addEffect(new MobEffectInstance(MobEffectRegistrar.NIGHT_WARPING.get(), SHADOW_SHIFTER_DURATION_SECONDS * 20, SHADOW_SHIFTER_RADIUS - 1));
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.SHADOW_SHIFTER, le.blockPosition(), 1.5f);
+                    ParticleUtil.addParticleExplosion(ParticleTypes.WITCH, 30, le.level(), le.getEyePosition());
                 }
                 return true;
             })
             .build();
 
+    private static final int POCKET_PORTAL_RANGE = 5;
     public static final UnitItem POCKET_PORTAL = UnitItemBuilder.of(ItemRegistrar.POCKET_PORTAL.get())
             .descId("pocket_portal")
-            .type(UnitItemType.ACTIVE)
-            .buyCost(200)
-            .sellValue(100) // TODO
+            .type(UnitItemType.CONSUMABLE)
+            .buyCost(150)
+            .sellValue(75)
+            .showRangeCircle()
+            .range(POCKET_PORTAL_RANGE)
+            .onUseGround((unit, pos) -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide()) {
+                    String error = BuildingValidators.getPlacementValidityError(
+                            le.level(),
+                            Buildings.PORTAL_POCKET,
+                            pos.offset(-1,0,-1),
+                            unit.getOwnerName(),
+                            Rotation.NONE,
+                            false,
+                            false,
+                            true
+                    );
+                    if (error != null) {
+                        HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), error);
+                        return false;
+                    } else {
+                        BuildingServerEvents.placeBuilding(
+                                Buildings.PORTAL_POCKET,
+                                pos.offset(-1,0,-1),
+                                Rotation.NONE,
+                                unit.getOwnerName(),
+                                new int[] {},
+                                false,
+                                false,
+                                true,
+                                true
+                        );
+                        return true;
+                    }
+                }
+                return true;
+            })
             .build();
 
     private static final int WAR_HORN_DURATION_SECONDS = 20;

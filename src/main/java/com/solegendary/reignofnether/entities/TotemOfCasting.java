@@ -12,6 +12,6 @@ public class TotemOfCasting extends AbstractTotem {
     public TotemOfCasting(EntityType<? extends Mob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.auraEffects.put(MobEffectRegistrar.VIGOR.get(), 0);
-        this.lifeTimeTicks = UnitItems.TOTEM_OF_CASTING_DURATION_SECONDS;
+        this.lifeTimeTicks = UnitItems.TOTEM_OF_CASTING_DURATION_SECONDS * 20;
     }
 }

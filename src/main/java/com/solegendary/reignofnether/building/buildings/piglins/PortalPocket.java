@@ -28,7 +28,7 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 public class PortalPocket extends AbstractPortal {
 
     public final static String buildingName = "Pocket Portal";
-    public final static String structureName = "portal_basic";
+    public final static String structureName = "pocket_portal";
 
     public final static ResourceCost cost = ResourceCosts.POCKET_PORTAL;
 

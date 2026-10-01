@@ -8,7 +8,7 @@ Passives
 --------
 [✔] Heart Medallion - Raises max HP
 [✔] Azure Medallion - Raises max Mana
-[🟡] Soul Collector - Grants mana when nearby enemy units die (proportional to their population)
+[✔] Soul Collector - Grants mana when nearby enemy units die (proportional to their population)
 [✔] Broadsword - Raises attack damage
 [✔] Katana - Grants a critical hit chance
 [✔] Heartstealer - Grants lifesteal
@@ -35,9 +35,9 @@ Actives
 [✔] Ice Wand (unit-targeted) - Freezes an enemy in a block of ice (like the wretched wraith ultimate)
 [✔] Staff of Lightning (ground-targeted) - Summons a bolt of lightning at the target location
 [✔] Updraft Tome (ground-targeted) - Applies levitation to enemies in a small radius
-[❌] Tome of Duplication  (1-click use, consumable) - Refreshes the cooldown on all items and spells (except ultimates)
-[🟡] Shadow Shifter (monsters only, 1-click-use) - Creates a temporary night aura around the hero
-[❌] Pocket Portal (piglins only, consumable, ground-targeted) - Creates a tiny portal that spreads nether terrain
+[🟡] Tome of Duplication  (1-click use, consumable) - Refreshes the cooldown on all items and spells (except ultimates)
+[✔] Shadow Shifter (monsters only, 1-click-use) - Creates a temporary night aura around the hero
+[✔] Pocket Portal (piglins only, consumable, ground-targeted) - Creates a tiny portal that spreads nether terrain
 [✔] War Horn (1-click-use) - Grants temporary strength to nearby friendly units
 
 [🟡] Totem of Regeneration + (ground-targeted, consumable) - Summons an immobile attackable totem that grants regeneration to nearby friendly units

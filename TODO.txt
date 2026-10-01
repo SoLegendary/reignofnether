@@ -30,7 +30,6 @@ Unit Items
         [❌] Should be visible to all players
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
-    [❌] totems should have limited life
 
 Item drops
     [❌] Track population amount killed for every RTS player
@@ -89,6 +88,8 @@ Bugfixes
 [🟡] Clarified in the tutorial that only humanoid non-hero units can pick up resources
 [❌] Slimes and Magma cubes unaffected by weakness (and strength?)
 [✔] Fixed large custom buildings having extreme lag while building
+[❌] Hero data not being wiped on game reset or start?
+    - Just delete the actual hero-unit.dat file on reset
 
 Languages
 ---------

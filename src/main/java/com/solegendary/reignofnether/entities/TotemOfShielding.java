@@ -14,7 +14,7 @@ public class TotemOfShielding extends AbstractTotem {
 
     public TotemOfShielding(EntityType<? extends Mob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
-        this.lifeTimeTicks = UnitItems.TOTEM_OF_SHIELDING_DURATION_SECONDS;
+        this.lifeTimeTicks = UnitItems.TOTEM_OF_SHIELDING_DURATION_SECONDS * 20;
     }
 
     private static final double MAX_REPEL_FORCE = 1.0; // blocks/tick^2 applied at point-blank range
