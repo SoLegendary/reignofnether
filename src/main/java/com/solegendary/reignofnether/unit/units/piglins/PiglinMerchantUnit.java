@@ -551,6 +551,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 .scale(0.04)
                 .add(0,0.4,0);
         tnt.setDeltaMovement(dMove);
+        tnt.setOwner(this);
         level().addFreshEntity(tnt);
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.EGG_THROW,
                 SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));

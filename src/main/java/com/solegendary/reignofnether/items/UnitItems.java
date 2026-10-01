@@ -174,8 +174,8 @@ public class UnitItems {
             .attribute(AttributeRegistrar.LIFESTEAL.get(), 0.20, ADDITION)
             .build();
 
-    public static final UnitItem SOUL_SCYTHE = UnitItemBuilder.of(ItemRegistrar.SOUL_SCYTHE.get())
-            .descId("soul_scythe")
+    public static final UnitItem RITUAL_DAGGER = UnitItemBuilder.of(ItemRegistrar.RITUAL_DAGGER.get())
+            .descId("ritual_dagger")
             .type(UnitItemType.PASSIVE)
             .buyCost(400)
             .sellValue(200)
@@ -680,7 +680,7 @@ public class UnitItems {
             BROADSWORD,
             KATANA,
             HEARTSTEALER,
-            SOUL_SCYTHE,
+            RITUAL_DAGGER,
             POWERSHAKER,
             GREAT_HAMMER,
             SPARKLER,

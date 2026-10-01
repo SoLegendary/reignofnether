@@ -473,6 +473,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
                 vex.setOwner(this);
                 vex.setBoundOrigin(blockpos);
                 vex.setLimitedLife(CastSummonVexes.VEX_DURATION_SECONDS * ResourceCost.TICKS_PER_SECOND);
+                vex.getPersistentData().putString("ownerName", getOwnerName());
                 ((ServerLevel) this.level()).addFreshEntityWithPassengers(vex);
             }
         }

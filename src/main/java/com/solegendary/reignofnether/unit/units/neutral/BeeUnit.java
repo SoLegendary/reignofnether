@@ -286,11 +286,6 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
     }
 
     @Override
-    public boolean wantsToEnterHive() {
-        return false;
-    }
-
-    @Override
     protected PathNavigation createNavigation(Level pLevel) {
         return new FlyingPathNavigation(this, level());
     }

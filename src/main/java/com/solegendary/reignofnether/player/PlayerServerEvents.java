@@ -1277,6 +1277,7 @@ public class PlayerServerEvents {
             SurvivalServerEvents.reset();
         }
         HeroServerEvents.fallenHeroes.clear();
+        UnitServerEvents.saveFallenHeroUnits(serverLevel);
 
         for (ServerPlayer player : serverLevel.players())
             player.setGameMode(GameType.SPECTATOR);
@@ -1338,6 +1339,7 @@ public class PlayerServerEvents {
             SurvivalServerEvents.reset();
         }
         HeroServerEvents.fallenHeroes.clear();
+        UnitServerEvents.saveFallenHeroUnits(serverLevel);
 
         for (ServerPlayer player : serverLevel.players())
             player.setGameMode(GameType.SPECTATOR);

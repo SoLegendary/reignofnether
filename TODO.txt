@@ -36,7 +36,7 @@ Item drops
         - Double check kill credits for things like TNT and fire
     [❌] On match start, create a random list of items dropped at each kill credit threshold (same for each player)
     [❌] Whenever a player reaches enough kill credit, the next enemy killed drops an item
-
+        [🟡] Test creepScore still works with
 
 
 
@@ -67,12 +67,12 @@ Quality of Life
      - critical_hit_chance (3x damage)
      - explosive_hit_chance
      - building_damage_bonus
-     - lifesteal
-     - mana_on_hit
+     - lifesteal (% of damage)
+     - mana_on_hit (% of damage)
      - scale (visual only)
 
 [✔] Added new mob effects:
-    [🟡] - vigor (-25% cooldown reduction per level)
+    [🟡] - vigor (-33% cooldown reduction per level)
      - phasing (can walk through mobs and ignore knockback)
      - night_warping (+2 night radius per level)
 
@@ -90,7 +90,7 @@ Bugfixes
 [🟡] Clarified in the tutorial that only humanoid non-hero units can pick up resources
 [❌] Slimes and Magma cubes unaffected by weakness (and strength?)
 [✔] Fixed large custom buildings having extreme lag while building
-[❌] Hero data not being wiped on game reset or start?
+[🟡] Hero data not being wiped on game reset or start?
     - Just delete the actual hero-unit.dat file on reset
 
 Languages

@@ -227,7 +227,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
             Unit.tick(this);
             AttackerUnit.tick(this);
 
-            if (isSummoned() && !hasEffectWithDuration(MobEffectRegistrar.LIMITED_LIFESPAN.get())) {
+            if (isSummoned() && !hasEffectWithDuration(MobEffectRegistrar.LIMITED_LIFESPAN.get()) && tickCount < RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY) {
                 this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY, 0, true, false));
             }
 

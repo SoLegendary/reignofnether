@@ -29,6 +29,7 @@ public class RTSPlayer {
     public int scenarioRoleIndex = -1;
     public Map<TradeAction, Integer> tradeRates = new HashMap<>();
     public boolean isDogPerson = true;
+    public int creepScore = 0; // value of neutral enemies killed, for credit towards item drops
 
     private RTSPlayer(String playerName, Faction faction, int id) {
         this.name = playerName;

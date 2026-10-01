@@ -5,15 +5,21 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.List;
@@ -81,6 +87,34 @@ public class ItemServerEvents {
                 boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
                 Unit.fullResetBehaviours(unit);
                 unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent evt) {
+        if (evt.getEntity() instanceof Unit unitKilled) {
+            String killerName = "";
+            Entity sourceEntity = evt.getSource().getEntity();
+            LivingEntity lastHurtBy = evt.getEntity().getLastHurtByMob();
+            if (evt.getSource().getEntity() instanceof Unit unit)
+                killerName = unit.getOwnerName();
+            else if (lastHurtBy instanceof Unit unit)
+                killerName = unit.getOwnerName();
+            else if (sourceEntity != null && sourceEntity.getPersistentData().contains("ownerName"))
+                killerName = sourceEntity.getPersistentData().getString("ownerName");
+            else if (lastHurtBy != null && lastHurtBy.getPersistentData().contains("ownerName"))
+                killerName = lastHurtBy.getPersistentData().getString("ownerName");
+
+            boolean isNeutral = unitKilled.getOwnerName().isBlank();
+            boolean isWaveSurvivalEnemy = SurvivalServerEvents.isEnabled() && unitKilled.getOwnerName().equals(SurvivalServerEvents.ENEMY_OWNER_NAME);
+            if (!killerName.isBlank() && (isNeutral || isWaveSurvivalEnemy)) {
+                RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(killerName);
+                if (rtsPlayer != null) {
+                    int creepScore = unitKilled.getCost().population + 2;
+                    rtsPlayer.creepScore += creepScore;
+                    System.out.println("+" + creepScore + " creepScore for: " + rtsPlayer.name);
+                }
             }
         }
     }

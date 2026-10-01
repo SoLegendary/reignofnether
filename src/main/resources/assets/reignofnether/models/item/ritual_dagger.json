@@ -1,6 +1,6 @@
 {
     "parent": "minecraft:item/generated",
     "textures": {
-        "layer0": "reignofnether:item/soul_scythe"
+        "layer0": "reignofnether:item/ritual_dagger"
     }
 }

@@ -220,7 +220,7 @@ public class ItemRegistrar {
     public static final RegistryObject<Item> BROADSWORD = ITEMS.register("broadsword", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> KATANA = ITEMS.register("katana", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> HEARTSTEALER = ITEMS.register("heartstealer", () -> new UnitGiveableItem(new Item.Properties()));
-    public static final RegistryObject<Item> SOUL_SCYTHE = ITEMS.register("soul_scythe", () -> new UnitGiveableItem(new Item.Properties()));
+    public static final RegistryObject<Item> RITUAL_DAGGER = ITEMS.register("ritual_dagger", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> POWERSHAKER = ITEMS.register("powershaker", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> GREAT_HAMMER = ITEMS.register("great_hammer", () -> new UnitGiveableItem(new Item.Properties()));
     public static final RegistryObject<Item> SPARKLER = ITEMS.register("sparkler", () -> new UnitGiveableItem(new Item.Properties()));

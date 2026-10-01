@@ -641,6 +641,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 ai.setBaseValue(InsomniaCurse.PHANTOM_DAMAGE + (soulRank * InsomniaCurse.PHANTOM_DAMAGE_BONUS_PER_SOUL_RANK));
             }
             this.level().addFreshEntity(phantom);
+            phantom.getPersistentData().putString("ownerName", getOwnerName());
             return phantom;
         }
         return null;
