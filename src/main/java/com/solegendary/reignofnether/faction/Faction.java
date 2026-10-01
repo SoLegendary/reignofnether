@@ -108,7 +108,7 @@ public class Faction {
 	}
 	
 	public boolean equals(Faction faction) {
-		return faction.key.equals(this.key);
+		return faction != null && faction.key.equals(this.key);
 	}
 	
 	public void addBuilding(Building building, Keybinding keybinding) {
