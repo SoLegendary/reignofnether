@@ -130,7 +130,7 @@ public abstract class AbstractUnitItemButton extends Button {
 
             guiGraphics.pose().translate(drawX, drawY, 0);
             guiGraphics.pose().scale(SMALL_SCALE, SMALL_SCALE, 1.0f);
-            guiGraphics.pose().translate(-drawX, -drawY, 0);
+            guiGraphics.pose().translate(-drawX, -drawY, 5);
 
             guiGraphics.drawCenteredString(MC.font,
                     hotkeyStr,

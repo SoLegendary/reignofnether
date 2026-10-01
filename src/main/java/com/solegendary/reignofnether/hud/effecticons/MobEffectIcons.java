@@ -134,7 +134,7 @@ public class MobEffectIcons {
 
     public static final MobEffectIcon VIGOR = new MobEffectIcon(
             MobEffectRegistrar.VIGOR.get(),
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/entities/totem_of_casting.png"),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/totem_of_casting.png"),
             "vigor"
     );
 

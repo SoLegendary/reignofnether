@@ -90,7 +90,7 @@ public class MobEffectRegistrar {
     public static final RegistryObject<MobEffect> WARM = MOB_EFFECTS.register("warm", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
 
     // cooldown reduction
-    public static final RegistryObject<MobEffect> VIGOR = MOB_EFFECTS.register("vigor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFFFFFF));
+    public static final RegistryObject<MobEffect> VIGOR = MOB_EFFECTS.register("vigor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x0000FF));
 
     // no knockback taken or received, not pushable
     public static final RegistryObject<MobEffect> PHASING = MOB_EFFECTS.register("phasing", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x5d105e)
