@@ -30,7 +30,6 @@ Unit Items
         [❌] Should be visible to all players
     [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
 
-    [❌] totems radii not showing
     [❌] totems should have limited life
 
 Item drops

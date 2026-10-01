@@ -559,28 +559,28 @@ public class UnitItems {
             })
             .build();
 
-    private static final int TOTEM_OF_REGENERATION_DURATION_SECONDS = 30;
+    public static final int TOTEM_OF_REGENERATION_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_REGENERATION = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_REGENERATION.get())
             .descId("totem_of_regeneration")
             .pointDesc("item.reignofnether.totem_of_regeneration.point1", TOTEM_OF_REGENERATION_DURATION_SECONDS),
             EntityRegistrar.TOTEM_OF_REGENERATION.get()
     );
 
-    private static final int TOTEM_OF_SHIELDING_DURATION_SECONDS = 20;
+    public static final int TOTEM_OF_SHIELDING_DURATION_SECONDS = 20;
     public static final UnitItem TOTEM_OF_SHIELDING = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
             .descId("totem_of_shielding")
             .pointDesc("item.reignofnether.totem_of_shielding.point1", TOTEM_OF_SHIELDING_DURATION_SECONDS),
             EntityRegistrar.TOTEM_OF_SHIELDING.get()
     );
 
-    private static final int TOTEM_OF_PROTECTION_DURATION_SECONDS = 30;
+    public static final int TOTEM_OF_PROTECTION_DURATION_SECONDS = 30;
     public static final UnitItem TOTEM_OF_PROTECTION = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_PROTECTION.get())
             .descId("totem_of_protection")
             .pointDesc("item.reignofnether.totem_of_protection.point1", TOTEM_OF_PROTECTION_DURATION_SECONDS),
             EntityRegistrar.TOTEM_OF_PROTECTION.get()
     );
 
-    private static final int TOTEM_OF_CASTING_DURATION_SECONDS = 40;
+    public static final int TOTEM_OF_CASTING_DURATION_SECONDS = 40;
     public static final UnitItem TOTEM_OF_CASTING = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_CASTING.get())
             .descId("totem_of_casting")
             .pointDesc("item.reignofnether.totem_of_casting.point1", TOTEM_OF_CASTING_DURATION_SECONDS),

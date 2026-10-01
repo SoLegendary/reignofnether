@@ -2,26 +2,19 @@ package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.heroAbilities.enchanter.MarchOfProgress;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.RangeIndicator;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
-import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.Checkpoint;
-import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
-import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -34,7 +27,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -43,7 +35,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
@@ -148,6 +139,8 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
     final static public float rangedDamageResist = 0.5f;
     final static public float magicDamageResist = 0.5f;
 
+    public int lifeTimeTicks = 30 * 20; // 20s
+
     final protected HashMap<MobEffect, Integer> auraEffects = new HashMap<>();
 
     private Abilities abilities = ABILITIES.clone();
@@ -178,7 +171,7 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
 
     @Override
     protected float getSoundVolume() {
-        return 1.0F;
+        return 2.0F;
     }
 
     @Override
@@ -207,6 +200,10 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
                 }
             }
         }
+        if (!hasEffectWithDuration(MobEffectRegistrar.LIMITED_LIFESPAN.get()))
+            this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), lifeTimeTicks, 0, true, false));
+        if (tickCount > lifeTimeTicks && !isDeadOrDying() && !isRemoved())
+            kill();
     }
 
     @Override

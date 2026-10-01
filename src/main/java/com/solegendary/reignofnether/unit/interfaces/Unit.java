@@ -749,7 +749,7 @@ public interface Unit {
                 usePortalGoal.stopUsingPortal();
         }
         if (unit.getItemGoal() != null)
-            unit.getItemGoal().stop();
+            unit.getItemGoal().stopGoal();
     }
 
     // can be overridden in the Unit's class to do additional logic on a reset

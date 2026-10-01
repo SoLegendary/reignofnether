@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.entities;
 
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.unit.units.monsters.AbstractTotem;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -14,6 +15,7 @@ public class TotemOfProtection extends AbstractTotem {
     public TotemOfProtection(EntityType<? extends Mob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
         this.auraEffects.put(MobEffects.DAMAGE_RESISTANCE, 0);
+        this.lifeTimeTicks = UnitItems.TOTEM_OF_PROTECTION_DURATION_SECONDS;
     }
 
     @Override protected SoundEvent getHurtSound(DamageSource pDamageSource) {

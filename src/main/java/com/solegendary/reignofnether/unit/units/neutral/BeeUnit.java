@@ -173,6 +173,7 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
         this.moveControl = new FlyingUnitMoveControl(this);
         this.navigation = new FlyingPathNavigation(this, level());
         updateAbilityButtons();
+        this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), LIFETIME_TICKS, 0, true, false));
     }
 
     @Override
@@ -337,10 +338,5 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
             return (int) (vertiDist * 0.5f);
         else
             return (int) (vertiDist * 0.25f);
-    }
-
-    @Override
-    public void setupEquipmentAndUpgradesServer() {
-        this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), LIFETIME_TICKS, 0, true, false));
     }
 }

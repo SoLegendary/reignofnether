@@ -67,6 +67,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -84,6 +85,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
@@ -1518,26 +1520,71 @@ public class UnitClientEvents {
         }
     }
 
-    public static void syncMobEffect(int entityId, int effectId, int amplifier, int duration) {
+    @SubscribeEvent
+    public static void onMobEffectAdded(MobEffectEvent.Added evt) {
+        LivingEntity entity = evt.getEntity();
+        if (!(entity instanceof Unit))
+            return;
+
+        MobEffectInstance mei = evt.getEffectInstance();
+
         synchronized (mobEffectIcons) {
-            for (LivingEntity entity : getAllUnits()) {
-                MobEffect effect = MobEffect.byId(effectId);
-                if (effect != null && entityId == entity.getId() && entity instanceof Unit) {
-                    if (duration > 0) {
-                        MobEffectInstance mei = new MobEffectInstance(effect, duration, amplifier);
-                        entity.addEffect(mei);
-                        if (!mobEffectIcons.containsKey(entityId))
-                            mobEffectIcons.put(entityId, new HashMap<>());
-                        mobEffectIcons.get(entityId).put(mei.getEffect(), MobEffectIcons.getIcon(mei));
-                        if (entity instanceof RangeIndicator ri)
-                            ri.updateHighlightBps(entity.level());
-                    } else if (entity.getEffect(effect) != null) {
-                        entity.removeEffect(effect);
-                        if (mobEffectIcons.containsKey(entityId))
-                            mobEffectIcons.get(entityId).remove(effect);
-                        if (entity instanceof RangeIndicator ri)
-                            ri.updateHighlightBps(entity.level());
-                    }
+            // add/update mob effect icon
+            mobEffectIcons
+                    .computeIfAbsent(entity.getId(), id -> new HashMap<>())
+                    .put(mei.getEffect(), MobEffectIcons.getIcon(mei));
+        }
+        if (entity instanceof RangeIndicator ri)
+            ri.updateHighlightBps(entity.level());
+    }
+
+    @SubscribeEvent
+    public static void onMobEffectRemoved(MobEffectEvent.Remove evt) {
+        LivingEntity entity = evt.getEntity();
+        if (!(entity instanceof Unit))
+            return;
+
+        removeMobEffectIcon(entity.getId(), evt.getEffect());
+        if (entity instanceof RangeIndicator ri)
+            ri.updateHighlightBps(entity.level());
+    }
+
+    // Without this, icons stay behind when an effect simply runs out
+    @SubscribeEvent
+    public static void onMobEffectExpired(MobEffectEvent.Expired evt) {
+        LivingEntity entity = evt.getEntity();
+        MobEffectInstance mei = evt.getEffectInstance();
+        if (!(entity instanceof Unit) || mei == null)
+            return;
+
+        removeMobEffectIcon(entity.getId(), mei.getEffect());
+        if (entity instanceof RangeIndicator ri)
+            ri.updateHighlightBps(entity.level());
+    }
+
+    private static void removeMobEffectIcon(int entityId, MobEffect effect) {
+        synchronized (mobEffectIcons) {
+            // remove mob effect icon
+            HashMap<MobEffect, MobEffectIcon> icons = mobEffectIcons.get(entityId);
+            if (icons != null) {
+                icons.remove(effect);
+                if (icons.isEmpty())
+                    mobEffectIcons.remove(entityId);
+            }
+        }
+    }
+
+    public static void syncMobEffect(int entityId, int effectId, int amplifier, int duration) {
+        MobEffect effect = MobEffect.byId(effectId);
+        if (effect == null)
+            return;
+
+        for (LivingEntity entity : getAllUnits()) {
+            if (entityId == entity.getId() && entity instanceof Unit) {
+                if (duration > 0) {
+                    entity.addEffect(new MobEffectInstance(effect, duration, amplifier));
+                } else if (entity.getEffect(effect) != null) {
+                    entity.removeEffect(effect);
                 }
             }
         }

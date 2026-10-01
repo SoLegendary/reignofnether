@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.entities;
 
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.unit.units.monsters.AbstractTotem;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.world.entity.EntityType;
@@ -13,6 +14,7 @@ public class TotemOfShielding extends AbstractTotem {
 
     public TotemOfShielding(EntityType<? extends Mob> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+        this.lifeTimeTicks = UnitItems.TOTEM_OF_SHIELDING_DURATION_SECONDS;
     }
 
     private static final double MAX_REPEL_FORCE = 1.0; // blocks/tick^2 applied at point-blank range
