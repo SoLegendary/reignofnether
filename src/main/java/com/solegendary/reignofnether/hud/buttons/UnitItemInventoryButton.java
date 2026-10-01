@@ -87,16 +87,12 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
         } else {
             this.greyPercent = 0;
         }
-        super.render(guiGraphics, x, y, mouseX, mouseY);
         this.bottomLeftText = () -> {
-            if (this.itemStack.getCount() > 0)
+            if (this.itemStack.getCount() > 1)
                 return String.valueOf(this.itemStack.getCount());
             return "";
         };
-        renderStackCount(guiGraphics);
-    }
-
-    private void renderStackCount(GuiGraphics guiGraphics) {
+        super.render(guiGraphics, x, y, mouseX, mouseY);
     }
 
     // render a translucent version of this button

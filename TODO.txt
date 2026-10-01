@@ -50,6 +50,8 @@ Balance
     - Reduce cost of iron armor
     - Reduce cost of militia archers
     - Rework enchanter absorption to be like MC dungeons (active linked buff)
+    - Block animations with block displays for royal guard slam
+        - And make slam single click like war stomp
 
 Quality of Life
 ---------------
@@ -62,17 +64,17 @@ Quality of Life
 [✔] Reworked the unit armour tooltip for mixed armour types
 
 [✔] Added new attributes:
-    [🟡] - critical_hit_chance (2.5x damage)
-    [🟡] - explosive_hit_chance
-    [✔] - building_damage_bonus
-    [🟡] - lifesteal
-    [🟡] - mana_on_hit
-    [✔] - scale (visual only)
+     - critical_hit_chance (3x damage)
+     - explosive_hit_chance
+     - building_damage_bonus
+     - lifesteal
+     - mana_on_hit
+     - scale (visual only)
 
 [✔] Added new mob effects:
     [🟡] - vigor (-25% cooldown reduction per level)
-    [✔] - phasing (can walk through mobs and ignore knockback)
-    [🟡] - night_warping (+2 night radius per level)
+     - phasing (can walk through mobs and ignore knockback)
+     - night_warping (+2 night radius per level)
 
 [❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
 

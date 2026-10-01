@@ -296,9 +296,9 @@ public interface Unit {
                 int extraCdTicks = 0;
                 if (unitMob.tickCount % 2 == 0) {
                     MobEffectInstance mei = unitMob.getEffect(MobEffectRegistrar.VIGOR.get());
-                    extraCdTicks = mei == null ? 0 : mei.getAmplifier() + 1;
-                    if (unit instanceof HeroUnit heroUnit && unitMob.tickCount % 20 == 0) {
-                        heroUnit.setMana(heroUnit.getMana() + 0.5f);
+                    int amp = mei == null ? 0 : mei.getAmplifier() + 1;
+                    if (amp > 0 && unit instanceof HeroUnit heroUnit && unitMob.tickCount % 20 == 0) {
+                        heroUnit.setMana(heroUnit.getMana() + (0.5f * amp));
                     }
                 }
 

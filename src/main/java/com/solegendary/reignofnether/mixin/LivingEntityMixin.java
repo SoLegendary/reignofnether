@@ -159,7 +159,7 @@ public abstract class LivingEntityMixin extends Entity {
     @Shadow public float getHealth() { return 0f; }
     @Shadow public void setHealth(float pHealth) { }
 
-    private static final float CRITICAL_HIT_MULTIPLIER = 2.5f;
+    private static final float CRITICAL_HIT_MULTIPLIER = 3f;
 
     @Inject(
             method = "actuallyHurt",

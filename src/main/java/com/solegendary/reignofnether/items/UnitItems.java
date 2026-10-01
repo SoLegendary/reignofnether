@@ -138,7 +138,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .buyCost(300)
             .sellValue(150)
-            .attribute(Attributes.ARMOR, 5, ADDITION)
+            .attribute(Attributes.ARMOR, 6, ADDITION)
             .build();
 
     public static final int SOUL_COLLECTOR_RADIUS = 20;
@@ -155,7 +155,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .buyCost(300)
             .sellValue(150)
-            .attribute(AttributeRegistrar.ATTACK_DAMAGE.get(), 0.25, MULTIPLY_BASE)
+            .attribute(AttributeRegistrar.ATTACK_DAMAGE.get(), 0.30, MULTIPLY_BASE)
             .build();
 
     public static final UnitItem KATANA = UnitItemBuilder.of(ItemRegistrar.KATANA.get())
@@ -171,7 +171,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .buyCost(400)
             .sellValue(200)
-            .attribute(AttributeRegistrar.LIFESTEAL.get(), 0.15, ADDITION)
+            .attribute(AttributeRegistrar.LIFESTEAL.get(), 0.20, ADDITION)
             .build();
 
     public static final UnitItem SOUL_SCYTHE = UnitItemBuilder.of(ItemRegistrar.SOUL_SCYTHE.get())
@@ -179,7 +179,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .buyCost(400)
             .sellValue(200)
-            .attribute(AttributeRegistrar.MANA_ON_HIT.get(), 0.25, ADDITION)
+            .attribute(AttributeRegistrar.MANA_ON_HIT.get(), 0.30, ADDITION)
             .build();
 
     public static final UnitItem POWERSHAKER = UnitItemBuilder.of(ItemRegistrar.POWERSHAKER.get())
@@ -203,7 +203,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .buyCost(300)
             .sellValue(150)
-            .attribute(Attributes.ATTACK_SPEED, 0.20, MULTIPLY_BASE)
+            .attribute(AttributeRegistrar.ATTACKS_PER_SECOND.get(), 0.25, MULTIPLY_BASE)
             .build();
 
     public static final UnitItem LIGHT_FEATHER = UnitItemBuilder.of(ItemRegistrar.LIGHT_FEATHER.get())

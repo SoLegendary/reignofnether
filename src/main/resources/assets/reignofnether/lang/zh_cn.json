@@ -213,7 +213,7 @@
   "attribute.reignofnether.max_mana_bonus_per_level": "最大魔力值增幅（每级）",
   "attribute.reignofnether.max_health_bonus_per_level": "最大生命值增幅（每级）",
   "attribute.reignofnether.attack_damage_bonus_per_level": "攻击伤害增幅（每级）",
-  "attribute.reignofnether.critical_hit_chance": "弱点攻击概率 (2.5 倍伤害)",
+  "attribute.reignofnether.critical_hit_chance": "弱点攻击概率 (3 倍伤害)",
   "attribute.reignofnether.explosive_hit_chance": "爆炸攻击概率",
   "attribute.reignofnether.building_damage_bonus": "对建筑额外伤害",
   "attribute.reignofnether.lifesteal": "生命偷取",
