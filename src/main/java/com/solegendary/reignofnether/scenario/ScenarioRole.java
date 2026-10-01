@@ -44,6 +44,16 @@ public class ScenarioRole {
 
     public void unpackNbt() {
         this.name = nbt.getString("name");
+        try {
+            this.faction = Factions.getFaction(ResourceLocation.parse(nbt.getString("faction")));
+        } catch (Exception e) {
+            switch (nbt.getString("faction")) {
+                case "VILLAGERS" -> this.faction = Factions.VILLAGERS;
+                case "MONSTERS" -> this.faction = Factions.MONSTERS;
+                case "PIGLINS" -> this.faction = Factions.PIGLINS;
+                case "NEUTRAL" -> this.faction = Factions.NEUTRAL;
+            }
+        }
         this.faction = Factions.getFaction(ResourceLocation.parse(nbt.getString("faction")));
         this.startingResources.food = nbt.getInt("startingFood");
         this.startingResources.wood = nbt.getInt("startingWood");
