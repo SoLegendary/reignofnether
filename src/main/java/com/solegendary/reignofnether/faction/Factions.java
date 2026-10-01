@@ -42,8 +42,6 @@ public class Factions {
 	
 	public static void register() {
 		VILLAGERS = register("villagers", new Faction()
-			.setWorkerEntityType(EntityRegistrar.VILLAGER_UNIT.get())
-			.setScoutEntityType(EntityRegistrar.SCOUT_DOG_UNIT.get())
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"))
 			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"))
 			.setSound(SoundRegistrar.VILLAGER_CALM_THEME_SONG.get())
@@ -52,7 +50,6 @@ public class Factions {
 		);
 		
 		MONSTERS = register("monsters", new Faction()
-			.setScoutEntityType(EntityRegistrar.BAT_UNIT.get())
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/zombie_villager.png"))
 			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/creeper.png"))
 			.setSound(SoundRegistrar.MONSTER_CALM_THEME_SONG.get())
@@ -61,8 +58,6 @@ public class Factions {
 		);
 		
 		PIGLINS = register("piglins", new Faction()
-			.setWorkerEntityType(EntityRegistrar.GRUNT_UNIT.get())
-			.setScoutEntityType(EntityRegistrar.STRIDER_UNIT.get())
 			.setWorkerIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"))
 			.setIcon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/grunt.png"))
 			.setSpawnWave(IllagerWaveSpawner::spawnIllagerWave)

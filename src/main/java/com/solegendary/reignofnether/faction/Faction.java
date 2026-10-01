@@ -92,14 +92,12 @@ public class Faction {
 		return this;
 	}
 	
-	public Faction setWorkerEntityType(EntityType<? extends Unit> workerEntityType) {
+	public void setWorkerEntityType(EntityType<? extends Unit> workerEntityType) {
 		this.workerEntityType = EntityType.getKey(workerEntityType);
-		return this;
 	}
 	
-	public Faction setScoutEntityType(EntityType<? extends Unit> scoutEntityType) {
+	public void setScoutEntityType(EntityType<? extends Unit> scoutEntityType) {
 		this.scoutEntityType = EntityType.getKey(scoutEntityType);
-		return this;
 	}
 	
 	public Faction setKey(ResourceLocation key) {
