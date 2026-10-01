@@ -273,6 +273,7 @@ public class Factions {
 	}
 	
 	public static Faction getFaction(ResourceLocation pKey) {
+		if (pKey == null) return Factions.NONE;
 		return ReignOfNetherRegistries.FACTIONS.get(pKey);
 	}
 	
