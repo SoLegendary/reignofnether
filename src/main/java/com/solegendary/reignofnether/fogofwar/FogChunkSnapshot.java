@@ -82,7 +82,7 @@ public class FogChunkSnapshot {
         ReignOfNether.LOGGER.info("[FogChunkSnapshot] captured {} chunks inside world border to {}", captured, dir);
     }
 
-    // encode the packet and flush it to its chunk file; register in the index on success
+    // encode the packet and flush it to its chunk file; registerBuilding in the index on success
     private static boolean writeChunk(ChunkPos pos, ClientboundLevelChunkWithLightPacket packet) {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         try {

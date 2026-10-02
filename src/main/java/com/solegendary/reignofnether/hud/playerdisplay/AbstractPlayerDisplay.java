@@ -1,11 +1,12 @@
 package com.solegendary.reignofnether.hud.playerdisplay;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.RTSPlayer;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -50,7 +51,7 @@ public abstract class AbstractPlayerDisplay {
     public AbstractPlayerDisplay(AbstractClientPlayer clientPlayer) {
         this.player = clientPlayer;
         this.playerName = clientPlayer.getName().getString();
-        this.faction = Faction.NONE;
+        this.faction = Factions.NONE;
     }
 
     public boolean isPlayerLoggedIn() {
@@ -70,7 +71,7 @@ public abstract class AbstractPlayerDisplay {
                 this.backgroundColor
         );
         // render faction icon
-        ResourceLocation factionIcon = MiscUtil.getFactionIcon(faction);
+        ResourceLocation factionIcon = faction.icon;
         if(factionIcon != null) {
             MyRenderer.renderIcon(guiGraphics,
                     factionIcon,

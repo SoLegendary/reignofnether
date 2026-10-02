@@ -5,7 +5,7 @@ import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.nether.NetherBlocks;
@@ -121,7 +121,7 @@ public class BuildingValidators {
             return true;
         }
         boolean netherTerrainCustomBuilding = building instanceof CustomBuilding cb && cb.netherTerrainOnly;
-        if (!netherTerrainCustomBuilding && building.getFaction() != Faction.PIGLINS || building instanceof CentralPortal) {
+        if (!netherTerrainCustomBuilding && !building.getFaction().equals(Factions.PIGLINS) || building instanceof CentralPortal) {
             return true;
         }
         if (building instanceof PortalBasic) {

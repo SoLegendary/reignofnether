@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.player;
 
 import com.solegendary.reignofnether.ability.TradeAction;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
@@ -53,7 +55,7 @@ public class PlayerClientboundPacket {
     public static void resetRTS(boolean hard) {
         if (hard) {
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new PlayerClientboundPacket(PlayerAction.RESET_RTS_HARD, "", 0L));
+                    new PlayerClientboundPacket(PlayerAction.RESET_RTS_HARD, "", 0L ));
         } else {
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new PlayerClientboundPacket(PlayerAction.RESET_RTS, "", 0L));
@@ -115,7 +117,7 @@ public class PlayerClientboundPacket {
         this.playerName = playerName;
         this.value1 = 0L;
         this.value2 = 0;
-        this.faction = Faction.NONE;
+        this.faction = Factions.NONE;
         this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
         this.pos = pos;
         this.isDogPerson = true;
@@ -137,7 +139,7 @@ public class PlayerClientboundPacket {
         this.playerName = playerName;
         this.value1 = value1;
         this.value2 = 0;
-        this.faction = Faction.NONE;
+        this.faction = Factions.NONE;
         this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
         this.pos = new BlockPos(0,0,0);
         this.isDogPerson = true;
@@ -148,7 +150,7 @@ public class PlayerClientboundPacket {
         this.playerName = playerName;
         this.value1 = value1;
         this.value2 = 0;
-        this.faction = Faction.NONE;
+        this.faction = Factions.NONE;
         this.tradeAction = tradeAction;
         this.pos = new BlockPos(0,0,0);
         this.isDogPerson = true;
@@ -159,7 +161,7 @@ public class PlayerClientboundPacket {
         this.playerName = buffer.readUtf();
         this.value1 = buffer.readLong();
         this.value2 = buffer.readInt();
-        this.faction = buffer.readEnum(Faction.class);
+        this.faction = Factions.getFaction(buffer.readResourceLocation());
         this.tradeAction = buffer.readEnum(TradeAction.class);
         this.pos = buffer.readBlockPos();
         this.isDogPerson = buffer.readBoolean();
@@ -170,7 +172,7 @@ public class PlayerClientboundPacket {
         buffer.writeUtf(this.playerName);
         buffer.writeLong(this.value1);
         buffer.writeInt(this.value2);
-        buffer.writeEnum(this.faction);
+        buffer.writeResourceLocation(this.faction.key);
         buffer.writeEnum(this.tradeAction);
         buffer.writeBlockPos(this.pos);
         buffer.writeBoolean(this.isDogPerson);

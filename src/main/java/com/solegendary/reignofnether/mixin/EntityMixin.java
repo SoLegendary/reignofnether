@@ -51,7 +51,7 @@ public abstract class EntityMixin {
         cir.setReturnValue(pDistance < d0 * d0);
     }
 
-    // use this mixin if you want a mob to avoid damage and not even register a damage animation
+    // use this mixin if you want a mob to avoid damage and not even registerBuilding a damage animation
     @Inject(
             method = "isInvulnerableTo",
             at = @At("HEAD"),
@@ -120,7 +120,7 @@ public abstract class EntityMixin {
         }
     }
 
-    // use this mixin if you want a mob to avoid damage and not even register a damage animation
+    // use this mixin if you want a mob to avoid damage and not even registerBuilding a damage animation
     @Inject(
             method = "isCurrentlyGlowing",
             at = @At("HEAD"),

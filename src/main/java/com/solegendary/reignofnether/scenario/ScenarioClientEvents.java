@@ -91,7 +91,7 @@ public class ScenarioClientEvents {
     public static Button getCycleRoleToPlayButton() {
         List<FormattedCharSequence> tooltipLines = new ArrayList<>();
         ScenarioRole role = scenarioRoles.get(roleIndexToPlay);
-        tooltipLines.add(fcs(I18n.get("hud.gamemode.reignofnether.choose_scenario_role", role.name, role.faction.name())));
+        tooltipLines.add(fcs(I18n.get("hud.gamemode.reignofnether.choose_scenario_role", role.name, role.faction.getName())));
 
         if (role.isNpc) {
             tooltipLines.add(fcs(I18n.get("hud.gamemode.reignofnether.npc_scenario_role")));
@@ -110,7 +110,7 @@ public class ScenarioClientEvents {
         }
 
         return new ButtonBuilder("Change Scenario Role")
-                .iconResource(MiscUtil.getFactionIcon(role.faction))
+                .iconResource(role.faction.icon)
                 .onLeftClick(() -> {
                     roleIndexToPlay += 1;
                     if (roleIndexToPlay >= scenarioRoles.size())

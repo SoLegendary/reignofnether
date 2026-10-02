@@ -71,7 +71,7 @@ Communism not included
 Giant Japanese Robots not included
 We will bury them!
 Absolutely Certainly Definitive Edition
-Animal faction when?
+Animal factionEnum when?
 RoN 2: The Frozen Stair Block
 RoN 2: Elytra of Liberty
 RoN 2: Legacy of the End

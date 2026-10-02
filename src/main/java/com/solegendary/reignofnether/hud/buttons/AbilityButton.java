@@ -7,7 +7,7 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import net.minecraft.client.Minecraft;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -90,15 +90,15 @@ public class AbilityButton extends Button {
 
         // charges remaining number
         if (this.ability != null && this.ability.usesCharges()) {
-            String chargeStr = String.valueOf(unit != null ? unit.getCharges(ability) : building.getCharges(ability));
+            String chargeStr = String.valueOf(unit != null ? unit.getAbilityCharges(ability) : building.getCharges(ability));
             guiGraphics.pose().translate(0,0,2);
 
             int colour = 0xFFFFFF;
-            if ((unit != null ? unit.getCharges(ability) : building.getCharges(ability)) >= this.ability.maxCharges)
+            if ((unit != null ? unit.getAbilityCharges(ability) : building.getCharges(ability)) >= this.ability.maxCharges)
                 colour = 0x00FF00;
-            else if ((unit != null ? unit.getCharges(ability) : building.getCharges(ability)) <= 0)
+            else if ((unit != null ? unit.getAbilityCharges(ability) : building.getCharges(ability)) <= 0)
                 colour = 0xFF0000;
-            else if ((unit != null ? unit.getCharges(ability) : building.getCharges(ability)) == 1)
+            else if ((unit != null ? unit.getAbilityCharges(ability) : building.getCharges(ability)) == 1)
                 colour = 0xFFFF00;
 
             guiGraphics.drawCenteredString(MC.font,

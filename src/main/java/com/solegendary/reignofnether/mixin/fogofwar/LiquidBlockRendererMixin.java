@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 // fog-tint fluids on the vanilla renderer (Embeddium replaces this class)
 @Mixin(LiquidBlockRenderer.class)
 public abstract class LiquidBlockRendererMixin {
-
     @Redirect(
             method = "tesselate(Lnet/minecraft/world/level/BlockAndTintGetter;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/material/FluidState;)V",
             at = @At(
