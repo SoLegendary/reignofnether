@@ -198,19 +198,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
         return ((this.getGatherResourceGoal() != null && this.getGatherResourceGoal().isGathering()) ||
                 (this.getBuildRepairGoal() != null && this.getBuildRepairGoal().isBuilding()));
     }
-
-    public static List<BuildingPlaceButton> getBuildingButtons() {
-	    List<BuildingPlaceButton> buttons = new ArrayList<>(Factions.PIGLINS.getBuildingButtons());
-
-        //TODO Add to Register
-        CustomBuildingClientEvents.customBuildings.forEach(cb -> {
-            if (cb.buildableByPiglins)
-                buttons.add(cb.getWorkerBuildButton(null));
-        });
-
-        return buttons;
-    }
-
+    
     public GruntUnit(EntityType<? extends Piglin> entityType, Level level) {
         super(entityType, level);
 
