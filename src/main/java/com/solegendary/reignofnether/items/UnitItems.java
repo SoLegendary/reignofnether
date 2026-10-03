@@ -97,7 +97,7 @@ public class UnitItems {
     public static final UnitItem STAFF_OF_LIGHTNING = UnitItemBuilder.of(ItemRegistrar.STAFF_OF_LIGHTNING.get())
             .descId("staff_of_lightning")
             .type(UnitItemType.ACTIVE)
-            .rarity(Rarity.COMMON)
+            .rarity(Rarity.EPIC)
             .noRandomDrop()
             .cooldownTicks(60 * 20)
             .manaCost(50)

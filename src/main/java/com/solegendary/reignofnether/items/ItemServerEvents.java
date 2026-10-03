@@ -117,7 +117,7 @@ public class ItemServerEvents {
                 dropper.level(), dropper.getX(), dropper.getY(), dropper.getZ(),
                 new ItemStack(unitItem.item))); // adjust to however UnitItem exposes its Item
 
-        SoundClientboundPacket.playSoundAtPos(getItemDropSound(unitItem.rarity), dropper.blockPosition(), 2.0f);
+        SoundClientboundPacket.playSoundAtPos(getItemDropSound(unitItem.rarity), dropper.blockPosition(), 2.5f);
 
         ReignOfNether.LOGGER.info(rtsPlayer.name + " received item drop #" + rtsPlayer.itemsDropped);
     }
@@ -169,7 +169,7 @@ public class ItemServerEvents {
         }
     }
 
-    private static SoundAction getItemDropSound(Rarity rarity) {
+    public static SoundAction getItemDropSound(Rarity rarity) {
         if (rarity == Rarity.RARE || rarity == Rarity.EPIC)
             return SoundAction.ITEM_DROP_RARE;
         if (rarity == UnitItemRarity.LEGENDARY || rarity == UnitItemRarity.MYTHIC)

@@ -269,17 +269,21 @@ public class GameruleClient {
         ));
         buttons.add(new GameruleIntegerButton("randomItemDrops: " + Math.round(randomItemDrops.getValue()),
                 () -> {
-                    int value = Math.min(0, randomItemDrops.getValue() + 1);
+                    int value = randomItemDrops.getValue() + 1;
+                    if (value > 2) value = 0;
                     GameruleServerboundPacket.setRandomItemDrops(value);
                 },
                 () -> {
-                    int value = Math.max(2, randomItemDrops.getValue() - 1);
+                    int value = randomItemDrops.getValue() - 1;
+                    if (value < 0) value = 2;
                     GameruleServerboundPacket.setRandomItemDrops(value);
                 },
                 List.of(
-                        fcs(I18n.get("commands.reignofnether.gamerule.animal_spawn_y_diff")),
-                        fcs(I18n.get("hud.gamerule.reignofnether.click")),
-                        fcs(I18n.get("hud.gamerule.reignofnether.shift_click"))
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point1")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point2")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point3")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point4"))
                 )
         ));
 

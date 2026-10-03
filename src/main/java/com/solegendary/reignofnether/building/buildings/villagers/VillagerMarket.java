@@ -76,8 +76,8 @@ public class VillagerMarket extends AbstractMarket {
     public ArrayList<StockedShopItem> getUpgradedItemsAndStock() {
         return new ArrayList<>(List.of(
                 new StockedShopItem(UnitItems.FROST_WALKER_BOOTS, 1, 600 * 20),
-                new StockedShopItem(UnitItems.BELL_OF_ARMS, 1, 600 * 20),
-                new StockedShopItem(UnitItems.WAR_HORN, 1, 600 * 20)
+                new StockedShopItem(UnitItems.WAR_HORN, 1, 600 * 20),
+                new StockedShopItem(UnitItems.BELL_OF_ARMS, 1, 600 * 20)
         ));
     }
 
