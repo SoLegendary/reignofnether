@@ -58,10 +58,23 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
     }
 
     @Override
-    protected ArrayList<StockedShopItem> getStartingItemsAndStock() {
+    public ArrayList<StockedShopItem> getStartingItemsAndStock() {
         return new ArrayList<>(List.of(
-                new StockedShopItem(UnitItems.HEALTH_POTION, 1, 60 * 20),
-                new StockedShopItem(UnitItems.MANA_POTION, 1, 60 * 20)
+                new StockedShopItem(UnitItems.HEALTH_POTION, 3, 60 * 20),
+                new StockedShopItem(UnitItems.MANA_POTION, 3, 60 * 20),
+                new StockedShopItem(UnitItems.BROADSWORD, 1, 180 * 20),
+                new StockedShopItem(UnitItems.IRON_HIDE_AMULET, 1, 180 * 20),
+                new StockedShopItem(UnitItems.HEART_MEDALLION, 1, 180 * 20),
+                new StockedShopItem(UnitItems.AZURE_MEDALLION, 1, 180 * 20)
+        ));
+    }
+
+    @Override
+    public ArrayList<StockedShopItem> getUpgradedItemsAndStock() {
+        return new ArrayList<>(List.of(
+                new StockedShopItem(UnitItems.MAGMA_WALKER_BOOTS, 1, 600 * 20),
+                new StockedShopItem(UnitItems.GONG_OF_WEAKENING, 1, 600 * 20),
+                new StockedShopItem(UnitItems.POCKET_PORTAL, 1, 600 * 20)
         ));
     }
 

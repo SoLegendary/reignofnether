@@ -3,9 +3,11 @@ package com.solegendary.reignofnether.research.researchItems;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.VillagerMarket;
 import com.solegendary.reignofnether.building.production.*;
+import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -14,6 +16,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -26,8 +29,13 @@ public class ResearchMarketUpgradeVillager extends ProductionItem {
     public ResearchMarketUpgradeVillager() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (!level.isClientSide() && placement.getBuilding() instanceof VillagerMarket) {
+            if (!level.isClientSide() && placement.getBuilding() instanceof VillagerMarket market) {
                 placement.changeStructure(VillagerMarket.upgradedStructureName);
+                ArrayList<StockedShopItem> stockedShopItems = placement.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
+                if (stockedShopItems != null) {
+                    stockedShopItems.addAll(market.getUpgradedItemsAndStock());
+                    placement.getDataStorage().setData(ItemShopAddon.STOCKED_ITEMS, stockedShopItems);
+                }
             }
         };
     }

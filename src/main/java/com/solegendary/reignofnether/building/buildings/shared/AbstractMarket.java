@@ -47,7 +47,9 @@ public abstract class AbstractMarket extends ProductionBuilding implements ItemS
         return BuildingBlockData.getBuildingBlocksFromNbt(structureName, level);
     }
 
-    protected abstract ArrayList<StockedShopItem> getStartingItemsAndStock();
+    public abstract ArrayList<StockedShopItem> getStartingItemsAndStock();
+
+    public abstract ArrayList<StockedShopItem> getUpgradedItemsAndStock();
 
     @Override
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
