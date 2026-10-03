@@ -106,9 +106,7 @@ public class ItemServerEvents {
                     unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
                 }
             } else if (SandboxServer.isAnyoneASandboxPlayer()) {
-                if (inv.deleteItem(itemUuid)) {
-                    HudClientboundPacket.showTempMessageI18n("item.reignofnether.hud.deleted_item", itemInHand.getHoverName().getString());
-                }
+                inv.deleteItem(itemUuid);
             }
         }
     }

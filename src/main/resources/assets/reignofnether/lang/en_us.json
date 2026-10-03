@@ -196,7 +196,6 @@
     "item.reignofnether.hud.buy": "Buy: %d",
     "item.reignofnether.hud.sell": "Sell: %d",
     "item.reignofnether.hud.give_to_unit": "Gave %s to %s",
-    "item.reignofnether.hud.deleted_item": "Deleted %s",
 
     "itemshop.reignofnether.toggle_menu": "Open Shop",
     "itemshop.reignofnether.error.out_of_stock": "Out of stock (restock in %ds)",

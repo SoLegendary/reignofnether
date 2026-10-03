@@ -36,7 +36,7 @@ Item drops
     [🟡] On match start, create a random list of items dropped at each kill credit threshold (same for each player)
     [🟡] Whenever a player reaches enough kill credit, the next enemy killed drops an item
 
-
+    [❌] Item drops are duplicated?
 
 Balance
 -------
