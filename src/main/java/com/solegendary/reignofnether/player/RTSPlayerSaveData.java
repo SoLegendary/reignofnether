@@ -15,6 +15,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class RTSPlayerSaveData extends SavedData {
 
@@ -50,7 +51,7 @@ public class RTSPlayerSaveData extends SavedData {
                 int ticksWithoutCapitol = ptag.getInt("ticksWithoutCapitol");
                 int beaconOwnerTicks = ptag.getInt("beaconOwnerTicks");
                 Faction faction = Faction.valueOf(ptag.getString("faction"));
-                int[] scores = ptag.contains("sources") ? ptag.getIntArray("scores") : new RTSPlayerScores().getScoreListAsArray();
+                int[] scores = ptag.contains("scores") ? ptag.getIntArray("scores") : new RTSPlayerScores().getScoreListAsArray();
                 int scenarioRoleIndex = ptag.getInt("scenarioRoleIndex");
 
                 Map<TradeAction, Integer> tradeRates = new HashMap<>();
@@ -61,7 +62,15 @@ public class RTSPlayerSaveData extends SavedData {
                 tradeRates.put(TradeAction.ORE_FOR_EMERALD, ptag.contains("oreEmeraldRate") ? ptag.getInt("oreEmeraldRate") : TradeResources.START_SELL_RATE);
                 tradeRates.put(TradeAction.EMERALD_FOR_ORE, ptag.contains("emeraldOreRate") ? ptag.getInt("emeraldOreRate") : TradeResources.START_BUY_RATE);
 
-                data.rtsPlayers.add(RTSPlayer.getFromSave(name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores, scenarioRoleIndex, tradeRates));
+                int creepScore = ptag.contains("creepScore") ? ptag.getInt("creepScore") : 0;
+                int itemsDropped = ptag.contains("itemsDropped") ? ptag.getInt("itemsDropped") : 0;
+                Long itemSeed = ptag.contains("itemSeed") ? ptag.getLong("itemSeed") : new Random().nextLong();
+
+                data.rtsPlayers.add(RTSPlayer.getFromSave(
+                        name, id, ticksWithoutCapitol, faction,
+                        beaconOwnerTicks, scores, scenarioRoleIndex,
+                        tradeRates, creepScore, itemsDropped, itemSeed
+                ));
 
                 ReignOfNether.LOGGER.info("RTSPlayerSaveData.load: " + name + "|" + id + "|" + faction);
             }
@@ -89,6 +98,9 @@ public class RTSPlayerSaveData extends SavedData {
             cTag.putInt("emeraldWoodRate", p.tradeRates.get(TradeAction.EMERALD_FOR_WOOD));
             cTag.putInt("oreEmeraldRate", p.tradeRates.get(TradeAction.ORE_FOR_EMERALD));
             cTag.putInt("emeraldOreRate", p.tradeRates.get(TradeAction.EMERALD_FOR_ORE));
+            cTag.putInt("creepScore", p.creepScore);
+            cTag.putInt("itemsDropped", p.itemsDropped);
+            cTag.putLong("itemSeed", p.itemSeed);
             list.add(cTag);
 
             //ReignOfNether.LOGGER.info("RTSPlayerSaveData.save: " + p.name + "|" + p.id + "|" + p.faction);

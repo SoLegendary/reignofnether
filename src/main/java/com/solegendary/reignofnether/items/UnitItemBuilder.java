@@ -10,6 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
@@ -50,6 +51,7 @@ public class UnitItemBuilder {
     UnitItemType type = UnitItemType.PASSIVE;
     int sellValue = 0;
     int buyCost = 0;
+    Rarity rarity = Rarity.COMMON;
     LocalizedText desc = null;
     Keybinding hotkey = null;
     boolean enableTooltip = true;
@@ -75,6 +77,7 @@ public class UnitItemBuilder {
     boolean doCastAnimation = false;
     boolean resetBehaviours = true;
     boolean forceAutocast = false;
+    boolean canRandomDrop = true;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -123,6 +126,13 @@ public class UnitItemBuilder {
         if (sellValue < 0)
             throw new IllegalArgumentException("sellValue must be >= 0, was " + sellValue);
         this.buyCost = buyCost;
+        return this;
+    }
+
+    public UnitItemBuilder rarity(Rarity rarity) {
+        this.rarity = rarity;
+        this.buyCost = UnitItem.RARITY_VALUES.get(rarity);
+        this.sellValue = UnitItem.RARITY_VALUES.get(rarity) / 2;
         return this;
     }
 
@@ -274,6 +284,11 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder forceAutocast() {
         this.forceAutocast = true;
+        return this;
+    }
+
+    public UnitItemBuilder noRandomDrop() {
+        this.canRandomDrop = false;
         return this;
     }
 

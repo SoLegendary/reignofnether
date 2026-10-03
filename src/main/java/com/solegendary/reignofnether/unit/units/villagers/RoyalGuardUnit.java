@@ -410,7 +410,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     public boolean doHurtTarget(Entity pEntity) {
         boolean result = super.doHurtTarget(pEntity);
         if (result && getAvatarTicksLeft() > 0) {
-            level().explode(null, null, null, pEntity.getX(), pEntity.getEyeY(), pEntity.getZ(),
+            level().explode(this, null, null, pEntity.getX(), pEntity.getEyeY(), pEntity.getZ(),
                     1.0f, false, Level.ExplosionInteraction.NONE);
             AttributeInstance ai = getAttribute(Attributes.ATTACK_DAMAGE);
 
@@ -646,7 +646,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
             return;
         MaceSlam maceSlam = getMaceSlam();
         if (maceSlam != null && maceSlam.getRank(this) > 0) {
-            level().explode(null, null, null, blockPos.getCenter().x, blockPos.getCenter().y, blockPos.getCenter().z,
+            level().explode(this, null, null, blockPos.getCenter().x, blockPos.getCenter().y, blockPos.getCenter().z,
                     2.0f, false, Level.ExplosionInteraction.NONE);
 
             for (int x = (int) (blockPos.getX() - MaceSlam.RADIUS); x <= blockPos.getX() + MaceSlam.RADIUS; x++) {

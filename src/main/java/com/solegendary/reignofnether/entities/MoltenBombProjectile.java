@@ -75,7 +75,7 @@ public class MoltenBombProjectile extends Fireball {
     }
 
     protected void detonate() {
-        level().explode(null, null, null, this.getX(), this.getEyeY(), this.getZ(),
+        level().explode(this, null, null, this.getX(), this.getEyeY(), this.getZ(),
                 2.0f, false, Level.ExplosionInteraction.NONE);
 
         HashMap<BlockPos, Double> bpAndDists = new HashMap<>();

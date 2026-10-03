@@ -15,13 +15,13 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class ItemUtil {
 
@@ -152,5 +152,66 @@ public class ItemUtil {
             heroUnit.setMana(heroUnit.getMana() + UnitItems.MANA_POTION_RESTORE_AMOUNT);
             ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), 5, mob.level(), mob.getEyePosition());
         }
+    }
+
+    public static ArrayDeque<UnitItem> getRandomItemDropsList() {
+        return getRandomItemDropsList(new Random());
+    }
+
+    public static ArrayDeque<UnitItem> getRandomItemDropsList(long seed) {
+        return getRandomItemDropsList(new Random(seed));
+    }
+
+    private static ArrayDeque<UnitItem> getRandomItemDropsList(Random random) {
+        // 1. Collect eligible, de-duplicated items
+        List<UnitItem> candidates = new ArrayList<>();
+        for (UnitItem item : UnitItems.ITEMS) {
+            if (item == UnitItems.EMPTY || !item.canRandomDrop || candidates.contains(item))
+                continue;
+            candidates.add(item);
+        }
+
+        // 2. Noisy sort by rarity
+        final double JITTER = 1.5;
+        Map<UnitItem, Double> sortKeys = new HashMap<>();
+        for (UnitItem item : candidates) {
+            sortKeys.put(item, item.rarity.ordinal() + random.nextDouble() * JITTER);
+        }
+        candidates.sort(Comparator.comparingDouble(sortKeys::get));
+
+        // 3. Force 1st = common, 3rd = uncommon
+        UnitItem firstCommon = null;
+        UnitItem firstUncommon = null;
+        for (UnitItem item : candidates) {
+            if (firstCommon == null && item.rarity == Rarity.COMMON)
+                firstCommon = item;
+            else if (firstUncommon == null && item.rarity == Rarity.UNCOMMON)
+                firstUncommon = item;
+            if (firstCommon != null && firstUncommon != null)
+                break;
+        }
+        if (firstUncommon != null) {
+            candidates.remove(firstUncommon);
+            candidates.add(Math.min(2, candidates.size()), firstUncommon);
+        }
+        if (firstCommon != null) {
+            candidates.remove(firstCommon);
+            candidates.add(0, firstCommon);
+        }
+
+        // 4. Force 5th = rare (earliest rare in the list, so overall ordering stays rough)
+        UnitItem firstRare = null;
+        for (UnitItem item : candidates) {
+            if (item.rarity == Rarity.RARE) {
+                firstRare = item;
+                break;
+            }
+        }
+        if (firstRare != null) {
+            candidates.remove(firstRare);
+            candidates.add(Math.min(4, candidates.size()), firstRare);
+        }
+
+        return new ArrayDeque<>(candidates);
     }
 }

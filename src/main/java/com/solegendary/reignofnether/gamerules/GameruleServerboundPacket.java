@@ -83,6 +83,10 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_ANIMAL_SPAWN_Y_DIFF, "", animalSpawnYDiff));
     }
+    public static void setRandomItemDrops(long randomItemDrops) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_RANDOM_ITEM_DROPS, "", randomItemDrops));
+    }
 
     public GameruleServerboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -190,6 +194,10 @@ public class GameruleServerboundPacket {
                 case SET_ANIMAL_SPAWN_Y_DIFF -> {
                     gameRules.getRule(GameRuleRegistrar.ANIMAL_SPAWN_Y_DIFF).set(Math.toIntExact(value), server);
                     GameruleClientboundPacket.setAnimalSpawnYDiff(value);
+                }
+                case SET_RANDOM_ITEM_DROPS -> {
+                    gameRules.getRule(GameRuleRegistrar.RANDOM_ITEM_DROPS).set(Math.toIntExact(value), server);
+                    GameruleClientboundPacket.setRandomItemDrops(value);
                 }
             }
             success.set(true);

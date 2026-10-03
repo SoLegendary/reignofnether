@@ -1106,7 +1106,7 @@ public class UnitServerEvents {
     private static final float EXPLOSIVE_HIT_KNOCKBACK = 0.5f;
 
     private static void doExplosiveHit(LivingEntity attacker, LivingEntity pEntity) {
-        attacker.level().explode(null, null, null, pEntity.getX(), pEntity.getEyeY(), pEntity.getZ(),
+        attacker.level().explode(attacker, null, null, pEntity.getX(), pEntity.getEyeY(), pEntity.getZ(),
                 1.0f, false, Level.ExplosionInteraction.NONE);
         AttributeInstance ai = attacker.getAttribute(Attributes.ATTACK_DAMAGE);
 

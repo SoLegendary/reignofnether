@@ -1,12 +1,15 @@
 package com.solegendary.reignofnether.items;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.ChatFormatting;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -17,7 +20,9 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.enchantment.Enchantment;
+import org.openjdk.nashorn.internal.ir.annotations.Immutable;
 
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -45,6 +50,7 @@ public abstract class UnitItem implements RangeIndicator {
     public final String descId;
     public ResourceLocation iconRl;
     public final UnitItemType type;
+    public Rarity rarity;
     public final int sellValue;
     public final int buyCost;
     public final LocalizedText desc;
@@ -72,6 +78,17 @@ public abstract class UnitItem implements RangeIndicator {
     public boolean doCastAnimation;
     public boolean resetBehaviours;
     public boolean forceAutocast;
+    public boolean canRandomDrop;
+
+    // default values only, can be overwritten with calls to .buyCost() and .sellValue()
+    public static final Map<Rarity, Integer> RARITY_VALUES = ImmutableMap.of(
+            Rarity.COMMON, 300,
+            Rarity.UNCOMMON, 400,
+            Rarity.RARE, 500,
+            Rarity.EPIC, 600,
+            UnitItemRarity.LEGENDARY, 750,
+            UnitItemRarity.MYTHIC, 1000
+    );
 
     private Set<BlockPos> highlightBps = new HashSet<>();
 
@@ -97,6 +114,7 @@ public abstract class UnitItem implements RangeIndicator {
         this.type = builder.type;
         this.sellValue = builder.sellValue;
         this.buyCost = builder.buyCost;
+        this.rarity = builder.rarity;
         this.desc = builder.desc != null
                 ? builder.desc
                 : new LocalizedText("item.reignofnether." + descId + ".desc");
@@ -124,6 +142,7 @@ public abstract class UnitItem implements RangeIndicator {
         this.doCastAnimation = builder.doCastAnimation;
         this.resetBehaviours = builder.resetBehaviours;
         this.forceAutocast = builder.forceAutocast;
+        this.canRandomDrop = builder.canRandomDrop;
     }
 
     public Item getItem() {
@@ -182,6 +201,4 @@ public abstract class UnitItem implements RangeIndicator {
     public List<FormattedCharSequence> getEntityTooltip(ItemStack itemStack) {
         return List.of();
     }
-
-    
 }

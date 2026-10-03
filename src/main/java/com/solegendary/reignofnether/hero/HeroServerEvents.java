@@ -42,7 +42,7 @@ public class HeroServerEvents {
             if (itemStack != null) {
                 evt.getEntity().setHealth(evt.getEntity().getMaxHealth() / 2);
                 evt.getEntity().addEffect(new MobEffectInstance(MobEffectRegistrar.INVINCIBLE.get(),
-                        UnitItems.TOTEM_OF_CASTING_INVINCIBILITY_DURATION_SECONDS * 20, 0, true, false));
+                        UnitItems.TOTEM_OF_UNDYING_INVINCIBILITY_DURATION_SECONDS * 20, 0, true, false));
                 itemStack.setCount(itemStack.getCount() - 1);
                 if (itemStack.isEmpty())
                     inv.deleteItem(UnitItems.TOTEM_OF_UNDYING);

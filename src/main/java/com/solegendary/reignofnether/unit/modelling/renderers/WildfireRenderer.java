@@ -1,12 +1,9 @@
 package com.solegendary.reignofnether.unit.modelling.renderers;
 
 
-import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
-import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
-import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
 import com.solegendary.reignofnether.unit.modelling.models.WildfireModel;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;

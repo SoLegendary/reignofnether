@@ -152,7 +152,8 @@ public abstract class AbstractUnitItemButton extends Button {
         int smallWrapWidth = Math.round(MAX_TEXT_WIDTH / SMALL_SCALE);
 
         // ---- band 1: name (+qty) | type ----
-        MutableComponent nameComp = unitItem.getName().copy().withStyle(NAME_STYLE);
+        Style nameStyle = unitItem.rarity.getStyleModifier().apply(NAME_STYLE);
+        MutableComponent nameComp = Component.literal(unitItem.desc.resolve()).withStyle(nameStyle);
         if (itemStack.getCount() > 1)
             nameComp.append(Component.literal(" (" + itemStack.getCount() + ")").withStyle(QTY_STYLE));
         FormattedCharSequence nameSeq = nameComp.getVisualOrderText();

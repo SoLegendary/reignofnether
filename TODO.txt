@@ -50,12 +50,14 @@ Balance
     - Reduce cost of iron armor
     - Reduce cost of militia archers
     - Rework enchanter absorption to be like MC dungeons (active linked buff)
+    - Royal guard ult strength from II to I but unpushable
     - Block animations with block displays for royal guard slam
         - And make slam single click like war stomp
 
 Quality of Life
 ---------------
 [❌] Create a new homing projectile entity from the ground up
+
 [✔] Added creative tabs for all RTS-related blocks and items:
     - RTS Mapmaker Blocks
     - RTS Unit Spawn Eggs
