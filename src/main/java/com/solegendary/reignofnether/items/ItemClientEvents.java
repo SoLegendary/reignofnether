@@ -70,6 +70,7 @@ public class ItemClientEvents {
 
     // items moused over
     private static final ArrayList<ItemEntity> preselectedItems = new ArrayList<>();
+    private static final ArrayList<ItemEntity> renderedItems = new ArrayList<>();
 
     public static ItemShopPlacement openItemShop = null;
 
@@ -85,15 +86,27 @@ public class ItemClientEvents {
         return preselectedItems;
     }
 
+    public static void addRenderedItem(ItemEntity itemEntity) {
+        if (!FogOfWarClientEvents.isInBrightChunk(itemEntity))
+            return;
+        renderedItems.add(itemEntity);
+    }
+    public static void clearRenderedItems() {
+        renderedItems.clear();
+    }
+    public static ArrayList<ItemEntity> getRenderedItems() {
+        return renderedItems;
+    }
+
     public static boolean hasDragActionItem() {
         return actionableUnitItemDrag != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) && !hasLeftClickAction();
     }
 
     public static boolean shouldRenderUnitInventory(LivingEntity le) {
         return ENABLED &&
-                le instanceof UnitInventory &&
+                le instanceof UnitInventory inv &&
                 le instanceof Unit unit &&
-                unit.getItemGoal() != null;
+                (unit.getItemGoal() != null || !inv.isEmpty());
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {
@@ -344,6 +357,16 @@ public class ItemClientEvents {
             return;
 
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
+            for (ItemEntity itemEntity : renderedItems) { // faint always-shown outline for visibility
+                if (ItemUtil.isUnitItem(itemEntity)) {
+                    MyRenderer.drawBoxBottom(
+                            evt.getPoseStack(),
+                            itemEntity.getBoundingBox().inflate(0.25, 0, 0.25),
+                            1, 1, 1,
+                            0.25f
+                    );
+                }
+            }
             for (ItemEntity itemEntity : preselectedItems) {
                 ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
                 boolean isResourceItem = res != null && res.resourceValue > 0;

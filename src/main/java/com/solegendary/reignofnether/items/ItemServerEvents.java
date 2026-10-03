@@ -6,25 +6,34 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.*;
 
@@ -77,22 +86,29 @@ public class ItemServerEvents {
         ServerLevel level = null;
         if (server != null) level = server.getLevel(Level.OVERWORLD);
 
-        if (unit instanceof UnitInventory inv &&
-            unit.getItemGoal() != null && level != null) {
-
-            Entity entity = level.getEntity(targetId);
+        if (unit instanceof UnitInventory inv && level != null) {
             ItemStack itemInHand = inv.get(itemUuid);
+            if (itemInHand == null) return;
             UnitItem unitItem = ItemUtil.getUnitItem(itemInHand);
-            if (action == ItemAction.USE) {
-                if (inv.use(ItemUtil.getUUID(itemInHand)) && unitItem != null && unitItem.resetBehaviours)
+            if (unitItem == null) return;
+
+            if (unit.getItemGoal() != null) {
+                Entity entity = level.getEntity(targetId);
+                if (action == ItemAction.USE) {
+                    if (inv.use(ItemUtil.getUUID(itemInHand)) && unitItem.resetBehaviours)
+                        Unit.fullResetBehaviours(unit);
+                } else {
+                    ItemEntity itemTarget = (entity instanceof ItemEntity ie) ? ie : null;
+                    LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
+                    BuildingPlacement buildingTarget = blockTarget != null ? BuildingUtils.findBuilding(false, blockTarget) : null;
+                    boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
                     Unit.fullResetBehaviours(unit);
-            } else {
-                ItemEntity itemTarget = (entity instanceof ItemEntity ie) ? ie : null;
-                LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
-                BuildingPlacement buildingTarget = blockTarget != null ? BuildingUtils.findBuilding(false, blockTarget) : null;
-                boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
-                Unit.fullResetBehaviours(unit);
-                unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
+                    unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
+                }
+            } else if (SandboxServer.isAnyoneASandboxPlayer()) {
+                if (inv.deleteItem(itemUuid)) {
+                    HudClientboundPacket.showTempMessageI18n("item.reignofnether.hud.deleted_item", itemInHand.getHoverName().getString());
+                }
             }
         }
     }
@@ -175,5 +191,37 @@ public class ItemServerEvents {
         if (rarity == UnitItemRarity.LEGENDARY || rarity == UnitItemRarity.MYTHIC)
             return SoundAction.ITEM_DROP_LEGENDARY;
         return SoundAction.ITEM_DROP_COMMON;
+    }
+
+    // give items to regular units to hold and drop on death
+    @SubscribeEvent
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract evt) {
+        if (evt.getLevel().isClientSide()) return;
+        if (evt.getHand() != InteractionHand.MAIN_HAND) return;
+
+        Player player = evt.getEntity();
+        ItemStack stack = evt.getItemStack();
+        Entity target = evt.getTarget();
+        String mobName = target.getName().getString();
+        String itemName = stack.getHoverName().getString();
+
+        if (target instanceof Mob && target instanceof UnitInventory inv && !stack.isEmpty() && ItemUtil.isUnitItem(stack)) {
+            evt.setCanceled(true);
+
+            if (inv.isFull()) {
+                player.sendSystemMessage(Component.translatable("item.reignofnether.error.full_inventory", mobName));
+                evt.setCancellationResult(InteractionResult.FAIL);
+            } else if (inv.tryAdding(stack)) {
+                player.sendSystemMessage(Component.translatable("item.reignofnether.hud.give_to_unit", itemName, mobName));
+                if (!player.isCreative()) {
+                    stack.setCount(stack.getCount() - 1);
+                }
+                evt.setCancellationResult(InteractionResult.SUCCESS);
+            }
+            else {
+                player.sendSystemMessage(Component.translatable("item.reignofnether.error.failed_other", mobName));
+                evt.setCancellationResult(InteractionResult.FAIL);
+            }
+        }
     }
 }

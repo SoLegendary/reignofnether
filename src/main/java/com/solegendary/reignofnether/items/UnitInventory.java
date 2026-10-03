@@ -14,6 +14,7 @@ public interface UnitInventory {
 
     NonNullList<ItemStack> getAllItems();
     boolean isFull();
+    boolean isEmpty();
     ItemStack get(int index);
     ItemStack get(UUID uuid);
     ItemStack get(UnitItem unitItem);

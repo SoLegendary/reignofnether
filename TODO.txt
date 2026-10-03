@@ -26,17 +26,15 @@ Shops
             - Buy cooldown
 
 Unit Items
-    [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
-        [❌] Should be visible to all players
-    [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
+    [🟡] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
+        [🟡] Should be visible to all players
 
 
 Item drops
-    [❌] Track population amount killed for every RTS player
+    [🟡] Track population amount killed for every RTS player
         - Double check kill credits for things like TNT and fire
-    [❌] On match start, create a random list of items dropped at each kill credit threshold (same for each player)
-    [❌] Whenever a player reaches enough kill credit, the next enemy killed drops an item
-        [🟡] Test creepScore still works with
+    [🟡] On match start, create a random list of items dropped at each kill credit threshold (same for each player)
+    [🟡] Whenever a player reaches enough kill credit, the next enemy killed drops an item
 
 
 

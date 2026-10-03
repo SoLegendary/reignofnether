@@ -72,6 +72,14 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
+    public boolean isEmpty() {
+        for (ItemStack itemStack : getAllItems())
+            if (itemStack != ItemStack.EMPTY && !itemStack.isEmpty())
+                return false;
+        return true;
+    }
+
+    @Override
     public ItemStack get(int index) {
         return this.unitItems.get(index);
     }
@@ -465,7 +473,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Inject(method = "dropCustomDeathLoot", at = @At("RETURN"))
     private void ron$dropUnitItemsOnDeath(DamageSource source, int looting, boolean recentlyHit, CallbackInfo ci) {
-        if ((Object) this instanceof HeroUnit) return; // heroes keep their gear
+        if (this instanceof HeroUnit) return; // heroes keep their gear
 
         for (int i = 0; i < this.unitItems.size(); i++) {
             ItemStack stack = this.unitItems.get(i);

@@ -186,6 +186,8 @@
     "item.reignofnether.error.use_on_ground": "Can't use that item there",
     "item.reignofnether.error.on_cooldown": "Item is on cooldown (%ds)",
     "item.reignofnether.error.not_enough_mana": "Not enough mana",
+    "item.reignofnether.error.full_inventory": "%s's inventory is full",
+    "item.reignofnether.error.failed_other": "Failed to give to %s",
 
     "item.reignofnether.hud.expand_hint": "Hold Shift for details",
     "item.reignofnether.hud.mana": "Mana: %d",
@@ -193,6 +195,8 @@
     "item.reignofnether.hud.range": "Range: %d",
     "item.reignofnether.hud.buy": "Buy: %d",
     "item.reignofnether.hud.sell": "Sell: %d",
+    "item.reignofnether.hud.give_to_unit": "Gave %s to %s",
+    "item.reignofnether.hud.deleted_item": "Deleted %s",
 
     "itemshop.reignofnether.toggle_menu": "Open Shop",
     "itemshop.reignofnether.error.out_of_stock": "Out of stock (restock in %ds)",

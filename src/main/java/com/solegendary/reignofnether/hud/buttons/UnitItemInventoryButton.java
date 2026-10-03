@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.hud.buttons;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.mixin.UnitInventoryMobMixin;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -14,6 +17,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -39,7 +43,11 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                         ItemClientEvents.actionableInvUUID.equals(ItemUtil.getUUID(itemStack))) ||
                         ItemUtil.isActive(itemStack),
                 () -> false,
-                () -> true,
+                () -> {
+                    Player player = Minecraft.getInstance().player;
+                    boolean ownsUnit = player != null && player.getName().getString().equals(unit.getOwnerName());
+                    return ownsUnit || AlliancesClient.canControlAlly(unit) || SandboxClientEvents.isSandboxPlayer();
+                },
                 () -> { // onLeftClick
                     ItemClientEvents.actionableUnitItem = unitItem;
                     ItemClientEvents.actionableUnitItem.updateHighlightBps(((LivingEntity) unit).level());

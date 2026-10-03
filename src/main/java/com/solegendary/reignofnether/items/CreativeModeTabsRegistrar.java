@@ -56,7 +56,7 @@ public class CreativeModeTabsRegistrar {
                     .title(Component.translatable("creativetab.reignofnether.unit_items"))
                     .displayItems((parameters, output) -> {
                         for (RegistryObject<Item> item : ItemRegistrar.ITEMS.getEntries())
-                            if (item.get() instanceof UnitGiveableItem)
+                            if (item.get() instanceof FoilableItem)
                                 output.accept(item.get());
                         output.accept(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get());
                         output.accept(Items.BELL);

@@ -362,7 +362,7 @@ public class HudClientEvents {
         // ItemShop
         // --------
         int x = blitX;
-        int y = blitY - 150;
+        int y = blitY - 140;
         boolean isShopOpen = ItemClientEvents.openItemShop != null && !ItemClientEvents.openItemShop.isDestroyedServerside;
         boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
         if (isShopOpen && ItemClientEvents.ENABLED) {
