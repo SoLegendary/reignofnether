@@ -40,7 +40,7 @@ public class WindcallerRenderer extends MobRenderer<WindcallerUnit, WindcallerMo
     }
 
     @Override
-    protected RenderType getRenderType(
+    public RenderType getRenderType(
             WindcallerUnit entity,
             boolean bodyVisible,
             boolean translucent,

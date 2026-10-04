@@ -129,7 +129,7 @@ public class PlayerClientboundPacket {
         this.value1 = value1;
         this.value2 = value2;
         this.faction = faction;
-        this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
+        this.tradeAction = TradeAction.EMERALD_FOR_FOOD; // dummy value
         this.pos = new BlockPos(0,0,0);
         this.isDogPerson = isDogPerson;
     }

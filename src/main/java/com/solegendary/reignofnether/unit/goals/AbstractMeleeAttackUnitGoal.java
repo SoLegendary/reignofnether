@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.unit.goals;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
+import com.solegendary.reignofnether.unit.units.neutral.BeeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import com.solegendary.reignofnether.unit.units.piglins.PiglinMerchantUnit;
 import net.minecraft.world.InteractionHand;
@@ -21,9 +22,6 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
     protected final Mob mob;
     private final boolean followingTargetEvenIfNotSeen;
     private Path path;
-    private double pathedTargetX;
-    private double pathedTargetY;
-    private double pathedTargetZ;
     protected int ticksUntilNextPathRecalculation;
     protected final int tickPathRecalcMax = 5;
     protected int ticksUntilNextAttack;
@@ -79,7 +77,7 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
             boolean canContinue = !(livingentity instanceof Player) || !livingentity.isSpectator() && !((Player)livingentity).isCreative();
             if (canContinue) {
                 this.path = this.mob.getNavigation().createPath(livingentity, 0);
-                this.mob.getNavigation().moveTo(this.path,  Unit.getSpeedModifier((Unit) this.mob));
+                this.mob.getNavigation().moveTo(this.path, ((Unit) this.mob).getSpeedModifier());
             }
             return canContinue;
         }
@@ -87,7 +85,7 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
 
     public void start() {
         if (!((Unit) this.mob).getHoldPosition())
-            this.mob.getNavigation().moveTo(this.path,  Unit.getSpeedModifier((Unit) this.mob));
+            this.mob.getNavigation().moveTo(this.path, ((Unit) this.mob).getSpeedModifier());
         this.mob.setAggressive(true);
     }
 
@@ -114,8 +112,13 @@ public abstract class AbstractMeleeAttackUnitGoal extends Goal {
                 this.mob.getNavigation().stop();
             else if (!((Unit) this.mob).getHoldPosition()) {
                 if (ticksUntilNextPathRecalculation <= 0) {
-                    Path path = mob.getNavigation().createPath(target.getX(), target.getY(), target.getZ(), 0);
-                    this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier((Unit) this.mob));
+                    Path path;
+                    if (((Unit) this.mob).isFlyingUnit()) {
+                        path = mob.getNavigation().createPath(target.blockPosition().above(), 0);
+                    } else {
+                        path = mob.getNavigation().createPath(target, 0);
+                    }
+                    this.mob.getNavigation().moveTo(path, ((Unit) this.mob).getSpeedModifier());
                     if (distSqr < 16)
                         ticksUntilNextPathRecalculation = tickPathRecalcMax;
                     else if (distSqr < 64)

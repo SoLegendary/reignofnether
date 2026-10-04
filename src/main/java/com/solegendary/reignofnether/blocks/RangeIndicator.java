@@ -6,12 +6,17 @@ import com.solegendary.reignofnether.ability.heroAbilities.wildfire.MoltenBomb;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcon;
 import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.UnitItems;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
@@ -29,8 +34,10 @@ public interface RangeIndicator {
         boolean showRangeLine = false;
         boolean showRadiusCircle = false;
         boolean showRangeCircle = false;
+        boolean showRadiusAtCursor = false;
 
         if (this instanceof Unit unit) {
+            boolean hasAbilityWithRange = false;
             for (Ability ability : unit.getAbilities().get()) {
                 if (CursorClientEvents.getLeftClickAction() == ability.action) {
                     range = ability.range;
@@ -39,6 +46,22 @@ public interface RangeIndicator {
                     showRangeLine = ability.showRangeLine;
                     showRadiusCircle = ability.showRadiusCircle;
                     showRangeCircle = ability.showRangeCircle;
+                    hasAbilityWithRange = true;
+                    break;
+                }
+            }
+            if (!hasAbilityWithRange) {
+                MobEffectInstance mei = ((LivingEntity) unit).getEffect(MobEffectRegistrar.NIGHT_WARPING.get());
+                if (mei != null) {
+                    range = mei.getAmplifier() + 1;
+                    bp = ((LivingEntity) unit).getOnPos();
+                    showRangeCircle = true;
+                }
+                MobEffectInstance mei2 = ((LivingEntity) unit).getEffect(MobEffectRegistrar.VILLAGER_INSPIRATION.get());
+                if (mei2 != null) {
+                    range = UnitItems.BELL_OF_ARMS_RANGE;
+                    bp = ((LivingEntity) unit).getOnPos();
+                    showRangeCircle = true;
                 }
             }
         } else if (this instanceof BuildingPlacement bpl) {
@@ -53,13 +76,15 @@ public interface RangeIndicator {
                 }
             }
         } else if (this instanceof UnitItem unitItem) {
-            if (ItemClientEvents.actionableUnitItem == unitItem && HudClientEvents.hudSelectedEntity != null) {
+            if ((ItemClientEvents.hoveredInvItem == unitItem || ItemClientEvents.actionableUnitItem == unitItem) &&
+                    HudClientEvents.hudSelectedEntity != null) {
                 range = unitItem.range;
                 radius = unitItem.radius;
                 bp = HudClientEvents.hudSelectedEntity.getOnPos();
                 showRangeLine = unitItem.showRangeLine;
                 showRadiusCircle = unitItem.showRadiusCircle;
                 showRangeCircle = unitItem.showRangeCircle;
+                showRadiusAtCursor = unitItem.showRadiusAtCursor;
             }
         }
         Set<BlockPos> highlightBps = new HashSet<>();
@@ -69,12 +94,15 @@ public interface RangeIndicator {
                 for (BlockPos pos : MiscUtil.getLine2D(bp, limitedBp))
                     highlightBps.add(MiscUtil.getHighestGroundBlock(level, pos).above());
             }
-            if (showRadiusCircle) {
-                BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(bp, CursorClientEvents.getPreselectedBlockPos(), range + 1);
-                highlightBps.addAll(MiscUtil.getRangeIndicatorFilledCircleBlocks(limitedBp, (int) radius - 1, level));
+            if (showRadiusCircle && !showRadiusAtCursor) {
+                highlightBps.addAll(MiscUtil.getRangeIndicatorFilledCircleBlocks(bp, (int) radius - 1, level));
             }
             if (showRangeCircle) {
                 highlightBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(bp, (int) (range - 1), level));
+            }
+            if (showRadiusAtCursor) {
+                BlockPos limitedBp = MyMath.getXZRangeLimitedBlockPos(bp, CursorClientEvents.getPreselectedBlockPos(), range + 1);
+                highlightBps.addAll(MiscUtil.getRangeIndicatorFilledCircleBlocks(limitedBp, (int) radius - 1, level));
             }
         }
         setHighlightBps(highlightBps);

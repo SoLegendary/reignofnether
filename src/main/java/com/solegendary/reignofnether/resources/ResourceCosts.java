@@ -64,6 +64,7 @@ public class ResourceCosts {
     public static final ResourceCost PANDA = new ResourceCost(ID, "PANDA");
     public static final ResourceCost WOLF = new ResourceCost(ID, "WOLF");
     public static final ResourceCost LLAMA = new ResourceCost(ID, "LLAMA");
+    public static final ResourceCost BEE = new ResourceCost(ID, "BEE");
     public static final ResourceCost KILLER_RABBIT = new ResourceCost(ID, "KILLER_RABBIT");
     public static final ResourceCost SILVERFISH = new ResourceCost(ID, "SILVERFISH");
 
@@ -106,6 +107,7 @@ public class ResourceCosts {
     public static final ResourceCost CENTRAL_PORTAL = new ResourceCost(ID, "CENTRAL_PORTAL");
     public static final ResourceCost BASIC_PORTAL = new ResourceCost(ID, "BASIC_PORTAL");
     public static final ResourceCost CIVILIAN_PORTAL = new ResourceCost(ID, "CIVILIAN_PORTAL");
+    public static final ResourceCost POCKET_PORTAL = new ResourceCost(ID, "POCKET_PORTAL");
     public static final ResourceCost NETHERWART_FARM = new ResourceCost(ID, "NETHERWART_FARM");
     public static final ResourceCost BASTION = new ResourceCost(ID, "BASTION");
     public static final ResourceCost HOGLIN_STABLES = new ResourceCost(ID, "HOGLIN_STABLES");
@@ -164,6 +166,7 @@ public class ResourceCosts {
     public static final ResourceCost RESEARCH_BEACON_LEVEL3 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL3");
     public static final ResourceCost RESEARCH_BEACON_LEVEL4 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL4");
     public static final ResourceCost RESEARCH_BEACON_LEVEL5 = new ResourceCost(ID, "RESEARCH_BEACON_LEVEL5");
+    public static final ResourceCost RESEARCH_UPGRADE_MARKET = new ResourceCost(ID, "RESEARCH_UPGRADE_MARKET");
 
     // ABILITIES
 
@@ -269,6 +272,7 @@ public class ResourceCosts {
         PANDA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.PANDA);
         WOLF.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.WOLF);
         LLAMA.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.LLAMA);
+        BEE.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.BEE);
         KILLER_RABBIT.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.KILLER_RABBIT);
         SILVERFISH.bakeValues(ReignOfNetherCommonConfigs.UnitCosts.SILVERFISH);
 
@@ -314,6 +318,7 @@ public class ResourceCosts {
         CENTRAL_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CENTRAL_PORTAL);
         BASIC_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASIC_PORTAL);
         CIVILIAN_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.CIVILIAN_PORTAL);
+        POCKET_PORTAL.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.POCKET_PORTAL);
         NETHERWART_FARM.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.NETHERWART_FARM);
         BASTION.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.BASTION);
         HOGLIN_STABLES.bakeValues(ReignOfNetherCommonConfigs.BuildingCosts.HOGLIN_STABLES);
@@ -370,6 +375,7 @@ public class ResourceCosts {
         RESEARCH_BEACON_LEVEL3.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL3);
         RESEARCH_BEACON_LEVEL4.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL4);
         RESEARCH_BEACON_LEVEL5.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_BEACON_LEVEL5);
+        RESEARCH_UPGRADE_MARKET.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_UPGRADE_MARKET);
         RESEARCH_VINDICATOR_AXES.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_VINDICATOR_AXES);
         RESEARCH_PILLAGER_CROSSBOWS.bakeValues(ReignOfNetherCommonConfigs.ResearchCosts.RESEARCH_PILLAGER_CROSSBOWS);
         // ******************* ABILITIES ******************* //

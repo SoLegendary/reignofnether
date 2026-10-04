@@ -577,7 +577,11 @@ public class MyRenderer {
         int spaceWidth = MC.font.width(" ");
         int paddingChars = iconSize / Math.max(spaceWidth, 1);
         String pad = " ".repeat(paddingChars);
-        Component name = unitItem.iconRl != null ? Component.literal(pad).append(unitItem.getName()) : unitItem.getName();
+        String qty = itemStack.getCount() > 1 ? " (" + itemStack.getCount() + ")" : "";
+        MutableComponent name = unitItem.iconRl != null ?
+                Component.literal(pad + unitItem.getName().getString() + qty) :
+                Component.literal(unitItem.getName().getString() + qty);
+
         List<FormattedCharSequence> lore = unitItem.getEntityTooltip(itemStack);
 
         List<FormattedCharSequence> lines = new ArrayList<>();

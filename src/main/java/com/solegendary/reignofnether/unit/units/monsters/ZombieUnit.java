@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.time.NightUtils;
@@ -186,7 +187,6 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
 
     public ZombieUnit(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
-
         updateAbilityButtons();
     }
 
@@ -199,7 +199,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, ZombieUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, ZombieUnit.attackDamage)
                 .add(Attributes.ARMOR, ZombieUnit.armorValue)
@@ -223,6 +223,10 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
             super.tick();
             Unit.tick(this);
             AttackerUnit.tick(this);
+
+            if (isSummoned() && !hasEffectWithDuration(MobEffectRegistrar.LIMITED_LIFESPAN.get()) && tickCount < RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY) {
+                this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY, 0, true, false));
+            }
 
             if (tickCount % 20 == 0 && !level().isClientSide()) {
                 if (getOwnerName().equals(BloodMoon.ENEMY_NAME) && !TimeServerEvents.isBloodMoonActive()) {

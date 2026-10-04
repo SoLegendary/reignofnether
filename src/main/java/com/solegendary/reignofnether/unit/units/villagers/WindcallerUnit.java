@@ -29,6 +29,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.WindcallerAnimations;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.commands.CommandSourceStack;
@@ -335,7 +336,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     @Override
     protected void checkFallDamage(double pY, boolean pOnGround, BlockState pState, BlockPos pPos) {
         if (!this.level().isClientSide && this.fallDistance > 3.0F && pOnGround && !pState.isAir()) {
-            MiscUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position().add(0, 0.1f, 0));
+            ParticleUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position().add(0, 0.1f, 0));
         }
         // super.super method logic (entity.class)
         if (pOnGround) {
@@ -401,7 +402,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WindcallerUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WindcallerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WindcallerUnit.maxHealth)
@@ -434,7 +435,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         updateRotation();
 
         if (level().isClientSide() && isFlying()) {
-            MiscUtil.spawnFlyingCloudParticles(this);
+            ParticleUtil.spawnFlyingCloudParticles(this);
         }
 
         // Apply deferred ground target once the windcaller has actually landed
@@ -539,16 +540,16 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         this.goalSelector.addGoal(3, flyingMoveGoal);
     }
 
-    public int getAttackerRangeBonus(Mob attacker) {
+    public double getAttackerRangeBonus(Mob attacker) {
         Vec2 attackerPos = new Vec2((float) attacker.getX(), (float) attacker.getZ());
         Vec2 ghastPos = new Vec2((float) this.getX(), (float) this.getZ());
         double horizDist = Math.sqrt(attackerPos.distanceToSqr(ghastPos));
         double vertiDist = Math.max(0, this.getY() - attacker.getY());
 
         if (horizDist < 4)
-            return (int) (vertiDist * 0.5f);
+            return vertiDist * 0.5f;
         else
-            return (int) (vertiDist * 0.25f);
+            return vertiDist * 0.25f;
     }
 
     @Override

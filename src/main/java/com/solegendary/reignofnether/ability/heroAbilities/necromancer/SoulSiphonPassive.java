@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitAnimationClientboundPacket;
 import com.solegendary.reignofnether.unit.units.monsters.NecromancerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -80,14 +81,14 @@ public class SoulSiphonPassive extends HeroAbility {
             this,
             necro
         );
-        button.extraLabel = String.valueOf(necro.souls);
+        button.bottomLeftText = () -> String.valueOf(necro.souls);
         if ((necro.souls) <= 0)
-            button.extraLabelColour = 0xFF0000;
+            button.bottomLeftTextColor = 0xFF0000;
         else if ((necro.souls) >= ((int) soulsMax))
-            button.extraLabelColour = 0x00FF00;
+            button.bottomLeftTextColor = 0x00FF00;
         else if ((necro.souls) <= ((int) soulsPerCast))
-            button.extraLabelColour = 0xFFFF00;
-        button.stretchIconToBorders = true;
+            button.bottomLeftTextColor = 0xFFFF00;
+        button.innerIconSizeModifier = 1;
         return button;
     }
 
@@ -161,7 +162,7 @@ public class SoulSiphonPassive extends HeroAbility {
     }
 
     private void addUnitPoofs(int amount, Unit hero) {
-        MiscUtil.addParticleExplosion(ParticleTypes.WITCH, amount, ((Entity) hero).level(), ((Entity) hero).getEyePosition());
+        ParticleUtil.addParticleExplosion(ParticleTypes.WITCH, amount, ((Entity) hero).level(), ((Entity) hero).getEyePosition());
     }
 
     public void checkAndGainSouls(LivingEntity entityKilled, int splitAmount, NecromancerUnit necro) {

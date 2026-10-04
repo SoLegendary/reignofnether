@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.core.BlockPos;
@@ -158,7 +159,7 @@ public class ScoutCatUnit extends Cat implements Unit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, ScoutCatUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, ScoutCatUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
@@ -198,7 +199,7 @@ public class ScoutCatUnit extends Cat implements Unit {
         happiness += 25;
         this.targetSquish = -0.5f;
         if (happiness >= 100) {
-            MiscUtil.addParticleExplosion(ParticleTypes.HEART, 1, level(), getEyePosition().add(new Vec3(0,0.5,0)));
+            ParticleUtil.addParticleExplosion(ParticleTypes.HEART, 1, level(), getEyePosition().add(new Vec3(0,0.5,0)));
             happiness = 0;
         }
     }

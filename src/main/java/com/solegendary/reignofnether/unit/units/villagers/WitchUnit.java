@@ -212,7 +212,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, WitchUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WitchUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
@@ -222,7 +222,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     }
 
     public void tick() {
-        this.setCanPickUpLoot(false);
+        this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
         this.throwPotionGoal.tick();
@@ -315,8 +315,4 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
             }
         }
     }
-
-
-
-
 }

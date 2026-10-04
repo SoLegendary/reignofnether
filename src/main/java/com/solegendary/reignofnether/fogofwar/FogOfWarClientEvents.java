@@ -125,6 +125,7 @@ public class FogOfWarClientEvents {
     }
 
     public static boolean isBlockVisible(int x, int z) {
+        if (!enabled) return true;
         ChunkPos cp = new ChunkPos(x >> 4, z >> 4);
         if (!brightChunks.contains(cp)) return false;              // server-dark chunk: fully fogged
         long[] mask = edgeMasks.get(cp);                            // single volatile read

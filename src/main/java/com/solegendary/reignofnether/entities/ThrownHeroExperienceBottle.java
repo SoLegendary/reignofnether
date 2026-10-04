@@ -56,7 +56,7 @@ public class ThrownHeroExperienceBottle extends ThrowableItemProjectile {
                 }
             }
             if (closestHero != null)
-                for (int i = 0; i < 5; i++) {
+                for (int i = 0; i < 10; i++) {
                     HeroExperienceOrb expOrb = HeroExperienceOrb.newOrb(
                             level(),
                             closestHero,

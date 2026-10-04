@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.blocks;
 
 import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
 import net.minecraft.core.BlockPos;
@@ -33,13 +35,14 @@ public class WalkableMagmaBlock extends Block {
 
     public void stepOn(Level pLevel, BlockPos pPos, BlockState pState, Entity pEntity) {
         boolean isPiglinFaction = pEntity instanceof Unit unit && Factions.getFaction(unit).equals(Factions.PIGLINS) && !pEntity.isOnFire();
+        boolean bootsImmunity = pEntity instanceof UnitInventory inv && inv.isHolding(UnitItems.MAGMA_WALKER_BOOTS);
         boolean isDamageTick = pEntity.tickCount % DAMAGE_DELAY == 0;
 
         if (!pEntity.isSteppingCarefully() &&
                 pEntity instanceof LivingEntity &&
                 !(pEntity instanceof GruntUnit) &&
                 !EnchantmentHelper.hasFrostWalker((LivingEntity)pEntity) &&
-                !isPiglinFaction && isDamageTick) {
+                !isPiglinFaction && !bootsImmunity && isDamageTick) {
             pEntity.hurt(pEntity.damageSources().hotFloor(), DAMAGE);
         }
     }

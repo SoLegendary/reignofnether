@@ -22,15 +22,20 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.ability.TradeAction.*;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
+import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommandManual;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class TradeResources extends Ability {
 
-    public static final int START_RATE = 75;
-    public static final int MAX_RATE = 135;
-    public static final int MIN_RATE = 15;
+    public static final int START_BUY_RATE = 80;
+    public static final int START_SELL_RATE = 100;
+    public static final int MAX_BUY_RATE = 160;
+    public static final int MIN_BUY_RATE = 40;
+    public static final int MAX_SELL_RATE = 160;
+    public static final int MIN_SELL_RATE = 40;
     public static final int RATE_STEP = 2;
+    public static final int ALT_RATE_STEP = 1;
     public static final int TRADE_AMOUNT = 100;
 
     private final TradeAction tradeAction;
@@ -38,12 +43,6 @@ public class TradeResources extends Ability {
     public TradeResources(UnitAction action) {
         super(action, 0, 0, 0, false);
         this.tradeAction = switch (action) {
-            case TRADE_FOOD_FOR_WOOD -> FOOD_FOR_WOOD;
-            case TRADE_FOOD_FOR_ORE -> FOOD_FOR_ORE;
-            case TRADE_WOOD_FOR_FOOD -> WOOD_FOR_FOOD;
-            case TRADE_WOOD_FOR_ORE -> WOOD_FOR_ORE;
-            case TRADE_ORE_FOR_FOOD -> ORE_FOR_FOOD;
-            case TRADE_ORE_FOR_WOOD -> ORE_FOR_WOOD;
             case SELL_FOOD -> FOOD_FOR_EMERALD;
             case SELL_WOOD -> WOOD_FOR_EMERALD;
             case SELL_ORE -> ORE_FOR_EMERALD;
@@ -68,7 +67,7 @@ public class TradeResources extends Ability {
                 getIconResource(),
                 hotkey,
                 () -> false,
-                () -> false,
+                () -> isBuyAction() && placement.getUpgradeLevel() <= 0,
                 () -> true,
                 () -> sendUnitCommand(action),
                 null,
@@ -83,46 +82,32 @@ public class TradeResources extends Ability {
 
     private ResourceName getSellResource() {
         return switch (tradeAction) {
-            case FOOD_FOR_WOOD, FOOD_FOR_ORE, FOOD_FOR_EMERALD -> ResourceName.FOOD;
-            case WOOD_FOR_FOOD, WOOD_FOR_ORE, WOOD_FOR_EMERALD -> ResourceName.WOOD;
-            case ORE_FOR_FOOD, ORE_FOR_WOOD, ORE_FOR_EMERALD -> ResourceName.ORE;
+            case FOOD_FOR_EMERALD -> ResourceName.FOOD;
+            case WOOD_FOR_EMERALD -> ResourceName.WOOD;
+            case ORE_FOR_EMERALD -> ResourceName.ORE;
             case EMERALD_FOR_FOOD, EMERALD_FOR_WOOD, EMERALD_FOR_ORE -> ResourceName.EMERALD;
-        };
-    }
-
-    private TradeAction getOppositeTradeAction() {
-        return switch (tradeAction) {
-            case FOOD_FOR_WOOD -> WOOD_FOR_FOOD;
-            case FOOD_FOR_ORE -> ORE_FOR_FOOD;
-            case WOOD_FOR_FOOD -> FOOD_FOR_WOOD;
-            case WOOD_FOR_ORE -> ORE_FOR_WOOD;
-            case ORE_FOR_FOOD -> FOOD_FOR_ORE;
-            case ORE_FOR_WOOD -> WOOD_FOR_ORE;
-
-            case FOOD_FOR_EMERALD -> EMERALD_FOR_FOOD;
-            case WOOD_FOR_EMERALD -> EMERALD_FOR_WOOD;
-            case ORE_FOR_EMERALD -> EMERALD_FOR_ORE;
-            case EMERALD_FOR_FOOD -> FOOD_FOR_EMERALD;
-            case EMERALD_FOR_WOOD -> WOOD_FOR_EMERALD;
-            case EMERALD_FOR_ORE -> ORE_FOR_EMERALD;
         };
     }
 
     private ResourceLocation getIconResource() {
         return switch (tradeAction) {
-            case WOOD_FOR_FOOD, ORE_FOR_FOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat_half_right.png");
-            case FOOD_FOR_WOOD, ORE_FOR_WOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood_half_right.png");
-            case FOOD_FOR_ORE, WOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore_half_right.png");
-            default -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald.png");
+            case FOOD_FOR_EMERALD,
+                WOOD_FOR_EMERALD,
+                ORE_FOR_EMERALD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald_half_right.png");
+            case EMERALD_FOR_FOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat_half_right.png");
+            case EMERALD_FOR_WOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood_half_right.png");
+            case EMERALD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore_half_right.png");
         };
     }
 
     private ResourceLocation getBgIconResource() {
         return switch (tradeAction) {
-            case FOOD_FOR_WOOD, FOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat_half_left.png");
-            case WOOD_FOR_FOOD, WOOD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood_half_left.png");
-            case ORE_FOR_FOOD, ORE_FOR_WOOD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore_half_left.png");
-            default -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald.png");
+            case EMERALD_FOR_FOOD,
+                EMERALD_FOR_WOOD,
+                EMERALD_FOR_ORE -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/emerald_half_left.png");
+            case FOOD_FOR_EMERALD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wheat_half_left.png");
+            case WOOD_FOR_EMERALD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/wood_half_left.png");
+            case ORE_FOR_EMERALD -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/iron_ore_half_left.png");
         };
     }
 
@@ -130,13 +115,6 @@ public class TradeResources extends Ability {
         RTSPlayer rtsPlayer = PlayerClientEvents.getRTSPlayer();
         int rate = rtsPlayer != null ? rtsPlayer.tradeRates.get(tradeAction) : 0;
         return switch (tradeAction) {
-            case FOOD_FOR_WOOD -> I18n.get("abilities.reignofnether.trade_food_wood", TRADE_AMOUNT, rate);
-            case FOOD_FOR_ORE -> I18n.get("abilities.reignofnether.trade_food_ore", TRADE_AMOUNT, rate);
-            case WOOD_FOR_FOOD -> I18n.get("abilities.reignofnether.trade_wood_food", TRADE_AMOUNT, rate);
-            case WOOD_FOR_ORE -> I18n.get("abilities.reignofnether.trade_wood_ore", TRADE_AMOUNT, rate);
-            case ORE_FOR_FOOD -> I18n.get("abilities.reignofnether.trade_ore_food", TRADE_AMOUNT, rate);
-            case ORE_FOR_WOOD -> I18n.get("abilities.reignofnether.trade_ore_wood", TRADE_AMOUNT, rate);
-
             case FOOD_FOR_EMERALD -> I18n.get("abilities.reignofnether.sell_food", TRADE_AMOUNT, rate);
             case WOOD_FOR_EMERALD -> I18n.get("abilities.reignofnether.sell_wood", TRADE_AMOUNT, rate);
             case ORE_FOR_EMERALD -> I18n.get("abilities.reignofnether.sell_ore", TRADE_AMOUNT, rate);
@@ -144,6 +122,12 @@ public class TradeResources extends Ability {
             case EMERALD_FOR_WOOD -> I18n.get("abilities.reignofnether.buy_wood", TRADE_AMOUNT, rate);
             case EMERALD_FOR_ORE -> I18n.get("abilities.reignofnether.buy_ore", TRADE_AMOUNT, rate);
         };
+    }
+
+    private boolean isBuyAction() {
+        return tradeAction == EMERALD_FOR_FOOD ||
+                tradeAction == EMERALD_FOR_WOOD ||
+                tradeAction == EMERALD_FOR_ORE;
     }
 
     @Override
@@ -154,44 +138,77 @@ public class TradeResources extends Ability {
     private void doTrade(BuildingPlacement placement) {
         if (placement.getLevel().isClientSide())
             return;
+        if (placement.getUpgradeLevel() <= 0 && isBuyAction()) {
+            return;
+        }
         String playerName = placement.ownerName;
         RTSPlayer player = PlayerServerEvents.getRTSPlayer(playerName);
         if (player == null)
             return;
         if (player.tradeRates.isEmpty())
             return;
-        TradeAction oppTradeAction = getOppositeTradeAction();
+
         int rate = player.tradeRates.get(tradeAction);
-        int oppRate = player.tradeRates.get(oppTradeAction);
 
         if (ResourcesServerEvents.canAfford(playerName, getSellResource(), TRADE_AMOUNT)) {
             switch (tradeAction) {
-                case FOOD_FOR_WOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, -TRADE_AMOUNT, rate, 0, 0));
-                case FOOD_FOR_ORE -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, -TRADE_AMOUNT, 0, rate, 0));
-                case WOOD_FOR_FOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, rate, -TRADE_AMOUNT, 0, 0));
-                case WOOD_FOR_ORE -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, -TRADE_AMOUNT, rate, 0));
-                case ORE_FOR_FOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, rate, 0, -TRADE_AMOUNT, 0));
-                case ORE_FOR_WOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, rate, -TRADE_AMOUNT, 0));
-                case FOOD_FOR_EMERALD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, -TRADE_AMOUNT,0, 0, rate));
-                case WOOD_FOR_EMERALD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0,-TRADE_AMOUNT, 0, rate));
-                case ORE_FOR_EMERALD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0,0, -TRADE_AMOUNT, rate));
-                case EMERALD_FOR_FOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, rate,0, 0, -TRADE_AMOUNT));
-                case EMERALD_FOR_WOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0,rate, 0, -TRADE_AMOUNT));
-                case EMERALD_FOR_ORE -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0,0, rate, -TRADE_AMOUNT));
+                case FOOD_FOR_EMERALD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, -TRADE_AMOUNT, 0, 0, rate));
+                case WOOD_FOR_EMERALD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, -TRADE_AMOUNT, 0, rate));
+                case ORE_FOR_EMERALD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, 0, -TRADE_AMOUNT, rate));
+                case EMERALD_FOR_FOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, rate, 0, 0, -TRADE_AMOUNT));
+                case EMERALD_FOR_WOOD -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, rate, 0, -TRADE_AMOUNT));
+                case EMERALD_FOR_ORE -> ResourcesServerEvents.addSubtractResources(new Resources(playerName, 0, 0, rate, -TRADE_AMOUNT));
             }
-            int newRate = Math.max(MIN_RATE, rate - RATE_STEP);
-            int newOppRate = Math.min(MAX_RATE, oppRate + RATE_STEP);
-            player.tradeRates.put(tradeAction, newRate);
-            player.tradeRates.put(oppTradeAction, newOppRate);
-            PlayerClientboundPacket.setMarketRate(tradeAction, playerName, newRate);
-            PlayerClientboundPacket.setMarketRate(oppTradeAction, playerName, newOppRate);
+            updateTradeRates(player);
         } else {
             ResourcesClientboundPacket.warnInsufficientResources(playerName,
                 getSellResource() != ResourceName.FOOD,
                 getSellResource() != ResourceName.WOOD,
                 getSellResource() != ResourceName.ORE,
-                    getSellResource() != ResourceName.EMERALD
+                    false
             );
         }
+    }
+
+    private void updateTradeRates(RTSPlayer player) {
+        TradeAction altTrade1;
+        TradeAction altTrade2;
+
+        if (tradeAction == EMERALD_FOR_FOOD) {
+            altTrade1 = EMERALD_FOR_WOOD;
+            altTrade2 = EMERALD_FOR_ORE;
+        } else if (tradeAction == EMERALD_FOR_WOOD) {
+            altTrade1 = EMERALD_FOR_FOOD;
+            altTrade2 = EMERALD_FOR_ORE;
+        } else if (tradeAction == EMERALD_FOR_ORE) {
+            altTrade1 = EMERALD_FOR_FOOD;
+            altTrade2 = EMERALD_FOR_WOOD;
+        } else if (tradeAction == FOOD_FOR_EMERALD) {
+            altTrade1 = WOOD_FOR_EMERALD;
+            altTrade2 = ORE_FOR_EMERALD;
+        } else if (tradeAction == WOOD_FOR_EMERALD) {
+            altTrade1 = FOOD_FOR_EMERALD;
+            altTrade2 = ORE_FOR_EMERALD;
+        } else {// if (tradeAction == ORE_FOR_EMERALD) {
+            altTrade1 = FOOD_FOR_EMERALD;
+            altTrade2 = WOOD_FOR_EMERALD;
+        }
+        int minRate = isBuyAction() ? MIN_BUY_RATE : MIN_SELL_RATE;
+        int maxRate = isBuyAction() ? MAX_BUY_RATE : MAX_SELL_RATE;
+
+        int rate = player.tradeRates.get(tradeAction);
+        int altRate1 = player.tradeRates.get(altTrade1);
+        int altRate2 = player.tradeRates.get(altTrade2);
+
+        int newRate = Math.max(minRate, rate - RATE_STEP);
+        int newAltRate1 = Math.min(maxRate, altRate1 + ALT_RATE_STEP);
+        int newAltRate2 = Math.min(maxRate, altRate2 + ALT_RATE_STEP);
+
+        player.tradeRates.put(tradeAction, newRate);
+        player.tradeRates.put(altTrade1, newAltRate1);
+        player.tradeRates.put(altTrade2, newAltRate2);
+        PlayerClientboundPacket.setMarketRate(tradeAction, player.name, newRate);
+        PlayerClientboundPacket.setMarketRate(altTrade1, player.name, newAltRate1);
+        PlayerClientboundPacket.setMarketRate(altTrade2, player.name, newAltRate2);
     }
 }

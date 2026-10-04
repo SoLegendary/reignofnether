@@ -166,7 +166,7 @@ public class Factions {
 		registerBuilding(MONSTERS, Buildings.SPRUCE_BRIDGE, Keybindings.hotkey4);
 		registerBuilding(MONSTERS, Buildings.HAUNTED_HOUSE);
 		
-		registerBuilding(MONSTERS, Buildings.MONSTER_MARKET);
+		registerBuilding(MONSTERS, Buildings.MONSTER_MARKET, Keybindings.hotkey10);
 		registerBuilding(MONSTERS, Buildings.BEACON);
 		
 		//Piglins
@@ -181,7 +181,7 @@ public class Factions {
 		registerBuilding(PIGLINS, Buildings.FORTRESS, Keybindings.abilitySlot9);
 		registerBuilding(PIGLINS, Buildings.INFERNAL_PORTAL, Keybindings.hotkey3);
 		registerBuilding(PIGLINS, Buildings.BLACKSTONE_BRIDGE, Keybindings.hotkey4);
-		registerBuilding(PIGLINS, Buildings.PIGLIN_MARKET);
+		registerBuilding(PIGLINS, Buildings.PIGLIN_MARKET, Keybindings.hotkey10);
 		registerBuilding(PIGLINS, Buildings.BEACON);
 		
 		//VillagersFaction
@@ -199,7 +199,7 @@ public class Factions {
 		registerBuilding(VILLAGERS, Buildings.SHRINE_OF_PROSPERITY, Keybindings.hotkey3);
 		registerBuilding(VILLAGERS, Buildings.IRON_GOLEM_BUILDING, Keybindings.hotkey9);
 		registerBuilding(VILLAGERS, Buildings.OAK_BRIDGE, Keybindings.hotkey4);
-		registerBuilding(VILLAGERS, Buildings.VILLAGER_MARKET);
+		registerBuilding(VILLAGERS, Buildings.VILLAGER_MARKET, Keybindings.hotkey10);
 		registerBuilding(VILLAGERS, Buildings.BEACON);
 		
 		//Neutral
@@ -270,10 +270,6 @@ public class Factions {
 	public static Faction getFaction(ResourceLocation pKey) {
 		if (pKey == null) return Factions.NONE;
 		return ReignOfNetherRegistries.FACTIONS.get(pKey);
-	}
-	
-	public static Faction getFaction(Entity entity) {
-		return getFaction(ENTITY_FACTION.get(EntityType.getKey(entity.getType())));
 	}
 	
 	public static Faction getFaction(Unit unit) {

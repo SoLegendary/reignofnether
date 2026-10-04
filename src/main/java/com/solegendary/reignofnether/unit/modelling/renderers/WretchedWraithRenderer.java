@@ -42,7 +42,7 @@ public class WretchedWraithRenderer extends MobRenderer<WretchedWraithUnit, Wret
     }
 
     @Override
-    protected RenderType getRenderType(
+    public RenderType getRenderType(
             WretchedWraithUnit entity,
             boolean bodyVisible,
             boolean translucent,

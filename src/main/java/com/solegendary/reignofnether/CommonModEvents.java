@@ -33,6 +33,7 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.PANDA_UNIT.get(), PandaUnit.createAttributes().build());
         evt.put(EntityRegistrar.WOLF_UNIT.get(), WolfUnit.createAttributes().build());
         evt.put(EntityRegistrar.LLAMA_UNIT.get(), LlamaUnit.createAttributes().build());
+        evt.put(EntityRegistrar.BEE_UNIT.get(), BeeUnit.createAttributes().build());
         evt.put(EntityRegistrar.PHANTOM_SUMMON.get(), PhantomSummon.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_UNIT.get(), ZombieUnit.createAttributes().build());
         evt.put(EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get(), ZombiePiglinUnit.createAttributes().build());
@@ -82,6 +83,10 @@ public class CommonModEvents {
         evt.put(EntityRegistrar.PIGLIN_MERCHANT_UNIT.get(), PiglinMerchantUnit.createAttributes().build());
         evt.put(EntityRegistrar.WILDFIRE_UNIT.get(), WildfireUnit.createAttributes().build());
         evt.put(EntityRegistrar.KILLER_RABBIT_UNIT.get(), KillerRabbitUnit.createAttributes().build());
+        evt.put(EntityRegistrar.TOTEM_OF_REGENERATION.get(), AbstractTotem.createAttributes().build());
+        evt.put(EntityRegistrar.TOTEM_OF_CASTING.get(), AbstractTotem.createAttributes().build());
+        evt.put(EntityRegistrar.TOTEM_OF_PROTECTION.get(), AbstractTotem.createAttributes().build());
+        evt.put(EntityRegistrar.TOTEM_OF_SHIELDING.get(), AbstractTotem.createAttributes().build());
     }
 
     @SubscribeEvent

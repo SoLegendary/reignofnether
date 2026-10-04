@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -54,7 +55,7 @@ public class WindcallerProjectile extends AbstractMagicProjectile {
                 levitationDealt = true;
             }
             if (levitationDealt && damageDealt) {
-                MiscUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position());
+                ParticleUtil.addParticleExplosion(ParticleTypes.CLOUD, 10, level(), position());
                 discard();
             }
         }

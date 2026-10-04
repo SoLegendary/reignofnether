@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.entities;
 
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.world.damagesource.DamageSource;
@@ -40,7 +41,7 @@ public abstract class AbstractMagicProjectile extends AbstractHurtingProjectile 
     protected void onHitEntity(EntityHitResult pResult) {
         if (!this.level().isClientSide && this.getOwner() instanceof AttackerUnit aUnit) {
             pResult.getEntity().hurt(damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), aUnit.getUnitAttackDamage());
-            MiscUtil.addParticleExplosion(particleType, 10, level(), position());
+            ParticleUtil.addParticleExplosion(particleType, 10, level(), position());
             discard();
         }
     }

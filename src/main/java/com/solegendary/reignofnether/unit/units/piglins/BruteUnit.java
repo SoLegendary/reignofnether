@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.ibm.icu.impl.ValidIdentifiers.Datatype.unit;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
@@ -152,11 +153,12 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
         this.entityData.define(holdingUpShieldAccessor, false);
     }
 
-    // combat stats
-    public float getMovementSpeed() {
-        return isHoldingUpShield() ?
-                Unit.super.getMovementSpeed() * ToggleShield.MOVESPEED_MULTIPLIER :
-                Unit.super.getMovementSpeed();
+    @Override
+    public float getSpeedModifier() {
+        if (isHoldingUpShield()) {
+            return ToggleShield.MOVESPEED_MULTIPLIER;
+        }
+        return 1.0f;
     }
 
     @Nullable
@@ -229,7 +231,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, BruteUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, BruteUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, BruteUnit.maxHealth)

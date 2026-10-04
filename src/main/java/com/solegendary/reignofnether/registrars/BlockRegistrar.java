@@ -112,6 +112,16 @@ public class BlockRegistrar {
                             .hasPostProcess(BlockRegistrar::always).emissiveRendering(BlockRegistrar::always)),
             CreativeModeTabs.BUILDING_BLOCKS);
 
+    public static final RegistryObject<Block> TEMPORARY_WALKABLE_MAGMA_BLOCK = registerBlock("temporary_walkable_magma_block", () ->
+                    new TemporaryWalkableMagmaBlock(BlockBehaviour
+                            .Properties.copy(Blocks.STONE).mapColor(MapColor.NETHER)
+                            .requiresCorrectToolForDrops()
+                            .lightLevel((p_50828_) -> 3)
+                            .randomTicks().strength(0.5F)
+                            .isValidSpawn((p_187421_, p_187422_, p_187423_, p_187424_) -> p_187424_.fireImmune())
+                            .hasPostProcess(BlockRegistrar::always).emissiveRendering(BlockRegistrar::always)),
+            CreativeModeTabs.BUILDING_BLOCKS);
+
     public static final RegistryObject<Block> WRAITH_SNOW_LAYER = registerBlock("wraith_snow_layer_block",
             () -> new WraithSnowLayerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.SNOW)
                     .replaceable()
@@ -281,6 +291,15 @@ public class BlockRegistrar {
             () -> new SpiderFriendlyBarrierBlock(BlockBehaviour.Properties.of()
                     .strength(-1.0F, 3600000.0F)
                     .noOcclusion()
+            ), CreativeModeTabs.BUILDING_BLOCKS);
+
+    public static final RegistryObject<Block> HORIZONTAL_PORTAL = registerBlock("horizontal_portal",
+            () -> new HorizontalPortalBlock(BlockBehaviour.Properties.of()
+                    .noCollission()
+                    .noOcclusion()
+                    .strength(-1F)
+                    .lightLevel(s -> 11)
+                    .sound(SoundType.GLASS)
             ), CreativeModeTabs.BUILDING_BLOCKS);
 
     private static boolean always(BlockState p_50775_, BlockGetter p_50776_, BlockPos p_50777_) {

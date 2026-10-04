@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -38,9 +39,11 @@ public class Button {
     public int tooltipOffsetY = 0;
     public int imageSize = DEFAULT_ICON_SIZE;
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
-    public boolean stretchIconToBorders = false;
+    public int innerIconSizeModifier = 0;
     public String playerNameForHeadIcon = "";
     public int bgColour = 0x64000000;
+    public Supplier<String> bottomLeftText = null;
+    public int bottomLeftTextColor = 0xFFFFFF;
 
     public ResourceLocation iconResource;
     public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
@@ -76,7 +79,9 @@ public class Button {
     // @ 1.0, whole button is greyed out
     public float greyPercent = 0.0f;
 
+    public Supplier<Float> getGreyPercent = null;
     public boolean greyWhenDisabled = true;
+    public boolean greyInverted = false;
     public boolean showSelectedFrameWhenDisabled = false;
 
     protected Minecraft MC = Minecraft.getInstance();
@@ -165,18 +170,14 @@ public class Button {
             guiGraphics.pose().translate(0,0,1);
             int iconX = x+4 + (7 - xyDiff - iconSize/2);
             int iconY = y+4 + (7 - xyDiff - iconSize/2);
-            if (stretchIconToBorders) {
-                iconX -= 1;
-                iconY -= 1;
-            }
-            iconX += (DEFAULT_ICON_SIZE - imageSize) / 2;
-            iconY += (DEFAULT_ICON_SIZE - imageSize) / 2;
+            iconX += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
+            iconY += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
             MyRenderer.renderIcon(
                     guiGraphics,
                     bgIconResource,
                     iconX,
                     iconY,
-                    stretchIconToBorders ? imageSize + 2 : imageSize
+                    imageSize + (innerIconSizeModifier * 2)
             );
         }
 
@@ -184,18 +185,14 @@ public class Button {
         if (iconResource != null) {
             int iconX = x+4 + (7 - xyDiff - iconSize/2);
             int iconY = y+4 + (7 - xyDiff - iconSize/2);
-            if (stretchIconToBorders) {
-                iconX -= 1;
-                iconY -= 1;
-            }
-            iconX += (DEFAULT_ICON_SIZE - imageSize) / 2;
-            iconY += (DEFAULT_ICON_SIZE - imageSize) / 2;
+            iconX += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
+            iconY += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
             guiGraphics.pose().translate(0,0,1);
             MyRenderer.renderIcon(
                     guiGraphics,
                     iconResource,
                     iconX, iconY,
-                    stretchIconToBorders ? imageSize + 2 : imageSize
+                    imageSize + (innerIconSizeModifier * 2)
             );
         }
         if (iconItem != null) {
@@ -234,6 +231,10 @@ public class Button {
                     0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
 
+        if (getGreyPercent != null) {
+            greyPercent = getGreyPercent.get();
+        }
+
         if (greyPercent > 0 || (!isEnabled.get() && greyWhenDisabled)) {
             int greyHeightPx = Math.round(greyPercent * iconFrameSize);
             if (!isEnabled.get())
@@ -242,11 +243,12 @@ public class Button {
             guiGraphics.pose().translate(0,0,1);
             guiGraphics.fill( // x1,y1, x2,y2,
                     x + xyDiff,
-                    y + xyDiff + greyHeightPx,
+                    y + xyDiff + (greyInverted ? 0 : greyHeightPx),
                     x + xyDiff + iconFrameSize,
-                    y + xyDiff + iconFrameSize,
+                    y + xyDiff + (greyInverted ? greyHeightPx : iconFrameSize),
                     0x99000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
+
 
         if (isFlashing.get()) {
             guiGraphics.fill(x, y,
@@ -254,6 +256,29 @@ public class Button {
                 y + iconFrameSize,
                 (0xFFFFFF | ((int) (0x80 * MiscUtil.getOscillatingFloat(0,1)) << 24))
             ); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+        }
+
+        if (bottomLeftText != null) {
+            String blText = bottomLeftText.get();
+            int drawX = x + 4 + ((blText.length() - 1) * 2);
+            int drawY = y + iconSize;
+
+            drawX += (DEFAULT_ICON_SIZE - iconSize) / 2;
+            drawY += (DEFAULT_ICON_SIZE - iconSize) / 2;
+
+            guiGraphics.pose().pushPose();
+
+            guiGraphics.pose().translate(drawX, drawY, 0);
+            guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
+            guiGraphics.pose().translate(-drawX, -drawY, 5);
+
+            guiGraphics.drawCenteredString(MC.font,
+                    blText,
+                    drawX,
+                    drawY,
+                    bottomLeftTextColor);
+
+            guiGraphics.pose().popPose();
         }
     }
 
@@ -306,7 +331,10 @@ public class Button {
         if (hotkey != null && hotkey.getKey() == key) {
             if (MC.player != null)
                 MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-            this.onLeftClick.run();
+            if (this.onLeftClick != null)
+                this.onLeftClick.run();
+            if (this.onLeftClickRelease != null)
+                this.onLeftClickRelease.run();
         }
     }
 }

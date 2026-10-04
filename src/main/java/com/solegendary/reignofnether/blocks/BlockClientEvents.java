@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -47,6 +48,7 @@ public class BlockClientEvents {
         }
         // draw range indicators for buildings with abilities and monster night sources
         for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
+            if (!FogOfWarClientEvents.isBuildingInBrightChunk(building)) continue;
             RangeIndicatorAddon ria;
             if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
                 for (BlockPos bp : ria.getHighlightBps(building)) {
@@ -69,8 +71,10 @@ public class BlockClientEvents {
                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, yOffset, bp, 0f, 0.8f, 0f, 0.3f);
             }
         }
-        for (LivingEntity le : UnitClientEvents.getSelectedUnits()) {
-            if (le instanceof RangeIndicator ri) {
+        for (LivingEntity le : UnitClientEvents.getAllUnits()) {
+            if (!FogOfWarClientEvents.isBlockVisible(le.getOnPos())) continue;
+            boolean selected = UnitClientEvents.getSelectedUnits().contains(le);
+            if (le instanceof RangeIndicator ri && (selected || !ri.showOnlyWhenSelected())) {
                 for (BlockPos bp : ri.getHighlightBps()) {
                     int snowLayers = BlockUtils.getSnowLayers(le.level().getBlockState(bp.above()));
                     float yOffset = snowLayers * 0.125f;
@@ -78,8 +82,10 @@ public class BlockClientEvents {
                 }
             }
         }
-        if (HudClientEvents.hudSelectedEntity != null && ItemClientEvents.actionableUnitItem != null && MC.level != null) {
+        if (HudClientEvents.hudSelectedEntity != null && MC.level != null &&
+                (ItemClientEvents.actionableUnitItem != null || ItemClientEvents.hoveredInvItem != null)) {
             RangeIndicator ri = ItemClientEvents.actionableUnitItem;
+            if (ri == null) ri = ItemClientEvents.hoveredInvItem;
             for (BlockPos bp : ri.getHighlightBps()) {
                 int snowLayers = BlockUtils.getSnowLayers(MC.level.getBlockState(bp.above()));
                 float yOffset = snowLayers * 0.125f;

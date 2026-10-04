@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
+import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -8,8 +9,11 @@ import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.NetherZone;
 import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.items.StockedShopItem;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -28,7 +32,8 @@ import java.util.List;
 public class PiglinMarket extends AbstractMarket implements NetherConvertingAddon {
 
     public static final String buildingName = "Commercial Portal";
-    public static final String structureName = "market_piglins";
+    public static final String structureName = "market_piglins1";
+    public static final String upgradedStructureName = "market_piglins2";
     public static final ResourceCost cost = ResourceCosts.PIGLIN_MARKET;
 
     public PiglinMarket() {
@@ -39,11 +44,48 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
 
         this.startingBlockTypes.add(Blocks.BLACKSTONE);
         this.startingBlockTypes.add(Blocks.POLISHED_BLACKSTONE_BRICKS);
+
+        this.productions.add(ProductionItems.RESEARCH_MARKET_UPGRADE_PIGLINS, Keybindings.abilitySlot4);
     }
 
     @Override
-    protected ArrayList<StockedShopItem> getStartingItemsAndStock() {
-        return new ArrayList<>();
+    public String getUpgradedStructureName(int upgradeLevel) {
+        return upgradeLevel > 0 ? upgradedStructureName : structureName;
+    }
+
+    @Override
+    public String getUpgradedName(BuildingPlacement placement) {
+        return Component.translatable("buildings.reignofnether.piglin_market_upgraded").getString();
+    }
+
+    @Override
+    public int getUpgradeLevel(BuildingPlacement placement) {
+        for (BuildingBlock block : placement.getBlocks())
+            if (block.getBlockState().getBlock() == Blocks.CRIMSON_STAIRS) {
+                return 1;
+            }
+        return 0;
+    }
+
+    @Override
+    public ArrayList<StockedShopItem> getStartingItemsAndStock() {
+        return new ArrayList<>(List.of(
+                new StockedShopItem(UnitItems.HEALTH_POTION, 3, 60 * 20),
+                new StockedShopItem(UnitItems.MANA_POTION, 3, 60 * 20),
+                new StockedShopItem(UnitItems.BROADSWORD, 1, 180 * 20),
+                new StockedShopItem(UnitItems.IRON_HIDE_AMULET, 1, 180 * 20),
+                new StockedShopItem(UnitItems.HEART_MEDALLION, 1, 180 * 20),
+                new StockedShopItem(UnitItems.AZURE_MEDALLION, 1, 180 * 20)
+        ));
+    }
+
+    @Override
+    public ArrayList<StockedShopItem> getUpgradedItemsAndStock() {
+        return new ArrayList<>(List.of(
+                new StockedShopItem(UnitItems.POCKET_PORTAL, 3, 60 * 20),
+                new StockedShopItem(UnitItems.MAGMA_WALKER_BOOTS, 1, 600 * 20),
+                new StockedShopItem(UnitItems.GONG_OF_WEAKENING, 1, 600 * 20)
+        ));
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
@@ -55,8 +97,7 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 () -> !TutorialClientEvents.isAtOrPastStage(TutorialStage.EXPLAIN_BUILDINGS),
-                () -> BuildingClientEvents.numFinishedBuildings(Buildings.PORTAL_CIVILIAN) >= 4 ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
+                () -> true,
                 List.of(
                         Component.translatable("buildings.reignofnether.piglin_market").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),

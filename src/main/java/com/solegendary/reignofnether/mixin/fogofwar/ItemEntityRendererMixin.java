@@ -19,7 +19,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,8 +26,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.List;
 
 // brightness shading for blocks excluding liquids and flat flace blocks (like tall grass)
 
@@ -46,7 +43,7 @@ public abstract class ItemEntityRendererMixin {
         Item item = itemEntity.getItem().getItem();
         if (!OrthoviewClientEvents.isEnabled())
             return false;
-        return ItemUtil.isPreparedEdibleFood(item) ||
+        return ItemUtil.isEdibleFoodOrDrink(item) ||
                 ResourceSources.getFromItem(item) != null ||
                 ItemUtil.isUnitItem(itemEntity.getItem());
     }

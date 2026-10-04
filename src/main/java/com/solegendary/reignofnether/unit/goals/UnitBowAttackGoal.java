@@ -140,10 +140,8 @@ public class UnitBowAttackGoal<T extends net.minecraft.world.entity.Mob> extends
                 }
                 else if (isTargetGarrisoned)
                     attackRange += targetGarr.getExternalAttackRangeBonus();
-                else if (target instanceof GhastUnit ghastUnit)
-                    attackRange += ghastUnit.getAttackerRangeBonus(this.mob);
-                else if (target instanceof WindcallerUnit windcallerUnit)
-                    attackRange += windcallerUnit.getAttackerRangeBonus(this.mob);
+                else if (target instanceof Unit targetUnit)
+                    attackRange += targetUnit.getAttackerRangeBonus(this.mob);
             }
 
             double distToTarget = this.mob.distanceTo(target);

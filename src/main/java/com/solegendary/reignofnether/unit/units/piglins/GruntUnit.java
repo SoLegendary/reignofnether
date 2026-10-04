@@ -202,7 +202,6 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     public static List<BuildingPlaceButton> getBuildingButtons() {
 	    List<BuildingPlaceButton> buttons = new ArrayList<>(Factions.PIGLINS.getBuildingButtons());
 
-        //TODO Add to Register
         CustomBuildingClientEvents.customBuildings.forEach(cb -> {
             if (cb.buildableByPiglins)
                 buttons.add(cb.getWorkerBuildButton(null));
@@ -231,7 +230,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, GruntUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, GruntUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, GruntUnit.maxHealth)

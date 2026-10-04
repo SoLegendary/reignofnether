@@ -20,6 +20,7 @@ public class MerchantEquipmentItem extends UnitItem {
             .type(UnitItemType.UPGRADE)
             .sellValue(50)
             .consumeOnUse()
+            .noRandomDrop()
         );
         this.isCompatibleTarget = isCompatibleTarget;
         this.onUseEntity = this::tryEquip;

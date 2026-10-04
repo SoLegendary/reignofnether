@@ -4,12 +4,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.unit.modelling.models.EnchanterModel;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 @OnlyIn(Dist.CLIENT)
 public class EnchanterRenderer extends MobRenderer<EnchanterUnit, EnchanterModel<EnchanterUnit>> {

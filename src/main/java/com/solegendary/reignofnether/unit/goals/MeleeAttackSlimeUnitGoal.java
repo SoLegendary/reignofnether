@@ -30,7 +30,7 @@ public class MeleeAttackSlimeUnitGoal extends AbstractMeleeAttackUnitGoal {
             if (!((Unit) this.mob).getHoldPosition()) {
                 if (ticksUntilNextPathRecalculation <= 0) {
                     Path path = mob.getNavigation().createPath(target.getX(), target.getY(), target.getZ(), 0);
-                    this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier((Unit) this.mob));
+                    this.mob.getNavigation().moveTo(path, ((Unit) this.mob).getSpeedModifier());
                     if (distSqr < 16)
                         ticksUntilNextPathRecalculation = tickPathRecalcMax;
                     else if (distSqr < 64)

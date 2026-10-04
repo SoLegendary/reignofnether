@@ -346,7 +346,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, NecromancerUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, NecromancerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, NecromancerUnit.maxHealth)
@@ -639,6 +639,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 ai.setBaseValue(InsomniaCurse.PHANTOM_DAMAGE + (soulRank * InsomniaCurse.PHANTOM_DAMAGE_BONUS_PER_SOUL_RANK));
             }
             this.level().addFreshEntity(phantom);
+            phantom.getPersistentData().putString("ownerName", getOwnerName());
             return phantom;
         }
         return null;

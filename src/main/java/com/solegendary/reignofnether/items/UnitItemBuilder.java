@@ -10,6 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 import javax.annotation.Nullable;
@@ -45,21 +46,23 @@ public class UnitItemBuilder {
 
     final Item item;
     int defaultStackCount = 1;
-    UUID uuid = UUID.randomUUID();
+    String descId;
     ResourceLocation iconRl = null;
     UnitItemType type = UnitItemType.PASSIVE;
     int sellValue = 0;
     int buyCost = 0;
-    String desc = "";
+    Rarity rarity = Rarity.COMMON;
+    LocalizedText desc = null;
     Keybinding hotkey = null;
     boolean enableTooltip = true;
     final List<Pair<Enchantment, Integer>> enchantments = new ArrayList<>();
-    final List<String> pointDescs = new ArrayList<>();
+    final List<LocalizedText> pointDescs = new ArrayList<>();
     final HashMap<Attribute, AttributeModifier> attributes = new HashMap<>();
     BiPredicate<Unit, BlockPos> onUseGround = null;
     BiPredicate<Unit, LivingEntity> onUseEntity = null;
     BiPredicate<Unit, BuildingPlacement> onUseBuilding = null;
     Predicate<Unit> onUse = null;
+    boolean toggleActiveOnUse = false;
     boolean suppressDefaultError = false;
     boolean consumeOnUse = false;
     int cooldownTicksMax = 0;
@@ -70,6 +73,12 @@ public class UnitItemBuilder {
     boolean showRangeCircle = true;
     boolean showRangeLine = false;
     boolean showRadiusCircle = false;
+    boolean showRadiusAtCursor = false;
+    boolean doCastAnimation = false;
+    boolean resetBehaviours = true;
+    boolean forceAutocast = false;
+    boolean canRandomDrop = true;
+    int maxStackSize = 1;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -81,8 +90,8 @@ public class UnitItemBuilder {
         return new UnitItemBuilder(item);
     }
 
-    public UnitItemBuilder uuid(String uuid) {
-        this.uuid = UUID.fromString(uuid);
+    public UnitItemBuilder descId(String descId) {
+        this.descId = descId;
         return this;
     }
 
@@ -105,6 +114,11 @@ public class UnitItemBuilder {
         return this;
     }
 
+    public UnitItemBuilder maxStackSize(int maxStackSize) {
+        this.maxStackSize = maxStackSize;
+        return this;
+    }
+
     /** Emerald cost returned when the item is sold; 0 means unsellable. */
     public UnitItemBuilder sellValue(int sellValue) {
         if (sellValue < 0)
@@ -118,6 +132,13 @@ public class UnitItemBuilder {
         if (sellValue < 0)
             throw new IllegalArgumentException("sellValue must be >= 0, was " + sellValue);
         this.buyCost = buyCost;
+        return this;
+    }
+
+    public UnitItemBuilder rarity(Rarity rarity) {
+        this.rarity = rarity;
+        this.buyCost = UnitItem.RARITY_VALUES.get(rarity);
+        this.sellValue = UnitItem.RARITY_VALUES.get(rarity) / 2;
         return this;
     }
 
@@ -157,26 +178,26 @@ public class UnitItemBuilder {
     }
 
     /** I18n key for the short description line(s) in the tooltip's middle band. */
-    public UnitItemBuilder desc(String desc) {
-        this.desc = desc == null ? "" : desc;
+    public UnitItemBuilder desc(String i18nKey, Object... args) {
+        if (i18nKey != null && !i18nKey.isBlank())
+            this.desc = new LocalizedText(i18nKey, args);
         return this;
     }
 
-    public UnitItemBuilder suppressDefaultError(boolean suppressDefaultError) {
-        this.suppressDefaultError = suppressDefaultError;
+    public UnitItemBuilder toggleActiveOnUse() {
+        this.toggleActiveOnUse = true;
+        return this;
+    }
+
+    public UnitItemBuilder suppressDefaultError() {
+        this.suppressDefaultError = true;
         return this;
     }
 
     /** Adds one bullet to the passive stat list; call once per bullet, in display order. */
-    public UnitItemBuilder pointDesc(String i18nKey) {
+    public UnitItemBuilder pointDesc(String i18nKey, Object... args) {
         if (i18nKey != null && !i18nKey.isBlank())
-            this.pointDescs.add(i18nKey);
-        return this;
-    }
-
-    public UnitItemBuilder pointDescs(String... descs) {
-        for (String desc : descs)
-            pointDesc(desc);
+            this.pointDescs.add(new LocalizedText(i18nKey, args));
         return this;
     }
 
@@ -242,26 +263,40 @@ public class UnitItemBuilder {
         return this;
     }
 
-    public UnitItemBuilder showRangeCircle(boolean show) {
-        this.showRangeCircle = show;
-        return this;
-    }
-
-    public UnitItemBuilder showRangeLine(boolean show) {
-        this.showRangeLine = show;
-        return this;
-    }
-
-    public UnitItemBuilder showRadiusCircle(boolean show) {
-        this.showRadiusCircle = show;
-        return this;
-    }
-
     public UnitItemBuilder showRangeCircle() {
         this.showRangeCircle = true;
         return this;
     }
 
+    public UnitItemBuilder showRangeCircle(boolean show) {
+        this.showRangeCircle = show;
+        return this;
+    }
+
+    public UnitItemBuilder showRadiusAtCursor() {
+        this.showRadiusAtCursor = true;
+        return this;
+    }
+
+    public UnitItemBuilder doCastAnimation() {
+        this.doCastAnimation = true;
+        return this;
+    }
+
+    public UnitItemBuilder noBehaviourReset() {
+        this.resetBehaviours = false;
+        return this;
+    }
+
+    public UnitItemBuilder forceAutocast() {
+        this.forceAutocast = true;
+        return this;
+    }
+
+    public UnitItemBuilder noRandomDrop() {
+        this.canRandomDrop = false;
+        return this;
+    }
 
     public UnitItem build() {
         return new BuiltUnitItem(this);

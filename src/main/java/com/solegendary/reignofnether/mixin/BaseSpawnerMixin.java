@@ -206,6 +206,7 @@ public class BaseSpawnerMixin {
                             if (entity instanceof Unit unit)
                                 unit.setAnchor(entity.getOnPos());
                         }
+                        mob.getPersistentData().putBoolean("isFromSpawner", true);
                     }
                     if (!pServerLevel.tryAddFreshEntityWithPassengers(entity)) {
                         this.delay(pServerLevel, pPos);

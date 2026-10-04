@@ -95,6 +95,42 @@ public class AttributeRegistrar {
                             .setSyncable(true)
             );
 
+    public static final RegistryObject<Attribute> CRITICAL_HIT_CHANCE =
+            ATTRIBUTES.register("critical_hit_chance",
+                    () -> new RangedAttribute("attribute.reignofnether.critical_hit_chance", 0.0, 0.0, 1.0)
+                            .setSyncable(true)
+            );
+
+    public static final RegistryObject<Attribute> EXPLOSIVE_HIT_CHANCE =
+            ATTRIBUTES.register("explosive_hit_chance",
+                    () -> new RangedAttribute("attribute.reignofnether.explosive_hit_chance", 0.0, 0.0, 1.0)
+                            .setSyncable(true)
+            );
+
+    public static final RegistryObject<Attribute> BUILDING_DAMAGE_BONUS =
+            ATTRIBUTES.register("building_damage_bonus",
+                    () -> new RangedAttribute("attribute.reignofnether.building_damage_bonus", 0.0, 0.0, 9999.0)
+                            .setSyncable(true)
+            );
+
+    public static final RegistryObject<Attribute> LIFESTEAL =
+            ATTRIBUTES.register("lifesteal",
+                    () -> new RangedAttribute("attribute.reignofnether.lifesteal", 0.0, 0.0, 9999.0)
+                            .setSyncable(true)
+            );
+
+    public static final RegistryObject<Attribute> MANA_ON_HIT =
+            ATTRIBUTES.register("mana_on_hit",
+                    () -> new RangedAttribute("attribute.reignofnether.mana_on_hit", 0.0, 0.0, 9999.0)
+                            .setSyncable(true)
+            );
+
+    public static final RegistryObject<Attribute> SCALE =
+            ATTRIBUTES.register("scale",
+                    () -> new RangedAttribute("attribute.reignofnether.scale", 1.0, 0.0, 9999.0)
+                            .setSyncable(true)
+            );
+
     public static void init(FMLJavaModLoadingContext context) {
         ATTRIBUTES.register(context.getModEventBus());
     }
