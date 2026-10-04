@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.RectZone;
+import com.solegendary.reignofnether.hud.buttons.AbstractUnitItemButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
@@ -25,7 +26,9 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -33,6 +36,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
@@ -62,9 +66,11 @@ public class ItemClientEvents {
     private static BlockPos lastCursorPos = new BlockPos(0,0,0);
 
     public static final ArrayList<Button> renderedButtons = new ArrayList<>();
+    public static UnitItem hoveredInvItem = null;
 
     // items moused over
     private static final ArrayList<ItemEntity> preselectedItems = new ArrayList<>();
+    private static final ArrayList<ItemEntity> renderedItems = new ArrayList<>();
 
     public static ItemShopPlacement openItemShop = null;
 
@@ -80,13 +86,27 @@ public class ItemClientEvents {
         return preselectedItems;
     }
 
+    public static void addRenderedItem(ItemEntity itemEntity) {
+        if (!FogOfWarClientEvents.isInBrightChunk(itemEntity))
+            return;
+        renderedItems.add(itemEntity);
+    }
+    public static void clearRenderedItems() {
+        renderedItems.clear();
+    }
+    public static ArrayList<ItemEntity> getRenderedItems() {
+        return renderedItems;
+    }
+
     public static boolean hasDragActionItem() {
         return actionableUnitItemDrag != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) && !hasLeftClickAction();
     }
 
-    public static boolean shouldRenderUnitInventory(Unit unit) {
-        return unit instanceof UnitInventory &&
-                unit.getItemGoal() != null;
+    public static boolean shouldRenderUnitInventory(LivingEntity le) {
+        return ENABLED &&
+                le instanceof UnitInventory inv &&
+                le instanceof Unit unit &&
+                (unit.getItemGoal() != null || !inv.isEmpty());
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {
@@ -139,6 +159,7 @@ public class ItemClientEvents {
 
     public static RectZone renderUnitInventory(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, UnitInventory inv) {
         ItemClientEvents.renderedButtons.clear();
+        ItemClientEvents.hoveredInvItem = null;
         for (int i = 0; i < inv.getAllItems().size(); i++) {
             Keybinding hotkey = i < hotkeys.size() ? hotkeys.get(i) : null;
             ItemStack itemStack = inv.getAllItems().get(i);
@@ -157,10 +178,17 @@ public class ItemClientEvents {
             i += 1;
         }
 
-        for (Button button : ItemClientEvents.renderedButtons)
-            if (button.isMouseOver(mouseX, mouseY))
+        for (Button button : ItemClientEvents.renderedButtons) {
+            if (button.isMouseOver(mouseX, mouseY)) {
                 button.renderTooltip(guiGraphics, mouseX, mouseY);
-
+                if (button instanceof UnitItemInventoryButton uiInvButton) {
+                    if (hoveredInvItem == null) {
+                        hoveredInvItem = uiInvButton.unitItem;
+                        hoveredInvItem.updateHighlightBps(MC.level);
+                    }
+                }
+            }
+        }
         return RectZone.getZoneByLW(x, y, INV_WIDTH, INV_HEIGHT);
     }
 
@@ -169,7 +197,8 @@ public class ItemClientEvents {
         if (HudClientEvents.hudSelectedEntity != null && actionableUnitItem != null &&
                 (actionableUnitItem.showRadiusCircle ||
                  actionableUnitItem.showRangeCircle ||
-                 actionableUnitItem.showRangeLine) &&
+                 actionableUnitItem.showRangeLine ||
+                 actionableUnitItem.showRadiusAtCursor) &&
                 (actionableUnitItem.range > 0 || actionableUnitItem.radius > 0)) {
             LivingEntity le = HudClientEvents.hudSelectedEntity;
             if (!lastOnPos.equals(le.getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
@@ -182,7 +211,7 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onLeftMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
-        if (!ENABLED || MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
+        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity) || MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
 
         for (Button button : renderedButtons)
@@ -252,14 +281,17 @@ public class ItemClientEvents {
     // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
+        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity))
+            return;
         for (Button button : renderedButtons)
             button.checkPressed(evt.getKeyCode());
     }
 
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (!ENABLED || !(MC.screen instanceof TopdownGui) || MC.player == null)
+        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity) || !(MC.screen instanceof TopdownGui) || MC.player == null)
             return;
+
         for (Button button : renderedButtons) {
             if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
                 button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
@@ -320,15 +352,26 @@ public class ItemClientEvents {
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (!ENABLED) return;
 
-        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS ||
-                HudClientEvents.isMouseOverAnyButtonOrHud())
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)
             return;
 
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
+            for (ItemEntity itemEntity : renderedItems) { // faint always-shown outline for visibility
+                if (ItemUtil.isUnitItem(itemEntity)) {
+                    MyRenderer.drawBoxBottom(
+                            evt.getPoseStack(),
+                            itemEntity.getBoundingBox().inflate(0.25, 0, 0.25),
+                            1, 1, 1,
+                            0.25f
+                    );
+                }
+            }
+            if (HudClientEvents.isMouseOverAnyButtonOrHud()) return;
+
             for (ItemEntity itemEntity : preselectedItems) {
                 ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
                 boolean isResourceItem = res != null && res.resourceValue > 0;
-                if (ItemUtil.isUnitItem(itemEntity) || isResourceItem || ItemUtil.isPreparedEdibleFood(itemEntity.getItem().getItem())) {
+                if (ItemUtil.isUnitItem(itemEntity) || isResourceItem || ItemUtil.isEdibleFoodOrDrink(itemEntity.getItem().getItem())) {
                     MyRenderer.drawBoxBottom(
                             evt.getPoseStack(),
                             itemEntity.getBoundingBox().inflate(0.25, 0, 0.25),
@@ -363,5 +406,85 @@ public class ItemClientEvents {
                         .renderGhost(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
             }
         }
+    }
+
+    private static final int WRAP_WIDTH = 200;
+    private static final Style HINT_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x888780));
+    private static final Style COST_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x945a35));
+
+    @SubscribeEvent
+    public static void onItemTooltip(ItemTooltipEvent evt) {
+        ItemStack stack = evt.getItemStack();
+        UnitItem unitItem = ItemUtil.getUnitItem(stack);
+        if (unitItem == null)
+            return;
+
+        // line 0 is the vanilla item name, so everything we add goes after it
+        List<Component> tooltips = new ArrayList<>();
+
+        if (!Screen.hasShiftDown()) {
+            evt.getToolTip().add(Component.translatable("item.reignofnether.hud.expand_hint").withStyle(HINT_STYLE));
+            return;
+        }
+
+        if (evt.getToolTip().size() > 1) {
+            Component type = Component.literal( evt.getToolTip().get(0).getString() + " (" + unitItem.type.getLabel() + ")");
+            evt.getToolTip().set(0, type);
+        }
+
+        // description, wrapped manually since vanilla tooltips don't wrap at a fixed width
+        String desc = unitItem.getDescription();
+        if (!desc.isBlank()) {
+            for (FormattedText part : Minecraft.getInstance().font.getSplitter()
+                    .splitLines(desc, WRAP_WIDTH, AbstractUnitItemButton.DESC_STYLE))
+                tooltips.add(Component.literal(part.getString())
+                        .withStyle(AbstractUnitItemButton.DESC_STYLE));
+        }
+
+        // dot points (enchantments omitted: vanilla already shows them)
+        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
+        points.addAll(AbstractUnitItemButton.getAttributeDescs(unitItem));
+        for (String point : points)
+            tooltips.add(MyRenderer.styledWithIcons(point.replace(" ", "   "), AbstractUnitItemButton.POINTS_STYLE));
+        // ^ assumes this returns a Component; if it returns FormattedText, convert it
+
+        // footer stats as plain text, since the icon textures can't go in a text tooltip
+        List<Component> stats = new ArrayList<>();
+        if (unitItem.manaCost > 0)
+            stats.add(Component.translatable("item.reignofnether.hud.mana", unitItem.manaCost)
+                    .withStyle(AbstractUnitItemButton.MANA_STYLE));
+        if (unitItem.cooldownTicksMax > 0)
+            stats.add(Component.translatable("item.reignofnether.hud.cooldown", (unitItem.cooldownTicksMax / 20))
+                    .withStyle(AbstractUnitItemButton.COOLDOWN_STYLE));
+        if (unitItem.range > 0)
+            stats.add(Component.translatable("item.reignofnether.hud.range", (int) unitItem.range)
+                    .withStyle(AbstractUnitItemButton.RANGE_STYLE));
+        if (!stats.isEmpty()) {
+            MutableComponent line = Component.empty();
+            for (int i = 0; i < stats.size(); i++) {
+                if (i > 0) line.append("   ");
+                line.append(stats.get(i));
+            }
+            tooltips.add(line);
+        }
+
+        List<Component> buysell = new ArrayList<>();
+        if (unitItem.buyCost > 0)
+            buysell.add(Component.translatable("item.reignofnether.hud.buy", unitItem.buyCost)
+                    .withStyle(COST_STYLE));
+        if (unitItem.sellValue > 0)
+            buysell.add(Component.translatable("item.reignofnether.hud.sell", unitItem.sellValue)
+                    .withStyle(COST_STYLE));
+
+        if (!buysell.isEmpty()) {
+            MutableComponent line = Component.empty();
+            for (int i = 0; i < buysell.size(); i++) {
+                if (i > 0) line.append("   ");
+                line.append(buysell.get(i));
+            }
+            tooltips.add(line);
+        }
+
+        evt.getToolTip().addAll(tooltips);
     }
 }

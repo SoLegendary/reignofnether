@@ -43,6 +43,13 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
         this.blockTarget = blockTarget;
         this.buildingTarget = buildingTarget;
         this.useItem = useItem;
+        System.out.println("");
+        System.out.println("itemInHand: " + itemInHand);
+        System.out.println("itemTarget: " + itemTarget);
+        System.out.println("leTarget: " + leTarget);
+        System.out.println("blockTarget: " + blockTarget);
+        System.out.println("buildingTarget: " + buildingTarget);
+        System.out.println("useItem: " + useItem);
     }
 
     private ItemAction getAction() {
@@ -106,7 +113,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                         case SELL -> {
                             BuildingPlacement bpl = BuildingUtils.findBuilding(false, blockTarget);
                             if (bpl != null && bpl.getBuilding() instanceof AbstractMarket) {
-                                inv.deleteUUID(ItemUtil.getUUID(itemInHand));
+                                inv.deleteItem(ItemUtil.getUUID(itemInHand));
                                 UnitItem unitItem = ItemUtil.getUnitItem(itemInHand);
                                 if (mob instanceof Unit unit) {
                                     RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(unit.getOwnerName());
@@ -125,9 +132,16 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                             }
                         }
                         case PICKUP -> {
-                            if (itemTarget.isAlive() && inv.tryAdding(itemTarget.getItem())) {
-                                this.mob.take(itemTarget, itemTarget.getItem().getCount());
-                                itemTarget.discard();
+                            if (itemTarget.isAlive()) {
+                                ItemStack groundStack = itemTarget.getItem().copy();
+                                int before = groundStack.getCount();
+                                if (inv.tryAdding(groundStack)) {
+                                    this.mob.take(itemTarget, before - groundStack.getCount());
+                                    if (groundStack.isEmpty())
+                                        itemTarget.discard();
+                                    else
+                                        itemTarget.setItem(groundStack); // remainder stays on the ground
+                                }
                             }
                         }
                         case USE_ON_BLOCK -> inv.useOnGround(ItemUtil.getUUID(itemInHand), blockTarget);
@@ -137,7 +151,7 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                         case NONE, SWAP, USE -> { }
                     }
                 }
-                this.stop();
+                this.stopGoal();
             }
         }
     }
@@ -146,8 +160,8 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
         return moveTarget == null;
     }
 
-    @Override
-    public void stop() {
+    public void stopGoal() {
+        super.stop();
         this.stopMoving();
         this.itemInHand = null;
         this.itemTarget = null;

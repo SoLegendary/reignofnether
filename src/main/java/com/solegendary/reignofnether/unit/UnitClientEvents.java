@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -23,6 +24,8 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcon;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcons;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.items.ItemUtil;
@@ -64,6 +67,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -74,12 +78,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
@@ -88,6 +94,7 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
@@ -120,6 +127,8 @@ public class UnitClientEvents {
     private static boolean sortedSelectedUnitsChanged = true;
     // tracking of all existing units
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
+
+    public static final Map<Integer, HashMap<MobEffect, MobEffectIcon>> mobEffectIcons = new ConcurrentHashMap<>();
 
     @Nullable
     private static UnitActionItem lastClientUAIActioned = null;
@@ -516,7 +525,7 @@ public class UnitClientEvents {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 if (entity instanceof Unit unit) {
-                    unit.getItems().removeIf(i -> !ItemUtil.isPreparedEdibleFood(i.getItem()));
+                    unit.getItems().removeIf(i -> !ItemUtil.isEdibleFoodOrDrink(i.getItem()));
                     unit.getItems().add(new ItemStack(Items.SUGAR, res.food));
                     unit.getItems().add(new ItemStack(Items.STICK, res.wood));
                     unit.getItems().add(new ItemStack(Items.STONE, res.ore));
@@ -1511,10 +1520,67 @@ public class UnitClientEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void onMobEffectAdded(MobEffectEvent.Added evt) {
+        LivingEntity entity = evt.getEntity();
+        if (!(entity instanceof Unit))
+            return;
+
+        MobEffectInstance mei = evt.getEffectInstance();
+
+        synchronized (mobEffectIcons) {
+            // add/update mob effect icon
+            mobEffectIcons
+                    .computeIfAbsent(entity.getId(), id -> new HashMap<>())
+                    .put(mei.getEffect(), MobEffectIcons.getIcon(mei));
+        }
+        if (entity instanceof RangeIndicator ri)
+            ri.updateHighlightBps(entity.level());
+    }
+
+    @SubscribeEvent
+    public static void onMobEffectRemoved(MobEffectEvent.Remove evt) {
+        LivingEntity entity = evt.getEntity();
+        if (!(entity instanceof Unit))
+            return;
+
+        removeMobEffectIcon(entity.getId(), evt.getEffect());
+        if (entity instanceof RangeIndicator ri)
+            ri.updateHighlightBps(entity.level());
+    }
+
+    // Without this, icons stay behind when an effect simply runs out
+    @SubscribeEvent
+    public static void onMobEffectExpired(MobEffectEvent.Expired evt) {
+        LivingEntity entity = evt.getEntity();
+        MobEffectInstance mei = evt.getEffectInstance();
+        if (!(entity instanceof Unit) || mei == null)
+            return;
+
+        removeMobEffectIcon(entity.getId(), mei.getEffect());
+        if (entity instanceof RangeIndicator ri)
+            ri.updateHighlightBps(entity.level());
+    }
+
+    private static void removeMobEffectIcon(int entityId, MobEffect effect) {
+        synchronized (mobEffectIcons) {
+            // remove mob effect icon
+            HashMap<MobEffect, MobEffectIcon> icons = mobEffectIcons.get(entityId);
+            if (icons != null) {
+                icons.remove(effect);
+                if (icons.isEmpty())
+                    mobEffectIcons.remove(entityId);
+            }
+        }
+    }
+
     public static void syncMobEffect(int entityId, int effectId, int amplifier, int duration) {
+        MobEffect effect = MobEffect.byId(effectId);
+        if (effect == null)
+            return;
+
         for (LivingEntity entity : getAllUnits()) {
-            MobEffect effect = MobEffect.byId(effectId);
-            if (effect != null && entityId == entity.getId() && entity instanceof Unit) {
+            if (entityId == entity.getId() && entity instanceof Unit) {
                 if (duration > 0) {
                     entity.addEffect(new MobEffectInstance(effect, duration, amplifier));
                 } else if (entity.getEffect(effect) != null) {
@@ -1586,7 +1652,6 @@ public class UnitClientEvents {
         });
     }
      */
-
 
     /*
     @SubscribeEvent

@@ -43,6 +43,9 @@ public class ItemShopMenu {
         if (stocks == null)
             stocks = new ArrayList<>();
 
+        int extraRows = ((stocks.size() - 1) / ITEMS_PER_ROW);
+        y -= (extraRows * ItemShopMenu.ITEM_SLOT_SIZE);
+
         int contentHeight = getMenuHeight(stocks.size());
         int panelWidth = MENU_WIDTH + PANEL_PADDING;
         int panelHeight = contentHeight + PANEL_PADDING;
@@ -56,6 +59,9 @@ public class ItemShopMenu {
         ArrayList<StockedShopItem> stocks = bpl.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
         if (stocks == null)
             stocks = new ArrayList<>();
+
+        int extraRows = ((stocks.size() - 1) / ITEMS_PER_ROW);
+        y -= (extraRows * ItemShopMenu.ITEM_SLOT_SIZE);
 
         ArrayList<Button> allButtons = new ArrayList<>();
         int contentX = x + PANEL_INSET;

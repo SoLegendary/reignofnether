@@ -11,7 +11,8 @@ import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
-import com.solegendary.reignofnether.hud.passives.EnchantmentIcon;
+import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.effecticons.EnchantmentIcon;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -223,8 +224,9 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         }
         int xOrig = x;
         if (entity instanceof Unit unit) {
-            for (EnchantmentIcon passiveIcon : unit.getPassiveIcons()) {
-                passiveIcon.render(guiGraphics, x - 2, y - 16, mouseX, mouseY);
+            for (Button passiveIcon : unit.getPassiveIcons()) {
+                int yr = unit instanceof HeroUnit ? y - 18 : y - 16;
+                passiveIcon.render(guiGraphics, x - 2, yr, mouseX, mouseY);
                 if (passiveIcon.isMouseOver(mouseX, mouseY))
                     passiveIcon.renderTooltip(guiGraphics, mouseX, mouseY);
                 x += EnchantmentIcon.ICON_SIZE * 2;
@@ -451,7 +453,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         double rangedArmour = unit.getUnitRangedArmorPercentage();
         double magicArmour = unit.getUnitMagicArmorPercentage();
         double resistArmour = unit.getUnitResistPercentage();
-        double avgArmourInv = 1;
+        double highestArmour = 0;
 
         String armourStr = "0%";
         int nonZeroArmourTypes = 0;
@@ -459,60 +461,58 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         if (physicalArmour != 0) {
             armourStr = (int) (physicalArmour * 100) + "%";
             armourColor = GREEN;
-            avgArmourInv *= (1 - physicalArmour);
+            if (physicalArmour > highestArmour) highestArmour = physicalArmour;
             nonZeroArmourTypes += 1;
         }
         if (rangedArmour != 0) {
             armourStr = (int) (rangedArmour * 100) + "%";
             armourColor = YELLOW;
-            avgArmourInv *= (1 - rangedArmour);
+            if (rangedArmour > highestArmour) highestArmour = rangedArmour;
             nonZeroArmourTypes += 1;
         }
         if (resistArmour != 0) {
             armourStr = (int) (resistArmour * 100) + "%";
             armourColor = LIGHT_BLUE;
-            avgArmourInv *= (1 - resistArmour);
+            if (resistArmour > highestArmour) highestArmour = resistArmour;
             nonZeroArmourTypes += 1;
         }
         if (magicArmour != 0 && resistArmour <= 0) { // resistArmour includes magicArmour
             armourStr = (int) (magicArmour * 100) + "%";
             armourColor = DARK_BLUE;
-            avgArmourInv *= (1 - magicArmour);
+            if (magicArmour > highestArmour) highestArmour = magicArmour;
             nonZeroArmourTypes += 1;
         }
-        if (nonZeroArmourTypes > 1) {
-            armourStr = "~" + (int) ((1 - avgArmourInv) * 100) + "%";
+        if (nonZeroArmourTypes > 1 && highestArmour > 0) {
+            armourStr = (int) (highestArmour * 100) + "%+";
             armourColor = LIGHT_BLUE;
-        }
-        if (armourStr.contains("~") && armourStr.contains("-")) {
-            armourStr = armourStr.replace("~", "");
         }
         if (armourStr.contains("-")) {
             armourColor = RED;
         }
+
+        int xOffset = 0;
+        if (armourStr.endsWith("+")) xOffset = -3;
+        if (armourStr.startsWith("-")) xOffset = -4;
 
         renderedStats.add(new RenderedStat(
                 ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/chestplate.png"),
                 armourStr,
                 UnitStatType.ARMOUR,
                 armourColor,
-                armourStr.startsWith("~") || armourStr.startsWith("-") ? -4 : 0
+                xOffset
         ));
 
         if (((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED) != null) {
-            float ms = unit.getMovementSpeed();
+            float ms = unit.getMovementSpeed() * unit.getSpeedModifier();
             int msInt = (int) (ms * 101);
             if (unit instanceof SlimeUnit slimeUnit && slimeUnit.isUsingJumpingMovement()) {
                 msInt /= SlimeJumpMoveControl.MOVESPEED_MULTIPLIER;
             }
-            if (unit instanceof BruteUnit pbUnit && pbUnit.isHoldingUpShield()) {
-                msInt *= ToggleShield.MOVESPEED_MULTIPLIER;
-            }
             int msColour = WHITE;
-            double msAttr = ((LivingEntity) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
-            if (msAttr < unit.getMovementSpeed()) {
+            double msBase = ((LivingEntity) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
+            if (msBase < ms) {
                 msColour = GREEN;
-            } else if (msAttr > unit.getMovementSpeed()) {
+            } else if (msBase > ms) {
                 msColour = RED;
             }
             renderedStats.add(new RenderedStat(

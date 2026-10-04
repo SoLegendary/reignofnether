@@ -20,6 +20,7 @@ public class BigEnchantParticle extends TextureSheetParticle {
 
     public BigEnchantParticle(ClientLevel pLevel, double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed) {
         super(pLevel, pX, pY, pZ);
+
         this.xd = pXSpeed;
         this.yd = pYSpeed;
         this.zd = pZSpeed;
@@ -32,11 +33,12 @@ public class BigEnchantParticle extends TextureSheetParticle {
         this.x = this.xo;
         this.y = this.yo;
         this.z = this.zo;
-        this.quadSize = 0.4F * (this.random.nextFloat() * 0.5F + 0.3F);
         float f = this.random.nextFloat() * 0.6F + 0.4F;
         this.rCol = f;
         this.gCol = f;
         this.bCol = f;
+
+        this.quadSize = 0.4F * (this.random.nextFloat() * 0.5F + 0.3F);
         this.hasPhysics = false;
         this.lifetime = (int)(Math.random() * 10.0) + 30;
     }
@@ -72,7 +74,6 @@ public class BigEnchantParticle extends TextureSheetParticle {
             this.z = this.zStart + this.zd * (double)f;
             this.setPos(this.x, this.y, this.z);
         }
-
     }
 
     @OnlyIn(Dist.CLIENT)

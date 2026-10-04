@@ -260,7 +260,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, MarauderUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, MarauderUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, MarauderUnit.maxHealth)
@@ -325,7 +325,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         if (isNextHitBig()) {
             this.getAttribute(Attributes.ATTACK_KNOCKBACK).addTransientModifier(new AttributeModifier("knockback", 1.5f, AttributeModifier.Operation.ADDITION));
             result = super.doHurtTarget(pEntity);
-            if (pEntity instanceof LivingEntity le) {
+            if (pEntity instanceof LivingEntity le && (!(pEntity instanceof Unit unit) || !unit.uninterruptable())) {
                 le.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 40));
             }
             this.getAttribute(Attributes.ATTACK_KNOCKBACK).removeModifiers();

@@ -180,7 +180,9 @@ public class MoveToTargetBlockGoal extends Goal {
             }
         }
          */
-        this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier(u));
+        float speedMod = u.getSpeedModifier();
+        if (speedMod < 1.0f) speedMod = (float) Math.sqrt(speedMod);
+        this.mob.getNavigation().moveTo(path, speedMod);
         // Broadcast the path so clients can render it briefly. Server-only — clients
         // that received the packet decide whether to render based on ownership/FOW.
         if (!this.mob.level().isClientSide()) {
@@ -225,7 +227,9 @@ public class MoveToTargetBlockGoal extends Goal {
             return;
         }
         // Follow even a partial (unreachable) path so the unit still makes progress toward the target.
-        this.mob.getNavigation().moveTo(path, Unit.getSpeedModifier(u));
+        float speedMod = u.getSpeedModifier();
+        if (speedMod < 1.0f) speedMod = (float) Math.sqrt(speedMod);
+        this.mob.getNavigation().moveTo(path, speedMod);
         // The RTS pathfinder is async: node 0 is the unit's position when the request was SUBMITTED, a few
         // ticks ago. By delivery the unit has often drifted off it (crowd/formation separation, momentum),
         // and vanilla navigation always starts following at node 0 - so it would steer the unit BACK to the

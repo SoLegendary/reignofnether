@@ -21,11 +21,13 @@ import com.solegendary.reignofnether.unit.HeroUnitSave;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,6 +48,16 @@ public interface HeroUnit extends Unit {
         if (((LivingEntity) heroUnit).tickCount % 20 == 0) {
             heroUnit.setMana(heroUnit.getMana() + heroUnit.getManaRegenPerSecond());
         }
+    }
+
+    public static AttributeSupplier.Builder createDefaultAttributes() {
+        return Unit.createDefaultAttributes()
+                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), 1)
+                .add(AttributeRegistrar.BASE_MAX_MANA.get(), 0)
+                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), 0)
+                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), 0)
+                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), 0)
+                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), 0);
     }
 
     public boolean needsStatSync();
@@ -105,9 +117,7 @@ public interface HeroUnit extends Unit {
     }
 
     static List<HeroUnitSave> getFallenHeroes(boolean isClientSide, String ownerName) {
-        ArrayList<HeroUnitSave> heroUnits = isClientSide ? HeroClientEvents.fallenHeroes : HeroServerEvents.fallenHeroes;
-        heroUnits.removeIf(h -> !h.ownerName.equals(ownerName));
-        return heroUnits;
+        return isClientSide ? HeroClientEvents.fallenHeroes : HeroServerEvents.fallenHeroes;
     }
 
     int MAX_LEVEL = 10;
@@ -187,8 +197,8 @@ public interface HeroUnit extends Unit {
             setSkillPoints(getSkillPoints() + levelDiff);
             HeroClientboundPacket.setSkillPoints(((LivingEntity) this).getId(), getSkillPoints());
             SoundClientboundPacket.playSoundAtPos(SoundAction.LEVEL_UP, ((LivingEntity) this).getOnPos());
-            MiscUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 10,
-                    ((LivingEntity) this).level(), ((LivingEntity) this).getEyePosition(), 0.5f);
+            ParticleUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 10,
+                    ((LivingEntity) this).level(), ((LivingEntity) this).getEyePosition());
             setStatsForLevel();
             ((LivingEntity) this).heal(levelDiff * getHealthBonusPerLevel());
         }

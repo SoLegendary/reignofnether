@@ -99,7 +99,7 @@ public class BlazeUnitFireball extends SmallFireball {
             this.onHitEntity(entityHitResult);
             this.level().gameEvent(GameEvent.PROJECTILE_LAND, pResult.getLocation(), GameEvent.Context.of(this, null));
             if (this.getOwner() instanceof LivingEntity le && le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) &&
-                entityHitResult.getEntity() instanceof LivingEntity leTarget) {
+                entityHitResult.getEntity() instanceof LivingEntity leTarget && !(leTarget instanceof Blaze)) {
                 leTarget.addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), 120, 0, false, false));
             }
             if (!this.level().isClientSide && !targetOnFire && !this.isFirewallShot)

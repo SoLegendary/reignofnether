@@ -188,10 +188,8 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
             }
             else if (isTargetGarrisoned)
                 attackRange += targetGarr.getExternalAttackRangeBonus();
-            else if (target instanceof GhastUnit ghastUnit)
-                attackRange += ghastUnit.getAttackerRangeBonus(this.mob);
-            else if (target instanceof WindcallerUnit windcallerUnit)
-                attackRange += windcallerUnit.getAttackerRangeBonus(this.mob);
+            else if (target instanceof Unit targetUnit)
+                attackRange += targetUnit.getAttackerRangeBonus(this.mob);
 
             // dont consider garrison range here so the unit still moves towards the edge of the building
             if (!this.mob.isPassenger()) {

@@ -226,7 +226,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, GhastUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, GhastUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, GhastUnit.maxHealth)
@@ -405,7 +405,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     }
 
     // range bonus that an attacker gets when targeting this ghast, so that we can't just float high up out of range
-    public int getAttackerRangeBonus(Mob attacker) {
+    public double getAttackerRangeBonus(Mob attacker) {
         Vec2 attackerPos = new Vec2((float) attacker.getX(), (float) attacker.getZ());
         Vec2 ghastPos = new Vec2((float) this.getX(), (float) this.getZ());
         double horizDist = Math.sqrt(attackerPos.distanceToSqr(ghastPos));
@@ -413,9 +413,9 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
         // if we're directly under the ghast, just allow anything to attack it
         if (horizDist < 4)
-            return (int) vertiDist;
+            return vertiDist;
         else
-            return (int) (vertiDist * 0.5f);
+            return vertiDist * 0.5f;
     }
 
     @Override

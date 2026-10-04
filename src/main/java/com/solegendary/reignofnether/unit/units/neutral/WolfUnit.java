@@ -167,7 +167,7 @@ public class WolfUnit extends Wolf implements Unit, AttackerUnit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WolfUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WolfUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WolfUnit.maxHealth)

@@ -16,7 +16,7 @@ public class GrizzlyBearUnit extends PolarBearUnit {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, PolarBearUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, PolarBearUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, PolarBearUnit.maxHealth)

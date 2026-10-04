@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -30,6 +31,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.*;
 
 // Shared base for UnitItemInventoryButton and UnitItemShopButton.
 public abstract class AbstractUnitItemButton extends Button {
@@ -41,17 +43,17 @@ public abstract class AbstractUnitItemButton extends Button {
     protected static final int DIVIDER_HEIGHT = 5; // 2px pad + 1px rule + 2px pad
     protected static final int MIN_COLUMN_GAP = 8; // between left and right halves of a row
 
-    protected static final Style NAME_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
-    protected static final Style QTY_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xB4B2A9));
-    protected static final Style TYPE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFAC775));
-    protected static final Style DESC_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD3D1C7));
-    protected static final Style POINTS_STYLE = Style.EMPTY
+    public static final Style NAME_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFFFFFF));
+    public static final Style QTY_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xB4B2A9));
+    public static final Style TYPE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xFAC775));
+    public static final Style DESC_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD3D1C7));
+    public static final Style POINTS_STYLE = Style.EMPTY
             .withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"))
             .withColor(TextColor.fromRgb(0x97C459));
-    protected static final Style SELL_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x5DCAA5));
-    protected static final Style MANA_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x6EA8D9));
-    protected static final Style COOLDOWN_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD9C46E));
-    protected static final Style RANGE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xC97A4A));
+    public static final Style SELL_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x5DCAA5));
+    public static final Style MANA_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x6EA8D9));
+    public static final Style COOLDOWN_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xD9C46E));
+    public static final Style RANGE_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xC97A4A));
 
     protected static final String EMERALD_ICON = "\uE010";
 
@@ -66,7 +68,7 @@ public abstract class AbstractUnitItemButton extends Button {
     protected static final int STAT_ICON_GAP = 2; // between an icon and its number
     protected static final int STAT_GAP = 5; // between mana stat and cooldown stat
 
-    protected UnitItem unitItem;
+    public final UnitItem unitItem;
     protected ItemStack itemStack;
     public int invIndex = 0;
     public UUID invUUID;
@@ -128,7 +130,7 @@ public abstract class AbstractUnitItemButton extends Button {
 
             guiGraphics.pose().translate(drawX, drawY, 0);
             guiGraphics.pose().scale(SMALL_SCALE, SMALL_SCALE, 1.0f);
-            guiGraphics.pose().translate(-drawX, -drawY, 0);
+            guiGraphics.pose().translate(-drawX, -drawY, 5);
 
             guiGraphics.drawCenteredString(MC.font,
                     hotkeyStr,
@@ -150,7 +152,8 @@ public abstract class AbstractUnitItemButton extends Button {
         int smallWrapWidth = Math.round(MAX_TEXT_WIDTH / SMALL_SCALE);
 
         // ---- band 1: name (+qty) | type ----
-        MutableComponent nameComp = unitItem.getName().copy().withStyle(NAME_STYLE);
+        Style nameStyle = unitItem.rarity.getStyleModifier().apply(NAME_STYLE);
+        MutableComponent nameComp = Component.translatable("item.reignofnether." + unitItem.descId).withStyle(nameStyle);
         if (itemStack.getCount() > 1)
             nameComp.append(Component.literal(" (" + itemStack.getCount() + ")").withStyle(QTY_STYLE));
         FormattedCharSequence nameSeq = nameComp.getVisualOrderText();
@@ -165,7 +168,7 @@ public abstract class AbstractUnitItemButton extends Button {
 
         int descLineCount = bodyLines.size(); // marks where desc ends and points begin
 
-        List<String> points = new ArrayList<>(unitItem.getPointDescs());
+        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
         points.addAll(getEnchantmentDescs(itemStack));
         points.addAll(getAttributeDescs(unitItem));
         for (String point : points)
@@ -264,10 +267,10 @@ public abstract class AbstractUnitItemButton extends Button {
 
             if (footerLeftWidth > 0) {
                 int statX = x;
-                if (hasMana)
+                if (hasCooldown)
                     statX += drawStat(guiGraphics, font, COOLDOWN_ICON_RL, cooldownText, COOLDOWN_STYLE, statX, lineY, SMALL_SCALE);
-                if (hasCooldown) {
-                    if (hasMana)
+                if (hasMana) {
+                    if (hasCooldown)
                         statX += STAT_GAP - 1;
                     statX += drawStat(guiGraphics, font, MANA_ICON_RL, manaText, MANA_STYLE, statX, lineY, SMALL_SCALE);
                 }
@@ -295,32 +298,15 @@ public abstract class AbstractUnitItemButton extends Button {
     }
 
     // "+5 Attack Damage", "+10% Movement Speed", ... from an item's flat attribute modifiers
-    private static List<String> getAttributeDescs(UnitItem unitItem) {
+    public static List<String> getAttributeDescs(UnitItem unitItem) {
         List<String> descs = new ArrayList<>();
         for (Map.Entry<Attribute, AttributeModifier> entry : unitItem.attributes.entrySet()) {
-            Attribute attribute = entry.getKey();
+            Attribute attr = entry.getKey();
             AttributeModifier modifier = entry.getValue();
-            String descId = attribute.getDescriptionId();
-            boolean isMoveSpeed = attribute == Attributes.MOVEMENT_SPEED;
-            if (isMoveSpeed) {
-                descId = "attribute.reignofnether.tooltip.movement_speed";
-            }
-            String attrName = Component.translatable(descId).getString();
-            String valueStr = switch (modifier.getOperation()) {
-                case ADDITION -> formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
-                case MULTIPLY_BASE, MULTIPLY_TOTAL -> formatSigned(modifier.getAmount() * 100) + "%";
-            };
-            descs.add(valueStr + " " + attrName);
+            String attrStr = MiscUtil.getAttrString(attr, modifier);
+            descs.add(attrStr);
         }
         return descs;
-    }
-
-    // drops trailing ".0" on whole numbers, always shows a sign
-    private static String formatSigned(double value) {
-        String num = (value == Math.floor(value))
-                ? String.valueOf((int) value)
-                : String.valueOf(value);
-        return (value >= 0 ? "+" : "") + num;
     }
 
     // on-screen width needed to fit both halves of a justified row without them touching

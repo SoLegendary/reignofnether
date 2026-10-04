@@ -405,7 +405,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, SlimeUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, SlimeUnit.attackDamagePerSize)
                 .add(Attributes.MAX_HEALTH, 10)

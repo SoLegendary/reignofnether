@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
+import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -23,6 +24,7 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -106,7 +108,6 @@ public class SurvivalServerEvents {
         if (ticks % TICK_INTERVAL != 0)
             return;
 
-        long time = evt.level.getDayTime();
         long normTime = TimeUtils.normaliseTime(evt.level.getDayTime());
 
         if (!isStarted()) {
@@ -136,9 +137,9 @@ public class SurvivalServerEvents {
 
         int enemyCount = getCurrentEnemies().size() + portals.size();
         if (enemyCount < lastEnemyCount && enemyCount <= 3) {
-            if (enemyCount == 0)
+            if (enemyCount == 0) {
                 waveCleared((ServerLevel) evt.level);
-            else if (enemyCount == 1) {
+            } else if (enemyCount == 1) {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.remaining_enemies_one");
             } else {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.remaining_enemies", false, enemyCount);
@@ -264,6 +265,15 @@ public class SurvivalServerEvents {
         }
     }
 
+    private static LivingEntity lastKilledEnemy = null;
+
+    @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent evt) {
+        if (evt.getEntity() instanceof Unit unit && unit.getOwnerName().equals(ENEMY_OWNER_NAME)) {
+            lastKilledEnemy = evt.getEntity();
+        }
+    }
+
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
         if (evt.getEntity() instanceof Unit unit &&
@@ -274,8 +284,6 @@ public class SurvivalServerEvents {
             enemies.removeIf(e -> e.getEntity().getId() == entity.getId());
         }
     }
-
-
 
     public static long getDayLength() {
         return 12000 - getWaveSurvivalTimeModifier(difficulty);
@@ -333,6 +341,9 @@ public class SurvivalServerEvents {
         PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.wave_cleared", true);
         SoundClientboundPacket.playSoundForAllPlayers(SoundAction.ALLY);
         currentWave = null;
+        if (lastKilledEnemy != null)
+            for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
+                ItemServerEvents.dropNextItem(rtsPlayer, lastKilledEnemy);
     }
 
     public static void setWaveNumber(int waveNumber) {

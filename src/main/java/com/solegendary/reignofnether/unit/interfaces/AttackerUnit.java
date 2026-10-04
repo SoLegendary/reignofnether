@@ -102,6 +102,31 @@ public interface AttackerUnit {
         }
         return Math.max(0, value * (1 - weak + str));
     }
+
+    public default float getCriticalChance() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.CRITICAL_HIT_CHANCE.get());
+        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.CRITICAL_HIT_CHANCE.get().getDefaultValue());
+    }
+    public default float getExplosiveChance() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get());
+        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get().getDefaultValue());
+    }
+    public default float getBuildingDamageBonus() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
+        return (float) (attr != null ? (attr.getValue()) : (AttributeRegistrar.BUILDING_DAMAGE_BONUS.get().getDefaultValue()));
+    }
+    public default float getBuildingDamageMultiplier() {
+        return getBuildingDamageBonus() + 1.0f;
+    }
+    public default float getLifeStealPercent() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.LIFESTEAL.get());
+        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.LIFESTEAL.get().getDefaultValue());
+    }
+    public default float getManaOnHitPercent() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.MANA_ON_HIT.get());
+        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.MANA_ON_HIT.get().getDefaultValue());
+    }
+
     public BlockPos getAttackMoveTarget();
     public boolean canAttackBuildings();
 
@@ -399,10 +424,6 @@ public interface AttackerUnit {
         MobEffectInstance bloodlust = ((LivingEntity) (this)).getEffect(MobEffectRegistrar.BLOODLUST.get());
 
         return (1 + (attackSlowdownAmp * 0.05f)) / (bloodlust != null ? 1.6f : 1.0f);
-    }
-
-    public default float getBuildingDamageMultiplier() {
-        return 1.0f;
     }
 
     public default void attackMoveNearestEnemyBuilding() {

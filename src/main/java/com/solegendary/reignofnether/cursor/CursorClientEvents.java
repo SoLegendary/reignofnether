@@ -314,11 +314,12 @@ public class CursorClientEvents {
         List<ItemEntity> nearbyItems = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 30, ItemEntity.class, MC.level);
 
         ItemClientEvents.clearPreselectedItems();
+        ItemClientEvents.clearRenderedItems();
         for (ItemEntity itemEntity : nearbyItems) {
+            ItemClientEvents.addRenderedItem(itemEntity);
             // inflate by set amount to improve click accuracy
             AABB entityaabb = itemEntity.getBoundingBox().inflate(0.25);
             entityaabb.setMaxY(entityaabb.maxY + 0.75d);
-
             if (MyMath.rayIntersectsAABBCustom(cursorWorldPosNear, MiscUtil.getPlayerLookVector(MC), entityaabb)) {
                 ItemClientEvents.addPreselectedItem(itemEntity);
             }

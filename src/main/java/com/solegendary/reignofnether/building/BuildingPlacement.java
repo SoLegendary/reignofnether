@@ -523,22 +523,12 @@ public class BuildingPlacement {
     // - block must be connected to something else (not air)
     // - block must be the lowest Y value possible
     public void queueNextBlock(ServerLevel level, String builderName) {
-        if (blocksPerBuild <= 0)
+        if (blocksPerBuild <= 0 || blockPlaceQueue.size() >= blocksPerBuild)
             return;
-
-        // if the building is already constructed then start subtracting resources for repairs
-        if (isBuilt) {
-            if (!ResourcesServerEvents.canAfford(builderName, ResourceName.WOOD, 1)) {
-                ResourcesClientboundPacket.warnInsufficientResources(builderName, true, false, true, true);
-                return;
-            } else {
-                ResourcesServerEvents.addSubtractResources(new Resources(builderName, 0, -1, 0));
-            }
-        }
 
         ArrayList<BuildingBlock> unplacedBlocks = new ArrayList<>();
         for (BuildingBlock block : blocks) {
-            if (!blockPlaceQueue.contains(block) && !block.isPlaced(getLevel()) && !block.getBlockState().isAir()) unplacedBlocks.add(block);
+            if (!block.isPlaced(getLevel()) && !block.getBlockState().isAir()) unplacedBlocks.add(block);
         }
 
         int minY = getMinCorner(unplacedBlocks).getY();
@@ -571,6 +561,15 @@ public class BuildingPlacement {
             }
         }
         if (!validBlocks.isEmpty()) {
+            // if the building is already constructed then start subtracting resources for repairs
+            if (isBuilt) {
+                if (!ResourcesServerEvents.canAfford(builderName, ResourceName.WOOD, 1)) {
+                    ResourcesClientboundPacket.warnInsufficientResources(builderName, true, false, true, true);
+                    return;
+                } else {
+                    ResourcesServerEvents.addSubtractResources(new Resources(builderName, 0, -1, 0));
+                }
+            }
             if (getBuilding() instanceof AbstractBridge) {
                 ArrayList<WorkerUnit> builders = getBuilders();
                 if (!builders.isEmpty()) {

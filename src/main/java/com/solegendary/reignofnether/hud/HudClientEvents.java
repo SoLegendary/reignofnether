@@ -362,13 +362,15 @@ public class HudClientEvents {
         // ItemShop
         // --------
         int x = blitX;
-        int y = blitY - 150;
+        int y = blitY - 145;
+
         boolean isShopOpen = ItemClientEvents.openItemShop != null && !ItemClientEvents.openItemShop.isDestroyedServerside;
         boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
         if (isShopOpen && ItemClientEvents.ENABLED) {
             ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
             if (itemShop != null) {
-                if (isShopSelected || ItemClientEvents.openItemShop.getServedUnit() == HudClientEvents.hudSelectedEntity) {
+                boolean isServedUnitSelected = ItemClientEvents.openItemShop.getServedUnit() == HudClientEvents.hudSelectedEntity && HudClientEvents.hudSelectedEntity != null;
+                if (isShopSelected || isServedUnitSelected) {
                     hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, x, y));
                     renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, x, y, mouseX, mouseY));
                 }
@@ -623,6 +625,7 @@ public class HudClientEvents {
                                     else
                                         ItemClientEvents.openItemShop = itemShopPlacement;
                                 })
+                                .hotkey(Keybindings.openShop)
                                 .build();
                         shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
                         productionButtons.add(shopMenuButton);
@@ -719,8 +722,7 @@ public class HudClientEvents {
 
                 int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
-
-                if (ItemClientEvents.ENABLED && unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(unit)) {
+                if (unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory((LivingEntity) unit)) {
                     hudZones.add(ItemClientEvents.renderUnitInventory(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, inv));
                     renderedItemsOrResources = true;
                 }

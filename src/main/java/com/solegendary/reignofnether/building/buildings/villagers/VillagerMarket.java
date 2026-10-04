@@ -1,15 +1,15 @@
 package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
+import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -27,7 +27,8 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class VillagerMarket extends AbstractMarket {
 
     public static final String buildingName = "Town Market";
-    public static final String structureName = "market_villagers";
+    public static final String structureName = "market_villagers1";
+    public static final String upgradedStructureName = "market_villagers2";
     public static final ResourceCost cost = ResourceCosts.VILLAGER_MARKET;
 
     public VillagerMarket() {
@@ -41,13 +42,47 @@ public class VillagerMarket extends AbstractMarket {
 
         this.startingBlockTypes.add(Blocks.COBBLESTONE);
         this.startingBlockTypes.add(Blocks.STONE);
+
+        this.productions.add(ProductionItems.RESEARCH_MARKET_UPGRADE_VILLAGER, Keybindings.abilitySlot4);
     }
 
     @Override
-    protected ArrayList<StockedShopItem> getStartingItemsAndStock() {
+    public String getUpgradedStructureName(int upgradeLevel) {
+        return upgradeLevel > 0 ? upgradedStructureName : structureName;
+    }
+
+    @Override
+    public String getUpgradedName(BuildingPlacement placement) {
+        return I18n.get("buildings.reignofnether.villager_market_upgraded");
+    }
+
+    @Override
+    public int getUpgradeLevel(BuildingPlacement placement) {
+        for (BuildingBlock block : placement.getBlocks())
+            if (block.getBlockState().getBlock() == Blocks.YELLOW_WOOL) {
+                return 1;
+            }
+        return 0;
+    }
+
+    @Override
+    public ArrayList<StockedShopItem> getStartingItemsAndStock() {
         return new ArrayList<>(List.of(
-            new StockedShopItem(UnitItems.TOTEM_OF_UNDYING, 1, 60 * 20),
-            new StockedShopItem(new EdibleFoodItem(Items.GOLDEN_APPLE), 3, 20 * 20)
+                new StockedShopItem(UnitItems.HEALTH_POTION, 3, 60 * 20),
+                new StockedShopItem(UnitItems.MANA_POTION, 3, 60 * 20),
+                new StockedShopItem(UnitItems.BROADSWORD, 1, 180 * 20),
+                new StockedShopItem(UnitItems.IRON_HIDE_AMULET, 1, 180 * 20),
+                new StockedShopItem(UnitItems.HEART_MEDALLION, 1, 180 * 20),
+                new StockedShopItem(UnitItems.AZURE_MEDALLION, 1, 180 * 20)
+        ));
+    }
+
+    @Override
+    public ArrayList<StockedShopItem> getUpgradedItemsAndStock() {
+        return new ArrayList<>(List.of(
+                new StockedShopItem(UnitItems.FROST_WALKER_BOOTS, 1, 600 * 20),
+                new StockedShopItem(UnitItems.WAR_HORN, 1, 600 * 20),
+                new StockedShopItem(UnitItems.BELL_OF_ARMS, 1, 600 * 20)
         ));
     }
 
@@ -62,8 +97,7 @@ public class VillagerMarket extends AbstractMarket {
                 hotkey,
                 () -> BuildingClientEvents.getBuildingToPlace() == this,
                 TutorialClientEvents::isEnabled,
-                () -> BuildingClientEvents.numFinishedBuildings(Buildings.VILLAGER_HOUSE) >= 6 ||
-                        ResearchClient.hasCheat("modifythephasevariance"),
+                () -> true,
                 List.of(
                         fcs(I18n.get("buildings.reignofnether.villager_market"), true),
                         ResourceCosts.getFormattedCost(cost),

@@ -17,6 +17,8 @@ import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiContainer;
 import com.solegendary.reignofnether.hero.HeroClientboundPacket;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
+import com.solegendary.reignofnether.items.ItemServerEvents;
+import com.solegendary.reignofnether.items.RandomItemDropRule;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchClientboundPacket;
@@ -76,6 +78,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.building.BuildingServerEvents.random;
 import static com.solegendary.reignofnether.building.BuildingServerEvents.saveBuildings;
+import static com.solegendary.reignofnether.items.RandomItemDropRule.ENABLED_NON_STRICT;
+import static com.solegendary.reignofnether.items.RandomItemDropRule.ENABLED_STRICT;
 import static com.solegendary.reignofnether.time.TimeUtils.getWaveSurvivalTimeModifier;
 import static net.minecraft.world.level.GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK;
 
@@ -273,7 +277,8 @@ public class PlayerServerEvents {
                 UnitSyncClientboundPacket.sendSyncResourcesPacket(unit);
                 UnitSyncClientboundPacket.sendSyncOwnerNamePacket(unit);
                 UnitSyncClientboundPacket.sendSyncScenarioRoleIndexPacket(unit);
-                UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
+                if (unit.getAnchor() != null)
+                    UnitSyncClientboundPacket.sendSyncAnchorPosPacket(entity, unit.getAnchor());
             }
             if (entity instanceof HeroUnit hero) {
                 HeroClientboundPacket.setExperience(entity.getId(), hero.getExperience());
@@ -456,12 +461,21 @@ public class PlayerServerEvents {
             if (rtsPlayers.isEmpty()) {
                 FogOfWarServerEvents.captureNeutralFogUnits();
             }
+            RandomItemDropRule randomItemDropRule = RandomItemDropRule.fromValue(
+                    serverPlayer.level().getGameRules().getRule(GameRuleRegistrar.RANDOM_ITEM_DROPS).get()
+            );
+            Long itemDropSeed = switch (randomItemDropRule) {
+                case DISABLED -> -1L;
+                case ENABLED_NON_STRICT -> random.nextLong();
+                case ENABLED_STRICT -> ItemServerEvents.RANDOM_UNIT_ITEM_DROPS_SEED;
+            };
             rtsPlayers.add(RTSPlayer.getNewPlayer(
                     serverPlayer.getName().getString(),
                     faction,
                     serverPlayer.getId(),
                     startPosColorId,
-                    isDogPerson
+                    isDogPerson,
+                    itemDropSeed
             ));
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
@@ -763,6 +777,7 @@ public class PlayerServerEvents {
                         int amount = Integer.parseInt(words[1]);
                         if (amount > 0) {
                             ResourcesServerEvents.addSubtractResources(new Resources(playerName,
+                                    amount,
                                     amount,
                                     amount,
                                     amount
@@ -1276,6 +1291,7 @@ public class PlayerServerEvents {
             SurvivalServerEvents.reset();
         }
         HeroServerEvents.fallenHeroes.clear();
+        UnitServerEvents.saveFallenHeroUnits(serverLevel);
 
         for (ServerPlayer player : serverLevel.players())
             player.setGameMode(GameType.SPECTATOR);
@@ -1337,6 +1353,7 @@ public class PlayerServerEvents {
             SurvivalServerEvents.reset();
         }
         HeroServerEvents.fallenHeroes.clear();
+        UnitServerEvents.saveFallenHeroUnits(serverLevel);
 
         for (ServerPlayer player : serverLevel.players())
             player.setGameMode(GameType.SPECTATOR);

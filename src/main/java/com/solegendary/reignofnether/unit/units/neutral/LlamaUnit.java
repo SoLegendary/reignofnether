@@ -168,7 +168,7 @@ public class LlamaUnit extends Llama implements Unit, AttackerUnit, RangedAttack
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, LlamaUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, LlamaUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, LlamaUnit.maxHealth)

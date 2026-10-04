@@ -30,7 +30,6 @@ import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBl
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SculkCatalyst extends Building implements NightSourceAddon, RangeIndicatorAddon {
-    //TODO public static final DataType<ArrayList<BlockPos>> SCULK_BPS_CACHE = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "sculk_bps_cache"), (nbt, server) -> new ArrayList<>(), (netherZone -> new CompoundTag()), () -> new ArrayList<>()); //Cache only, shouldn't be saved
 
     public final static String buildingName = "Sculk Catalyst";
     public final static String structureName = "sculk_catalyst";

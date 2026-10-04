@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
+import com.solegendary.reignofnether.items.RandomItemDropRule;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.network.FriendlyByteBuf;
@@ -94,6 +95,10 @@ public class GameruleClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new GameruleClientboundPacket(GameruleAction.SET_ANIMAL_SPAWN_Y_DIFF, "", yDiff));
     }
+    public static void setRandomItemDrops(long value) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new GameruleClientboundPacket(GameruleAction.SET_RANDOM_ITEM_DROPS, "", value));
+    }
 
     public GameruleClientboundPacket(GameruleAction action, String playerName, Long value) {
         this.action = action;
@@ -154,6 +159,7 @@ public class GameruleClientboundPacket {
                             case SET_BUILDINGS_OUTSIDE_BORDER -> GameruleClient.buildingsOutsideBorder = value == 1L;
                             case SET_RTS_PATHFINDING -> GameruleClient.rtsPathfinding = value == 1L;
                             case SET_ANIMAL_SPAWN_Y_DIFF -> GameruleClient.animalSpawnYDiff = Math.toIntExact(value);
+                            case SET_RANDOM_ITEM_DROPS -> GameruleClient.randomItemDrops = RandomItemDropRule.fromValue(Math.toIntExact(value));
                         }
                         success.set(true);
                     });

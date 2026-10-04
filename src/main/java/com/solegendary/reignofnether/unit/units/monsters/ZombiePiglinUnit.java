@@ -170,7 +170,7 @@ public class ZombiePiglinUnit extends ZombifiedPiglin implements Unit, AttackerU
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, ZombiePiglinUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, ZombiePiglinUnit.attackDamage)
                 .add(Attributes.ARMOR, ZombiePiglinUnit.armorValue)

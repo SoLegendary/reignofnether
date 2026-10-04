@@ -169,7 +169,7 @@ public class KillerRabbitUnit extends Rabbit implements Unit, AttackerUnit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, KillerRabbitUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, KillerRabbitUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, KillerRabbitUnit.maxHealth)

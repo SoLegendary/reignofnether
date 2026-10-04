@@ -212,7 +212,6 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
         List<BuildingPlaceButton> buttons = new ArrayList<>();
         buttons.addAll(FactionRegistries.MONSTERS.getBuildingButtons());
 
-        //TODO Add to register
         CustomBuildingClientEvents.customBuildings.forEach(cb -> {
             if (cb.buildableByMonsters)
                 buttons.add(cb.getWorkerBuildButton(null));
@@ -236,7 +235,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Monster.createMonsterAttributes()
+        return Unit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, VillagerUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, ZombieVillagerUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, ZombieVillagerUnit.maxHealth)

@@ -338,7 +338,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, EnchanterUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, EnchanterUnit.attackDamage)
                 .add(Attributes.ARMOR, EnchanterUnit.armorValue)

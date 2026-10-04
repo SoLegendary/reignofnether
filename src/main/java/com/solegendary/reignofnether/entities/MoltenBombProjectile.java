@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -74,7 +75,7 @@ public class MoltenBombProjectile extends Fireball {
     }
 
     protected void detonate() {
-        level().explode(null, null, null, this.getX(), this.getEyeY(), this.getZ(),
+        level().explode(this, null, null, this.getX(), this.getEyeY(), this.getZ(),
                 2.0f, false, Level.ExplosionInteraction.NONE);
 
         HashMap<BlockPos, Double> bpAndDists = new HashMap<>();
@@ -111,11 +112,11 @@ public class MoltenBombProjectile extends Fireball {
             mob.hurt(damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), 0.5f);
             if (random.nextBoolean())
                 mob.setSecondsOnFire(5);
-            if (this.getOwner() instanceof LivingEntity le && le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
+            if (this.getOwner() instanceof LivingEntity le && le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) && !(mob instanceof Blaze)) {
                 mob.addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), 120, 0, false, false));
             }
         }
-        MiscUtil.addParticleExplosion(ParticleTypes.LAVA, explosionRadius * 3, level(), position());
+        ParticleUtil.addParticleExplosion(ParticleTypes.LAVA, explosionRadius * 3, level(), position());
         discard();
     }
 

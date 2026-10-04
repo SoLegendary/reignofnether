@@ -417,4 +417,16 @@ public class BuildingUtils {
             return new BlockPos(pos.getZ(), pos.getY(), -pos.getX()); // z and x switched
         }
     }
+
+    // does the player own one of these buildings?
+    public static int numFinishedBuildings(boolean isClientSide, Building building, String playerName) {
+        List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
+        int count = 0;
+        for (BuildingPlacement bpl : buildings) {
+            if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt && bpl.ownerName.equals(playerName)) {
+                count += 1;
+            }
+        }
+        return count;
+    }
 }

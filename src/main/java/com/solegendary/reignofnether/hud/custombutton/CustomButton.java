@@ -59,7 +59,6 @@ public class CustomButton extends Button {
 		@Nullable ResourceLocation frameResource,
 		Supplier<Boolean> isFlashing,
 		float greyPercent,
-		boolean stretchIconToBorders,
 		int tooltipOffsetY,
 		boolean lightUpOnHover,
 		int OffsetX,
@@ -75,7 +74,6 @@ public class CustomButton extends Button {
 		this.bgIconResource = bgIconResource;
 		this.isFlashing = isFlashing != null ? isFlashing : () -> false;
 		this.greyPercent = greyPercent;
-		this.stretchIconToBorders = stretchIconToBorders;
 		this.tooltipOffsetY = tooltipOffsetY;
 		this.imageSize = iconSize;
 		this.lightUpOnHover = lightUpOnHover;
@@ -106,7 +104,7 @@ public class CustomButton extends Button {
 		this.bgIconResource = null;
 		this.isFlashing = () -> false;
 		this.greyPercent = 0.0f;
-		this.stretchIconToBorders = false;
+		this.innerIconSizeModifier = 0;
 		this.tooltipOffsetY = 0;
 		this.imageSize = iconSize;
 		this.lightUpOnHover = lightUpOnHover;
@@ -140,7 +138,7 @@ public class CustomButton extends Button {
 		this.bgIconResource = null;
 		this.isFlashing = () -> false;
 		this.greyPercent = 0.0f;
-		this.stretchIconToBorders = false;
+		this.innerIconSizeModifier = 0;
 		this.tooltipOffsetY = 0;
 		this.imageSize = Button.DEFAULT_ICON_SIZE;
 		this.lightUpOnHover = lightUpOnHover;

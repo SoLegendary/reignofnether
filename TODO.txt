@@ -1,5 +1,5 @@
 
-1.20.1-1.4.4d
+1.20.1-1.5.0-beta-1
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -11,12 +11,13 @@
 Hero Items
 ----------
 Emerald Resource
-    [❌] Market trading all has to go via emeralds
-    [❌] Markets can be built at the start of the game, but upgraded to unlock resource buying
+    [🟡] Market trading all has to go via emeralds
+    [🟡] Markets can be built at the start of the game, but upgraded to unlock resource buying
     [🟡] Neutrals now give emerald bounties
 
 
 Shops
+    [❌] Neutral market building selling expensive items
     [❌] Custom Item Shops
         - Items placed in container blocks in a custom building's structure stocks that building as a shop
         - Custom tags:
@@ -25,20 +26,17 @@ Shops
             - Buy cooldown
 
 Unit Items
-    [❌] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
-        [❌] Should be visible to all players
-    [❌] Minecraft.Item class called "unitGiveableItem" with use() to give to neutrals to drop
+    [🟡] While held by a FPV player, can be right-clicked to give to a neutral unit and dropped on death
+        [🟡] Should be visible to all players
 
-    [❌] Drinking sound/animation for potions like food
 
 Item drops
-    [❌] Track population amount killed for every RTS player
+    [🟡] Track population amount killed for every RTS player
         - Double check kill credits for things like TNT and fire
-    [❌] On match start, create a random list of items dropped at each kill credit threshold (same for each player)
-    [❌] Whenever a player reaches enough kill credit, the next enemy killed drops an item
+    [🟡] On match start, create a random list of items dropped at each kill credit threshold (same for each player)
+    [🟡] Whenever a player reaches enough kill credit, the next enemy killed drops an item
 
-
-
+    [❌] Item drops are duplicated?
 
 Balance
 -------
@@ -49,11 +47,40 @@ Balance
     - Siege tank mode for ravager artillery (by burrowing them partially into the ground)
     - Reduce cost of iron armor
     - Reduce cost of militia archers
+    - Rework enchanter absorption to be like MC dungeons (active linked buff)
+    - Royal guard ult strength from II to I but unpushable
+    - Block animations with block displays for royal guard slam
+        - And make slam single click like war stomp
 
 Quality of Life
 ---------------
 [❌] Create a new homing projectile entity from the ground up
 
+[✔] Added creative tabs for all RTS-related blocks and items:
+    - RTS Mapmaker Blocks
+    - RTS Unit Spawn Eggs
+    - RTS Hero Items
+
+[✔] Reworked the unit armour tooltip for mixed armour types
+
+[✔] Added new attributes:
+     - critical_hit_chance (3x damage)
+     - explosive_hit_chance
+     - building_damage_bonus
+     - lifesteal (% of damage)
+     - mana_on_hit (% of damage)
+     - scale (visual only)
+
+[✔] Added passive icons
+
+[✔] Added new mob effects:
+    [🟡] - vigor (-33% cooldown reduction per level)
+     - phasing (can walk through mobs and ignore knockback)
+     - night_warping (+2 night radius per level)
+
+[❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
+
+[❌] Datapack to return no-cave generation
 
 Bugfixes
 --------
@@ -61,6 +88,15 @@ Bugfixes
 [🟡] Units that spawn outside of client render range are now still counted to population totals
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
+[🟡] Evasion chance attribute now works on all units
+[🟡] Bears and Zoglins now respect evasion chance
+[✔] Iron golems and witches can now pick up resources
+[🟡] Clarified in the tutorial that only humanoid non-hero units can pick up resources
+[❌] Slimes and Magma cubes unaffected by weakness (and strength?)
+[✔] Fixed large custom buildings having extreme lag while building
+[🟡] Hero data not being wiped on game reset or start?
+    - Just delete the actual hero-unit.dat file on reset
+[❌] Pillagers unable to hit short targets
 
 Languages
 ---------

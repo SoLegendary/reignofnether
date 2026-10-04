@@ -326,7 +326,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        return HeroUnit.createDefaultAttributes()
                 .add(Attributes.ATTACK_DAMAGE, PiglinMerchantUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, PiglinMerchantUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, PiglinMerchantUnit.maxHealth)
@@ -551,6 +551,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 .scale(0.04)
                 .add(0,0.4,0);
         tnt.setDeltaMovement(dMove);
+        tnt.setOwner(this);
         level().addFreshEntity(tnt);
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.EGG_THROW,
                 SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
@@ -677,7 +678,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
             item.setDeltaMovement(dMove);
             level().addFreshEntity(item);
         }
-        level().explode(null, null, null, getX(), getY(), getZ(),
+        level().explode(this, null, null, getX(), getY(), getZ(),
                 2.0f, false, Level.ExplosionInteraction.NONE);
         setMana(getMana() + (resourceBonus * LootExplosion.MANA_REFUND_PER_CHUNK_RESOURCES));
     }
