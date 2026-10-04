@@ -78,6 +78,8 @@ Quality of Life
 
 [❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
 
+[❌] Datapack to return no-cave generation
+
 Bugfixes
 --------
 [❌] Grass blocks are tinted weirdly even when fog of war is off

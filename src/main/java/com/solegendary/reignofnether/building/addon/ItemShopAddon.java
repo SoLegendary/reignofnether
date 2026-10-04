@@ -109,7 +109,7 @@ public interface ItemShopAddon extends BuildingAddon {
                         itemEntity.discard();
                     }
                     shopStock.stock -= 1;
-                    ResourcesServerEvents.addSubtractResources(Resources.emeralds(unit.getOwnerName(), item.buyCost));
+                    ResourcesServerEvents.addSubtractResources(Resources.emeralds(unit.getOwnerName(), -item.buyCost));
                     SoundClientboundPacket.playSoundAtPos(SoundAction.SELL_ITEM, ((LivingEntity) unit).getOnPos());
                     ItemShopClientboundPacket.syncItemShopStock(bpl.originPos, bpl.getStockedItems());
                 } else {

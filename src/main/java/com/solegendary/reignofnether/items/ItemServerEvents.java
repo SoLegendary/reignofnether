@@ -111,7 +111,7 @@ public class ItemServerEvents {
     private static int getCreepScoreThreshold(int itemsDropped) {
         int total = 0;
         for (int i = 0; i <= itemsDropped; i++)
-            total += Math.min(15 + (i * 3), 45);
+            total += Math.min(12 + (i * 4), 48);
         return total;
     }
 
@@ -159,10 +159,10 @@ public class ItemServerEvents {
             if (!killerName.isBlank() && isNeutral && !willDropOwnItem) {
                 RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(killerName);
                 if (rtsPlayer != null) {
-                    int creepScore = unitKilled.getCost().population + 4;
+                    int creepScore = unitKilled.getCost().population + 3;
                     if (killedEntity.getPersistentData().contains("isFromSpawner") &&
                         killedEntity.getPersistentData().getBoolean("isFromSpawner")) {
-                        creepScore = unitKilled.getCost().population + 1;
+                        creepScore = Math.max(1, unitKilled.getCost().population);
                     }
                     rtsPlayer.creepScore += creepScore;
                     ReignOfNether.LOGGER.info("+" + creepScore + " creepScore for: " + rtsPlayer.name);

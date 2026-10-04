@@ -779,6 +779,7 @@ public class PlayerServerEvents {
                             ResourcesServerEvents.addSubtractResources(new Resources(playerName,
                                     amount,
                                     amount,
+                                    amount,
                                     amount
                             ));
                             evt.setCanceled(true);
