@@ -54,7 +54,6 @@ public class ScenarioRole {
                 case "NEUTRAL" -> this.faction = Factions.NEUTRAL;
             }
         }
-        this.faction = Factions.getFaction(ResourceLocation.parse(nbt.getString("faction")));
         this.startingResources.food = nbt.getInt("startingFood");
         this.startingResources.wood = nbt.getInt("startingWood");
         this.startingResources.ore = nbt.getInt("startingOre");

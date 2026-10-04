@@ -61,8 +61,7 @@ public class RTSPlayerSaveData extends SavedData {
                         case "VILLAGERS" -> Factions.VILLAGERS;
                         case "MONSTERS" -> Factions.MONSTERS;
                         case "PIGLINS" -> Factions.PIGLINS;
-                        case "NEUTRAL" -> Factions.NEUTRAL;
-                        default -> Factions.NEUTRAL;
+	                    default -> Factions.NEUTRAL;
                     };
                 }
                 int[] scores = ptag.contains("scores") ? ptag.getIntArray("scores") : new RTSPlayerScores().getScoreListAsArray();
