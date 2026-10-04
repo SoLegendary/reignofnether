@@ -123,6 +123,7 @@ public class UnitItems {
             .descId("heart_medallion")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.COMMON)
+            .noRandomDrop()
             .attribute(Attributes.MAX_HEALTH, 50, ADDITION)
             .build();
 
@@ -130,6 +131,7 @@ public class UnitItems {
             .descId("azure_medallion")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.COMMON)
+            .noRandomDrop()
             .attribute(AttributeRegistrar.BASE_MAX_MANA.get(), 50, ADDITION)
             .build();
 
@@ -137,6 +139,7 @@ public class UnitItems {
             .descId("iron_hide_amulet")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.COMMON)
+            .noRandomDrop()
             .attribute(Attributes.ARMOR, 5, ADDITION)
             .build();
 
@@ -152,6 +155,7 @@ public class UnitItems {
             .descId("broadsword")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.COMMON)
+            .noRandomDrop()
             .attribute(AttributeRegistrar.ATTACK_DAMAGE.get(), 0.30, MULTIPLY_BASE)
             .build();
 
