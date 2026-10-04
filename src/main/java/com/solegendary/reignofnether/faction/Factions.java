@@ -269,7 +269,9 @@ public class Factions {
 	
 	public static Faction getFaction(ResourceLocation pKey) {
 		if (pKey == null) return Factions.NONE;
-		return ReignOfNetherRegistries.FACTIONS.get(pKey);
+		Faction faction = ReignOfNetherRegistries.FACTIONS.get(pKey);
+		if (faction == null) return Factions.NONE;
+		return faction; 
 	}
 	
 	public static Faction getFaction(Unit unit) {
@@ -277,7 +279,9 @@ public class Factions {
 	}
 	
 	public static Faction getFaction(int id) {
-		return ReignOfNetherRegistries.FACTIONS.byId(id);
+		Faction faction = ReignOfNetherRegistries.FACTIONS.byId(id);
+		if (faction == null) return Factions.NONE;
+		return faction;
 	}
 	
 	public static ResourceLocation getKey(Faction faction) {
