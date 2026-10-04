@@ -272,8 +272,8 @@ public class Factions {
 		return ReignOfNetherRegistries.FACTIONS.get(pKey);
 	}
 	
-	public static Faction getFaction(Unit unit) {
-		return getFaction(ENTITY_FACTION.get(EntityType.getKey(((Entity) unit).getType())));
+	public static Faction getFaction(Entity entity) {
+		return getFaction(ENTITY_FACTION.get(EntityType.getKey((entity).getType())));
 	}
 	
 	public static Faction getFaction(int id) {
