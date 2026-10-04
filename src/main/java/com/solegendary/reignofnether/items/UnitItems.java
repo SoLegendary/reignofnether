@@ -137,7 +137,7 @@ public class UnitItems {
             .descId("iron_hide_amulet")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.COMMON)
-            .attribute(Attributes.ARMOR, 6, ADDITION)
+            .attribute(Attributes.ARMOR, 5, ADDITION)
             .build();
 
     public static final int SOUL_COLLECTOR_RADIUS = 20;
@@ -275,7 +275,7 @@ public class UnitItems {
             .maxStackSize(9)
             .buyCost(150)
             .sellValue(75)
-            .pointDesc("item.reignofnether.health_potion.point1", HEALTH_POTION_RESTORE_AMOUNT)
+            .pointDesc("item.reignofnether.health_potion.point1", (int) HEALTH_POTION_RESTORE_AMOUNT)
             .suppressDefaultError()
             .noRandomDrop()
             .cooldownTicks(10 * 20)
@@ -307,7 +307,7 @@ public class UnitItems {
             .maxStackSize(9)
             .buyCost(150)
             .sellValue(75)
-            .pointDesc("item.reignofnether.mana_potion.point1", MANA_POTION_RESTORE_AMOUNT)
+            .pointDesc("item.reignofnether.mana_potion.point1", (int) MANA_POTION_RESTORE_AMOUNT)
             .suppressDefaultError()
             .noRandomDrop()
             .cooldownTicks(10 * 20)

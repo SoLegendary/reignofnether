@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.neutral;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.ability.heroAbilities.necromancer.RaiseDead;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -173,7 +174,6 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
         this.moveControl = new FlyingUnitMoveControl(this);
         this.navigation = new FlyingPathNavigation(this, level());
         updateAbilityButtons();
-        this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), LIFETIME_TICKS, 0, true, false));
     }
 
     @Override
@@ -203,6 +203,8 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
         AttackerUnit.tick(this);
         updateRotation();
 
+        if (!hasEffectWithDuration(MobEffectRegistrar.LIMITED_LIFESPAN.get()) && tickCount < LIFETIME_TICKS)
+            this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), LIFETIME_TICKS, 0, true, false));
         if (tickCount > LIFETIME_TICKS && !isDeadOrDying() && !isRemoved())
             kill();
     }

@@ -535,8 +535,8 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     }
                 }
             }
-            if (!isEmpty()) {
-                ParticleUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 5, level(), position());
+            if (!isEmpty() && !(this instanceof HeroUnit)) {
+                ParticleUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 2, level(), position(), 0.05);
             }
         }
     }

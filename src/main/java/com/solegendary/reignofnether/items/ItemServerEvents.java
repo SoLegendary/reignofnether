@@ -206,7 +206,7 @@ public class ItemServerEvents {
             if (inv.isFull(unitItem)) {
                 player.sendSystemMessage(Component.translatable("item.reignofnether.error.full_inventory", mobName));
                 evt.setCancellationResult(InteractionResult.FAIL);
-            } else if (inv.tryAdding(stack)) {
+            } else if (inv.tryAdding(new ItemStack(stack.getItem(), 1))) {
                 player.sendSystemMessage(Component.translatable("item.reignofnether.hud.give_to_unit", itemName, mobName));
                 if (!player.isCreative()) {
                     stack.setCount(stack.getCount() - 1);
