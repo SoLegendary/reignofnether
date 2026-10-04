@@ -94,6 +94,7 @@ Bugfixes
 [✔] Fixed large custom buildings having extreme lag while building
 [🟡] Hero data not being wiped on game reset or start?
     - Just delete the actual hero-unit.dat file on reset
+[❌] Pillagers unable to hit short targets
 
 Languages
 ---------

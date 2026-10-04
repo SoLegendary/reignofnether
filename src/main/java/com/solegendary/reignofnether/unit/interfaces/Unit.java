@@ -609,7 +609,7 @@ public interface Unit {
 
     public static void startEatingOrDrinking(Unit unit, ItemEntity itemEntity) {
         if (ItemUtil.isEdibleDrink(itemEntity.getItem().getItem())) {
-            SoundClientboundPacket.playSoundAtPos(SoundAction.POTION_POP, ((LivingEntity) unit).blockPosition(), 2.0f);
+            SoundClientboundPacket.playSoundAtPos(SoundAction.POTION_POP, ((LivingEntity) unit).blockPosition(), 1.5f);
         }
         ItemStack itemStack = itemEntity.getItem();
         ((LivingEntity) unit).onItemPickup(itemEntity);

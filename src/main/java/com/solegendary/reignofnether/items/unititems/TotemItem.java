@@ -15,6 +15,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 
 import java.util.function.Predicate;
 
@@ -27,6 +28,7 @@ public class TotemItem extends UnitItem {
     public TotemItem(UnitItemBuilder builder, EntityType<? extends AbstractTotem> totemType) {
         super(builder
             .type(UnitItemType.CONSUMABLE)
+            .rarity(Rarity.UNCOMMON)
             .buyCost(300)
             .sellValue(150)
             .consumeOnUse()

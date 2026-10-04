@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.building.buildings.piglins.CentralPortal;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalBasic;
+import com.solegendary.reignofnether.building.buildings.piglins.PortalPocket;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractBridge;
 import com.solegendary.reignofnether.building.buildings.villagers.TownCentre;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
@@ -124,7 +125,7 @@ public class BuildingValidators {
         if (!netherTerrainCustomBuilding && building.getFaction() != Faction.PIGLINS || building instanceof CentralPortal) {
             return true;
         }
-        if (building instanceof PortalBasic) {
+        if (building instanceof PortalBasic || building instanceof PortalPocket) {
             return true;
         }
         return isOnNetherBlocks(level, blocks, originPos, true);

@@ -80,6 +80,7 @@ public class UnitItems {
     public static final UnitItem HERO_EXPERIENCE_BOTTLE = UnitItemBuilder.of(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get())
             .descId("hero_experience_bottle")
             .type(UnitItemType.CONSUMABLE)
+            .maxStackSize(64)
             .pointDesc("item.reignofnether.hero_experience_bottle.point1", EXPERIENCE_BOTTLE_EXP_VALUE)
             .buyCost(100)
             .sellValue(50)
@@ -238,7 +239,7 @@ public class UnitItems {
             .rarity(Rarity.UNCOMMON)
             .noBehaviourReset()
             .suppressDefaultError()
-            .cooldownTicks(10 * 20)
+            .cooldownTicks(15 * 20)
             .forceAutocast()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
@@ -271,11 +272,13 @@ public class UnitItems {
     public static final UnitItem HEALTH_POTION = UnitItemBuilder.of(ItemRegistrar.HEALTH_POTION.get())
             .descId("health_potion")
             .type(UnitItemType.CONSUMABLE)
+            .maxStackSize(9)
             .buyCost(150)
             .sellValue(75)
             .pointDesc("item.reignofnether.health_potion.point1", HEALTH_POTION_RESTORE_AMOUNT)
             .suppressDefaultError()
             .noRandomDrop()
+            .cooldownTicks(10 * 20)
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
@@ -301,11 +304,13 @@ public class UnitItems {
     public static final UnitItem MANA_POTION = UnitItemBuilder.of(ItemRegistrar.MANA_POTION.get())
             .descId("mana_potion")
             .type(UnitItemType.CONSUMABLE)
+            .maxStackSize(9)
             .buyCost(150)
             .sellValue(75)
             .pointDesc("item.reignofnether.mana_potion.point1", MANA_POTION_RESTORE_AMOUNT)
             .suppressDefaultError()
             .noRandomDrop()
+            .cooldownTicks(10 * 20)
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
@@ -519,11 +524,13 @@ public class UnitItems {
     public static final UnitItem POCKET_PORTAL = UnitItemBuilder.of(ItemRegistrar.POCKET_PORTAL.get())
             .descId("pocket_portal")
             .type(UnitItemType.CONSUMABLE)
+            .maxStackSize(3)
             .buyCost(150)
             .sellValue(75)
             .noRandomDrop()
             .showRangeCircle()
             .range(POCKET_PORTAL_RANGE)
+            .suppressDefaultError()
             .onUseGround((unit, pos) -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
@@ -610,12 +617,12 @@ public class UnitItems {
             })
             .build();
 
-    public static final int TOTEM_OF_UNDYING_INVINCIBILITY_DURATION_SECONDS = 5;
+    public static final int TOTEM_OF_UNDYING_INVINCIBILITY_DURATION_SECONDS = 10;
     public static final UnitItem TOTEM_OF_UNDYING = UnitItemBuilder.of(Items.TOTEM_OF_UNDYING)
             .descId("totem_of_undying")
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
             .type(UnitItemType.CONSUMABLE)
-            .rarity(Rarity.RARE) // Handled in HeroServerEvents.onLivingDeath
+            .rarity(Rarity.EPIC) // Handled in HeroServerEvents.onLivingDeath
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
             .pointDesc("item.reignofnether.totem_of_undying.point1", TOTEM_OF_UNDYING_INVINCIBILITY_DURATION_SECONDS)
             .build();

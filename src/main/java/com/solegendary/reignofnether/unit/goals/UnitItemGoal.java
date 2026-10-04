@@ -132,9 +132,16 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                             }
                         }
                         case PICKUP -> {
-                            if (itemTarget.isAlive() && inv.tryAdding(itemTarget.getItem())) {
-                                this.mob.take(itemTarget, itemTarget.getItem().getCount());
-                                itemTarget.discard();
+                            if (itemTarget.isAlive()) {
+                                ItemStack groundStack = itemTarget.getItem().copy();
+                                int before = groundStack.getCount();
+                                if (inv.tryAdding(groundStack)) {
+                                    this.mob.take(itemTarget, before - groundStack.getCount());
+                                    if (groundStack.isEmpty())
+                                        itemTarget.discard();
+                                    else
+                                        itemTarget.setItem(groundStack); // remainder stays on the ground
+                                }
                             }
                         }
                         case USE_ON_BLOCK -> inv.useOnGround(ItemUtil.getUUID(itemInHand), blockTarget);

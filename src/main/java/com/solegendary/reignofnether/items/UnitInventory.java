@@ -13,7 +13,7 @@ public interface UnitInventory {
     int MAX_INVENTORY_SIZE = 6;
 
     NonNullList<ItemStack> getAllItems();
-    boolean isFull();
+    boolean isFull(UnitItem item);
     boolean isEmpty();
     ItemStack get(int index);
     ItemStack get(UUID uuid);

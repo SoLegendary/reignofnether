@@ -267,10 +267,10 @@ public abstract class AbstractUnitItemButton extends Button {
 
             if (footerLeftWidth > 0) {
                 int statX = x;
-                if (hasMana)
+                if (hasCooldown)
                     statX += drawStat(guiGraphics, font, COOLDOWN_ICON_RL, cooldownText, COOLDOWN_STYLE, statX, lineY, SMALL_SCALE);
-                if (hasCooldown) {
-                    if (hasMana)
+                if (hasMana) {
+                    if (hasCooldown)
                         statX += STAT_GAP - 1;
                     statX += drawStat(guiGraphics, font, MANA_ICON_RL, manaText, MANA_STYLE, statX, lineY, SMALL_SCALE);
                 }

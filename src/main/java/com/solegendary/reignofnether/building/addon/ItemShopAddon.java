@@ -88,7 +88,7 @@ public interface ItemShopAddon extends BuildingAddon {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), outOfStock);
                     return;
                 }
-                if (inv.isFull()) {
+                if (inv.isFull(item)) {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "itemshop.reignofnether.error.full_inventory");
                     return;
                 }

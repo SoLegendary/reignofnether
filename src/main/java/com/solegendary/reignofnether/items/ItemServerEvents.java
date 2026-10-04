@@ -198,11 +198,12 @@ public class ItemServerEvents {
         Entity target = evt.getTarget();
         String mobName = target.getName().getString();
         String itemName = stack.getHoverName().getString();
+        UnitItem unitItem = ItemUtil.getUnitItem(stack);
 
-        if (target instanceof Mob && target instanceof UnitInventory inv && !stack.isEmpty() && ItemUtil.isUnitItem(stack)) {
+        if (target instanceof Mob && target instanceof UnitInventory inv && !stack.isEmpty() && unitItem != null) {
             evt.setCanceled(true);
 
-            if (inv.isFull()) {
+            if (inv.isFull(unitItem)) {
                 player.sendSystemMessage(Component.translatable("item.reignofnether.error.full_inventory", mobName));
                 evt.setCancellationResult(InteractionResult.FAIL);
             } else if (inv.tryAdding(stack)) {

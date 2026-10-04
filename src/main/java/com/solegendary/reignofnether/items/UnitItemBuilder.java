@@ -78,6 +78,7 @@ public class UnitItemBuilder {
     boolean resetBehaviours = true;
     boolean forceAutocast = false;
     boolean canRandomDrop = true;
+    int maxStackSize = 1;
 
     private UnitItemBuilder(Item item) {
         if (item == null)
@@ -110,6 +111,11 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder type(UnitItemType type) {
         this.type = type;
+        return this;
+    }
+
+    public UnitItemBuilder maxStackSize(int maxStackSize) {
+        this.maxStackSize = maxStackSize;
         return this;
     }
 

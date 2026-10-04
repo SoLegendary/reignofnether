@@ -27,6 +27,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -64,10 +65,14 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public boolean isFull() {
-        for (ItemStack itemStack : getAllItems())
-            if (itemStack == ItemStack.EMPTY || itemStack.isEmpty())
+    public boolean isFull(UnitItem item) {
+        for (ItemStack itemStack : getAllItems()) {
+            if (itemStack.isEmpty() || itemStack == ItemStack.EMPTY)
                 return false;
+            UnitItem held = ItemUtil.getUnitItem(itemStack);
+            if (held != null && held == item && itemStack.getCount() < Math.max(1, held.maxStackSize))
+                return false;
+        }
         return true;
     }
 
@@ -202,30 +207,53 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Override
     public boolean tryAdding(ItemStack newItemStack) {
-        if (!ItemUtil.isUnitItem(newItemStack))
+        UnitItem unitItem = ItemUtil.getUnitItem(newItemStack);
+        if (unitItem == null || newItemStack.isEmpty())
             return false;
-        for (int i = 0; i < getAllItems().size(); i++) {
-            if (getAllItems().get(i).getItem() == Items.AIR) {
-                set(i, newItemStack);
-                syncToClient();
-                return true;
-            }
+
+        int startCount = newItemStack.getCount();
+        int maxStack = Math.max(1, unitItem.maxStackSize);
+        NonNullList<ItemStack> items = getAllItems();
+
+        // top up existing partial stacks
+        for (ItemStack existing : items) {
+            if (newItemStack.isEmpty()) break;
+            if (existing.isEmpty() || ItemUtil.getUnitItem(existing) != unitItem) continue;
+            int space = maxStack - existing.getCount();
+            if (space <= 0) continue;
+            int toMove = Math.min(space, newItemStack.getCount());
+            existing.grow(toMove);
+            newItemStack.shrink(toMove);
         }
-        return false;
+        // spill the rest into empty slots, respecting max stack size
+        for (int i = 0; i < items.size() && !newItemStack.isEmpty(); i++) {
+            if (!items.get(i).isEmpty()) continue;
+            int toMove = Math.min(maxStack, newItemStack.getCount());
+            ItemStack copy = newItemStack.copy();
+            copy.setCount(toMove);
+            if (copy.getTag() != null)
+                copy.getTag().remove("uuid"); // set() assigns a fresh one
+            newItemStack.shrink(toMove);
+            set(i, copy);
+        }
+        boolean added = newItemStack.getCount() < startCount;
+        if (added) syncToClient();
+        return added;
     }
 
     @Override
     public void giveTo(UUID uuid, UnitInventory inv) {
-        ItemStack itemStack = get(uuid);
-        if (itemStack != null && !EnchantmentHelper.hasBindingCurse(itemStack)) {
-            if (inv.tryAdding(get(uuid))) {
-                this.deleteItem(uuid);
-                ItemEntity itemEntity = this.spawnAtLocation(itemStack);
-                if (itemEntity != null) {
-                    ((LivingEntity) inv).take(itemEntity, itemStack.getCount());
-                    itemEntity.discard();
-                }
-            }
+        ItemStack stack = get(uuid);
+        if (stack == null || EnchantmentHelper.hasBindingCurse(stack)) return;
+
+        ItemStack toGive = stack.copy();
+        if (inv.tryAdding(toGive)) {
+            int moved = stack.getCount() - toGive.getCount();
+            if (moved >= stack.getCount())
+                deleteItem(uuid); // whole stack went across
+            else
+                stack.shrink(moved); // keep the remainder
+            syncToClient();
         }
     }
 
@@ -327,9 +355,10 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     private void afterUse(UnitItem unitItem, ItemStack itemStack, UUID uuid) {
         if (unitItem.consumeOnUse) {
-            itemStack.setCount(itemStack.getCount() - 1);
-            if (itemStack.isEmpty())
+            if (itemStack.getCount() <= 1)
                 this.deleteItem(uuid);
+            else
+                itemStack.shrink(1);
         }
         if (this instanceof HeroUnit heroUnit && unitItem.manaCost > 0)
             heroUnit.setMana(heroUnit.getMana() - unitItem.manaCost);
@@ -499,8 +528,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                     if (unitItem != null && unitItem.forceAutocast &&
                         isOffCooldown(unitItem, itemStack) && canAffordManaCost(unitItem)) {
                         UUID itemUUID = itemStack.getTag().getUUID("uuid");
-                        if (use(itemUUID))
-                            afterUse(unitItem, itemStack, itemUUID);
+                        use(itemUUID);
                     }
                 }
             }

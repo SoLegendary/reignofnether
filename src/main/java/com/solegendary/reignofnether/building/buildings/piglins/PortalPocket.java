@@ -35,7 +35,7 @@ public class PortalPocket extends AbstractPortal {
     public PortalPocket() {
         super(structureName, cost);
         this.name = buildingName;
-        this.portraitBlock = Blocks.NETHER_PORTAL;
+        this.portraitBlock = Blocks.GRAY_GLAZED_TERRACOTTA;
         this.icon = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/gray_glazed_terracotta.png");
         this.canSetRallyPoint = false;
         this.maxHealth = 50f;

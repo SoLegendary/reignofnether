@@ -79,6 +79,7 @@ public abstract class UnitItem implements RangeIndicator {
     public boolean resetBehaviours;
     public boolean forceAutocast;
     public boolean canRandomDrop;
+    public int maxStackSize; // only affects units; players can stack any items
 
     // default values only, can be overwritten with calls to .buyCost() and .sellValue()
     public static final Map<Rarity, Integer> RARITY_VALUES = ImmutableMap.of(
@@ -143,6 +144,7 @@ public abstract class UnitItem implements RangeIndicator {
         this.resetBehaviours = builder.resetBehaviours;
         this.forceAutocast = builder.forceAutocast;
         this.canRandomDrop = builder.canRandomDrop;
+        this.maxStackSize = builder.maxStackSize;
     }
 
     public Item getItem() {
