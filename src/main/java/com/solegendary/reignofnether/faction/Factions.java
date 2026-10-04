@@ -83,11 +83,11 @@ public class Factions {
 			.noCubeMap()
 		);
 		
-		registerUnit();
-		registerBuilding();
+		registerUnits();
+		registerBuildings();
 	}
 	
-	public static void registerUnit() {
+	public static void registerUnits() {
 		// Villagers
 		registerWorkerEntity(VILLAGERS, EntityRegistrar.VILLAGER_UNIT.get(), ProductionItems.VILLAGER);
 		registerEntity(VILLAGERS, EntityRegistrar.MILITIA_UNIT.get(), ProductionItems.VILLAGER);
@@ -149,64 +149,68 @@ public class Factions {
 	}
 	
 	
-	public static void registerBuilding() {
+	public static void registerBuildings() {
 		// Monsters
 		registerStartBuilding(MONSTERS, Buildings.MAUSOLEUM, Keybindings.abilitySlot1);
-		registerBuilding(MONSTERS, Buildings.SPRUCE_STOCKPILE, Keybindings.abilitySlot2);
-		registerBuilding(MONSTERS, Buildings.SCULK_CATALYST, Keybindings.abilitySlot3);
-		registerBuilding(MONSTERS, Buildings.PUMPKIN_FARM, Keybindings.abilitySlot4);
-		registerBuilding(MONSTERS, Buildings.DARK_WATCHTOWER, Keybindings.abilitySlot5);
-		registerBuilding(MONSTERS, Buildings.GRAVEYARD, Keybindings.abilitySlot6);
-		registerBuilding(MONSTERS, Buildings.DUNGEON, Keybindings.abilitySlot7);
-		registerBuilding(MONSTERS, Buildings.SPIDER_LAIR, Keybindings.abilitySlot8);
-		registerBuilding(MONSTERS, Buildings.SLIME_PIT, Keybindings.abilitySlot9);
-		registerBuilding(MONSTERS, Buildings.LABORATORY, Keybindings.abilitySlot10);
-		registerBuilding(MONSTERS, Buildings.STRONGHOLD, Keybindings.hotkey2);
-		registerBuilding(MONSTERS, Buildings.ALTAR_OF_DARKNESS, Keybindings.hotkey3);
-		registerBuilding(MONSTERS, Buildings.SPRUCE_BRIDGE, Keybindings.hotkey4);
-		registerBuilding(MONSTERS, Buildings.HAUNTED_HOUSE);
+		registerBuildings(MONSTERS, Buildings.SPRUCE_STOCKPILE, Keybindings.abilitySlot2);
+		registerBuildings(MONSTERS, Buildings.SCULK_CATALYST, Keybindings.abilitySlot3);
+		registerBuildings(MONSTERS, Buildings.PUMPKIN_FARM, Keybindings.abilitySlot4);
+		registerBuildings(MONSTERS, Buildings.DARK_WATCHTOWER, Keybindings.abilitySlot5);
+		registerBuildings(MONSTERS, Buildings.GRAVEYARD, Keybindings.abilitySlot6);
+		registerBuildings(MONSTERS, Buildings.DUNGEON, Keybindings.abilitySlot7);
+		registerBuildings(MONSTERS, Buildings.SPIDER_LAIR, Keybindings.abilitySlot8);
+		registerBuildings(MONSTERS, Buildings.SLIME_PIT, Keybindings.abilitySlot9);
+		registerBuildings(MONSTERS, Buildings.LABORATORY, Keybindings.abilitySlot10);
+		registerBuildings(MONSTERS, Buildings.STRONGHOLD, Keybindings.hotkey2);
+		registerBuildings(MONSTERS, Buildings.ALTAR_OF_DARKNESS, Keybindings.hotkey3);
+		registerBuildings(MONSTERS, Buildings.SPRUCE_BRIDGE, Keybindings.hotkey4);
+		registerBuildings(MONSTERS, Buildings.HAUNTED_HOUSE);
 		
-		registerBuilding(MONSTERS, Buildings.MONSTER_MARKET, Keybindings.hotkey10);
-		registerBuilding(MONSTERS, Buildings.BEACON);
+		registerBuildings(MONSTERS, Buildings.MONSTER_MARKET, Keybindings.hotkey10);
+		registerBuildings(MONSTERS, Buildings.BEACON);
 		
 		//Piglins
 		registerStartBuilding(PIGLINS, Buildings.CENTRAL_PORTAL, Keybindings.abilitySlot1);
-		registerBuilding(PIGLINS, Buildings.PORTAL_BASIC, Keybindings.abilitySlot2);
-		registerBuilding(PIGLINS, Buildings.NETHERWART_FARM, Keybindings.abilitySlot3);
-		registerBuilding(PIGLINS, Buildings.BASTION, Keybindings.abilitySlot4);
-		registerBuilding(PIGLINS, Buildings.HOGLIN_STABLES, Keybindings.abilitySlot5);
-		registerBuilding(PIGLINS, Buildings.FLAME_SANCTUARY, Keybindings.abilitySlot6);
-		registerBuilding(PIGLINS, Buildings.WITHER_SHRINE, Keybindings.abilitySlot7);
-		registerBuilding(PIGLINS, Buildings.BASALT_SPRINGS, Keybindings.abilitySlot8);
-		registerBuilding(PIGLINS, Buildings.FORTRESS, Keybindings.abilitySlot9);
-		registerBuilding(PIGLINS, Buildings.INFERNAL_PORTAL, Keybindings.hotkey3);
-		registerBuilding(PIGLINS, Buildings.BLACKSTONE_BRIDGE, Keybindings.hotkey4);
-		registerBuilding(PIGLINS, Buildings.PIGLIN_MARKET, Keybindings.hotkey10);
-		registerBuilding(PIGLINS, Buildings.BEACON);
+		registerBuildings(PIGLINS, Buildings.PORTAL_BASIC, Keybindings.abilitySlot2);
+		registerBuildings(PIGLINS, Buildings.NETHERWART_FARM, Keybindings.abilitySlot3);
+		registerBuildings(PIGLINS, Buildings.BASTION, Keybindings.abilitySlot4);
+		registerBuildings(PIGLINS, Buildings.HOGLIN_STABLES, Keybindings.abilitySlot5);
+		registerBuildings(PIGLINS, Buildings.FLAME_SANCTUARY, Keybindings.abilitySlot6);
+		registerBuildings(PIGLINS, Buildings.WITHER_SHRINE, Keybindings.abilitySlot7);
+		registerBuildings(PIGLINS, Buildings.BASALT_SPRINGS, Keybindings.abilitySlot8);
+		registerBuildings(PIGLINS, Buildings.FORTRESS, Keybindings.abilitySlot9);
+		registerBuildings(PIGLINS, Buildings.INFERNAL_PORTAL, Keybindings.hotkey3);
+		registerBuildings(PIGLINS, Buildings.BLACKSTONE_BRIDGE, Keybindings.hotkey4);
+		registerBuildings(PIGLINS, Buildings.PIGLIN_MARKET, Keybindings.hotkey10);
+		registerBuildings(PIGLINS, Buildings.BEACON);
+		registerBuilding(PIGLINS, Buildings.PORTAL_CIVILIAN);
+		registerBuilding(PIGLINS, Buildings.PORTAL_POCKET);
+		registerBuilding(PIGLINS, Buildings.PORTAL_MILITARY);
+		registerBuilding(PIGLINS, Buildings.PORTAL_TRANSPORT);
 		
 		//VillagersFaction
 		registerStartBuilding(VILLAGERS, Buildings.TOWN_CENTRE, Keybindings.abilitySlot1);
-		registerBuilding(VILLAGERS, Buildings.OAK_STOCKPILE, Keybindings.abilitySlot2);
-		registerBuilding(VILLAGERS, Buildings.VILLAGER_HOUSE, Keybindings.abilitySlot3);
-		registerBuilding(VILLAGERS, Buildings.WHEAT_FARM, Keybindings.abilitySlot4);
-		registerBuilding(VILLAGERS, Buildings.WATCHTOWER, Keybindings.abilitySlot5);
-		registerBuilding(VILLAGERS, Buildings.BARRACKS, Keybindings.abilitySlot6);
-		registerBuilding(VILLAGERS, Buildings.BLACKSMITH, Keybindings.abilitySlot7);
-		registerBuilding(VILLAGERS, Buildings.WITCH_HUT, Keybindings.abilitySlot8);
-		registerBuilding(VILLAGERS, Buildings.ARCANE_TOWER, Keybindings.abilitySlot9);
-		registerBuilding(VILLAGERS, Buildings.LIBRARY, Keybindings.abilitySlot10);
-		registerBuilding(VILLAGERS, Buildings.CASTLE, Keybindings.hotkey2);
-		registerBuilding(VILLAGERS, Buildings.SHRINE_OF_PROSPERITY, Keybindings.hotkey3);
-		registerBuilding(VILLAGERS, Buildings.IRON_GOLEM_BUILDING, Keybindings.hotkey9);
-		registerBuilding(VILLAGERS, Buildings.OAK_BRIDGE, Keybindings.hotkey4);
-		registerBuilding(VILLAGERS, Buildings.VILLAGER_MARKET, Keybindings.hotkey10);
-		registerBuilding(VILLAGERS, Buildings.BEACON);
+		registerBuildings(VILLAGERS, Buildings.OAK_STOCKPILE, Keybindings.abilitySlot2);
+		registerBuildings(VILLAGERS, Buildings.VILLAGER_HOUSE, Keybindings.abilitySlot3);
+		registerBuildings(VILLAGERS, Buildings.WHEAT_FARM, Keybindings.abilitySlot4);
+		registerBuildings(VILLAGERS, Buildings.WATCHTOWER, Keybindings.abilitySlot5);
+		registerBuildings(VILLAGERS, Buildings.BARRACKS, Keybindings.abilitySlot6);
+		registerBuildings(VILLAGERS, Buildings.BLACKSMITH, Keybindings.abilitySlot7);
+		registerBuildings(VILLAGERS, Buildings.WITCH_HUT, Keybindings.abilitySlot8);
+		registerBuildings(VILLAGERS, Buildings.ARCANE_TOWER, Keybindings.abilitySlot9);
+		registerBuildings(VILLAGERS, Buildings.LIBRARY, Keybindings.abilitySlot10);
+		registerBuildings(VILLAGERS, Buildings.CASTLE, Keybindings.hotkey2);
+		registerBuildings(VILLAGERS, Buildings.SHRINE_OF_PROSPERITY, Keybindings.hotkey3);
+		registerBuildings(VILLAGERS, Buildings.IRON_GOLEM_BUILDING, Keybindings.hotkey9);
+		registerBuildings(VILLAGERS, Buildings.OAK_BRIDGE, Keybindings.hotkey4);
+		registerBuildings(VILLAGERS, Buildings.VILLAGER_MARKET, Keybindings.hotkey10);
+		registerBuildings(VILLAGERS, Buildings.BEACON);
 		
 		//Neutral
-		registerBuilding(NEUTRAL, Buildings.CAPTURABLE_BEACON, Keybindings.abilitySlot1);
-		registerBuilding(NEUTRAL, Buildings.HEALING_FOUNTAIN, Keybindings.abilitySlot2);
-		registerBuilding(NEUTRAL, Buildings.END_PORTAL, Keybindings.abilitySlot3);
-		registerBuilding(NEUTRAL, Buildings.NEUTRAL_TRANSPORT_PORTAL, Keybindings.abilitySlot4);
+		registerBuildings(NEUTRAL, Buildings.CAPTURABLE_BEACON, Keybindings.abilitySlot1);
+		registerBuildings(NEUTRAL, Buildings.HEALING_FOUNTAIN, Keybindings.abilitySlot2);
+		registerBuildings(NEUTRAL, Buildings.END_PORTAL, Keybindings.abilitySlot3);
+		registerBuildings(NEUTRAL, Buildings.NEUTRAL_TRANSPORT_PORTAL, Keybindings.abilitySlot4);
 		
 		if (FMLEnvironment.dist.isClient())
 			for (ResourceLocation faction : PLAYABLE_FACTIONS) {
@@ -225,19 +229,22 @@ public class Factions {
 	}
 	
 	public static <T extends Faction> T register(ResourceLocation key, T faction) {
-		
 		return Registry.register(ReignOfNetherRegistries.FACTIONS, key, faction);
 	}
 	
 	public static void registerStartBuilding(Faction faction, Building building, Keybinding key) {
-		registerBuilding(faction, building, key);
+		registerBuildings(faction, building, key);
 		faction.capitolBuilding = ReignOfNetherRegistries.BUILDING.getKey(building);
 	}
 	
-	public static void registerBuilding(Faction faction, Building building, Keybinding key) {
+	public static void registerBuildings(Faction faction, Building building, Keybinding key) {
 		building.setFaction(faction.key);
 		if (FMLEnvironment.dist.isClient())
 			faction.addBuilding(building, key);
+	}
+	
+	public static void registerBuilding(Faction faction, Building building) {
+		building.setFaction(faction.key);
 	}
 	
 	public static <T extends IUnitProductionItem> void registerWorkerEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
@@ -263,8 +270,8 @@ public class Factions {
 		ENTITY_FACTION.put(EntityType.getKey(unit), faction.key);
 	}
 	
-	public static void registerBuilding(Faction faction, Building building) {
-		registerBuilding(faction, building, null);
+	public static void registerBuildings(Faction faction, Building building) {
+		registerBuildings(faction, building, null);
 	}
 	
 	public static Faction getFaction(ResourceLocation pKey) {
