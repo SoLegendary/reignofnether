@@ -491,7 +491,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         }
 
         int xOffset = 0;
-        if (armourStr.endsWith("+")) xOffset = -2;
+        if (armourStr.endsWith("+")) xOffset = -3;
         if (armourStr.startsWith("-")) xOffset = -4;
 
         renderedStats.add(new RenderedStat(
