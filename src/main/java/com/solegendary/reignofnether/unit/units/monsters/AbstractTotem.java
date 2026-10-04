@@ -49,10 +49,10 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
     public void updateAbilityButtons() { }
     Object2ObjectArrayMap<Ability, Float> cooldowns = Unit.createCooldownMap();
     Object2ObjectArrayMap<Ability, Integer> charges = new Object2ObjectArrayMap<>();
-    @Override public Object2ObjectArrayMap<Ability, Float> getCooldowns() { return cooldowns; }
+    @Override public Object2ObjectArrayMap<Ability, Float> getAbilityCooldowns() { return cooldowns; }
     @Override public boolean hasAutocast(Ability ability) { return false; }
     @Override public void setAutocast(Ability autocast) {  }
-    @Override public Object2ObjectArrayMap<Ability, Integer> getCharges() { return charges; }
+    @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     public void setEatingTicksLeft(int amount) {  }
     public int getEatingTicksLeft() { return 0; }
@@ -68,7 +68,6 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
     public UsePortalGoal getUsePortalGoal() { return null; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-    public Faction getFaction() {return Faction.NEUTRAL;}
     public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return List.of();}
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
