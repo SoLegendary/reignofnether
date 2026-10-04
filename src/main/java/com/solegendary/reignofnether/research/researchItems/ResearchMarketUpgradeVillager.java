@@ -29,7 +29,7 @@ public class ResearchMarketUpgradeVillager extends ProductionItem {
     public ResearchMarketUpgradeVillager() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (!level.isClientSide() && placement.getBuilding() instanceof VillagerMarket market) {
+            if (!level.isClientSide() && placement.getBuilding() instanceof VillagerMarket market && market.getUpgradeLevel(placement) <= 0) {
                 placement.changeStructure(VillagerMarket.upgradedStructureName);
                 ArrayList<StockedShopItem> stockedShopItems = placement.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
                 if (stockedShopItems != null) {

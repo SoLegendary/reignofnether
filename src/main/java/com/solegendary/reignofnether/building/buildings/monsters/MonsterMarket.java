@@ -54,6 +54,11 @@ public class MonsterMarket extends AbstractMarket {
     }
 
     @Override
+    public String getUpgradedName(BuildingPlacement placement) {
+        return I18n.get("buildings.reignofnether.monster_market_upgraded");
+    }
+
+    @Override
     public int getUpgradeLevel(BuildingPlacement placement) {
         for (BuildingBlock block : placement.getBlocks())
             if (block.getBlockState().getBlock() == Blocks.BREWING_STAND) {

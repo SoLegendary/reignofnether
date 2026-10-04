@@ -30,7 +30,7 @@ public class ResearchMarketUpgradePiglin extends ProductionItem {
     public ResearchMarketUpgradePiglin() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (!level.isClientSide() && placement.getBuilding() instanceof PiglinMarket market) {
+            if (!level.isClientSide() && placement.getBuilding() instanceof PiglinMarket market && market.getUpgradeLevel(placement) <= 0) {
                 placement.changeStructure(PiglinMarket.upgradedStructureName);
                 ArrayList<StockedShopItem> stockedShopItems = placement.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
                 if (stockedShopItems != null) {

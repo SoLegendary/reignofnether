@@ -31,7 +31,7 @@ public class ResearchMarketUpgradeMonster extends ProductionItem {
     public ResearchMarketUpgradeMonster() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (!level.isClientSide() && placement.getBuilding() instanceof MonsterMarket market) {
+            if (!level.isClientSide() && placement.getBuilding() instanceof MonsterMarket market && market.getUpgradeLevel(placement) <= 0) {
                 placement.changeStructure(MonsterMarket.upgradedStructureName);
                 ArrayList<StockedShopItem> stockedShopItems = placement.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
                 if (stockedShopItems != null) {

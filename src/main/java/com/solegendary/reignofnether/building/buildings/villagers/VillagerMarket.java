@@ -52,6 +52,11 @@ public class VillagerMarket extends AbstractMarket {
     }
 
     @Override
+    public String getUpgradedName(BuildingPlacement placement) {
+        return I18n.get("buildings.reignofnether.villager_market_upgraded");
+    }
+
+    @Override
     public int getUpgradeLevel(BuildingPlacement placement) {
         for (BuildingBlock block : placement.getBlocks())
             if (block.getBlockState().getBlock() == Blocks.YELLOW_WOOL) {

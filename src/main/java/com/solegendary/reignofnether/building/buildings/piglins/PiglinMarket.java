@@ -49,9 +49,14 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
     }
 
     @Override
+    public String getUpgradedName(BuildingPlacement placement) {
+        return I18n.get("buildings.reignofnether.piglin_market_upgraded");
+    }
+
+    @Override
     public int getUpgradeLevel(BuildingPlacement placement) {
         for (BuildingBlock block : placement.getBlocks())
-            if (block.getBlockState().getBlock() == Blocks.YELLOW_WOOL) {
+            if (block.getBlockState().getBlock() == Blocks.CRIMSON_STAIRS) {
                 return 1;
             }
         return 0;
