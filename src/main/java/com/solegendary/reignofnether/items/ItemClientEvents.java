@@ -352,8 +352,7 @@ public class ItemClientEvents {
     public static void onRenderLevel(RenderLevelStageEvent evt) {
         if (!ENABLED) return;
 
-        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS ||
-                HudClientEvents.isMouseOverAnyButtonOrHud())
+        if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS)
             return;
 
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
@@ -367,6 +366,8 @@ public class ItemClientEvents {
                     );
                 }
             }
+            if (HudClientEvents.isMouseOverAnyButtonOrHud()) return;
+
             for (ItemEntity itemEntity : preselectedItems) {
                 ResourceSource res = ResourceSources.getFromItem(itemEntity.getItem().getItem());
                 boolean isResourceItem = res != null && res.resourceValue > 0;

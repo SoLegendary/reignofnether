@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -86,28 +87,23 @@ public class ItemServerEvents {
         ServerLevel level = null;
         if (server != null) level = server.getLevel(Level.OVERWORLD);
 
-        if (unit instanceof UnitInventory inv && level != null) {
+        if (unit instanceof UnitInventory inv &&
+                unit.getItemGoal() != null && level != null) {
+            Entity entity = level.getEntity(targetId);
             ItemStack itemInHand = inv.get(itemUuid);
-            if (itemInHand == null) return;
-            UnitItem unitItem = ItemUtil.getUnitItem(itemInHand);
-            if (unitItem == null) return;
-
-            if (unit.getItemGoal() != null) {
-                Entity entity = level.getEntity(targetId);
-                if (action == ItemAction.USE) {
-                    if (inv.use(ItemUtil.getUUID(itemInHand)) && unitItem.resetBehaviours)
-                        Unit.fullResetBehaviours(unit);
-                } else {
-                    ItemEntity itemTarget = (entity instanceof ItemEntity ie) ? ie : null;
-                    LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
-                    BuildingPlacement buildingTarget = blockTarget != null ? BuildingUtils.findBuilding(false, blockTarget) : null;
-                    boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
+            if (action == ItemAction.USE) {
+                if (inv.use(ItemUtil.getUUID(itemInHand)))
                     Unit.fullResetBehaviours(unit);
-                    unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
-                }
-            } else if (SandboxServer.isAnyoneASandboxPlayer()) {
-                inv.deleteItem(itemUuid);
+            } else {
+                ItemEntity itemTarget = (entity instanceof ItemEntity ie) ? ie : null;
+                LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
+                BuildingPlacement buildingTarget = blockTarget != null ? BuildingUtils.findBuilding(false, blockTarget) : null;
+                boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
+                Unit.fullResetBehaviours(unit);
+                unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
             }
+        } else if (unit instanceof UnitInventory inv && action == ItemAction.DROP && SandboxServer.isAnyoneASandboxPlayer()) {
+            inv.deleteItem(itemUuid);
         }
     }
 
@@ -119,7 +115,7 @@ public class ItemServerEvents {
         return total;
     }
 
-    private static void dropNextItem(RTSPlayer rtsPlayer, LivingEntity dropper) {
+    public static void dropNextItem(RTSPlayer rtsPlayer, LivingEntity dropper) {
         if (rtsPlayer.itemDropQueue.isEmpty())
             return;
 
@@ -135,7 +131,6 @@ public class ItemServerEvents {
 
         ReignOfNether.LOGGER.info(rtsPlayer.name + " received item drop #" + rtsPlayer.itemsDropped);
     }
-
 
     @SubscribeEvent
     public static void onLivingDeath(LivingDeathEvent evt) {
@@ -160,7 +155,8 @@ public class ItemServerEvents {
                 killerName = lastHurtBy.getPersistentData().getString("ownerName");
 
             boolean isNeutral = unitKilled.getOwnerName().isBlank();
-            if (!killerName.isBlank() && isNeutral) {
+            boolean willDropOwnItem = unitKilled instanceof UnitInventory inv && !inv.isEmpty() && !(unitKilled instanceof HeroUnit);
+            if (!killerName.isBlank() && isNeutral && !willDropOwnItem) {
                 RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(killerName);
                 if (rtsPlayer != null) {
                     int creepScore = unitKilled.getCost().population + 4;
