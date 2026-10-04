@@ -71,6 +71,8 @@ Quality of Life
      - mana_on_hit (% of damage)
      - scale (visual only)
 
+[✔] Added passive icons
+
 [✔] Added new mob effects:
     [🟡] - vigor (-33% cooldown reduction per level)
      - phasing (can walk through mobs and ignore knockback)

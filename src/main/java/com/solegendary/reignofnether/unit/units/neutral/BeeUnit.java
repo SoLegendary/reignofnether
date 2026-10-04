@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.controls.FlyingUnitMoveControl;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -130,10 +131,9 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
     public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
             SynchedEntityData.defineId(BeeUnit.class, EntityDataSerializers.STRING);
 
-    public boolean isFlying() { return this.entityData.get(isFlyingAccessor); }
-    public void setFlying(boolean value) { this.entityData.set(isFlyingAccessor, value); }
-    public static final EntityDataAccessor<Boolean> isFlyingAccessor =
-            SynchedEntityData.defineId(BeeUnit.class, EntityDataSerializers.BOOLEAN);
+    public boolean isSummoned() { return this.entityData.get(isSummonedAccessor); }
+    public void setIsSummoned(boolean index) { this.entityData.set(isSummonedAccessor, index); }
+    public static final EntityDataAccessor<Boolean> isSummonedAccessor = SynchedEntityData.defineId(BeeUnit.class, EntityDataSerializers.BOOLEAN);
 
     @Override
     protected void defineSynchedData() {
@@ -141,7 +141,7 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
         this.entityData.define(ownerDataAccessor, "");
         this.entityData.define(scenarioRoleDataAccessor, -1);
         this.entityData.define(onDeathCommandDataAccessor, "");
-        this.entityData.define(isFlyingAccessor, false);
+        this.entityData.define(isSummonedAccessor, false);
     }
 
     // combat stats
@@ -203,9 +203,9 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
         AttackerUnit.tick(this);
         updateRotation();
 
-        if (!hasEffectWithDuration(MobEffectRegistrar.LIMITED_LIFESPAN.get()) && tickCount < LIFETIME_TICKS)
+        if (isSummoned() && !hasEffectWithDuration(MobEffectRegistrar.LIMITED_LIFESPAN.get()) && tickCount < LIFETIME_TICKS)
             this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), LIFETIME_TICKS, 0, true, false));
-        if (tickCount > LIFETIME_TICKS && !isDeadOrDying() && !isRemoved())
+        if (isSummoned() && tickCount > LIFETIME_TICKS && !isDeadOrDying() && !isRemoved())
             kill();
     }
 

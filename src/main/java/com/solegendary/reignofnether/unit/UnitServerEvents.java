@@ -35,6 +35,7 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.packets.*;
 import com.solegendary.reignofnether.unit.units.monsters.*;
+import com.solegendary.reignofnether.unit.units.neutral.BeeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.EnchantmentUtil;
@@ -1089,7 +1090,8 @@ public class UnitServerEvents {
                         if (dmg > UnitItems.BEENEST_ARMOUR_DAMAGE_PER_BEE) {
                             Entity entity = UnitServerEvents.spawnMob(EntityRegistrar.BEE_UNIT.get(),
                                     serverLevel, evt.getEntity().blockPosition().above(), unit.getOwnerName());
-                            if (entity != null) {
+                            if (entity instanceof BeeUnit beeUnit) {
+                                beeUnit.setIsSummoned(true);
                                 tag.putFloat("damageTaken", 0f);
                             }
                         } else {
