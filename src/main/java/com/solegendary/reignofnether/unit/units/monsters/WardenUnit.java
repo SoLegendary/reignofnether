@@ -229,7 +229,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
     public void setAttackTarget(LivingEntity pAttackTarget) { }
 
     public void tick() {
-        this.setCanPickUpLoot(false);
+        this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
