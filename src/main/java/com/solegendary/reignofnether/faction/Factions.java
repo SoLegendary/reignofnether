@@ -225,7 +225,10 @@ public class Factions {
 			CLASSIC_FACTIONS.add(key);
 		if (faction.playable)
 			PLAYABLE_FACTIONS.add(key);
-		return Registry.register(ReignOfNetherRegistries.FACTIONS, key, faction).setKey(getKey(faction));
+		if (faction.spawnWave != null)
+			SURVIVAL_FACTIONS.add(key);
+		faction = register(key, faction).setKey(key);
+		return faction;
 	}
 	
 	public static <T extends Faction> T register(ResourceLocation key, T faction) {

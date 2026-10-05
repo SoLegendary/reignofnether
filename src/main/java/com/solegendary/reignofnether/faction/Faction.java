@@ -64,7 +64,6 @@ public class Faction {
 	
 	public Faction setSpawnWave(BiConsumer<ServerLevel, Wave> spawnWave) {
 		this.spawnWave = spawnWave;
-		Factions.SURVIVAL_FACTIONS.add(this.key);
 		return this;
 	}
 	
