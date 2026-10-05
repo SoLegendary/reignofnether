@@ -1,6 +1,10 @@
 package com.solegendary.reignofnether.survival;
 
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.util.MiscUtil;
+
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 
@@ -25,26 +29,18 @@ public class Wave {
         this.number = number;
         this.population = population;
         this.highestUnitTier = highestUnitTier;
-        this.faction = factions.get(Mth.clamp(number - 1, 0, factions.size()));
+        this.faction = Factions.getFaction(Factions.SURVIVAL_FACTIONS.get(Mth.clamp(number - 1, 0, Factions.SURVIVAL_FACTIONS.size() - 1)));
     }
 
     public int getNumPortals() {
         return Math.max(1, 1 + number / 3);
     }
-
+    
     public void start(ServerLevel level) {
-        switch (faction) {
-            case VILLAGERS -> spawnIllagerWave(level, this);
-            case MONSTERS -> spawnMonsterWave(level, this);
-            case PIGLINS -> spawnPiglinWave(level, this);
-            default -> {
-                switch (new Random().nextInt(3)) {
-                    case 0 -> spawnIllagerWave(level, this);
-                    case 1 -> spawnMonsterWave(level, this);
-                    case 2 -> spawnPiglinWave(level, this);
-                }
-            }
-        }
+        if (Factions.SURVIVAL_FACTIONS.contains(faction.key))
+            faction.spawnWave(level, this);
+        else
+            Factions.getFaction(MiscUtil.getRandomItem(Factions.SURVIVAL_FACTIONS)).spawnWave(level, this);
     }
 
     public static Wave getWave(int number) {
@@ -58,43 +54,18 @@ public class Wave {
 
     private static final ArrayList<Wave> waves = new ArrayList<>();
 
-    private static final ArrayList<Faction> factions = new ArrayList<>();
+    private static final ArrayList<Faction> FACTIONS = new ArrayList<>();
 
     public static void reseedWaves() {
         Random random = new Random(randomSeed);
-        factions.clear();
+        FACTIONS.clear();
 
-        Faction lastFaction = Faction.NONE;
+        Faction lastFaction = Factions.NONE;
         for (int i = 0; i < 30; i++) {
-            Faction newFaction = Faction.NONE;
-            switch (lastFaction) {
-                case VILLAGERS -> {
-                    if (random.nextBoolean())
-                        newFaction = Faction.MONSTERS;
-                    else
-                        newFaction = Faction.PIGLINS;
-                }
-                case MONSTERS -> {
-                    if (random.nextBoolean())
-                        newFaction = Faction.VILLAGERS;
-                    else
-                        newFaction = Faction.PIGLINS;
-                }
-                case PIGLINS -> {
-                    if (random.nextBoolean())
-                        newFaction = Faction.MONSTERS;
-                    else
-                        newFaction = Faction.VILLAGERS;
-                }
-                case NONE, NEUTRAL -> {
-                    switch (random.nextInt(3)) {
-                        case 0 -> newFaction = Faction.MONSTERS;
-                        case 1 -> newFaction = Faction.VILLAGERS;
-                        case 2 -> newFaction = Faction.PIGLINS;
-                    }
-                }
-            }
-            factions.add(newFaction);
+            List<ResourceLocation> factions = new ArrayList<>(Factions.CLASSIC_FACTIONS);
+            factions.remove(lastFaction.key);
+            Faction newFaction = Factions.getFaction(MiscUtil.getRandomItem(factions));
+            FACTIONS.add(newFaction);
             lastFaction = newFaction;
         }
 

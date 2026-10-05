@@ -15,17 +15,17 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
-
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class AltarOfDarkness extends ProductionBuilding {
 
@@ -57,11 +57,9 @@ public class AltarOfDarkness extends ProductionBuilding {
         return pp;
     }
 
-    public Faction getFaction() {return Faction.MONSTERS;}
-
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/dark_prismarine.png"),
@@ -71,11 +69,11 @@ public class AltarOfDarkness extends ProductionBuilding {
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        fcs(I18n.get("buildings.reignofnether.altar_of_darkness"), true),
+                        Component.translatable("buildings.reignofnether.altar_of_darkness").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        fcs(""),
-                        fcs(I18n.get("buildings.reignofnether.altar_of_darkness.tooltip1")),
-                        fcs(I18n.get("buildings.reignofnether.altar_of_darkness.tooltip2"))
+                        FormattedCharSequence.EMPTY,
+                        Component.translatable("buildings.reignofnether.altar_of_darkness.tooltip1").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.altar_of_darkness.tooltip2").getVisualOrderText()
                 ),
                 this
         );

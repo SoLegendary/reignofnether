@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.neutral;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
@@ -10,19 +11,18 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.unit.units.piglins.BruteProd;
-import net.minecraft.client.resources.language.I18n;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class PandaProd extends ProductionItem {
+public class PandaProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Panda";
     public final static ResourceCost cost = ResourceCosts.PANDA;
@@ -45,9 +45,9 @@ public class PandaProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/panda.png"),
                 List.of(
-                        fcs(I18n.get("entity.reignofnether.panda_unit"), false),
+	                Component.translatable("entity.reignofnether.panda_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         fcs(""),
-                        fcs(I18n.get("entity.reignofnether.panda_unit.tooltip1"))
+	                Component.translatable("entity.reignofnether.panda_unit.tooltip1").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText()
                 )
         );
     }
@@ -60,11 +60,11 @@ public class PandaProd extends ProductionItem {
                 () -> false,
                 () -> true,
                 List.of(
-                        fcs(I18n.get("entity.reignofnether.panda_unit"), true),
+                        Component.translatable("entity.reignofnether.panda_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPopAndTime(cost),
                         fcs(""),
-                        fcs(I18n.get("entity.reignofnether.panda_unit.tooltip1"))
+                        Component.translatable("entity.reignofnether.panda_unit.tooltip1").getVisualOrderText()
                 ),
                 this
         );

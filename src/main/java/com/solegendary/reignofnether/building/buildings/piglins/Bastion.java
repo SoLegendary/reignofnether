@@ -1,7 +1,11 @@
 package com.solegendary.reignofnether.building.buildings.piglins;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -10,17 +14,15 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class Bastion extends ProductionBuilding implements GarrisonableBuildingAddon {
     public final static int MAX_OCCUPANTS = 4;
@@ -53,12 +55,11 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuildingA
         setActiveAddon(GarrisonableBuildingAddon.class, this, true);
     }
 
-    public Faction getFaction() {return Faction.PIGLINS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
-        return new BuildingPlaceButton(
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
+	    return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/chiseled_polished_blackstone.png"),
                 hotkey,
@@ -67,15 +68,15 @@ public class Bastion extends ProductionBuilding implements GarrisonableBuildingA
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.PORTAL_BASIC) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion"), Style.EMPTY.withBold(true)),
+                        Component.translatable("buildings.reignofnether.bastion").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion.tooltip2"), Style.EMPTY),
+                        Component.translatable("buildings.reignofnether.bastion.tooltip1").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.bastion.tooltip2").getVisualOrderText(),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion.tooltip3", MAX_OCCUPANTS), Style.EMPTY),
+                        Component.translatable("buildings.reignofnether.bastion.tooltip3", MAX_OCCUPANTS).getVisualOrderText(),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.bastion.tooltip4"), Style.EMPTY)
+                        Component.translatable("buildings.reignofnether.bastion.tooltip4").getVisualOrderText()
                 ),
                 this
         );

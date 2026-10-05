@@ -6,18 +6,16 @@ import com.solegendary.reignofnether.blocks.RTSStartBlock;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
-import com.solegendary.reignofnether.rtsmap.RTSMapInfo;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -84,7 +82,7 @@ public class StartPosServerEvents {
                 if (!startPos.enabled) {
                     startPos.playerName = "";
                     startPos.ready = false;
-                    startPos.faction = Faction.NONE;
+                    startPos.faction = Factions.NONE;
                 }
             }
         }
@@ -188,7 +186,7 @@ public class StartPosServerEvents {
                     SoundClientboundPacket.playSoundForAllPlayers(SoundAction.ALLY);
                     for (ServerPlayer serverPlayer : PlayerServerEvents.players) {
                         for (StartPos startPos : startPoses) {
-                            if (startPos.playerName.equals(serverPlayer.getName().getString()) && startPos.faction != Faction.NONE) {
+                            if (startPos.playerName.equals(serverPlayer.getName().getString()) && startPos.faction != Factions.NONE) {
                                 PlayerServerEvents.startRTS(
                                         serverPlayer.getId(),
                                         new Vec3(startPos.pos.getX(), startPos.pos.getY(), startPos.pos.getZ()),

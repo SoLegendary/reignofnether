@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.startpos;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -23,14 +24,13 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.solegendary.reignofnether.building.BuildingUtils.isBridge;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class StartPosClientEvents {
 
     // client player is considered to have reserved a spot if selectedFaction != NONE && startPosIndex >= 0
     public static ArrayList<StartPos> startPoses = new ArrayList<>();
-    public static Faction selectedFaction = Faction.NONE;
+    public static Faction selectedFaction = Factions.NONE;
     public static boolean isStarting = false; // game is counting down to start
 
     public static boolean isEnabled() {
@@ -62,7 +62,7 @@ public class StartPosClientEvents {
                 if (!startPos.enabled) {
                     startPos.playerName = "";
                     startPos.ready = false;
-                    startPos.faction = Faction.NONE;
+                    startPos.faction = Factions.NONE;
                 }
             }
         }
@@ -89,7 +89,7 @@ public class StartPosClientEvents {
                 null,
                 () -> false,
                 () -> !isEnabled() || isStarting || isReady(),
-                () -> hasReservedPos() && selectedFaction != Faction.NONE,
+                () -> hasReservedPos() && selectedFaction != Factions.NONE,
                 () -> {
                     if (MC.player != null)
                         StartPosServerboundPacket.readyPlayer(MC.player.getName().getString());
@@ -102,7 +102,7 @@ public class StartPosClientEvents {
     private static int getNumPlayersReady() {
         int readyPlayers = 0;
         for (StartPos startPose : startPoses)
-            if (startPose.faction != Faction.NONE && startPose.ready && !startPose.playerName.isBlank())
+            if (startPose.faction != Factions.NONE && startPose.ready && !startPose.playerName.isBlank())
                 readyPlayers++;
         return readyPlayers;
     }
@@ -119,7 +119,7 @@ public class StartPosClientEvents {
         fcsList.add(fcs(I18n.get("startpos.reignofnether.ready_button.ready"), true));
         if (!hasReservedPos())
             fcsList.add(fcs(I18n.get("startpos.reignofnether.start_button.no_reserved_pos")));
-        if (selectedFaction == Faction.NONE)
+        if (selectedFaction.equals(Factions.NONE))
             fcsList.add(fcs(I18n.get("startpos.reignofnether.start_button.no_faction")));
         return fcsList;
     }
@@ -163,7 +163,7 @@ public class StartPosClientEvents {
     public static void onChangeGamemode(PlayerEvent.PlayerChangeGameModeEvent evt) {
         StartPos startPos = getPos();
         if (evt.getEntity() == MC.player && startPos != null && MC.player != null) {
-            selectedFaction = Faction.NONE;
+            selectedFaction.equals(Factions.NONE);
             StartPosServerboundPacket.unreservePos(startPos.pos);
         }
     }
@@ -176,13 +176,8 @@ public class StartPosClientEvents {
             return;
 
         for (StartPos startPos : startPoses) {
-            if (startPos.faction != Faction.NONE) {
-                Building capitolBuilding = null;
-                switch (startPos.faction) {
-                    case VILLAGERS -> capitolBuilding = Buildings.TOWN_CENTRE;
-                    case MONSTERS -> capitolBuilding = Buildings.MAUSOLEUM;
-                    case PIGLINS -> capitolBuilding = Buildings.CENTRAL_PORTAL;
-                }
+            if (startPos.faction != Factions.NONE) {
+                Building capitolBuilding = startPos.faction.getBuilding(startPos.faction.capitolBuilding);
                 int forceColour = 2;
                 if (startPos.playerName.equals(MC.player.getName().getString()))
                     forceColour = 1;
@@ -199,7 +194,7 @@ public class StartPosClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
 
     public static void resetAll() {
-        selectedFaction = Faction.NONE;
+        selectedFaction.equals(Factions.NONE);
         isStarting = false;
         for (StartPos startPos : startPoses)
             startPos.reset();

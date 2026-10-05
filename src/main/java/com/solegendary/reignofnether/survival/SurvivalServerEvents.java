@@ -6,6 +6,8 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
@@ -15,7 +17,7 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -45,7 +47,7 @@ public class SurvivalServerEvents {
     private static final ArrayList<WaveEnemy> enemies = new ArrayList<>();
     public static final String ENEMY_OWNER_NAME = "Enemy";
     private static final Random random = new Random();
-    public static Faction lastFaction = Faction.NONE;
+    public static Faction lastFaction = Factions.NONE;
 
     public static final ArrayList<WavePortal> portals = new ArrayList<>();
 
@@ -329,10 +331,10 @@ public class SurvivalServerEvents {
     public static void startNextWave(ServerLevel level) {
         saveData(level);
         currentWave = nextWave;
-        System.out.println("starting wave: " + nextWave.faction.name());
+        System.out.println("starting wave: " + nextWave.faction.getName());
         nextWave.start(level);
         nextWave = Wave.getWave(nextWave.number + 1);
-        System.out.println("next wave: " + nextWave.faction.name());
+        System.out.println("next wave: " + nextWave.faction.getName());
         SurvivalClientboundPacket.setWaveNumber(nextWave.number);
     }
 

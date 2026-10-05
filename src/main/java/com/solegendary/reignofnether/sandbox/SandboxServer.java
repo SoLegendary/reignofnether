@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -22,14 +22,14 @@ public class SandboxServer {
 
     public static boolean isSandboxPlayer(String playerName) {
         for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
-            if (rtsPlayer.faction == Faction.NONE && playerName.equals(rtsPlayer.name))
+            if (rtsPlayer.faction == Factions.NONE && playerName.equals(rtsPlayer.name))
                 return true;
         return false;
     }
 
     public static boolean isAnyoneASandboxPlayer() {
         for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
-            if (rtsPlayer.faction == Faction.NONE)
+            if (rtsPlayer.faction == Factions.NONE)
                 return true;
         return false;
     }

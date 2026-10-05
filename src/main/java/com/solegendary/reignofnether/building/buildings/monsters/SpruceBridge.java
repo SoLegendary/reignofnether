@@ -10,9 +10,9 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -50,13 +50,11 @@ public class SpruceBridge extends AbstractBridge {
     }
 
     @Override
-    public Faction getFaction() {
-        return Faction.MONSTERS;
-    }
+    
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         Minecraft MC = Minecraft.getInstance();
         return new BuildingPlaceButton(
                 name,
@@ -68,14 +66,14 @@ public class SpruceBridge extends AbstractBridge {
                         BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spruce_bridge"), Style.EMPTY.withBold(true)),
+                        Component.translatable("buildings.reignofnether.spruce_bridge").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spruce_bridge.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spruce_bridge.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spruce_bridge.tooltip3"), Style.EMPTY),
+                        Component.translatable("buildings.reignofnether.spruce_bridge.tooltip1").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.spruce_bridge.tooltip2").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.spruce_bridge.tooltip3").getVisualOrderText(),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.spruce_bridge.tooltip4"), Style.EMPTY)
+                        Component.translatable("buildings.reignofnether.spruce_bridge.tooltip4").getVisualOrderText()
                 ),
                 this
         );

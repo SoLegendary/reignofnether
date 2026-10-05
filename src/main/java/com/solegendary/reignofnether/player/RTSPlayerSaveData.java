@@ -4,9 +4,12 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.ability.abilities.TradeResources;
 import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -50,7 +53,17 @@ public class RTSPlayerSaveData extends SavedData {
                 int id = ptag.getInt("id");
                 int ticksWithoutCapitol = ptag.getInt("ticksWithoutCapitol");
                 int beaconOwnerTicks = ptag.getInt("beaconOwnerTicks");
-                Faction faction = Faction.valueOf(ptag.getString("faction"));
+                Faction faction;
+                try {
+                    faction = Factions.getFaction(ResourceLocation.parse(ptag.getString("faction")));
+                } catch (Exception e) {
+                    faction = switch (ptag.getString("faction")) {
+                        case "VILLAGERS" -> Factions.VILLAGERS;
+                        case "MONSTERS" -> Factions.MONSTERS;
+                        case "PIGLINS" -> Factions.PIGLINS;
+	                    default -> Factions.NEUTRAL;
+                    };
+                }
                 int[] scores = ptag.contains("scores") ? ptag.getIntArray("scores") : new RTSPlayerScores().getScoreListAsArray();
                 int scenarioRoleIndex = ptag.getInt("scenarioRoleIndex");
 
@@ -89,7 +102,7 @@ public class RTSPlayerSaveData extends SavedData {
             cTag.putInt("id", p.id);
             cTag.putInt("ticksWithoutCapitol", p.ticksWithoutCapitol);
             cTag.putInt("beaconOwnerTicks", p.beaconOwnerTicks);
-            cTag.putString("faction", p.faction.name());
+            cTag.putString("faction", p.faction.key.toString());
             cTag.putIntArray("scores", p.scores.getScoreListAsArray());
             cTag.putInt("scenarioRoleIndex", p.scenarioRoleIndex);
             cTag.putInt("foodEmeraldRate", p.tradeRates.get(TradeAction.FOOD_FOR_EMERALD));
