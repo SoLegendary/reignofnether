@@ -203,7 +203,10 @@ public class ItemServerEvents {
         String itemName = stack.getHoverName().getString();
         UnitItem unitItem = ItemUtil.getUnitItem(stack);
 
-        if (target instanceof Mob && target instanceof UnitInventory inv && !stack.isEmpty() && unitItem != null) {
+        if (target instanceof Mob && target instanceof UnitInventory inv &&
+            (inv.canPickupUnitItems() || player.isCreative()) &&
+            !stack.isEmpty() && unitItem != null
+        ) {
             evt.setCanceled(true);
 
             if (inv.isFull(unitItem)) {
