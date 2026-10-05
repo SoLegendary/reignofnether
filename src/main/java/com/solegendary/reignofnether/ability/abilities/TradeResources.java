@@ -32,7 +32,7 @@ public class TradeResources extends Ability {
     public static final int START_SELL_RATE = 100;
     public static final int MAX_BUY_RATE = 160;
     public static final int MIN_BUY_RATE = 40;
-    public static final int MAX_SELL_RATE = 180;
+    public static final int MAX_SELL_RATE = 140;
     public static final int MIN_SELL_RATE = 20;
     public static final int RATE_STEP = 4;
     public static final int TRADE_AMOUNT = 100;

@@ -83,7 +83,7 @@ Bugfixes
 [✔] Fixed incorrect tooltip numbers on buying resources
 [✔] Added Item Backpacks research at the stockpile/civil portal
     - When researched, humanoid units can pick up items
-[✔] Selling resources for emeralds now incurs 2x the penalty rate, but buying resources is now always 1:1
+[✔] Selling resources for emeralds now incurs 2x the penalty rate, but buying resources is now always 100:80
 
 Languages
 ---------
