@@ -90,6 +90,9 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
+
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
@@ -277,6 +280,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
         this.throwPotionGoal = new ThrowPotionGoal(this);
     }

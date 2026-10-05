@@ -43,13 +43,6 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
         this.blockTarget = blockTarget;
         this.buildingTarget = buildingTarget;
         this.useItem = useItem;
-        System.out.println("");
-        System.out.println("itemInHand: " + itemInHand);
-        System.out.println("itemTarget: " + itemTarget);
-        System.out.println("leTarget: " + leTarget);
-        System.out.println("blockTarget: " + blockTarget);
-        System.out.println("buildingTarget: " + buildingTarget);
-        System.out.println("useItem: " + useItem);
     }
 
     private ItemAction getAction() {

@@ -112,12 +112,12 @@ public class RTSPlayer {
     }
 
     private void initTradeRates() {
-        tradeRates.put(FOOD_FOR_EMERALD, START_BUY_RATE);
-        tradeRates.put(WOOD_FOR_EMERALD, START_BUY_RATE);
-        tradeRates.put(ORE_FOR_EMERALD, START_BUY_RATE);
-        tradeRates.put(EMERALD_FOR_FOOD, START_SELL_RATE);
-        tradeRates.put(EMERALD_FOR_WOOD, START_SELL_RATE);
-        tradeRates.put(EMERALD_FOR_ORE, START_SELL_RATE);
+        tradeRates.put(FOOD_FOR_EMERALD, START_SELL_RATE);
+        tradeRates.put(WOOD_FOR_EMERALD, START_SELL_RATE);
+        tradeRates.put(ORE_FOR_EMERALD, START_SELL_RATE);
+        tradeRates.put(EMERALD_FOR_FOOD, START_BUY_RATE);
+        tradeRates.put(EMERALD_FOR_WOOD, START_BUY_RATE);
+        tradeRates.put(EMERALD_FOR_ORE, START_BUY_RATE);
     }
 
     public boolean isBot() {

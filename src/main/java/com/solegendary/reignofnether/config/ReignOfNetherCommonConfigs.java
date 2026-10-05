@@ -138,6 +138,7 @@ public class ReignOfNetherCommonConfigs {
         ResearchCosts.RESEARCH_MILITIA_BOWS.define(BUILDER);
         ResearchCosts.RESEARCH_LAB_LIGHTNING_ROD.define(BUILDER);
         ResearchCosts.RESEARCH_RESOURCE_CAPACITY.define(BUILDER);
+        ResearchCosts.RESEARCH_ITEM_BACKPACK.define(BUILDER);
         ResearchCosts.RESEARCH_SPIDER_JOCKEYS.define(BUILDER);
         ResearchCosts.RESEARCH_SPIDER_WEBS.define(BUILDER);
         ResearchCosts.RESEARCH_POISON_SPIDERS.define(BUILDER);
@@ -320,6 +321,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry RESEARCH_MILITIA_BOWS = ResourceCostConfigEntry.Research(250,500,0, 160, ResourceCosts.RESEARCH_MILITIA_BOWS, "Militia Bows Research Config");
         public static final ResourceCostConfigEntry RESEARCH_LAB_LIGHTNING_ROD = ResourceCostConfigEntry.Research(0,0,400, 120, ResourceCosts.RESEARCH_LAB_LIGHTNING_ROD, "Lightning Lab Research Config");
         public static final ResourceCostConfigEntry RESEARCH_RESOURCE_CAPACITY = ResourceCostConfigEntry.Research(200,200,0, 90, ResourceCosts.RESEARCH_RESOURCE_CAPACITY, "Stockpile Resource Capacity Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_ITEM_BACKPACK = ResourceCostConfigEntry.Research(0,75,75, 90, ResourceCosts.RESEARCH_ITEM_BACKPACKS, "Item Backpacks Research Config");
         public static final ResourceCostConfigEntry RESEARCH_SPIDER_JOCKEYS = ResourceCostConfigEntry.Research(300,250,0, 100, ResourceCosts.RESEARCH_SPIDER_JOCKEYS, "Spider Jockey Research Config");
         public static final ResourceCostConfigEntry RESEARCH_SPIDER_WEBS = ResourceCostConfigEntry.Research(0,300,300, 140, ResourceCosts.RESEARCH_SPIDER_WEBS, "Spider Webs Research Config");
         public static final ResourceCostConfigEntry RESEARCH_POISON_SPIDERS = ResourceCostConfigEntry.Research(400,0,250, 150, ResourceCosts.RESEARCH_POISON_SPIDERS, "Poison Spider Research Config");

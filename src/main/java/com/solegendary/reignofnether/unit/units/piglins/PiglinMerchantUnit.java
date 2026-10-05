@@ -357,7 +357,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
     }
 
     public void tick() {
-        this.setCanPickUpLoot(false);
+        this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);

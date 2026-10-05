@@ -511,7 +511,7 @@ public interface Unit {
 
     private static void checkAndPickupResources(Unit unit) {
         Mob unitMob = (Mob) unit;
-        if (unitMob.canPickUpLoot()) {
+        if (unitMob.canPickUpLoot() && (!(unit instanceof UnitInventory inv) || inv.isEmpty())) {
             for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
                 if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive()) {
                     if (!Unit.atMaxResources(unit)) {
@@ -537,6 +537,19 @@ public interface Unit {
                     }
                 }
             }
+        }
+    }
+
+    public default void dropAllResources() {
+        if (!((LivingEntity) this).level().isClientSide()) {
+            getItems().removeIf(itemStack -> {
+                if (ResourceSources.getFromItem(itemStack.getItem()) != null) {
+                    ((LivingEntity) this).spawnAtLocation(itemStack);
+                    return true;
+                }
+                return false;
+            });
+            UnitSyncClientboundPacket.sendSyncResourcesPacket(this);
         }
     }
 

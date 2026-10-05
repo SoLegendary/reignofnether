@@ -104,6 +104,9 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
+
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
@@ -523,6 +526,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         this.flyingMoveGoal = new FlyingMoveToTargetGoal(this, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, false);
         this.garrisonGoal = new GarrisonGoal(this);
+        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new UnitRangedAttackGoal<>(this, ATTACK_WINDUP_TICKS);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }

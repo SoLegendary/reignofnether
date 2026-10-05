@@ -73,7 +73,7 @@ public interface ItemShopAddon extends BuildingAddon {
         ArrayList<StockedShopItem> shopStocks = bpl.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
         if (!bpl.isBuilt || shopStocks == null) return;
         if (!bpl.canServeUnit(unit)) return;
-        if (!(unit instanceof UnitInventory inv)) return;
+        if (!(unit instanceof UnitInventory inv && inv.canPickupUnitItems())) return;
         if (((Entity) unit).level().isClientSide()) return;
 
         for (StockedShopItem shopStock : shopStocks) {

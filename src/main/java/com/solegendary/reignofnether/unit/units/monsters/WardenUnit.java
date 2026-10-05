@@ -91,6 +91,9 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
     public GarrisonGoal getGarrisonGoal() { return null; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
+    UnitItemGoal itemGoal;
+    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
+
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
@@ -224,7 +227,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
     public void setAttackTarget(LivingEntity pAttackTarget) { }
 
     public void tick() {
-        this.setCanPickUpLoot(false);
+        this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);

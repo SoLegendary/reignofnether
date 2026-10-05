@@ -139,6 +139,7 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
     final static public float magicDamageResist = 0.5f;
 
     public int lifeTimeTicks = 30 * 20; // 20s
+    public int auraDurationTicks = 30;
 
     final protected HashMap<MobEffect, Integer> auraEffects = new HashMap<>();
 
@@ -190,12 +191,12 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
             updateHighlightBps(level());
         }
 
-        if (!level().isClientSide && tickCount % 20 == 0) {
+        if (!level().isClientSide && tickCount % (auraDurationTicks - 10) == 0) {
             SoundClientboundPacket.playSoundAtPos(SoundAction.BEACON_AMBIENT, blockPosition(), 1.5f);
             for (Mob mob : MiscUtil.getEntitiesWithinRange(position(), AURA_RANGE, Mob.class, level())) {
                 if (mob instanceof Unit unit && AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), getOwnerName()) && !(unit instanceof AbstractTotem)) {
                     for (MobEffect mobEffect : auraEffects.keySet())
-                        mob.addEffect(new MobEffectInstance(mobEffect, 30, auraEffects.get(mobEffect), false, true));
+                        mob.addEffect(new MobEffectInstance(mobEffect, auraDurationTicks, auraEffects.get(mobEffect), false, true));
                 }
             }
         }

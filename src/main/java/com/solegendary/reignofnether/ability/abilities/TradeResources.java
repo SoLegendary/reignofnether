@@ -32,10 +32,9 @@ public class TradeResources extends Ability {
     public static final int START_SELL_RATE = 100;
     public static final int MAX_BUY_RATE = 160;
     public static final int MIN_BUY_RATE = 40;
-    public static final int MAX_SELL_RATE = 160;
-    public static final int MIN_SELL_RATE = 40;
-    public static final int RATE_STEP = 2;
-    public static final int ALT_RATE_STEP = 1;
+    public static final int MAX_SELL_RATE = 140;
+    public static final int MIN_SELL_RATE = 20;
+    public static final int RATE_STEP = 4;
     public static final int TRADE_AMOUNT = 100;
 
     private final TradeAction tradeAction;
@@ -118,9 +117,9 @@ public class TradeResources extends Ability {
             case FOOD_FOR_EMERALD -> I18n.get("abilities.reignofnether.sell_food", TRADE_AMOUNT, rate);
             case WOOD_FOR_EMERALD -> I18n.get("abilities.reignofnether.sell_wood", TRADE_AMOUNT, rate);
             case ORE_FOR_EMERALD -> I18n.get("abilities.reignofnether.sell_ore", TRADE_AMOUNT, rate);
-            case EMERALD_FOR_FOOD -> I18n.get("abilities.reignofnether.buy_food", TRADE_AMOUNT, rate);
-            case EMERALD_FOR_WOOD -> I18n.get("abilities.reignofnether.buy_wood", TRADE_AMOUNT, rate);
-            case EMERALD_FOR_ORE -> I18n.get("abilities.reignofnether.buy_ore", TRADE_AMOUNT, rate);
+            case EMERALD_FOR_FOOD -> I18n.get("abilities.reignofnether.buy_food", rate, TRADE_AMOUNT);
+            case EMERALD_FOR_WOOD -> I18n.get("abilities.reignofnether.buy_wood", rate, TRADE_AMOUNT);
+            case EMERALD_FOR_ORE -> I18n.get("abilities.reignofnether.buy_ore", rate, TRADE_AMOUNT);
         };
     }
 
@@ -200,9 +199,10 @@ public class TradeResources extends Ability {
         int altRate1 = player.tradeRates.get(altTrade1);
         int altRate2 = player.tradeRates.get(altTrade2);
 
-        int newRate = Math.max(minRate, rate - RATE_STEP);
-        int newAltRate1 = Math.min(maxRate, altRate1 + ALT_RATE_STEP);
-        int newAltRate2 = Math.min(maxRate, altRate2 + ALT_RATE_STEP);
+        int rateStep = isBuyAction() ? 0 : RATE_STEP;
+        int newRate = Math.max(minRate, rate - rateStep);
+        int newAltRate1 = Math.min(maxRate, altRate1 + (rateStep / 2));
+        int newAltRate2 = Math.min(maxRate, altRate2 + (rateStep / 2));
 
         player.tradeRates.put(tradeAction, newRate);
         player.tradeRates.put(altTrade1, newAltRate1);

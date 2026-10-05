@@ -1,24 +1,29 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.ParticleRegistrar;
-import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
@@ -29,14 +34,14 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -50,6 +55,8 @@ import java.util.UUID;
 
 @Mixin(Mob.class)
 public abstract class UnitInventoryMobMixin extends LivingEntity implements UnitInventory {
+
+    @Shadow public abstract InteractionResult interact(Player pPlayer, InteractionHand pHand);
 
     @Unique
     private static final String RON$UNIT_ITEMS_KEY = "reignofnether:UnitItems";
@@ -240,7 +247,11 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             set(i, copy);
         }
         boolean added = newItemStack.getCount() < startCount;
-        if (added) syncToClient();
+        if (added) {
+            syncToClient();
+            if (this instanceof Unit unit)
+                unit.dropAllResources();
+        }
         return added;
     }
 
@@ -398,7 +409,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Unique
     private void ron$applyItemAttributes(ItemStack stack) {
-        if (this.level().isClientSide() || stack.isEmpty()) return;
+        if (this.level().isClientSide() || stack.isEmpty() || !(this instanceof HeroUnit)) return;
         UnitItem unitItem = ItemUtil.getUnitItem(stack);
         if (unitItem == null || unitItem.attributes.isEmpty()) return;
 
@@ -438,7 +449,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Unique
     private void ron$removeItemAttributes(ItemStack stack) {
-        if (this.level().isClientSide() || stack.isEmpty()) return;
+        if (this.level().isClientSide() || stack.isEmpty() || !(this instanceof HeroUnit)) return;
         UnitItem unitItem = ItemUtil.getUnitItem(stack);
         CompoundTag tag = stack.getTag();
         if (unitItem == null || tag == null || !tag.hasUUID("uuid")) return;
@@ -539,5 +550,23 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                 ParticleUtil.addParticleExplosion(ParticleRegistrar.LEVEL_UP.get(), 2, level(), position(), 0.05);
             }
         }
+    }
+
+    @Override
+    public boolean canPickupUnitItems() {
+        boolean hasBackpack = false;
+        if (this instanceof Unit unit) {
+            if (level().isClientSide()) {
+                hasBackpack = ResearchClient.hasResearch(ProductionItems.RESEARCH_ITEM_BACKPACKS);
+            } else {
+                hasBackpack = ResearchServerEvents.playerHasResearch(unit.getOwnerName(), ProductionItems.RESEARCH_ITEM_BACKPACKS);
+            }
+        }
+        return ((Mob) (Object) this).canPickUpLoot() && (hasBackpack || (this instanceof HeroUnit));
+    }
+
+    @Override
+    public boolean canUseUnitItems() {
+        return this instanceof HeroUnit;
     }
 }
