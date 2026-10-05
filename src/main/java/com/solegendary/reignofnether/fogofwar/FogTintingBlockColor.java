@@ -8,19 +8,25 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 // Wraps an existing BlockColor and multiplies the result by FOG_TINT_RGB in dark chunks.
-// Biome-tinted blocks are skipped - BiomeColorsMixin handles those.
+// Biome-tinted blocks only get fogged on FOG_ONLY_TINT_INDEX quads - BiomeColorsMixin handles their tinted quads.
 public class FogTintingBlockColor implements BlockColor {
 
-    @Nullable private final BlockColor delegate;
+    // tint index FogTintingBakedModel assigns to originally-untinted quads: fog only, never the block's own colour
+    public static final int FOG_ONLY_TINT_INDEX = 1000;
 
-    public FogTintingBlockColor(@Nullable BlockColor delegate) {
+    @Nullable private final BlockColor delegate;
+    private final boolean biomeTinted;
+
+    public FogTintingBlockColor(@Nullable BlockColor delegate, boolean biomeTinted) {
         this.delegate = delegate;
+        this.biomeTinted = biomeTinted;
     }
 
     @Override
     public int getColor(BlockState state, @Nullable BlockAndTintGetter level, @Nullable BlockPos pos, int tintIndex) {
-        int base = (delegate != null) ? delegate.getColor(state, level, pos, tintIndex) : -1;
-        if (pos == null || level == null) return base;
+        boolean fogOnly = tintIndex == FOG_ONLY_TINT_INDEX;
+        int base = (delegate != null && !fogOnly) ? delegate.getColor(state, level, pos, tintIndex) : -1;
+        if (pos == null || level == null || (biomeTinted && !fogOnly)) return base;
 
         int tint = 0;
         if (WorldBorderClientEvents.isOutsideWorldBorder(pos)) {
