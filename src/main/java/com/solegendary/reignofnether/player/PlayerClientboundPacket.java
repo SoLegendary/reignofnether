@@ -55,7 +55,7 @@ public class PlayerClientboundPacket {
     public static void resetRTS(boolean hard) {
         if (hard) {
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                    new PlayerClientboundPacket(PlayerAction.RESET_RTS_HARD, "", 0L ));
+                    new PlayerClientboundPacket(PlayerAction.RESET_RTS_HARD, "", 0L));
         } else {
             PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                     new PlayerClientboundPacket(PlayerAction.RESET_RTS, "", 0L));
