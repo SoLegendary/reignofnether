@@ -20,7 +20,6 @@ Shops
             - Restock
             - Buy cooldown
 
-
 Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
@@ -78,13 +77,11 @@ Bugfixes
 [✔] Fixed large custom buildings having extreme lag while building
 [🟡] Hero data not being wiped on game reset or start?
     - Just delete the actual hero-unit.dat file on reset
-
 [✔] Fixed incorrect tooltip numbers on buying resources
 [✔] Added Item Backpacks research at the stockpile/civil portal
     - When researched, humanoid units can pick up items
     [🟡] retain items when converting (esp. militia!)
 [❌] If a unit picks up resources, it drops all hero items and vice versa
-
 
 Languages
 ---------
