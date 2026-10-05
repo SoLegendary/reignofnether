@@ -24,7 +24,7 @@ public class ResearchItemBackpacks extends ProductionItem {
     public ResearchItemBackpacks() {
         super(cost, ProdDupeRule.DISALLOW);
         this.onComplete = (Level level, ProductionPlacement placement) -> {
-            if (level.isClientSide()) {
+            if (!level.isClientSide()) {
                 ResearchServerEvents.addResearch(placement.ownerName, ProductionItems.RESEARCH_ITEM_BACKPACKS);
             }
         };

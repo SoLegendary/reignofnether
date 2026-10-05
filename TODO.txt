@@ -71,17 +71,19 @@ Bugfixes
 [✔] Evasion chance attribute now works on all units
 [✔] Bears and Zoglins now respect evasion chance
 [✔] Iron golems and witches can now pick up resources
-[❌] Slimes and Magma cubes unaffected by weakness (and strength?)
-[❌] Bridges don't work on snow/ice?
-    - Test on villagers campaign #3
 [✔] Fixed large custom buildings having extreme lag while building
 [🟡] Hero data not being wiped on game reset or start?
     - Just delete the actual hero-unit.dat file on reset
+
+[❌] Disabling doDaylightCycle messes up the time
+[❌] Slimes and Magma cubes unaffected by weakness (and strength?)
+[❌] Bridges don't work on snow/ice?
+    - Test on villagers campaign #3
+
 [✔] Fixed incorrect tooltip numbers on buying resources
 [✔] Added Item Backpacks research at the stockpile/civil portal
     - When researched, humanoid units can pick up items
-    [🟡] retain items when converting (esp. militia!)
-[❌] If a unit picks up resources, it drops all hero items and vice versa
+[✔] Selling resources for emeralds now incurs 2x the penalty rate, but buying resources is now always 1:1
 
 Languages
 ---------

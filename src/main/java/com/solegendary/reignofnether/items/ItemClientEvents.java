@@ -106,7 +106,7 @@ public class ItemClientEvents {
         return ENABLED &&
                 le instanceof UnitInventory inv &&
                 le instanceof Unit unit &&
-                (unit.getItemGoal() != null || !inv.isEmpty());
+                (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null));
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {

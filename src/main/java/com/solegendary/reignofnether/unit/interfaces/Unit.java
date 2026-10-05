@@ -545,6 +545,19 @@ public interface Unit {
         }
     }
 
+    public default void dropAllResources() {
+        if (!((LivingEntity) this).level().isClientSide()) {
+            getItems().removeIf(itemStack -> {
+                if (ResourceSources.getFromItem(itemStack.getItem()) != null) {
+                    ((LivingEntity) this).spawnAtLocation(itemStack);
+                    return true;
+                }
+                return false;
+            });
+            UnitSyncClientboundPacket.sendSyncResourcesPacket(this);
+        }
+    }
+
     private static void checkAndPickupEquipment(Unit unit) {
         Mob unitMob = (Mob) unit;
         for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
