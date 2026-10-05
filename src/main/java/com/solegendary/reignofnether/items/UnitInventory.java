@@ -33,4 +33,6 @@ public interface UnitInventory {
     boolean checkManaCostAndCooldown(UnitItem unitItem, ItemStack itemStack);
     boolean isHolding(UnitItem unitItem);
     boolean isHoldingActive(UnitItem unitItem);
+    boolean canPickupUnitItems();
+    boolean canUseUnitItems();
 }

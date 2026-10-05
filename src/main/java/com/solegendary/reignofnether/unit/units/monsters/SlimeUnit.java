@@ -307,9 +307,6 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         return false;
     }
 
-    public float getUnitAttackDamage() {
-        return AttackerUnit.super.getUnitAttackDamage() + (attackDamagePerSize * getSize());
-    }
     public float getUnitMaxHealth() { return getMaxHealthForSize(getSize()); }
     public float getKnockbackResistance() {
         return getSize() * (1.0f / 6);
@@ -331,8 +328,8 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
         this.refreshDimensions();
         this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(getUnitMaxHealth());
         this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(getBaseMovementSpeed());
-        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0);
-        this.getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get()).setBaseValue(0);
+        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(attackDamagePerSize * getSize());
+        this.getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get()).setBaseValue(attackDamagePerSize * getSize());
         this.getAttribute(Attributes.KNOCKBACK_RESISTANCE).setBaseValue(getKnockbackResistance());
 
         if (pResetHealth)
@@ -407,10 +404,10 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
     public static AttributeSupplier.Builder createAttributes() {
         return Unit.createDefaultAttributes()
                 .add(Attributes.MOVEMENT_SPEED, SlimeUnit.movementSpeed)
-                .add(Attributes.ATTACK_DAMAGE, SlimeUnit.attackDamagePerSize)
+                .add(Attributes.ATTACK_DAMAGE, SlimeUnit.attackDamagePerSize * 2)
                 .add(Attributes.MAX_HEALTH, 10)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamagePerSize)
+                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamagePerSize * 2)
                 .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), 2)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)

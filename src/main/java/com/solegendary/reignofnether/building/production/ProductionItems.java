@@ -80,6 +80,7 @@ public class ProductionItems {
     public static final ResearchMilitiaBows RESEARCH_MILITIA_BOWS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "militia_bows"), new ResearchMilitiaBows());
     public static final ResearchLabLightningRod RESEARCH_LAB_LIGHTNING_ROD = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "lab_lightning_rod"), new ResearchLabLightningRod());
     public static final ResearchResourceCapacity RESEARCH_RESOURCE_CAPACITY = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_capacity"), new ResearchResourceCapacity());
+    public static final ResearchItemBackpacks RESEARCH_ITEM_BACKPACKS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "item_backpacks"), new ResearchItemBackpacks());
     public static final ResearchSpiderJockeys RESEARCH_SPIDER_JOCKEYS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "spider_jockeys"), new ResearchSpiderJockeys());
     public static final ResearchPoisonSpiders RESEARCH_POISON_SPIDERS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_poison_spiders"), new ResearchPoisonSpiders());
     public static final ResearchHusks RESEARCH_HUSKS = register(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_husks"), new ResearchHusks());

@@ -6,11 +6,15 @@ import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
+import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemShopClientboundPacket;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.research.ResearchClient;
+import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.research.researchItems.ResearchItemBackpacks;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -43,13 +47,14 @@ public class ItemShopPlacement extends ProductionPlacement {
     }
 
     public boolean canServeUnit(Unit unit) {
-        if (unit instanceof LivingEntity le && unit instanceof UnitInventory) {
+        if (unit instanceof Mob mob && unit instanceof UnitInventory inv && inv.canPickupUnitItems()) {
             boolean friendly;
-            if (le.level().isClientSide())
+            if (mob.level().isClientSide()) {
                 friendly = AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), ownerName);
-            else
+            } else {
                 friendly = AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), ownerName);
-            return friendly && isPosInsideBuilding(le.getOnPos(), UNIT_SERVE_RANGE);
+            }
+            return friendly && isPosInsideBuilding(mob.getOnPos(), UNIT_SERVE_RANGE);
         }
         return false;
     }

@@ -37,7 +37,7 @@ public class HeroServerEvents {
         if (evt.getEntity().level().isClientSide())
             return;
 
-        if (evt.getEntity() instanceof HeroUnit && evt.getEntity() instanceof UnitInventory inv) {
+        if (evt.getEntity() instanceof UnitInventory inv && inv.canUseUnitItems()) {
             ItemStack itemStack = inv.get(UnitItems.TOTEM_OF_UNDYING);
             if (itemStack != null) {
                 evt.getEntity().setHealth(evt.getEntity().getMaxHealth() / 2);

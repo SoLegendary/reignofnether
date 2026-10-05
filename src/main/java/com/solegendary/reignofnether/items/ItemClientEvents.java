@@ -106,7 +106,7 @@ public class ItemClientEvents {
         return ENABLED &&
                 le instanceof UnitInventory inv &&
                 le instanceof Unit unit &&
-                (unit.getItemGoal() != null || !inv.isEmpty());
+                (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null));
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {
@@ -227,9 +227,8 @@ public class ItemClientEvents {
                 inv.swapSlots(actionableInvIndex, uiButton.invIndex);
                 ItemServerboundPacket.swap(((Entity) inv).getId(), actionableInvIndex, uiButton.invIndex);
             } else if (hudMousedOverButton != null &&
-                    hudMousedOverButton.entity instanceof HeroUnit &&
                     hudMousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
-                    hudMousedOverButton.entity instanceof UnitInventory) {
+                    hudMousedOverButton.entity instanceof UnitInventory inv1 && inv1.canPickupUnitItems()) {
                 Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
                 if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED) {
                     // Give via group button
@@ -244,8 +243,8 @@ public class ItemClientEvents {
                 if (!UnitClientEvents.getPreselectedUnits().isEmpty()) {
                     LivingEntity le = UnitClientEvents.getPreselectedUnits().get(0);
                     Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(le);
-                    if (le instanceof HeroUnit &&
-                        le instanceof UnitInventory &&
+                    if (le instanceof UnitInventory inv1 &&
+                        inv1.canPickupUnitItems() &&
                         le != HudClientEvents.hudSelectedEntity &&
                         (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED)) {
                         // Give via direct entity
