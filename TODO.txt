@@ -57,9 +57,9 @@ Quality of Life
 [✔] Added passive icons
 
 [✔] Added new mob effects:
-    [🟡] - vigor (-33% cooldown reduction per level)
-     - phasing (can walk through mobs and ignore knockback)
-     - night_warping (+2 night radius per level)
+    - vigor (-33% cooldown reduction per level)
+    - phasing (can walk through mobs and ignore knockback)
+    - night_warping (+2 night radius per level)
 
 [❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
 
@@ -67,15 +67,14 @@ Quality of Life
 
 Bugfixes
 --------
-[❌] Grass blocks are tinted weirdly even when fog of war is off
-[🟡] Units that spawn outside of client render range are now still counted to population totals
+[✔] Grass blocks are tinted weirdly even when fog of war is off
+[✔] Units that spawn outside of client render range are now still counted to population totals
+[✔] Evasion chance attribute now works on all units
+[✔] Bears and Zoglins now respect evasion chance
+[✔] Iron golems and witches can now pick up resources
+[❌] Slimes and Magma cubes unaffected by weakness (and strength?)
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
-[🟡] Evasion chance attribute now works on all units
-[🟡] Bears and Zoglins now respect evasion chance
-[✔] Iron golems and witches can now pick up resources
-[🟡] Clarified in the tutorial that only humanoid non-hero units can pick up resources
-[❌] Slimes and Magma cubes unaffected by weakness (and strength?)
 [✔] Fixed large custom buildings having extreme lag while building
 [🟡] Hero data not being wiped on game reset or start?
     - Just delete the actual hero-unit.dat file on reset

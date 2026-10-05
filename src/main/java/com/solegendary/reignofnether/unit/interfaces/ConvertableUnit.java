@@ -29,7 +29,7 @@ public interface ConvertableUnit {
 
         if (this instanceof UnitInventory inv1 && newEntity instanceof UnitInventory inv2)
             for (int i = 0; i < UnitInventory.MAX_INVENTORY_SIZE; i++)
-                inv2.set(i, inv1.get(0));
+                inv2.set(i, inv1.get(i));
 
         float maxHealthDiff = newEntity.getMaxHealth() - oldEntity.getMaxHealth();
 
