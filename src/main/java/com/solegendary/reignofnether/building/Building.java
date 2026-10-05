@@ -32,7 +32,7 @@ public abstract class Building {
     public final boolean isCapitol;
     public Block portraitBlock; // block rendered in the portrait GUI to represent this building
     public boolean canAcceptResources = false; // can workers drop off resources here?
-    private Faction faction = Factions.NONE;
+    private Faction faction;
 
     // chance for a mini explosion to destroy extra blocks if a player is breaking it
     // should be higher for large fragile buildings so players don't take ages to destroy it
@@ -105,7 +105,7 @@ public abstract class Building {
     }
     
     public Faction getFaction() {
-        return this.faction;
+        return this.faction == null ? Factions.NONE : this.faction;
     }
 
     public int getUpgradeLevel(BuildingPlacement placement) {
