@@ -118,9 +118,9 @@ public class TradeResources extends Ability {
             case FOOD_FOR_EMERALD -> I18n.get("abilities.reignofnether.sell_food", TRADE_AMOUNT, rate);
             case WOOD_FOR_EMERALD -> I18n.get("abilities.reignofnether.sell_wood", TRADE_AMOUNT, rate);
             case ORE_FOR_EMERALD -> I18n.get("abilities.reignofnether.sell_ore", TRADE_AMOUNT, rate);
-            case EMERALD_FOR_FOOD -> I18n.get("abilities.reignofnether.buy_food", TRADE_AMOUNT, rate);
-            case EMERALD_FOR_WOOD -> I18n.get("abilities.reignofnether.buy_wood", TRADE_AMOUNT, rate);
-            case EMERALD_FOR_ORE -> I18n.get("abilities.reignofnether.buy_ore", TRADE_AMOUNT, rate);
+            case EMERALD_FOR_FOOD -> I18n.get("abilities.reignofnether.buy_food", rate, TRADE_AMOUNT);
+            case EMERALD_FOR_WOOD -> I18n.get("abilities.reignofnether.buy_wood", rate, TRADE_AMOUNT);
+            case EMERALD_FOR_ORE -> I18n.get("abilities.reignofnether.buy_ore", rate, TRADE_AMOUNT);
         };
     }
 
