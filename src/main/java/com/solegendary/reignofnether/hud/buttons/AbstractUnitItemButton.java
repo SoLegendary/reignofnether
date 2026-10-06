@@ -1,11 +1,14 @@
 package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
@@ -110,10 +113,11 @@ public abstract class AbstractUnitItemButton extends Button {
     }
 
     public boolean hasUseAction() {
-        return this.unitItem.onUse != null ||
+        return HudClientEvents.hudSelectedEntity instanceof UnitInventory inv && inv.canUseItem(this.unitItem) &&
+                (this.unitItem.onUse != null ||
                 this.unitItem.onUseEntity != null ||
                 this.unitItem.onUseBuilding != null ||
-                this.unitItem.onUseGround != null;
+                this.unitItem.onUseGround != null);
     }
 
     // scale down and recentre
