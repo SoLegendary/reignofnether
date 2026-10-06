@@ -8,7 +8,7 @@ public class FoilableItem extends Item {
     private final boolean isFoil;
 
     public FoilableItem(Properties pProperties) {
-        super(pProperties);
+        super(pProperties.fireResistant());
         this.isFoil = false;
     }
 

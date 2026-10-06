@@ -39,6 +39,7 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -1265,6 +1266,7 @@ public class HudClientEvents {
 
                 // worker count assigned to each resource
                 String finalSelPlayerName = selPlayerName;
+                RTSPlayer rtsPlayer = PlayerClientEvents.getPlayer(finalSelPlayerName);
 
                 int numWorkersHunting = UnitClientEvents.getAllUnits()
                     .stream()
@@ -1273,15 +1275,17 @@ public class HudClientEvents {
                     .toList()
                     .size();
 
-                int numWorkersAssigned = 0;
+                int numberInSquare = 0;
                 // we can only see ReturnResourcesGoal data on server, so we can't use that here
                 if (resName == ResourceName.NONE) {
-                    numWorkersAssigned = UnitClientEvents.getAllUnits()
-                        .stream()
-                        .filter(u -> u instanceof WorkerUnit
-                                && ((Unit) u).getOwnerName().equals(finalSelPlayerName))
-                        .toList()
-                        .size();
+                    numberInSquare = UnitClientEvents.getAllUnits()
+                            .stream()
+                            .filter(u -> u instanceof WorkerUnit
+                                    && ((Unit) u).getOwnerName().equals(finalSelPlayerName))
+                            .toList()
+                            .size();
+                } else if (resName == ResourceName.EMERALD && rtsPlayer != null) {
+                    numberInSquare = rtsPlayer.itemsDropped;
                 } else {
                     for (LivingEntity le : UnitClientEvents.getAllUnits()) {
                         if (le instanceof Unit u && le instanceof WorkerUnit wu && u.getOwnerName()
@@ -1294,20 +1298,20 @@ public class HudClientEvents {
                                 if (resName == ResourceName.FOOD && res.food > 0
                                     || resName == ResourceName.WOOD && res.wood > 0
                                     || resName == ResourceName.ORE && res.ore > 0) {
-                                    numWorkersAssigned += 1;
+                                    numberInSquare += 1;
                                     alreadyAssigned = true;
                                 }
                             }
                             if (!alreadyAssigned && wu.getGatherResourceGoal()
                                 .getTargetResourceName()
                                 .equals(resName)) {
-                                numWorkersAssigned += 1;
+                                numberInSquare += 1;
                             }
                         }
                     }
                 }
                 if (resName == ResourceName.FOOD) {
-                    numWorkersAssigned += numWorkersHunting;
+                    numberInSquare += numWorkersHunting;
                 }
 
                 hudZones.add(MyRenderer.renderIconFrameWithBg(evt.getGuiGraphics(),
@@ -1320,7 +1324,7 @@ public class HudClientEvents {
 
                 evt.getGuiGraphics().drawCenteredString(
                         MC.font,
-                        String.valueOf(numWorkersAssigned),
+                        String.valueOf(numberInSquare),
                         blitX + 69 + (iconFrameSize / 2),
                         blitY + (iconSize / 2) + 1,
                         0xFFFFFF
@@ -1332,6 +1336,7 @@ public class HudClientEvents {
 
             blitY = resourceBlitYStart;
             final String finalSelPlayerName = selPlayerName;
+            RTSPlayer rtsPlayer = PlayerClientEvents.getPlayer(finalSelPlayerName);
             String[] resourceNames2;
             if (ItemClientEvents.ENABLED) {
                 resourceNames2 = new String[] { "food", "wood", "ore", "emerald", "population" };
@@ -1355,7 +1360,7 @@ public class HudClientEvents {
                 }
                 if (mouseX >= blitX + 69 && mouseY >= blitY && mouseX < blitX + 69 + iconFrameSize
                     && mouseY < blitY + iconFrameSize) {
-                    List<FormattedCharSequence> tooltipNumber;
+                    List<FormattedCharSequence> tooltipInSquare;
                     if (resourceName.equals("population")) {
                         int numWorkers = UnitClientEvents.getAllUnits()
                             .stream()
@@ -1363,21 +1368,20 @@ public class HudClientEvents {
                                 && ((Unit) u).getOwnerName().equals(finalSelPlayerName))
                             .toList()
                             .size();
-                        tooltipNumber = List.of(fcs(I18n.get("hud.reignofnether.total_workers", numWorkers)));
+                        tooltipInSquare = List.of(fcs(I18n.get("hud.reignofnether.total_workers", numWorkers)));
                     } else if (resourceName.equals("emerald")) {
-                        if (GameruleClient.randomItemDrops != RandomItemDropRule.DISABLED && PlayerClientEvents.getRTSPlayer() != null) {
-                            tooltipNumber = List.of(
-                                    fcs(I18n.get("hud.reignofnether.items_found", PlayerClientEvents.getRTSPlayer().itemsDropped)),
+                        if (GameruleClient.randomItemDrops != RandomItemDropRule.DISABLED && rtsPlayer != null) {
+                            tooltipInSquare = List.of(
+                                    fcs(I18n.get("hud.reignofnether.items_found", rtsPlayer.itemsDropped)),
                                     fcs(I18n.get("hud.reignofnether.items_hint"))
                             );
                         } else {
-                            tooltipNumber = List.of(fcs("-"));
+                            tooltipInSquare = List.of(fcs("-"));
                         }
                     } else {
-                        tooltipNumber = List.of(fcs(I18n.get("hud.reignofnether.workers_on_" + resourceName)));
+                        tooltipInSquare = List.of(fcs(I18n.get("hud.reignofnether.workers_on_" + resourceName)));
                     }
-                    if (!resourceName.equals("emerald"))
-                        MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipNumber, mouseX + 5, mouseY);
+                    MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipInSquare, mouseX + 5, mouseY);
                 }
                 blitY += iconFrameSize - 1;
             }

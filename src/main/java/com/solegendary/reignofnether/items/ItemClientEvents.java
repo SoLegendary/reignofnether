@@ -20,6 +20,8 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -106,6 +108,7 @@ public class ItemClientEvents {
         return ENABLED &&
                 le instanceof UnitInventory inv &&
                 le instanceof Unit unit &&
+                Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() <= 0 &&
                 (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null && MC.player != null &&
                         AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), MC.player.getName().getString())));
     }

@@ -68,6 +68,8 @@ Quality of Life
 [❌] Villager profession bonuses as passive icons
 [❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
 [❌] Datapack to return no-cave generation
+[❌] /rtsapi-set-scenario-role
+    - "only works before game start and role is empty, not for in game"
 
 Bugfixes
 --------
@@ -92,6 +94,9 @@ Bugfixes
     - Fixed random item drops sometimes being disabled
     - Added emeralds to the held resources UI
     - The number next the emerald resource now shows how many items you've found so far
+    - Hero items can no longer burn
+
+    [❌] let piglins use merchant items on themselves
 
 Languages
 ---------

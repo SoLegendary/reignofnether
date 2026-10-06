@@ -62,6 +62,7 @@ import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -72,6 +73,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
@@ -444,17 +446,21 @@ public class UnitClientEvents {
             return;
         }
         // pickup item
-        else if (ItemClientEvents.ENABLED && MC.player != null &&
+        else if (ItemClientEvents.ENABLED &&
                 HudClientEvents.hudSelectedEntity instanceof Unit unit &&
-                unit instanceof UnitInventory inv && preSelItem != null) {
+                unit instanceof UnitInventory inv &&
+                unit instanceof Mob mob &&
+                preSelItem != null) {
 
             if (ResourceSources.getFromItem(preSelItem.getItem().getItem()) != null) {
-                if (inv.isEmpty()) {
+                if (!mob.canPickUpLoot()) {
+                    HudClientEvents.showTemporaryMessage(I18n.get("item.reignofnether.error.cant_hold_resources"));
+                } else if (inv.isEmpty()) {
                     unit.getCheckpoints().clear();
                     unit.getCheckpoints().add(new Checkpoint(preSelItem, true));
                     sendUnitCommand(UnitAction.MOVE);
                 } else {
-                    HudClientEvents.showTemporaryMessage("item.reignofnether.error.cant_pick_resources");
+                    HudClientEvents.showTemporaryMessage(I18n.get("item.reignofnether.error.cant_pick_resources"));
                 }
             } else if (ItemUtil.isUnitItem(preSelItem)) {
                 if (inv.canPickupUnitItems()) {
@@ -463,12 +469,12 @@ public class UnitClientEvents {
                     ItemServerboundPacket.pickup(
                             HudClientEvents.hudSelectedEntity.getId(), preSelItem.getId());
                 } else {
-                    HudClientEvents.showTemporaryMessage("item.reignofnether.error.cant_hold_items");
+                    HudClientEvents.showTemporaryMessage(I18n.get("item.reignofnether.error.cant_hold_items"));
                 }
             }
         }
         // follow friendly unit
-        if (preselectedUnits.size() == 1 && !targetingSelf()) {
+        else if (preselectedUnits.size() == 1 && !targetingSelf()) {
             if (hudSelectedEntity instanceof WitchUnit) {
                 sendUnitCommand(UnitAction.THROW_LINGERING_REGEN_POTION);
             } else {

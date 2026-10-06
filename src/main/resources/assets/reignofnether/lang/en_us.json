@@ -190,6 +190,7 @@
     "item.reignofnether.error.full_inventory": "%s's inventory is full",
     "item.reignofnether.error.failed_other": "Failed to give to %s",
     "item.reignofnether.error.cant_hold_items": "Unit can't hold items",
+    "item.reignofnether.error.cant_hold_resources": "Unit can't hold resources",
     "item.reignofnether.error.cant_use_item": "Unit can't use this item",
     "item.reignofnether.error.cant_pick_resources": "Can't hold resources while holding items!",
 
