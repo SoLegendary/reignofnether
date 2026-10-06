@@ -231,9 +231,7 @@ public class ItemClientEvents {
                     hudMousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
                     hudMousedOverButton.entity instanceof UnitInventory inv1) {
                 Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
-                if (!inv1.canPickupUnitItems()) {
-                    HudClientEvents.showTempMessageI18n("item.reignofnether.error.cant_hold_items");
-                } else if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED || SandboxClientEvents.isSandboxPlayer()) {
+                if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED || SandboxClientEvents.isSandboxPlayer()) {
                     // Give via group button
                     unit.getCheckpoints().clear();
                     unit.getCheckpoints().add(new Checkpoint(hudMousedOverButton.entity, true));
@@ -247,7 +245,6 @@ public class ItemClientEvents {
                     LivingEntity le = UnitClientEvents.getPreselectedUnits().get(0);
                     Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(le);
                     if (le instanceof UnitInventory inv1 &&
-                        inv1.canPickupUnitItems() &&
                         le != HudClientEvents.hudSelectedEntity &&
                         (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED)) {
                         // Give via direct entity
@@ -256,7 +253,7 @@ public class ItemClientEvents {
                         ItemServerboundPacket.give(((Entity) inv).getId(), actionableInvUUID, le.getId());
                     }
                 } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
-                        (rl == Relationship.FRIENDLY || rl == Relationship.OWNED) &&
+                        (rl == Relationship.FRIENDLY || rl == Relationship.OWNED || SandboxClientEvents.isSandboxPlayer()) &&
                         actionableUnitItemDrag != null && actionableUnitItemDrag.sellValue > 0) {
                     // sell at market
                     unit.getCheckpoints().clear();

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
@@ -93,6 +94,8 @@ public class ItemServerEvents {
                 if (action == ItemAction.USE) {
                     if (inv.use(ItemUtil.getUUID(itemInHand)))
                         Unit.fullResetBehaviours(unit);
+                } else if (action == ItemAction.GIVE && entity instanceof UnitInventory invTarget && !invTarget.canPickupUnitItems()) {
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_hold_items");
                 } else {
                     ItemEntity itemTarget = (entity instanceof ItemEntity ie) ? ie : null;
                     LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
@@ -112,7 +115,8 @@ public class ItemServerEvents {
                     }
                 }
             } else if (action == ItemAction.DROP && SandboxServer.isAnyoneASandboxPlayer()) {
-                inv.deleteItem(itemUuid);
+                if (inv.deleteItem(itemUuid))
+                    HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.hud.item_deleted");
             } else {
                 HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_use_item");
             }
