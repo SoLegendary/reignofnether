@@ -31,6 +31,7 @@ import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemShopMenu;
+import com.solegendary.reignofnether.items.RandomItemDropRule;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -741,7 +742,7 @@ public class HudClientEvents {
                                 () -> true,
                                 () -> sendUnitCommand(UnitAction.RETURN_RESOURCES_TO_CLOSEST),
                                 null,
-                                List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.drop_off_resources"),
+                                List.of(fcs(I18n.get("hud.reignofnether.drop_off_resources"),
                                         Style.EMPTY
                                 ))
                         );
@@ -860,7 +861,7 @@ public class HudClientEvents {
                                 nextUnitName = HudClientEvents.getModifiedEntityName(nextUnit);
                             }
                             if (!unitName.equals(nextUnitName)) {
-                                tooltipLines.add(FormattedCharSequence.forward("x" + numUnits + " " + capitaliseAndSpace(unitName),
+                                tooltipLines.add(fcs("x" + numUnits + " " + capitaliseAndSpace(unitName),
                                     Style.EMPTY
                                 ));
                                 numUnits = 0;
@@ -985,10 +986,10 @@ public class HudClientEvents {
                     String resourceName = UnitClientEvents.getSelectedUnitResourceTarget().toString();
                     String key = String.format("resources.reignofnether.%s", resourceName.toLowerCase(Locale.ENGLISH));
                     actionButton.tooltipLines = List.of(
-                            FormattedCharSequence.forward(I18n.get("hud.reignofnether" + ".gather_resources",
+                            fcs(I18n.get("hud.reignofnether" + ".gather_resources",
                                     I18n.get(key)
                             ), Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.reignofnether.change_target_resource"), Style.EMPTY)
+                            fcs(I18n.get("hud.reignofnether.change_target_resource"), Style.EMPTY)
                     );
                 }
                 actionButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
@@ -1341,12 +1342,12 @@ public class HudClientEvents {
                 List<FormattedCharSequence> tooltip;
                 String key = String.format("resources.reignofnether.%s", resourceName);
                 if (resourceName.equals("population")) {
-                    tooltip = List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.max_resources",
+                    tooltip = List.of(fcs(I18n.get("hud.reignofnether.max_resources",
                         I18n.get(key),
                         GameruleClient.maxPopulation
-                    ), Style.EMPTY));
+                    )));
                 } else {
-                    tooltip = List.of(FormattedCharSequence.forward(I18n.get(key), Style.EMPTY));
+                    tooltip = List.of(fcs(I18n.get(key)));
                 }
                 if (mouseX >= blitX && mouseY >= blitY && mouseX < blitX + iconFrameSize
                     && mouseY < blitY + iconFrameSize) {
@@ -1354,7 +1355,7 @@ public class HudClientEvents {
                 }
                 if (mouseX >= blitX + 69 && mouseY >= blitY && mouseX < blitX + 69 + iconFrameSize
                     && mouseY < blitY + iconFrameSize) {
-                    List<FormattedCharSequence> tooltipWorkersAssigned;
+                    List<FormattedCharSequence> tooltipNumber;
                     if (resourceName.equals("population")) {
                         int numWorkers = UnitClientEvents.getAllUnits()
                             .stream()
@@ -1362,17 +1363,21 @@ public class HudClientEvents {
                                 && ((Unit) u).getOwnerName().equals(finalSelPlayerName))
                             .toList()
                             .size();
-                        tooltipWorkersAssigned =
-                            List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.total_workers",
-                            numWorkers
-                        ), Style.EMPTY));
+                        tooltipNumber = List.of(fcs(I18n.get("hud.reignofnether.total_workers", numWorkers)));
+                    } else if (resourceName.equals("emerald")) {
+                        if (GameruleClient.randomItemDrops != RandomItemDropRule.DISABLED && PlayerClientEvents.getRTSPlayer() != null) {
+                            tooltipNumber = List.of(
+                                    fcs(I18n.get("hud.reignofnether.items_found", PlayerClientEvents.getRTSPlayer().itemsDropped)),
+                                    fcs(I18n.get("hud.reignofnether.items_hint"))
+                            );
+                        } else {
+                            tooltipNumber = List.of(fcs("-"));
+                        }
                     } else {
-                        tooltipWorkersAssigned =
-                            List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.workers_on_" + resourceName
-                        ), Style.EMPTY));
+                        tooltipNumber = List.of(fcs(I18n.get("hud.reignofnether.workers_on_" + resourceName)));
                     }
                     if (!resourceName.equals("emerald"))
-                        MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipWorkersAssigned, mouseX + 5, mouseY);
+                        MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipNumber, mouseX + 5, mouseY);
                 }
                 blitY += iconFrameSize - 1;
             }

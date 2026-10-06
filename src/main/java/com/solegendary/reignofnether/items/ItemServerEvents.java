@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
@@ -188,6 +190,7 @@ public class ItemServerEvents {
                         while (rtsPlayer.creepScore >= getCreepScoreThreshold(rtsPlayer.itemsDropped)) {
                             dropNextItem(rtsPlayer, killedEntity);
                             rtsPlayer.itemsDropped += 1;
+                            PlayerClientboundPacket.syncItemsDropped(rtsPlayer.name, rtsPlayer.itemsDropped);
                         }
                     }
                 }

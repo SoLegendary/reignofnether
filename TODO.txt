@@ -85,5 +85,13 @@ Bugfixes
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
 
+
+    - Added error messages for units that can't pick up or use items
+    - Units with the backpack upgrade can now use some consumables including health potions and totems
+    - Fixed being unable to pick up resources with direct clicks
+    - Fixed random item drops sometimes being disabled
+    - Added emeralds to the held resources UI
+    - The number next the emerald resource now shows how many items you've found so far
+
 Languages
 ---------

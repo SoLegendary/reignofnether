@@ -151,6 +151,12 @@ public class PlayerClientEvents {
                 bpl.updateButtons();
     }
 
+    public static void setItemsDropped(String playerName, int itemsDropped) {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (playerName.equals(rtsPlayer.name))
+                rtsPlayer.itemsDropped = itemsDropped;
+    }
+
     @SubscribeEvent
     public static void onRegisterCommand(RegisterClientCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("rts-camera").executes((command) -> {

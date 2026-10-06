@@ -97,6 +97,11 @@ public class PlayerClientboundPacket {
                 new PlayerClientboundPacket(PlayerAction.SYNC_BEACON_OWNER_TICKS, playerName, ticks));
     }
 
+    public static void syncItemsDropped(String playerName, long itemsDropped) {
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+                new PlayerClientboundPacket(PlayerAction.SYNC_ITEMS_DROPPED, playerName, itemsDropped));
+    }
+
     public static void setRTSCamera(String playerName, boolean value) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
                 new PlayerClientboundPacket(PlayerAction.SET_RTS_CAMERA, playerName, (long) (value ? 1 : 0)));
@@ -203,6 +208,7 @@ public class PlayerClientboundPacket {
                             case SYNC_BEACON_OWNER_TICKS -> PlayerClientEvents.syncBeaconOwnerTicks(playerName, value1);
                             case SET_RTS_CAMERA -> OrthoviewClientEvents.tryToSetCamera(playerName, value1 == 1L);
                             case SET_MARKET_RATE -> PlayerClientEvents.setMarketRate(tradeAction, playerName, Math.toIntExact(value1));
+                            case SYNC_ITEMS_DROPPED -> PlayerClientEvents.setItemsDropped(playerName, Math.toIntExact(value1));
                         }
                         success.set(true);
                     });

@@ -191,6 +191,7 @@
     "item.reignofnether.error.failed_other": "Failed to give to %s",
     "item.reignofnether.error.cant_hold_items": "Unit can't hold items",
     "item.reignofnether.error.cant_use_item": "Unit can't use this item",
+    "item.reignofnether.error.cant_pick_resources": "Can't hold resources while holding items!",
 
     "item.reignofnether.hud.expand_hint": "Hold Shift for details",
     "item.reignofnether.hud.mana": "Mana: %d",
@@ -1119,6 +1120,8 @@
     "hud.reignofnether.workers_on_food": "Workers on food",
     "hud.reignofnether.workers_on_wood": "Workers on wood",
     "hud.reignofnether.workers_on_ore": "Workers on ore",
+    "hud.reignofnether.items_found": "Items found: %d",
+    "hud.reignofnether.items_hint": "Kill neutral enemies for emeralds and items",
     "hud.reignofnether.max_resources": "%s (Max: %d)",
     "hud.reignofnether.players_resources": "%s's resources",
     "hud.reignofnether.you_are_spectator": "You are a spectator",
