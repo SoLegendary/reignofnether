@@ -327,7 +327,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null && unitItem.onUse != null && checkManaCostAndCooldown(unitItem, itemStack)) {
+            if (unitItem != null && canUseItem(unitItem) && unitItem.onUse != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUse.test(unit)) {
                     CompoundTag tag = itemStack.getTag();
                     if (itemStack.getTag() != null && unitItem.toggleActiveOnUse) {
@@ -341,6 +341,8 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                 } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use");
                 }
+            } else if (unitItem != null && !canUseItem(unitItem)) {
+                HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_use_item");
             }
         }
         return false;
@@ -539,7 +541,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             for (ItemStack itemStack : getAllItems()) {
                 if (itemStack.getTag() != null && itemStack.getTag().hasUUID("uuid")) {
                     UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-                    if (unitItem != null && unitItem.forceAutocast &&
+                    if (unitItem != null && unitItem.forceAutocast && canUseItem(unitItem) &&
                         isOffCooldown(unitItem, itemStack) && canAffordManaCost(unitItem)) {
                         UUID itemUUID = itemStack.getTag().getUUID("uuid");
                         use(itemUUID);
@@ -566,7 +568,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public boolean canUseUnitItems() {
-        return this instanceof HeroUnit;
+    public boolean canUseItem(UnitItem unitItem) {
+        return this instanceof HeroUnit || (unitItem != null && UnitItems.NON_UNIT_USEABLE_ITEMS.contains(unitItem));
     }
 }

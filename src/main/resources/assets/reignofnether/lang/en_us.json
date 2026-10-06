@@ -189,6 +189,8 @@
     "item.reignofnether.error.not_enough_mana": "Not enough mana",
     "item.reignofnether.error.full_inventory": "%s's inventory is full",
     "item.reignofnether.error.failed_other": "Failed to give to %s",
+    "item.reignofnether.error.cant_hold_items": "Unit can't hold items",
+    "item.reignofnether.error.cant_use_item": "Unit can't use this item",
 
     "item.reignofnether.hud.expand_hint": "Hold Shift for details",
     "item.reignofnether.hud.mana": "Mana: %d",
@@ -1531,7 +1533,7 @@
     "tutorial.reignofnether.hunt_pig2": "Select any villager, then RIGHT-CLICK an animal and wait for it to be killed. Make sure that villager doesn't already have a full inventory.",
     "tutorial.reignofnether.empty_pockets": "Make sure your worker isn't holding any other resources!",
     "tutorial.reignofnether.tip.dropped": "TIP: If your worker can't hold all the food after hunting an animal, it will drop to the ground.",
-    "tutorial.reignofnether.tip.pick_up": "TIP: Dropped items like food and saplings can be picked by any humanoid non-hero unit and returned for resources.",
+    "tutorial.reignofnether.tip.pick_up": "TIP: Dropped items like food and saplings can be picked by any humanoid unit and returned for resources.",
     "tutorial.reignofnether.great_work": "Great work!",
     "tutorial.reignofnether.return_food": "Your villager should now return the food to your town centre, but if they aren't, simply select the villager and RIGHT-CLICK your Town Centre.",
     "tutorial.reignofnether.return_food2": "Select your villager that hunted the pig and RIGHT-CLICK your Town Centre.",

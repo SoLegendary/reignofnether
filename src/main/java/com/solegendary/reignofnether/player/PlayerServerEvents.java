@@ -459,7 +459,7 @@ public class PlayerServerEvents {
             );
             Long itemDropSeed = switch (randomItemDropRule) {
                 case DISABLED -> -1L;
-                case ENABLED_NON_STRICT -> random.nextLong();
+                case ENABLED_NON_STRICT -> random.nextLong(1, Long.MAX_VALUE);
                 case ENABLED_STRICT -> ItemServerEvents.RANDOM_UNIT_ITEM_DROPS_SEED;
             };
             rtsPlayers.add(RTSPlayer.getNewPlayer(

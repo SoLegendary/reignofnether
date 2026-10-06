@@ -701,4 +701,13 @@ public class UnitItems {
             TOTEM_OF_PROTECTION,
             TOTEM_OF_CASTING
     );
+
+    public static final List<UnitItem> NON_UNIT_USEABLE_ITEMS = List.of(
+            HEALTH_POTION,
+            POCKET_PORTAL,
+            TOTEM_OF_REGENERATION,
+            TOTEM_OF_SHIELDING,
+            TOTEM_OF_PROTECTION,
+            TOTEM_OF_CASTING
+    );
 }

@@ -12,14 +12,12 @@ import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
-import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -34,16 +32,17 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
-import org.checkerframework.checker.units.qual.C;
 
-import java.util.*;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 public class ItemServerEvents {
 
     public static final boolean ENABLED = UnitItem.ENABLED;
 
     // for making every RTS player have the same drops
-    public static final Long RANDOM_UNIT_ITEM_DROPS_SEED = new Random().nextLong();
+    public static final Long RANDOM_UNIT_ITEM_DROPS_SEED = new Random().nextLong(1, Long.MAX_VALUE);
 
     public static void buyItem(
             Unit unit,
@@ -87,26 +86,36 @@ public class ItemServerEvents {
         ServerLevel level = null;
         if (server != null) level = server.getLevel(Level.OVERWORLD);
 
-        if (unit instanceof UnitInventory inv &&
-            inv.canPickupUnitItems() &&
-            unit.getItemGoal() != null && level != null) {
-            Entity entity = level.getEntity(targetId);
-            ItemStack itemInHand = inv.get(itemUuid);
-            if (action == ItemAction.USE) {
-                if (inv.canUseUnitItems() && inv.use(ItemUtil.getUUID(itemInHand)))
-                    Unit.fullResetBehaviours(unit);
-            } else {
-                ItemEntity itemTarget = (entity instanceof ItemEntity ie) ? ie : null;
-                LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
-                BuildingPlacement buildingTarget = blockTarget != null ? BuildingUtils.findBuilding(false, blockTarget) : null;
-                boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
-                if (inv.canUseUnitItems() || !useItem) {
-                    Unit.fullResetBehaviours(unit);
-                    unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
+        if (unit instanceof UnitInventory inv) {
+            if (inv.canPickupUnitItems() && unit.getItemGoal() != null && level != null) {
+                Entity entity = level.getEntity(targetId);
+                ItemStack itemInHand = inv.get(itemUuid);
+                if (action == ItemAction.USE) {
+                    if (inv.use(ItemUtil.getUUID(itemInHand)))
+                        Unit.fullResetBehaviours(unit);
+                } else {
+                    ItemEntity itemTarget = (entity instanceof ItemEntity ie) ? ie : null;
+                    LivingEntity leTarget = (entity instanceof LivingEntity le2) ? le2 : null;
+                    BuildingPlacement buildingTarget = blockTarget != null ? BuildingUtils.findBuilding(false, blockTarget) : null;
+                    boolean useItem = List.of(ItemAction.USE_ON_BUILDING, ItemAction.USE_ON_BLOCK, ItemAction.USE_ON_ENTITY).contains(action);
+                    boolean canUseItem = false;
+                    if (useItem && itemInHand != null) {
+                        UnitItem unitItem = ItemUtil.getUnitItem(itemInHand);
+                        if (unitItem != null)
+                            canUseItem = inv.canUseItem(unitItem);
+                        if (!canUseItem)
+                            HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_use_item");
+                    }
+                    if (canUseItem || !useItem) {
+                        Unit.fullResetBehaviours(unit);
+                        unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
+                    }
                 }
+            } else if (action == ItemAction.DROP && SandboxServer.isAnyoneASandboxPlayer()) {
+                inv.deleteItem(itemUuid);
+            } else {
+                HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_hold_items");
             }
-        } else if (unit instanceof UnitInventory inv && action == ItemAction.DROP && SandboxServer.isAnyoneASandboxPlayer()) {
-            inv.deleteItem(itemUuid);
         }
     }
 
