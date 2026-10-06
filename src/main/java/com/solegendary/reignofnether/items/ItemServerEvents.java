@@ -114,7 +114,7 @@ public class ItemServerEvents {
             } else if (action == ItemAction.DROP && SandboxServer.isAnyoneASandboxPlayer()) {
                 inv.deleteItem(itemUuid);
             } else {
-                HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_hold_items");
+                HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_use_item");
             }
         }
     }

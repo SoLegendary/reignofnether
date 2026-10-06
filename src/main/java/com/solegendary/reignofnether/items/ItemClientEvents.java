@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
@@ -8,6 +9,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.hud.buttons.AbstractUnitItemButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -18,6 +20,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -94,9 +97,6 @@ public class ItemClientEvents {
     public static void clearRenderedItems() {
         renderedItems.clear();
     }
-    public static ArrayList<ItemEntity> getRenderedItems() {
-        return renderedItems;
-    }
 
     public static boolean hasDragActionItem() {
         return actionableUnitItemDrag != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) && !hasLeftClickAction();
@@ -106,7 +106,8 @@ public class ItemClientEvents {
         return ENABLED &&
                 le instanceof UnitInventory inv &&
                 le instanceof Unit unit &&
-                (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null));
+                (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null && MC.player != null &&
+                        AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), MC.player.getName().getString())));
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {
@@ -228,9 +229,11 @@ public class ItemClientEvents {
                 ItemServerboundPacket.swap(((Entity) inv).getId(), actionableInvIndex, uiButton.invIndex);
             } else if (hudMousedOverButton != null &&
                     hudMousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
-                    hudMousedOverButton.entity instanceof UnitInventory inv1 && inv1.canPickupUnitItems()) {
+                    hudMousedOverButton.entity instanceof UnitInventory inv1) {
                 Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
-                if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED) {
+                if (!inv1.canPickupUnitItems()) {
+                    HudClientEvents.showTempMessageI18n("item.reignofnether.error.cant_hold_items");
+                } else if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED || SandboxClientEvents.isSandboxPlayer()) {
                     // Give via group button
                     unit.getCheckpoints().clear();
                     unit.getCheckpoints().add(new Checkpoint(hudMousedOverButton.entity, true));
