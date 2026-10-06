@@ -2,7 +2,11 @@ package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
@@ -11,22 +15,16 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.BlockPos;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class Mausoleum extends ProductionBuilding implements NightSourceAddon, RangeIndicatorAddon {
 
@@ -59,33 +57,25 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
         setActiveAddon(NightSourceAddon.class, this, true);
     }
 
-    public Faction getFaction() {
-        return Faction.MONSTERS;
-    }
+    
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(name,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/deepslate_tiles.png"),
             hotkey,
             () -> BuildingClientEvents.getBuildingToPlace() == Buildings.MAUSOLEUM,
             () -> false,
             () -> true,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.mausoleum"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(Component.translatable("buildings.reignofnether.mausoleum").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(
-                    I18n.get("buildings.reignofnether.mausoleum.tooltip1"),
-                    Style.EMPTY
-                ),
+                Component.translatable("buildings.reignofnether.mausoleum.tooltip1").getVisualOrderText(),
                 FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.mausoleum.tooltip2",  nightRange), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.mausoleum.tooltip4",  nightRangeReduced), Style.EMPTY)
+                Component.translatable("buildings.reignofnether.mausoleum.tooltip2", nightRange).getVisualOrderText(),
+                Component.translatable("buildings.reignofnether.mausoleum.tooltip3", nightRangeReduced).getVisualOrderText()
             ),
             this
         );

@@ -1,7 +1,18 @@
 package com.solegendary.reignofnether.building.buildings.neutral;
 
-import com.solegendary.reignofnether.ability.abilities.*;
-import com.solegendary.reignofnether.building.*;
+import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+
+import com.solegendary.reignofnether.ability.abilities.BeaconHaste;
+import com.solegendary.reignofnether.ability.abilities.BeaconRegeneration;
+import com.solegendary.reignofnether.ability.abilities.BeaconResistance;
+import com.solegendary.reignofnether.ability.abilities.BeaconStrength;
+import com.solegendary.reignofnether.ability.abilities.BeaconWealth;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingBlockData;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -13,9 +24,9 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -26,8 +37,6 @@ import net.minecraft.world.level.block.Rotation;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class Beacon extends ProductionBuilding {
 
@@ -112,15 +121,15 @@ public class Beacon extends ProductionBuilding {
                     );
                 },
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon"), Style.EMPTY.withBold(true)),
+                        Component.translatable("buildings.reignofnether.beacon").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip2"), Style.EMPTY),
+                        Component.translatable("buildings.reignofnether.beacon.tooltip1").getVisualOrderText(),
+                        Component.translatable("buildings.reignofnether.beacon.tooltip2").getVisualOrderText(),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip4"), Style.EMPTY),
+                        Component.translatable("buildings.reignofnether.beacon.tooltip4").getVisualOrderText(),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.beacon.tooltip3"), Style.EMPTY)
+                        Component.translatable("buildings.reignofnether.beacon.tooltip3").getVisualOrderText()
                 ),
                 this
         );
@@ -142,10 +151,7 @@ public class Beacon extends ProductionBuilding {
         return 0;
     }
 
-    @Override
-    public Faction getFaction() {
-        return Faction.NONE;
-    }
+    
 }
 
 

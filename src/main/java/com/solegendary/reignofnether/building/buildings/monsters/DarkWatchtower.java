@@ -1,23 +1,26 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.faction.Faction;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class DarkWatchtower extends Building implements GarrisonableBuildingAddon {
     public final static int MAX_OCCUPANTS = 3;
@@ -43,11 +46,10 @@ public class DarkWatchtower extends Building implements GarrisonableBuildingAddo
         this.maxHealth = 240d;
     }
 
-    public Faction getFaction() {return Faction.MONSTERS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
             name,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/deepslate_bricks.png"),
@@ -57,13 +59,13 @@ public class DarkWatchtower extends Building implements GarrisonableBuildingAddo
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.MAUSOLEUM) ||
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(
-                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dark_watchtower"), Style.EMPTY.withBold(true)),
+                    Component.translatable("buildings.reignofnether.dark_watchtower").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                     ResourceCosts.getFormattedCost(cost),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dark_watchtower.tooltip1"), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dark_watchtower.tooltip2"), Style.EMPTY),
+                    Component.translatable("buildings.reignofnether.dark_watchtower.tooltip1").getVisualOrderText(),
+                    Component.translatable("buildings.reignofnether.dark_watchtower.tooltip2").getVisualOrderText(),
                     FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("buildings.reignofnether.dark_watchtower.tooltip3", MAX_OCCUPANTS), Style.EMPTY)
+                    Component.translatable("buildings.reignofnether.dark_watchtower.tooltip3", MAX_OCCUPANTS).getVisualOrderText()
             ),
             this
         );

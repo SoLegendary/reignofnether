@@ -2,7 +2,9 @@ package com.solegendary.reignofnether.unit.units.neutral;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItem;
+
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
@@ -10,7 +12,7 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -20,7 +22,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class PolarBearProd extends ProductionItem {
+public class PolarBearProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Polar Bear";
     public final static ResourceCost cost = ResourceCosts.POLAR_BEAR;
@@ -43,9 +45,9 @@ public class PolarBearProd extends ProductionItem {
                 itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/polar_bear.png"),
                 List.of(
-                        fcs(I18n.get("entity.reignofnether.polar_bear_unit"), true),
+	                Component.translatable("entity.reignofnether.polar_bear_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         fcs("", Style.EMPTY),
-                        fcs(I18n.get("entity.reignofnether.polar_bear_unit.tooltip1"))
+	                Component.translatable("entity.reignofnether.polar_bear_unit.tooltip1").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText()
                 )
         );
     }
@@ -58,11 +60,11 @@ public class PolarBearProd extends ProductionItem {
                 () -> false,
                 () -> true,
                 List.of(
-                        fcs(I18n.get("entity.reignofnether.polar_bear_unit"), true),
+                        Component.translatable("entity.reignofnether.polar_bear_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPopAndTime(cost),
                         fcs(""),
-                        fcs(I18n.get("entity.reignofnether.polar_bear_unit.tooltip1"))
+                        Component.translatable("entity.reignofnether.polar_bear_unit.tooltip1").getVisualOrderText()
                 ),
                 this
         );

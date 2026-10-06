@@ -8,7 +8,7 @@ import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.unit.UnitAction;
-import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import net.minecraft.resources.ResourceLocation;
 
@@ -29,14 +29,14 @@ public class StartButtons {
             () -> false,
             () -> false,
             () -> true,
-            () -> PlayerServerboundPacket.startRTS(Faction.NONE, 0d,0d,0d),
+            () -> PlayerServerboundPacket.startRTS(Factions.NONE, 0d,0d,0d),
             null,
             List.of(
                     fcs(LanguageUtil.getTranslation("hud.gamemode.reignofnether.sandbox_confirm"))
             )
     );
     public static Button villagerStartButton = new Button(
-        "Villagers",
+        "VillagersFaction",
             ICON_SIZE,
         ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/villager.png"),
         (Keybinding) null,

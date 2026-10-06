@@ -2,16 +2,21 @@ package com.solegendary.reignofnether.building.buildings.villagers;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.EquipAbility;
-import com.solegendary.reignofnether.ability.abilities.*;
+import com.solegendary.reignofnether.ability.abilities.EquipChainmailChestplate;
+import com.solegendary.reignofnether.ability.abilities.EquipLeatherChestplate;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
-import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.data.DataType;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -20,21 +25,21 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.client.resources.language.I18n;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 
 public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddon {
     private static final EquipLeatherChestplate EQUIP_LEATHER_CHESTPLATE_INSTANCE = new EquipLeatherChestplate();
@@ -87,11 +92,10 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
         setActiveAddon(RangeIndicatorAddon.class, this, true);
     }
 
-    public Faction getFaction() {return Faction.VILLAGERS;}
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = I18n.get("buildings." + getFaction().name().toLowerCase() + "." + key.getNamespace() + "." + key.getPath());
+        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/smithing_table_front.png"),
@@ -101,12 +105,12 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
                 () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS) ||
                         ResearchClient.hasCheat("modifythephasevariance"),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blacksmith"), Style.EMPTY.withBold(true)),
+                        Component.translatable("buildings.reignofnether.blacksmith").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blacksmith.tooltip1"), Style.EMPTY),
+                        Component.translatable("buildings.reignofnether.blacksmith.tooltip1").getVisualOrderText(),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("buildings.reignofnether.blacksmith.tooltip2"), Style.EMPTY)
+                        Component.translatable("buildings.reignofnether.blacksmith.tooltip2").getVisualOrderText()
                 ),
                 this
         );
@@ -153,7 +157,7 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
 
     @Override
     public String getUpgradedName(BuildingPlacement placement) {
-        return I18n.get("buildings.reignofnether.blacksmith.superior");
+        return Component.translatable("buildings.reignofnether.blacksmith.superior").getString();
     }
 
     @Override
