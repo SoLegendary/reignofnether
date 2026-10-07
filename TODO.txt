@@ -53,9 +53,9 @@ Bugfixes
 [❌] Units don't show clientside population until loaded the first time
 [❌] Grass blocks are tinted weirdly even when fog of war is off
 
+[✔] Fixed a crash related to possessing units with anchor points
 [✔] Bears and Zoglins now respect evasion chance
 [✔] Fixed grass blocks being tinted weirdly
-[✔] Fixed a crash related to possessing units with anchor points
 [✔] World generation is now back to its pre-1.3.3 state (no caves, flattened biomes, surface ores)
 [✔] Fixed /gamerule doDaylightCycle messing up the time of day clientside
 [✔] Windcallers and Militia can now be converted by Drowned
