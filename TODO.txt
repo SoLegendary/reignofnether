@@ -82,12 +82,10 @@ Bugfixes
 [🟡] Hero data not being wiped on game reset or start?
     - Just delete the actual hero-unit.dat file on reset
 
-[❌] Disabling doDaylightCycle messes up the time
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
 
-    [❌] let piglins use merchant items on themselves
-
+[❌] let piglins use merchant items on themselves
 
 [✔] Fixed a crash related to possessing units with anchor points
 [✔] World generation is now back to its pre-1.3.3 state (no caves, flattened biomes, surface ores)
