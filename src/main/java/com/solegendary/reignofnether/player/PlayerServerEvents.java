@@ -508,7 +508,7 @@ public class PlayerServerEvents {
                             .above()
                             .above();
                     ((Unit) scoutEntity).setOwnerName(playerName);
-                    scoutEntity.moveTo(bp, isBat ? 2 : 0, 0);
+                    scoutEntity.moveTo(isBat ? bp.offset(0,10,0) : bp, 0, 0);
                     if (!readiedStart)
                         level.addFreshEntity(scoutEntity);
                     startingScout = scoutEntity;
@@ -541,7 +541,7 @@ public class PlayerServerEvents {
                         level.addFreshEntity(startingWorkers.get(i));
                     }
                     if (startingScout != null) {
-                        startingScout.moveTo(bp.offset(0,  isBat ? 3 : 1, 2), 0, 0);
+                        startingScout.moveTo(bp.offset(0,  isBat ? 10 : 1, 2), 0, 0);
                         level.addFreshEntity(startingScout);
                     }
                     var workerIds = new int[startingWorkers.size()];

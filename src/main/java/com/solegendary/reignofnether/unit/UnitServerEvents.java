@@ -562,10 +562,10 @@ public class UnitServerEvents {
                     entityType = EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get();
                 } else if (evt.getEntity() instanceof HoglinUnit) {
                     entityType = EntityRegistrar.ZOGLIN_UNIT.get();
-                } else if (evt.getEntity() instanceof VillagerUnit) {
+                } else if (evt.getEntity() instanceof VillagerUnit || evt.getEntity() instanceof MilitiaUnit) {
                     entityType = EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
-                } else if (evt.getEntity() instanceof VindicatorUnit || evt.getEntity() instanceof PillagerUnit
-                        || evt.getEntity() instanceof EvokerUnit || evt.getEntity() instanceof WitchUnit) {
+                } else if (evt.getEntity() instanceof VindicatorUnit || evt.getEntity() instanceof PillagerUnit || evt.getEntity() instanceof EvokerUnit ||
+                        evt.getEntity() instanceof WitchUnit || evt.getEntity() instanceof WindcallerUnit) {
                     entityType = EntityRegistrar.DROWNED_UNIT.get();
                 }
             }
