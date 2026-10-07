@@ -325,7 +325,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         if (isNextHitBig()) {
             this.getAttribute(Attributes.ATTACK_KNOCKBACK).addTransientModifier(new AttributeModifier("knockback", 1.5f, AttributeModifier.Operation.ADDITION));
             result = super.doHurtTarget(pEntity);
-            if (pEntity instanceof Unit unit && !unit.uninterruptable()) {
+            if (result && pEntity instanceof Unit unit && !unit.uninterruptable()) {
                 ((LivingEntity) unit).addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 40));
             }
             this.getAttribute(Attributes.ATTACK_KNOCKBACK).removeModifiers();
@@ -343,8 +343,9 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
                 int extraHitsLeft = 2;
                 for (Mob mob : closestMobs) {
                     if (UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY && mob.getId() != pEntity.getId()) {
-                        super.doHurtTarget(mob);
-                        mob.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 20));
+                        if (super.doHurtTarget(mob)) {
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 20));
+                        }
                         extraHitsLeft -= 1;
                         if (extraHitsLeft <= 0) {
                             break;

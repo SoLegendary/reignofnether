@@ -53,9 +53,11 @@ Bugfixes
 [❌] Units don't show clientside population until loaded the first time
 [❌] Grass blocks are tinted weirdly even when fog of war is off
 
-[✔] Fixed piglin brutes moving at 1/4 speed instead of 1/2 speed when their shield is raised
-[✔] Fixed heroes sometimes being unable to be revived
-[✔] Fixed monster units being slowed under sunlight before dawn was actually announced
+[✔] Fixed a crash related to possessing units with anchor points
+[✔] World generation is now back to its pre-1.3.3 state (no caves, flattened biomes, surface ores)
+[✔] Fixed /gamerule doDaylightCycle messing up the time of day clientside
+[✔] Windcallers and Militia can now be converted by Drowned
+[✔] Marauders can no longer stun invulnerable or evaded targets
 
 Languages
 ---------
