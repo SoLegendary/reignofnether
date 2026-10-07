@@ -226,7 +226,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     }
 
     public void tick() {
-        this.setCanPickUpLoot(false);
+        this.setCanPickUpLoot(true);
         super.tick();
         Unit.tick(this);
         this.throwPotionGoal.tick();
