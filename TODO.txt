@@ -1,5 +1,5 @@
 
-1.20.1-1.4.4e
+1.20.1-1.4.4f
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -53,6 +53,7 @@ Bugfixes
 [❌] Units don't show clientside population until loaded the first time
 [❌] Grass blocks are tinted weirdly even when fog of war is off
 
+[✔] Fixed grass blocks being tinted weirdly
 [✔] Fixed a crash related to possessing units with anchor points
 [✔] World generation is now back to its pre-1.3.3 state (no caves, flattened biomes, surface ores)
 [✔] Fixed /gamerule doDaylightCycle messing up the time of day clientside
