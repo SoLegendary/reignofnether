@@ -511,7 +511,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
         if (targetEntity instanceof Unit unit && unit.getCost().population <= (amp + 1) * Possess.POP_PER_WRAITH) {
             targetEntity.removeEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get());
             unit.setOwnerName(this.getOwnerName());
-            unit.setAnchor(null);
+            unit.setAnchor(new BlockPos(0,0,0));
             ParticleUtil.addParticleExplosion(ParticleTypes.SCULK_SOUL, 40, level(), targetEntity.getEyePosition(), 0.15f);
             if (!this.level().isClientSide()) {
                 Unit.fullResetBehaviours(unit); // stop the unit's left_click_actions and stop all allied units from attacking it

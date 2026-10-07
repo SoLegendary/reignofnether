@@ -39,7 +39,10 @@ public class ClientPacketMixin {
 
         ci.cancel();
 
-        TimeClientEvents.serverNormDayTime = TimeUtils.normaliseTime(pPacket.getDayTime());
+        // vanilla sends a negative day time when doDaylightCycle is false
+        long dayTime = Math.abs(pPacket.getDayTime());
+
+        TimeClientEvents.serverNormDayTime = TimeUtils.normaliseTime(dayTime);
         TimeClientEvents.serverGameTime = pPacket.getGameTime();
         TimeClientEvents.ticksSinceLastUpdate = 0;
 

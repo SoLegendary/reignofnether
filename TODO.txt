@@ -67,7 +67,6 @@ Quality of Life
 
 [❌] Villager profession bonuses as passive icons
 [❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
-[❌] Datapack to return no-cave generation
 [❌] /rtsapi-set-scenario-role
     - "only works before game start and role is empty, not for in game"
 
@@ -87,16 +86,12 @@ Bugfixes
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
 
-
-    - Added error messages for units that can't pick up or use items
-    - Units with the backpack upgrade can now use some consumables including health potions and totems
-    - Fixed being unable to pick up resources with direct clicks
-    - Fixed random item drops sometimes being disabled
-    - Added emeralds to the held resources UI
-    - The number next the emerald resource now shows how many items you've found so far
-    - Hero items can no longer burn
-
     [❌] let piglins use merchant items on themselves
+
+
+[✔] Fixed a crash related to possessing units with anchor points
+[✔] World generation is now back to its pre-1.3.3 state (no caves, flattened biomes, surface ores)
+[✔] Fixed /gamerule doDaylightCycle messing up the time of day clientside
 
 Languages
 ---------

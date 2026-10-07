@@ -576,7 +576,7 @@ public class UnitClientEvents {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
                 if (entity instanceof Unit unit) {
-                    unit.setAnchor(null);
+                    unit.setAnchor(new BlockPos(0,0,0));
                     break;
                 }
             }
