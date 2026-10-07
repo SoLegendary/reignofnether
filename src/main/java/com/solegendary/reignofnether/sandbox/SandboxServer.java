@@ -76,7 +76,7 @@ public class SandboxServer {
         for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
             for (int entityId : entityIds) {
                 if (entity.getId() == entityId && entity instanceof Unit unit) {
-                    unit.setAnchor(null);
+                    unit.setAnchor(new BlockPos(0,0,0));
                     UnitSyncClientboundPacket.sendRemoveAnchorPosPacket(entity);
                 }
             }
