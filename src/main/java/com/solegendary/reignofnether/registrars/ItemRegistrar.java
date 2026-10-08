@@ -242,6 +242,7 @@ public class ItemRegistrar {
     public static final RegistryObject<Item> SHADOW_SHIFTER = ITEMS.register("shadow_shifter", () -> new FoilableItem(new Item.Properties().rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> POCKET_PORTAL = ITEMS.register("pocket_portal", () -> new FoilableItem(new Item.Properties()));
     public static final RegistryObject<Item> WAR_HORN = ITEMS.register("war_horn", () -> new FoilableItem(new Item.Properties().rarity(Rarity.RARE)));
+    public static final RegistryObject<Item> BELL_OF_ARMS = ITEMS.register("bell_of_arms", () -> new FoilableItem(new Item.Properties().rarity(Rarity.EPIC)));
     public static final RegistryObject<Item> TOTEM_OF_REGENERATION = ITEMS.register("totem_of_regeneration", () -> new FoilableItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> TOTEM_OF_SHIELDING = ITEMS.register("totem_of_shielding", () -> new FoilableItem(new Item.Properties().rarity(Rarity.UNCOMMON)));
     public static final RegistryObject<Item> TOTEM_OF_PROTECTION = ITEMS.register("totem_of_protection", () -> new FoilableItem(new Item.Properties().rarity(Rarity.UNCOMMON)));

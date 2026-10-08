@@ -414,7 +414,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                     }
                     if (hitEntity == pEntity)
                         continue;
-                    boolean hurt = hitEntity.hurt(this.damageSources().generic(), (float) ai.getValue() * Avatar.ATTACK_SPLASH_MULT);
+                    boolean hurt = hitEntity.hurt(this.damageSources().explosion(this, this), (float) ai.getValue() * Avatar.ATTACK_SPLASH_MULT);
                     if (hurt) {
                         hitEntity.knockback(Avatar.KNOCKBACK, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F));
                         this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
@@ -676,7 +676,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 } else {
                     hitEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, maceSlam.stunDuration, 63));
                 }
-                boolean hurt = hitEntity.hurt(this.damageSources().generic(), maceSlam.damage);
+                boolean hurt = hitEntity.hurt(this.damageSources().explosion(this, this), maceSlam.damage);
                 if (hurt) {
                     hitEntity.knockback(MaceSlam.KNOCKBACK, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F));
                     this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));

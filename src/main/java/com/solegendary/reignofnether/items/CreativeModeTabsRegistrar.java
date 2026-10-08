@@ -59,7 +59,6 @@ public class CreativeModeTabsRegistrar {
                             if (item.get() instanceof FoilableItem)
                                 output.accept(item.get());
                         output.accept(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get());
-                        output.accept(Items.BELL);
                         output.accept(Items.SPYGLASS);
                         output.accept(Items.TOTEM_OF_UNDYING);
                     })

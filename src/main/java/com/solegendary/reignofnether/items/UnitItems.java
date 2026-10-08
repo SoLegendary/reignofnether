@@ -598,9 +598,8 @@ public class UnitItems {
             .build();
 
     public static final int BELL_OF_ARMS_RANGE = 20;
-    public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(Items.BELL)
+    public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(ItemRegistrar.BELL_OF_ARMS.get())
             .descId("bell_of_arms")
-            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/bell.png"))
             .type(UnitItemType.ACTIVE)
             .rarity(Rarity.EPIC)
             .toggleActiveOnUse()

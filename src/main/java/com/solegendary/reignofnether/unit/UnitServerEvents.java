@@ -1061,7 +1061,9 @@ public class UnitServerEvents {
         }
 
         if (evt.getSource().getEntity() instanceof AttackerUnit aUnit) {
-            if (RANDOM.nextFloat() < aUnit.getExplosiveChance()) {
+            if (!evt.getSource().is(DamageTypes.EXPLOSION) &&
+                !evt.getSource().is(DamageTypes.PLAYER_EXPLOSION) &&
+                RANDOM.nextFloat() < aUnit.getExplosiveChance() && evt.getAmount() > 0.1f) {
                 doExplosiveHit((LivingEntity) aUnit, evt.getEntity());
             }
             float lifeDmgPerc = aUnit.getLifeStealPercent();
@@ -1110,6 +1112,7 @@ public class UnitServerEvents {
     private static void doExplosiveHit(LivingEntity attacker, LivingEntity pEntity) {
         attacker.level().explode(attacker, null, null, pEntity.getX(), pEntity.getEyeY(), pEntity.getZ(),
                 1.0f, false, Level.ExplosionInteraction.NONE);
+
         AttributeInstance ai = attacker.getAttribute(Attributes.ATTACK_DAMAGE);
 
         if (ai != null) {
@@ -1121,7 +1124,7 @@ public class UnitServerEvents {
                 }
                 if (hitEntity == pEntity)
                     continue;
-                boolean hurt = hitEntity.hurt(attacker.damageSources().generic(), (float) ai.getValue() * EXPLOSIVE_HIT_SPLASH_MULT);
+                boolean hurt = hitEntity.hurt(attacker.damageSources().explosion(attacker, attacker), (float) ai.getValue() * EXPLOSIVE_HIT_SPLASH_MULT);
                 if (hurt) {
                     hitEntity.knockback(EXPLOSIVE_HIT_KNOCKBACK, Mth.sin(attacker.getYRot() * 0.017453292F), -Mth.cos(attacker.getYRot() * 0.017453292F));
                     attacker.setDeltaMovement(attacker.getDeltaMovement().multiply(0.6, 1.0, 0.6));

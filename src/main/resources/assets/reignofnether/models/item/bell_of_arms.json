@@ -1,6 +1,6 @@
 {
     "parent": "minecraft:item/generated",
     "textures": {
-        "layer0": "minecraft:item/bell"
+        "layer0": "reignofnether:item/bell_of_arms"
     }
 }
