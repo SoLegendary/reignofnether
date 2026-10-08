@@ -255,7 +255,7 @@ public class ItemClientEvents {
                         unit.getCheckpoints().add(new Checkpoint(le, true));
                         ItemServerboundPacket.give(((Entity) inv).getId(), actionableInvUUID, le.getId());
                     }
-                } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
+                } else if (bpl instanceof ItemShopPlacement itemShopPlacement && !itemShopPlacement.getStockedItems().isEmpty() &&
                         (rl == Relationship.FRIENDLY || rl == Relationship.OWNED || SandboxClientEvents.isSandboxPlayer()) &&
                         actionableUnitItemDrag != null && actionableUnitItemDrag.sellValue > 0) {
                     // sell at market
@@ -471,10 +471,14 @@ public class ItemClientEvents {
         }
 
         List<Component> buysell = new ArrayList<>();
-        if (unitItem.buyCost > 0)
+
+        int buyCost = stack.getOrCreateTag().contains("buyCost") ? stack.getOrCreateTag().getInt("buyCost") : unitItem.buyCost;
+        if (buyCost > 0)
             buysell.add(Component.translatable("item.reignofnether.hud.buy", unitItem.buyCost)
                     .withStyle(COST_STYLE));
-        if (unitItem.sellValue > 0)
+
+        int sellValue = stack.getOrCreateTag().contains("sellValue") ? stack.getOrCreateTag().getInt("sellValue") : unitItem.sellValue;
+        if (sellValue > 0)
             buysell.add(Component.translatable("item.reignofnether.hud.sell", unitItem.sellValue)
                     .withStyle(COST_STYLE));
 

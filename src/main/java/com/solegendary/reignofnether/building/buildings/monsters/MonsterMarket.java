@@ -68,7 +68,7 @@ public class MonsterMarket extends AbstractMarket {
     }
 
     @Override
-    public ArrayList<StockedShopItem> getStartingItemsAndStock() {
+    public ArrayList<StockedShopItem> getStartingStockedItems() {
         return new ArrayList<>(List.of(
                 new StockedShopItem(UnitItems.HEALTH_POTION, 3, 60 * 20),
                 new StockedShopItem(UnitItems.MANA_POTION, 3, 60 * 20),
@@ -80,7 +80,7 @@ public class MonsterMarket extends AbstractMarket {
     }
 
     @Override
-    public ArrayList<StockedShopItem> getUpgradedItemsAndStock() {
+    public ArrayList<StockedShopItem> getUpgradedStockedItems() {
         return new ArrayList<>(List.of(
                 new StockedShopItem(UnitItems.FROST_WALKER_BOOTS, 1, 600 * 20),
                 new StockedShopItem(UnitItems.STAFF_OF_LIGHTNING, 1, 600 * 20),

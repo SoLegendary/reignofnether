@@ -31,7 +31,7 @@ public interface ItemShopAddon extends BuildingAddon {
     DataType<ArrayList<StockedShopItem>> STOCKED_ITEMS = DataType.createRegistered(
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "stocked_items"),
             (nbt, server) -> { // decode
-                ArrayList<StockedShopItem> itemsAndStock = new ArrayList<>();
+                ArrayList<StockedShopItem> stockedItems = new ArrayList<>();
                 ListTag ltag = nbt.getList("list", Tag.TAG_COMPOUND);
                 for (int i = 0; i < ltag.size(); i++) {
                     CompoundTag tag = ltag.getCompound(i);
@@ -45,15 +45,15 @@ public interface ItemShopAddon extends BuildingAddon {
                                 tag.getInt("maxRestockTicks"),
                                 tag.getInt("restockTicks")
                         );
-                        itemsAndStock.add(stock);
+                        stockedItems.add(stock);
                     }
                 }
-                return itemsAndStock;
+                return stockedItems;
             },
-            itemsAndStock -> { // encode
+            stockedItems -> { // encode
                 CompoundTag tag = new CompoundTag();
                 ListTag ltag = new ListTag();
-                for (StockedShopItem stockedShopItem : itemsAndStock) {
+                for (StockedShopItem stockedShopItem : stockedItems) {
                     CompoundTag tag2 = new CompoundTag();
                     tag2.putString("descId", stockedShopItem.item.descId);
                     tag2.putInt("buyCost", stockedShopItem.getBuyCost());
@@ -102,6 +102,10 @@ public interface ItemShopAddon extends BuildingAddon {
                 }
 
                 ItemStack itemStack = item.getNewItemStack();
+                if (shopStock.buyCost != item.buyCost) {
+                    itemStack.getOrCreateTag().putInt("sellValue", shopStock.buyCost / 2);
+                }
+
                 if (inv.tryAdding(itemStack)) {
                     ItemEntity itemEntity = ((LivingEntity) inv).spawnAtLocation(itemStack);
                     if (itemEntity != null) {

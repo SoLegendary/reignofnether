@@ -629,11 +629,13 @@ public class HudClientEvents {
                                 })
                                 .hotkey(Keybindings.openShop)
                                 .build();
-                        shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
-                        productionButtons.add(shopMenuButton);
-                        renderedButtons.add(shopMenuButton);
-                        blitX += iconFrameSize;
-                        buildingProdRows += 1;
+                        if (!shopMenuButton.isHidden.get()) {
+                            shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                            productionButtons.add(shopMenuButton);
+                            renderedButtons.add(shopMenuButton);
+                            blitX += iconFrameSize;
+                            buildingProdRows += 1;
+                        }
                     }
 
                     if (hudSelectedPlacement instanceof ProductionPlacement selProdPlacement) {

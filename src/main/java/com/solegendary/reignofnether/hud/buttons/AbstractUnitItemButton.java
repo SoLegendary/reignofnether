@@ -97,7 +97,11 @@ public abstract class AbstractUnitItemButton extends Button {
         this.unitItem = unitItem;
         this.itemStack = itemStack;
         this.invUUID = ItemUtil.getUUID(itemStack);
-        this.emeraldValue = unitItem.sellValue;
+        if (itemStack.getOrCreateTag().contains("sellValue")) {
+            this.emeraldValue = itemStack.getOrCreateTag().getInt("sellValue");
+        } else {
+            this.emeraldValue = unitItem.sellValue;
+        }
     }
 
     @Override

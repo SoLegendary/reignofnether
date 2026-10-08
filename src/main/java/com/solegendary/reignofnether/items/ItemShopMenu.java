@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -37,7 +38,7 @@ public class ItemShopMenu {
     private static final int PANEL_PADDING = 10;
     private static final int PANEL_INSET = PANEL_PADDING / 2;
 
-    public static RectZone renderFrame(GuiGraphics guiGraphics, ItemShopAddon shop, int x, int y) {
+    public static @NotNull RectZone renderFrame(GuiGraphics guiGraphics, ItemShopAddon shop, int x, int y) {
         ItemShopPlacement bpl = ItemClientEvents.openItemShop;
         ArrayList<StockedShopItem> stocks = bpl.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
         if (stocks == null)

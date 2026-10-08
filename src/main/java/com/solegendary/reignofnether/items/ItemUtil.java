@@ -46,6 +46,17 @@ public class ItemUtil {
         return entity != null && isUnitItem(entity.getItem());
     }
 
+    // excludes vanilla items that need enchantments and vanilla food
+    @Nullable
+    public static UnitItem getUnitItem(Item item) {
+        if (item == null)
+            return null;
+        for (UnitItem unitItem : UnitItems.ITEMS)
+            if (unitItem.item == item)
+                return unitItem;
+        return null;
+    }
+
     @Nullable
     public static UnitItem getUnitItem(ItemStack itemStack) {
         if (itemStack == null)

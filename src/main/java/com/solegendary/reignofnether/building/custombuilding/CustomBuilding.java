@@ -3,20 +3,20 @@ package com.solegendary.reignofnether.building.custombuilding;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.*;
-import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
-import com.solegendary.reignofnether.building.addon.NetherConvertingAddon;
-import com.solegendary.reignofnether.building.addon.NightSourceAddon;
-import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
+import com.solegendary.reignofnether.building.addon.*;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
-import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.CustomProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.StockedShopItem;
+import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
+import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.resources.*;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -41,11 +41,12 @@ import org.apache.commons.lang3.text.WordUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class CustomBuilding extends ProductionBuilding implements GarrisonableBuildingAddon, NetherConvertingAddon, NightSourceAddon, RangeIndicatorAddon {
+public class CustomBuilding extends ProductionBuilding implements GarrisonableBuildingAddon, NetherConvertingAddon, NightSourceAddon, RangeIndicatorAddon, ItemShopAddon {
     public static final List<Block> INVULNERABLE_BLOCKS = List.of(
             BlockRegistrar.GARRISON_EXIT_BLOCK.get(),
             BlockRegistrar.GARRISON_ENTRY_BLOCK.get(),
@@ -84,6 +85,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
     public int numSpawnBlocks = 0;
     public ArrayList<BuildingCommand> commands = new ArrayList<>(List.of(new BuildingCommand()));
     private final Random random = new Random();
+    public final ArrayList<StockedShopItem> stockedItems = new ArrayList<>();
 
     public CustomBuilding(String structureName, Vec3i structureSize, Block portraitBlock, CompoundTag structureNbt) {
         this(structureName, structureSize, portraitBlock, structureNbt, null, null);
@@ -155,8 +157,9 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                 listTags.add(bb.getBlockNbt().getList("Items", Tag.TAG_COMPOUND));
             }
         }
-
+        checkAndAddShopItems(listTags);
         checkAndAddProductionItems(listTags);
+
         if (this.productions.get().isEmpty())
             this.canSetRallyPoint = false;
 
@@ -167,6 +170,9 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         setActiveAddon(NetherConvertingAddon.class, this, true);
         setActiveAddon(NightSourceAddon.class, this, true);
         setActiveAddon(RangeIndicatorAddon.class, this, true);
+        if (!stockedItems.isEmpty()) {
+            setActiveAddon(ItemShopAddon.class, this, true);
+        }
     }
 
     private static final List<Keybinding> HOTKEYS = List.of(
@@ -181,6 +187,55 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             Keybindings.abilitySlot9,
             Keybindings.abilitySlot10
     );
+
+    // check the chest items for any RoN unit spawn eggs and add production items for them
+    public void checkAndAddShopItems(List<ListTag> itemsLists) {
+        for (ListTag items : itemsLists) {
+            for (Tag tag : items) {
+                try {
+                    CompoundTag itemTag = (CompoundTag) tag;
+                    ResourceLocation itemId = ResourceLocation.tryParse(itemTag.getString("id"));
+                    Item item = ForgeRegistries.ITEMS.getValue(itemId);
+
+                    UnitItem unitItem = ItemUtil.getUnitItem(item);
+                    if (stockedItems.stream().map(si -> si.item).toList().contains(unitItem))
+                        continue;
+
+                    if (unitItem == null)
+                        continue;
+
+                    int buyCost = unitItem.buyCost;
+                    int maxStock = 1;
+                    int restockTicks = 60 * 20;
+                    int startingStock = maxStock;
+
+                    CompoundTag stackNbt = itemTag.contains("tag", Tag.TAG_COMPOUND)
+                            ? itemTag.getCompound("tag")
+                            : null;
+
+                    if (stackNbt != null) {
+                        if (stackNbt.contains("buyCost", Tag.TAG_INT))
+                            buyCost = stackNbt.getInt("buyCost");
+                        if (stackNbt.contains("maxStock", Tag.TAG_INT))
+                            maxStock = stackNbt.getInt("maxStock");
+                        if (stackNbt.contains("startingStock", Tag.TAG_INT))
+                            startingStock = stackNbt.getInt("startingStock");
+                        if (stackNbt.contains("restockTicks", Tag.TAG_INT))
+                            restockTicks = stackNbt.getInt("restockTicks");
+                    }
+                    StockedShopItem stockedItem = new StockedShopItem(
+                            unitItem,
+                            buyCost,
+                            maxStock,
+                            startingStock,
+                            restockTicks
+                    );
+                    stockedItems.add(stockedItem);
+                }
+                catch (Exception e) { }
+            }
+        }
+    }
 
     // check the chest items for any RoN unit spawn eggs and add production items for them
     public void checkAndAddProductionItems(List<ListTag> itemsLists) {
@@ -258,9 +313,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             hotkeyIndex += 1;
                         }
                     }
-                } catch (Exception e) {
-                    continue;
-                }
+                } catch (Exception e) { }
             }
         }
     }
@@ -337,9 +390,16 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         }
     }
 
+    public ArrayList<StockedShopItem> getStockedItems() {
+        return stockedItems;
+    }
+
     @Override
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
-        return new CustomBuildingPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation), false);
+        CustomBuildingPlacement cbp = new CustomBuildingPlacement(this, level, pos, rotation, ownerName,
+                getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation));
+        cbp.getDataStorage().setData(ItemShopAddon.STOCKED_ITEMS, getStockedItems());
+        return cbp;
     }
 
     @Override

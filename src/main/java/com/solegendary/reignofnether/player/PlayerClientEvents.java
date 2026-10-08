@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
@@ -147,7 +148,7 @@ public class PlayerClientEvents {
                 rtsPlayer.tradeRates.put(tradeAction, rate);
 
         for (BuildingPlacement bpl : BuildingClientEvents.getBuildings())
-            if (bpl.getBuilding() instanceof AbstractMarket)
+            if (bpl instanceof ItemShopPlacement shop && !shop.getStockedItems().isEmpty())
                 bpl.updateButtons();
     }
 

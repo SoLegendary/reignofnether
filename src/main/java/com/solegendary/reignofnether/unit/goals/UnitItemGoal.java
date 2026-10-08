@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -14,6 +15,7 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -105,13 +107,17 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                         case DROP -> inv.dropUUID(ItemUtil.getUUID(itemInHand), blockTarget);
                         case SELL -> {
                             BuildingPlacement bpl = BuildingUtils.findBuilding(false, blockTarget);
-                            if (bpl != null && bpl.getBuilding() instanceof AbstractMarket) {
+                            if (bpl instanceof ItemShopPlacement shop && !shop.getStockedItems().isEmpty()) {
                                 inv.deleteItem(ItemUtil.getUUID(itemInHand));
                                 UnitItem unitItem = ItemUtil.getUnitItem(itemInHand);
+
                                 if (mob instanceof Unit unit) {
                                     RTSPlayer rtsPlayer = PlayerServerEvents.getRTSPlayer(unit.getOwnerName());
                                     if (rtsPlayer != null && unitItem != null) {
-                                        Resources res = new Resources(unit.getOwnerName(), 0, 0, 0, unitItem.sellValue);
+                                        int sellValue = itemInHand.getOrCreateTag().contains("sellValue") ?
+                                                itemInHand.getOrCreateTag().getInt("sellValue") : unitItem.sellValue;
+
+                                        Resources res = new Resources(unit.getOwnerName(), 0, 0, 0, sellValue);
                                         ResourcesServerEvents.addSubtractResources(res);
                                         ResourcesClientboundPacket.showFloatingText(res, this.mob.getOnPos());
                                         SoundClientboundPacket.playSoundAtPos(SoundAction.SELL_ITEM, this.mob.getOnPos());

@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.building.buildings.villagers.VillagerMarket
 import com.solegendary.reignofnether.building.production.*;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
@@ -33,7 +32,7 @@ public class ResearchMarketUpgradeVillager extends ProductionItem {
                 placement.changeStructure(VillagerMarket.upgradedStructureName);
                 ArrayList<StockedShopItem> stockedShopItems = placement.getDataStorage().getData(ItemShopAddon.STOCKED_ITEMS);
                 if (stockedShopItems != null) {
-                    stockedShopItems.addAll(market.getUpgradedItemsAndStock());
+                    stockedShopItems.addAll(market.getUpgradedStockedItems());
                     placement.getDataStorage().setData(ItemShopAddon.STOCKED_ITEMS, stockedShopItems);
                 }
             }

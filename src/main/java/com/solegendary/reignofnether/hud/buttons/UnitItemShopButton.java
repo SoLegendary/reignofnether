@@ -44,7 +44,7 @@ public class UnitItemShopButton extends AbstractUnitItemButton {
         );
         this.iconItem = this.itemStack;
         this.stockedShopItem = stockedShopItem;
-        this.emeraldValue = stockedShopItem.item.buyCost;
+        this.emeraldValue = stockedShopItem.buyCost;
     }
 
     @Override
@@ -57,6 +57,7 @@ public class UnitItemShopButton extends AbstractUnitItemButton {
         super.render(guiGraphics, x, y, mouseX, mouseY);
 
         if (stockedShopItem.maxStock >= 0) {
+            guiGraphics.pose().translate(0,0,1);
             MyRenderer.drawScaledString(guiGraphics,
                     MC.font,
                     String.valueOf(stockedShopItem.stock),

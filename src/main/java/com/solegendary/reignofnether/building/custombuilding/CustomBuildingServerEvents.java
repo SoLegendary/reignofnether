@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.custombuilding;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import net.minecraft.core.BlockPos;
@@ -85,7 +86,7 @@ public class CustomBuildingServerEvents {
                     }
                 }
                 customBuildings.add(building);
-                BuildingPlacement placement = new CustomBuildingPlacement(building, level, pos, Rotation.NONE, "", blocks, false);
+                BuildingPlacement placement = building.createBuildingPlacement(level, pos, Rotation.NONE, "");
                 BuildingServerEvents.getBuildings().add(placement);
                 CustomBuildingClientboundPacket.registerCustomBuilding(building);
                 saveCustomBuildings(level);

@@ -167,8 +167,6 @@ public abstract class LivingEntityMixin extends Entity {
             cancellable = true
     )
     protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount, CallbackInfo ci) {
-
-
         // ensure projectiles from units do the damage of the unit, not the item,
         // and that armour and anti-armour effects are considered through absorption
         if ((pDamageSource.is(DamageTypeTags.IS_PROJECTILE) ||

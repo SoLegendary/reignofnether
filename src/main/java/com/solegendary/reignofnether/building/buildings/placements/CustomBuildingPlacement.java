@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.Rotation;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class CustomBuildingPlacement extends ProductionPlacement {
+public class CustomBuildingPlacement extends ItemShopPlacement {
     public final ArrayList<BlockPos> garrisonEntries = new ArrayList<>();
     public final ArrayList<BlockPos> garrisonExits = new ArrayList<>();
     public final ArrayList<BlockPos> spawnBlocks = new ArrayList<>();
@@ -31,8 +31,8 @@ public class CustomBuildingPlacement extends ProductionPlacement {
     public ListTag commandsNbt = new ListTag();
     private final Random random = new Random();
 
-    public CustomBuildingPlacement(CustomBuilding customBuilding, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
-        super(customBuilding, level, originPos, rotation, ownerName, blocks, isCapitol);
+    public CustomBuildingPlacement(CustomBuilding customBuilding, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks) {
+        super(customBuilding, level, originPos, rotation, ownerName, blocks);
 
         for (BuildingBlock bb : blocks) {
             if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_ENTRY_BLOCK.get()) {
