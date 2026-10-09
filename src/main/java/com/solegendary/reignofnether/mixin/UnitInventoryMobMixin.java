@@ -415,7 +415,10 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         UnitItem unitItem = ItemUtil.getUnitItem(stack);
         if (unitItem == null || unitItem.attributes.isEmpty()) return;
 
-        UUID itemUuid = stack.getOrCreateTag().getUUID("uuid");
+        CompoundTag stackTag = stack.getOrCreateTag();
+        if (!stackTag.hasUUID("uuid"))
+            stackTag.putUUID("uuid", UUID.randomUUID());
+        UUID itemUuid = stackTag.getUUID("uuid");
         int i = 0;
         for (Attribute attr : unitItem.attributes.keySet()) {
             AttributeModifier modifier = unitItem.attributes.get(attr);
@@ -511,6 +514,11 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ListTag list = tag.getList(RON$UNIT_ITEMS_KEY, Tag.TAG_COMPOUND);
         for (int i = 0; i < this.unitItems.size(); i++) {
             ItemStack stack = i < list.size() ? ItemStack.of(list.getCompound(i)) : ItemStack.EMPTY;
+            if (!stack.isEmpty()) {
+                CompoundTag t = stack.getOrCreateTag();
+                if (!t.hasUUID("uuid"))
+                    t.putUUID("uuid", UUID.randomUUID());
+            }
             this.unitItems.set(i, stack);
             if (!stack.isEmpty()) ron$applyItemAttributes(stack);
         }
