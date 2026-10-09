@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -291,12 +292,33 @@ public class CustomBuildingMenu {
 
         Button trainableUnitsButton = new IntegerButton(
                 I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.label") + ": " + customBuilding.productions.get().size(),
-                null,
+                () -> {
+                    if (MC.player != null) {
+                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint1"));
+                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint2"));
+                    }
+                },
                 null,
                 getTrainableUnitsTooltips(customBuilding)
         );
         trainableUnitsButton.iconResource = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/fletching_table_front.png");
         buttonsCol1.add(trainableUnitsButton);
+
+        Button buyableItemsButton = new IntegerButton(
+                I18n.get("sandbox.reignofnether.custom_buildings.buyable_items.label") + ": " + customBuilding.stockedItems.size(),
+                () -> {
+                    if (MC.player != null) {
+                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint1"));
+                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint2"));
+                    }
+                },
+                null,
+                List.of(
+                    fcs(I18n.get("sandbox.reignofnether.custom_buildings.buyable_items.tooltip1")),
+                )
+        );
+        buyableItemsButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/item/heart_medallion.png");
+        buttonsCol1.add(buyableItemsButton);
 
         buttonsCol2.add(new BooleanButton(
             I18n.get("sandbox.reignofnether.custom_buildings.set_capturable.label"), customBuilding.capturable,
@@ -442,7 +464,6 @@ public class CustomBuildingMenu {
     private static List<FormattedCharSequence> getTrainableUnitsTooltips(CustomBuilding customBuilding) {
         ArrayList<FormattedCharSequence> tooltips = new ArrayList<>();
         tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.tooltip1")));
-        tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.tooltip2")));
         if (customBuilding.numSpawnBlocks <= 0) {
             tooltips.add(fcsIcons(I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.no_spawn_block")));
         } else if (customBuilding.numSpawnBlocks > 1) {
@@ -459,7 +480,7 @@ public class CustomBuildingMenu {
     private static final int COOLDOWN_EDIT_BOX_WIDTH = 40;
     
     // how many command rows are visible in the scrollable viewport at once
-    private static final int VISIBLE_COMMAND_ROWS = 9;
+    private static final int VISIBLE_COMMAND_ROWS = 10;
     private static final int SCROLLBAR_WIDTH = 6;
     // gap between the delete-command button column and the scrollbar
     private static final int SCROLLBAR_X_OFFSET = COOLDOWN_EDIT_BOX_WIDTH + TEXT_EDIT_BOX_WIDTH + 80;

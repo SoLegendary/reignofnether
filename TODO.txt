@@ -48,22 +48,21 @@ Quality of Life
 [❌] /rtsapi-set-scenario-role
     - "only works before game start and role is empty, not for in game"
 
-[❌] Add new tooltip line to custom building menu for shop items
-    "Buyable items: 0"
-    "To sell items from this building, save its structure
-     with hero items in a chest or other container"
+
 
 Bugfixes
 --------
-[🟡] Hero data not being wiped on game reset or start?
-    - Just delete the actual hero-unit.dat file on reset
-
-[❌] Partially possessed units are showing as fully possessed
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
 
 
+
+
 [✔] Fixed a crash when having 100% explosive hit chance
+[❌] Add new tooltip line to custom building menu for shop items
+    "Buyable items: 0"
+    "To sell items from this building, save its structure
+     with hero items in a chest or other container"
 [❌] let piglins use merchant items on themselves
 
 
