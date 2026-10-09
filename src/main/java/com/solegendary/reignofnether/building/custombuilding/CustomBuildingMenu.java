@@ -294,7 +294,9 @@ public class CustomBuildingMenu {
                 I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.label") + ": " + customBuilding.productions.get().size(),
                 () -> {
                     if (MC.player != null) {
+                        MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint1"));
+                        MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint2"));
                     }
                 },
@@ -308,7 +310,9 @@ public class CustomBuildingMenu {
                 I18n.get("sandbox.reignofnether.custom_buildings.buyable_items.label") + ": " + customBuilding.stockedItems.size(),
                 () -> {
                     if (MC.player != null) {
+                        MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint1"));
+                        MC.player.sendSystemMessage(Component.literal(""));
                         MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint2"));
                     }
                 },
