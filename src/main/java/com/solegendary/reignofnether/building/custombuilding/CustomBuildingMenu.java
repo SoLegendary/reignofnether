@@ -314,7 +314,7 @@ public class CustomBuildingMenu {
                 },
                 null,
                 List.of(
-                    fcs(I18n.get("sandbox.reignofnether.custom_buildings.buyable_items.tooltip1")),
+                    fcs(I18n.get("sandbox.reignofnether.custom_buildings.buyable_items.tooltip1"))
                 )
         );
         buyableItemsButton.iconResource = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/item/heart_medallion.png");
