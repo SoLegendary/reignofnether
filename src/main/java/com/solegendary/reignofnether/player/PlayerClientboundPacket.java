@@ -24,15 +24,16 @@ public class PlayerClientboundPacket {
     TradeAction tradeAction; // for updating market rates
     BlockPos pos;
     boolean isDogPerson;
+    boolean isForLogin;
 
-    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson) {
+    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson, boolean isForLogin) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.ADD_RTS_PLAYER, playerName, id, startPosColorId, faction, isDogPerson));
+                new PlayerClientboundPacket(PlayerAction.ADD_RTS_PLAYER, playerName, id, startPosColorId, faction, isDogPerson, isForLogin));
     }
 
     public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new PlayerClientboundPacket(PlayerAction.ADD_SCENARIO_NPC_RTS_PLAYER, playerName, id, scenarioRoleIndex, faction, true));
+                new PlayerClientboundPacket(PlayerAction.ADD_SCENARIO_NPC_RTS_PLAYER, playerName, id, scenarioRoleIndex, faction, true, true));
     }
 
     public static void removeRTSPlayer(String playerName) {
@@ -121,7 +122,7 @@ public class PlayerClientboundPacket {
         this.isDogPerson = true;
     }
 
-    public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1, int value2, Faction faction, boolean isDogPerson) {
+    public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1, int value2, Faction faction, boolean isDogPerson, boolean isForLogin) {
         this.playerAction = playerAction;
         this.playerName = playerName;
         this.value1 = value1;
@@ -130,6 +131,7 @@ public class PlayerClientboundPacket {
         this.tradeAction = TradeAction.FOOD_FOR_WOOD; // dummy value
         this.pos = new BlockPos(0,0,0);
         this.isDogPerson = isDogPerson;
+        this.isForLogin = isForLogin;
     }
 
     public PlayerClientboundPacket(PlayerAction playerAction, String playerName, Long value1) {
@@ -163,6 +165,7 @@ public class PlayerClientboundPacket {
         this.tradeAction = buffer.readEnum(TradeAction.class);
         this.pos = buffer.readBlockPos();
         this.isDogPerson = buffer.readBoolean();
+        this.isForLogin = buffer.readBoolean();
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -174,6 +177,7 @@ public class PlayerClientboundPacket {
         buffer.writeEnum(this.tradeAction);
         buffer.writeBlockPos(this.pos);
         buffer.writeBoolean(this.isDogPerson);
+        buffer.writeBoolean(this.isForLogin);
     }
 
     // server-side packet-consuming functions
@@ -187,7 +191,7 @@ public class PlayerClientboundPacket {
                             case TELEPORT -> OrthoviewClientEvents.centreCameraOnPosForPlayer(playerName, pos);
                             case DEFEAT -> PlayerClientEvents.defeat(playerName);
                             case VICTORY -> PlayerClientEvents.victory(playerName);
-                            case ADD_RTS_PLAYER -> PlayerClientEvents.addRTSPlayer(playerName, faction, value1, value2, isDogPerson);
+                            case ADD_RTS_PLAYER -> PlayerClientEvents.addRTSPlayer(playerName, faction, value1, value2, isDogPerson, isForLogin);
                             case ADD_SCENARIO_NPC_RTS_PLAYER -> PlayerClientEvents.addScenarioNPCRTSPlayer(playerName, faction, value1, value2);
                             case REMOVE_RTS_PLAYER -> PlayerClientEvents.removeRTSPlayer(playerName);
                             case RESET_RTS -> PlayerClientEvents.resetRTS(false);

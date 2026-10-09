@@ -51,7 +51,6 @@ Quality of Life
 Bugfixes
 --------
 [❌] Units don't show clientside population until loaded the first time
-[❌] Grass blocks are tinted weirdly even when fog of war is off
 
 [🟡] Fixed units partially possessed by wraiths showing as though you own them
 [❌] Fixed heroes sometimes not being trainable by any player

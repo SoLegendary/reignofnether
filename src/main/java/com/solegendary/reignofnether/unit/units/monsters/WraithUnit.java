@@ -497,7 +497,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
 
 
     public void onCastPossess(LivingEntity targetEntity) {
-        if (!level().isClientSide()) return;
+        if (this.level().isClientSide()) return;
 
         MobEffectInstance mei = targetEntity.getEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get());
         int amp = 0;
@@ -527,8 +527,7 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
                     true
             ));
             MiscUtil.addParticleExplosion(ParticleTypes.SCULK_SOUL, 10, level(), targetEntity.getEyePosition(), 0.10f);
-            if (!this.level().isClientSide())
-                SoundClientboundPacket.playSoundAtPos(SoundAction.WRAITH_POSSESS_PARTIAL, targetEntity.blockPosition());
+            SoundClientboundPacket.playSoundAtPos(SoundAction.WRAITH_POSSESS_PARTIAL, targetEntity.blockPosition());
         }
     }
 }

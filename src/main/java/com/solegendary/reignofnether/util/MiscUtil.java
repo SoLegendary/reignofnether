@@ -907,8 +907,9 @@ public class MiscUtil {
             double d2 = rand.nextGaussian() * velocityScale;
             if (level.isClientSide()) {
                 level.addParticle(particleType, pos.x, pos.y, pos.z, d0, d1, d2);
+                level.addParticle(particleType, pos.x, pos.y, pos.z, d0, d1, d2);
             } else {
-                ((ServerLevel) level).sendParticles(particleType, pos.x, pos.y, pos.z, 1, d0, d1, d2, 0);
+                ((ServerLevel) level).sendParticles(particleType, pos.x, pos.y, pos.z, 0, d0, d1, d2, 1.0);
             }
         }
     }
