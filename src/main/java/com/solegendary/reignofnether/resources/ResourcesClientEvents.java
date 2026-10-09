@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -56,7 +57,7 @@ public class ResourcesClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(ScreenEvent.Render evt) {
-        if (MC.level != null && !HudClientEvents.isMouseOverAnyButtonOrHud()) {
+        if (MC.level != null && !HudClientEvents.isMouseOverAnyButtonOrHud() && MC.screen instanceof TopdownGui) {
             BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
             ResourceSource res = ResourceSources.getFromBlockPos(preSelBp, MC.level);
             boolean isItem = false;

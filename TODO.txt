@@ -43,28 +43,6 @@ Quality of Life
 ---------------
 [❌] Create a new homing projectile entity from the ground up
 
-[✔] Added creative tabs for all RTS-related blocks and items:
-    - RTS Mapmaker Blocks
-    - RTS Unit Spawn Eggs
-    - RTS Hero Items
-
-[✔] Reworked the unit armour tooltip for mixed armour types
-
-[✔] Added new attributes:
-     - critical_hit_chance (3x damage)
-     - explosive_hit_chance
-     - building_damage_bonus
-     - lifesteal (% of damage)
-     - mana_on_hit (% of damage)
-     - scale (visual only)
-
-[✔] Added passive icons
-
-[✔] Added new mob effects:
-    - vigor (-33% cooldown reduction per level)
-    - phasing (can walk through mobs and ignore knockback)
-    - night_warping (+2 night radius per level)
-
 [❌] Villager profession bonuses as passive icons
 [❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
 [❌] /rtsapi-set-scenario-role
@@ -77,9 +55,6 @@ Quality of Life
 
 Bugfixes
 --------
-[✔] Units that spawn outside of client render range are now still counted to population totals
-[✔] Evasion chance attribute now works on all units
-[✔] Fixed large custom buildings having extreme lag while building
 [🟡] Hero data not being wiped on game reset or start?
     - Just delete the actual hero-unit.dat file on reset
 
@@ -90,6 +65,8 @@ Bugfixes
 
 [✔] Fixed a crash when having 100% explosive hit chance
 [❌] let piglins use merchant items on themselves
+
+
 
 
 Languages

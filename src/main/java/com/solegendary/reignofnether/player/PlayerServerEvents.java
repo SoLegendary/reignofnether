@@ -376,7 +376,10 @@ public class PlayerServerEvents {
             PlayerClientboundPacket.removeRTSPlayer(playerName);
         }
         for (RTSPlayer rtsPlayer : rtsPlayers) {
-            PlayerClientboundPacket.addRTSPlayer(rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id, rtsPlayer.startPosColorId, rtsPlayer.isDogPerson);
+            PlayerClientboundPacket.addRTSPlayer(
+                    rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id,
+                    rtsPlayer.startPosColorId, rtsPlayer.isDogPerson, true
+            );
         }
 
         if (rtsLocked) {
@@ -473,7 +476,8 @@ public class PlayerServerEvents {
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignResources(playerName);
-            PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId, isDogPerson);
+            PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId, isDogPerson, false);
+            HeroServerEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(playerName));
 
             ServerLevel level = (ServerLevel) serverPlayer.level();
             ArrayList<Entity> startingWorkers = new ArrayList<>();
@@ -575,9 +579,9 @@ public class PlayerServerEvents {
             if (coopMode)
                 AlliancesServerEvents.applyCoopAlliances();
 
+
             PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
             saveRTSPlayers();
-
         }
     }
 
@@ -674,7 +678,7 @@ public class PlayerServerEvents {
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignScenarioResources(rtsPlayer);
-            PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0, true);
+            PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0, true, false);
 
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building.scenarioRoleIndex == roleIndex) {

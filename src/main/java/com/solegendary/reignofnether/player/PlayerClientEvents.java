@@ -255,7 +255,7 @@ public class PlayerClientEvents {
         MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 
-    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson) {
+    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson, boolean isSyncing) {
         if (!isRTSPlayer(playerName)) {
             rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId, isDogPerson, -1L));
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
@@ -263,10 +263,13 @@ public class PlayerClientEvents {
                 GameruleClient.gamerulesMenuOpen = false;
                 if (faction != Factions.NONE) {
                     MC.getMusicManager().stopPlaying();
-                    ResearchClient.removeAllCheats();
+                    if (!isSyncing)
+                        ResearchClient.removeAllCheats();
                 }
                 PlayerServerboundPacket.requestMarketRates();
             }
+            if (!isSyncing)
+                HeroClientEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(playerName));
         }
     }
 
