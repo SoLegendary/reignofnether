@@ -497,6 +497,8 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
 
 
     public void onCastPossess(LivingEntity targetEntity) {
+        if (!level().isClientSide()) return;
+
         MobEffectInstance mei = targetEntity.getEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get());
         int amp = 0;
         if (mei != null) {
@@ -510,14 +512,12 @@ public class WraithUnit extends Monster implements Unit, AttackerUnit, KeyframeA
             unit.setOwnerName(this.getOwnerName());
             unit.setAnchor(new BlockPos(0,0,0));
             MiscUtil.addParticleExplosion(ParticleTypes.SCULK_SOUL, 40, level(), targetEntity.getEyePosition(), 0.15f);
-            if (!this.level().isClientSide()) {
-                Unit.fullResetBehaviours(unit); // stop the unit's left_click_actions and stop all allied units from attacking it
-                for (LivingEntity entity : UnitServerEvents.getAllUnits())
-                    if (entity instanceof Unit unit1 && unit1.getTargetGoal().getTarget() == unit && unit1.getOwnerName().equals(unit.getOwnerName()))
-                        Unit.fullResetBehaviours(unit1);
-                SoundClientboundPacket.playSoundAtPos(SoundAction.WRAITH_POSSESS_FULL, targetEntity.blockPosition());
-                targetEntity.heal(health);
-            }
+            Unit.fullResetBehaviours(unit); // stop the unit's left_click_actions and stop all allied units from attacking it
+            for (LivingEntity entity : UnitServerEvents.getAllUnits())
+                if (entity instanceof Unit unit1 && unit1.getTargetGoal().getTarget() == unit && unit1.getOwnerName().equals(unit.getOwnerName()))
+                    Unit.fullResetBehaviours(unit1);
+            SoundClientboundPacket.playSoundAtPos(SoundAction.WRAITH_POSSESS_FULL, targetEntity.blockPosition());
+            targetEntity.heal(health);
         } else { // partial possession
             targetEntity.addEffect(new MobEffectInstance(
                     MobEffectRegistrar.PARTIALLY_POSSESSED.get(),
