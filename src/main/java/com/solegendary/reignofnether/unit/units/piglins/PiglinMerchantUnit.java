@@ -664,6 +664,9 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         if (greedIsGood.isAutocasting(this))
             resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
+        level().explode(this, null, null, getX(), getY(), getZ(),
+                2.0f, false, Level.ExplosionInteraction.NONE);
+
         int numItems = LootExplosion.BASE_ITEMS + (LootExplosion.BONUS_ITEMS_PER_CHUNK_RESOURCES * resourceBonus);
         List<ItemStack> items = getRandomLoot(numItems);
 
@@ -678,8 +681,6 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
             item.setDeltaMovement(dMove);
             level().addFreshEntity(item);
         }
-        level().explode(this, null, null, getX(), getY(), getZ(),
-                2.0f, false, Level.ExplosionInteraction.NONE);
         setMana(getMana() + (resourceBonus * LootExplosion.MANA_REFUND_PER_CHUNK_RESOURCES));
     }
 

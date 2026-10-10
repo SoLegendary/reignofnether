@@ -665,6 +665,8 @@ public class UnitItems {
             .descId("ender_pearl")
             .defaultStackCount(3)
             .maxStackSize(9)
+            .buyCost(200)
+            .sellValue(100)
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/ender_pearl.png"))
             .type(UnitItemType.CONSUMABLE)
             .rarity(Rarity.COMMON)
