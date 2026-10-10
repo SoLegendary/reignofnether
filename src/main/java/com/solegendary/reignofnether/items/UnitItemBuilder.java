@@ -78,6 +78,7 @@ public class UnitItemBuilder {
     boolean resetBehaviours = true;
     boolean forceAutocast = false;
     boolean canRandomDrop = true;
+    boolean nonHeroUseable = false;
     int maxStackSize = 1;
 
     private UnitItemBuilder(Item item) {
@@ -295,6 +296,11 @@ public class UnitItemBuilder {
 
     public UnitItemBuilder noRandomDrop() {
         this.canRandomDrop = false;
+        return this;
+    }
+
+    public UnitItemBuilder nonHeroUseable() {
+        this.nonHeroUseable = true;
         return this;
     }
 

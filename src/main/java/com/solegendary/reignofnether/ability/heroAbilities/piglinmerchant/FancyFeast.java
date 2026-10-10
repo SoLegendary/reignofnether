@@ -111,7 +111,7 @@ public class FancyFeast extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip2",
-                    BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk))
+                    BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.RESOURCE_SPEND_CHUNK))
         );
     }
 
@@ -122,7 +122,7 @@ public class FancyFeast extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.tooltip2",
-                        BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk)),
+                        BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.RESOURCE_SPEND_CHUNK)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.rank1", HEALTH_PER_BREAD), getRank(hero) == 0),
                 fcs(I18n.get("abilities.reignofnether.fancy_feast.rank2", HEALTH_PER_CHICKEN), getRank(hero) == 1),

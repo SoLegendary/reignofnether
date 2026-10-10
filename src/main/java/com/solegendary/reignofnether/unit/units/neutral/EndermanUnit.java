@@ -309,8 +309,4 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
             this.playSound(SoundEvents.ENDERMAN_TELEPORT, 3.0F, 1.0F);
         }
     }
-
-
-
-
 }

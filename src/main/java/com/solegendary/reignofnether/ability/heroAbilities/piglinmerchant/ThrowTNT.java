@@ -109,7 +109,7 @@ public class ThrowTNT extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2",
-                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk))
+                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.RESOURCE_SPEND_CHUNK))
         );
     }
 
@@ -120,7 +120,7 @@ public class ThrowTNT extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip2",
-                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk)),
+                    LESS_COOLDOWN_PER_CHUNK_RESOURCES / 20, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.RESOURCE_SPEND_CHUNK)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.rank1"), getRank(hero) == 0),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.rank2"), getRank(hero) == 1),

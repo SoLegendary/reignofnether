@@ -85,7 +85,7 @@ public class LootExplosion extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip2")),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3",
-                    BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk))
+                    BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.RESOURCE_SPEND_CHUNK))
         );
     }
 
@@ -97,7 +97,7 @@ public class LootExplosion extends HeroAbility {
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip2")),
                 fcs(I18n.get("abilities.reignofnether.loot_explosion.tooltip3",
-                    BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.resourceSpendChunk))
+                    BASE_ITEMS, BONUS_ITEMS_PER_CHUNK_RESOURCES, MANA_REFUND_PER_CHUNK_RESOURCES, GreedIsGoodPassive.RESOURCE_SPEND_CHUNK))
         );
     }
 

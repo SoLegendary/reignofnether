@@ -196,7 +196,7 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
     }
 
     public void tick() {
-        this.setCanPickUpLoot(true);
+        this.setCanPickUpLoot(false);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);

@@ -11,7 +11,6 @@ import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
@@ -29,11 +28,11 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class GreedIsGoodPassive extends HeroAbility {
 
-    public static final int resourceSpendChunk = 75;
-    public int maxResourcesPerCast = resourceSpendChunk;
-    public int maxResourcesPerCastRank1 = resourceSpendChunk;
-    public int maxResourcesPerCastRank2 = resourceSpendChunk * 2;
-    public int maxResourcesPerCastRank3 = resourceSpendChunk * 3;
+    public static final int RESOURCE_SPEND_CHUNK = 75;
+    public int maxResourcesPerCast = RESOURCE_SPEND_CHUNK;
+    public int maxResourcesPerCastRank1 = RESOURCE_SPEND_CHUNK;
+    public int maxResourcesPerCastRank2 = RESOURCE_SPEND_CHUNK * 2;
+    public int maxResourcesPerCastRank3 = RESOURCE_SPEND_CHUNK * 3;
 
     public GreedIsGoodPassive() {
         super(3, 0, UnitAction.NONE, 0, 0, 0, false);
@@ -117,7 +116,7 @@ public class GreedIsGoodPassive extends HeroAbility {
     }
 
     // return the amount of chunks of resources spent
-    public int spendResourcesAndGetChunksSpent(ResourceName resName, HeroUnit hero) {
+    public int spendResourcesAndGetChunksSpent(HeroUnit hero) {
         int totalSpent = 0;
         String ownerName = hero.getOwnerName();
         boolean isClientSide = ((LivingEntity) hero).level().isClientSide();
@@ -127,18 +126,9 @@ public class GreedIsGoodPassive extends HeroAbility {
                 if (resources.ownerName.equals(ownerName)) {
                     for (int i = 0; i < getRank(hero); i++) {
                         Resources resToSpend = new Resources(hero.getOwnerName(), 0, 0, 0, 0);
-                        if (resName == ResourceName.FOOD && resources.food >= resourceSpendChunk) {
-                            resToSpend.food -= resourceSpendChunk;
-                            totalSpent += resourceSpendChunk;
-                        } else if (resName == ResourceName.WOOD && resources.wood >= resourceSpendChunk) {
-                            resToSpend.wood -= resourceSpendChunk;
-                            totalSpent += resourceSpendChunk;
-                        } else if (resName == ResourceName.ORE && resources.ore >= resourceSpendChunk) {
-                            resToSpend.ore -= resourceSpendChunk;
-                            totalSpent += resourceSpendChunk;
-                        } else if (resName == ResourceName.EMERALD && resources.emerald >= resourceSpendChunk) {
-                            resToSpend.emerald -= resourceSpendChunk;
-                            totalSpent += resourceSpendChunk;
+                        if (resources.emerald >= RESOURCE_SPEND_CHUNK) {
+                            resToSpend.emerald -= RESOURCE_SPEND_CHUNK;
+                            totalSpent += RESOURCE_SPEND_CHUNK;
                         }
                         if (!isClientSide) {
                             ResourcesServerEvents.addSubtractResources(resToSpend);
@@ -147,6 +137,6 @@ public class GreedIsGoodPassive extends HeroAbility {
                 }
             }
         }
-        return totalSpent / resourceSpendChunk;
+        return totalSpent / RESOURCE_SPEND_CHUNK;
     }
 }

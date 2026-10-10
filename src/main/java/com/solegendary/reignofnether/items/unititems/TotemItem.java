@@ -32,6 +32,7 @@ public class TotemItem extends UnitItem {
             .buyCost(300)
             .sellValue(150)
             .consumeOnUse()
+            .nonHeroUseable()
         );
         this.onUseGround = this::spawnTotem;
         this.totemType = totemType;

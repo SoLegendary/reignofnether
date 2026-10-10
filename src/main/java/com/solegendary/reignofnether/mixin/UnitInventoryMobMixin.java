@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
+import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.ParticleRegistrar;
@@ -577,6 +578,8 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Override
     public boolean canUseItem(UnitItem unitItem) {
-        return this instanceof HeroUnit || (unitItem != null && UnitItems.NON_UNIT_USEABLE_ITEMS.contains(unitItem));
+        if (unitItem instanceof MerchantEquipmentItem mei && mei.isCompatibleTarget.test(this))
+            return true;
+        return this instanceof HeroUnit || (unitItem != null && unitItem.nonHeroUseable);
     }
 }

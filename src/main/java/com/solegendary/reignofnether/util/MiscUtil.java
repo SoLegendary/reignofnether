@@ -727,16 +727,6 @@ public class MiscUtil {
             if (radius <= 0)
                 return new HashSet<>();
 
-            // skip rendering entirely if we are fully inside another circle
-            if (BlockClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS) {
-                for (Pair<BlockPos, Integer> os : overlapSources) {
-                    Vec2 centre1 = new Vec2(center.getX(), center.getZ());
-                    Vec2 centre2 = new Vec2(os.getFirst().getX(), os.getFirst().getZ());
-                    int overlapRange = os.getSecond();
-                    if (!center.equals(os.getFirst()) && radius < overlapRange && centre1.distanceToSqr(centre2) < radius * radius)
-                        return Set.of();
-                }
-            }
             Set<BlockPos> circleBps = getCircle(center, radius);
 
             for (Pair<BlockPos, Integer> os : overlapSources) {

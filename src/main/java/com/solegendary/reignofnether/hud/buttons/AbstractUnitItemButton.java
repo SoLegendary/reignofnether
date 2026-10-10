@@ -161,7 +161,10 @@ public abstract class AbstractUnitItemButton extends Button {
 
         // ---- band 1: name (+qty) | type ----
         Style nameStyle = unitItem.rarity.getStyleModifier().apply(NAME_STYLE);
-        MutableComponent nameComp = Component.translatable("item.reignofnether." + unitItem.descId).withStyle(nameStyle);
+        String nameKey = "item.reignofnether." + unitItem.descId;
+        MutableComponent nameComp = Component.translatable(nameKey).withStyle(nameStyle);
+        if (nameComp.getString().equals(nameKey))
+            nameComp = Component.literal(itemStack.getDisplayName().getString()).withStyle(nameStyle);
         if (itemStack.getCount() > 1)
             nameComp.append(Component.literal(" (" + itemStack.getCount() + ")").withStyle(QTY_STYLE));
         FormattedCharSequence nameSeq = nameComp.getVisualOrderText();

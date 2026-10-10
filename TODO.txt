@@ -55,18 +55,11 @@ Bugfixes
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
 
-
-
-
-[✔] Fixed a crash when having 100% explosive hit chance
-[❌] Add new tooltip line to custom building menu for shop items
-    "Buyable items: 0"
-    "To sell items from this building, save its structure
-     with hero items in a chest or other container"
-[❌] let piglins use merchant items on themselves
-
-
-
+[✔] Fixed a crash when the piglin merchant picks up resources
+[✔] Fixed an issue where multiple sculk catalysts close together cause their night circles to disappear
+[✔] Piglins can now click on merchant items on the ground and click to equip them if in their inventory
+[✔] The piglin merchant passive now uses emeralds
+[✔] Added ender pearls as an item useable by both heroes and regular units
 
 Languages
 ---------

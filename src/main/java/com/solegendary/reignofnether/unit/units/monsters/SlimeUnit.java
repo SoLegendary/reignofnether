@@ -507,7 +507,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     public void tick() {
         this.setMaxUpStep(1.15f);
-        this.setCanPickUpLoot(true);
+        this.setCanPickUpLoot(false);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);

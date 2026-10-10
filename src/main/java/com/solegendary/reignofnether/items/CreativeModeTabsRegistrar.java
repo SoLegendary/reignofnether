@@ -61,6 +61,7 @@ public class CreativeModeTabsRegistrar {
                         output.accept(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get());
                         output.accept(Items.SPYGLASS);
                         output.accept(Items.TOTEM_OF_UNDYING);
+                        output.accept(Items.ENDER_PEARL);
                     })
                     .build());
 

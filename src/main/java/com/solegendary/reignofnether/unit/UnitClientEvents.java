@@ -29,6 +29,7 @@ import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.hud.effecticons.MobEffectIcon;
 import com.solegendary.reignofnether.hud.effecticons.MobEffectIcons;
 import com.solegendary.reignofnether.items.*;
+import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -468,6 +469,10 @@ public class UnitClientEvents {
                     unit.getCheckpoints().add(new Checkpoint(preSelItem, true));
                     ItemServerboundPacket.pickup(
                             HudClientEvents.hudSelectedEntity.getId(), preSelItem.getId());
+                } else if (ItemUtil.getUnitItem(preSelItem.getItem()) instanceof MerchantEquipmentItem mei && mei.isCompatibleTarget.test(hudSelectedEntity)) {
+                    unit.getCheckpoints().clear();
+                    unit.getCheckpoints().add(new Checkpoint(preSelItem, true));
+                    sendUnitCommand(UnitAction.MOVE);
                 } else {
                     HudClientEvents.showTemporaryMessage(I18n.get("item.reignofnether.error.cant_hold_items"));
                 }

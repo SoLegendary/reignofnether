@@ -23,6 +23,7 @@ import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.ParticleUtil;
+import com.solegendary.reignofnether.util.PearlThrower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
@@ -283,6 +284,7 @@ public class UnitItems {
             .suppressDefaultError()
             .noRandomDrop()
             .cooldownTicks(10 * 20)
+            .nonHeroUseable()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
@@ -535,6 +537,7 @@ public class UnitItems {
             .showRangeCircle()
             .range(POCKET_PORTAL_RANGE)
             .suppressDefaultError()
+            .nonHeroUseable()
             .onUseGround((unit, pos) -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
@@ -626,7 +629,6 @@ public class UnitItems {
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
             .type(UnitItemType.CONSUMABLE)
             .rarity(Rarity.EPIC) // Handled in HeroServerEvents.onLivingDeath
-            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
             .pointDesc("item.reignofnether.totem_of_undying.point1", TOTEM_OF_UNDYING_INVINCIBILITY_DURATION_SECONDS)
             .build();
 
@@ -657,6 +659,26 @@ public class UnitItems {
             .pointDesc("item.reignofnether.totem_of_casting.point1", TOTEM_OF_CASTING_DURATION_SECONDS),
             EntityRegistrar.TOTEM_OF_CASTING.get()
     );
+
+    public static final int ENDER_PEARL_RANGE = 15;
+    public static final UnitItem ENDER_PEARL = UnitItemBuilder.of(Items.ENDER_PEARL)
+            .descId("ender_pearl")
+            .defaultStackCount(3)
+            .maxStackSize(9)
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/ender_pearl.png"))
+            .type(UnitItemType.CONSUMABLE)
+            .rarity(Rarity.COMMON)
+            .range(ENDER_PEARL_RANGE)
+            .pointDesc("item.reignofnether.ender_pearl.point1")
+            .nonHeroUseable()
+            .onUseGround((unit, pos) -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide())
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.THROW_PEARL, le.blockPosition());
+                PearlThrower.throwPearlAt((LivingEntity) unit, pos);
+                return true;
+            })
+            .build();
 
     public static final List<UnitItem> ITEMS = List.of(
             EMPTY,
@@ -698,15 +720,7 @@ public class UnitItems {
             TOTEM_OF_REGENERATION,
             TOTEM_OF_SHIELDING,
             TOTEM_OF_PROTECTION,
-            TOTEM_OF_CASTING
-    );
-
-    public static final List<UnitItem> NON_UNIT_USEABLE_ITEMS = List.of(
-            HEALTH_POTION,
-            POCKET_PORTAL,
-            TOTEM_OF_REGENERATION,
-            TOTEM_OF_SHIELDING,
-            TOTEM_OF_PROTECTION,
-            TOTEM_OF_CASTING
+            TOTEM_OF_CASTING,
+            ENDER_PEARL
     );
 }
