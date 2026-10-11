@@ -195,10 +195,10 @@
     "item.reignofnether.heros_armour.point1": "Heals up to %d nearby allies for %d when drinking a health potion",
     "item.reignofnether.hungry_horror_armour": "Hungry Horror Armour",
     "item.reignofnether.hungry_horror_armour.desc": "With great power comes an insatiable hunger",
-    "item.reignofnether.hungry_horror_armour.point1": "Nearby allies gain %d% lifesteal under night zones",
+    "item.reignofnether.hungry_horror_armour.point1": "Nearby allies gain %d%% lifesteal under night zones",
     "item.reignofnether.golden_piglin_armour": "Golden Piglin Armour",
     "item.reignofnether.golden_piglin_armour.desc": "Gleaming armour worn by leaders of Piglin tribes",
-    "item.reignofnether.golden_piglin_armour.point1": "Nearby allies gain %d attack speed and 2x natural regen on nether terrain",
+    "item.reignofnether.golden_piglin_armour.point1": "Nearby allies gain %d%% attack speed and 2x natural regen on nether terrain",
 
     "item.reignofnether.error.use": "Can't use that item right now",
     "item.reignofnether.error.use_on_entity": "Can't use on that unit",
@@ -2241,6 +2241,10 @@
     "effect.reignofnether.villager_inspiration.desc": "Nearby villagers become militia",
     "effect.reignofnether.limited_lifespan": "Limited Lifespan",
     "effect.reignofnether.limited_lifespan.desc": "Dies once this timer runs out",
+    "effect.reignofnether.lifesteal": "Lifesteal",
+    "effect.reignofnether.lifesteal.desc": "Healing a portion of damage dealt",
+    "effect.reignofnether.piglin_fervor": "Piglin Fervor",
+    "effect.reignofnether.piglin_fervor.desc": "Increased attack speed and regen",
 
     "effect.reignofnether.duration": "(%ds)",
 

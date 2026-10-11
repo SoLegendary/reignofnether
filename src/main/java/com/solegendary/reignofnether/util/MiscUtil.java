@@ -1030,7 +1030,7 @@ public class MiscUtil {
 
         String valueStr;
         if (List.of(MULTIPLY_BASE, MULTIPLY_TOTAL).contains(modifier.getOperation()) || isPercentStat) {
-            valueStr = formatSigned(modifier.getAmount() * 100) + "%";
+            valueStr = formatSigned((int) (modifier.getAmount() * 100)) + "%";
         } else {
             valueStr = formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
         }

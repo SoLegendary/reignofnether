@@ -380,7 +380,7 @@ public interface Unit {
 
             if (unit.hasEffectWithDuration(MobEffectRegistrar.PIGLIN_FERVOR.get()) &&
                     Factions.getFaction(unit).equals(Factions.PIGLINS) &&
-                    le.tickCount + (PIGLIN_HEALING_TICKS / 2) % PIGLIN_HEALING_TICKS == 0 &&
+                    (le.tickCount + (PIGLIN_HEALING_TICKS / 2)) % PIGLIN_HEALING_TICKS == 0 &&
                     (MiscUtil.isOnNetherTerrain(le) || unit instanceof GhastUnit)) {
                 le.heal( 1);
             }
