@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.heroAbilities.piglinmerchant.ThrowTNT;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingValidators;
@@ -754,13 +753,13 @@ public class UnitItems {
             .pointDesc("item.reignofnether.hungry_horror_armour.point1", (int) (HUNGRY_HORROR_ARMOUR_LIFESTEAL * 100))
             .build();
 
-    public static final float GOLDEN_PIGLIN_ATTACK_SPEED = 0.10f; // tooltip only
+    public static final float GOLDEN_PIGLIN_ATTACK_DAMAGE = 0.10f; // tooltip only
     public static final UnitItem GOLDEN_PIGLIN_ARMOUR = UnitItemBuilder.of(ItemRegistrar.GOLDEN_PIGLIN_ARMOUR.get())
             .descId("golden_piglin_armour")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.EPIC)
             .range(ARMOUR_AURA_RANGE)
-            .pointDesc("item.reignofnether.golden_piglin_armour.point1", (int) (GOLDEN_PIGLIN_ATTACK_SPEED * 100))
+            .pointDesc("item.reignofnether.golden_piglin_armour.point1", (int) (GOLDEN_PIGLIN_ATTACK_DAMAGE * 100))
             .build();
 
     public static final List<UnitItem> ITEMS = List.of(

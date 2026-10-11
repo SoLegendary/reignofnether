@@ -141,8 +141,8 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                                 int before = groundStack.getCount();
 
                                 Relationship rl = UnitServerEvents.getUnitToEntityRelationship((Unit) this.mob, itemTarget);
-                                if (ItemUtil.isEdibleFoodOrDrink(groundStack.getItem()) &&
-                                    (rl != Relationship.HOSTILE || itemTarget.tickCount > HOSTILE_FOOD_DELAY_TICKS)) {
+                                if (ItemUtil.isEdibleFood(groundStack.getItem()) &&
+                                    rl == Relationship.HOSTILE && itemTarget.tickCount <= HOSTILE_FOOD_DELAY_TICKS) {
                                     HudClientboundPacket.showTempMessageI18n(((Unit) this.mob).getOwnerName(), "item.reignofnether.error.not_your_item");
                                 }
                                 else if (inv.tryAdding(groundStack)) {

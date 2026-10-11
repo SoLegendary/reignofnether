@@ -345,6 +345,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         attributesNbt.putInt("garrisonCapacity", this.garrisonCapacity);
         attributesNbt.putInt("garrisonRange", this.garrisonRange);
         attributesNbt.putInt("maxHealth", (int) this.maxHealth);
+        attributesNbt.putBoolean("drawAggro", this.drawAggro);
     }
 
 	private void unpackAttributesNbt() {

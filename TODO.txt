@@ -61,5 +61,6 @@ Bugfixes
 [🟡] Enemy units with the backpack upgrade can no longer steal piglin merchant food that was thrown recently
 [❌] Draw aggro on custom buildings turns back on when relogging
 
+
 Languages
 ---------

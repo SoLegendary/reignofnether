@@ -303,21 +303,22 @@ public interface Unit {
         float speed = 1f + Math.max(0f, unit.getFasterCooldownsPercent());
         float reduction = (float) (ticksPerSec / 20d) * speed;
 
-        for (Map.Entry<Ability, Float> entry : unit.getAbilityCooldowns().entrySet()) {
-            Ability ability = entry.getKey();
-            float cooldown = entry.getValue();
+        var cooldowns = unit.getAbilityCooldowns();
+
+        for (Ability ability : new ArrayList<>(cooldowns.keySet())) {
+            float cooldown = cooldowns.get(ability);
 
             if (cooldown <= 0 && unit.getAbilityCharges(ability) >= ability.maxCharges)
                 continue;
 
             float newCd = cooldown - reduction;
-            entry.setValue(newCd);
+            cooldowns.put(ability, newCd);
 
             if (newCd <= 0 && ability.usesCharges() && unit.getAbilityCharges(ability) < ability.maxCharges) {
                 int charges = Math.min(unit.getAbilityCharges(ability) + 1, ability.maxCharges);
                 unit.setCharges(ability, charges);
                 if (charges < ability.maxCharges)
-                    entry.setValue(ability.cooldownMax + newCd); // carries overshoot; use cooldownMax to discard
+                    cooldowns.put(ability, ability.cooldownMax + newCd); // carries overshoot; use cooldownMax to discard
             }
         }
 

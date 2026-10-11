@@ -174,8 +174,9 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
     public float getAttackCooldown() {
-        return (int) ((20 * (Math.pow(VigorEnchantment.CD_MULTIPLIER, getVigorLevel())) / getNonBaseAttacksPerSecond())
-                * getAttackCooldownMultiplier());
+        float speed = 1f + Math.max(0f, getFasterCooldownsPercent());
+        float base = 20f * (float) Math.pow(VigorEnchantment.CD_MULTIPLIER, getVigorLevel()) / getNonBaseAttacksPerSecond();
+        return Math.max(1, Math.round(base * getAttackCooldownMultiplier() / speed));
     }
     public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}

@@ -92,8 +92,8 @@ public class MobEffectRegistrar {
 
     // cooldown reduction
     public static final RegistryObject<MobEffect> VIGOR = MOB_EFFECTS.register("vigor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x0000FF)
-            .addAttributeModifier(AttributeRegistrar.FASTER_COOLDOWNS.get(), "c967f9cf-ef58-46be-a775-d69c80c688ed", 1.0f, AttributeModifier.Operation.ADDITION)
-            .addAttributeModifier(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), "e47194b6-8fc3-42c1-99fb-4957cbaa23eb", 0.5, AttributeModifier.Operation.ADDITION));
+            .addAttributeModifier(AttributeRegistrar.FASTER_COOLDOWNS.get(), "c967f9cf-ef58-46be-a775-d69c80c688ed", 0.5f, AttributeModifier.Operation.ADDITION)
+            .addAttributeModifier(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), "e47194b6-8fc3-42c1-99fb-4957cbaa23eb", 1.0, AttributeModifier.Operation.ADDITION));
 
     // no knockback taken or received, not pushable
     public static final RegistryObject<MobEffect> PHASING = MOB_EFFECTS.register("phasing", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x5d105e)
@@ -120,7 +120,7 @@ public class MobEffectRegistrar {
             .addAttributeModifier(AttributeRegistrar.LIFESTEAL.get(), "c159f105-f0cd-464d-86fe-82213a34dac7", UnitItems.HUNGRY_HORROR_ARMOUR_LIFESTEAL, AttributeModifier.Operation.ADDITION));
 
     public static final RegistryObject<MobEffect> PIGLIN_FERVOR = MOB_EFFECTS.register("piglin_fervor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
-            .addAttributeModifier(AttributeRegistrar.ATTACKS_PER_SECOND.get(), "166f078d-89e3-4529-abdc-13b09915002f", UnitItems.GOLDEN_PIGLIN_ATTACK_SPEED, AttributeModifier.Operation.MULTIPLY_BASE));
+            .addAttributeModifier(AttributeRegistrar.ATTACK_DAMAGE.get(), "166f078d-89e3-4529-abdc-13b09915002f", UnitItems.GOLDEN_PIGLIN_ATTACK_DAMAGE, AttributeModifier.Operation.MULTIPLY_BASE));
 
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||
