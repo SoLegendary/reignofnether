@@ -1,14 +1,19 @@
 package com.solegendary.reignofnether.items;
 
 import com.mojang.datafixers.util.Pair;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.AbstractTotem;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.food.FoodProperties;
@@ -159,6 +164,22 @@ public class ItemUtil {
         if (item == ItemRegistrar.HEALTH_POTION.get()) {
             mob.heal(UnitItems.HEALTH_POTION_RESTORE_AMOUNT);
             ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), 5, mob.level(), mob.getEyePosition());
+
+            if (mob instanceof Unit unit1 && mob instanceof UnitInventory inv && inv.isHolding(UnitItems.HEROS_ARMOUR)) {
+                List<Mob> mobs = MiscUtil.getEntitiesWithinRange(mob.position(), UnitItems.ARMOUR_AURA_RANGE, Mob.class, mob.level())
+                        .stream()
+                        .filter(mob2 -> mob2 instanceof Unit unit2 &&
+                                mob != mob2 &&
+                                mob2.getHealth() < mob2.getMaxHealth() &&
+                                AlliancesServerEvents.isAlliedOrOwned(unit1.getOwnerName(), unit2.getOwnerName()))
+                        .sorted(Comparator.comparingDouble((Mob m) -> m.getMaxHealth() - m.getHealth()).reversed())
+                        .limit(UnitItems.HEROS_ARMOUR_MAX_TARGETS)
+                        .toList();
+                for (Mob alliedMob : mobs) {
+                    alliedMob.heal(UnitItems.HEROS_ARMOUR_HEAL);
+                    ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), 3, alliedMob.level(), alliedMob.getEyePosition());
+                }
+            }
         } else if (item == ItemRegistrar.MANA_POTION.get() && mob instanceof HeroUnit heroUnit) {
             heroUnit.setMana(heroUnit.getMana() + UnitItems.MANA_POTION_RESTORE_AMOUNT);
             ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), 5, mob.level(), mob.getEyePosition());

@@ -13,9 +13,12 @@ import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.AbstractTotem;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -26,6 +29,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -543,10 +547,22 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         at = @At("TAIL")
     )
     public void tick(CallbackInfo ci) {
-        if (tickCount % 20 == 0 && isHoldingActive(UnitItems.BELL_OF_ARMS)) {
-            addEffect(new MobEffectInstance(MobEffectRegistrar.VILLAGER_INSPIRATION.get(), 30, 0, true, false));
-        }
-        if (tickCount % 20 == 0) {
+        if (tickCount % 20 == 0 && this instanceof Unit unit) {
+            if (isHoldingActive(UnitItems.BELL_OF_ARMS)) {
+                addEffect(new MobEffectInstance(MobEffectRegistrar.VILLAGER_INSPIRATION.get(), 30, 0, true, false));
+            }
+            boolean hasHorrorArmour = isHolding(UnitItems.HUNGRY_HORROR_ARMOUR);
+            boolean hasPiglinArmour = isHolding(UnitItems.GOLDEN_PIGLIN_ARMOUR);
+            if (hasHorrorArmour || hasPiglinArmour) {
+                for (Mob mob : MiscUtil.getEntitiesWithinRange(position(), UnitItems.ARMOUR_AURA_RANGE, Mob.class, level())) {
+                    if (mob instanceof Unit unit2 && AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), unit2.getOwnerName()) && !(unit2 instanceof AbstractTotem)) {
+                        if (hasHorrorArmour && NightUtils.isInRangeOfNightSource(mob.position(), mob.level().isClientSide()))
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.LIFESTEAL.get(), 30, 0, true, false));
+                        if (hasPiglinArmour && MiscUtil.isOnNetherTerrain(mob))
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.PIGLIN_FERVOR.get(), 30, 0, true, false));
+                    }
+                }
+            }
             for (ItemStack itemStack : getAllItems()) {
                 if (itemStack.getTag() != null && itemStack.getTag().hasUUID("uuid")) {
                     UnitItem unitItem = ItemUtil.getUnitItem(itemStack);

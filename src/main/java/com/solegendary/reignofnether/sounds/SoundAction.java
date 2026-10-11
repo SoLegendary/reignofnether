@@ -52,5 +52,6 @@ public enum SoundAction {
     WAR_HORN,
     POTION_POP,
     TELEPORT,
-    THROW_PEARL
+    THROW_PEARL,
+    THROW_EGG
 }

@@ -1024,7 +1024,8 @@ public class MiscUtil {
                 AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(),
                 AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(),
                 AttributeRegistrar.LIFESTEAL.get(),
-                AttributeRegistrar.MANA_ON_HIT.get()
+                AttributeRegistrar.MANA_ON_HIT.get(),
+                AttributeRegistrar.FASTER_COOLDOWNS.get()
         ).contains(attr);
 
         String valueStr;

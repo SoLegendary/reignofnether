@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
@@ -12,6 +13,8 @@ import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
+import com.solegendary.reignofnether.unit.Relationship;
+import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -22,6 +25,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
+
+import static com.solegendary.reignofnether.unit.interfaces.Unit.HOSTILE_FOOD_DELAY_TICKS;
 
 public class UnitItemGoal extends MoveToTargetBlockGoal {
 
@@ -134,7 +139,13 @@ public class UnitItemGoal extends MoveToTargetBlockGoal {
                             if (itemTarget.isAlive()) {
                                 ItemStack groundStack = itemTarget.getItem().copy();
                                 int before = groundStack.getCount();
-                                if (inv.tryAdding(groundStack)) {
+
+                                Relationship rl = UnitServerEvents.getUnitToEntityRelationship((Unit) this.mob, itemTarget);
+                                if (ItemUtil.isEdibleFoodOrDrink(groundStack.getItem()) &&
+                                    (rl != Relationship.HOSTILE || itemTarget.tickCount > HOSTILE_FOOD_DELAY_TICKS)) {
+                                    HudClientboundPacket.showTempMessageI18n(((Unit) this.mob).getOwnerName(), "item.reignofnether.error.not_your_item");
+                                }
+                                else if (inv.tryAdding(groundStack)) {
                                     this.mob.take(itemTarget, before - groundStack.getCount());
                                     if (groundStack.isEmpty())
                                         itemTarget.discard();

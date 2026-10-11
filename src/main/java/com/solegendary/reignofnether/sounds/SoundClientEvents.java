@@ -274,5 +274,6 @@ public class SoundClientEvents {
         SOUND_MAP.put(SoundAction.POTION_POP, SoundRegistrar.POTION_POP.get());
         SOUND_MAP.put(SoundAction.TELEPORT, SoundEvents.ENDERMAN_TELEPORT);
         SOUND_MAP.put(SoundAction.THROW_PEARL, SoundEvents.ENDER_PEARL_THROW);
+        SOUND_MAP.put(SoundAction.THROW_EGG, SoundEvents.EGG_THROW);
     }
 }

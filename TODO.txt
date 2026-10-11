@@ -48,18 +48,18 @@ Quality of Life
 [❌] /rtsapi-set-scenario-role
     - "only works before game start and role is empty, not for in game"
 
-
+[🟡] Added an attribute "faster_cooldowns"
+    2x faster cooldowns == 50% less cooldown time
+    10x faster cooldowns == 90% less cooldown time
 
 Bugfixes
 --------
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
 
-[✔] Fixed a crash when the piglin merchant picks up resources
-[✔] Fixed an issue where multiple sculk catalysts close together cause their night circles to disappear
-[✔] Piglins can now click on merchant items on the ground and click to equip them if in their inventory
-[✔] The piglin merchant passive now uses emeralds
-[✔] Added ender pearls as an item useable by both heroes and regular units
+[✔] Raised Market upgrade time from 120s to 180s
+[🟡] Enemy units with the backpack upgrade can no longer steal piglin merchant food that was thrown recently
+[❌] Draw aggro on custom buildings turns back on when relogging
 
 Languages
 ---------

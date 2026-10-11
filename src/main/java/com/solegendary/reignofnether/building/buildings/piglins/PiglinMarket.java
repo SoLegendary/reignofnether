@@ -84,7 +84,8 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
         return new ArrayList<>(List.of(
                 new StockedShopItem(UnitItems.POCKET_PORTAL, 3, 60 * 20),
                 new StockedShopItem(UnitItems.MAGMA_WALKER_BOOTS, 1, 600 * 20),
-                new StockedShopItem(UnitItems.GONG_OF_WEAKENING, 1, 600 * 20)
+                new StockedShopItem(UnitItems.GONG_OF_WEAKENING, 1, 600 * 20),
+                new StockedShopItem(UnitItems.GOLDEN_PIGLIN_ARMOUR, 1, 600 * 20)
         ));
     }
 

@@ -234,6 +234,18 @@ public class MobEffectIcons {
             "limited_lifespan"
     );
 
+    public static final MobEffectIcon LIFESTEAL = new MobEffectIcon(
+            MobEffectRegistrar.LIFESTEAL.get(),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/item/hungry_horror_armour.png"),
+            "lifesteal"
+    );
+
+    public static final MobEffectIcon PIGLIN_FERVOR = new MobEffectIcon(
+            MobEffectRegistrar.PIGLIN_FERVOR.get(),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,  "textures/item/golden_piglin_armour.png"),
+            "piglin_fervor"
+    );
+
     @Nullable
     public static MobEffectIcon getIcon(MobEffectInstance mei) {
         for (MobEffectIcon effectIcon : EFFECT_ICONS)
@@ -279,6 +291,8 @@ public class MobEffectIcons {
             FIRE_RESISTANCE,
             INVINCIBLE,
             VILLAGER_INSPIRATION,
-            LIMITED_LIFESPAN
+            LIMITED_LIFESPAN,
+            LIFESTEAL,
+            PIGLIN_FERVOR
     );
 }

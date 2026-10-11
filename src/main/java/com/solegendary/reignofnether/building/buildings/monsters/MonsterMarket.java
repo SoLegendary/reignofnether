@@ -84,7 +84,8 @@ public class MonsterMarket extends AbstractMarket {
         return new ArrayList<>(List.of(
                 new StockedShopItem(UnitItems.FROST_WALKER_BOOTS, 1, 600 * 20),
                 new StockedShopItem(UnitItems.STAFF_OF_LIGHTNING, 1, 600 * 20),
-                new StockedShopItem(UnitItems.SHADOW_SHIFTER, 1, 600 * 20)
+                new StockedShopItem(UnitItems.SHADOW_SHIFTER, 1, 600 * 20),
+                new StockedShopItem(UnitItems.HUNGRY_HORROR_ARMOUR, 1, 600 * 20)
         ));
     }
 

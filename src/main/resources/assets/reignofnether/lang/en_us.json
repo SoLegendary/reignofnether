@@ -60,6 +60,8 @@
 
     "item.reignofnether.totem_of_undying": "Totem of Undying",
     "item.reignofnether.throwable_tnt": "Throwable TNT",
+    "item.reignofnether.throwable_tnt.desc": "KABOOM, baby!",
+    "item.reignofnether.throwable_tnt.point1": "Throws a TNT with a delayed fuse at the target location",
     "item.reignofnether.thrown_hero_experience_bottle": "Bottle O'Hero Experience",
     "item.reignofnether.hero_experience_bottle.desc": "Filled to the brim with pure knowledge",
     "item.reignofnether.hero_experience_bottle.point1": "Grants %s experience",
@@ -183,11 +185,20 @@
     "item.reignofnether.scroll_of_recall.desc": "Reading the parchment makes one homesick",
     "item.reignofnether.scroll_of_recall.point1": "Channel to teleport your hero and all nearby friendly units to the targeted capitol",
     "item.reignofnether.scroll_of_recall.error": "Must target a friendly capitol",
-
     "item.reignofnether.ender_pearl": "Ender Pearl",
     "item.reignofnether.ender_pearl.desc": "Holds unstable teleportation energies",
     "item.reignofnether.ender_pearl.point1": "Throws an enderpearl at the target, teleporting to it on impact",
-
+    "item.reignofnether.evocation_robes": "Evocation Robes",
+    "item.reignofnether.evocation_robes.desc": "Cloth weaved of potent magical runes",
+    "item.reignofnether.heros_armour": "Hero's Armour",
+    "item.reignofnether.heros_armour.desc": "True heroes protect those who cannot protect themselves",
+    "item.reignofnether.heros_armour.point1": "Heals up to %d nearby allies for %d when drinking a health potion",
+    "item.reignofnether.hungry_horror_armour": "Hungry Horror Armour",
+    "item.reignofnether.hungry_horror_armour.desc": "With great power comes an insatiable hunger",
+    "item.reignofnether.hungry_horror_armour.point1": "Nearby allies gain %d% lifesteal under night zones",
+    "item.reignofnether.golden_piglin_armour": "Golden Piglin Armour",
+    "item.reignofnether.golden_piglin_armour.desc": "Gleaming armour worn by leaders of Piglin tribes",
+    "item.reignofnether.golden_piglin_armour.point1": "Nearby allies gain %d attack speed and 2x natural regen on nether terrain",
 
     "item.reignofnether.error.use": "Can't use that item right now",
     "item.reignofnether.error.use_on_entity": "Can't use on that unit",
@@ -201,6 +212,7 @@
     "item.reignofnether.error.cant_hold_resources": "Unit can't hold resources",
     "item.reignofnether.error.cant_use_item": "Unit can't use this item",
     "item.reignofnether.error.cant_pick_resources": "Can't hold resources while holding items!",
+    "item.reignofnether.error.not_your_item": "That's not your item to take!",
 
     "item.reignofnether.hud.expand_hint": "Hold Shift for details",
     "item.reignofnether.hud.mana": "Mana: %d",
@@ -240,6 +252,7 @@
     "attribute.reignofnether.building_damage_bonus": "Bonus Damage to Buildings",
     "attribute.reignofnether.lifesteal": "Lifesteal",
     "attribute.reignofnether.mana_on_hit": "Mana on hit",
+    "attribute.reignofnether.faster_cooldowns": "Faster Cooldowns",
 
     "sounds.reignofnether.under_attack": "Under attack!",
     "sounds.reignofnether.victory": "Victory!",

@@ -1,14 +1,13 @@
 package com.solegendary.reignofnether.util;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import net.minecraft.world.level.Level;
 
-public final class PearlThrower {
+public final class ProjectileThrower {
 
     // ThrowableProjectile physics: pos += vel; vel *= 0.99; vel.y -= 0.03
     private static final double DRAG = 0.99;
