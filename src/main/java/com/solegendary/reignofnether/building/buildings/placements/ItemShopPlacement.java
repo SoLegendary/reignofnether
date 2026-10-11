@@ -47,6 +47,7 @@ public class ItemShopPlacement extends ProductionPlacement {
     }
 
     public boolean canServeUnit(Unit unit) {
+        if (getStockedItems().isEmpty()) return false;
         if (unit instanceof Mob mob && unit instanceof UnitInventory inv && inv.canPickupUnitItems()) {
             boolean friendly;
             if (mob.level().isClientSide()) {

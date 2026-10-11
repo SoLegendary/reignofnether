@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 
 public class MerchantEquipmentItem extends UnitItem {
 
-    Predicate<LivingEntity> isCompatibleTarget;
+    public final Predicate<LivingEntity> isCompatibleTarget;
 
     public MerchantEquipmentItem(UnitItemBuilder builder, Predicate<LivingEntity> isCompatibleTarget) {
         super(builder
@@ -21,9 +21,29 @@ public class MerchantEquipmentItem extends UnitItem {
             .sellValue(50)
             .consumeOnUse()
             .noRandomDrop()
+            .suppressDefaultError()
         );
         this.isCompatibleTarget = isCompatibleTarget;
+        this.onUse = this::tryEquip;
         this.onUseEntity = this::tryEquip;
+    }
+
+    // piglin using on self
+    private boolean tryEquip(Unit unit) {
+        Mob mob = (Mob) unit;
+        if (!isCompatibleTarget.test(mob) || !(mob instanceof Unit targetUnit))
+            return false;
+
+        ItemStack itemStack = getNewItemStack();
+        ItemEntity itemEntity = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), itemStack);
+        mob.level().addFreshEntity(itemEntity);
+        itemEntity.tickCount = 100;
+
+        if (Unit.tryPickingUpEquipment(targetUnit, itemEntity))
+            return true;
+
+        itemEntity.discard();
+        return false;
     }
 
     // shared drop-and-equip logic used by all merchant upgrades

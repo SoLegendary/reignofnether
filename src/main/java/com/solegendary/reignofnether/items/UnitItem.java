@@ -79,6 +79,7 @@ public abstract class UnitItem implements RangeIndicator {
     public boolean resetBehaviours;
     public boolean forceAutocast;
     public boolean canRandomDrop;
+    public boolean nonHeroUseable;
     public int maxStackSize; // only affects units; players can stack any items
 
     // default values only, can be overwritten with calls to .buyCost() and .sellValue()
@@ -145,6 +146,7 @@ public abstract class UnitItem implements RangeIndicator {
         this.forceAutocast = builder.forceAutocast;
         this.canRandomDrop = builder.canRandomDrop;
         this.maxStackSize = builder.maxStackSize;
+        this.nonHeroUseable = builder.nonHeroUseable;
     }
 
     public Item getItem() {

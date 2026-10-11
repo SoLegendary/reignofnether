@@ -1,11 +1,14 @@
 package com.solegendary.reignofnether.hud.buttons;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
@@ -94,7 +97,11 @@ public abstract class AbstractUnitItemButton extends Button {
         this.unitItem = unitItem;
         this.itemStack = itemStack;
         this.invUUID = ItemUtil.getUUID(itemStack);
-        this.emeraldValue = unitItem.sellValue;
+        if (itemStack.getOrCreateTag().contains("sellValue")) {
+            this.emeraldValue = itemStack.getOrCreateTag().getInt("sellValue");
+        } else {
+            this.emeraldValue = unitItem.sellValue;
+        }
     }
 
     @Override
@@ -110,10 +117,11 @@ public abstract class AbstractUnitItemButton extends Button {
     }
 
     public boolean hasUseAction() {
-        return this.unitItem.onUse != null ||
+        return HudClientEvents.hudSelectedEntity instanceof UnitInventory inv && inv.canUseItem(this.unitItem) &&
+                (this.unitItem.onUse != null ||
                 this.unitItem.onUseEntity != null ||
                 this.unitItem.onUseBuilding != null ||
-                this.unitItem.onUseGround != null;
+                this.unitItem.onUseGround != null);
     }
 
     // scale down and recentre
@@ -153,7 +161,10 @@ public abstract class AbstractUnitItemButton extends Button {
 
         // ---- band 1: name (+qty) | type ----
         Style nameStyle = unitItem.rarity.getStyleModifier().apply(NAME_STYLE);
-        MutableComponent nameComp = Component.translatable("item.reignofnether." + unitItem.descId).withStyle(nameStyle);
+        String nameKey = "item.reignofnether." + unitItem.descId;
+        MutableComponent nameComp = Component.translatable(nameKey).withStyle(nameStyle);
+        if (nameComp.getString().equals(nameKey))
+            nameComp = Component.literal(itemStack.getDisplayName().getString()).withStyle(nameStyle);
         if (itemStack.getCount() > 1)
             nameComp.append(Component.literal(" (" + itemStack.getCount() + ")").withStyle(QTY_STYLE));
         FormattedCharSequence nameSeq = nameComp.getVisualOrderText();

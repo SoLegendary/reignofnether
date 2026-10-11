@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -25,8 +26,8 @@ public class TotemOfShielding extends AbstractTotem {
         Vec3 totemCentre = position().add(0, getBbHeight() / 2, 0);
 
         for (Projectile proj : MiscUtil.getEntitiesWithinRange(position(), AURA_RANGE, Projectile.class, level())) {
-            if (proj instanceof AbstractArrow arrow) {
-                Vec3 motion = arrow.getDeltaMovement();
+            if (proj instanceof AbstractHurtingProjectile aproj) {
+                Vec3 motion = aproj.getDeltaMovement();
                 Vec3 horizDeltaMovement = new Vec3(motion.x, 0, motion.z);
 
                 // ignore arrows that are stuck in the ground or otherwise barely moving
@@ -35,7 +36,7 @@ public class TotemOfShielding extends AbstractTotem {
                 }
 
                 // direction pointing from the totem's centre towards the arrow
-                Vec3 offset = arrow.position().subtract(totemCentre);
+                Vec3 offset = aproj.position().subtract(totemCentre);
                 double dist = offset.length();
                 if (dist < 0.001) {
                     continue;
@@ -44,7 +45,7 @@ public class TotemOfShielding extends AbstractTotem {
 
                 // stronger the closer the arrow is, fading to zero at the aura's edge
                 double falloff = Math.max(0, 1.0 - (dist / AURA_RANGE));
-                arrow.addDeltaMovement(awayDir.scale(MAX_REPEL_FORCE * falloff));
+                aproj.addDeltaMovement(awayDir.scale(MAX_REPEL_FORCE * falloff));
             }
         }
     }

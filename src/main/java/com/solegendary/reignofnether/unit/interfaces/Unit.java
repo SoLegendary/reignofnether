@@ -21,6 +21,7 @@ import com.solegendary.reignofnether.hud.effecticons.MobEffectIcon;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.items.unititems.EdibleFoodItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
@@ -86,6 +87,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.w3c.dom.Attr;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -131,7 +133,8 @@ public interface Unit {
                 .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 0)
                 .add(AttributeRegistrar.LIFESTEAL.get(), 0)
                 .add(AttributeRegistrar.MANA_ON_HIT.get(), 0)
-                .add(AttributeRegistrar.SCALE.get(), 1.0f);
+                .add(AttributeRegistrar.SCALE.get(), 1.0f)
+                .add(AttributeRegistrar.FASTER_COOLDOWNS.get(), 0);
     }
 
     static Object2ObjectArrayMap<Ability, Float> createCooldownMap() {
@@ -207,6 +210,10 @@ public interface Unit {
     public default int getSightRange() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.SIGHT_RANGE.get());
         return (int) Math.round(attr != null ? attr.getValue() : AttributeRegistrar.SIGHT_RANGE.get().getDefaultValue());
+    }
+    public default float getFasterCooldownsPercent() {
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.FASTER_COOLDOWNS.get());
+        return (float) (attr != null ? attr.getValue() : AttributeRegistrar.FASTER_COOLDOWNS.get().getDefaultValue());
     }
 
     public ResourceCost getCost();
@@ -287,30 +294,31 @@ public interface Unit {
                 }
             }
         }
-        for (Map.Entry<Ability, Float> cooldownEntry : unit.getAbilityCooldowns().entrySet()) {
-            Ability ability = cooldownEntry.getKey();
-            float cooldown = cooldownEntry.getValue();
-            if (cooldown > 0 || unit.getAbilityCharges(ability) < ability.maxCharges) {
-                if (unitMob.tickCount % 2 == 0) {
-                    MobEffectInstance mei = unitMob.getEffect(MobEffectRegistrar.VIGOR.get());
-                    int amp = mei == null ? 0 : mei.getAmplifier() + 1;
-                    if (amp > 0 && unit instanceof HeroUnit heroUnit && unitMob.tickCount % 20 == 0) {
-                        heroUnit.setMana(heroUnit.getMana() + (0.5f * amp));
-                    }
-                }
+        boolean clientSide = ((Entity) unit).level().isClientSide();
+        double ticksPerSec = clientSide ? RtsDebugClientEvents.getCappedTPS() : 20d;
 
-                if (((Entity) unit).level().isClientSide())
-                    unit.getAbilityCooldowns().put(ability, (float) (cooldown - (RtsDebugClientEvents.getCappedTPS() / 20D)));
-                else
-                    unit.getAbilityCooldowns().put(ability, cooldown - 1);
+        // fasterCooldownsPercent 0   -> 1x,
+        // fasterCooldownsPercent 1.0 -> 2x,
+        // fasterCooldownsPercent 2.0 -> 3x
+        float speed = 1f + Math.max(0f, unit.getFasterCooldownsPercent());
+        float reduction = (float) (ticksPerSec / 20d) * speed;
 
-                if (cooldown <= 0 && ability.usesCharges() && unit.getAbilityCharges(ability) < ability.maxCharges) {
-                    unit.setCharges(ability, unit.getAbilityCharges(ability) + 1);
-                    if (unit.getAbilityCharges(ability) < ability.maxCharges)
-                        unit.getAbilityCooldowns().put(ability, ability.cooldownMax);
-                    if (unit.getAbilityCharges(ability) > ability.maxCharges)
-                        unit.setCharges(ability, ability.maxCharges);
-                }
+        var cooldowns = unit.getAbilityCooldowns();
+
+        for (Ability ability : new ArrayList<>(cooldowns.keySet())) {
+            float cooldown = cooldowns.get(ability);
+
+            if (cooldown <= 0 && unit.getAbilityCharges(ability) >= ability.maxCharges)
+                continue;
+
+            float newCd = cooldown - reduction;
+            cooldowns.put(ability, newCd);
+
+            if (newCd <= 0 && ability.usesCharges() && unit.getAbilityCharges(ability) < ability.maxCharges) {
+                int charges = Math.min(unit.getAbilityCharges(ability) + 1, ability.maxCharges);
+                unit.setCharges(ability, charges);
+                if (charges < ability.maxCharges)
+                    cooldowns.put(ability, ability.cooldownMax + newCd); // carries overshoot; use cooldownMax to discard
             }
         }
 
@@ -369,6 +377,13 @@ public interface Unit {
                     le.tickCount % PIGLIN_HEALING_TICKS == 0 &&
                     (MiscUtil.isOnNetherTerrain(le) || unit instanceof GhastUnit)) {
                 le.heal(1);
+            }
+
+            if (unit.hasEffectWithDuration(MobEffectRegistrar.PIGLIN_FERVOR.get()) &&
+                    Factions.getFaction(unit).equals(Factions.PIGLINS) &&
+                    (le.tickCount + (PIGLIN_HEALING_TICKS / 2)) % PIGLIN_HEALING_TICKS == 0 &&
+                    (MiscUtil.isOnNetherTerrain(le) || unit instanceof GhastUnit)) {
+                le.heal( 1);
             }
         }
 

@@ -31,6 +31,7 @@ import com.solegendary.reignofnether.hud.buttons.*;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemShopMenu;
+import com.solegendary.reignofnether.items.RandomItemDropRule;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -38,6 +39,7 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.ResourceSources;
@@ -627,11 +629,13 @@ public class HudClientEvents {
                                 })
                                 .hotkey(Keybindings.openShop)
                                 .build();
-                        shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
-                        productionButtons.add(shopMenuButton);
-                        renderedButtons.add(shopMenuButton);
-                        blitX += iconFrameSize;
-                        buildingProdRows += 1;
+                        if (!shopMenuButton.isHidden.get()) {
+                            shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
+                            productionButtons.add(shopMenuButton);
+                            renderedButtons.add(shopMenuButton);
+                            blitX += iconFrameSize;
+                            buildingProdRows += 1;
+                        }
                     }
 
                     if (hudSelectedPlacement instanceof ProductionPlacement selProdPlacement) {
@@ -741,7 +745,7 @@ public class HudClientEvents {
                                 () -> true,
                                 () -> sendUnitCommand(UnitAction.RETURN_RESOURCES_TO_CLOSEST),
                                 null,
-                                List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.drop_off_resources"),
+                                List.of(fcs(I18n.get("hud.reignofnether.drop_off_resources"),
                                         Style.EMPTY
                                 ))
                         );
@@ -860,7 +864,7 @@ public class HudClientEvents {
                                 nextUnitName = HudClientEvents.getModifiedEntityName(nextUnit);
                             }
                             if (!unitName.equals(nextUnitName)) {
-                                tooltipLines.add(FormattedCharSequence.forward("x" + numUnits + " " + capitaliseAndSpace(unitName),
+                                tooltipLines.add(fcs("x" + numUnits + " " + capitaliseAndSpace(unitName),
                                     Style.EMPTY
                                 ));
                                 numUnits = 0;
@@ -985,10 +989,10 @@ public class HudClientEvents {
                     String resourceName = UnitClientEvents.getSelectedUnitResourceTarget().toString();
                     String key = String.format("resources.reignofnether.%s", resourceName.toLowerCase(Locale.ENGLISH));
                     actionButton.tooltipLines = List.of(
-                            FormattedCharSequence.forward(I18n.get("hud.reignofnether" + ".gather_resources",
+                            fcs(I18n.get("hud.reignofnether" + ".gather_resources",
                                     I18n.get(key)
                             ), Style.EMPTY),
-                            FormattedCharSequence.forward(I18n.get("hud.reignofnether.change_target_resource"), Style.EMPTY)
+                            fcs(I18n.get("hud.reignofnether.change_target_resource"), Style.EMPTY)
                     );
                 }
                 actionButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
@@ -1264,6 +1268,7 @@ public class HudClientEvents {
 
                 // worker count assigned to each resource
                 String finalSelPlayerName = selPlayerName;
+                RTSPlayer rtsPlayer = PlayerClientEvents.getPlayer(finalSelPlayerName);
 
                 int numWorkersHunting = UnitClientEvents.getAllUnits()
                     .stream()
@@ -1272,15 +1277,17 @@ public class HudClientEvents {
                     .toList()
                     .size();
 
-                int numWorkersAssigned = 0;
+                int numberInSquare = 0;
                 // we can only see ReturnResourcesGoal data on server, so we can't use that here
                 if (resName == ResourceName.NONE) {
-                    numWorkersAssigned = UnitClientEvents.getAllUnits()
-                        .stream()
-                        .filter(u -> u instanceof WorkerUnit
-                                && ((Unit) u).getOwnerName().equals(finalSelPlayerName))
-                        .toList()
-                        .size();
+                    numberInSquare = UnitClientEvents.getAllUnits()
+                            .stream()
+                            .filter(u -> u instanceof WorkerUnit
+                                    && ((Unit) u).getOwnerName().equals(finalSelPlayerName))
+                            .toList()
+                            .size();
+                } else if (resName == ResourceName.EMERALD && rtsPlayer != null) {
+                    numberInSquare = rtsPlayer.itemsDropped;
                 } else {
                     for (LivingEntity le : UnitClientEvents.getAllUnits()) {
                         if (le instanceof Unit u && le instanceof WorkerUnit wu && u.getOwnerName()
@@ -1293,20 +1300,20 @@ public class HudClientEvents {
                                 if (resName == ResourceName.FOOD && res.food > 0
                                     || resName == ResourceName.WOOD && res.wood > 0
                                     || resName == ResourceName.ORE && res.ore > 0) {
-                                    numWorkersAssigned += 1;
+                                    numberInSquare += 1;
                                     alreadyAssigned = true;
                                 }
                             }
                             if (!alreadyAssigned && wu.getGatherResourceGoal()
                                 .getTargetResourceName()
                                 .equals(resName)) {
-                                numWorkersAssigned += 1;
+                                numberInSquare += 1;
                             }
                         }
                     }
                 }
                 if (resName == ResourceName.FOOD) {
-                    numWorkersAssigned += numWorkersHunting;
+                    numberInSquare += numWorkersHunting;
                 }
 
                 hudZones.add(MyRenderer.renderIconFrameWithBg(evt.getGuiGraphics(),
@@ -1319,7 +1326,7 @@ public class HudClientEvents {
 
                 evt.getGuiGraphics().drawCenteredString(
                         MC.font,
-                        String.valueOf(numWorkersAssigned),
+                        String.valueOf(numberInSquare),
                         blitX + 69 + (iconFrameSize / 2),
                         blitY + (iconSize / 2) + 1,
                         0xFFFFFF
@@ -1331,6 +1338,7 @@ public class HudClientEvents {
 
             blitY = resourceBlitYStart;
             final String finalSelPlayerName = selPlayerName;
+            RTSPlayer rtsPlayer = PlayerClientEvents.getPlayer(finalSelPlayerName);
             String[] resourceNames2;
             if (ItemClientEvents.ENABLED) {
                 resourceNames2 = new String[] { "food", "wood", "ore", "emerald", "population" };
@@ -1341,12 +1349,12 @@ public class HudClientEvents {
                 List<FormattedCharSequence> tooltip;
                 String key = String.format("resources.reignofnether.%s", resourceName);
                 if (resourceName.equals("population")) {
-                    tooltip = List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.max_resources",
+                    tooltip = List.of(fcs(I18n.get("hud.reignofnether.max_resources",
                         I18n.get(key),
                         GameruleClient.maxPopulation
-                    ), Style.EMPTY));
+                    )));
                 } else {
-                    tooltip = List.of(FormattedCharSequence.forward(I18n.get(key), Style.EMPTY));
+                    tooltip = List.of(fcs(I18n.get(key)));
                 }
                 if (mouseX >= blitX && mouseY >= blitY && mouseX < blitX + iconFrameSize
                     && mouseY < blitY + iconFrameSize) {
@@ -1354,7 +1362,7 @@ public class HudClientEvents {
                 }
                 if (mouseX >= blitX + 69 && mouseY >= blitY && mouseX < blitX + 69 + iconFrameSize
                     && mouseY < blitY + iconFrameSize) {
-                    List<FormattedCharSequence> tooltipWorkersAssigned;
+                    List<FormattedCharSequence> tooltipInSquare;
                     if (resourceName.equals("population")) {
                         int numWorkers = UnitClientEvents.getAllUnits()
                             .stream()
@@ -1362,17 +1370,20 @@ public class HudClientEvents {
                                 && ((Unit) u).getOwnerName().equals(finalSelPlayerName))
                             .toList()
                             .size();
-                        tooltipWorkersAssigned =
-                            List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.total_workers",
-                            numWorkers
-                        ), Style.EMPTY));
+                        tooltipInSquare = List.of(fcs(I18n.get("hud.reignofnether.total_workers", numWorkers)));
+                    } else if (resourceName.equals("emerald")) {
+                        if (GameruleClient.randomItemDrops != RandomItemDropRule.DISABLED && rtsPlayer != null) {
+                            tooltipInSquare = List.of(
+                                    fcs(I18n.get("hud.reignofnether.items_found", rtsPlayer.itemsDropped)),
+                                    fcs(I18n.get("hud.reignofnether.items_hint"))
+                            );
+                        } else {
+                            tooltipInSquare = List.of(fcs("-"));
+                        }
                     } else {
-                        tooltipWorkersAssigned =
-                            List.of(FormattedCharSequence.forward(I18n.get("hud.reignofnether.workers_on_" + resourceName
-                        ), Style.EMPTY));
+                        tooltipInSquare = List.of(fcs(I18n.get("hud.reignofnether.workers_on_" + resourceName)));
                     }
-                    if (!resourceName.equals("emerald"))
-                        MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipWorkersAssigned, mouseX + 5, mouseY);
+                    MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipInSquare, mouseX + 5, mouseY);
                 }
                 blitY += iconFrameSize - 1;
             }

@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.faction.Faction;
@@ -147,8 +148,14 @@ public class PlayerClientEvents {
                 rtsPlayer.tradeRates.put(tradeAction, rate);
 
         for (BuildingPlacement bpl : BuildingClientEvents.getBuildings())
-            if (bpl.getBuilding() instanceof AbstractMarket)
+            if (bpl instanceof ItemShopPlacement shop && !shop.getStockedItems().isEmpty())
                 bpl.updateButtons();
+    }
+
+    public static void setItemsDropped(String playerName, int itemsDropped) {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (playerName.equals(rtsPlayer.name))
+                rtsPlayer.itemsDropped = itemsDropped;
     }
 
     @SubscribeEvent
@@ -248,7 +255,7 @@ public class PlayerClientEvents {
         MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 
-    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson) {
+    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson, boolean isSyncing) {
         if (!isRTSPlayer(playerName)) {
             rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId, isDogPerson, -1L));
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
@@ -256,10 +263,13 @@ public class PlayerClientEvents {
                 GameruleClient.gamerulesMenuOpen = false;
                 if (faction != Factions.NONE) {
                     MC.getMusicManager().stopPlaying();
-                    ResearchClient.removeAllCheats();
+                    if (!isSyncing)
+                        ResearchClient.removeAllCheats();
                 }
                 PlayerServerboundPacket.requestMarketRates();
             }
+            if (!isSyncing)
+                HeroClientEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(playerName));
         }
     }
 

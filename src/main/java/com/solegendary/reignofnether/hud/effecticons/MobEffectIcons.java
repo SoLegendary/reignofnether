@@ -30,6 +30,12 @@ public class MobEffectIcons {
             "uncontrollable"
     );
 
+    public static final MobEffectIcon PARTIALLY_POSSESSED = new MobEffectIcon(
+            MobEffectRegistrar.PARTIALLY_POSSESSED.get(),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/possess.png"),
+            "partially_possessed"
+    );
+
     public static final MobEffectIcon ZOMBIE_INFECTED = new MobEffectIcon(
             MobEffectRegistrar.ZOMBIE_INFECTED.get(),
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/drowned.png"),
@@ -228,6 +234,18 @@ public class MobEffectIcons {
             "limited_lifespan"
     );
 
+    public static final MobEffectIcon LIFESTEAL = new MobEffectIcon(
+            MobEffectRegistrar.LIFESTEAL.get(),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/item/hungry_horror_armour.png"),
+            "lifesteal"
+    );
+
+    public static final MobEffectIcon PIGLIN_FERVOR = new MobEffectIcon(
+            MobEffectRegistrar.PIGLIN_FERVOR.get(),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,  "textures/item/golden_piglin_armour.png"),
+            "piglin_fervor"
+    );
+
     @Nullable
     public static MobEffectIcon getIcon(MobEffectInstance mei) {
         for (MobEffectIcon effectIcon : EFFECT_ICONS)
@@ -240,6 +258,7 @@ public class MobEffectIcons {
             STUN,
             FREEZE,
             UNCONTROLLABLE,
+            PARTIALLY_POSSESSED,
             ZOMBIE_INFECTED,
             SLIME_INFECTED,
             MINOR_SPEED,
@@ -272,6 +291,8 @@ public class MobEffectIcons {
             FIRE_RESISTANCE,
             INVINCIBLE,
             VILLAGER_INSPIRATION,
-            LIMITED_LIFESPAN
+            LIMITED_LIFESPAN,
+            LIFESTEAL,
+            PIGLIN_FERVOR
     );
 }

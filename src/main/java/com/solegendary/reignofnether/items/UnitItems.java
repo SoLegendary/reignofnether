@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.blocks.BlockServerEvents;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingValidators;
 import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.entities.ThrowableTntProjectile;
 import com.solegendary.reignofnether.entities.ThrownHeroExperienceBottle;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
@@ -23,10 +25,13 @@ import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import com.solegendary.reignofnether.unit.units.piglins.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.ParticleUtil;
+import com.solegendary.reignofnether.util.ProjectileThrower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
@@ -39,6 +44,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Comparator;
 import java.util.List;
@@ -80,7 +86,7 @@ public class UnitItems {
     public static final UnitItem HERO_EXPERIENCE_BOTTLE = UnitItemBuilder.of(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get())
             .descId("hero_experience_bottle")
             .type(UnitItemType.CONSUMABLE)
-            .maxStackSize(64)
+            .maxStackSize(9)
             .pointDesc("item.reignofnether.hero_experience_bottle.point1", EXPERIENCE_BOTTLE_EXP_VALUE)
             .buyCost(100)
             .sellValue(50)
@@ -170,7 +176,7 @@ public class UnitItems {
             .descId("heartstealer")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.UNCOMMON)
-            .attribute(AttributeRegistrar.LIFESTEAL.get(), 0.20, ADDITION)
+            .attribute(AttributeRegistrar.LIFESTEAL.get(), 0.25, ADDITION)
             .build();
 
     public static final UnitItem RITUAL_DAGGER = UnitItemBuilder.of(ItemRegistrar.RITUAL_DAGGER.get())
@@ -240,7 +246,7 @@ public class UnitItems {
     public static final UnitItem SATCHEL_OF_SNACKS = UnitItemBuilder.of(ItemRegistrar.SATCHEL_OF_SNACKS.get())
             .descId("satchel_of_snacks")
             .type(UnitItemType.PASSIVE)
-            .rarity(Rarity.UNCOMMON)
+            .rarity(Rarity.RARE)
             .noBehaviourReset()
             .suppressDefaultError()
             .cooldownTicks(15 * 20)
@@ -283,6 +289,7 @@ public class UnitItems {
             .suppressDefaultError()
             .noRandomDrop()
             .cooldownTicks(10 * 20)
+            .nonHeroUseable()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
@@ -291,7 +298,7 @@ public class UnitItems {
                         return false;
                     }
                     boolean fullHealth = le.getHealth() >= le.getMaxHealth();
-                    if (!fullHealth) {
+                    if (!fullHealth || unit.isHolding(UnitItems.HEROS_ARMOUR)) {
                         Unit.startEatingOrDrinking(unit, new ItemEntity(le.level(), le.getX(), le.getY(), le.getZ(),
                                 new ItemStack(ItemRegistrar.HEALTH_POTION.get())));
                         return true;
@@ -355,7 +362,7 @@ public class UnitItems {
             })
             .build();
 
-    private static final int GONG_OF_WEAKENING_DURATION_SECONDS = 10;
+    private static final int GONG_OF_WEAKENING_DURATION_SECONDS = 15;
     private static final int GONG_OF_WEAKENING_RADIUS = 10;
     public static final UnitItem GONG_OF_WEAKENING = UnitItemBuilder.of(ItemRegistrar.GONG_OF_WEAKENING.get())
             .descId("gong_of_weakening")
@@ -387,7 +394,7 @@ public class UnitItems {
     public static final UnitItem ICE_WAND = UnitItemBuilder.of(ItemRegistrar.ICE_WAND.get())
             .descId("ice_wand")
             .type(UnitItemType.ACTIVE)
-            .rarity(Rarity.UNCOMMON)
+            .rarity(Rarity.RARE)
             .pointDesc("item.reignofnether.ice_wand.point1", ICE_WAND_DURATION_SECONDS)
             .pointDesc("item.reignofnether.ice_wand.point2")
             .cooldownTicks(45 * 20)
@@ -492,10 +499,12 @@ public class UnitItems {
                     if (!success) {
                         HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.tome_of_duplication.error");
                     } else {
-                        ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), 30, le.level(),le.getEyePosition());
                         SoundClientboundPacket.playSoundAtPos(SoundAction.TOME_OF_DUPLICATION, le.blockPosition(), 1.5f);
                         UnitSyncAbilityClientboundPacket.sendSyncAbilitiesPacket(le);
                     }
+                }
+                if (success) {
+                    ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), 30, le.level(), le.getEyePosition());
                 }
                 return success;
             })
@@ -535,6 +544,7 @@ public class UnitItems {
             .showRangeCircle()
             .range(POCKET_PORTAL_RANGE)
             .suppressDefaultError()
+            .nonHeroUseable()
             .onUseGround((unit, pos) -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
@@ -598,9 +608,8 @@ public class UnitItems {
             .build();
 
     public static final int BELL_OF_ARMS_RANGE = 20;
-    public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(Items.BELL)
+    public static final UnitItem BELL_OF_ARMS = UnitItemBuilder.of(ItemRegistrar.BELL_OF_ARMS.get())
             .descId("bell_of_arms")
-            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/bell.png"))
             .type(UnitItemType.ACTIVE)
             .rarity(Rarity.EPIC)
             .toggleActiveOnUse()
@@ -627,7 +636,6 @@ public class UnitItems {
             .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
             .type(UnitItemType.CONSUMABLE)
             .rarity(Rarity.EPIC) // Handled in HeroServerEvents.onLivingDeath
-            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/totem_of_undying.png"))
             .pointDesc("item.reignofnether.totem_of_undying.point1", TOTEM_OF_UNDYING_INVINCIBILITY_DURATION_SECONDS)
             .build();
 
@@ -641,6 +649,7 @@ public class UnitItems {
     public static final int TOTEM_OF_SHIELDING_DURATION_SECONDS = 20;
     public static final UnitItem TOTEM_OF_SHIELDING = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
             .descId("totem_of_shielding")
+            .rarity(Rarity.RARE)
             .pointDesc("item.reignofnether.totem_of_shielding.point1", TOTEM_OF_SHIELDING_DURATION_SECONDS),
             EntityRegistrar.TOTEM_OF_SHIELDING.get()
     );
@@ -658,6 +667,106 @@ public class UnitItems {
             .pointDesc("item.reignofnether.totem_of_casting.point1", TOTEM_OF_CASTING_DURATION_SECONDS),
             EntityRegistrar.TOTEM_OF_CASTING.get()
     );
+
+    public static final int ENDER_PEARL_RANGE = 15;
+    public static final UnitItem ENDER_PEARL = UnitItemBuilder.of(Items.ENDER_PEARL)
+            .descId("ender_pearl")
+            .defaultStackCount(3)
+            .maxStackSize(9)
+            .buyCost(200)
+            .sellValue(100)
+            .icon(ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/ender_pearl.png"))
+            .type(UnitItemType.CONSUMABLE)
+            .rarity(Rarity.COMMON)
+            .range(ENDER_PEARL_RANGE)
+            .pointDesc("item.reignofnether.ender_pearl.point1")
+            .nonHeroUseable()
+            .onUseGround((unit, pos) -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide())
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.THROW_PEARL, le.blockPosition());
+                ProjectileThrower.throwPearlAt((LivingEntity) unit, pos);
+                return true;
+            })
+            .build();
+
+    public static final int TNT_RANGE = 12;
+    public static final int TNT_COOLDOWN_TICKS = 20 * 20;
+    public static final UnitItem THROWABLE_TNT = UnitItemBuilder.of(ItemRegistrar.THROWABLE_TNT.get())
+            .descId("throwable_tnt")
+            .maxStackSize(3)
+            .buyCost(150)
+            .sellValue(75)
+            .icon(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/tnt.png"))
+            .type(UnitItemType.CONSUMABLE)
+            .rarity(Rarity.COMMON)
+            .range(TNT_RANGE)
+            .cooldownTicks(TNT_COOLDOWN_TICKS)
+            .pointDesc("item.reignofnether.throwable_tnt.point1")
+            .onUseGround((unit, pos) -> {
+                LivingEntity le = (LivingEntity) unit;
+                if (!le.level().isClientSide())
+                    SoundClientboundPacket.playSoundAtPos(SoundAction.THROW_EGG, le.blockPosition());
+
+                ThrowableTntProjectile tnt = new ThrowableTntProjectile(le.level(), le, 2);
+                tnt.setItem(new ItemStack(ItemRegistrar.THROWABLE_TNT.get()));
+                Vec3 dMove = Vec3.atCenterOf(pos).subtract(le.getEyePosition())
+                        .multiply(1,0,1)
+                        .scale(0.04)
+                        .add(0,0.4,0);
+                tnt.setDeltaMovement(dMove);
+                tnt.setOwner(le);
+                le.level().addFreshEntity(tnt);
+                le.level().playSound(null, le.getX(), le.getY(), le.getZ(), SoundEvents.EGG_THROW,
+                        SoundSource.NEUTRAL, 0.5F, 0.4F / (le.getRandom().nextFloat() * 0.4F + 0.8F));
+
+                return true;
+            })
+            .build();
+
+    public static final float EVOCATION_ROBES_FASTER_COOLDOWN = 0.33f; // tooltip only
+    public static final float EVOCATION_ROBES_MANA_REGEN = 0.25f;
+    public static final UnitItem EVOCATION_ROBES = UnitItemBuilder.of(ItemRegistrar.EVOCATION_ROBES.get())
+            .descId("evocation_robes")
+            .type(UnitItemType.PASSIVE)
+            .rarity(Rarity.RARE)
+            .attribute(AttributeRegistrar.FASTER_COOLDOWNS.get(), EVOCATION_ROBES_FASTER_COOLDOWN)
+            .attribute(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), EVOCATION_ROBES_MANA_REGEN)
+            .build();
+
+    public static final int HEROS_ARMOUR_MAX_TARGETS = 10;
+    public static final float HEROS_ARMOUR_HEAL = 10f;
+    public static final float HEROS_ARMOUR_RANGE = 20f;
+    public static final UnitItem HEROS_ARMOUR = UnitItemBuilder.of(ItemRegistrar.HEROS_ARMOUR.get())
+            .descId("heros_armour")
+            .type(UnitItemType.PASSIVE)
+            .rarity(Rarity.EPIC)
+            .range(HEROS_ARMOUR_RANGE)
+            .noRandomDrop()
+            .pointDesc("item.reignofnether.heros_armour.point1", HEROS_ARMOUR_MAX_TARGETS, HEROS_ARMOUR_HEAL)
+            .build();
+
+    public static final float ARMOUR_AURA_RANGE = 20f;
+
+    public static final float HUNGRY_HORROR_ARMOUR_LIFESTEAL = 0.15f; // tooltip only
+    public static final UnitItem HUNGRY_HORROR_ARMOUR = UnitItemBuilder.of(ItemRegistrar.HUNGRY_HORROR_ARMOUR.get())
+            .descId("hungry_horror_armour")
+            .type(UnitItemType.PASSIVE)
+            .rarity(Rarity.EPIC)
+            .range(ARMOUR_AURA_RANGE)
+            .noRandomDrop()
+            .pointDesc("item.reignofnether.hungry_horror_armour.point1", (int) (HUNGRY_HORROR_ARMOUR_LIFESTEAL * 100))
+            .build();
+
+    public static final float GOLDEN_PIGLIN_ATTACK_DAMAGE = 0.10f; // tooltip only
+    public static final UnitItem GOLDEN_PIGLIN_ARMOUR = UnitItemBuilder.of(ItemRegistrar.GOLDEN_PIGLIN_ARMOUR.get())
+            .descId("golden_piglin_armour")
+            .type(UnitItemType.PASSIVE)
+            .rarity(Rarity.EPIC)
+            .range(ARMOUR_AURA_RANGE)
+            .noRandomDrop()
+            .pointDesc("item.reignofnether.golden_piglin_armour.point1", (int) (GOLDEN_PIGLIN_ATTACK_DAMAGE * 100))
+            .build();
 
     public static final List<UnitItem> ITEMS = List.of(
             EMPTY,
@@ -699,6 +808,12 @@ public class UnitItems {
             TOTEM_OF_REGENERATION,
             TOTEM_OF_SHIELDING,
             TOTEM_OF_PROTECTION,
-            TOTEM_OF_CASTING
+            TOTEM_OF_CASTING,
+            ENDER_PEARL,
+            THROWABLE_TNT,
+            EVOCATION_ROBES,
+            HEROS_ARMOUR,
+            HUNGRY_HORROR_ARMOUR,
+            GOLDEN_PIGLIN_ARMOUR
     );
 }

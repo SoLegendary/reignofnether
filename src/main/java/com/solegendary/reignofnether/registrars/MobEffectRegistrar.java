@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.registrars;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.unit.MyMobEffect;
 import net.minecraft.world.effect.InstantenousMobEffect;
 import net.minecraft.world.effect.MobEffect;
@@ -90,7 +91,9 @@ public class MobEffectRegistrar {
     public static final RegistryObject<MobEffect> WARM = MOB_EFFECTS.register("warm", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0xFF0000));
 
     // cooldown reduction
-    public static final RegistryObject<MobEffect> VIGOR = MOB_EFFECTS.register("vigor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x0000FF));
+    public static final RegistryObject<MobEffect> VIGOR = MOB_EFFECTS.register("vigor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x0000FF)
+            .addAttributeModifier(AttributeRegistrar.FASTER_COOLDOWNS.get(), "c967f9cf-ef58-46be-a775-d69c80c688ed", 0.5f, AttributeModifier.Operation.ADDITION)
+            .addAttributeModifier(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), "e47194b6-8fc3-42c1-99fb-4957cbaa23eb", 1.0, AttributeModifier.Operation.ADDITION));
 
     // no knockback taken or received, not pushable
     public static final RegistryObject<MobEffect> PHASING = MOB_EFFECTS.register("phasing", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x5d105e)
@@ -112,6 +115,12 @@ public class MobEffectRegistrar {
 
     // visual only
     public static final RegistryObject<MobEffect> LIMITED_LIFESPAN = MOB_EFFECTS.register("limited_lifespan", () -> new InstantenousMobEffect(MobEffectCategory.NEUTRAL, 0xffffff));
+
+    public static final RegistryObject<MobEffect> LIFESTEAL = MOB_EFFECTS.register("lifesteal", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
+            .addAttributeModifier(AttributeRegistrar.LIFESTEAL.get(), "c159f105-f0cd-464d-86fe-82213a34dac7", UnitItems.HUNGRY_HORROR_ARMOUR_LIFESTEAL, AttributeModifier.Operation.ADDITION));
+
+    public static final RegistryObject<MobEffect> PIGLIN_FERVOR = MOB_EFFECTS.register("piglin_fervor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
+            .addAttributeModifier(AttributeRegistrar.ATTACK_DAMAGE.get(), "166f078d-89e3-4529-abdc-13b09915002f", UnitItems.GOLDEN_PIGLIN_ATTACK_DAMAGE, AttributeModifier.Operation.MULTIPLY_BASE));
 
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||

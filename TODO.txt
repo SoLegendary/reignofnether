@@ -1,5 +1,5 @@
 
-1.20.1-1.5.0-beta-4
+1.20.1-1.5.0
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -43,47 +43,22 @@ Quality of Life
 ---------------
 [❌] Create a new homing projectile entity from the ground up
 
-[✔] Added creative tabs for all RTS-related blocks and items:
-    - RTS Mapmaker Blocks
-    - RTS Unit Spawn Eggs
-    - RTS Hero Items
-
-[✔] Reworked the unit armour tooltip for mixed armour types
-
-[✔] Added new attributes:
-     - critical_hit_chance (3x damage)
-     - explosive_hit_chance
-     - building_damage_bonus
-     - lifesteal (% of damage)
-     - mana_on_hit (% of damage)
-     - scale (visual only)
-
-[✔] Added passive icons
-
-[✔] Added new mob effects:
-    - vigor (-33% cooldown reduction per level)
-    - phasing (can walk through mobs and ignore knockback)
-    - night_warping (+2 night radius per level)
-
 [❌] Villager profession bonuses as passive icons
 [❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
-[❌] Datapack to return no-cave generation
+[❌] /rtsapi-set-scenario-role
+    - "only works before game start and role is empty, not for in game"
+
+[🟡] Added an attribute "faster_cooldowns"
+    - a value of 1.0 means 2x faster cooldowns (50% less cooldown time)
+    - a value of 2.0 means 3x faster cooldowns (66% less cooldown time)
 
 Bugfixes
 --------
-[✔] Grass blocks are tinted weirdly even when fog of war is off
-[✔] Units that spawn outside of client render range are now still counted to population totals
-[✔] Evasion chance attribute now works on all units
-[✔] Bears and Zoglins now respect evasion chance
-[✔] Iron golems and witches can now pick up resources
-[✔] Fixed large custom buildings having extreme lag while building
-[✔] Fixed Slimes and Magma cubes being unaffected by weakness and strength
-[🟡] Hero data not being wiped on game reset or start?
-    - Just delete the actual hero-unit.dat file on reset
-
-[❌] Disabling doDaylightCycle messes up the time
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
+
+[✔] Draw aggro on custom buildings turns back on when relogging
+[✔] Partially possessed units are now less likely to be targeted
 
 Languages
 ---------

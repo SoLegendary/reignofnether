@@ -7,14 +7,18 @@ import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.items.*;
+import com.solegendary.reignofnether.items.unititems.MerchantEquipmentItem;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
+import com.solegendary.reignofnether.time.NightUtils;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.monsters.AbstractTotem;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.ParticleUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -25,6 +29,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -327,7 +332,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ItemStack itemStack = get(uuid);
         if (itemStack != null && this instanceof Unit unit) {
             UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-            if (unitItem != null && unitItem.onUse != null && checkManaCostAndCooldown(unitItem, itemStack)) {
+            if (unitItem != null && canUseItem(unitItem) && unitItem.onUse != null && checkManaCostAndCooldown(unitItem, itemStack)) {
                 if (unitItem.onUse.test(unit)) {
                     CompoundTag tag = itemStack.getTag();
                     if (itemStack.getTag() != null && unitItem.toggleActiveOnUse) {
@@ -341,6 +346,8 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
                 } else if (!this.level().isClientSide() && !unitItem.suppressDefaultError) {
                     HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.use");
                 }
+            } else if (unitItem != null && !canUseItem(unitItem)) {
+                HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.error.cant_use_item");
             }
         }
         return false;
@@ -413,7 +420,10 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         UnitItem unitItem = ItemUtil.getUnitItem(stack);
         if (unitItem == null || unitItem.attributes.isEmpty()) return;
 
-        UUID itemUuid = stack.getOrCreateTag().getUUID("uuid");
+        CompoundTag stackTag = stack.getOrCreateTag();
+        if (!stackTag.hasUUID("uuid"))
+            stackTag.putUUID("uuid", UUID.randomUUID());
+        UUID itemUuid = stackTag.getUUID("uuid");
         int i = 0;
         for (Attribute attr : unitItem.attributes.keySet()) {
             AttributeModifier modifier = unitItem.attributes.get(attr);
@@ -509,6 +519,11 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         ListTag list = tag.getList(RON$UNIT_ITEMS_KEY, Tag.TAG_COMPOUND);
         for (int i = 0; i < this.unitItems.size(); i++) {
             ItemStack stack = i < list.size() ? ItemStack.of(list.getCompound(i)) : ItemStack.EMPTY;
+            if (!stack.isEmpty()) {
+                CompoundTag t = stack.getOrCreateTag();
+                if (!t.hasUUID("uuid"))
+                    t.putUUID("uuid", UUID.randomUUID());
+            }
             this.unitItems.set(i, stack);
             if (!stack.isEmpty()) ron$applyItemAttributes(stack);
         }
@@ -532,14 +547,26 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
         at = @At("TAIL")
     )
     public void tick(CallbackInfo ci) {
-        if (tickCount % 20 == 0 && isHoldingActive(UnitItems.BELL_OF_ARMS)) {
-            addEffect(new MobEffectInstance(MobEffectRegistrar.VILLAGER_INSPIRATION.get(), 30, 0, true, false));
-        }
-        if (tickCount % 20 == 0) {
+        if (tickCount % 20 == 0 && this instanceof Unit unit) {
+            if (isHoldingActive(UnitItems.BELL_OF_ARMS)) {
+                addEffect(new MobEffectInstance(MobEffectRegistrar.VILLAGER_INSPIRATION.get(), 30, 0, true, false));
+            }
+            boolean hasHorrorArmour = isHolding(UnitItems.HUNGRY_HORROR_ARMOUR);
+            boolean hasPiglinArmour = isHolding(UnitItems.GOLDEN_PIGLIN_ARMOUR);
+            if (hasHorrorArmour || hasPiglinArmour) {
+                for (Mob mob : MiscUtil.getEntitiesWithinRange(position(), UnitItems.ARMOUR_AURA_RANGE, Mob.class, level())) {
+                    if (mob instanceof Unit unit2 && AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), unit2.getOwnerName()) && !(unit2 instanceof AbstractTotem)) {
+                        if (hasHorrorArmour && NightUtils.isInRangeOfNightSource(mob.position(), mob.level().isClientSide()))
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.LIFESTEAL.get(), 30, 0, true, false));
+                        if (hasPiglinArmour && MiscUtil.isOnNetherTerrain(mob))
+                            mob.addEffect(new MobEffectInstance(MobEffectRegistrar.PIGLIN_FERVOR.get(), 30, 0, true, false));
+                    }
+                }
+            }
             for (ItemStack itemStack : getAllItems()) {
                 if (itemStack.getTag() != null && itemStack.getTag().hasUUID("uuid")) {
                     UnitItem unitItem = ItemUtil.getUnitItem(itemStack);
-                    if (unitItem != null && unitItem.forceAutocast &&
+                    if (unitItem != null && unitItem.forceAutocast && canUseItem(unitItem) &&
                         isOffCooldown(unitItem, itemStack) && canAffordManaCost(unitItem)) {
                         UUID itemUUID = itemStack.getTag().getUUID("uuid");
                         use(itemUUID);
@@ -566,7 +593,9 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
     }
 
     @Override
-    public boolean canUseUnitItems() {
-        return this instanceof HeroUnit;
+    public boolean canUseItem(UnitItem unitItem) {
+        if (unitItem instanceof MerchantEquipmentItem mei && mei.isCompatibleTarget.test(this))
+            return true;
+        return this instanceof HeroUnit || (unitItem != null && unitItem.nonHeroUseable);
     }
 }

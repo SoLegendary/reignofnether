@@ -622,16 +622,18 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         int blitYIcon = y + 7;
 
         // prep strings/icons to render
-        List<ResourceLocation> textureStatIcons = List.of(ResourceLocation.fromNamespaceAndPath("reignofnether",
-                "textures/icons/items/wheat.png"
-            ),
+        List<ResourceLocation> textureStatIcons = List.of(
+            ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/wheat.png"),
             ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/wood.png"),
-            ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/iron_ore.png")
+            ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/iron_ore.png"),
+            ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/emerald.png")
         );
 
-        List<String> statStrings = List.of(String.valueOf(resources.food),
+        List<String> statStrings = List.of(
+            String.valueOf(resources.food),
             String.valueOf(resources.wood),
-            String.valueOf(resources.ore)
+            String.valueOf(resources.ore),
+            String.valueOf(resources.emerald)
         );
 
         // render based on prepped strings/icons

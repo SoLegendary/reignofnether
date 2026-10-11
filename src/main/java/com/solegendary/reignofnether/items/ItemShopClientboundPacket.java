@@ -23,13 +23,13 @@ public class ItemShopClientboundPacket {
     private final ArrayList<Integer> maxRestockTicks;
     private final ArrayList<Integer> restockTicks;
 
-    public static void syncItemShopStock(BlockPos buildingPos, ArrayList<StockedShopItem> itemsAndStock) {
+    public static void syncItemShopStock(BlockPos buildingPos, ArrayList<StockedShopItem> stockedItems) {
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new ItemShopClientboundPacket(buildingPos, itemsAndStock)
+                new ItemShopClientboundPacket(buildingPos, stockedItems)
         );
     }
 
-    public ItemShopClientboundPacket(BlockPos buildingPos, ArrayList<StockedShopItem> itemsAndStock) {
+    public ItemShopClientboundPacket(BlockPos buildingPos, ArrayList<StockedShopItem> stockedItems) {
         this.buildingPos = buildingPos;
         this.descIds = new ArrayList<>();
         this.buyCosts = new ArrayList<>();
@@ -38,7 +38,7 @@ public class ItemShopClientboundPacket {
         this.maxRestockTicks = new ArrayList<>();
         this.restockTicks = new ArrayList<>();
 
-        for (StockedShopItem stock : itemsAndStock) {
+        for (StockedShopItem stock : stockedItems) {
             descIds.add(stock.item.descId);
             buyCosts.add(stock.getBuyCost());
             maxStocks.add(stock.maxStock);
@@ -88,12 +88,12 @@ public class ItemShopClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
-                        ArrayList<StockedShopItem> itemsAndStock = new ArrayList<>();
+                        ArrayList<StockedShopItem> stockedItems = new ArrayList<>();
                         for (int i = 0; i < descIds.size(); i++) {
                             UnitItem unitItem = ItemUtil.getUnitItem(descIds.get(i));
                             if (unitItem == null)
                                 continue;
-                            itemsAndStock.add(new StockedShopItem(
+                            stockedItems.add(new StockedShopItem(
                                     unitItem,
                                     buyCosts.get(i),
                                     maxStocks.get(i),
@@ -102,7 +102,7 @@ public class ItemShopClientboundPacket {
                                     restockTicks.get(i)
                             ));
                         }
-                        ItemClientEvents.setStockedShopItems(buildingPos, itemsAndStock);
+                        ItemClientEvents.setStockedShopItems(buildingPos, stockedItems);
                         success.set(true);
                     });
         });

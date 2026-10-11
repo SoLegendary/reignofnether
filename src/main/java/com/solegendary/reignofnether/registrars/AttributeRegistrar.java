@@ -131,6 +131,12 @@ public class AttributeRegistrar {
                             .setSyncable(true)
             );
 
+    public static final RegistryObject<Attribute> FASTER_COOLDOWNS =
+            ATTRIBUTES.register("faster_cooldowns",
+                    () -> new RangedAttribute("attribute.reignofnether.faster_cooldowns", 0, 0.0, 9999.0)
+                            .setSyncable(true)
+            );
+
     public static void init(FMLJavaModLoadingContext context) {
         ATTRIBUTES.register(context.getModEventBus());
     }

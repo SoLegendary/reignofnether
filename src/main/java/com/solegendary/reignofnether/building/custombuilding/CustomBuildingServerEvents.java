@@ -3,11 +3,13 @@ package com.solegendary.reignofnether.building.custombuilding;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import com.solegendary.reignofnether.building.*;
+import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -84,8 +86,21 @@ public class CustomBuildingServerEvents {
                         return false;
                     }
                 }
+                if (!building.productions.get().isEmpty()) {
+                    PlayerServerEvents.sendMessageToAllPlayers(
+                            "sandbox.reignofnether.custom_buildings.trainable_units.save_success",
+                            false, building.productions.get().size()
+                    );
+                }
+                if (!building.stockedItems.isEmpty()) {
+                    PlayerServerEvents.sendMessageToAllPlayers(
+                            "sandbox.reignofnether.custom_buildings.buyable_items.save_success",
+                            false, building.stockedItems.size()
+                    );
+                }
+
                 customBuildings.add(building);
-                BuildingPlacement placement = new CustomBuildingPlacement(building, level, pos, Rotation.NONE, "", blocks, false);
+                BuildingPlacement placement = building.createBuildingPlacement(level, pos, Rotation.NONE, "");
                 BuildingServerEvents.getBuildings().add(placement);
                 CustomBuildingClientboundPacket.registerCustomBuilding(building);
                 saveCustomBuildings(level);

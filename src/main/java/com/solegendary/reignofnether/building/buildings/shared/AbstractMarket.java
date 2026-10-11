@@ -1,14 +1,12 @@
 package com.solegendary.reignofnether.building.buildings.shared;
 
 import com.solegendary.reignofnether.ability.abilities.TradeResources;
-import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.production.ProductionBuilding;
-import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.items.StockedShopItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -47,14 +45,14 @@ public abstract class AbstractMarket extends ProductionBuilding implements ItemS
         return BuildingBlockData.getBuildingBlocksFromNbt(structureName, level);
     }
 
-    public abstract ArrayList<StockedShopItem> getStartingItemsAndStock();
+    public abstract ArrayList<StockedShopItem> getStartingStockedItems();
 
-    public abstract ArrayList<StockedShopItem> getUpgradedItemsAndStock();
+    public abstract ArrayList<StockedShopItem> getUpgradedStockedItems();
 
     @Override
     public BuildingPlacement createBuildingPlacement(Level level, BlockPos pos, Rotation rotation, String ownerName) {
         BuildingPlacement bpl = new ItemShopPlacement(this, level, pos, rotation, ownerName, getAbsoluteBlockData(getRelativeBlockData(level), level, pos, rotation));
-        bpl.getDataStorage().setData(ItemShopAddon.STOCKED_ITEMS, getStartingItemsAndStock());
+        bpl.getDataStorage().setData(ItemShopAddon.STOCKED_ITEMS, getStartingStockedItems());
         return bpl;
     }
 }

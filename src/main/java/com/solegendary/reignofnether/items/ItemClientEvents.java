@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
@@ -8,6 +9,7 @@ import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.hud.buttons.AbstractUnitItemButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -18,6 +20,9 @@ import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
@@ -94,9 +99,6 @@ public class ItemClientEvents {
     public static void clearRenderedItems() {
         renderedItems.clear();
     }
-    public static ArrayList<ItemEntity> getRenderedItems() {
-        return renderedItems;
-    }
 
     public static boolean hasDragActionItem() {
         return actionableUnitItemDrag != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) && !hasLeftClickAction();
@@ -106,7 +108,9 @@ public class ItemClientEvents {
         return ENABLED &&
                 le instanceof UnitInventory inv &&
                 le instanceof Unit unit &&
-                (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null));
+                Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() <= 0 &&
+                (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null && MC.player != null &&
+                        AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), MC.player.getName().getString())));
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {
@@ -228,9 +232,9 @@ public class ItemClientEvents {
                 ItemServerboundPacket.swap(((Entity) inv).getId(), actionableInvIndex, uiButton.invIndex);
             } else if (hudMousedOverButton != null &&
                     hudMousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
-                    hudMousedOverButton.entity instanceof UnitInventory inv1 && inv1.canPickupUnitItems()) {
+                    hudMousedOverButton.entity instanceof UnitInventory inv1) {
                 Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
-                if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED) {
+                if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED || SandboxClientEvents.isSandboxPlayer()) {
                     // Give via group button
                     unit.getCheckpoints().clear();
                     unit.getCheckpoints().add(new Checkpoint(hudMousedOverButton.entity, true));
@@ -244,7 +248,6 @@ public class ItemClientEvents {
                     LivingEntity le = UnitClientEvents.getPreselectedUnits().get(0);
                     Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(le);
                     if (le instanceof UnitInventory inv1 &&
-                        inv1.canPickupUnitItems() &&
                         le != HudClientEvents.hudSelectedEntity &&
                         (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED)) {
                         // Give via direct entity
@@ -252,8 +255,8 @@ public class ItemClientEvents {
                         unit.getCheckpoints().add(new Checkpoint(le, true));
                         ItemServerboundPacket.give(((Entity) inv).getId(), actionableInvUUID, le.getId());
                     }
-                } else if (bpl != null && bpl.getBuilding() instanceof AbstractMarket &&
-                        (rl == Relationship.FRIENDLY || rl == Relationship.OWNED) &&
+                } else if (bpl instanceof ItemShopPlacement itemShopPlacement && !itemShopPlacement.getStockedItems().isEmpty() &&
+                        (rl == Relationship.FRIENDLY || rl == Relationship.OWNED || SandboxClientEvents.isSandboxPlayer()) &&
                         actionableUnitItemDrag != null && actionableUnitItemDrag.sellValue > 0) {
                     // sell at market
                     unit.getCheckpoints().clear();
@@ -468,10 +471,14 @@ public class ItemClientEvents {
         }
 
         List<Component> buysell = new ArrayList<>();
-        if (unitItem.buyCost > 0)
+
+        int buyCost = stack.getOrCreateTag().contains("buyCost") ? stack.getOrCreateTag().getInt("buyCost") : unitItem.buyCost;
+        if (buyCost > 0)
             buysell.add(Component.translatable("item.reignofnether.hud.buy", unitItem.buyCost)
                     .withStyle(COST_STYLE));
-        if (unitItem.sellValue > 0)
+
+        int sellValue = stack.getOrCreateTag().contains("sellValue") ? stack.getOrCreateTag().getInt("sellValue") : unitItem.sellValue;
+        if (sellValue > 0)
             buysell.add(Component.translatable("item.reignofnether.hud.sell", unitItem.sellValue)
                     .withStyle(COST_STYLE));
 

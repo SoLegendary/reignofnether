@@ -480,6 +480,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 SoundClientboundPacket.playSoundAtPos(SoundAction.PIGLIN_MERCHANT_LOOT_EXPLOSION, blockPosition());
             }
         });
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override
@@ -487,6 +488,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         initialiseGoals();
         this.goalSelector.addGoal(2, usePortalGoal);
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, attackBuildingGoal);
         this.goalSelector.addGoal(2, itemGoal);
@@ -548,16 +550,16 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 .multiply(1,0,1)
                 .scale(0.04)
                 .add(0,0.4,0);
+
         tnt.setDeltaMovement(dMove);
         tnt.setOwner(this);
         level().addFreshEntity(tnt);
-        level().playSound(null, getX(), getY(), getZ(), SoundEvents.EGG_THROW,
-                SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
+        SoundClientboundPacket.playSoundAtPos(SoundAction.THROW_EGG, blockPosition());
 
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.WOOD, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
         float cooldown = Math.max(0, throwTNT.cooldownMax - (resourceBonus * ThrowTNT.LESS_COOLDOWN_PER_CHUNK_RESOURCES));
         throwTNT.setCooldown(cooldown, this);
@@ -571,7 +573,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.FOOD, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
         int numItems = FancyFeast.BASE_ITEMS + (FancyFeast.BONUS_ITEMS_PER_CHUNK_RESOURCES * resourceBonus);
 
@@ -660,7 +662,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.ORE, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
         int numItems = LootExplosion.BASE_ITEMS + (LootExplosion.BONUS_ITEMS_PER_CHUNK_RESOURCES * resourceBonus);
         List<ItemStack> items = getRandomLoot(numItems);
@@ -676,7 +678,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
             item.setDeltaMovement(dMove);
             level().addFreshEntity(item);
         }
-        level().explode(this, null, null, getX(), getY(), getZ(),
+        level().explode(null, null, null, getX(), getY(), getZ(),
                 2.0f, false, Level.ExplosionInteraction.NONE);
         setMana(getMana() + (resourceBonus * LootExplosion.MANA_REFUND_PER_CHUNK_RESOURCES));
     }

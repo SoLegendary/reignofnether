@@ -65,8 +65,7 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
         this.unit = unit;
 
         this.onLeftClickRelease = () -> { // actual item use actions
-            if (!ItemClientEvents.hasDragActionItem() && this.unit instanceof UnitInventory inv &&
-                    inv.checkManaCostAndCooldown(unitItem, itemStack)) {
+            if (!ItemClientEvents.hasDragActionItem() && this.unit instanceof UnitInventory) {
 
                 if (unitItem.onUse != null) {
                     ItemServerboundPacket.use(((Entity) unit).getId(), invUUID);

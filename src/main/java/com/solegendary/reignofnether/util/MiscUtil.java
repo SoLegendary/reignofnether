@@ -353,7 +353,7 @@ public class MiscUtil {
             e -> {
                 double dist = e.position().distanceTo(pos); // deprioritise over actual enemy units
                 boolean isMeleeAgainstFlyer = isMelee && e instanceof Unit unit && unit.isFlyingUnit();
-                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer || (e instanceof BeeUnit))
+                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer || (e instanceof BeeUnit) || e.hasEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get()))
                     dist += 100;
                 return dist;
             }
@@ -727,16 +727,6 @@ public class MiscUtil {
             if (radius <= 0)
                 return new HashSet<>();
 
-            // skip rendering entirely if we are fully inside another circle
-            if (BlockClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS) {
-                for (Pair<BlockPos, Integer> os : overlapSources) {
-                    Vec2 centre1 = new Vec2(center.getX(), center.getZ());
-                    Vec2 centre2 = new Vec2(os.getFirst().getX(), os.getFirst().getZ());
-                    int overlapRange = os.getSecond();
-                    if (!center.equals(os.getFirst()) && radius < overlapRange && centre1.distanceToSqr(centre2) < radius * radius)
-                        return Set.of();
-                }
-            }
             Set<BlockPos> circleBps = getCircle(center, radius);
 
             for (Pair<BlockPos, Integer> os : overlapSources) {
@@ -1034,12 +1024,13 @@ public class MiscUtil {
                 AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(),
                 AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(),
                 AttributeRegistrar.LIFESTEAL.get(),
-                AttributeRegistrar.MANA_ON_HIT.get()
+                AttributeRegistrar.MANA_ON_HIT.get(),
+                AttributeRegistrar.FASTER_COOLDOWNS.get()
         ).contains(attr);
 
         String valueStr;
         if (List.of(MULTIPLY_BASE, MULTIPLY_TOTAL).contains(modifier.getOperation()) || isPercentStat) {
-            valueStr = formatSigned(modifier.getAmount() * 100) + "%";
+            valueStr = formatSigned((int) (modifier.getAmount() * 100)) + "%";
         } else {
             valueStr = formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
         }

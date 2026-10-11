@@ -7,5 +7,5 @@
     "to_value": -1.5,
     "to_y": 320
   },
-  "argument2": "flat_dimensions:overworld/terrain/offset"
+  "argument2": "minecraft:overworld/offset"
 }

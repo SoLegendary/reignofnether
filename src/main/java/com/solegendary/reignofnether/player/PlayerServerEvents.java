@@ -376,7 +376,10 @@ public class PlayerServerEvents {
             PlayerClientboundPacket.removeRTSPlayer(playerName);
         }
         for (RTSPlayer rtsPlayer : rtsPlayers) {
-            PlayerClientboundPacket.addRTSPlayer(rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id, rtsPlayer.startPosColorId, rtsPlayer.isDogPerson);
+            PlayerClientboundPacket.addRTSPlayer(
+                    rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id,
+                    rtsPlayer.startPosColorId, rtsPlayer.isDogPerson, true
+            );
         }
 
         if (rtsLocked) {
@@ -459,7 +462,7 @@ public class PlayerServerEvents {
             );
             Long itemDropSeed = switch (randomItemDropRule) {
                 case DISABLED -> -1L;
-                case ENABLED_NON_STRICT -> random.nextLong();
+                case ENABLED_NON_STRICT -> random.nextLong(1, Long.MAX_VALUE);
                 case ENABLED_STRICT -> ItemServerEvents.RANDOM_UNIT_ITEM_DROPS_SEED;
             };
             rtsPlayers.add(RTSPlayer.getNewPlayer(
@@ -473,7 +476,8 @@ public class PlayerServerEvents {
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignResources(playerName);
-            PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId, isDogPerson);
+            PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId, isDogPerson, false);
+            HeroServerEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(playerName));
 
             ServerLevel level = (ServerLevel) serverPlayer.level();
             ArrayList<Entity> startingWorkers = new ArrayList<>();
@@ -508,7 +512,7 @@ public class PlayerServerEvents {
                             .above()
                             .above();
                     ((Unit) scoutEntity).setOwnerName(playerName);
-                    scoutEntity.moveTo(bp, isBat ? 2 : 0, 0);
+                    scoutEntity.moveTo(isBat ? bp.offset(0,10,0) : bp, 0, 0);
                     if (!readiedStart)
                         level.addFreshEntity(scoutEntity);
                     startingScout = scoutEntity;
@@ -541,7 +545,7 @@ public class PlayerServerEvents {
                         level.addFreshEntity(startingWorkers.get(i));
                     }
                     if (startingScout != null) {
-                        startingScout.moveTo(bp.offset(0,  isBat ? 3 : 1, 2), 0, 0);
+                        startingScout.moveTo(bp.offset(0,  isBat ? 10 : 1, 2), 0, 0);
                         level.addFreshEntity(startingScout);
                     }
                     var workerIds = new int[startingWorkers.size()];
@@ -575,9 +579,9 @@ public class PlayerServerEvents {
             if (coopMode)
                 AlliancesServerEvents.applyCoopAlliances();
 
+
             PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
             saveRTSPlayers();
-
         }
     }
 
@@ -674,7 +678,7 @@ public class PlayerServerEvents {
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignScenarioResources(rtsPlayer);
-            PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0, true);
+            PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0, true, false);
 
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building.scenarioRoleIndex == roleIndex) {

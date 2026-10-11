@@ -25,6 +25,7 @@ import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -49,6 +50,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -562,10 +564,10 @@ public class UnitServerEvents {
                     entityType = EntityRegistrar.ZOMBIE_PIGLIN_UNIT.get();
                 } else if (evt.getEntity() instanceof HoglinUnit) {
                     entityType = EntityRegistrar.ZOGLIN_UNIT.get();
-                } else if (evt.getEntity() instanceof VillagerUnit) {
+                } else if (evt.getEntity() instanceof VillagerUnit || evt.getEntity() instanceof MilitiaUnit) {
                     entityType = EntityRegistrar.ZOMBIE_VILLAGER_UNIT.get();
-                } else if (evt.getEntity() instanceof VindicatorUnit || evt.getEntity() instanceof PillagerUnit
-                        || evt.getEntity() instanceof EvokerUnit || evt.getEntity() instanceof WitchUnit) {
+                } else if (evt.getEntity() instanceof VindicatorUnit || evt.getEntity() instanceof PillagerUnit || evt.getEntity() instanceof EvokerUnit ||
+                        evt.getEntity() instanceof WitchUnit || evt.getEntity() instanceof WindcallerUnit) {
                     entityType = EntityRegistrar.DROWNED_UNIT.get();
                 }
             }
@@ -1061,7 +1063,9 @@ public class UnitServerEvents {
         }
 
         if (evt.getSource().getEntity() instanceof AttackerUnit aUnit) {
-            if (RANDOM.nextFloat() < aUnit.getExplosiveChance()) {
+            if (!evt.getSource().is(DamageTypes.EXPLOSION) &&
+                !evt.getSource().is(DamageTypes.PLAYER_EXPLOSION) &&
+                RANDOM.nextFloat() < aUnit.getExplosiveChance() && evt.getAmount() > 0.1f) {
                 doExplosiveHit((LivingEntity) aUnit, evt.getEntity());
             }
             float lifeDmgPerc = aUnit.getLifeStealPercent();
@@ -1110,6 +1114,7 @@ public class UnitServerEvents {
     private static void doExplosiveHit(LivingEntity attacker, LivingEntity pEntity) {
         attacker.level().explode(attacker, null, null, pEntity.getX(), pEntity.getEyeY(), pEntity.getZ(),
                 1.0f, false, Level.ExplosionInteraction.NONE);
+
         AttributeInstance ai = attacker.getAttribute(Attributes.ATTACK_DAMAGE);
 
         if (ai != null) {
@@ -1121,7 +1126,7 @@ public class UnitServerEvents {
                 }
                 if (hitEntity == pEntity)
                     continue;
-                boolean hurt = hitEntity.hurt(attacker.damageSources().generic(), (float) ai.getValue() * EXPLOSIVE_HIT_SPLASH_MULT);
+                boolean hurt = hitEntity.hurt(attacker.damageSources().explosion(attacker, attacker), (float) ai.getValue() * EXPLOSIVE_HIT_SPLASH_MULT);
                 if (hurt) {
                     hitEntity.knockback(EXPLOSIVE_HIT_KNOCKBACK, Mth.sin(attacker.getYRot() * 0.017453292F), -Mth.cos(attacker.getYRot() * 0.017453292F));
                     attacker.setDeltaMovement(attacker.getDeltaMovement().multiply(0.6, 1.0, 0.6));
