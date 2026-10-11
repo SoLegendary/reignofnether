@@ -2244,7 +2244,7 @@
     "effect.reignofnether.lifesteal": "Lifesteal",
     "effect.reignofnether.lifesteal.desc": "Healing a portion of damage dealt",
     "effect.reignofnether.piglin_fervor": "Piglin Fervor",
-    "effect.reignofnether.piglin_fervor.desc": "Increased attack speed and regen",
+    "effect.reignofnether.piglin_fervor.desc": "Increased attack damage and regen",
 
     "effect.reignofnether.duration": "(%ds)",
 
