@@ -49,18 +49,16 @@ Quality of Life
     - "only works before game start and role is empty, not for in game"
 
 [🟡] Added an attribute "faster_cooldowns"
-    2x faster cooldowns == 50% less cooldown time
-    10x faster cooldowns == 90% less cooldown time
+    - a value of 1.0 means 2x faster cooldowns (50% less cooldown time)
+    - a value of 2.0 means 3x faster cooldowns (66% less cooldown time)
 
 Bugfixes
 --------
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
 
-[✔] Raised Market upgrade time from 120s to 180s
-[🟡] Enemy units with the backpack upgrade can no longer steal piglin merchant food that was thrown recently
-[❌] Draw aggro on custom buildings turns back on when relogging
-
+[✔] Draw aggro on custom buildings turns back on when relogging
+[✔] Partially possessed units are now less likely to be targeted
 
 Languages
 ---------

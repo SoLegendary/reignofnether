@@ -353,7 +353,7 @@ public class MiscUtil {
             e -> {
                 double dist = e.position().distanceTo(pos); // deprioritise over actual enemy units
                 boolean isMeleeAgainstFlyer = isMelee && e instanceof Unit unit && unit.isFlyingUnit();
-                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer || (e instanceof BeeUnit))
+                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer || (e instanceof BeeUnit) || e.hasEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get()))
                     dist += 100;
                 return dist;
             }

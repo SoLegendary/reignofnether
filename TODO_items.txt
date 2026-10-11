@@ -15,16 +15,6 @@ Actives
 Later ideas:
 ------------
 
-[❌] New item ideas
-    Upgraded market:
-        [🟡] - villagers (epic): hero's armour (health potions restore 25% to all nearby allies)
-        [🟡] - monsters (epic): hungry horror armour (lifesteal aura in night zones)
-        [🟡] - piglins (epic): piglin armour (regen aura on nether terrain)
-
-    Neutral:
-        [🟡] - Evocation Robe (rare): +25% faster cooldowns, +0.25 mana regen/s
-        [🟡] - Throwable TNT (common)
-
 Enchanted grass (epic): transform an enemy into a sheep for 10s, disarming them and causing them to take 2x damage and move slower
             (half duration on heroes)
 

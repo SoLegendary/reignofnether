@@ -86,7 +86,7 @@ public class UnitItems {
     public static final UnitItem HERO_EXPERIENCE_BOTTLE = UnitItemBuilder.of(ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get())
             .descId("hero_experience_bottle")
             .type(UnitItemType.CONSUMABLE)
-            .maxStackSize(64)
+            .maxStackSize(9)
             .pointDesc("item.reignofnether.hero_experience_bottle.point1", EXPERIENCE_BOTTLE_EXP_VALUE)
             .buyCost(100)
             .sellValue(50)
@@ -362,7 +362,7 @@ public class UnitItems {
             })
             .build();
 
-    private static final int GONG_OF_WEAKENING_DURATION_SECONDS = 10;
+    private static final int GONG_OF_WEAKENING_DURATION_SECONDS = 15;
     private static final int GONG_OF_WEAKENING_RADIUS = 10;
     public static final UnitItem GONG_OF_WEAKENING = UnitItemBuilder.of(ItemRegistrar.GONG_OF_WEAKENING.get())
             .descId("gong_of_weakening")
@@ -499,10 +499,12 @@ public class UnitItems {
                     if (!success) {
                         HudClientboundPacket.showTempMessageI18n(unit.getOwnerName(), "item.reignofnether.tome_of_duplication.error");
                     } else {
-                        ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), 30, le.level(),le.getEyePosition());
                         SoundClientboundPacket.playSoundAtPos(SoundAction.TOME_OF_DUPLICATION, le.blockPosition(), 1.5f);
                         UnitSyncAbilityClientboundPacket.sendSyncAbilitiesPacket(le);
                     }
+                }
+                if (success) {
+                    ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), 30, le.level(), le.getEyePosition());
                 }
                 return success;
             })
@@ -647,6 +649,7 @@ public class UnitItems {
     public static final int TOTEM_OF_SHIELDING_DURATION_SECONDS = 20;
     public static final UnitItem TOTEM_OF_SHIELDING = new TotemItem(UnitItemBuilder.of(ItemRegistrar.TOTEM_OF_SHIELDING.get())
             .descId("totem_of_shielding")
+            .rarity(Rarity.RARE)
             .pointDesc("item.reignofnether.totem_of_shielding.point1", TOTEM_OF_SHIELDING_DURATION_SECONDS),
             EntityRegistrar.TOTEM_OF_SHIELDING.get()
     );
@@ -739,6 +742,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.EPIC)
             .range(HEROS_ARMOUR_RANGE)
+            .noRandomDrop()
             .pointDesc("item.reignofnether.heros_armour.point1", HEROS_ARMOUR_MAX_TARGETS, HEROS_ARMOUR_HEAL)
             .build();
 
@@ -750,6 +754,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.EPIC)
             .range(ARMOUR_AURA_RANGE)
+            .noRandomDrop()
             .pointDesc("item.reignofnether.hungry_horror_armour.point1", (int) (HUNGRY_HORROR_ARMOUR_LIFESTEAL * 100))
             .build();
 
@@ -759,6 +764,7 @@ public class UnitItems {
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.EPIC)
             .range(ARMOUR_AURA_RANGE)
+            .noRandomDrop()
             .pointDesc("item.reignofnether.golden_piglin_armour.point1", (int) (GOLDEN_PIGLIN_ATTACK_DAMAGE * 100))
             .build();
 
