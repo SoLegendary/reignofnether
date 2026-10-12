@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.building.custombuilding;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
+import com.solegendary.reignofnether.blocks.BlockUtils;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.*;
 import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
@@ -132,15 +133,6 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             this.unpackCommandsNbt();
         }
 
-        List<Block> storageBlocks = List.of(
-                Blocks.BARREL,
-                Blocks.CHEST,
-                Blocks.TRAPPED_CHEST,
-                Blocks.DISPENSER,
-                Blocks.DROPPER,
-                Blocks.HOPPER
-        );
-
         ArrayList<ListTag> listTags = new ArrayList<>();
         for (BuildingBlock bb : buildingBlocks) {
             if (bb.getBlockState().getBlock() == BlockRegistrar.GARRISON_ZONE_BLOCK.get()) {
@@ -152,7 +144,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             } else if (bb.getBlockState().getBlock() == BlockRegistrar.PRODUCTION_SPAWN_BLOCK.get()) {
                 numSpawnBlocks += 1;
             } else if (bb.getBlockNbt() != null &&
-                        storageBlocks.contains(bb.getBlockState().getBlock()) &&
+                        BlockUtils.STORAGE_BLOCKS.contains(bb.getBlockState().getBlock()) &&
                         bb.getBlockNbt().contains("Items")) {
                 listTags.add(bb.getBlockNbt().getList("Items", Tag.TAG_COMPOUND));
             }
@@ -342,6 +334,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         attributesNbt.putInt("foodCost", this.cost.food);
         attributesNbt.putInt("woodCost", this.cost.wood);
         attributesNbt.putInt("oreCost", this.cost.ore);
+        attributesNbt.putInt("popSupply", this.cost.population);
         attributesNbt.putInt("garrisonCapacity", this.garrisonCapacity);
         attributesNbt.putInt("garrisonRange", this.garrisonRange);
         attributesNbt.putInt("maxHealth", (int) this.maxHealth);
@@ -363,6 +356,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
 		this.cost.food = attributesNbt.getInt("foodCost");
 		this.cost.wood = attributesNbt.getInt("woodCost");
 		this.cost.ore = attributesNbt.getInt("oreCost");
+        this.cost.population = attributesNbt.getInt("popSupply");
 		this.garrisonCapacity = attributesNbt.getInt("garrisonCapacity");
 		this.garrisonRange = attributesNbt.getInt("garrisonRange");
 		if (attributesNbt.contains("maxHealth"))
@@ -428,6 +422,8 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         tooltips.add(fcs(this.name, true));
         if (cost.food > 0 || cost.ore > 0 || cost.wood > 0)
             tooltips.add(ResourceCosts.getFormattedCost(cost));
+        if (cost.population > 0)
+            tooltips.add(ResourceCosts.getFormattedPop(cost));
         if (capturable)
             tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.set_capturable.label")));
         if (invulnerable)
@@ -442,6 +438,10 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
             tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.set_garrison_capacity.label") + ": " + garrisonCapacity));
         if (garrisonRange > 0)
             tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.set_garrison_range.label") + ": " + garrisonRange));
+        if (productions.get().size() > 0)
+            tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.label") + ": " + productions.get().size()));
+        if (stockedItems.size() > 0)
+            tooltips.add(fcs(I18n.get("sandbox.reignofnether.custom_buildings.buyable_items.label") + ": " + stockedItems.size()));
         return tooltips;
     }
 

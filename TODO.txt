@@ -13,18 +13,6 @@ Faction rework testing
 [❌] Custom buildings 'buildable by' settings
 
 
-Hero Items
-----------
-
-Shops
-    [❌] Neutral market building selling expensive items
-    [❌] Custom Item Shops
-        - Items placed in container blocks in a custom building's structure stocks that building as a shop
-        - Custom tags:
-            - Max Stock
-            - Restock
-            - Buy cooldown
-
 Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
@@ -39,26 +27,32 @@ Balance
     - Block animations with block displays for royal guard slam
         - And make slam single click like war stomp
 
+[✔] Cost of Item Backpacks raised from (75 wood, 75 ore) to (100 wood, 100 ore)
+[✔] Health potion healing raised from 50 to 60
+[✔] Heros' armour healing raised from 10 to 12
+[✔] Health and mana potion cooldown reduced from 10s to 5s
+
 Quality of Life
 ---------------
 [❌] Create a new homing projectile entity from the ground up
-
+[❌] Allow custom buildings to grant population
 [❌] Villager profession bonuses as passive icons
 [❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
 [❌] /rtsapi-set-scenario-role
     - "only works before game start and role is empty, not for in game"
 
-[🟡] Added an attribute "faster_cooldowns"
-    - a value of 1.0 means 2x faster cooldowns (50% less cooldown time)
-    - a value of 2.0 means 3x faster cooldowns (66% less cooldown time)
+[✔] Added a population supply setting to custom buildings
 
 Bugfixes
 --------
 [❌] Bridges don't work on snow/ice?
     - Test on villagers campaign #3
 
-[✔] Draw aggro on custom buildings turns back on when relogging
-[✔] Partially possessed units are now less likely to be targeted
+[✔] Fixed broken drowned tooltips
+[✔] Items with passive non-attribute effects no longer work on regular units
+[✔] Fixed throwable TNT being too weak
+[✔] Buildings with spawn eggs and hero items in chests now have those items removed on placement
+    - So that they can't be looted by FPV players or when damaged/destroyed
 
 Languages
 ---------

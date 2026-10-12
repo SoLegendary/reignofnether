@@ -211,12 +211,13 @@ public class Factions {
 		registerBuildings(NEUTRAL, Buildings.HEALING_FOUNTAIN, Keybindings.abilitySlot2);
 		registerBuildings(NEUTRAL, Buildings.END_PORTAL, Keybindings.abilitySlot3);
 		registerBuildings(NEUTRAL, Buildings.NEUTRAL_TRANSPORT_PORTAL, Keybindings.abilitySlot4);
-		
+
+		/*
 		if (FMLEnvironment.dist.isClient())
 			for (ResourceLocation faction : PLAYABLE_FACTIONS) {
 				getFaction(faction).addCustomBuildings();
 			}
-		
+		 */
 	}
 	
 	public static Faction register(String name, Faction faction) {
@@ -292,6 +293,11 @@ public class Factions {
 		Faction faction = ReignOfNetherRegistries.FACTIONS.byId(id);
 		if (faction == null) return Factions.NONE;
 		return faction;
+	}
+
+	public static void updateCustomBuildings() {
+		for (ResourceLocation faction : Factions.CLASSIC_FACTIONS)
+			Factions.getFaction(faction).updateCustomBuildings();
 	}
 	
 	public static ResourceLocation getKey(Faction faction) {

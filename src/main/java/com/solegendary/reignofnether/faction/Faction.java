@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.buildings.placements.CustomBuildingPlacement;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
@@ -54,11 +55,13 @@ public class Faction {
 		return this;
 	}
 	
-	public void addCustomBuildings() {
+	public void updateCustomBuildings() {
 		if (!this.playable) return;
 		CustomBuildingClientEvents.customBuildings.forEach(cb -> {
+			BuildingPlaceButton button = cb.getWorkerBuildButton(null);
+			this.buildingButtons.removeIf(b -> button.name.equals(b.name));
 			if (this.isBuildableCustomBuilding.test(cb))
-				this.buildingButtons.add(cb.getWorkerBuildButton(null));
+				this.buildingButtons.add(button);
 		});
 	}
 	

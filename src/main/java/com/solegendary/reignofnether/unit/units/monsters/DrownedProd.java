@@ -12,6 +12,8 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.util.LanguageUtil;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -19,6 +21,8 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class DrownedProd extends GraveyardUnitProductionItem implements IUnitProductionItem {
 
@@ -47,14 +51,14 @@ public class DrownedProd extends GraveyardUnitProductionItem implements IUnitPro
                 DrownedProd.itemName,
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/drowned.png"),
                 List.of(
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit"), Style.EMPTY.withBold(true)),
+                        Component.translatable("entity.reignofnether.drowned_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         FormattedCharSequence.EMPTY,
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip2"), Style.EMPTY),
+                        Component.translatable("entity.reignofnether.drowned_unit.tooltip1").getVisualOrderText(),
+                        Component.translatable("entity.reignofnether.drowned_unit.tooltip2").getVisualOrderText(),
                         FormattedCharSequence.EMPTY,
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip3"), Style.EMPTY),
+                        Component.translatable("entity.reignofnether.drowned_unit.tooltip3").getVisualOrderText(),
                         FormattedCharSequence.EMPTY,
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip4"), Style.EMPTY)
+                        Component.translatable("entity.reignofnether.drowned_unit.tooltip4").getVisualOrderText()
                 )
         );
     }
@@ -67,16 +71,16 @@ public class DrownedProd extends GraveyardUnitProductionItem implements IUnitPro
             () -> false,
             () -> ResearchClient.hasResearch(ProductionItems.RESEARCH_DROWNED) || prodBuilding instanceof CustomBuildingPlacement,
             List.of(
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit"), Style.EMPTY.withBold(true)),
+                Component.translatable("entity.reignofnether.drowned_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip3"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(LanguageUtil.getTranslation("entity.reignofnether.drowned_unit.tooltip4"), Style.EMPTY)
+                FormattedCharSequence.EMPTY,
+                Component.translatable("entity.reignofnether.drowned_unit.tooltip1").getVisualOrderText(),
+                Component.translatable("entity.reignofnether.drowned_unit.tooltip2").getVisualOrderText(),
+                FormattedCharSequence.EMPTY,
+                Component.translatable("entity.reignofnether.drowned_unit.tooltip3").getVisualOrderText(),
+                FormattedCharSequence.EMPTY,
+                Component.translatable("entity.reignofnether.drowned_unit.tooltip4").getVisualOrderText()
             ),
             this
         );

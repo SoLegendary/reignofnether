@@ -20,6 +20,15 @@ public class BlockUtils {
 
     private static final Random RANDOM = new Random();
 
+    public static final List<Block> STORAGE_BLOCKS = List.of(
+            Blocks.BARREL,
+            Blocks.CHEST,
+            Blocks.TRAPPED_CHEST,
+            Blocks.DISPENSER,
+            Blocks.DROPPER,
+            Blocks.HOPPER
+    );
+
     public static boolean isLogBlock(BlockState bs) {
         return List.of(Blocks.OAK_LOG, Blocks.BIRCH_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.JUNGLE_LOG, Blocks.MANGROVE_LOG, Blocks.SPRUCE_LOG, Blocks.CHERRY_LOG,
                         Blocks.OAK_WOOD, Blocks.BIRCH_WOOD, Blocks.ACACIA_WOOD, Blocks.DARK_OAK_WOOD, Blocks.JUNGLE_WOOD, Blocks.MANGROVE_WOOD, Blocks.SPRUCE_WOOD, Blocks.CHERRY_WOOD,

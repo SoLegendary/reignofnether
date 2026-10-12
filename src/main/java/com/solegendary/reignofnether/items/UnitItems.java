@@ -278,7 +278,7 @@ public class UnitItems {
             .pointDesc("item.reignofnether.beenest_armour.point1", BEENEST_ARMOUR_DAMAGE_PER_BEE)
             .build();
 
-    public static final float HEALTH_POTION_RESTORE_AMOUNT = 50f;
+    public static final float HEALTH_POTION_RESTORE_AMOUNT = 60f;
     public static final UnitItem HEALTH_POTION = UnitItemBuilder.of(ItemRegistrar.HEALTH_POTION.get())
             .descId("health_potion")
             .type(UnitItemType.CONSUMABLE)
@@ -288,7 +288,7 @@ public class UnitItems {
             .pointDesc("item.reignofnether.health_potion.point1", (int) HEALTH_POTION_RESTORE_AMOUNT)
             .suppressDefaultError()
             .noRandomDrop()
-            .cooldownTicks(10 * 20)
+            .cooldownTicks(5 * 20)
             .nonHeroUseable()
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
@@ -321,7 +321,7 @@ public class UnitItems {
             .pointDesc("item.reignofnether.mana_potion.point1", (int) MANA_POTION_RESTORE_AMOUNT)
             .suppressDefaultError()
             .noRandomDrop()
-            .cooldownTicks(10 * 20)
+            .cooldownTicks(5 * 20)
             .onUse(unit -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide()) {
@@ -708,7 +708,7 @@ public class UnitItems {
                 if (!le.level().isClientSide())
                     SoundClientboundPacket.playSoundAtPos(SoundAction.THROW_EGG, le.blockPosition());
 
-                ThrowableTntProjectile tnt = new ThrowableTntProjectile(le.level(), le, 2);
+                ThrowableTntProjectile tnt = new ThrowableTntProjectile(le.level(), le, 3);
                 tnt.setItem(new ItemStack(ItemRegistrar.THROWABLE_TNT.get()));
                 Vec3 dMove = Vec3.atCenterOf(pos).subtract(le.getEyePosition())
                         .multiply(1,0,1)
@@ -735,7 +735,7 @@ public class UnitItems {
             .build();
 
     public static final int HEROS_ARMOUR_MAX_TARGETS = 10;
-    public static final float HEROS_ARMOUR_HEAL = 10f;
+    public static final float HEROS_ARMOUR_HEAL = 12f;
     public static final float HEROS_ARMOUR_RANGE = 20f;
     public static final UnitItem HEROS_ARMOUR = UnitItemBuilder.of(ItemRegistrar.HEROS_ARMOUR.get())
             .descId("heros_armour")
@@ -743,7 +743,7 @@ public class UnitItems {
             .rarity(Rarity.EPIC)
             .range(HEROS_ARMOUR_RANGE)
             .noRandomDrop()
-            .pointDesc("item.reignofnether.heros_armour.point1", HEROS_ARMOUR_MAX_TARGETS, HEROS_ARMOUR_HEAL)
+            .pointDesc("item.reignofnether.heros_armour.point1", HEROS_ARMOUR_MAX_TARGETS, (int) HEROS_ARMOUR_HEAL)
             .build();
 
     public static final float ARMOUR_AURA_RANGE = 20f;

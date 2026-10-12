@@ -37,6 +37,7 @@ import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.items.ItemServerEvents;
+import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
@@ -76,6 +77,8 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -88,6 +91,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -1100,7 +1105,9 @@ public class BuildingPlacement {
                         be.setChanged();
                     }
                 } else {
-                    BlockEntity be = BlockEntity.loadStatic(bp, bs, bNbt);
+                    CompoundTag tagToLoad = BlockUtils.STORAGE_BLOCKS.contains(bs.getBlock())
+                            ? stripUnwantedItems(bNbt) : bNbt;
+                    BlockEntity be = BlockEntity.loadStatic(bp, bs, tagToLoad);
                     if (be != null)
                         level.setBlockEntity(be);
                 }
@@ -1123,6 +1130,29 @@ public class BuildingPlacement {
                 highestBlockCountReached = this.getBlocksPlaced();
             }
         }
+    }
+
+    // remove spawn eggs and hero items from chests so they can't be looted by FPV players or upon destruction
+    private static boolean shouldStripItem(ItemStack stack) {
+        return !stack.isEmpty()
+                && (ItemUtil.isUnitItem(stack) || stack.getItem() instanceof SpawnEggItem);
+    }
+
+    private static CompoundTag stripUnwantedItems(CompoundTag tag) {
+        CompoundTag copy = tag.copy();
+        if (!copy.contains("Items", Tag.TAG_LIST))
+            return copy;
+
+        ListTag items = copy.getList("Items", Tag.TAG_COMPOUND);
+        ListTag filtered = new ListTag();
+        for (int i = 0; i < items.size(); i++) {
+            CompoundTag itemTag = items.getCompound(i);
+            ItemStack stack = ItemStack.of(itemTag);
+            if (!shouldStripItem(stack))
+                filtered.add(itemTag); // keeps original "Slot" byte intact
+        }
+        copy.put("Items", filtered);
+        return copy;
     }
 
     // if there aren't already too many animals nearby, spawn some random huntable animals

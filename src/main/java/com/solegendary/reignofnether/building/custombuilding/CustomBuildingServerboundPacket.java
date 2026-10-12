@@ -105,6 +105,7 @@ public class CustomBuildingServerboundPacket {
                     case SET_FOOD_COST -> customBuilding.cost.food = this.intValue;
                     case SET_WOOD_COST -> customBuilding.cost.wood = this.intValue;
                     case SET_ORE_COST -> customBuilding.cost.ore = this.intValue;
+                    case SET_POPULATION_SUPPLY -> customBuilding.cost.population = this.intValue;
                     case SET_GARRISON_CAPACITY -> customBuilding.garrisonCapacity = this.intValue;
                     case SET_GARRISON_RANGE -> customBuilding.garrisonRange = this.intValue;
                     case ADD_COMMAND -> customBuilding.addCommand();

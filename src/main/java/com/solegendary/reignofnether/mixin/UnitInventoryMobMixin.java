@@ -355,6 +355,8 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
 
     @Override
     public boolean isHolding(UnitItem unitItem) {
+        if (!(this instanceof HeroUnit))
+            return false;
         for (ItemStack itemStack : getAllItems()) {
             UnitItem heldUnitItem = ItemUtil.getUnitItem(itemStack);
             if (heldUnitItem != null && heldUnitItem.descId.equals(unitItem.descId))

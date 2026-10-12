@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingBlockData;
+import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
@@ -14,6 +15,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -86,6 +88,8 @@ public class CustomBuildingClientEvents {
         CustomBuilding building = new CustomBuilding(name, structureSize, portraitBlock, structureNbt, attributesNbt, commandsNbt);
 
         customBuildings.add(building);
+
+        Factions.updateCustomBuildings();
     }
 
     @SubscribeEvent
