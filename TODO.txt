@@ -51,6 +51,7 @@ Bugfixes
 [✔] Fixed broken drowned tooltips
 [✔] Items with passive non-attribute effects no longer work on regular units
 [✔] Fixed throwable TNT being too weak
+[✔] Fixed custom building 'buildableBy' options not working
 [✔] Buildings with spawn eggs and hero items in chests now have those items removed on placement
     - So that they can't be looted by FPV players or when damaged/destroyed
 
