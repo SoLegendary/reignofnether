@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.guiscreen;
 
-
 import com.solegendary.reignofnether.registrars.ContainerRegistrar;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
@@ -65,6 +66,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 
 public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, RangedAttackerUnit, HeroUnit, KeyframeAnimated, RangeIndicator {
     public final Abilities ABILITIES = new Abilities(
@@ -99,7 +101,6 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
     Object2ObjectArrayMap<HeroAbility, Integer> heroAbilityRanks = new Object2ObjectArrayMap<>();
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -183,11 +184,11 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
         SynchedEntityData.defineId(NecromancerUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -352,19 +353,19 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 .add(Attributes.MAX_HEALTH, NecromancerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, NecromancerUnit.armorValue)
-                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), NecromancerUnit.maxHealth)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
-                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
-                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
-                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
-                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
-                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
+                .add(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_HEALTH.get()), NecromancerUnit.maxHealth)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), HeroUnit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), magicDamageResist)
+                .add(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_MANA.get()), baseMaxMana)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MANA_REGEN_PER_SECOND.get()), manaRegenPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get()), manaBonusPerLevel)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get()), maxHealthBonusPerLevel)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get()), attackBonusPerLevel);
     }
 
     public void tick() {
@@ -592,12 +593,12 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                     sword = new ItemStack(Items.IRON_SWORD);
                 }
                 if (soulRank >= 1)
-                    chestPlate.enchant(Enchantments.THORNS, 3);
+                    chestPlate.enchant(EnchantmentRegistrar.vanilla(Enchantments.THORNS), 3);
                 if (soulRank >= 2)
-                    leggings.enchant(Enchantments.THORNS, 3);
+                    leggings.enchant(EnchantmentRegistrar.vanilla(Enchantments.THORNS), 3);
                 if (soulRank >= 3) {
-                    boots.enchant(Enchantments.THORNS, 2);
-                    helmet.enchant(Enchantments.THORNS, 2);
+                    boots.enchant(EnchantmentRegistrar.vanilla(Enchantments.THORNS), 2);
+                    helmet.enchant(EnchantmentRegistrar.vanilla(Enchantments.THORNS), 2);
                 }
                 zombieUnit.setItemSlot(EquipmentSlot.HEAD, helmet);
                 zombieUnit.setItemSlot(EquipmentSlot.CHEST, chestPlate);

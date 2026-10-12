@@ -50,5 +50,8 @@ public enum SoundAction {
     TOME_OF_DUPLICATION,
     TOTEM_PLACE,
     WAR_HORN,
-    POTION_POP
+    POTION_POP,
+    TELEPORT,
+    THROW_PEARL,
+    THROW_EGG
 }

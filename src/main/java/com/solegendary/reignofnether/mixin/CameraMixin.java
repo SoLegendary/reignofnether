@@ -20,8 +20,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class CameraMixin {
 
     @Shadow private Vec3 position;
-    @Shadow protected void move(double pDistanceOffset, double pVerticalOffset, double pHorizontalOffset) { }
-    @Shadow private double getMaxZoom(double pStartingDistance) { return pStartingDistance; }
+    // 1.21.1 narrowed Camera#move to floats.
+    @Shadow protected void move(float pDistanceOffset, float pVerticalOffset, float pHorizontalOffset) { }
+    @Shadow private float getMaxZoom(float pStartingDistance) { return pStartingDistance; }
     @Shadow protected void setPosition(Vec3 pPos) { }
     @Shadow protected void setPosition(double pX, double pY, double pZ) { }
     @Shadow @Final private Vector3f forwards;
@@ -45,11 +46,12 @@ public class CameraMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    protected void move(double pDistanceOffset, double pVerticalOffset, double pHorizontalOffset, CallbackInfo ci) {
+    // 1.21.1 narrowed Camera#move's offsets from double to float.
+    protected void move(float pDistanceOffset, float pVerticalOffset, float pHorizontalOffset, CallbackInfo ci) {
         if (!OrthoviewClientEvents.isEnabled())
             return;
         ci.cancel();
-        pDistanceOffset -= 20;
+        pDistanceOffset -= 20.0F;
         double d0 = (double)this.forwards.x() * pDistanceOffset + (double)this.up.x() * pVerticalOffset + (double)this.left.x() * pHorizontalOffset;
         double d1 = (double)this.forwards.y() * pDistanceOffset + (double)this.up.y() * pVerticalOffset + (double)this.left.y() * pHorizontalOffset;
         double d2 = (double)this.forwards.z() * pDistanceOffset + (double)this.up.z() * pVerticalOffset + (double)this.left.z() * pHorizontalOffset;
@@ -72,11 +74,11 @@ public class CameraMixin {
             if (pThirdPersonReverse) {
                 this.setRotation(this.yRot + 180.0F, -this.xRot);
             }
-            this.move(-this.getMaxZoom(4.0), 0.0, 0.0);
+            this.move(-this.getMaxZoom(4.0F), 0.0F, 0.0F);
         } else if (pEntity instanceof LivingEntity && ((LivingEntity)pEntity).isSleeping()) {
             Direction direction = ((LivingEntity)pEntity).getBedOrientation();
             this.setRotation(direction != null ? direction.toYRot() - 180.0F : 0.0F, 0.0F);
-            this.move(0.0, 0.3, 0.0);
+            this.move(0.0F, 0.3F, 0.0F);
         }
     }
 }

@@ -14,17 +14,28 @@ import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class AbilityClientboundPacket {
+
+public class AbilityClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<AbilityClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ability_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<AbilityClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final int unitId;
     private final boolean isSettingCooldown;
@@ -44,25 +55,25 @@ public class AbilityClientboundPacket {
 
     public static void sendSetCooldownPacket(int unitId, UnitAction unitAction, float cooldown) {
         setServersideCooldown(unitId, unitAction, cooldown);
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AbilityClientboundPacket(unitId, true, unitAction, cooldown, new BlockPos(0,0,0))
         );
     }
 
     public static void doAbility(int unitId, UnitAction unitAction, float value) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AbilityClientboundPacket(unitId, false, unitAction, value, new BlockPos(0,0,0))
         );
     }
 
     public static void doAbility(int unitId, UnitAction unitAction, boolean value) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AbilityClientboundPacket(unitId, false, unitAction, value ? 1f : 0f, new BlockPos(0,0,0))
         );
     }
 
     public static void doAbility(int unitId, UnitAction unitAction, float value, BlockPos pos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AbilityClientboundPacket(unitId, false, unitAction, value, pos)
         );
     }
@@ -81,7 +92,7 @@ public class AbilityClientboundPacket {
         this.pos = pos;
     }
 
-    public AbilityClientboundPacket(FriendlyByteBuf buffer) {
+    public AbilityClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.unitId = buffer.readInt();
         this.isSettingCooldown = buffer.readBoolean();
         this.unitAction = buffer.readEnum(UnitAction.class);
@@ -89,7 +100,7 @@ public class AbilityClientboundPacket {
         this.pos = buffer.readBlockPos();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeInt(this.unitId);
         buffer.writeBoolean(this.isSettingCooldown);
         buffer.writeEnum(this.unitAction);
@@ -98,11 +109,10 @@ public class AbilityClientboundPacket {
     }
 
     // client-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
                     Unit unit = null;
                     for (LivingEntity entity : UnitClientEvents.getAllUnits()) {
@@ -144,7 +154,6 @@ public class AbilityClientboundPacket {
                     }
                 });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

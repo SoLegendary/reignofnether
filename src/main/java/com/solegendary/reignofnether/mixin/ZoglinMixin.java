@@ -5,7 +5,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.PolarBear;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Random;
 
-// make bears respect evasion chance
+// make zoglins respect evasion chance
 @Mixin(Zoglin.class)
 public abstract class ZoglinMixin extends Mob {
 

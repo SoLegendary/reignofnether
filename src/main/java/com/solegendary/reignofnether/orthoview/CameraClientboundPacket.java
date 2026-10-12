@@ -2,19 +2,29 @@ package com.solegendary.reignofnether.orthoview;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class CameraClientboundPacket {
+public class CameraClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<CameraClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "camera_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<CameraClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final String playerName;
     private final BlockPos pos;
@@ -25,7 +35,7 @@ public class CameraClientboundPacket {
     public static void forceMoveCam(ServerPlayer player, BlockPos pos, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
         if (player == null)
             return;
-        PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
+        PacketHandler.send(PacketHandler.toPlayer(() -> player),
                 new CameraClientboundPacket(player.getName().getString(), pos, cameraLockTicks, forcePanTicks, zoomLevel)
         );
     }
@@ -38,7 +48,7 @@ public class CameraClientboundPacket {
         this.zoomLevel = zoomLevel;
     }
 
-    public CameraClientboundPacket(FriendlyByteBuf buffer) {
+    public CameraClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.playerName = buffer.readUtf();
         this.pos = buffer.readBlockPos();
         this.cameraLockTicks = buffer.readInt();
@@ -46,7 +56,7 @@ public class CameraClientboundPacket {
         this.zoomLevel = buffer.readInt();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeUtf(this.playerName);
         buffer.writeBlockPos(this.pos);
         buffer.writeInt(this.cameraLockTicks);
@@ -54,17 +64,14 @@ public class CameraClientboundPacket {
         buffer.writeInt(this.zoomLevel);
     }
 
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         OrthoviewClientEvents.forceMoveCam(this.playerName, this.pos, cameraLockTicks, forcePanTicks, zoomLevel);
-                        success.set(true);
                     });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

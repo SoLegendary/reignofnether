@@ -1,33 +1,43 @@
 package com.solegendary.reignofnether.survival;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class SurvivalClientboundPacket {
+public class SurvivalClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<SurvivalClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "survival_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<SurvivalClientboundPacket> type() {
+        return TYPE;
+    }
 
     SurvivalSyncAction action;
     WaveDifficulty difficulty;
     long value;
 
     public static void enableAndSetDifficulty(WaveDifficulty diff) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new SurvivalClientboundPacket(SurvivalSyncAction.ENABLE_AND_SET_DIFFICULTY, diff, 0, 0L));
     }
 
     public static void setWaveNumber(long waveNumber) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new SurvivalClientboundPacket(SurvivalSyncAction.SET_WAVE_NUMBER, WaveDifficulty.EASY, waveNumber, 0L));
     }
 
     public static void setWaveRandomSeed(long seed) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new SurvivalClientboundPacket(SurvivalSyncAction.SET_WAVE_RANDOM_SEED, WaveDifficulty.EASY, seed, 0L));
     }
 
@@ -37,34 +47,31 @@ public class SurvivalClientboundPacket {
         this.value = value;
     }
 
-    public SurvivalClientboundPacket(FriendlyByteBuf buffer) {
+    public SurvivalClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(SurvivalSyncAction.class);
         this.difficulty = buffer.readEnum(WaveDifficulty.class);
         this.value = buffer.readLong();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeEnum(this.difficulty);
         buffer.writeLong(this.value);
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         switch (action) {
                             case ENABLE_AND_SET_DIFFICULTY -> SurvivalClientEvents.enable(difficulty);
                             case SET_WAVE_NUMBER -> SurvivalClientEvents.setWaveNumber(value);
                             case SET_WAVE_RANDOM_SEED -> SurvivalClientEvents.setRandomSeed(value);
                         }
-                        success.set(true);
                     });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

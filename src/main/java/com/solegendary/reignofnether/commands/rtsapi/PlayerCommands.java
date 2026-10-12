@@ -24,7 +24,6 @@ import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -237,7 +236,7 @@ public class PlayerCommands {
 									ResearchServerEvents.addResearch(playerName, researchItem);
 									ResearchServerEvents.syncResearch(playerName);
 									ctx.getSource().sendSuccess(
-										() -> Component.translatable("commands.reignofnether.research.add.success",researchItem, playerName),
+										() -> Component.translatable("commands.reignofnether.research.add.success", researchItem.toString(), playerName),
 										true
 									);
 									return 1;
@@ -256,7 +255,7 @@ public class PlayerCommands {
 									ResearchServerEvents.removeResearch(playerName, researchItem);
 									ResearchServerEvents.syncResearch(playerName);
 									ctx.getSource().sendSuccess(
-										() -> Component.translatable("commands.reignofnether.research.remove.success", researchItem, playerName),
+										() -> Component.translatable("commands.reignofnether.research.remove.success", researchItem.toString(), playerName),
 										true
 									);
 									return 1;
@@ -368,7 +367,6 @@ public class PlayerCommands {
 						)
 					)
 
-
 					.then(Commands.argument("value", BoolArgumentType.bool())
 					.then(Commands.argument("player", PlayerNameArgument.player())
 						.executes(ctx -> {
@@ -411,9 +409,10 @@ public class PlayerCommands {
 			return 0;
 		}
 		CameraClientboundPacket.forceMoveCam(player, pos, lockTicks, forcePanTicks, zoomLevel);
-        String forcePanTicksText = forcePanTicks > 0 ? I18n.get("commands.reignofnether.player.move_camera.force_pan_ticks", forcePanTicks) : "";
-		String lockTicksText = lockTicks > 0 ? I18n.get("commands.reignofnether.player.move_camera.lock_ticks", lockTicks) : "";
-		String zoomLevelText = zoomLevel > 0 ? I18n.get("commands.reignofnether.player.move_camera.zoom_level", zoomLevel) : "";
+        // built as components, not via I18n: the helper is client-only and throws on a dedicated server
+        Component forcePanTicksText = forcePanTicks > 0 ? Component.translatable("commands.reignofnether.player.move_camera.force_pan_ticks", forcePanTicks) : Component.empty();
+		Component lockTicksText = lockTicks > 0 ? Component.translatable("commands.reignofnether.player.move_camera.lock_ticks", lockTicks) : Component.empty();
+		Component zoomLevelText = zoomLevel > 0 ? Component.translatable("commands.reignofnether.player.move_camera.zoom_level", zoomLevel) : Component.empty();
 		ctx.getSource().sendSuccess(
 				() -> Component.translatable("commands.reignofnether.player.move_camera", playerName, pos.getX(), pos.getZ(), forcePanTicksText, lockTicksText, zoomLevelText),
 				true
@@ -440,7 +439,6 @@ public class PlayerCommands {
 		);
 		return 1;
 	}
-
 
 	private static int changeResources(
 		CommandContext<CommandSourceStack> ctx,
@@ -472,7 +470,7 @@ public class PlayerCommands {
 					}
 					ResourcesClientboundPacket.syncResources(ResourcesServerEvents.resourcesList);
 					ctx.getSource().sendSuccess(
-						() -> Component.translatable("commands.reignofnether.player.resource.set", I18n.get("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
+						() -> Component.translatable("commands.reignofnether.player.resource.set", Component.translatable("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
 						true
 					);
 					return 1;
@@ -485,7 +483,7 @@ public class PlayerCommands {
 			int emerald = resource == ResourceName.EMERALD ? amount : 0;
 			ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore, emerald));
 			ctx.getSource().sendSuccess(
-				() -> Component.translatable("commands.reignofnether.player.resource.add", I18n.get("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
+				() -> Component.translatable("commands.reignofnether.player.resource.add", Component.translatable("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
 				true
 			);
 			return 1;

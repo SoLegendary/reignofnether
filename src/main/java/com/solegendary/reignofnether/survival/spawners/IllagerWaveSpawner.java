@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.survival.spawners;
+import com.solegendary.reignofnether.faction.Factions;
 
+import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -14,8 +16,9 @@ import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VindicatorUnit;
-import com.solegendary.reignofnether.faction.Factions;
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.raid.Raid;
@@ -29,6 +32,8 @@ import java.util.*;
 import static com.solegendary.reignofnether.survival.SurvivalServerEvents.ENEMY_OWNER_NAME;
 import static com.solegendary.reignofnether.survival.SurvivalServerEvents.lastFaction;
 import static com.solegendary.reignofnether.survival.spawners.WaveSpawner.*;
+import com.solegendary.reignofnether.util.EnchantmentUtil;
+import net.minecraft.core.Holder;
 
 public class IllagerWaveSpawner {
 
@@ -94,19 +99,19 @@ public class IllagerWaveSpawner {
     }
 
     public static void checkAndApplyEnchants(LivingEntity entity, int tier) {
-        Enchantment enchantment = null;
+        Holder<Enchantment> enchantment = null;
 
         if (entity instanceof VindicatorUnit vUnit && (tier == 2 || tier == 3)) {
             enchantment = EnchantmentRegistrar.MAIMING.get();
         }
         else if (entity instanceof VindicatorUnit vUnit && (tier == 4 || tier == 5)) {
-            enchantment = Enchantments.SHARPNESS;
+            enchantment = EnchantmentRegistrar.vanilla(Enchantments.SHARPNESS);
         }
         else if (entity instanceof PillagerUnit vUnit && (tier == 3 || tier == 4)) {
-            enchantment = Enchantments.QUICK_CHARGE;
+            enchantment = EnchantmentRegistrar.vanilla(Enchantments.QUICK_CHARGE);
         }
         else if (entity instanceof PillagerUnit vUnit && (tier == 5 || tier == 6)) {
-            enchantment = Enchantments.MULTISHOT;
+            enchantment = EnchantmentRegistrar.vanilla(Enchantments.MULTISHOT);
         }
         else if (entity instanceof EvokerUnit vUnit && tier >= 6) {
             enchantment = EnchantmentRegistrar.VIGOR.get();
@@ -114,8 +119,9 @@ public class IllagerWaveSpawner {
 
         ItemStack item = entity.getItemBySlot(EquipmentSlot.MAINHAND);
         if (enchantment != null && item != ItemStack.EMPTY) {
-            EnchantmentHelper.setEnchantments(new HashMap<>(), item);
-            item.enchant(enchantment, enchantment == Enchantments.SHARPNESS ? 2 : 1);
+            EnchantmentUtil.clearEnchantments(item);
+            boolean sharpness = enchantment.value() == EnchantmentRegistrar.vanilla(Enchantments.SHARPNESS).value();
+            item.enchant(enchantment, sharpness ? 2 : 1);
         }
     }
 
@@ -161,7 +167,8 @@ public class IllagerWaveSpawner {
                     Entity entityPassenger = UnitServerEvents.spawnMob(EntityRegistrar.PILLAGER_UNIT.get(),
                             level, bp.above(), ENEMY_OWNER_NAME);
                     if (entityPassenger instanceof Unit unit) {
-                        entityPassenger.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
+                        if (entityPassenger instanceof LivingEntity living)
+                            living.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance(level.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
                         entityPassenger.startRiding(ravagerUnit);
                         remainingPop -= getModifiedPopCost(unit);
                     }

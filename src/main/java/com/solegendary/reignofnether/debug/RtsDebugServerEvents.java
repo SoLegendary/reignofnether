@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.debug;
 
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.pathfinding.PathfinderWorkerPool;
@@ -7,8 +8,7 @@ import com.solegendary.reignofnether.unit.pathfinding.WalkabilityGrid;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.concurrent.atomic.LongAdder;
 
@@ -51,12 +51,10 @@ public class RtsDebugServerEvents {
         pathE2eCount += 1;
     }
 
-    // logic borrowed from net.minecraftforge.server.command.TPSCommand
+    // logic borrowed from net.neoforged.neoforge.server.command.TPSCommand
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
-            return;
-
+    public static void onServerTick(ServerTickEvent.Post evt) {
+        
         // Sample the pathfinder backlog (parked + in-flight requests) every tick (cheap, captures bursts);
         // averaged at the once-per-second boundary below. This is the queue that backs up under load and
         // drives "Path e2e" - the formation dispatch queue drains ~instantly and read ~0.

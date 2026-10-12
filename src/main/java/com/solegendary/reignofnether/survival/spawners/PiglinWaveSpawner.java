@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.Rotation;
 import java.util.*;
 
 import static com.solegendary.reignofnether.survival.SurvivalServerEvents.*;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 
 public class PiglinWaveSpawner {
 
@@ -103,9 +104,9 @@ public class PiglinWaveSpawner {
                 entity.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.GOLDEN_BOOTS));
             }
             if (tier >= 6) {
-                entity.getItemBySlot(EquipmentSlot.CHEST).enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
-                entity.getItemBySlot(EquipmentSlot.LEGS).enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
-                entity.getItemBySlot(EquipmentSlot.FEET).enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
+                entity.getItemBySlot(EquipmentSlot.CHEST).enchant(EnchantmentRegistrar.vanilla(Enchantments.PROTECTION), 1);
+                entity.getItemBySlot(EquipmentSlot.LEGS).enchant(EnchantmentRegistrar.vanilla(Enchantments.PROTECTION), 1);
+                entity.getItemBySlot(EquipmentSlot.FEET).enchant(EnchantmentRegistrar.vanilla(Enchantments.PROTECTION), 1);
             }
         }
     }
@@ -150,7 +151,6 @@ public class PiglinWaveSpawner {
                     if (spawnBp != null && it.distSqr(spawnBp) < 25)
                         tooCloseToAnotherPortal = true;
                 }
-
 
             } while((spawnBp == null || tooCloseToAnotherPortal) && attempts < 100);
 

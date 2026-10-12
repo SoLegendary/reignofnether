@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -34,6 +35,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 
 public interface HeroUnit extends Unit {
 
@@ -52,12 +55,12 @@ public interface HeroUnit extends Unit {
 
     public static AttributeSupplier.Builder createDefaultAttributes() {
         return Unit.createDefaultAttributes()
-                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), 1)
-                .add(AttributeRegistrar.BASE_MAX_MANA.get(), 0)
-                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), 0)
-                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), 0)
-                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), 0)
-                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), 0);
+                .add((AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_HEALTH.get())), 1)
+                .add((AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_MANA.get())), 0)
+                .add((AttributeHelpers.holder(AttributeRegistrar.MANA_REGEN_PER_SECOND.get())), 0)
+                .add((AttributeHelpers.holder(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get())), 0)
+                .add((AttributeHelpers.holder(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get())), 0)
+                .add((AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get())), 0);
     }
 
     public boolean needsStatSync();
@@ -81,6 +84,10 @@ public interface HeroUnit extends Unit {
         List<HeroUnit> list = new ArrayList<>();
         for (LivingEntity e : units) {
             if (e instanceof HeroUnit heroUnit &&
+                    // dead-but-not-yet-removed heroes stayed in this list, so a player whose hero
+                    // had just died was told they own it - and could then neither revive it nor
+                    // build another
+                    e.isAlive() &&
                     heroUnit.getOwnerName().equals(ownerName) &&
                     (e.getType().getDescriptionId().equals(unitName) || unitName.isBlank())) {
                 list.add(heroUnit);
@@ -117,38 +124,39 @@ public interface HeroUnit extends Unit {
     }
 
     static List<HeroUnitSave> getFallenHeroes(boolean isClientSide, String ownerName) {
-        return isClientSide ? HeroClientEvents.fallenHeroes : HeroServerEvents.fallenHeroes;
+        ArrayList<HeroUnitSave> fallenHeroes = isClientSide ? HeroClientEvents.fallenHeroes : HeroServerEvents.fallenHeroes;
+        return fallenHeroes.stream().filter(hero -> hero.ownerName.equals(ownerName)).toList();
     }
 
     int MAX_LEVEL = 10;
     int MAX_NEUTRAL_EXP_LEVEL = 5; // cannot gain exp from neutral enemies at or past this level
 
     default float getHealthBonusPerLevel() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get()));
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get().getDefaultValue());
     }
     default float getAttackBonusPerLevel() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get()));
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get().getDefaultValue());
     }
     default float getBaseHealth() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.BASE_MAX_HEALTH.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_HEALTH.get()));
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.BASE_MAX_HEALTH.get().getDefaultValue());
     }
     default float getBaseAttack() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()));
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue());
     }
     default float getBaseMaxMana() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.BASE_MAX_MANA.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_MANA.get()));
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.BASE_MAX_MANA.get().getDefaultValue());
     }
     default float getManaRegenPerSecond() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.MANA_REGEN_PER_SECOND.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.MANA_REGEN_PER_SECOND.get()));
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.MANA_REGEN_PER_SECOND.get().getDefaultValue());
     }
     default float getManaBonusPerLevel() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get()));
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get().getDefaultValue());
     }
 
@@ -325,5 +333,4 @@ public interface HeroUnit extends Unit {
 
     Object2ObjectArrayMap<HeroAbility,Integer> getHeroAbilityRanks();
 }
-
 

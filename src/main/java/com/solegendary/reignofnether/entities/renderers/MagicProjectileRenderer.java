@@ -18,8 +18,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class MagicProjectileRenderer<T extends AbstractMagicProjectile> extends EntityRenderer<T> {
@@ -49,10 +49,10 @@ public class MagicProjectileRenderer<T extends AbstractMagicProjectile> extends 
         pPoseStack.scale(-0.5F, -0.5F, 0.5F);
         this.model.setupAnim(pEntity, 0.0F, 0.0F, 0.0F, $$6, $$7);
         VertexConsumer $$9 = pBuffer.getBuffer(this.model.renderType(textureLocation));
-        this.model.renderToBuffer(pPoseStack, $$9, pPackedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        this.model.renderToBuffer(pPoseStack, $$9, pPackedLight, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
         pPoseStack.scale(1.5F, 1.5F, 1.5F);
         VertexConsumer $$10 = pBuffer.getBuffer(model.renderType(textureLocation));
-        this.model.renderToBuffer(pPoseStack, $$10, pPackedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 0.15F);
+        this.model.renderToBuffer(pPoseStack, $$10, pPackedLight, OverlayTexture.NO_OVERLAY, 0x26FFFFFF);
         pPoseStack.popPose();
         super.render(pEntity, pEntityYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight);
     }

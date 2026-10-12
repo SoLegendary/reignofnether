@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.blocks;
 
-
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
@@ -8,7 +7,6 @@ import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
 import com.solegendary.reignofnether.building.buildings.placements.SculkCatalystPlacement;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
-import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
@@ -16,18 +14,19 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.researchItems.ResearchSculkAmplifiers;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.util.LevelRenderCompat;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -41,14 +40,14 @@ public class BlockClientEvents {
     // deals with block rendering jobs like range indicators
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
-        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }
+        ResourceLocation rl = ResourceLocation.parse("neoforge:textures/white.png");
+        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         // draw range indicators for buildings with abilities and monster night sources
+        try {
         for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-            if (!FogOfWarClientEvents.isBuildingInBrightChunk(building)) continue;
             RangeIndicatorAddon ria;
             if ((ria = building.getBuilding().getActiveAddon(RangeIndicatorAddon.class)) != null) {
                 for (BlockPos bp : ria.getHighlightBps(building)) {
@@ -71,10 +70,8 @@ public class BlockClientEvents {
                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumer, Direction.UP, yOffset, bp, 0f, 0.8f, 0f, 0.3f);
             }
         }
-        for (LivingEntity le : UnitClientEvents.getAllUnits()) {
-            if (!FogOfWarClientEvents.isBlockVisible(le.getOnPos())) continue;
-            boolean selected = UnitClientEvents.getSelectedUnits().contains(le);
-            if (le instanceof RangeIndicator ri && (selected || !ri.showOnlyWhenSelected())) {
+        for (LivingEntity le : UnitClientEvents.getSelectedUnits()) {
+            if (le instanceof RangeIndicator ri) {
                 for (BlockPos bp : ri.getHighlightBps()) {
                     int snowLayers = BlockUtils.getSnowLayers(le.level().getBlockState(bp.above()));
                     float yOffset = snowLayers * 0.125f;
@@ -85,7 +82,8 @@ public class BlockClientEvents {
         if (HudClientEvents.hudSelectedEntity != null && MC.level != null &&
                 (ItemClientEvents.actionableUnitItem != null || ItemClientEvents.hoveredInvItem != null)) {
             RangeIndicator ri = ItemClientEvents.actionableUnitItem;
-            if (ri == null) ri = ItemClientEvents.hoveredInvItem;
+            if (ri == null)
+                ri = ItemClientEvents.hoveredInvItem;
             for (BlockPos bp : ri.getHighlightBps()) {
                 int snowLayers = BlockUtils.getSnowLayers(MC.level.getBlockState(bp.above()));
                 float yOffset = snowLayers * 0.125f;
@@ -93,6 +91,8 @@ public class BlockClientEvents {
             }
         }
 
+        // early returns below would otherwise leave the range indicators queued in the shared
+        // builder for the GUI pass to flush with an orthographic matrix (see LevelRenderCompat)
         if (MC.player == null || MC.level == null) return;
         ItemStack heldItem = MC.player.getMainHandItem();
         if (!heldItem.is(BlockRegistrar.SPIDER_FRIENDLY_BARRIER.get().asItem()))
@@ -107,6 +107,9 @@ public class BlockClientEvents {
                 MyRenderer.drawBlockOutline(evt.getPoseStack(), pos, 0.6f);
             }
         }
+        } finally {
+            LevelRenderCompat.flushWorldGeometry();
+        }
     }
 
     // maintain a mapping of night sources for easy culling calcs
@@ -118,10 +121,8 @@ public class BlockClientEvents {
     public static final int VISIBLE_BORDER_ADJ = 2; // shrink a bit so borderlines themselves are safe to walk on
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
-            return;
-
+    public static void onClientTick(ClientTickEvent.Post evt) {
+        
         nightSourcesUpdateTicks -= 1;
 
         NightSourceAddon nsa0 = null;

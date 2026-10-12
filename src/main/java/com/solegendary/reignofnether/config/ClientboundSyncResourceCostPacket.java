@@ -1,19 +1,28 @@
 package com.solegendary.reignofnether.config;
 
 import com.solegendary.reignofnether.resources.ResourceCost;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /*
     Clientbound packet to synchronize serverside config options with the client
     so that the GUI and other elements can properly reflect the values present on the server.
  */
-public class ClientboundSyncResourceCostPacket {
+public class ClientboundSyncResourceCostPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<ClientboundSyncResourceCostPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "clientbound_sync_resource_cost"));
+
+    @Override
+    public CustomPacketPayload.Type<ClientboundSyncResourceCostPacket> type() {
+        return TYPE;
+    }
     private final int food;
     private final int wood;
     private final int ore;
@@ -29,7 +38,7 @@ public class ClientboundSyncResourceCostPacket {
         this.population = entry.population;
         this.id = entry.id;
     }
-    public ClientboundSyncResourceCostPacket(FriendlyByteBuf buf) {
+    public ClientboundSyncResourceCostPacket(RegistryFriendlyByteBuf buf) {
         this.food = buf.readInt();
         this.wood = buf.readInt();
         this.ore = buf.readInt();
@@ -37,7 +46,7 @@ public class ClientboundSyncResourceCostPacket {
         this.population = buf.readInt();
         this.id = buf.readUtf();
     }
-    public void encode(FriendlyByteBuf buf) {
+    public void encode(RegistryFriendlyByteBuf buf) {
         buf.writeInt(this.getFood());
         buf.writeInt(this.getWood());
         buf.writeInt(this.getOre());
@@ -45,19 +54,16 @@ public class ClientboundSyncResourceCostPacket {
         buf.writeInt(this.getPopulation());
         buf.writeUtf(this.getId());
     }
-    public static ClientboundSyncResourceCostPacket decode(FriendlyByteBuf buf) {
+    public static ClientboundSyncResourceCostPacket decode(RegistryFriendlyByteBuf buf) {
         return new ClientboundSyncResourceCostPacket(buf);
     }
 
-    public static boolean handle(ClientboundSyncResourceCostPacket msg, Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        NetworkEvent.Context context = ctx.get();
-        context.enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ConfigClientEvents.loadConfigData(msg, ctx));
-            success.set(true);
+    @Override
+    public void handle(IPayloadContext ctx) {
+        ClientboundSyncResourceCostPacket msg = this;
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ConfigClientEvents.loadConfigData(msg));
         });
-        context.setPacketHandled(true);
-        return success.get();
     }
 
     public int getFood() {

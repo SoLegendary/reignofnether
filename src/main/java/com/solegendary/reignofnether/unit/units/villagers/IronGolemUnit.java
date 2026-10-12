@@ -1,8 +1,8 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -12,7 +12,8 @@ import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSourceStack;
@@ -57,7 +58,6 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -125,11 +125,11 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
         SynchedEntityData.defineId(IronGolemUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-                this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+                builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -155,6 +155,10 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     final static public boolean willRetaliate = true; // will attack when hurt by an enemy
     final static public boolean aggressiveWhenIdle = true;
 
+    public float getBuildingDamageMultiplier() {
+        return 2.0f;
+    }
+
     final static public int maxResources = 200;
 
     private AbstractMeleeAttackUnitGoal attackGoal;
@@ -175,21 +179,20 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Unit.createDefaultAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.MOVEMENT_SPEED, IronGolemUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, IronGolemUnit.attackDamage)
                 .add(Attributes.ARMOR, IronGolemUnit.armorValue)
                 .add(Attributes.MAX_HEALTH, IronGolemUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), rangedDamageResist)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 1.0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), rangedDamageResist)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     private LivingEntity lastTarget = null;
@@ -201,13 +204,9 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
         Unit.tick(this);
         AttackerUnit.tick(this);
 
-        // due to vanilla AI, iron golems like to attack friendly illagers, so force them off unless it was intentional
-        if (!level().isClientSide() &&
-                !getTargetGoal().forced &&
-                getTarget() instanceof Unit unit &&
-                AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), getOwnerName()))
+        // for some reason iron golems like to attack friendly illagers, so force them off
+        if (lastTarget != null && getTarget() instanceof Unit unit && unit.getOwnerName().equals(getOwnerName()))
             setTarget(lastTarget);
-
         lastTarget = getTarget();
     }
 
@@ -266,18 +265,14 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
 
     @Override
     public List<FormattedCharSequence> getAttackDamageStatTooltip() {
-        String attrStr = MiscUtil.formatSigned(getBuildingDamageBonus() * 100) + "%";
         return List.of(
                 fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
-                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", attrStr))
+                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", "100%"))
         );
     }
     @Override
     public int getDamageTooltipColour() {
         return TooltipColours.GREEN;
     }
-
-
-
 
 }

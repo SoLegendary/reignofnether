@@ -3,13 +3,13 @@ package com.solegendary.reignofnether.orthoview;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 /**
  * Fades the screen to black, snaps the RTS camera to a position while it is fully black,
@@ -76,8 +76,8 @@ public class CameraFadeClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || !fading) {
+    public static void onClientTick(ClientTickEvent.Post evt) {
+        if (!fading) {
             return;
         }
         if (MC.player == null || MC.level == null) {
@@ -134,7 +134,8 @@ public class CameraFadeClientEvents {
     @SubscribeEvent
     public static void onRenderGui(RenderGuiEvent.Post evt) {
         if (fading && MC.screen == null) {
-            drawFade(evt.getGuiGraphics(), evt.getPartialTick());
+            // RenderGuiEvent hands out the DeltaTracker; ScreenEvent.Render.Post already has a float.
+            drawFade(evt.getGuiGraphics(), evt.getPartialTick().getGameTimeDeltaPartialTick(false));
         }
     }
 

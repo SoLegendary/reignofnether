@@ -1,8 +1,6 @@
 package com.solegendary.reignofnether.blocks;
-
 import com.solegendary.reignofnether.faction.Factions;
-import com.solegendary.reignofnether.items.UnitInventory;
-import com.solegendary.reignofnether.items.UnitItems;
+
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
 import net.minecraft.core.BlockPos;
@@ -23,7 +21,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BubbleColumnBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.enchantment.Enchantments;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 
 public class WalkableMagmaBlock extends Block {
     public static final int DAMAGE_DELAY = 20; // higher == damage less often
@@ -35,14 +35,15 @@ public class WalkableMagmaBlock extends Block {
 
     public void stepOn(Level pLevel, BlockPos pPos, BlockState pState, Entity pEntity) {
         boolean isPiglinFaction = pEntity instanceof Unit unit && Factions.getFaction(unit).equals(Factions.PIGLINS) && !pEntity.isOnFire();
-        boolean bootsImmunity = pEntity instanceof UnitInventory inv && inv.isHolding(UnitItems.MAGMA_WALKER_BOOTS);
         boolean isDamageTick = pEntity.tickCount % DAMAGE_DELAY == 0;
 
         if (!pEntity.isSteppingCarefully() &&
                 pEntity instanceof LivingEntity &&
                 !(pEntity instanceof GruntUnit) &&
-                !EnchantmentHelper.hasFrostWalker((LivingEntity)pEntity) &&
-                !isPiglinFaction && !bootsImmunity && isDamageTick) {
+                EnchantmentHelper.getItemEnchantmentLevel(
+                        EnchantmentRegistrar.vanilla(Enchantments.FROST_WALKER),
+                        ((LivingEntity) pEntity).getItemBySlot(EquipmentSlot.FEET)) == 0 &&
+                !isPiglinFaction && isDamageTick) {
             pEntity.hurt(pEntity.damageSources().hotFloor(), DAMAGE);
         }
     }

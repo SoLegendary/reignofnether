@@ -5,18 +5,28 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.ArrayUtil;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 // send a list of worker unit ids that are idle at this point in time
-public class UnitIdleWorkerClientBoundPacket {
+public class UnitIdleWorkerClientBoundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<UnitIdleWorkerClientBoundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "unit_idle_worker_client_bound"));
+
+    @Override
+    public CustomPacketPayload.Type<UnitIdleWorkerClientBoundPacket> type() {
+        return TYPE;
+    }
 
     private final int[] oldUnitIds; // units to be controlled
 
@@ -25,7 +35,7 @@ public class UnitIdleWorkerClientBoundPacket {
         for (LivingEntity livingEntity : UnitServerEvents.getAllUnits()) {
             if (livingEntity instanceof WorkerUnit wu && WorkerUnit.isIdle(wu)) units.add(livingEntity.getId());
         }
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
             new UnitIdleWorkerClientBoundPacket(ArrayUtil.intListToArray(units)));
     }
 
@@ -36,22 +46,19 @@ public class UnitIdleWorkerClientBoundPacket {
         this.oldUnitIds = oldUnitIds;
     }
 
-    public UnitIdleWorkerClientBoundPacket(FriendlyByteBuf buffer) {
+    public UnitIdleWorkerClientBoundPacket(RegistryFriendlyByteBuf buffer) {
         this.oldUnitIds = buffer.readVarIntArray();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeVarIntArray(this.oldUnitIds);
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
             UnitClientEvents.syncIdleWorkers(oldUnitIds);
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.production.ProductionItems;
@@ -107,8 +108,8 @@ public class Bloodlust extends Ability {
             Unit.addParticlesAroundSelf(unitUsing, ParticleTypes.ANGRY_VILLAGER);
         }
         setToMaxCooldown(unitUsing);
-        ((LivingEntity) unitUsing).addEffect(new MobEffectInstance(MobEffectRegistrar.BLOODLUST.get(), DURATION_SECONDS * 20, 0));
-        ((LivingEntity) unitUsing).addEffect(new MobEffectInstance(MobEffects.REGENERATION, (int) (getHealthCost(unitUsing) * 20 * 2.5f) + 40, 0));
+        ((LivingEntity) unitUsing).addEffect(MobEffectHelpers.instance(MobEffectRegistrar.BLOODLUST.get(), DURATION_SECONDS * 20, 0));
+        ((LivingEntity) unitUsing).addEffect(MobEffectHelpers.instance(MobEffects.REGENERATION, (int) (getHealthCost(unitUsing) * 20 * 2.5f) + 40, 0));
     }
 
     @Override

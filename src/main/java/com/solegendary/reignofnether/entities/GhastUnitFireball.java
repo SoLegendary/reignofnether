@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,16 +24,18 @@ public class GhastUnitFireball extends LargeFireball {
 
     public static final int SOULSAND_DURATION = 200;
 
-    public GhastUnitFireball(Level pLevel, LivingEntity pShooter, double pOffsetX, double pOffsetY, double pOffsetZ, int pExplosionPower) {
-        super(pLevel, pShooter, pOffsetX, pOffsetY, pOffsetZ, pExplosionPower);
+    // 1.21.1's LargeFireball(Level, LivingEntity, Vec3, int) takes the shoot direction instead of a
+    // spawn offset, and the fireball is always launched from the shooter's position.
+    public GhastUnitFireball(Level pLevel, LivingEntity pShooter, Vec3 pDirection, int pExplosionPower) {
+        super(pLevel, pShooter, pDirection, pExplosionPower);
     }
 
+    // 1.21.1 passes the exploding Explosion in, so the projectile can tell what is damaging it
     @Override
-    public boolean ignoreExplosion() {
+    public boolean ignoreExplosion(net.minecraft.world.level.Explosion explosion) {
         return true;
     }
 
-    @Override
     protected void onHit(HitResult pResult) {
         super.onHit(pResult);
 

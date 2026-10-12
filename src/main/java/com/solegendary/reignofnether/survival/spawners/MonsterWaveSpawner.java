@@ -27,6 +27,7 @@ import static com.solegendary.reignofnether.survival.SurvivalServerEvents.ENEMY_
 import static com.solegendary.reignofnether.survival.SurvivalServerEvents.lastFaction;
 import static com.solegendary.reignofnether.survival.spawners.WaveSpawner.*;
 import static net.minecraft.world.entity.monster.Creeper.DATA_IS_POWERED;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 
 public class MonsterWaveSpawner {
 
@@ -113,9 +114,9 @@ public class MonsterWaveSpawner {
                 entity.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.CHAINMAIL_BOOTS));
             }
             if (tier >= 6) {
-                entity.getItemBySlot(EquipmentSlot.CHEST).enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
-                entity.getItemBySlot(EquipmentSlot.LEGS).enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
-                entity.getItemBySlot(EquipmentSlot.FEET).enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
+                entity.getItemBySlot(EquipmentSlot.CHEST).enchant(EnchantmentRegistrar.vanilla(Enchantments.PROTECTION), 1);
+                entity.getItemBySlot(EquipmentSlot.LEGS).enchant(EnchantmentRegistrar.vanilla(Enchantments.PROTECTION), 1);
+                entity.getItemBySlot(EquipmentSlot.FEET).enchant(EnchantmentRegistrar.vanilla(Enchantments.PROTECTION), 1);
             }
         }
     }

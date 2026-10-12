@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -72,7 +73,6 @@ public abstract class EntityMixin {
     @Shadow public abstract BlockPos getOnPos();
     @Shadow public abstract Level level();
 
-
     @Shadow private Level level;
 
     @Inject(
@@ -92,7 +92,7 @@ public abstract class EntityMixin {
             cancellable = true
     )
     public void extinguishFire(CallbackInfo ci) {
-        if ((Object)this instanceof LivingEntity le && le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
+        if ((Object)this instanceof LivingEntity le && le.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get()))) {
             ci.cancel();
         }
     }
@@ -103,7 +103,7 @@ public abstract class EntityMixin {
             cancellable = true
     )
     public void playEntityOnFireExtinguishedSound(CallbackInfo ci) {
-        if ((Object)this instanceof LivingEntity le && le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
+        if ((Object)this instanceof LivingEntity le && le.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get()))) {
             ci.cancel();
         }
     }
@@ -115,7 +115,7 @@ public abstract class EntityMixin {
     )
     public void setRemainingFireTicks(int pRemainingFireTicks, CallbackInfo ci) {
         if (pRemainingFireTicks <= 0 && (Object)this instanceof LivingEntity le &&
-            le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
+            le.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get()))) {
             ci.cancel();
         }
     }

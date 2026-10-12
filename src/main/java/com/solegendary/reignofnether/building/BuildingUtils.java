@@ -68,7 +68,6 @@ public class BuildingUtils {
         return cursorBp.offset(xAdj, 0, zAdj);
     }
 
-
     public static int getTotalCompletedBuildingsOwned(boolean isClientSide, String ownerName) {
         List<BuildingPlacement> buildings;
         if (isClientSide)
@@ -123,8 +122,8 @@ public class BuildingUtils {
     // returns a list of BPs that may reside in unique chunks for fog of war calcs
     public static ArrayList<BlockPos> getUniqueChunkBps(BuildingPlacement building) {
         AABB aabb = new AABB(
-                building.minCorner,
-                building.maxCorner.offset(1,1,1)
+                Vec3.atLowerCornerOf(building.minCorner),
+                Vec3.atLowerCornerOf(building.maxCorner.offset(1,1,1))
         );
 
         ArrayList<BlockPos> bps = new ArrayList<>();
@@ -232,8 +231,6 @@ public class BuildingUtils {
         }
     }
 
-
-
     public static Vec3i getBuildingSize(ArrayList<BuildingBlock> blocks) {
         BlockPos min = getMinCorner(blocks);
         BlockPos max = getMaxCorner(blocks);
@@ -284,7 +281,6 @@ public class BuildingUtils {
         }
         return false;
     }
-
 
     // returns whether the given pos is part of ANY building in the level
     public static boolean isPosInsideAnyBuilding(boolean isClientSide, BlockPos bp) {

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability;
 
+import net.minecraft.core.Holder;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -24,6 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import com.solegendary.reignofnether.util.EnchantmentUtil;
 
 public abstract class EnchantAbility extends Ability {
 
@@ -47,7 +49,7 @@ public abstract class EnchantAbility extends Ability {
         this.equipmentSlot = equipmentSlot;
     }
 
-    public Enchantment getEnchantment() {
+    public Holder<Enchantment> getEnchantment() {
         return null;
     }
 
@@ -72,18 +74,14 @@ public abstract class EnchantAbility extends Ability {
     }
 
     protected boolean hasSameEnchant(LivingEntity entity) {
-        return entity.getItemBySlot(equipmentSlot).getAllEnchantments().containsKey(getEnchantment());
+        return entity.getItemBySlot(equipmentSlot).getEnchantments().keySet().contains(getEnchantment());
     }
 
     protected void doEnchant(LivingEntity entity) {
         ItemStack item = entity.getItemBySlot(equipmentSlot);
-        Enchantment enchantToRemove = getMutuallyExclusiveEnchant(entity);
+        Holder<Enchantment> enchantToRemove = getMutuallyExclusiveEnchant(entity);
         if (item != ItemStack.EMPTY) {
-            if (enchantToRemove != null) {
-                Map<Enchantment, Integer> enchants = new HashMap<>(item.getAllEnchantments());
-                enchants.remove(enchantToRemove);
-                EnchantmentHelper.setEnchantments(enchants, item);
-            }
+            if (enchantToRemove != null) EnchantmentUtil.removeEnchantment(item, enchantToRemove);
             item.enchant(getEnchantment(), enchantmentLevel);
         }
     }
@@ -131,7 +129,7 @@ public abstract class EnchantAbility extends Ability {
     }
 
     @Nullable
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
+    public Holder<Enchantment> getMutuallyExclusiveEnchant(LivingEntity entity) {
         return null;
     }
 }

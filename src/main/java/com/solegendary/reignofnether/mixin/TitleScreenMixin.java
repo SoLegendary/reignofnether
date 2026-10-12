@@ -9,6 +9,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.core.Holder;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -16,18 +17,17 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.gui.TitleScreenModUpdateIndicator;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.internal.BrandingControl;
+import net.neoforged.neoforge.client.ClientHooks;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.internal.BrandingControl;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
 import java.net.URI;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 
 @Mixin(TitleScreen.class)
 public class TitleScreenMixin extends Screen {
@@ -51,10 +52,8 @@ public class TitleScreenMixin extends Screen {
     private static final ResourceLocation LILYPAD_TEXTURE =
             ResourceLocation.parse( "textures/gui/title/lilypad.png");
 
-    @Shadow @Final private PanoramaRenderer panorama;
     @Shadow @Final private boolean fading;
     @Shadow private long fadeInStart;
-    @Nullable @Shadow(remap = false) private TitleScreenModUpdateIndicator modUpdateNotification;
     private AbstractWidget lilypadButton;
     private AbstractWidget discordButton;
     private AbstractWidget mapsButton;
@@ -114,7 +113,6 @@ public class TitleScreenMixin extends Screen {
                 pPoseStack.popPose();
             }
         };
-
 
         int discordX = lilypadX - 2;
         int discordY = lilypadY - 38;
@@ -181,7 +179,11 @@ public class TitleScreenMixin extends Screen {
                         this.isHoveredOrFocused() ? "textures/hud/title_button_highlighted.png" : "textures/hud/title_button.png");
                 guiGraphics.blit(buttonSprite, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
                 ItemStack mapStack = new ItemStack(Items.FILLED_MAP);
-                mapStack.enchant(Enchantments.UNBREAKING, 1);
+                // The glint needs a Holder, which needs the enchantment registry - and on the client
+                // that only exists once a level is joined. At the title screen the map is drawn
+                // unglinted rather than crashing the game.
+                Holder<Enchantment> unbreaking = EnchantmentRegistrar.tryVanilla(Enchantments.UNBREAKING);
+                if (unbreaking != null) mapStack.enchant(unbreaking, 1);
                 int itemX = this.getX() + (this.width - 16) / 2;
                 int itemY = this.getY() + (this.height - 16) / 2;
 
@@ -202,7 +204,6 @@ public class TitleScreenMixin extends Screen {
         this.addRenderableWidget(this.discordButton);
         this.addRenderableWidget(this.mapsButton);
     }
-
 
     private void openLink(String url) {
         try {
@@ -232,7 +233,9 @@ public class TitleScreenMixin extends Screen {
                 ? (float) (Util.getMillis() - this.fadeInStart) / 1000.0F
                 : 1.0F;
 
-        TitleClientEvents.getPanorama().render(pPartialTick, Mth.clamp(fadeProgress, 0.0F, 1.0F));
+        // 1.21.1 PanoramaRenderer#render takes the GuiGraphics plus viewport size and fade values.
+        TitleClientEvents.getPanorama().render(guiGraphics, this.width, this.height,
+                Mth.clamp(fadeProgress, 0.0F, 1.0F), pPartialTick);
         int logoX = this.width / 2 - 137;
 
         float alpha = this.fading ? Mth.clamp(fadeProgress - 1.0F, 0.0F, 1.0F) : 1.0F;
@@ -256,7 +259,7 @@ public class TitleScreenMixin extends Screen {
             guiGraphics.blit(MINECRAFT_EDITION, logoX + 44,  editionY, 0.0F, 0.0F, 186, 14, 186, 16);
 
             // Render main menu elements and splash text
-            ForgeHooksClient.renderMainMenu((TitleScreen) Minecraft.getInstance().screen,
+            ClientHooks.renderMainMenu((TitleScreen) Minecraft.getInstance().screen,
                     guiGraphics, this.font, this.width, this.height, alphaMask);
 
             if (TitleClientEvents.splash != null) {
@@ -293,11 +296,6 @@ public class TitleScreenMixin extends Screen {
 
             // Call the superclass render
             super.render(guiGraphics, pMouseX, pMouseY, pPartialTick);
-
-            // Render mod update notification
-            if (alpha >= 1.0F && this.modUpdateNotification != null) {
-                this.modUpdateNotification.render(guiGraphics, pMouseX, pMouseY, pPartialTick);
-            }
 
             // Disable blending after rendering
             RenderSystem.disableBlend();

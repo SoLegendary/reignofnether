@@ -2,15 +2,26 @@ package com.solegendary.reignofnether.hud.custombutton;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
-import java.util.function.Supplier;
 
-public class CustomButtonActionServerboundPacket {
+public class CustomButtonActionServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<CustomButtonActionServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "custom_button_action_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<CustomButtonActionServerboundPacket> type() {
+        return TYPE;
+    }
 	
 	public ResourceLocation button;
 	public boolean isLeft;
@@ -20,28 +31,26 @@ public class CustomButtonActionServerboundPacket {
 		this.isLeft = isLeft;
 	}
 	
-	public static CustomButtonActionServerboundPacket decode(FriendlyByteBuf buf) {
+	public static CustomButtonActionServerboundPacket decode(RegistryFriendlyByteBuf buf) {
 		return new CustomButtonActionServerboundPacket(buf.readResourceLocation(), buf.readBoolean());
 	}
 	
 	public static void runLeftClickCommand(ResourceLocation button) {
-		PacketHandler.INSTANCE.sendToServer(new CustomButtonActionServerboundPacket(button, true));
+		PacketHandler.sendToServer(new CustomButtonActionServerboundPacket(button, true));
 	}
 	
 	public static void runRightClickCommand(ResourceLocation button) {
-		PacketHandler.INSTANCE.sendToServer(new CustomButtonActionServerboundPacket(button, false));
+		PacketHandler.sendToServer(new CustomButtonActionServerboundPacket(button, false));
 	}
 	
-	public void encode(FriendlyByteBuf buf) {
+	public void encode(RegistryFriendlyByteBuf buf) {
 		buf.writeResourceLocation(button);
 		buf.writeBoolean(isLeft);
 	}
 	
-	public void handle(Supplier<NetworkEvent.Context> ctxSupplier) {
-		NetworkEvent.Context ctx = ctxSupplier.get();
+	public void handle(IPayloadContext ctx) {
 		ctx.enqueueWork(() -> {
-			ServerPlayer player = ctx.getSender();
-			if (player == null)
+			if (!(ctx.player() instanceof ServerPlayer player))
 				return;
 			
 			CustomButton button = CustomButtonServerEvents.customButtons.get(this.button);
@@ -55,6 +64,5 @@ public class CustomButtonActionServerboundPacket {
 			}
 			
 		});
-		ctx.setPacketHandled(true);
 	}
 }

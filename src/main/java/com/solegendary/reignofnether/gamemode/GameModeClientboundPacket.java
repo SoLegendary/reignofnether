@@ -4,24 +4,34 @@ import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
+import com.solegendary.reignofnether.faction.Faction;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class GameModeClientboundPacket {
+public class GameModeClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<GameModeClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "game_mode_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<GameModeClientboundPacket> type() {
+        return TYPE;
+    }
 
     public GameMode gameMode;
 
     // sets the gamemode of all players
     // unlocked and reset back to
     public static void setAndLockAllClientGameModes(GameMode mode) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new GameModeClientboundPacket(mode));
     }
 
@@ -29,20 +39,19 @@ public class GameModeClientboundPacket {
         this.gameMode = gameMode;
     }
 
-    public GameModeClientboundPacket(FriendlyByteBuf buffer) {
+    public GameModeClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.gameMode = buffer.readEnum(GameMode.class);
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.gameMode);
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         if (gameMode != GameMode.NONE) {
                             ClientGameModeHelper.gameModeLocked = true;
@@ -54,10 +63,8 @@ public class GameModeClientboundPacket {
                         } else {
                             ClientGameModeHelper.gameModeLocked = false;
                         }
-                        success.set(true);
                     });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

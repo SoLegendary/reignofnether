@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.unit.pathfinding;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
@@ -40,7 +40,7 @@ public final class PathConverter {
         }
         if (nodes.isEmpty()) {
             Node fallback = new Node(target.getX(), target.getY(), target.getZ());
-            fallback.type = BlockPathTypes.WALKABLE;
+            fallback.type = PathType.WALKABLE;
             nodes.add(fallback);
         }
 
@@ -60,7 +60,7 @@ public final class PathConverter {
             climbAim[i] = true;
             descending[i] = dir < 0;
             wallDir[i] = wd;
-            n.type = BlockPathTypes.WALKABLE;
+            n.type = PathType.WALKABLE;
         }
 
         // Per-node body position for WIDE units. Our A* node is a single cell, but a 2-wide body occupies the node
@@ -193,15 +193,15 @@ public final class PathConverter {
         }
     }
 
-    private static BlockPathTypes typeFor(WalkabilityView view, BlockPos bp) {
-        if (view == null) return BlockPathTypes.WALKABLE;
+    private static PathType typeFor(WalkabilityView view, BlockPos bp) {
+        if (view == null) return PathType.WALKABLE;
         byte kind = view.kindAt(bp.getX(), bp.getY(), bp.getZ());
         return switch (kind) {
-            case WalkabilityBuilder.KIND_WATER -> BlockPathTypes.WATER;
-            case WalkabilityBuilder.KIND_LAVA  -> BlockPathTypes.LAVA;
-            case WalkabilityBuilder.KIND_FIRE  -> BlockPathTypes.DAMAGE_FIRE;
-            case WalkabilityBuilder.KIND_SLIME  -> BlockPathTypes.STICKY_HONEY;
-            default -> BlockPathTypes.WALKABLE;
+            case WalkabilityBuilder.KIND_WATER -> PathType.WATER;
+            case WalkabilityBuilder.KIND_LAVA  -> PathType.LAVA;
+            case WalkabilityBuilder.KIND_FIRE  -> PathType.DAMAGE_FIRE;
+            case WalkabilityBuilder.KIND_SLIME  -> PathType.STICKY_HONEY;
+            default -> PathType.WALKABLE;
         };
     }
 }

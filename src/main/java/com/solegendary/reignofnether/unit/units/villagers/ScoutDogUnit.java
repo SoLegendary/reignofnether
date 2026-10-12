@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
@@ -108,11 +109,11 @@ public class ScoutDogUnit extends Wolf implements Unit {
             SynchedEntityData.defineId(ScoutDogUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable
@@ -140,7 +141,8 @@ public class ScoutDogUnit extends Wolf implements Unit {
     public ScoutDogUnit(EntityType<? extends Wolf> entityType, Level level) {
         super(entityType, level);
         updateAbilityButtons();
-        this.setTame(true);
+        // 1.21.1 needs the second flag too: the tame-sound/particle half of the call.
+        this.setTame(true, false);
     }
 
     @Override
@@ -163,9 +165,9 @@ public class ScoutDogUnit extends Wolf implements Unit {
                 .add(Attributes.MAX_HEALTH, ScoutDogUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, ScoutDogUnit.armorValue)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), 20)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), 20)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0)
                 .add(Attributes.ATTACK_DAMAGE, 0); // for compatibility with Wolf only
     }
 
@@ -242,7 +244,7 @@ public class ScoutDogUnit extends Wolf implements Unit {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
         return pSpawnData;
     }
 }

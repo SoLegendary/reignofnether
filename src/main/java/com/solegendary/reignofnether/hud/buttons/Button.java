@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -37,13 +36,24 @@ public class Button {
     public static int DEFAULT_ICON_SIZE = 14;
     public static int DEFAULT_ICON_FRAME_SIZE = 22;
     public int tooltipOffsetY = 0;
+    /**
+     * Grows an icon out of its cell: the icon is drawn this many pixels larger on each side and
+     * pulled back by the same amount, so it overflows the frame instead of being centred in it.
+     *
+     * <p>1.5.0 uses this to make an ability icon on an enchanted item readable over the item icon.
+     */
+    public int innerIconSizeModifier = 0;
+
+    /** Optional caption drawn under the icon; 1.5.0 uses it for live counters. */
+    public java.util.function.Supplier<String> bottomLeftText = null;
+
+    public int bottomLeftTextColor = 0xFFFFFF;
+
     public int imageSize = DEFAULT_ICON_SIZE;
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
-    public int innerIconSizeModifier = 0;
+    public boolean stretchIconToBorders = false;
     public String playerNameForHeadIcon = "";
     public int bgColour = 0x64000000;
-    public Supplier<String> bottomLeftText = null;
-    public int bottomLeftTextColor = 0xFFFFFF;
 
     public ResourceLocation iconResource;
     public ResourceLocation bgIconResource = null; // for rendering a background icon (eg. for mounted unit passengers)
@@ -78,9 +88,11 @@ public class Button {
     // @ 0.5, bottom half is greyed out
     // @ 1.0, whole button is greyed out
     public float greyPercent = 0.0f;
+    /** When set, replaces greyPercent every frame - used for timed fades. */
+    public java.util.function.Supplier<Float> getGreyPercent = null;
 
-    public Supplier<Float> getGreyPercent = null;
     public boolean greyWhenDisabled = true;
+    /** Fades from the bottom up instead of the top down (used by timed icons). */
     public boolean greyInverted = false;
     public boolean showSelectedFrameWhenDisabled = false;
 
@@ -170,6 +182,10 @@ public class Button {
             guiGraphics.pose().translate(0,0,1);
             int iconX = x+4 + (7 - xyDiff - iconSize/2);
             int iconY = y+4 + (7 - xyDiff - iconSize/2);
+            if (stretchIconToBorders) {
+                iconX -= 1;
+                iconY -= 1;
+            }
             iconX += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
             iconY += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
             MyRenderer.renderIcon(
@@ -185,6 +201,10 @@ public class Button {
         if (iconResource != null) {
             int iconX = x+4 + (7 - xyDiff - iconSize/2);
             int iconY = y+4 + (7 - xyDiff - iconSize/2);
+            if (stretchIconToBorders) {
+                iconX -= 1;
+                iconY -= 1;
+            }
             iconX += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
             iconY += ((DEFAULT_ICON_SIZE - imageSize) / 2) - innerIconSizeModifier;
             guiGraphics.pose().translate(0,0,1);
@@ -221,6 +241,26 @@ public class Button {
         }
         renderHotkey(guiGraphics, x, y);
 
+        // Optional caption drawn under the icon, centred and shrunk; 1.5.0 uses it for live
+        // counters (souls held, remaining charges, and so on).
+        if (bottomLeftText != null) {
+            String blText = bottomLeftText.get();
+            int drawX = x + 4 + ((blText.length() - 1) * 2);
+            int drawY = y + iconSize;
+
+            drawX += (DEFAULT_ICON_SIZE - iconSize) / 2;
+            drawY += (DEFAULT_ICON_SIZE - iconSize) / 2;
+
+            guiGraphics.pose().pushPose();
+            guiGraphics.pose().translate(drawX, drawY, 0);
+            guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
+            guiGraphics.pose().translate(-drawX, -drawY, 5);
+
+            guiGraphics.drawCenteredString(MC.font, blText, drawX, drawY, bottomLeftTextColor);
+
+            guiGraphics.pose().popPose();
+        }
+
         // light up on hover
         if (isEnabled.get() && isMouseOver(mouseX, mouseY) && lightUpOnHover) {
             guiGraphics.pose().translate(0,0,1);
@@ -231,6 +271,7 @@ public class Button {
                     0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
 
+        // 1.5.0 lets a button recompute its fade every frame (used by timed effect icons)
         if (getGreyPercent != null) {
             greyPercent = getGreyPercent.get();
         }
@@ -249,36 +290,12 @@ public class Button {
                     0x99000000); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
 
-
         if (isFlashing.get()) {
             guiGraphics.fill(x, y,
                 x + iconFrameSize,
                 y + iconFrameSize,
                 (0xFFFFFF | ((int) (0x80 * MiscUtil.getOscillatingFloat(0,1)) << 24))
             ); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-        }
-
-        if (bottomLeftText != null) {
-            String blText = bottomLeftText.get();
-            int drawX = x + 4 + ((blText.length() - 1) * 2);
-            int drawY = y + iconSize;
-
-            drawX += (DEFAULT_ICON_SIZE - iconSize) / 2;
-            drawY += (DEFAULT_ICON_SIZE - iconSize) / 2;
-
-            guiGraphics.pose().pushPose();
-
-            guiGraphics.pose().translate(drawX, drawY, 0);
-            guiGraphics.pose().scale(0.75f, 0.75f, 1.0f);
-            guiGraphics.pose().translate(-drawX, -drawY, 5);
-
-            guiGraphics.drawCenteredString(MC.font,
-                    blText,
-                    drawX,
-                    drawY,
-                    bottomLeftTextColor);
-
-            guiGraphics.pose().popPose();
         }
     }
 
@@ -301,11 +318,11 @@ public class Button {
 
         if (isMouseOver(mouseX, mouseY) && MC.player != null) {
             if (leftClick && this.onLeftClick != null) {
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.2f, 1.0f);
                 this.onLeftClick.run();
             }
             else if (!leftClick && this.onRightClick != null) {
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.2f, 1.0f);
                 this.onRightClick.run();
             }
         }
@@ -330,11 +347,8 @@ public class Button {
 
         if (hotkey != null && hotkey.getKey() == key) {
             if (MC.player != null)
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-            if (this.onLeftClick != null)
-                this.onLeftClick.run();
-            if (this.onLeftClickRelease != null)
-                this.onLeftClickRelease.run();
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.2f, 1.0f);
+            this.onLeftClick.run();
         }
     }
 }

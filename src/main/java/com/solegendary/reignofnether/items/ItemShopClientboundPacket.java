@@ -2,18 +2,33 @@ package com.solegendary.reignofnether.items;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.StockedShopItem;
+import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.ItemShopClientboundPacket;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 
-public class ItemShopClientboundPacket {
+public class ItemShopClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<ItemShopClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "item_shop_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<ItemShopClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final BlockPos buildingPos;
     private final ArrayList<String> descIds;
@@ -24,7 +39,7 @@ public class ItemShopClientboundPacket {
     private final ArrayList<Integer> restockTicks;
 
     public static void syncItemShopStock(BlockPos buildingPos, ArrayList<StockedShopItem> itemsAndStock) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new ItemShopClientboundPacket(buildingPos, itemsAndStock)
         );
     }
@@ -48,7 +63,7 @@ public class ItemShopClientboundPacket {
         }
     }
 
-    public ItemShopClientboundPacket(FriendlyByteBuf buffer) {
+    public ItemShopClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.buildingPos = buffer.readBlockPos();
         int size = buffer.readInt();
         this.descIds = new ArrayList<>();
@@ -68,7 +83,7 @@ public class ItemShopClientboundPacket {
         }
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeBlockPos(buildingPos);
         buffer.writeInt(descIds.size());
         for (int i = 0; i < descIds.size(); i++) {
@@ -82,11 +97,10 @@ public class ItemShopClientboundPacket {
     }
 
     // client-side packet-consuming function
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         ArrayList<StockedShopItem> itemsAndStock = new ArrayList<>();
                         for (int i = 0; i < descIds.size(); i++) {
@@ -103,10 +117,8 @@ public class ItemShopClientboundPacket {
                             ));
                         }
                         ItemClientEvents.setStockedShopItems(buildingPos, itemsAndStock);
-                        success.set(true);
                     });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

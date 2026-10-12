@@ -15,6 +15,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
@@ -28,7 +29,7 @@ public class ThrowWaterPotion extends Ability {
 
     public static final int CD_MAX_SECONDS = 8;
 
-    public final Potion potion = Potions.WATER;
+    public final Holder<Potion> potion = Potions.WATER;
 
     public ThrowWaterPotion(int potionThrowRange) {
         super(

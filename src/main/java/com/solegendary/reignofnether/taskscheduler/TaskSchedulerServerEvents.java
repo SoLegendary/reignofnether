@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.taskscheduler;
 
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,9 +18,9 @@ public class TaskSchedulerServerEvents {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END) return;
-
+    // Forge's TickEvent.ServerTickEvent is gone in NeoForge; ServerTickEvent.Post is the same
+    // "end of the server tick" point and is what the rest of this mod already uses.
+    public static void onServerTick(ServerTickEvent.Post evt) {
         Iterator<ScheduledTask> it = tasks.iterator();
         List<ScheduledTask> next = new ArrayList<>();
         while (it.hasNext()) {

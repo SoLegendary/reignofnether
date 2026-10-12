@@ -7,17 +7,29 @@ import com.solegendary.reignofnether.building.production.ProductionBuilding;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.Vec3i;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.DoubleTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.ArrayList;
@@ -76,7 +88,7 @@ public class CustomBuildingPlacement extends ProductionPlacement {
         if (this.getBuilding() instanceof CustomBuilding cb && cb.unitProductionNbts.containsKey(entityType))
             nbt = cb.unitProductionNbts.get(entityType);
 
-        Entity entity = entityType.spawn(level, (CompoundTag) null,
+        Entity entity = entityType.spawn(level, ItemStack.EMPTY,
                 null,
                 spawnPoint,
                 MobSpawnType.SPAWNER,

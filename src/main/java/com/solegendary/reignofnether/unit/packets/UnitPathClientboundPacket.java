@@ -5,13 +5,16 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.pathfinder.Path;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +22,15 @@ import java.util.function.Supplier;
 
 // Sent server→client when a unit gets a fresh path. The client renders the path so the player
 // can see the route their units will actually take. Gated by /rts-debug on the sender side.
-public class UnitPathClientboundPacket {
+public class UnitPathClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<UnitPathClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "unit_path_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<UnitPathClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final int entityId;
     private final byte pathType;
@@ -32,7 +43,7 @@ public class UnitPathClientboundPacket {
         List<BlockPos> bps = new ArrayList<>(path.nodes.size());
         for (var node : path.nodes)
             bps.add(node.asBlockPos());
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new UnitPathClientboundPacket(entity.getId(), pathType, bps));
     }
 
@@ -42,7 +53,7 @@ public class UnitPathClientboundPacket {
         this.nodes = nodes;
     }
 
-    public UnitPathClientboundPacket(FriendlyByteBuf buffer) {
+    public UnitPathClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.entityId = buffer.readInt();
         this.pathType = buffer.readByte();
         int n = buffer.readVarInt();
@@ -51,7 +62,7 @@ public class UnitPathClientboundPacket {
             this.nodes.add(buffer.readBlockPos());
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeInt(this.entityId);
         buffer.writeByte(this.pathType);
         buffer.writeVarInt(this.nodes.size());
@@ -59,12 +70,10 @@ public class UnitPathClientboundPacket {
             buffer.writeBlockPos(bp);
     }
 
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> RtsDebugPathPreview.receiveUnitPath(this.entityId, this.pathType, this.nodes));
         });
-        ctx.get().setPacketHandled(true);
-        return true;
     }
 }

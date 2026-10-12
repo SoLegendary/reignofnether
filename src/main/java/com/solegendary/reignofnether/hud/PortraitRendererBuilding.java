@@ -25,6 +25,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import org.joml.Matrix4fStack;
 import org.joml.Quaternionf;
 
 // Renders a Building's portrait including an animated block, name, healthbar, list of stats and UI frames
@@ -105,9 +106,10 @@ public class PortraitRendererBuilding {
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        PoseStack poseStack = RenderSystem.getModelViewStack();
-        poseStack.pushPose();
-        poseStack.translate(x+xBlock, y+yBlock, 100.0F);
+        // RenderSystem#getModelViewStack is a JOML Matrix4fStack in 1.21.1, not a PoseStack.
+        Matrix4fStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushMatrix();
+        poseStack.translate(x + xBlock, y + yBlock, 100.0F);
         poseStack.scale(blockScale, -blockScale, blockScale);
         RenderSystem.applyModelViewMatrix();
 
@@ -127,7 +129,7 @@ public class PortraitRendererBuilding {
                 blockPoseStack, bufferSource, null, 0);
         bufferSource.endBatch();
 
-        poseStack.popPose();
+        poseStack.popMatrix();
         RenderSystem.applyModelViewMatrix();
     }
 }

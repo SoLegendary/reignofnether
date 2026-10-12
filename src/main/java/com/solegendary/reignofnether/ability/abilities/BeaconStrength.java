@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 
@@ -19,7 +20,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class BeaconStrength extends BeaconAbility {
 
-    public final static MobEffect AURA_EFFECT = MobEffects.DAMAGE_BOOST;
+    public final static Holder<MobEffect> AURA_EFFECT = MobEffects.DAMAGE_BOOST;
 
     public BeaconStrength() {
         super(UnitAction.BEACON_STRENGTH, AURA_EFFECT);

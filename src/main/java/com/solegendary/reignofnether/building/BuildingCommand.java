@@ -139,6 +139,10 @@ public class BuildingCommand {
         if (bpl.level instanceof ServerLevel level) {
             ServerPlayer player = level.getServer().getPlayerList().getPlayerByName(bpl.ownerName);
 
+            // Attached commands run unattended on build/destroy/damage/capture from a data-driven
+            // string. Level 2 would let anyone with building access chain arbitrary commands through
+            // a building, so it requires an operator: a command set on a building is a privileged
+            // configuration, same as editing the building's NBT.
             CommandSourceStack source;
             if (player != null) {
                 source = player
@@ -146,14 +150,14 @@ public class BuildingCommand {
                         .withPosition(bpl.minCorner.offset(-1, 0, -1).getCenter())
                         .withLevel(level)
                         .withSuppressedOutput()
-                        .withPermission(2)
+                        .withPermission(4)
                         .withSource(player);
             } else {
                 source = level.getServer()
                         .createCommandSourceStack()
                         .withPosition(bpl.minCorner.offset(-1, 0, -1).getCenter())
                         .withLevel(level)
-                        .withPermission(2)
+                        .withPermission(4)
                         .withSuppressedOutput();
             }
             level.getServer().getCommands().performPrefixedCommand(source, commandStr);

@@ -279,7 +279,6 @@ public class WaveEnemy {
         if (!playerBuildings.isEmpty())
             targetBp = buildings.get(0).getClosestGroundPos(((Entity) unit).getOnPos(), 1);
 
-
         if (targetBp != null) {
             if (unit instanceof AttackerUnit)
                 UnitServerEvents.addActionItem(unit.getOwnerName(), UnitAction.ATTACK_MOVE, -1,

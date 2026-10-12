@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
-
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.Building;
@@ -26,6 +26,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -48,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BeaconPlacement extends ProductionPlacement implements RangeIndicator {
     public BlockPos beaconPos;
-    private MobEffect auraEffect = null;
+    private Holder<MobEffect> auraEffect = null;
     private boolean beaconActive = false;
     public BeaconPlacement(Building building, Level level, BlockPos originPos, Rotation rotation, String ownerName, ArrayList<BuildingBlock> blocks, boolean isCapitol) {
         super(building, level, originPos, rotation, ownerName, blocks, isCapitol);
@@ -89,15 +90,14 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
         return level.getBlockEntity(beaconPos);
     }
 
-    public MobEffect getAuraEffect() {
+    public Holder<MobEffect> getAuraEffect() {
         if (getBeaconBlockEntity() != null)
             return auraEffect;
         return null;
     }
     public boolean isBeaconActive() { return auraEffect != null && beaconActive; }
 
-
-    public static MobEffect getMobEffectForAction(UnitAction action) {
+    public static Holder<MobEffect> getMobEffectForAction(UnitAction action) {
         return switch (action) {
             case BEACON_HASTE -> MobEffects.DIG_SPEED;
             case BEACON_REGENERATION -> MobEffects.REGENERATION;
@@ -108,7 +108,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
         };
     }
 
-    public static UnitAction getActionForMobEffect(MobEffect effect) {
+    public static UnitAction getActionForMobEffect(Holder<MobEffect> effect) {
         if (effect == MobEffects.DIG_SPEED)
             return UnitAction.BEACON_HASTE;
         else if (effect == MobEffects.REGENERATION)
@@ -122,7 +122,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
         return UnitAction.NONE;
     }
 
-    public void activate(MobEffect effect) {
+    public void activate(Holder<MobEffect> effect) {
         beaconActive = true;
         auraEffect = effect;
         if (!level.isClientSide()) {
@@ -141,7 +141,7 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
     }
 
     // serverside only
-    public void setAuraEffect(MobEffect effect) {
+    public void setAuraEffect(Holder<MobEffect> effect) {
         // turn off the beacon
         // after delay, turn on the beacon and change the effect
         if (isBeaconActive()) {
@@ -180,10 +180,10 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
                         getBeaconBlockEntity() != null) {
                     if (auraEffect != MobEffects.REGENERATION) {
                         if (le instanceof WorkerUnit || auraEffect != MobEffects.DIG_SPEED) {
-                            le.addEffect(new MobEffectInstance(auraEffect, 25, 0));
+                            le.addEffect(MobEffectHelpers.instance(auraEffect, 25, 0));
                         }
                     } else if (tickAgeAfterBuilt % 80 == 0) { // only 1hp/4s
-                        le.addEffect(new MobEffectInstance(auraEffect, 60, 0));
+                        le.addEffect(MobEffectHelpers.instance(auraEffect, 60, 0));
                     }
                 }
             }

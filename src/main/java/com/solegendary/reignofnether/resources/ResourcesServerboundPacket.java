@@ -2,14 +2,25 @@ package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class ResourcesServerboundPacket {
+public class ResourcesServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<ResourcesServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resources_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<ResourcesServerboundPacket> type() {
+        return TYPE;
+    }
 
     ResourcesAction action;
     public String senderName;
@@ -20,7 +31,7 @@ public class ResourcesServerboundPacket {
     public int emerald;
 
     public static void sendResources(Resources resources, String senderName) {
-        PacketHandler.INSTANCE.sendToServer(new ResourcesServerboundPacket(
+        PacketHandler.sendToServer(new ResourcesServerboundPacket(
                 ResourcesAction.SEND_RESOURCES,
                 senderName,
                 resources.ownerName,
@@ -41,7 +52,7 @@ public class ResourcesServerboundPacket {
         this.emerald = emerald;
     }
 
-    public ResourcesServerboundPacket(FriendlyByteBuf buffer) {
+    public ResourcesServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(ResourcesAction.class);
         this.senderName = buffer.readUtf();
         this.receiverName = buffer.readUtf();
@@ -51,7 +62,7 @@ public class ResourcesServerboundPacket {
         this.emerald = buffer.readInt();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeUtf(this.senderName);
         buffer.writeUtf(this.receiverName);
@@ -62,19 +73,16 @@ public class ResourcesServerboundPacket {
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
 
-            ServerPlayer player = ctx.get().getSender();
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) {
                 ReignOfNether.LOGGER.warn("ResourcesServerboundPacket: Sender was null");
-                success.set(false);
                 return;
             }
             if (!player.getName().getString().equals(senderName)) {
                 ReignOfNether.LOGGER.warn("ResourcesServerboundPacket: Tried to process packet from " + player.getName() + " for: " + senderName);
-                success.set(false);
                 return;
             }
             if (action == ResourcesAction.SEND_RESOURCES) {
@@ -82,9 +90,7 @@ public class ResourcesServerboundPacket {
                         senderName, this.receiverName, this.food, this.wood, this.ore, this.emerald);
                 ResourcesServerEvents.trySendingAnyResources(this.receiverName, new Resources(this.senderName, this.food, this.wood, this.ore, this.emerald));
             }
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

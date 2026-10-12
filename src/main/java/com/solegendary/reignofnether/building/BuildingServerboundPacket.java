@@ -12,21 +12,32 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServe
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
 
-public class BuildingServerboundPacket {
+public class BuildingServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<BuildingServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "building_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<BuildingServerboundPacket> type() {
+        return TYPE;
+    }
     public String itemName; // name of the building // PLACE
     public BlockPos buildingPos; // required for all actions (used to identify the relevant building)
     public BlockPos rallyPos;
@@ -60,7 +71,7 @@ public class BuildingServerboundPacket {
             action = BuildingAction.PLACE;
             itemName = ReignOfNetherRegistries.BUILDING.getKey(building).toString();
         }
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(action, itemName,
+        PacketHandler.sendToServer(new BuildingServerboundPacket(action, itemName,
                 originPos, BlockPos.ZERO, rotation, ownerName, builderUnitIds, isDiagonalBridge));
     }
     public static void placeAndQueueBuilding(Building building, BlockPos originPos, Rotation rotation,
@@ -71,46 +82,46 @@ public class BuildingServerboundPacket {
             action = BuildingAction.PLACE_AND_QUEUE;
             itemName = ReignOfNetherRegistries.BUILDING.getKey(building).toString();
         }
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(action, itemName,
+        PacketHandler.sendToServer(new BuildingServerboundPacket(action, itemName,
                 originPos, BlockPos.ZERO, rotation, ownerName, builderUnitIds, isDiagonalBridge));
     }
     public static void cancelBuilding(BlockPos buildingPos, String ownerName) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+        PacketHandler.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.DESTROY,
                 "", buildingPos, BlockPos.ZERO, Rotation.NONE, ownerName, new int[0], false));
     }
     public static void setRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+        PacketHandler.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.SET_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
     public static void setAttackRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+        PacketHandler.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.SET_ATTACK_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
     public static void addRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+        PacketHandler.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.ADD_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
     public static void addAttackRallyPoint(BlockPos buildingPos, BlockPos rallyPos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+        PacketHandler.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.ADD_ATTACK_RALLY_POINT,
                 "", buildingPos, rallyPos, Rotation.NONE, "", new int[0], false));
     }
     public static void setRallyPointEntity(BlockPos buildingPos, int entityId) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+        PacketHandler.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.SET_RALLY_POINT_ENTITY,
                 "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[]{ entityId }, false));
     }
     public static void checkStockpileChests(BlockPos chestPos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+        PacketHandler.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.CHECK_STOCKPILE_CHEST,
                 "", chestPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
     }
     public static void requestReplacement(BlockPos buildingPos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingServerboundPacket(
+        PacketHandler.sendToServer(new BuildingServerboundPacket(
                 BuildingAction.REQUEST_REPLACEMENT,
                 "", buildingPos, BlockPos.ZERO, Rotation.NONE, "", new int[0], false));
     }
@@ -127,7 +138,7 @@ public class BuildingServerboundPacket {
         this.isDiagonalBridge = isDiagonalBridge;
     }
 
-    public BuildingServerboundPacket(FriendlyByteBuf buffer) {
+    public BuildingServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(BuildingAction.class);
         this.itemName = buffer.readUtf();
         this.buildingPos = buffer.readBlockPos();
@@ -138,7 +149,7 @@ public class BuildingServerboundPacket {
         this.isDiagonalBridge = buffer.readBoolean();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeUtf(this.itemName);
         buffer.writeBlockPos(this.buildingPos);
@@ -150,9 +161,8 @@ public class BuildingServerboundPacket {
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
             BuildingPlacement building = null;
             if (!List.of(BuildingAction.PLACE, BuildingAction.PLACE_AND_QUEUE, BuildingAction.PLACE_CUSTOM, BuildingAction.PLACE_AND_QUEUE_CUSTOM).contains(this.action)) {
                 building = findBuilding(false, this.buildingPos);
@@ -160,10 +170,9 @@ public class BuildingServerboundPacket {
                     return;
             }
 
-            ServerPlayer player = ctx.get().getSender();
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) {
                 ReignOfNether.LOGGER.warn("Sender for unit action packet was null");
-                success.set(false);
                 return;
             }
             else if (((newBuildingAuthActions.contains(this.action) &&
@@ -174,7 +183,6 @@ public class BuildingServerboundPacket {
                     !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
 
                 ReignOfNether.LOGGER.warn("BuildingServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
-                success.set(false);
                 return;
             }
             ReignOfNether.LOGGER.info("[Building] {} performed {} for {} (itemName: {}, pos: {})", player.getName(), this.action, this.ownerName, this.itemName, this.buildingPos);
@@ -235,9 +243,7 @@ public class BuildingServerboundPacket {
                     BuildingServerEvents.replaceClientBuilding(buildingPos);
                 }
             }
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

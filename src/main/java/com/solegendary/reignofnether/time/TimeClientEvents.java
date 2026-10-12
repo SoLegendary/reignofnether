@@ -2,7 +2,6 @@ package com.solegendary.reignofnether.time;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
-import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -16,7 +15,9 @@ import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
+import com.solegendary.reignofnether.util.GuiLayerCompat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -25,10 +26,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -45,11 +47,89 @@ public class TimeClientEvents {
     private static final Minecraft MC = Minecraft.getInstance();
 
     // setting this value causes the time of day to smoothly move towards it regardless of the server time
+    /** Monotonic wall clock in milliseconds, for timed UI animations. */
+    public static long getClientTime() {
+        return System.currentTimeMillis();
+    }
+
     public static long targetClientTime = 0;
     // actual time on the server
     public static long serverNormDayTime = 0;
     public static long serverGameTime = 0;
-    public static double ticksSinceLastUpdate = 0; // for counting partial ticks since serverGameTime is only updated once per second
+
+    /** The phase the client clock is pulled towards while inside a source of night distortion. */
+    public static final long MIDNIGHT = 18000;
+
+    /** True while the camera sits inside a source of night distortion. */
+    public static boolean steeringClock = false;
+
+    /**
+     * True while the mod is the authority for the client's day clock: either inside a night
+     * source, or still warping home from one. While true, the server's time updates are recorded
+     * but not applied, so the sky is never cut to the real time mid-transition.
+     */
+    public static boolean owningClock = false;
+
+    /**
+     * Day-clock ticks per client tick for the trip back out of a night source. Entering is meant
+     * to be quick and matches upstream (100, or 500 in orthoview while the sky is out of focus);
+     * the way home is deliberately slower so daybreak sweeps across the sky instead of arriving
+     * in a single frame.
+     */
+    public static final long RETURN_RATE = 60L;
+
+    /** Set around the mod's own write to the day clock, so that write is not read back as server
+     * time - if it were, leaving a night source would pin the target to midnight forever. */
+    public static boolean writingWarpedTime = false;
+
+    /**
+     * Records the server's clock for one time update.
+     *
+     * Called from ClientLevel#setDayTime, which is the one point both delivery paths converge on: the
+     * vanilla ClientboundSetTimePacket is applied by ClientPacketListener#handleSetTime via
+     * setDayTime, and NeoForge's ClientPayloadHandler does the same for
+     * ClientboundCustomSetTimePayload - the packet a NeoForge server actually sends. Hooking only
+     * handleSetTime therefore missed the payload path entirely, which is how the HUD clock got pinned
+     * to "25s until day": serverNormDayTime kept its initial 0, and getTimeUntilStr(0, DAWN) is
+     * exactly 25s, while targetClientTime also stayed 0 so the night distortion never started either.
+     */
+    public static void onServerTimeUpdate(long dayTime, long gameTime) {
+        serverNormDayTime = TimeUtils.normaliseTime(dayTime);
+        serverGameTime = gameTime;
+    }
+
+    /**
+     * Decides where the client clock should be from where the camera is right now. Run once per client
+     * tick so entering or leaving a night source takes effect immediately instead of waiting for the next
+     * time update (up to a second later).
+     */
+    public static void updateClockTarget() {
+        Vec3 pos;
+        if (OrthoviewClientEvents.isEnabled())
+            pos = MiscUtil.getOrthoviewCentreWorldPos(MC);
+        else if (MC.player != null && MC.level != null)
+            pos = MC.player.position();
+        else
+            return;
+
+        steeringClock = NightUtils.isInRangeOfNightSource(pos, true);
+        targetClientTime = steeringClock ? MIDNIGHT : serverNormDayTime;
+    }
+
+    /**
+     * The clock arbitration is per-world state. A latch left set in one world would keep the next
+     * world's time updates suppressed until the warp happened to finish there too, so it is cleared
+     * every time the client logs in.
+     */
+    @SubscribeEvent
+    public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn evt) {
+        steeringClock = false;
+        owningClock = false;
+        writingWarpedTime = false;
+        serverNormDayTime = 0;
+        serverGameTime = 0;
+        targetClientTime = 0;
+    }
 
     public static boolean showClockTooltip = false;
 
@@ -68,7 +148,6 @@ public class TimeClientEvents {
     private static Button bloodMoonButton = getBloodMoonButton();
     private static int bloodMoonTicksLeft = 0;
     private static BlockPos bloodMoonPos = null;
-
     public static void resetBloodMoon() {
         bloodMoonTicksLeft = 0;
         bloodMoonPos = null;
@@ -113,9 +192,11 @@ public class TimeClientEvents {
 
     // render directly above the minimap
     @SubscribeEvent
-    public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
+    public static void renderOverlay(RenderGuiLayerEvent.Post evt) {
+        if (!GuiLayerCompat.isTopLayer(evt))
+            return;
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
-                || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
+            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
             return;
         }
 
@@ -151,7 +232,7 @@ public class TimeClientEvents {
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
-                || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
+            || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
             return;
         }
 
@@ -162,7 +243,8 @@ public class TimeClientEvents {
             bloodMoonButton.render(evt.getGuiGraphics(), xPos - 3, yPos - 3, evt.getMouseX(), evt.getMouseY());
             if (bloodMoonButton.isMouseOver(evt.getMouseX(), evt.getMouseY()))
                 bloodMoonButton.renderTooltip(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
-        } else if (!clockButton.isHidden.get() && evt.getScreen() instanceof TopdownGui)
+        }
+        else if (!clockButton.isHidden.get() && evt.getScreen() instanceof TopdownGui)
             clockButton.render(evt.getGuiGraphics(), xPos - 3, yPos - 3, evt.getMouseX(), evt.getMouseY());
     }
 
@@ -171,16 +253,17 @@ public class TimeClientEvents {
         if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
             clockButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
             bloodMoonButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-        } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
+        }
+        else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
             clockButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
             bloodMoonButton.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
         }
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render evt) {
+    public static void onDrawClockTooltip(ScreenEvent.Render.Post evt) {
         if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) ||
-                !(MC.screen instanceof TopdownGui) || !HudClientEvents.enabled) {
+            !(MC.screen instanceof TopdownGui) || !HudClientEvents.enabled) {
             return;
         }
 
@@ -199,12 +282,12 @@ public class TimeClientEvents {
             String timeStr = get12HourTimeStr(serverNormDayTime);
 
             FormattedCharSequence timeUntilStr =
-                    FormattedCharSequence.forward(
-                            isDay ? I18n.get("time.reignofnether.time_until_night",
-                                    getTimeUntilStr(serverNormDayTime, DUSK)) :
-                                    I18n.get("time.reignofnether.time_until_day",
-                                            getTimeUntilStr(serverNormDayTime, DAWN)),
-                            Style.EMPTY);
+                FormattedCharSequence.forward(
+                    isDay ? I18n.get("time.reignofnether.time_until_night",
+                        getTimeUntilStr(serverNormDayTime, DUSK)) :
+                        I18n.get("time.reignofnether.time_until_day",
+                        getTimeUntilStr(serverNormDayTime, DAWN)),
+                    Style.EMPTY);
 
             ArrayList<FormattedCharSequence> tooltip = new ArrayList<>();
 
@@ -238,28 +321,5 @@ public class TimeClientEvents {
             }
         }
     }
-
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END && !MC.isPaused())
-            ticksSinceLastUpdate += RtsDebugClientEvents.getCappedTPS() / 20D;
-    }
-
-    public static Long getClientTime() {
-        return TimeClientEvents.serverGameTime + (long) TimeClientEvents.ticksSinceLastUpdate;
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.util.AttributeModifierCompat;
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Bloodlust;
@@ -60,6 +62,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 
 public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, RangedAttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -81,7 +84,6 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -145,11 +147,11 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
         SynchedEntityData.defineId(HeadhunterUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable
@@ -212,13 +214,13 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
                 .add(Attributes.MAX_HEALTH, HeadhunterUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, HeadhunterUnit.armorValue)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     @Override
@@ -326,14 +328,13 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     public void setupEquipmentAndUpgradesServer() {
         if (!hasFlameTrident()) {
             ItemStack tridentStack = new ItemStack(Items.TRIDENT);
-            AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
-            tridentStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+            AttributeModifierCompat.addModifier(tridentStack, Attributes.ATTACK_DAMAGE, 0, AttributeModifier.Operation.ADD_VALUE, EquipmentSlot.MAINHAND);
             this.setItemSlot(EquipmentSlot.MAINHAND, tridentStack);
         }
         //if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_HEAVY_TRIDENTS))
-        //    this.getItemBySlot(EquipmentSlot.MAINHAND).enchant(Enchantments.PUNCH_ARROWS, 1);
+        //    this.getItemBySlot(EquipmentSlot.MAINHAND).enchant(EnchantmentRegistrar.vanilla(Enchantments.PUNCH), 1);
         if (ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_GREEDY_TRIDENTS))
-            this.getItemBySlot(EquipmentSlot.MAINHAND).enchant(Enchantments.MOB_LOOTING, 1);
+            this.getItemBySlot(EquipmentSlot.MAINHAND).enchant(EnchantmentRegistrar.vanilla(Enchantments.LOOTING), 1);
     }
 
     @Override
@@ -352,7 +353,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
 
     public boolean hasFlameTrident() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getAllEnchantments().containsKey(Enchantments.FLAMING_ARROWS);
+        return itemStack.getEnchantments().keySet().contains(EnchantmentRegistrar.vanilla(Enchantments.FLAME));
     }
 
     @Override
@@ -375,8 +376,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
     @Override
     public void onPickupEquipment(ItemStack itemStack) {
         if (itemStack.getItem() == Items.TRIDENT) {
-            AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
-            itemStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+            AttributeModifierCompat.addModifier(itemStack, Attributes.ATTACK_DAMAGE, 0, AttributeModifier.Operation.ADD_VALUE, EquipmentSlot.MAINHAND);
         }
         setItemSlot(getEquipmentSlotForItem(itemStack), itemStack);
     }
@@ -393,7 +393,7 @@ public class HeadhunterUnit extends PiglinBrute implements Unit, AttackerUnit, R
 
     public int getPowerLevel() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getEnchantmentLevel(Enchantments.POWER_ARROWS);
+        return itemStack.getEnchantmentLevel(EnchantmentRegistrar.vanilla(Enchantments.POWER));
     }
 
     @Override

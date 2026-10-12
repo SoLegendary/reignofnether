@@ -4,17 +4,18 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.Level;
 
 import static com.solegendary.reignofnether.resources.ResourceCost.TICKS_PER_SECOND;
 
 public abstract class BeaconAbility extends Ability {
-    protected final MobEffect effect;
+    protected final Holder<MobEffect> effect;
 
     public static final int CD_MAX = 5 * TICKS_PER_SECOND;
 
-    public BeaconAbility(UnitAction action, MobEffect effect) {
+    public BeaconAbility(UnitAction action, Holder<MobEffect> effect) {
         super(
                 action,
                 CD_MAX,

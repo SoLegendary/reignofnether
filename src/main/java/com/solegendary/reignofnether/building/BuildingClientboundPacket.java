@@ -8,25 +8,35 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClien
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
 
-public class BuildingClientboundPacket {
+public class BuildingClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<BuildingClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "building_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<BuildingClientboundPacket> type() {
+        return TYPE;
+    }
     public static final ResourceLocation EMPTY = ResourceLocation.fromNamespaceAndPath("", "");
 
     // pos is used to identify the building object serverside
@@ -53,7 +63,7 @@ public class BuildingClientboundPacket {
         BuildingPlacement b = findBuilding(false, buildingPos);
         for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
             if (b != null && FogOfWarServerEvents.canPlayerSeeBuilding(sp, b)) {
-                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
+                PacketHandler.send(PacketHandler.toPlayer(() -> sp), packet);
             }
         }
     }
@@ -229,7 +239,7 @@ public class BuildingClientboundPacket {
         this.portalDestination = portalDestination;
     }
 
-    public BuildingClientboundPacket(FriendlyByteBuf buffer) {
+    public BuildingClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(BuildingAction.class);
         this.itemKey = buffer.readResourceLocation();
         this.itemName = buffer.readUtf();
@@ -247,7 +257,7 @@ public class BuildingClientboundPacket {
         this.partialBlocksDestroyed = buffer.readDouble();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeResourceLocation(this.itemKey);
         buffer.writeUtf(this.itemName);
@@ -266,11 +276,10 @@ public class BuildingClientboundPacket {
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 BuildingPlacement building = null;
                 if (this.action != BuildingAction.PLACE &&
                         this.action != BuildingAction.PLACE_CUSTOM) {
@@ -330,10 +339,8 @@ public class BuildingClientboundPacket {
                         BuildingClientEvents.removeBuilding(buildingPos);
                     }
                 }
-                success.set(true);
             });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

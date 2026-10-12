@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.entities;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.abilities.FirewallShot;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 
@@ -34,7 +36,8 @@ public class BlazeUnitFireball extends SmallFireball {
     public static final int FIRE_SECONDS = 5;
 
     public BlazeUnitFireball(Level pLevel, LivingEntity pShooter, double pOffsetX, double pOffsetY, double pOffsetZ, boolean isFirewallShot) {
-        super(pLevel, pShooter, pOffsetX, pOffsetY, pOffsetZ);
+        // SmallFireball's 1.21.1 constructor takes the initial movement as a Vec3.
+        super(pLevel, pShooter, new Vec3(pOffsetX, pOffsetY, pOffsetZ));
         this.isFirewallShot = isFirewallShot;
     }
 
@@ -43,7 +46,7 @@ public class BlazeUnitFireball extends SmallFireball {
         super.tick();
         if (!this.level().isClientSide() && isFirewallShot) {
             BlockState fireState = Blocks.FIRE.defaultBlockState();
-            if (getOwner() instanceof Blaze blaze && blaze.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
+            if (getOwner() instanceof Blaze blaze && blaze.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get()))) {
                 fireState = BlockRegistrar.UNEXTINGUISHABLE_SOUL_FIRE.get().defaultBlockState();
             }
             Block block = this.level().getBlockState(this.getOnPos()).getBlock();
@@ -51,7 +54,7 @@ public class BlazeUnitFireball extends SmallFireball {
             Block blockBelow2 = this.level().getBlockState(this.getOnPos().below().below()).getBlock();
 
             List<Block> nonSolidBlocks = List.of(
-                    Blocks.AIR, Blocks.TALL_GRASS, Blocks.GRASS,
+                    Blocks.AIR, Blocks.TALL_GRASS, Blocks.SHORT_GRASS,
                     Blocks.CRIMSON_ROOTS, Blocks.WARPED_ROOTS,
                     Blocks.DEAD_BUSH, Blocks.SNOW,
                     BlockRegistrar.WRAITH_SNOW_LAYER.get()
@@ -98,9 +101,9 @@ public class BlazeUnitFireball extends SmallFireball {
 
             this.onHitEntity(entityHitResult);
             this.level().gameEvent(GameEvent.PROJECTILE_LAND, pResult.getLocation(), GameEvent.Context.of(this, null));
-            if (this.getOwner() instanceof LivingEntity le && le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) &&
-                entityHitResult.getEntity() instanceof LivingEntity leTarget && !(leTarget instanceof Blaze)) {
-                leTarget.addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), 120, 0, false, false));
+            if (this.getOwner() instanceof LivingEntity le && le.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get())) &&
+                entityHitResult.getEntity() instanceof LivingEntity leTarget) {
+                leTarget.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.SOULS_AFLAME.get(), 120, 0, false, false));
             }
             if (!this.level().isClientSide && !targetOnFire && !this.isFirewallShot)
                 this.discard();

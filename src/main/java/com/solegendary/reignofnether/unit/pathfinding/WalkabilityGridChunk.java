@@ -35,6 +35,25 @@ public final class WalkabilityGridChunk {
         this.crowd = crowd;
     }
 
+    /**
+     * A snapshot over the requested band with every cell {@link WalkabilityBuilder#KIND_BLOCKED},
+     * built without reading the world.
+     *
+     * <p>Used when the chunk is not loaded. {@link #build} reads through {@code Level#getBlockState},
+     * which is a blocking chunk load: it adds a {@code TicketType.UNKNOWN} ticket at FULL - a type
+     * {@code MinecraftServer#stopServer} deliberately keeps - and forces the chunk to generate.
+     * Since A* expands across unloaded chunks, reading the world from the pathfinder pinned chunks
+     * far beyond the map instead of just failing to find a path.
+     */
+    public static WalkabilityGridChunk blocked(Level level, int windowMinY, int windowMaxY) {
+        int minY = Math.max(level.getMinBuildHeight(), windowMinY);
+        int maxY = Math.min(level.getMaxBuildHeight(), windowMaxY);
+        if (maxY <= minY) maxY = Math.min(level.getMaxBuildHeight(), minY + 1);
+        int height = maxY - minY;
+        int cells = SIZE * SIZE * height;
+        return new WalkabilityGridChunk(minY, height, new byte[cells], new byte[cells], new byte[cells]);
+    }
+
     public static WalkabilityGridChunk build(Level level, ChunkPos cp, int windowMinY, int windowMaxY) {
         int worldMin = level.getMinBuildHeight();
         int worldMax = level.getMaxBuildHeight();

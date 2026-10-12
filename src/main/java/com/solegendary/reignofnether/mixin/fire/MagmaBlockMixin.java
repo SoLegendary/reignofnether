@@ -1,9 +1,8 @@
 package com.solegendary.reignofnether.mixin.fire;
+import com.solegendary.reignofnether.faction.Factions;
 
 import com.solegendary.reignofnether.blocks.WalkableMagmaBlock;
-import com.solegendary.reignofnether.faction.Factions;
-import com.solegendary.reignofnether.items.UnitInventory;
-import com.solegendary.reignofnether.items.UnitItems;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.GruntUnit;
 import net.minecraft.core.BlockPos;
@@ -17,6 +16,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.solegendary.reignofnether.util.EnchantmentUtil;
 
 @Mixin(MagmaBlock.class)
 public abstract class MagmaBlockMixin {
@@ -30,14 +30,13 @@ public abstract class MagmaBlockMixin {
         ci.cancel();
 
         boolean piglinImmunity = pEntity instanceof Unit unit && Factions.getFaction(unit).equals(Factions.PIGLINS) && !pEntity.isOnFire();
-        boolean bootsImmunity = pEntity instanceof UnitInventory inv && inv.isHolding(UnitItems.MAGMA_WALKER_BOOTS);
         boolean isDamageTick = pEntity.tickCount % WalkableMagmaBlock.DAMAGE_DELAY == 0;
 
         if (!pEntity.isSteppingCarefully() &&
             pEntity instanceof LivingEntity &&
             !(pEntity instanceof GruntUnit) &&
-            !EnchantmentHelper.hasFrostWalker((LivingEntity)pEntity) &&
-            !piglinImmunity && !bootsImmunity && isDamageTick) {
+            !EnchantmentUtil.hasFrostWalker((LivingEntity)pEntity) &&
+            !piglinImmunity && isDamageTick) {
             pEntity.hurt(pEntity.damageSources().hotFloor(), WalkableMagmaBlock.DAMAGE);
         }
     }

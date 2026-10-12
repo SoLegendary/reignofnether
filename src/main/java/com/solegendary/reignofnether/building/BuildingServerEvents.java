@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building;
 
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.google.common.collect.Sets;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.EnchantAbility;
@@ -69,16 +71,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Objective;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.ExplosionEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -174,10 +174,8 @@ public class BuildingServerEvents {
     private static final int SAVE_TICKS_MAX = 600;
     private static int saveTicks = 0;
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
-            return;
-        saveTicks += 1;
+    public static void onServerTick(ServerTickEvent.Post evt) {
+                saveTicks += 1;
         if (saveTicks >= SAVE_TICKS_MAX) {
             ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
             if (level != null) {
@@ -375,7 +373,7 @@ public class BuildingServerEvents {
         boolean fromCommand, // ignore resources, terrain or any other restrictions and self-build
         boolean ignoreFog
     ) {
-        if (serverLevel == null)
+        if (serverLevel == null || building == null)
             return null;
 
         BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
@@ -560,7 +558,6 @@ public class BuildingServerEvents {
             newBuilding.addToBlockPlaceQueue(scaffold);
         }
     }
-
 
     private static void assignBuilderUnits(int[] builderUnitIds, boolean queue, BuildingPlacement newBuilding) {
         if (serverLevel == null)
@@ -779,28 +776,27 @@ public class BuildingServerEvents {
     }
 
     // prevent dungeons spawners from actually spawning
+    // (1.21.1 removed MobSpawnEvent.FinalizeSpawn, so this hooks entity-joins instead and
+    //  looks the building up at the mob.s position rather than at the spawner block)
     @SubscribeEvent
-    public static void onLivingSpawn(MobSpawnEvent.FinalizeSpawn evt) {
-        if (evt.getSpawnType() == MobSpawnType.SPAWNER) {
-            if (evt.getSpawner() != null && evt.getSpawner().getSpawnerBlockEntity() != null) {
-                BlockPos bp = evt.getSpawner().getSpawnerBlockEntity().getBlockPos();
-                BuildingPlacement bpl = BuildingUtils.findBuilding(false, bp);
-                if (bpl != null &&
-                   (bpl.getBuilding() instanceof Dungeon ||
-                    bpl.getBuilding() instanceof FlameSanctuary)) {
-                    evt.getEntity().discard();
-                }
-            }
+    public static void onLivingSpawn(EntityJoinLevelEvent evt) {
+        if (evt.getLevel().isClientSide() || !(evt.getEntity() instanceof Mob mob)) return;
+
+        BuildingPlacement bpl = BuildingUtils.findBuilding(false, mob.blockPosition());
+        if (bpl != null &&
+           (bpl.getBuilding() instanceof Dungeon ||
+            bpl.getBuilding() instanceof FlameSanctuary)) {
+            mob.discard();
         }
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD) {
+    public static void onWorldTick(LevelTickEvent.Post evt) {
+        if (evt.getLevel().isClientSide() || evt.getLevel().dimension() != Level.OVERWORLD) {
             return;
         }
 
-        serverLevel = (ServerLevel) evt.level;
+        serverLevel = (ServerLevel) evt.getLevel();
 
         buildingSyncTicks -= 1;
         if (buildingSyncTicks <= 0) {
@@ -831,8 +827,13 @@ public class BuildingServerEvents {
             return false;
         });
 
-        for (BuildingPlacement building : buildingsToDestroy)
+        for (BuildingPlacement building : buildingsToDestroy) {
+            // Tell clients to drop the placement too. destroy() only clears the world blocks; without
+            // this the client keeps the building in its list, so a destroyed building stayed standing
+            // on screen and could not be repaired (the server no longer had it).
+            BuildingClientboundPacket.removeBuilding(building.originPos);
             building.destroy(serverLevel);
+        }
 
         ArrayList<BuildingPlacement> bpls = new ArrayList<>(buildings);
         for (BuildingPlacement building : bpls)
@@ -857,7 +858,9 @@ public class BuildingServerEvents {
                         int currentPopulation = UnitServerEvents.getCurrentPopulation(playerName);
                         if (serverLevel != null && currentPopulation != populations.getInt(playerName)) {
                             populations.put(playerName, currentPopulation);
-	                        serverLevel.getScoreboard().forAllObjectives(ResourceObjectiveCriteria.POPULATION, playerName, (p_9178_) -> p_9178_.setScore(currentPopulation));
+	                        // 1.21.1's forAllObjectives takes a ScoreHolder, not a String, and
+	                        // ScoreAccess renamed setScore to set.
+	                        serverLevel.getScoreboard().forAllObjectives(ResourceObjectiveCriteria.POPULATION, player, (p_9178_) -> p_9178_.set(currentPopulation));
                         }
                     }
             }
@@ -887,26 +890,27 @@ public class BuildingServerEvents {
         CreeperUnit creeperUnit = null;
         PillagerUnit pillagerUnit = null;
 
-        if (evt.getExplosion().getExploder() instanceof CreeperUnit cUnit) {
+        if (evt.getExplosion().getDirectSourceEntity() instanceof CreeperUnit cUnit) {
             creeperUnit = cUnit;
         }
-        else if (evt.getExplosion().getExploder() instanceof PillagerUnit pUnit) {
+        else if (evt.getExplosion().getDirectSourceEntity() instanceof PillagerUnit pUnit) {
             pillagerUnit = pUnit;
-        } else if (evt.getExplosion().getExploder() instanceof LargeFireball fireball && fireball.getOwner() instanceof GhastUnit gUnit) {
+        } else if (evt.getExplosion().getDirectSourceEntity() instanceof LargeFireball fireball && fireball.getOwner() instanceof GhastUnit gUnit) {
             ghastUnit = gUnit;
         }
 
-        if (exp.getExploder() == null && ghastUnit == null) {
+        if (exp.getDirectSourceEntity() == null && ghastUnit == null) {
             evt.getAffectedEntities().clear();
         }
 
         // apply creeper, ghast and mounted pillager attack damage as bonus damage to buildings
         // this is dealt in addition to the actual blocks destroyed by the explosion itself
-        if (creeperUnit != null || ghastUnit != null || pillagerUnit != null || exp.getExploder() instanceof PrimedTnt) {
+        if (creeperUnit != null || ghastUnit != null || pillagerUnit != null || exp.getDirectSourceEntity() instanceof PrimedTnt) {
             Set<BuildingPlacement> affectedBuildings = new HashSet<>();
 
             if (pillagerUnit != null) {
-                Vec3 pos = evt.getExplosion().getPosition();
+                // 1.21.1 renamed Explosion#getPosition to #center.
+                Vec3 pos = evt.getExplosion().center();
                 evt.getAffectedBlocks().add(new BlockPos((int) pos.x, (int) pos.y - 1, (int) pos.z));
             }
 
@@ -920,6 +924,22 @@ public class BuildingServerEvents {
                             SurvivalServerEvents.ENEMY_OWNER_NAME.equals(building.ownerName)))
                         affectedBuildings.add(building);
                 }
+            }
+            // Diagnostic for the "ghast fireballs and projectiles do not damage buildings" report.
+            // It says whether this explosion was attributed to one of our units at all, how many
+            // blocks vanilla listed and how many of those resolved to a building: a fireball that
+            // lands on a base and logs blocks=0 (or buildings=0) is the whole answer, and there is
+            // no other way to see it from outside. Upstream 1.5.0 needs the same two numbers, but
+            // on 1.20.1 Forge they came from Explosion#getExploder(), which is field-identical to
+            // 1.21.1's getDirectSourceEntity() (checked against both jars), so the attribution code
+            // itself is not the suspect - these numbers are.
+            if (ghastUnit != null || creeperUnit != null || pillagerUnit != null) {
+                String attacker = ghastUnit != null ? "ghast-" + ghastUnit.getOwnerName()
+                        : creeperUnit != null ? "creeper-" + creeperUnit.getOwnerName()
+                        : "pillager-" + pillagerUnit.getOwnerName();
+                ReignOfNether.LOGGER.info("[Explosion] " + attacker + " at " + exp.center()
+                        + " blocks=" + evt.getAffectedBlocks().size()
+                        + " buildings=" + affectedBuildings.size());
             }
             for (BuildingPlacement building : affectedBuildings) {
                 float atkDmg = 0;
@@ -935,9 +955,9 @@ public class BuildingServerEvents {
                 } else if (pillagerUnit != null) {
                     atkDmg = pillagerUnit.getUnitAttackDamage() / 2;
                     building.lastAttacker = pillagerUnit;
-                } else if (exp.getExploder() instanceof AdjustablePrimedTnt aTNT) {
+                } else if (exp.getDirectSourceEntity() instanceof AdjustablePrimedTnt aTNT) {
                     atkDmg = aTNT.getExplosionPower() *  AdjustablePrimedTnt.DAMAGE_PER_POWER;
-                } else if (exp.getExploder() instanceof PrimedTnt) {
+                } else if (exp.getDirectSourceEntity() instanceof PrimedTnt) {
                     atkDmg = TNT_BUILDING_BASE_DAMAGE;
                 }
 
@@ -946,7 +966,9 @@ public class BuildingServerEvents {
                     GarrisonableBuildingAddon garr;
                     if ((garr = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null) {
                         for (LivingEntity le : garr.getOccupants(building))
-                            le.hurt(exp.getDamageSource(), (random.nextFloat(atkDmg + 1)) / 2f);
+                            // 1.21.1 made Explosion's damage source a field opened up by the AT
+                            // rather than a getter.
+                            le.hurt(exp.damageSource, (random.nextFloat(atkDmg + 1)) / 2f);
                     }
 
                     building.destroyRandomBlocks(atkDmg);

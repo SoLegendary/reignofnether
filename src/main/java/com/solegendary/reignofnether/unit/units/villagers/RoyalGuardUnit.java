@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
@@ -101,7 +103,6 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     Ability autocast;
 
-
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
     public int getEatingTicksLeft() { return eatingTicksLeft; }
@@ -193,14 +194,14 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
             SynchedEntityData.defineId(RoyalGuardUnit.class, EntityDataSerializers.INT);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
-        this.entityData.define(avatarTicksLeftAccessor, 0);
-        this.entityData.define(avatarScalingStartedAccessor, false);
-        this.entityData.define(avatarScaleTicksAccessor, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
+        builder.define(avatarTicksLeftAccessor, 0);
+        builder.define(avatarScalingStartedAccessor, false);
+        builder.define(avatarScaleTicksAccessor, 0);
     }
 
     // combat stats
@@ -437,19 +438,19 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 .add(Attributes.MAX_HEALTH, RoyalGuardUnit.maxHealth)
                 .add(Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_RESISTANCE)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), RoyalGuardUnit.maxHealth)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
-                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
-                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
-                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
-                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
-                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
+                .add(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_HEALTH.get()), RoyalGuardUnit.maxHealth)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), magicDamageResist)
+                .add(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_MANA.get()), baseMaxMana)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MANA_REGEN_PER_SECOND.get()), manaRegenPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get()), manaBonusPerLevel)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get()), maxHealthBonusPerLevel)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get()), attackBonusPerLevel);
     }
 
     public void tick() {
@@ -616,7 +617,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
         return pSpawnData;
     }
 
@@ -672,9 +673,9 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                     if (relationShip.equals(Relationship.OWNED)) continue;
                     if (relationShip.equals(Relationship.FRIENDLY)) continue;
                     Unit.fullResetBehaviours(unit);
-                    hitEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), maceSlam.stunDuration));
+                    hitEntity.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.STUN.get(), maceSlam.stunDuration));
                 } else {
-                    hitEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, maceSlam.stunDuration, 63));
+                    hitEntity.addEffect(MobEffectHelpers.instance(MobEffects.MOVEMENT_SLOWDOWN, maceSlam.stunDuration, 63));
                 }
                 boolean hurt = hitEntity.hurt(this.damageSources().generic(), maceSlam.damage);
                 if (hurt) {
@@ -701,11 +702,11 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 }
                 Unit.fullResetBehaviours((Unit) attackerUnit);
                 attackerUnit.setUnitAttackTargetForced(this);
-                ((LivingEntity) attackerUnit).addEffect(new MobEffectInstance(MobEffectRegistrar.UNCONTROLLABLE.get(), tauntingCry.duration));
-                ((LivingEntity) attackerUnit).addEffect(new MobEffectInstance(MobEffectRegistrar.ANGRY.get(), tauntingCry.duration));
+                ((LivingEntity) attackerUnit).addEffect(MobEffectHelpers.instance(MobEffectRegistrar.UNCONTROLLABLE.get(), tauntingCry.duration));
+                ((LivingEntity) attackerUnit).addEffect(MobEffectHelpers.instance(MobEffectRegistrar.ANGRY.get(), tauntingCry.duration));
             }
-            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, tauntingCry.duration, 2));
-            this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, tauntingCry.duration, 2));
+            this.addEffect(MobEffectHelpers.instance(MobEffects.MOVEMENT_SLOWDOWN, tauntingCry.duration, 2));
+            this.addEffect(MobEffectHelpers.instance(MobEffects.DAMAGE_RESISTANCE, tauntingCry.duration, 2));
             tauntingCryTicksLeft = tauntingCry.duration;
             updateKnockbackResistance();
             SoundClientboundPacket.playSoundAtPos(SoundAction.HEROISM, this.getOnPos().above());
@@ -768,8 +769,8 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
 
     public void enableAvatar() {
         setAvatarTicksLeft(Avatar.DURATION);
-        addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, getAvatarTicksLeft(), 0));
-        addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, getAvatarTicksLeft(), 1));
+        addEffect(MobEffectHelpers.instance(MobEffects.MOVEMENT_SPEED, getAvatarTicksLeft(), 0));
+        addEffect(MobEffectHelpers.instance(MobEffects.DAMAGE_BOOST, getAvatarTicksLeft(), 1));
         updateKnockbackResistance();
         setStatsForLevel();
         heal(Avatar.BONUS_HEALTH);

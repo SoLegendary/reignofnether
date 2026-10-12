@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
@@ -52,6 +53,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.Holder;
 
 // despite being a RangedAttackerUnit we don't implement performRangedAttack as we override the Pillager crossbow attack instead
 // we just implement this for fog reveal methods
@@ -74,7 +76,6 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -152,11 +153,11 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         SynchedEntityData.defineId(PillagerUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -164,7 +165,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     public float getAttackCooldown() {return ((20 / AttackerUnit.super.getNonBaseAttacksPerSecond()) * getAttackCooldownMultiplier());}
     public float getAttacksPerSecond() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return 20f / (getAttackCooldown() + (CrossbowItem.getChargeDuration(itemStack)));
+        return 20f / (getAttackCooldown() + (CrossbowItem.getChargeDuration(itemStack, this)));
     }
     public float getNonBaseAttacksPerSecond() {
         return 20f / (getAttackCooldown() + 35);
@@ -239,13 +240,13 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
                 .add(Attributes.MAX_HEALTH, PillagerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, PillagerUnit.armorValue)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), 18)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), 18)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     public void tick() {
@@ -329,17 +330,17 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     @Override
     public void setupEquipmentAndUpgradesServer() {
-        if (!getMainHandItem().getAllEnchantments().isEmpty())
+        if (!getMainHandItem().getEnchantments().isEmpty())
             return;
 
         ItemStack cbowStack = new ItemStack(Items.CROSSBOW);
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }
 
-    public Enchantment getEnchant() {
+    public Holder<Enchantment> getEnchant() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        Optional<Enchantment> enchant = Optional.empty();
-        for (Enchantment enchantment : itemStack.getAllEnchantments().keySet()) {
+        Optional<Holder<Enchantment>> enchant = Optional.empty();
+        for (Holder<Enchantment> enchantment : itemStack.getEnchantments().keySet()) {
             enchant = Optional.of(enchantment);
             break;
         }
@@ -353,16 +354,23 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
                 item instanceof CrossbowItem
         );
         ItemStack itemstack = pUser.getItemInHand(interactionhand);
-        if (pUser.isHolding((is) -> is.getItem() instanceof CrossbowItem)) {
-            CrossbowItem.performShooting(pUser.level(), pUser, interactionhand, itemstack, pVelocity, 0);
+        if (pUser.isHolding((is) -> is.getItem() instanceof CrossbowItem) && itemstack.getItem() instanceof CrossbowItem crossbow) {
+            // 1.21.1's performShooting gained a spread float and a target argument; the unit
+            // still wants zero inaccuracy, so the difficulty-based spread stays at 0.
+            crossbow.performShooting(pUser.level(), pUser, interactionhand, itemstack, pVelocity, 0.0F, this.getTarget());
             this.playSound(SoundEvents.CROSSBOW_SHOOT, 3.0F, 0);
         }
         this.onCrossbowAttackPerformed();
         getMainHandItem().setDamageValue(0);
     }
 
-    @Override
-    public void shootCrossbowProjectile(LivingEntity pUser, LivingEntity pTarget, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
+    /**
+     * 1.21.1 removed the {@code Pillager#shootCrossbowProjectile} hook that 1.20.1's
+     * CrossbowItem called into, and inlined the aiming maths into
+     * {@code CrossbowItem#shootProjectile}. CrossbowMixin redirects that method here for
+     * PillagerUnit, which needs to aim at buildings and ground as well as at mobs.
+     */
+    public void ron$shootCrossbowProjectile(LivingEntity pUser, @Nullable LivingEntity pTarget, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
         // bit of a hacky fix to attack buildings since this function is called from CrossbowItem
         try {
             if (pTarget == null) {
@@ -389,7 +397,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         if (pTarget.getEyeHeight() <= 1.0f)
             d1 -= (1.0f - pTarget.getEyeHeight());
 
-        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
+        Vector3f vector3f = ron$getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
         pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
         pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
 
@@ -401,7 +409,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         double d0 = rabg.getBuildingTarget().centrePos.getX() - pUser.getX() + 0.5f;
         double d1 = rabg.getBuildingTarget().centrePos.getZ() - pUser.getZ() + 0.5f;
 
-        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
+        Vector3f vector3f = ron$getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
         pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
         pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
 
@@ -413,14 +421,29 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         double d0 = ragg.getGroundTarget().getX() - pUser.getX() + 0.5f;
         double d1 = ragg.getGroundTarget().getZ() - pUser.getZ() + 0.5f;
 
-        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
+        Vector3f vector3f = ron$getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
         pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
         pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
     }
 
+    /**
+     * Verbatim copy of {@code CrossbowItem#getProjectileShotVector}, which became private in
+     * 1.21.1 and so is no longer reachable from here.
+     */
+    private static Vector3f ron$getProjectileShotVector(LivingEntity pUser, Vec3 pPosition, float pAngle) {
+        Vector3f vector3f = pPosition.toVector3f().normalize();
+        Vector3f vector3f1 = new Vector3f(vector3f).cross(new Vector3f(0.0F, 1.0F, 0.0F));
+        if ((double)vector3f1.lengthSquared() <= 1.0E-7) {
+            Vec3 vec3 = pUser.getUpVector(1.0F);
+            vector3f1 = new Vector3f(vector3f).cross(vec3.toVector3f());
+        }
+        Vector3f vector3f2 = new Vector3f(vector3f).rotateAxis((float)(Math.PI / 2), vector3f1.x, vector3f1.y, vector3f1.z);
+        return new Vector3f(vector3f).rotateAxis(pAngle * (float)(Math.PI / 180.0), vector3f2.x, vector3f2.y, vector3f2.z);
+    }
+
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
         return pSpawnData;
     }
 }

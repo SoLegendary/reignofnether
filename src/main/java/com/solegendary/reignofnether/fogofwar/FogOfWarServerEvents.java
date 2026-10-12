@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.fogofwar;
 
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -24,11 +25,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
@@ -322,11 +322,11 @@ public class FogOfWarServerEvents {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
+    public static void onWorldTick(LevelTickEvent.Post evt) {
+        if (evt.getLevel().isClientSide() || evt.getLevel().dimension() != Level.OVERWORLD)
             return;
 
-        serverLevel = (ServerLevel) evt.level;
+        serverLevel = (ServerLevel) evt.getLevel();
 
         // Only attempt the forced auto-enable on an RTS-optimised map; otherwise setEnabled would refuse
         // and spam the log/chat every tick. On a vanilla-sized map force-fog simply stays inert.
@@ -377,6 +377,9 @@ public class FogOfWarServerEvents {
 
         for (LivingEntity le : UnitServerEvents.getAllUnits()) {
             if (!(le instanceof Unit unit)) continue;
+            // a unit that is dead but not yet removed from the level still sits in this list -
+            // it must not keep lighting up the map for its owner
+            if (!le.isAlive()) continue;
             String unitOwner = unit.getOwnerName();
             int bx = le.blockPosition().getX(), bz = le.blockPosition().getZ();
             int sight = unit.getSightRange();
@@ -620,14 +623,18 @@ public class FogOfWarServerEvents {
     }
 
     // register here too for command blocks
+    // The client mirrors this command and already demands permission 4 before asking the server, but
+    // the server-side registration itself had no requirement, so any player could toggle fog for the
+    // whole match by typing the command directly. Level 2 leaves command blocks (and the client's
+    // own level-4 path) working while closing that hole.
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
-        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("enable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").requires(cs -> cs.hasPermission(2)).then(Commands.literal("enable")
                 .executes((command) -> {
                     setEnabled(true);
                     return 1;
                 })));
-        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("disable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").requires(cs -> cs.hasPermission(2)).then(Commands.literal("disable")
                 .executes((command) -> {
                     setEnabled(false);
                     return 1;

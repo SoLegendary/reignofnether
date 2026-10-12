@@ -1,0 +1,648 @@
+// Static validation of the mod's mixins against the Minecraft + NeoForge artifact.
+//
+// NeoForge 1.21.1 runs on official Mojang mappings, so no refmap is generated and the
+// Mixin annotation processor is not on the compile classpath. That means @Mixin / @Inject
+// / @WrapOperation targets are never checked while compiling, and a typo in an injection
+// descriptor only surfaces as a crash at client startup.
+//
+// This closes that gap without launching the game: it parses the mixin sources,
+// disassembles the target classes with javap and checks, for every injector:
+//
+//   1. the @Mixin target class exists in the artifact
+//   2. the method named by `method = "..."` exists with the matching parameter descriptor
+//   3. the injector's `static`-ness matches the target method's
+//   4. the injector signature matches what Mixin will actually hand it
+//   5. the @At target instruction is really present in the target method's bytecode
+//
+// The injector signature rules come from MixinExtras 0.5.4's WrapOperationInjector and
+// Mixin's own Injector:
+//
+//   @Inject        -> (target method args..., CallbackInfo)
+//   @WrapOperation -> (wrapped call args..., Operation<R>, target method args[0..capture))
+//
+// where "wrapped call args" are the descriptor's argument types *with the receiver
+// prepended* for non-static calls (MixinExtras appends the owner type, except for
+// INVOKEVIRTUAL which it leaves alone), and `capture` is however many leading
+// arguments of the enclosing target method the handler asks for.
+
+import java.util.jar.JarFile
+import java.util.regex.Matcher
+
+class MixinValidator {
+
+    final File artifact
+    final List<String> failures = []
+    final List<String> warnings = []
+    final Map<String, List<Map<String, Object>>> cache = [:]
+    int checked = 0
+
+    private static final Map<String, String> KNOWN_TYPES = [
+            'CallbackInfo'        : 'Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;',
+            'CallbackInfoReturnable': 'Lorg/spongepowered/asm/mixin/injection/CallbackInfoReturnable;',
+            'Operation'           : 'Lcom/llamalad7/mixinextras/injector/wrapoperation/Operation;',
+            'LocalCaptureContext' : 'Lorg/spongepowered/asm/mixin/injection/callback/LocalCaptureContext;',
+            'Context'             : 'Lorg/spongepowered/asm/mixin/injection/Context;',
+    ]
+
+    MixinValidator(File artifact) {
+        this.artifact = artifact
+    }
+
+    // -----------------------------------------------------------------------
+    // Descriptor helpers
+    // -----------------------------------------------------------------------
+
+    /** Splits a method descriptor into its argument types (internal names). */
+    static List<String> descriptorArgs(String descriptor) {
+        int open = descriptor.indexOf('(')
+        int close = descriptor.indexOf(')', open)
+        List<String> out = []
+        int i = open + 1
+        while (i < close) {
+            int start = i
+            while (descriptor.charAt(i) == '[') {
+                i++
+            }
+            if (descriptor.charAt(i) == 'L') {
+                i = descriptor.indexOf(';', i)
+            }
+            i++
+            out.add(descriptor.substring(start, i))
+        }
+        return out
+    }
+
+    /** Turns `LivingEntity` / `int[]` / `CallbackInfo` into a bare internal name (`net/minecraft/...`). */
+    static String internalName(String javaType, Map<String, String> imports) {
+        String t = stripGenerics(javaType)
+        if (t.endsWith('[]')) {
+            return '[' + internalName(t.substring(0, t.length() - 2), imports)
+        }
+        if (t.contains('.')) {
+            // `Outer.Inner` where Outer is imported: the binary name joins the segments with '$',
+            // not '/'. Only do that when the head really came from an import, so a fully qualified
+            // name keeps its packages as plain slashes.
+            String head = t.substring(0, t.indexOf('.'))
+            if (imports.containsKey(head)) {
+                return imports.get(head).replace('.', '/') + '$' +
+                        t.substring(t.indexOf('.') + 1).replace('.', '$')
+            }
+            return t.replace('.', '/')
+        }
+        if (KNOWN_TYPES.containsKey(t)) {
+            return KNOWN_TYPES[t].replaceAll('^L', '').replaceAll(';$', '')
+        }
+        if (imports.containsKey(t)) {
+            return imports.get(t).replace('.', '/')
+        }
+        return "java/lang/${t}"
+    }
+
+    /** Same, but in descriptor form: `Lnet/minecraft/.../LivingEntity;` / `I`. */
+    static String descriptorType(String javaType, Map<String, String> imports) {
+        String t = stripGenerics(javaType)
+        if (t.endsWith('[]')) {
+            return '[' + descriptorType(t.substring(0, t.length() - 2), imports)
+        }
+        switch (t) {
+            case 'int': return 'I'
+            case 'long': return 'J'
+            case 'float': return 'F'
+            case 'double': return 'D'
+            case 'boolean': return 'Z'
+            case 'byte': return 'B'
+            case 'char': return 'C'
+            case 'short': return 'S'
+            case 'void': return 'V'
+        }
+        return 'L' + internalName(t, imports) + ';'
+    }
+
+    /**
+     * Drops generic arguments, innermost first.
+     *
+     * <p>A single cut at the last '<' handles `CallbackInfoReturnable<Boolean>`, the shape the mod
+     * uses almost everywhere, but leaves `CallbackInfoReturnable<List<BeamSection>>` as
+     * `CallbackInfoReturnable<List`, which resolves to java/lang and reports a mismatch that does
+     * not exist. Repeating while the result still has a '<' fixes the nested case too.
+     */
+    private static String stripGenerics(String javaType) {
+        String t = javaType.trim()
+        while (t.contains('<') && t.lastIndexOf('<') > 0) {
+            t = t.substring(0, t.lastIndexOf('<'))
+        }
+        return t
+    }
+
+    /** Owner/member name boundary inside a rewritten `@At` reference. */
+    private static int ownerEnd(String ref) {
+        int paren = ref.indexOf('(')
+        int lastDot = ref.lastIndexOf('.', paren)
+        return lastDot
+    }
+
+    /** Rewrites a Mixin `@At` target into the shape javap prints in its comments. */
+    static String atTargetToRef(String atTarget) {
+        if (!atTarget.startsWith('L')) {
+            return atTarget
+        }
+        int semi = atTarget.indexOf(';')
+        int paren = atTarget.indexOf('(')
+        String owner = atTarget.substring(1, semi)
+        String name = atTarget.substring(semi + 1, paren)
+        return "${owner}.${name}:${atTarget.substring(paren)}"
+    }
+
+    // -----------------------------------------------------------------------
+    // javap
+    // -----------------------------------------------------------------------
+
+    /** Disassembles one class and splits the output into per-method maps. */
+    List<Map<String, Object>> disassemble(String className) {
+        if (cache.containsKey(className)) {
+            return cache[className]
+        }
+
+        File javapExe = new File(System.getProperty('java.home'), "bin/javap${System.getProperty('os.name').toLowerCase().contains('windows') ? '.exe' : ''}")
+        if (!javapExe.exists()) {
+            throw new GradleException("javap not found at ${javapExe}; run Gradle with a JDK, not a JRE")
+        }
+        String javap = javapExe.absolutePath
+
+        // A nested class is written with a dot in an import but with '$' in a binary name, so try the
+        // dotted form first and fall back to the last segment turning into '$'.
+        List<Map<String, Object>> methods = disassembleAs(className, javap)
+        String alsoTried = null
+        if (methods.isEmpty() && className.contains('/')) {
+            int slash = className.lastIndexOf('/')
+            alsoTried = className.substring(0, slash) + '$' + className.substring(slash + 1)
+            methods = disassembleAs(alsoTried, javap)
+        }
+        if (methods.isEmpty()) {
+            lastFailure = "no methods for ${className}" + (alsoTried ? " (also tried ${alsoTried})" : '') +
+                    '; javap output was: ' + lastJavapOutput
+        }
+        cache[className] = methods
+        return methods
+    }
+
+    private String lastJavapOutput = ''
+    private String lastFailure = ''
+
+    /** Runs javap on one class and splits the output into per-method maps. */
+    private List<Map<String, Object>> disassembleAs(String className, String javap) {
+        List<String> command = [javap, '-p', '-c', '-s', '-cp', artifact.absolutePath, className]
+        Process proc = new ProcessBuilder(command).redirectErrorStream(true).start()
+        String output = proc.inputStream.getText('UTF-8')
+        proc.waitFor()
+        lastJavapOutput = output.readLines().take(3).join(' | ')
+
+        List<Map<String, Object>> methods = []
+        if (proc.exitValue() != 0) {
+            return methods
+        }
+
+        Map<String, Object> current = null
+        List<String> body = []
+        boolean inCode = false
+
+        output.eachLine { String line ->
+            // Any member declaration sits at exactly two spaces of indentation and ends with ';'.
+            // A static initialiser ('static {};') has no parameter list but still owns the
+            // 'descriptor: ()V' line that follows it, so it has to end the previous member too -
+            // otherwise that descriptor is attributed to whatever was parsed before it.
+            if (line.startsWith('  ') && !line.startsWith('   ') && line.trim().endsWith(';')) {
+                if (current != null) {
+                    current['refs'] = body
+                    methods.add(current)
+                }
+                current = null
+                body = []
+                inCode = false
+                if (!line.contains('(')) {
+                    return
+                }
+                String decl = line.trim().replaceAll(';$', '')
+                int paren = decl.indexOf('(')
+                String head = decl.substring(0, paren)
+                current = [
+                        name      : head.contains(' ') ? head.substring(head.lastIndexOf(' ') + 1) : head,
+                        isStatic  : head.contains(' static ') || head.endsWith(' static'),
+                        descriptor: null,
+                        refs      : []
+                ]
+                return
+            }
+            if (current == null) {
+                return
+            }
+            if (line.trim().startsWith('descriptor: ')) {
+                current['descriptor'] = line.trim().substring('descriptor: '.length())
+                return
+            }
+            if (line.trim() == 'Code:') {
+                inCode = true
+                return
+            }
+            if (inCode) {
+                body.add(line)
+            }
+        }
+        if (current != null) {
+            current['refs'] = body
+            methods.add(current)
+        }
+
+        return methods
+    }
+
+    // -----------------------------------------------------------------------
+    // Source parsing
+    // -----------------------------------------------------------------------
+
+    private static int countOccurrences(String text, String ch) {
+        int n = 0
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i).toString().equals(ch)) {
+                n++
+            }
+        }
+        return n
+    }
+
+    /** Extracts the injector's parameter types from its (possibly multi-line) signature. */
+    private static List<String> parseParams(String signature, Map<String, String> imports) {
+        int open = signature.indexOf('(')
+        int close = signature.lastIndexOf(')')
+        if (open < 0 || close < open) {
+            return []
+        }
+        String body = signature.substring(open + 1, close).trim()
+        if (body.isEmpty()) {
+            return []
+        }
+
+        List<String> parts = []
+        int depth = 0
+        StringBuilder current = new StringBuilder()
+        for (int i = 0; i < body.length(); i++) {
+            char c = body.charAt(i)
+            if (c == '<') depth++
+            if (c == '>') depth--
+            if (c == ',' && depth == 0) {
+                parts.add(current.toString())
+                current = new StringBuilder()
+                continue
+            }
+            current.append(c)
+        }
+        parts.add(current.toString())
+
+        List<String> types = []
+        parts.each { String part ->
+            String type = part.trim().replaceAll('(final|@Nullable|@NotNull)\\s*', '')
+            // The parameter name is the last identifier; everything before it is the type.
+            Matcher named = type =~ /^(.*\S)\s+\w+$/
+            String typeOnly = named.matches() ? named.group(1) : type
+            types.add(descriptorType(typeOnly, imports))
+        }
+        return types
+    }
+
+    /**
+     * Expands a name written in source against the file's imports.
+     *
+     * <p>A nested class is written as `Outer.Inner` even though its binary name uses `$`, and the
+     * package is only visible through the import. Without this, `@Mixin(Outer.Inner.class)` becomes
+     * `Outer/Inner` with no package and javap reports the class as missing.
+     */
+    static String resolveTypeName(String written, Map<String, String> imports) {
+        if (written.contains('.') && imports.containsKey(written)) {
+            return imports.get(written)
+        }
+        String last = written.substring(written.lastIndexOf('.') + 1)
+        if (imports.containsKey(last)) {
+            return imports.get(last)
+        }
+        // `Outer.Inner` reached through an import of Outer alone: the outer class comes from the
+        // import, and every further segment is a nested class, which uses '$' in a binary name.
+        String first = written.substring(0, written.indexOf('.'))
+        if (imports.containsKey(first)) {
+            return imports.get(first) + written.substring(written.indexOf('.')).replace('.', '$')
+        }
+        return written
+    }
+
+    /** Returns the balanced contents of the first `@At(...)`, ignoring parens inside strings. */    private static String atBody(String annotationText) {
+        int start = annotationText.indexOf('@At(')
+        if (start < 0) {
+            return null
+        }
+        StringBuilder body = new StringBuilder()
+        int depth = 1
+        boolean inString = false
+        for (int i = start + '@At('.length(); i < annotationText.length() && depth > 0; i++) {
+            char c = annotationText.charAt(i)
+            if (c == '"') {
+                inString = !inString
+            }
+            if (!inString) {
+                if (c == '(') {
+                    depth++
+                } else if (c == ')') {
+                    depth--
+                    if (depth == 0) {
+                        break
+                    }
+                }
+            }
+            body.append(c)
+        }
+        return body.toString()
+    }
+
+    /** Extracts every `@Inject` / `@WrapOperation` injector declared in a mixin source file. */
+    List<Map<String, Object>> parseInjectors(File file) {
+        Map<String, String> imports = [:]
+        List<String> wildcards = []
+        List<String> typeVariables = []
+        List<Map<String, Object>> injectors = []
+
+        List<String> lines = file.readLines('UTF-8')
+        // Line comments inside a handler's parameter list would otherwise be read as a type.
+        String text = lines.collect { it.replaceAll('//.*$', '') }.join('\n')
+
+        Matcher imp = text =~ /(?m)^import\s+(?:static\s+)?([\w.*]+)\s*;/
+        while (imp.find()) {
+            String fqn = imp.group(1)
+            if (fqn.endsWith('.*')) {
+                // Wildcards carry the package, so they cannot key on a simple name; remember them
+                // separately and let the simple-name lookup fall back to java/lang (a mismatch then).
+                wildcards << fqn.substring(0, fqn.length() - 2)
+            } else {
+                imports[fqn.substring(fqn.lastIndexOf('.') + 1)] = fqn
+            }
+        }
+        // A single-letter name that is not imported and not a known callback is almost certainly a
+        // type variable of the mixin class (e.g. `LivingEntityRendererMixin<T>`). Record the ones the
+        // mixin itself declares so they can be matched positionally instead of rejected.
+        Matcher tv = text =~ /(?m)^(?:public\s+)?abstract\s+class\s+\w+(?:<([^>]*)>)?/
+        if (tv.find() && tv.group(1)) {
+            tv.group(1).split(',').each { String v ->
+                typeVariables << v.trim().replaceAll('(extends|super)\\s+\\w+', '')
+            }
+        }
+
+        Matcher mixin = text =~ /@Mixin\(\s*([\w.$]+)\.class\s*\)/
+        if (!mixin.find()) {
+            return injectors
+        }
+        String targetClass = internalName(resolveTypeName(mixin.group(1), imports), imports)
+
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines[i]
+            if (!(line.contains('@Inject') || line.contains('@WrapOperation'))) {
+                continue
+            }
+            String kind = line.contains('@WrapOperation') ? 'WrapOperation' : 'Inject'
+
+            StringBuilder ann = new StringBuilder(line)
+            int depth = countOccurrences(line, '(') - countOccurrences(line, ')')
+            while (depth > 0 && ++i < lines.size()) {
+                ann.append('\n').append(lines[i])
+                depth += countOccurrences(lines[i], '(') - countOccurrences(lines[i], ')')
+            }
+            String annText = ann.toString()
+
+            StringBuilder sig = new StringBuilder()
+            while (++i < lines.size()) {
+                String current = lines[i].replaceAll('//.*$', '')
+                sig.append(current).append(' ')
+                // The parameter list may span several lines; it always ends with `) {`.
+                if (current.trim() == '{' || current.contains(')') && current.trim().endsWith('{')) {
+                    break
+                }
+            }
+            String sigText = sig.toString()
+
+            Matcher methodMatcher = annText =~ /method\s*=\s*"([^"]*)"/
+            String methodSpec = methodMatcher.find() ? methodMatcher.group(1) : null
+
+            String atValue = null
+            String atTarget = null
+            String at = atBody(annText)
+            if (at != null) {
+                Matcher atValueMatcher = at =~ /value\s*=\s*"([^"]*)"/
+                Matcher atShorthand = at =~ /\A\s*"([^"]*)"/
+                atValue = atValueMatcher.find() ? atValueMatcher.group(1) : (atShorthand.find() ? atShorthand.group(1) : null)
+                Matcher atTargetMatcher = at =~ /target\s*=\s*"([^"]*)"/
+                atTarget = atTargetMatcher.find() ? atTargetMatcher.group(1) : null
+            }
+
+            Matcher handlerNameMatcher = sigText =~ /([\w$]+)\s*\(/
+            injectors.add([
+                    file          : file.name,
+                    kind          : kind,
+                    targetClass   : targetClass,
+                    methodSpec    : methodSpec,
+                    handlerName   : handlerNameMatcher.find() ? handlerNameMatcher.group(1) : '?',
+                    handlerStatic : sigText.substring(0, Math.max(sigText.indexOf('('), 0)).contains('static'),
+                    handlerParams : parseParams(sigText, imports),
+                    typeVariables : typeVariables,
+                    wildcards     : wildcards,
+                    atValue       : atValue,
+                    atTarget      : atTarget
+            ])
+        }
+
+        return injectors
+    }
+
+    // -----------------------------------------------------------------------
+    // Validation
+    // -----------------------------------------------------------------------
+
+    /**
+     * Whether the handler's parameters can stand in for the target's.
+     *
+     * <p>A parameter is "opaque" when its type is a single letter (a type variable of the mixin, e.g.
+     * `T` in `LivingEntityRendererMixin<T>`) or a simple name that only a wildcard import could have
+     * supplied - the source parser has no way to turn those into a descriptor. Opaque positions are
+     * not compared, but arity and the callback in the last position still are, and those are what
+     * actually catch a drifted signature.
+     */
+    static boolean paramsMatch(List<String> expected, List<String> actual,
+                               List<String> typeVariables, List<String> wildcards) {
+        if (expected.size() != actual.size()) {
+            return false
+        }
+        for (int i = 0; i < expected.size(); i++) {
+            String a = actual[i]
+            if (expected[i] == a) {
+                continue
+            }
+            String simple = (a.startsWith('Ljava/lang/') && a.endsWith(';'))
+                    ? a.substring('Ljava/lang/'.length(), a.length() - 1) : null
+            if (simple != null && (typeVariables.contains(simple) || typeVariables.any { it.startsWith(simple) })) {
+                continue
+            }
+            if (simple != null && wildcards.any { it.endsWith('.' + simple.toLowerCase()) || it.endsWith('.' + simple) }) {
+                continue
+            }
+            return false
+        }
+        return true
+    }
+
+    void validate(File file) {
+        parseInjectors(file).each { Map<String, Object> injector ->
+            String id = "${injector.file} -> ${injector.targetClass}#${injector.handlerName} (${injector.kind})"
+            String targetClass = injector.targetClass
+
+            if (disassemble(targetClass).isEmpty()) {
+                failures << "${id}: target class ${targetClass} not found in the artifact; ${lastFailure}"
+                return
+            }
+
+            String spec = injector.methodSpec
+            int paren = spec.indexOf('(')
+            String name = paren >= 0 ? spec.substring(0, paren) : spec
+            List<String> specArgs = paren >= 0 ? descriptorArgs(spec.substring(paren)) : null
+
+            List candidates = disassemble(targetClass).findAll { m ->
+                m['name'] == name && (specArgs == null || descriptorArgs(m['descriptor']) == specArgs)
+            }
+
+            if (candidates.isEmpty()) {
+                failures << "${id}: no method '${name}' with the expected descriptor in ${targetClass}"
+                return
+            }
+
+            candidates.each { target ->
+                checked++
+                List<String> targetArgs = descriptorArgs(target['descriptor'])
+                List<String> handlerArgs = injector.handlerParams
+                String rule
+                List<String> expected
+                boolean matched = false
+
+                if ((target['isStatic'] as boolean) != (injector.handlerStatic as boolean)) {
+                    failures << "${id}: target ${name} is${target['isStatic'] ? '' : ' not'} static " +
+                            "but the injector is${injector.handlerStatic ? '' : ' not'}"
+                }
+
+                // The @At instruction has to be reachable from the target method for both injector kinds.
+                String ref = injector.atTarget != null ? atTargetToRef(injector.atTarget) : null
+                if (ref != null) {
+                    List<String> refs = target['refs'].findAll { it.contains('// ') }
+                            .collect { it.substring(it.indexOf('// ') + 3).trim() }
+                    // javap prefixes each comment with the member kind, e.g. "InterfaceMethod".
+                    if (!refs.any { it == ref || it.endsWith(' ' + ref) }) {
+                        failures << "${id}: @At target '${ref}' is not referenced by the bytecode of " +
+                                "${targetClass}#${name}; that method references " + refs.size() +
+                                " members, e.g. " + (refs.isEmpty() ? '(nothing)' : refs.take(8).join(', '))
+                    }
+                } else if (injector.atValue != null && !(injector.atValue in ['TAIL', 'HEAD'])) {
+                    warnings << "${id}: @At('${injector.atValue}') has no target, so the injection point was not checked"
+                }
+
+                if (injector.kind == 'Inject') {
+                    // Mixin takes a CallbackInfo on a void target and a CallbackInfoReturnable on
+                    // one that returns a value; both are legal on the latter, and the mod uses both.
+                    String descriptor = target['descriptor']
+                    boolean returnsVoid = descriptor.endsWith(')V')
+                    boolean plain = handlerArgs == targetArgs + KNOWN_TYPES['CallbackInfo']
+                    boolean returnable = !returnsVoid && handlerArgs == targetArgs + KNOWN_TYPES['CallbackInfoReturnable']
+                    rule = returnsVoid
+                            ? '@Inject expects the target method args plus CallbackInfo'
+                            : '@Inject expects the target method args plus CallbackInfo or CallbackInfoReturnable'
+                    expected = targetArgs + (returnsVoid
+                            ? KNOWN_TYPES['CallbackInfo']
+                            : [KNOWN_TYPES['CallbackInfo'], KNOWN_TYPES['CallbackInfoReturnable']])
+                    if (plain || returnable) {
+                        matched = true
+                    }
+                    if (!matched && (paramsMatch(targetArgs + KNOWN_TYPES['CallbackInfo'], handlerArgs,
+                            (injector.typeVariables ?: []) as List<String>, (injector.wildcards ?: []) as List<String>) ||
+                            (!returnsVoid && paramsMatch(targetArgs + KNOWN_TYPES['CallbackInfoReturnable'], handlerArgs,
+                                    (injector.typeVariables ?: []) as List<String>, (injector.wildcards ?: []) as List<String>)))) {
+                        matched = true
+                    }
+                } else {
+                    int callParen = ref.indexOf('(')
+                    int dot = ownerEnd(ref)
+                    String callOwner = ref.substring(0, dot)
+                    String callName = ref.substring(dot + 1, callParen)
+                    List<String> callArgs = descriptorArgs(ref.substring(callParen))
+
+                    List<String> wrapped = (injector.atTarget.startsWith('L') ? ['L' + callOwner + ';'] : []) + callArgs
+                    int capture = handlerArgs.size() - wrapped.size() - 1
+                    if (capture < 0) {
+                        failures << "${id}: handler takes ${handlerArgs.size()} parameters but the wrapped call " +
+                                "'${callOwner}.${callName}' only supplies ${wrapped.size()} + Operation"
+                        return
+                    }
+                    expected = wrapped + [KNOWN_TYPES['Operation']] + targetArgs.take(capture)
+                    rule = "@WrapOperation expects the wrapped call args (${wrapped.size()}), Operation, " +
+                            "then the first ${capture} target args"
+                    matched = expected == handlerArgs
+                    if (!matched) {
+                        matched = paramsMatch(expected, handlerArgs,
+                                (injector.typeVariables ?: []) as List<String>, (injector.wildcards ?: []) as List<String>)
+                    }
+                }
+
+                if (!matched) {
+                    failures << "${id}: ${rule}\n      target:   ${target['descriptor']}" +
+                            "\n      expected: ${expected}\n      actual:   ${handlerArgs}"
+                }
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Gradle wiring
+// ---------------------------------------------------------------------------
+
+tasks.register('validateMixins') {
+    group = 'verification'
+    description = 'Checks every @Mixin/@Inject/@WrapOperation target against the Minecraft artifact.'
+
+    // Overridable so the validator's own behaviour can be exercised against mutated copies.
+    def mixinPath = providers.gradleProperty('mixinSourceDir')
+            .getOrElse('src/main/java/com/solegendary/reignofnether/mixin')
+    def sourceDir = layout.projectDirectory.dir(mixinPath)
+    inputs.dir(sourceDir)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        File artifact = configurations.compileClasspath.files.find { File f ->
+            f.name.endsWith('.jar') && new JarFile(f).withCloseable { jar ->
+                jar.getEntry('net/minecraft/client/model/HumanoidModel.class') != null
+            }
+        }
+        if (artifact == null) {
+            throw new GradleException('Could not find the Minecraft artifact on the compile classpath')
+        }
+        logger.lifecycle("Validating mixins against ${artifact.name}")
+
+        List<File> files = sourceDir.asFile.listFiles().findAll { it.name.endsWith('.java') }.sort { it.name }
+        MixinValidator validator = new MixinValidator(artifact)
+        files.each { validator.validate(it) }
+
+        logger.lifecycle("validateMixins: ${validator.checked} injection point(s) checked " +
+                "across ${files.size()} mixin class(es)")
+
+        validator.warnings.each { logger.warn("warning: ${it}") }
+        if (!validator.failures.isEmpty()) {
+            validator.failures.each { logger.error("error: ${it}") }
+            throw new GradleException("Mixin validation failed with ${validator.failures.size()} problem(s)")
+        }
+        logger.lifecycle('validateMixins: all injection points resolve')
+    }
+}
+
+tasks.named('check') {
+    dependsOn 'validateMixins'
+}

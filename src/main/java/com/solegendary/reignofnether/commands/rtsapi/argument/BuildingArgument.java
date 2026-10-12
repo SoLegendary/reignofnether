@@ -14,6 +14,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 
@@ -25,6 +26,25 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class BuildingArgument implements ArgumentType<BuildingSelector> {
+
+    /**
+     * The one Info instance for this type.
+     *
+     * <p>It has to be a single shared instance: {@code ArgumentTypeInfos.byClass} and
+     * {@code minecraft:command_argument_type} must hand out the same object, because the node writer
+     * does {@code registry.getId(template.type())} and a second, equal-but-distinct Info would not be
+     * in the registry at all.
+     */
+    public static final Info INFO = new Info();
+
+    static {
+        // Commands.validate() runs during bootstrap, before NeoForge constructs the mods,
+        // so an ArgumentTypeInfo has to be in ArgumentTypeInfos by the time this class is
+        // loaded - which happens while the commands using it are registered. Registering
+        // from the mod constructor or from common setup is too late and fails startup with
+        // "Unregistered argument types".
+        ArgumentTypeInfos.registerByClass(BuildingArgument.class, INFO);
+    }
 	
 	public static final SimpleCommandExceptionType ERROR_NOT_SINGLE_BUILDING = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.too_many.error"));
 	public static final SimpleCommandExceptionType NO_BUILDINGS_FOUND = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.building.not_found.building.error"));

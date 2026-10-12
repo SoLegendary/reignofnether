@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import net.minecraft.core.Holder;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
@@ -40,6 +41,14 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import com.solegendary.reignofnether.unit.goals.UsePortalGoal;
+import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
+import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
+import com.solegendary.reignofnether.unit.goals.GarrisonGoal;
+import com.solegendary.reignofnether.unit.units.monsters.AbstractTotem;
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 
 public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
@@ -100,11 +109,11 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
             SynchedEntityData.defineId(AbstractTotem.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     public ResourceCost getCost() {return ResourceCost.Unit(0,0,0,0,0);}
@@ -141,7 +150,8 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
     public int lifeTimeTicks = 30 * 20; // 20s
     public int auraDurationTicks = 30;
 
-    final protected HashMap<MobEffect, Integer> auraEffects = new HashMap<>();
+    /** 1.21.1 hands mob effects out as Holder<MobEffect>, so the aura table is keyed by holder. */
+    final protected HashMap<Holder<MobEffect>, Integer> auraEffects = new HashMap<>();
 
     private Abilities abilities = ABILITIES.clone();
 
@@ -158,8 +168,8 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
                 .add(Attributes.FOLLOW_RANGE, 0)
                 .add(Attributes.ARMOR, 0)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 9999.0f)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), rangedDamageResist)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), rangedDamageResist)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), magicDamageResist);
     }
 
     @Override protected SoundEvent getHurtSound(DamageSource pDamageSource) {
@@ -195,13 +205,13 @@ public abstract class AbstractTotem extends Mob implements Unit, RangeIndicator 
             SoundClientboundPacket.playSoundAtPos(SoundAction.BEACON_AMBIENT, blockPosition(), 1.5f);
             for (Mob mob : MiscUtil.getEntitiesWithinRange(position(), AURA_RANGE, Mob.class, level())) {
                 if (mob instanceof Unit unit && AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), getOwnerName()) && !(unit instanceof AbstractTotem)) {
-                    for (MobEffect mobEffect : auraEffects.keySet())
-                        mob.addEffect(new MobEffectInstance(mobEffect, auraDurationTicks, auraEffects.get(mobEffect), false, true));
+                    for (Holder<MobEffect> mobEffect : auraEffects.keySet())
+                        mob.addEffect(new MobEffectInstance(mobEffect, 30, auraEffects.get(mobEffect), false, true));
                 }
             }
         }
         if (!hasEffectWithDuration(MobEffectRegistrar.LIMITED_LIFESPAN.get()))
-            this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), lifeTimeTicks, 0, true, false));
+            this.addEffect(new MobEffectInstance(MobEffectHelpers.holder(MobEffectRegistrar.LIMITED_LIFESPAN.get()), lifeTimeTicks, 0, true, false));
         if (tickCount > lifeTimeTicks && !isDeadOrDying() && !isRemoved())
             kill();
     }

@@ -20,14 +20,13 @@ import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
-import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.IEventBus;
 
 /*
     This class is required to make sure that we don't accidentally try to load any client-side-only classes
@@ -36,7 +35,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
  */
 
 public class ServerEventRegistrar {
-    private final IEventBus vanillaEventBus = MinecraftForge.EVENT_BUS;
+    private final IEventBus vanillaEventBus = NeoForge.EVENT_BUS;
 
     public ServerEventRegistrar() { }
 
@@ -70,6 +69,5 @@ public class ServerEventRegistrar {
         vanillaEventBus.register(WorldBorderServerEvents.class);
         vanillaEventBus.register(CustomButtonServerEvents.class);
         vanillaEventBus.register(ItemServerEvents.class);
-        vanillaEventBus.register(TaskSchedulerServerEvents.class);
     }
 }

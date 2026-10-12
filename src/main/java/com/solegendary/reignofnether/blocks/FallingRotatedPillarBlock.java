@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.blocks;
 
+import com.mojang.serialization.MapCodec;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,9 +23,16 @@ public class FallingRotatedPillarBlock extends FallingBlock {
     public static final EnumProperty<Direction.Axis> AXIS;
     private long tickAge = 0;
 
+    public static final MapCodec<FallingRotatedPillarBlock> CODEC = simpleCodec(FallingRotatedPillarBlock::new);
+
     public FallingRotatedPillarBlock(BlockBehaviour.Properties pProperties) {
         super(pProperties);
         this.registerDefaultState((BlockState)this.defaultBlockState().setValue(AXIS, Direction.Axis.Y));
+    }
+
+    @Override
+    protected MapCodec<? extends FallingBlock> codec() {
+        return CODEC;
     }
 
     public BlockState rotate(BlockState pState, Rotation pRot) {

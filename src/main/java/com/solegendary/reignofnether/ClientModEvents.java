@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import com.solegendary.reignofnether.blocks.InvisibleBlockRenderer;
 import com.solegendary.reignofnether.blocks.SkullTypes;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -25,27 +26,27 @@ import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.*;
-import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.ModelEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.HashSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 
-@Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID, bus = Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = ReignOfNether.MOD_ID, value = Dist.CLIENT)
 public class ClientModEvents {
 
     // wrap every baked model so the fog tint applies to untinted quads
@@ -85,17 +86,20 @@ public class ClientModEvents {
         // wrap every block's provider with the fog multiplier; biome-tinted ones only fog their untinted quads
         // (BiomeColorsMixin fogs the biome colour itself)
         java.util.Set<Block> biomeTinted = java.util.Set.of(
-                Blocks.GRASS_BLOCK, Blocks.FERN, Blocks.GRASS, Blocks.POTTED_FERN,
+                Blocks.GRASS_BLOCK, Blocks.FERN, Blocks.SHORT_GRASS, Blocks.POTTED_FERN,
                 Blocks.PINK_PETALS, Blocks.SUGAR_CANE, Blocks.LARGE_FERN, Blocks.TALL_GRASS,
                 Blocks.OAK_LEAVES, Blocks.JUNGLE_LEAVES, Blocks.ACACIA_LEAVES,
                 Blocks.DARK_OAK_LEAVES, Blocks.VINE, Blocks.MANGROVE_LEAVES,
                 Blocks.WATER, Blocks.BUBBLE_COLUMN
         );
         BlockColors blockColors = evt.getBlockColors();
-        java.util.Map<Holder.Reference<Block>, BlockColor> map =
+        // 1.21.1: BlockColors keeps an IdentityHashMap keyed by Block itself, not by a Holder - looking up a
+        // Holder here silently returned null for every block, which dropped all vanilla biome tints (grass and
+        // foliage rendered untinted) and skipped their fog branch.
+        java.util.Map<Block, BlockColor> map =
                 ((BlockColorsAccessor) (Object) blockColors).getBlockColors();
-        for (Block block : ForgeRegistries.BLOCKS.getValues()) {
-            BlockColor existing = map.get(ForgeRegistries.BLOCKS.getDelegateOrThrow(block));
+        for (Block block : BuiltInRegistries.BLOCK) {
+            BlockColor existing = map.get(block);
             evt.register(new FogTintingBlockColor(existing, biomeTinted.contains(block)), block);
         }
     }
@@ -174,11 +178,27 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.TOTEM_OF_SHIELDING.get(), TotemOfShieldingRenderer::new);
     }
 
+    /**
+     * Enchantments are a datapack registry, and on the client the registry only exists once a level
+     * with datapacks has been joined - so this is where the mod's enchantment holders start working.
+     */
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public static void bindEnchantmentRegistryOnLogin(ClientPlayerNetworkEvent.LoggingIn evt) {
+        EnchantmentRegistrar.bindClient(evt.getPlayer().level().registryAccess());
+    }
+
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public static void registerMenuScreens(RegisterMenuScreensEvent evt) {
+        // 1.21.1 made MenuScreens#register private; NeoForge exposes the map through this event.
+        evt.register(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), TopdownGui::new);
+    }
+
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public static void onClientSetupEvent(FMLClientSetupEvent evt) {
         evt.enqueueWork(() -> {
-            MenuScreens.register(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), TopdownGui::new);
             ItemBlockRenderTypes.setRenderLayer(
                     BlockRegistrar.UNEXTINGUISHABLE_SOUL_FIRE.get(),
                     RenderType.cutout()

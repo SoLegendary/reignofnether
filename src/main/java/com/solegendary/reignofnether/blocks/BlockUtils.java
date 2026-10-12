@@ -73,7 +73,6 @@ public class BlockUtils {
         return false;
     }
 
-
     private static boolean isWraithSnow(BlockState bs) {
         return bs.getBlock() == BlockRegistrar.WRAITH_SNOW_LAYER.get();
     }

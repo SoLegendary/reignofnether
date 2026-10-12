@@ -156,9 +156,20 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     public void syncFromServer(ResourceName gatherName, BlockPos gatherPos, int gatherTicks) {
-        this.data.targetResourceName = gatherName;
+        // The server can send a unit that has no gather target (never selected, or just finished).
+        // "No target" is ResourceName.NONE, never null: TargetResourcesSave initialises the field
+        // that way, and callers either switch on it or call equals() on it - both of which throw on
+        // null. The null position has to be handled separately, since looking a resource up at a
+        // null BlockPos dereferences it inside BuildingUtils#isPosInsideFarm.
         this.data.gatherTarget = gatherPos;
         this.gatherTicksLeft = gatherTicks;
+        if (gatherPos == null) {
+            this.data.targetResourceName = ResourceName.NONE;
+            this.data.targetResourceSource = null;
+            this.gatherTicksLeft = 0;
+            return;
+        }
+        this.data.targetResourceName = gatherName == null ? ResourceName.NONE : gatherName;
         this.data.targetResourceSource = ResourceSources.getFromBlockPos(data.gatherTarget, mob.level());
     }
 
@@ -217,12 +228,16 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                     }
                     else {
                         // increase search range until we've maxed out (to prevent idle workers using up too much CPU)
-                        int range = REACH_RANGE * (failedSearches + 1);
                         if (failedSearches > MAX_FAILED_SEARCHES) {
-                            //System.out.println("Failed too many searches.");
-                            stopGathering();
+                            // Give up searching for now, but keep the chosen resource mode. stopGathering()
+                            // resets targetResourceName to NONE, so a player who toggled gather to FOOD/WOOD/ORE
+                            // saw it flip itself back to "nothing" once no matching resource was nearby.
+                            // The idle bookkeeping below already parks the worker between attempts.
                             ticksIdle += 200;
+                            searchCdTicksLeft = MAX_SEARCH_CD_TICKS * MAX_FAILED_SEARCHES;
+                            return;
                         }
+                        int range = REACH_RANGE * (failedSearches + 1);
 
                         bpOpt = ResourceIndex.get(mob.level()).findClosest(
                             mob.level(),
@@ -436,7 +451,6 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         data.targetResourceSource = saveData.targetResourceSource;
         data.targetFarm = saveData.targetFarm;
     }
-
 
     // True if a worker can stand somewhere adjacent to bp (within mining reach) to gather it: a cell with a
     // solid floor below and clear feet+head, in one of the 4 cardinal neighbour columns across a vertical band

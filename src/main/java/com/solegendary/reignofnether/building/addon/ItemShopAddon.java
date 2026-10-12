@@ -25,6 +25,13 @@ import net.minecraft.world.item.ItemStack;
 import java.util.ArrayList;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import com.solegendary.reignofnether.items.UnitItem;
+import com.solegendary.reignofnether.items.UnitInventory;
+import com.solegendary.reignofnether.items.StockedShopItem;
+import com.solegendary.reignofnether.items.ItemUtil;
+import com.solegendary.reignofnether.items.ItemShopClientboundPacket;
+import com.solegendary.reignofnether.building.addon.ItemShopAddon;
+import com.solegendary.reignofnether.building.addon.BuildingAddon;
 
 public interface ItemShopAddon extends BuildingAddon {
 

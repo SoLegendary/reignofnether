@@ -23,15 +23,14 @@ import com.solegendary.reignofnether.gamemode.GameModeServerEvents;
 import com.solegendary.reignofnether.gamerules.GameruleServerEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGuiClientEvents;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
-import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.hero.HeroServerEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonServerEvents;
+import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.hud.TitleClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
-import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.matchstart.MatchEndClientEvents;
 import com.solegendary.reignofnether.matchstart.MatchStartClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -49,9 +48,7 @@ import com.solegendary.reignofnether.scenario.ScenarioServerEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
-import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerEvents;
-import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.time.TimeServerEvents;
 import com.solegendary.reignofnether.debug.RtsDebugServerEvents;
@@ -63,11 +60,11 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.worldborder.WorldBorderClientEvents;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.IEventBus;
 
 public class ClientEventRegistrar {
-    private final IEventBus vanillaEventBus = MinecraftForge.EVENT_BUS;
+    private final IEventBus vanillaEventBus = NeoForge.EVENT_BUS;
 
     public ClientEventRegistrar() { }
 
@@ -96,12 +93,10 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(TutorialClientEvents.class);
         vanillaEventBus.register(TitleClientEvents.class);
         vanillaEventBus.register(WorldBorderClientEvents.class);
-        vanillaEventBus.register(SurvivalClientEvents.class);
         vanillaEventBus.register(StartPosClientEvents.class);
         vanillaEventBus.register(MatchStartClientEvents.class);
         vanillaEventBus.register(MatchEndClientEvents.class);
         vanillaEventBus.register(NonUnitClientEvents.class);
-        vanillaEventBus.register(HeroClientEvents.class);
         vanillaEventBus.register(CustomBuildingClientEvents.class);
         vanillaEventBus.register(SoundClientEvents.class);
         vanillaEventBus.register(PlayerDisplayClientEvents.class);
@@ -141,6 +136,5 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(WorldBorderServerEvents.class);
         vanillaEventBus.register(CustomButtonServerEvents.class);
         vanillaEventBus.register(ItemServerEvents.class);
-        vanillaEventBus.register(TaskSchedulerServerEvents.class);
     }
 }

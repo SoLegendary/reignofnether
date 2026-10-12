@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
@@ -73,7 +74,7 @@ public class BuildingBlockData {
             ResourceLocation rl = ResourceLocation.fromNamespaceAndPath("reignofnether", "structures/" + structureName + ".nbt");
             Optional<Resource> rs = resManager.getResource(rl);
             if (rs.isEmpty()) return null;
-            return NbtIo.readCompressed(rs.get().open());
+            return NbtIo.readCompressed(rs.get().open(), NbtAccounter.unlimitedHeap());
         } catch (IOException e) {
             ReignOfNether.LOGGER.error(e.getMessage(), e);
             return null;

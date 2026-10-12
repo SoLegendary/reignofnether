@@ -62,8 +62,11 @@ public interface ConvertableUnit {
         }
         newEntity.setYRot(oldEntity.getYRot());
 
-        // discard with a reflected packet so the client has a chance to sync goals, command groups and selections
-        //oldEntity.discard();
+        // The old entity must actually go away. It used to be left commented out on the theory that a
+        // reflected packet gave the client time to sync goals and selections - but with no discard, every
+        // caller that did not discard by hand (including convertAllToUnit) left a duplicate of the old
+        // unit standing next to the new one.
+        oldEntity.discard();
         return newEntity;
     }
 }

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -36,13 +38,13 @@ public class BoggedUnit extends SkeletonUnit implements Unit, AttackerUnit, Rang
                 .add(Attributes.MAX_HEALTH, SkeletonUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, SkeletonUnit.armorValue)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     public static final int POISON_DAMAGE = 6;
@@ -50,10 +52,10 @@ public class BoggedUnit extends SkeletonUnit implements Unit, AttackerUnit, Rang
     final static public float attackDamage = 2.0f;
 
     @Override
-    protected @NotNull AbstractArrow getArrow(@NotNull ItemStack pArrowStack, float pDistanceFactor) {
-        AbstractArrow arrow = super.getArrow(pArrowStack, pDistanceFactor);
+    protected @NotNull AbstractArrow getArrow(@NotNull ItemStack pArrowStack, float pDistanceFactor, ItemStack pShootingItem) {
+        AbstractArrow arrow = super.getArrow(pArrowStack, pDistanceFactor, pShootingItem);
         if (arrow instanceof Arrow)
-            ((Arrow)arrow).addEffect(new MobEffectInstance(MobEffects.POISON, POISON_DAMAGE * 27));
+            ((Arrow)arrow).addEffect(MobEffectHelpers.instance(MobEffects.POISON, POISON_DAMAGE * 27));
         return arrow;
     }
 

@@ -1,0 +1,11 @@
+{
+  "anvil_cost": 2,
+  "description": { "translate": "enchantment.reignofnether.vigor" },
+  "max_cost": { "base": 21, "per_level_above_first": 11 },
+  "max_level": 3,
+  "min_cost": { "base": 1, "per_level_above_first": 11 },
+  "primary_items": "#minecraft:enchantable/sword",
+  "slots": [ "mainhand" ],
+  "supported_items": "#minecraft:enchantable/weapon",
+  "weight": 1
+}

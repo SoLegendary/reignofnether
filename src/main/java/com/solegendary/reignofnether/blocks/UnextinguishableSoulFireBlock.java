@@ -1,9 +1,11 @@
 package com.solegendary.reignofnether.blocks;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.heroAbilities.wildfire.SoulsAflame;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.piglins.WildfireUnit;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -17,6 +19,14 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class UnextinguishableSoulFireBlock extends BaseFireBlock {
+    public static final MapCodec<UnextinguishableSoulFireBlock> CODEC =
+            simpleCodec(p -> new UnextinguishableSoulFireBlock(p));
+
+    @Override
+    protected MapCodec<? extends BaseFireBlock> codec() {
+        return CODEC;
+    }
+
     public UnextinguishableSoulFireBlock(BlockBehaviour.Properties p_56653_) {
         super(p_56653_, 2.0F);
     }
@@ -40,7 +50,7 @@ public class UnextinguishableSoulFireBlock extends BaseFireBlock {
     public void randomTick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
         boolean inRangeOfWildfireUlt = false;
         for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
-            if (unit instanceof WildfireUnit wildfireUnit && wildfireUnit.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()) &&
+            if (unit instanceof WildfireUnit wildfireUnit && wildfireUnit.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get())) &&
                 pPos.distToCenterSqr(wildfireUnit.position()) <= SoulsAflame.RANGE * SoulsAflame.RANGE) {
                 inRangeOfWildfireUlt = true;
                 break;

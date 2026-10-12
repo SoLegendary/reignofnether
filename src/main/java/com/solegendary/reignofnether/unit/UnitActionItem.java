@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
@@ -170,11 +171,11 @@ public class UnitActionItem {
         actionableUnitsLoop:
         for (Unit unit : actionableUnits) {
 
-            if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null ||
-                ((LivingEntity) unit).getEffect(MobEffectRegistrar.FREEZE.get()) != null) {
+            if (((LivingEntity) unit).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.STUN.get())) != null ||
+                ((LivingEntity) unit).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.FREEZE.get())) != null) {
                 Unit.fullResetBehaviours(unit);
                 continue;
-            } else if (((LivingEntity) unit).getEffect(MobEffectRegistrar.UNCONTROLLABLE.get()) != null) {
+            } else if (((LivingEntity) unit).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.UNCONTROLLABLE.get())) != null) {
                 continue;
             } else if (unit.ignoreNonStopCommands() && action != UnitAction.STOP)
                 continue;
@@ -183,21 +184,23 @@ public class UnitActionItem {
                 continue;
             }
 
-            // have to do this before resetBehaviours so we can assign the correct resourceName first
+            // Changing the gather mode only retargets the worker; it must NOT reset behaviours, or
+            // pressing the toggle cancelled whatever the worker was doing. The goal re-tests its
+            // current target against the new mode each tick and re-searches on its own.
             if (action == UnitAction.TOGGLE_GATHER_TARGET) {
                 if (unit instanceof WorkerUnit workerUnit) {
                     GatherResourcesGoal goal = workerUnit.getGatherResourceGoal();
                     if (goal != null) {
-                        ResourceName targetResourceName = goal.getTargetResourceName();
-                        Unit.fullResetBehaviours(unit);
-                        if (targetResourceName != null) {
-                            switch (targetResourceName) {
-                                case NONE -> goal.setTargetResourceName(ResourceName.FOOD);
-                                case FOOD -> goal.setTargetResourceName(ResourceName.WOOD);
-                                case WOOD -> goal.setTargetResourceName(ResourceName.ORE);
-                                case ORE -> goal.setTargetResourceName(ResourceName.NONE);
-                            }
-                        }
+                        ResourceName current = goal.getTargetResourceName();
+                        ResourceName next = switch (current == null ? ResourceName.NONE : current) {
+                            case NONE -> ResourceName.FOOD;
+                            case FOOD -> ResourceName.WOOD;
+                            case WOOD -> ResourceName.ORE;
+                            case ORE, EMERALD -> ResourceName.NONE;
+                        };
+                        goal.setTargetResourceName(next);
+                        if (next == ResourceName.NONE)
+                            goal.removeGatherTarget();
                     }
                 }
             } else {

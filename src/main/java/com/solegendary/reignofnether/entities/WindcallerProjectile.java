@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.entities;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -51,7 +52,7 @@ public class WindcallerProjectile extends AbstractMagicProjectile {
                     !levitationDealt) {
                 ItemStack itemStack = ((LivingEntity) this.getOwner()).getItemBySlot(EquipmentSlot.MAINHAND);
                 int gustLevel = itemStack.getEnchantmentLevel(EnchantmentRegistrar.GUST.get());
-                le.addEffect(new MobEffectInstance(MobEffects.LEVITATION, WindcallerUnit.LEVITATE_TICKS, gustLevel, true, false));
+                le.addEffect(MobEffectHelpers.instance(MobEffects.LEVITATION, WindcallerUnit.LEVITATE_TICKS, gustLevel, true, false));
                 levitationDealt = true;
             }
             if (levitationDealt && damageDealt) {

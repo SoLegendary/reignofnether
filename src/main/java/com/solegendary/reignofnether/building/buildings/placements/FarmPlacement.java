@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nullable;
 
@@ -128,9 +129,12 @@ public class FarmPlacement extends BuildingPlacement {
         for (Direction dir : dirs) {
             BlockPos bpAdj = bp.relative(dir);
             BlockState bs = level.getBlockState(bpAdj.below());
-            if (level.isEmptyBlock(bpAdj) && (bs.canSustainPlant(level, bpAdj.below(), Direction.UP, stemBlock.getFruit()) || bs.is(Blocks.FARMLAND) || bs.is(BlockTags.DIRT))) {
-                level.setBlockAndUpdate(bpAdj, stemBlock.getFruit().defaultBlockState());
-                level.setBlockAndUpdate(bp, stemBlock.getFruit().getAttachedStem().defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, dir));
+            Block fruitBlock = BuiltInRegistries.BLOCK.get(stemBlock.fruit);
+            // 1.21.1 dropped BlockStateBase#canSustainPlant; a plant block now answers "may I be
+            // placed here" through canSurvive, which is the check the old helper delegated to.
+            if (level.isEmptyBlock(bpAdj) && (fruitBlock.defaultBlockState().canSurvive(level, bpAdj) || bs.is(Blocks.FARMLAND) || bs.is(BlockTags.DIRT))) {
+                level.setBlockAndUpdate(bpAdj, fruitBlock.defaultBlockState());
+                level.setBlockAndUpdate(bp, BuiltInRegistries.BLOCK.get(stemBlock.attachedStem).defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, dir));
                 return;
             }
         }

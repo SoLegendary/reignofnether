@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.common.IPlantable;
+import net.neoforged.neoforge.common.SpecialPlantable;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -31,7 +31,7 @@ public class ResourceSources {
             (s)->s.getFluidState().is(FluidTags.WATER),
             (s)->s.isAir(),
             (s)->s.is(BlockTags.LEAVES),
-            (s)->s.getBlock() instanceof IPlantable
+            (s)->s.getBlock() instanceof SpecialPlantable
     );
 
     public static boolean isClearMaterial(BlockState state){

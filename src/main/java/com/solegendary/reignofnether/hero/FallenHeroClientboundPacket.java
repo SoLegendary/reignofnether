@@ -5,18 +5,28 @@ import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.HeroUnitSave;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class FallenHeroClientboundPacket {
+public class FallenHeroClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<FallenHeroClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "fallen_hero_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<FallenHeroClientboundPacket> type() {
+        return TYPE;
+    }
 
     public String uuid;
     public String name;
@@ -32,14 +42,14 @@ public class FallenHeroClientboundPacket {
     public static void addFallenHero(HeroUnitSave heroUnitSave) {
         for (ServerPlayer sp : PlayerServerEvents.players) {
             if (sp.getName().getString().equals(heroUnitSave.ownerName)) {
-                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp),
+                PacketHandler.send(PacketHandler.toPlayer(() -> sp),
                         new FallenHeroClientboundPacket(heroUnitSave));
             }
         }
     }
 
     public static void addFallenHero(ServerPlayer player, HeroUnitSave heroUnitSave) {
-        PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
+        PacketHandler.send(PacketHandler.toPlayer(() -> player),
                 new FallenHeroClientboundPacket(heroUnitSave));
     }
 
@@ -56,7 +66,7 @@ public class FallenHeroClientboundPacket {
         this.items = heroUnitSave.items;
     }
 
-    public FallenHeroClientboundPacket(FriendlyByteBuf buffer) {
+    public FallenHeroClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.uuid = buffer.readUtf();
         this.name = buffer.readUtf();
         this.ownerName = buffer.readUtf();
@@ -68,10 +78,12 @@ public class FallenHeroClientboundPacket {
         this.ability4Rank = buffer.readInt();
         this.items = NonNullList.withSize(UnitInventory.MAX_INVENTORY_SIZE, ItemStack.EMPTY);
         for (int i = 0; i < this.items.size(); i++)
-            this.items.set(i, buffer.readItem());
+            // 1.21.1 removed FriendlyByteBuf#readItem; ItemStack's own optional stream codec has the
+            // same wire shape (presence boolean, then the nbt + component payload).
+            this.items.set(i, ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer));
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeUtf(this.uuid);
         buffer.writeUtf(this.name);
         buffer.writeUtf(this.ownerName);
@@ -82,15 +94,14 @@ public class FallenHeroClientboundPacket {
         buffer.writeInt(this.ability3Rank);
         buffer.writeInt(this.ability4Rank);
         for (ItemStack stack : this.items)
-            buffer.writeItem(stack);
+            ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, stack);
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
                     HeroClientEvents.addFallenHero(new HeroUnitSave(
                         uuid,
@@ -105,10 +116,8 @@ public class FallenHeroClientboundPacket {
                         ability4Rank,
                         items
                     ));
-                    success.set(true);
                 });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

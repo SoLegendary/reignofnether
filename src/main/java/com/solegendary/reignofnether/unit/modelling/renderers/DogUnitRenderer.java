@@ -6,6 +6,7 @@
 package com.solegendary.reignofnether.unit.modelling.renderers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.util.FastColor;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutDogUnit;
 import net.minecraft.client.model.WolfModel;
@@ -17,8 +18,8 @@ import net.minecraft.client.renderer.entity.layers.WolfCollarLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Wolf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class DogUnitRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
@@ -42,14 +43,15 @@ public class DogUnitRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
     }
 
     public void render(Wolf pEntity, float pEntityYaw, float pPartialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {
+        // 1.21.1 replaced Model#setColor(float,float,float) with a single packed ARGB int.
         if (pEntity.isWet()) {
             float $$6 = pEntity.getWetShade(pPartialTicks);
-            this.model.setColor($$6, $$6, $$6);
+            this.model.setColor(FastColor.ARGB32.colorFromFloat(1.0F, $$6, $$6, $$6));
         }
 
         super.render(pEntity, pEntityYaw, pPartialTicks, pPoseStack, pBuffer, pPackedLight);
         if (pEntity.isWet()) {
-            this.model.setColor(1.0F, 1.0F, 1.0F);
+            this.model.setColor(-1);
         }
     }
 

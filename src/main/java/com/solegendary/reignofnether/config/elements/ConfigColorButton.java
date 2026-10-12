@@ -12,14 +12,14 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import org.jetbrains.annotations.NotNull;
 
 public class ConfigColorButton implements Renderable, GuiEventListener, NarratableEntry {
 
     protected static final Minecraft MC = Minecraft.getInstance();
 
-    private final ForgeConfigSpec.ConfigValue<Integer> configValue;
+    private final ModConfigSpec.ConfigValue<Integer> configValue;
     private final String label;
     private int x = 0;
     private int y = 0;
@@ -27,7 +27,7 @@ public class ConfigColorButton implements Renderable, GuiEventListener, Narratab
     private int h = 10;
     private boolean focused = false;
 
-    public ConfigColorButton(ForgeConfigSpec.ConfigValue<Integer> configValue, String label) {
+    public ConfigColorButton(ModConfigSpec.ConfigValue<Integer> configValue, String label) {
         this.configValue = configValue;
         this.label = label;
     }

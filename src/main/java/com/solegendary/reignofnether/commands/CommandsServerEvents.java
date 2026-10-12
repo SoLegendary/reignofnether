@@ -19,6 +19,7 @@ import com.solegendary.reignofnether.commands.rtsapi.RTSApiCommands;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.registrars.CommandArgumentRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
@@ -36,7 +37,6 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -54,14 +54,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class CommandsServerEvents {
 	
@@ -74,7 +74,7 @@ public class CommandsServerEvents {
 	
 	@SubscribeEvent
 	public static void onRegisterCommands(RegisterCommandsEvent event) {
-		CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 		RTSApiCommands.register(dispatcher);
 		
 		dispatcher.register(Commands.literal("rtsapi-place-building")
@@ -253,7 +253,8 @@ public class CommandsServerEvents {
 			.then(Commands.argument("ownerName", StringArgumentType.string())
 				.then(Commands.argument("entity", ResourceLocationArgument.id())
 					.suggests((ctx, builder) -> SharedSuggestionProvider.suggestResource(
-						ForgeRegistries.ENTITY_TYPES.getKeys().stream(), builder))
+						BuiltInRegistries.ENTITY_TYPE.registryKeySet().stream()
+							.map(key -> key.location()), builder))
 					.executes(ctx -> summonEntity(
 						ctx,
 						StringArgumentType.getString(ctx, "ownerName"),
@@ -577,12 +578,17 @@ public class CommandsServerEvents {
 		);
 		item.action(ctx.getSource().getLevel());
 
-		String ownersText = ownerName.isEmpty() ? "" : I18n.get("commands.reignofnether.unit.action.issue.owner", ownerName);
+		// Command feedback has to be built from translatable components: the I18n helper is a client-only
+		// class, and touching it from a dedicated server throws (neoforge tries to load a client class on
+		// the DEDICATED_SERVER dist) - the action above had already run, so the command looked broken.
 		ctx.getSource().sendSuccess(
 			() -> Component.translatable(
 				"commands.reignofnether.unit.action.issue.with_owner.success",
-					action.name().toLowerCase(),
-					unitIds.length, ownersText
+				action.name().toLowerCase(),
+				unitIds.length,
+				ownerName.isEmpty()
+					? Component.empty()
+					: Component.translatable("commands.reignofnether.unit.action.issue.owner", ownerName)
 			),
 			true
 		);
@@ -640,7 +646,7 @@ public class CommandsServerEvents {
 		});
 		
 		if (entity == null) {
-			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.entity.create.failed", entityId));
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.entity.create.failed", entityId.toString()));
 			return 0;
 		}
 		level.addFreshEntity(entity);
@@ -651,7 +657,7 @@ public class CommandsServerEvents {
 		}
 		
 		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.entity.summon.success", entityId, ownerName, formatPos(pos)), true
+			() -> Component.translatable("commands.reignofnether.entity.summon.success", entityId.toString(), ownerName, formatPos(pos)), true
 		);
 		return 1;
 	}
@@ -663,7 +669,7 @@ public class CommandsServerEvents {
 			case "180" -> Rotation.CLOCKWISE_180;
 			case "270" -> Rotation.COUNTERCLOCKWISE_90;
 			default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
-				.create(I18n.get("commands.reignofnether.entity.rotation.invalid", input));
+				.create(Component.translatable("commands.reignofnether.entity.rotation.invalid", input));
 		};
 	}
 	
@@ -861,7 +867,7 @@ public class CommandsServerEvents {
 		
 		ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore, emerald));
 		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.player.resource.add", I18n.get("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
+			() -> Component.translatable("commands.reignofnether.player.resource.add", Component.translatable("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
 			true
 		);
 		return 1;
@@ -875,7 +881,7 @@ public class CommandsServerEvents {
 		ResearchServerEvents.addResearch(playerName, researchItemName);
 		ResearchServerEvents.syncResearch(playerName);
 		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.research.add.success", researchItemName, playerName),
+			() -> Component.translatable("commands.reignofnether.research.add.success", researchItemName.toString(), playerName),
 			true
 		);
 		return 1;
@@ -889,7 +895,7 @@ public class CommandsServerEvents {
 		ResearchServerEvents.removeResearch(playerName, researchItemName);
 		ResearchServerEvents.syncResearch(playerName);
 		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.research.remove.success", researchItemName, playerName),
+			() -> Component.translatable("commands.reignofnether.research.remove.success", researchItemName.toString(), playerName),
 			true
 		);
 		return 1;
@@ -1040,7 +1046,6 @@ public class CommandsServerEvents {
 		}
 		return 1;
 	}
-
 
 	private static ResourceName resolveResource(String name) throws CommandSyntaxException {
 		try {

@@ -16,6 +16,10 @@ import net.minecraft.world.item.TridentItem;
 
 import java.util.EnumSet;
 import java.util.Random;
+import com.solegendary.reignofnether.unit.goals.UnitBowAttackGoal;
+import net.minecraft.world.entity.ai.goal.RangedBowAttackGoal;
+import net.minecraft.world.entity.Mob;
+import com.solegendary.reignofnether.unit.goals.FlyingMoveToTargetGoal;
 
 // modified version of RangedBowAttackGoal which:
 // - doesn't strafe

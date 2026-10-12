@@ -1,14 +1,12 @@
 package com.solegendary.reignofnether.keybinds;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import com.solegendary.reignofnether.ReignOfNether;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
-@Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID,
-                        bus = Mod.EventBusSubscriber.Bus.MOD,
-                        value = Dist.CLIENT)
+@EventBusSubscriber(modid = ReignOfNether.MOD_ID, value = Dist.CLIENT)
 public class KeybindRegistrar {
 
     @SubscribeEvent

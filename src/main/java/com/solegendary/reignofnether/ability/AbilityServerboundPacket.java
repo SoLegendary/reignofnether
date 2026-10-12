@@ -6,21 +6,32 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class AbilityServerboundPacket {
+public class AbilityServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<AbilityServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "ability_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<AbilityServerboundPacket> type() {
+        return TYPE;
+    }
 
     private final int unitId;
     private final UnitAction unitAction;
 
     public static void rankUpAbility(int unitId, UnitAction abilityAction) {
-        PacketHandler.INSTANCE.sendToServer(new AbilityServerboundPacket(unitId, abilityAction));
+        PacketHandler.sendToServer(new AbilityServerboundPacket(unitId, abilityAction));
     }
 
     public AbilityServerboundPacket(
@@ -31,25 +42,23 @@ public class AbilityServerboundPacket {
         this.unitAction = unitAction;
     }
 
-    public AbilityServerboundPacket(FriendlyByteBuf buffer) {
+    public AbilityServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.unitId = buffer.readInt();
         this.unitAction = buffer.readEnum(UnitAction.class);
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeInt(this.unitId);
         buffer.writeEnum(this.unitAction);
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
 
-            ServerPlayer player = ctx.get().getSender();
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) {
                 ReignOfNether.LOGGER.warn("AbilityServerboundPacket: Sender was null");
-                success.set(false);
                 return;
             }
             for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
@@ -57,7 +66,6 @@ public class AbilityServerboundPacket {
 
                     if (!player.getName().getString().equals(unit.getOwnerName())) {
                         ReignOfNether.LOGGER.warn("AbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + unit.getOwnerName());
-                        success.set(false);
                         return;
                     }
 
@@ -69,9 +77,7 @@ public class AbilityServerboundPacket {
                     }
                 }
             }
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

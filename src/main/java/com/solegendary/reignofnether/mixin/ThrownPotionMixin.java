@@ -18,7 +18,8 @@ import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.LingeringPotionItem;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
+import com.solegendary.reignofnether.util.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
@@ -45,7 +46,7 @@ public abstract class ThrownPotionMixin extends ThrowableItemProjectile {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void makeAreaOfEffectCloud(ItemStack pStack, Potion pPotion, CallbackInfo ci) {
+    private void makeAreaOfEffectCloud(PotionContents pContents, CallbackInfo ci) {
         ci.cancel();
 
         AdjustableAreaEffectCloud aec = new AdjustableAreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
@@ -73,23 +74,19 @@ public abstract class ThrownPotionMixin extends ThrowableItemProjectile {
         }
 
         aec.setRadiusPerTick(-aec.getRadius() / (float)aec.getDuration());
-        aec.setPotion(pPotion);
 
-        for (MobEffectInstance $$4 : PotionUtils.getCustomEffects(pStack)) {
-            aec.addEffect(new MobEffectInstance($$4));
-        }
-
-        CompoundTag $$5 = pStack.getTag();
-        if ($$5 != null && $$5.contains("CustomPotionColor", 99)) {
-            aec.setFixedColor($$5.getInt("CustomPotionColor"));
-        }
+        // In 1.21.1 the cloud no longer keeps a separate potion plus a custom-effects list: it holds
+        // one PotionContents, and AreaEffectCloud#tick re-applies its customEffects() every cycle
+        // while updateColor() derives the particle colour from it. So setting the contents is
+        // enough — setPotion/setFixedColor/addEffect are all gone.
+        aec.setPotionContents(pContents);
 
         this.level().addFreshEntity(aec);
     }
 
     private boolean isWaterPotion() {
         ItemStack item = this.getItem();
-        Potion potion = PotionUtils.getPotion(item);
+        net.minecraft.core.Holder<Potion> potion = PotionUtils.getPotion(item);
         List<MobEffectInstance> mei = PotionUtils.getMobEffects(item);
         return potion == Potions.WATER && mei.isEmpty();
     }

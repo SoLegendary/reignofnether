@@ -113,15 +113,15 @@ public class ArmouredHoglinUnitModel<T extends Entity> extends EntityModel<T> {
     }
 
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
-        head.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-        left_ear.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-        right_ear.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-        body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-        mane.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-        front_left_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-        front_right_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-        back_left_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-        back_right_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color) {
+        head.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        left_ear.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        right_ear.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        body.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        mane.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        front_left_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        front_right_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        back_left_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
+        back_right_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, color);
     }
 }

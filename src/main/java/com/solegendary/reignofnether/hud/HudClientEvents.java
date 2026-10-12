@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
+import com.solegendary.reignofnether.util.GuiLayerCompat;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
@@ -36,7 +37,9 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.items.RandomItemDropRule;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceName;
@@ -70,6 +73,7 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.resources.language.I18n;
@@ -85,9 +89,8 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.client.event.*;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.*;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -362,15 +365,13 @@ public class HudClientEvents {
         // ItemShop
         // --------
         int x = blitX;
-        int y = blitY - 145;
-
+        int y = blitY - 150;
         boolean isShopOpen = ItemClientEvents.openItemShop != null && !ItemClientEvents.openItemShop.isDestroyedServerside;
         boolean isShopSelected = isShopOpen && hudSelectedPlacement == ItemClientEvents.openItemShop;
         if (isShopOpen && ItemClientEvents.ENABLED) {
             ItemShopAddon itemShop = ItemClientEvents.openItemShop.getBuilding().getActiveAddon(ItemShopAddon.class);
             if (itemShop != null) {
-                boolean isServedUnitSelected = ItemClientEvents.openItemShop.getServedUnit() == HudClientEvents.hudSelectedEntity && HudClientEvents.hudSelectedEntity != null;
-                if (isShopSelected || isServedUnitSelected) {
+                if (isShopSelected || ItemClientEvents.openItemShop.getServedUnit() == HudClientEvents.hudSelectedEntity) {
                     hudZones.add(ItemShopMenu.renderFrame(evt.getGuiGraphics(), itemShop, x, y));
                     renderedButtons.addAll(ItemShopMenu.renderButtons(evt.getGuiGraphics(), itemShop, x, y, mouseX, mouseY));
                 }
@@ -585,7 +586,6 @@ public class HudClientEvents {
                 }
             }
 
-
             // ---------------------------
             // Building production buttons
             // ---------------------------
@@ -625,7 +625,6 @@ public class HudClientEvents {
                                     else
                                         ItemClientEvents.openItemShop = itemShopPlacement;
                                 })
-                                .hotkey(Keybindings.openShop)
                                 .build();
                         shopMenuButton.render(evt.getGuiGraphics(), blitX, blitY, mouseX, mouseY);
                         productionButtons.add(shopMenuButton);
@@ -722,7 +721,7 @@ public class HudClientEvents {
 
                 int totalRes = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue();
 
-                if (unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory((LivingEntity) unit)) {
+                if (ItemClientEvents.ENABLED && unit instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(unit)) {
                     hudZones.add(ItemClientEvents.renderUnitInventory(evt.getGuiGraphics(), blitX, blitY - 6, mouseX, mouseY, inv));
                     renderedItemsOrResources = true;
                 }
@@ -894,7 +893,6 @@ public class HudClientEvents {
                 buttonsRendered += 1;
             }
         }
-
 
         // ---------------------------
         // Unit sandbox buttons
@@ -1373,6 +1371,17 @@ public class HudClientEvents {
                     }
                     if (!resourceName.equals("emerald"))
                         MyRenderer.renderTooltip(evt.getGuiGraphics(), tooltipWorkersAssigned, mouseX + 5, mouseY);
+                    // item-drop progress, in place of the unused workers-on-emerald line
+                    else if (GameruleClient.randomItemDrops != RandomItemDropRule.DISABLED) {
+                        RTSPlayer rtsPlayer = PlayerClientEvents.getRTSPlayer(finalSelPlayerName);
+                        if (rtsPlayer != null)
+                            MyRenderer.renderTooltip(evt.getGuiGraphics(), List.of(
+                                    FormattedCharSequence.forward(I18n.get("hud.reignofnether.items_found",
+                                            rtsPlayer.itemsDropped), Style.EMPTY),
+                                    FormattedCharSequence.forward(I18n.get("hud.reignofnether.items_hint"),
+                                            Style.EMPTY)
+                            ), mouseX + 5, mouseY);
+                    }
                 }
                 blitY += iconFrameSize - 1;
             }
@@ -1979,8 +1988,6 @@ public class HudClientEvents {
         }
     }
 
-
-
     // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
@@ -1995,10 +2002,7 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END) {
-            return;
-        }
+    public static void onClientTick(ClientTickEvent.Post evt) {
         if (OrthoviewClientEvents.isEnabled()) {
             portraitRendererUnit.tickAnimation();
         }
@@ -2231,7 +2235,9 @@ public class HudClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+    public static void onRenderOverLay(RenderGuiLayerEvent.Pre evt) {
+        if (!GuiLayerCompat.isTopLayer(evt))
+            return;
         if (MC.screen != null && MC.level != null && SandboxClientEvents.isSandboxPlayer() && showPreselectedBlockInfo) {
             int y = 5;
             for (ControlGroup controlGroup : controlGroups) {

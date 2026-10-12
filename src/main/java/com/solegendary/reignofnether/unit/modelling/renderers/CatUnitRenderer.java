@@ -24,8 +24,8 @@ import net.minecraft.world.entity.animal.Cat;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class CatUnitRenderer extends MobRenderer<Cat, CatModel<Cat>> {
@@ -49,8 +49,9 @@ public class CatUnitRenderer extends MobRenderer<Cat, CatModel<Cat>> {
         }
     }
 
-    protected void setupRotations(Cat pEntityLiving, PoseStack pPoseStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks) {
-        super.setupRotations(pEntityLiving, pPoseStack, pAgeInTicks, pRotationYaw, pPartialTicks);
+    // 1.21.1 added a trailing Entity#getScale() parameter to setupRotations.
+    protected void setupRotations(Cat pEntityLiving, PoseStack pPoseStack, float pAgeInTicks, float pRotationYaw, float pPartialTicks, float pScale) {
+        super.setupRotations(pEntityLiving, pPoseStack, pAgeInTicks, pRotationYaw, pPartialTicks, pScale);
         float $$5 = pEntityLiving.getLieDownAmount(pPartialTicks);
         if ($$5 > 0.0F) {
             pPoseStack.translate(0.4F * $$5, 0.15F * $$5, 0.1F * $$5);

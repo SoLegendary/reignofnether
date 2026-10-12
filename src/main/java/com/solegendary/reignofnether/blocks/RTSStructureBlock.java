@@ -5,6 +5,7 @@
 
 package com.solegendary.reignofnether.blocks;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -31,6 +32,13 @@ import javax.annotation.Nullable;
 
 public class RTSStructureBlock extends BaseEntityBlock implements GameMasterBlock {
     public static final EnumProperty<StructureMode> MODE;
+
+    public static final MapCodec<RTSStructureBlock> CODEC = simpleCodec(RTSStructureBlock::new);
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
 
     public RTSStructureBlock(BlockBehaviour.Properties pProperties) {
         super(pProperties);

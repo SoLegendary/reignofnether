@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.AttackGround;
@@ -55,7 +57,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -64,6 +65,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import net.minecraft.world.level.GameRules;
 
 public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttackerUnit {
     final static public float attackRange = 30; // only used by ranged units or melee building attackers
@@ -86,7 +88,6 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -146,11 +147,11 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         SynchedEntityData.defineId(GhastUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable
@@ -227,13 +228,13 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
                 .add(Attributes.MOVEMENT_SPEED, GhastUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, GhastUnit.maxHealth)
                 .add(Attributes.ARMOR, GhastUnit.armorValue)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), 24)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0.5f);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), 24)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0.5f);
     }
 
     @Override // prevent vanilla logic for picking up items
@@ -241,7 +242,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     @Override // destroy touching leaves, copied from Ravager AI
     protected void customServerAiStep() {
-        if (this.isAlive() && this.horizontalCollision && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
+        if (this.isAlive() && this.horizontalCollision && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
             boolean flag = false;
             AABB aabb = this.getBoundingBox().inflate(0.2);
             Iterator var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
@@ -272,7 +273,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
             BlockPos bp = MiscUtil.getHighestNonAirBlock(level(), blockPosition(), false, true);
             BlockState lowestBs = level().getBlockState(bp.below());
             if (lowestBs.isAir()) {
-                addEffect(new MobEffectInstance(MobEffectRegistrar.DISARM.get(), 15, 1, true, false));
+                addEffect(MobEffectHelpers.instance(MobEffectRegistrar.DISARM.get(), 15, 1, true, false));
             }
         }
 
@@ -382,7 +383,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void performUnitRangedAttack(double x, double y, double z, float velocity) {
-        if (this.hasEffect(MobEffectRegistrar.DISARM.get()))
+        if (this.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.DISARM.get())))
             return;
 
         Vec3 viewVec = this.getViewVector(1.0F);
@@ -392,7 +393,10 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         if (!this.isSilent()) {
             this.level().levelEvent(null, 1016, this.blockPosition(), 0);
         }
-        LargeFireball fireball = new GhastUnitFireball(this.level(), this, tx, ty, tz, EXPLOSION_POWER);
+        // 1.21.1's LargeFireball takes a shoot direction and always spawns at the shooter's position;
+// the old constructor took an offset and then got re-positioned by hand right afterwards.
+        LargeFireball fireball = new GhastUnitFireball(
+                this.level(), this, new Vec3(tx, ty, tz).normalize(), EXPLOSION_POWER);
         fireball.setInvulnerable(true);
         fireball.setPos(this.getX() + viewVec.x * 4.0, this.getY(0.5) + 0.5, fireball.getZ() + viewVec.z * 4.0);
         this.playSound(SoundEvents.GHAST_WARN, 3.0F, 1.0F);
@@ -435,8 +439,5 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public int getDamageTooltipColour() {
         return TooltipColours.GREEN;
     }
-
-
-
 
 }

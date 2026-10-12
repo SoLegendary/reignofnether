@@ -30,5 +30,4 @@ public class TopdownGui extends AbstractContainerScreen<TopdownGuiContainer> {
         return true; // allow to close but in ScreenOpenEvent open the pause menu, and vice versa
     }
 
-
 }

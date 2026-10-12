@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import net.minecraft.core.Holder;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.BuildingAbilityServerboundPacket;
 import com.solegendary.reignofnether.ability.EnchantAbility;
@@ -35,7 +36,7 @@ public class EnchantGust extends EnchantAbility {
     }
 
     @Override
-    public Enchantment getEnchantment() {
+    public Holder<Enchantment> getEnchantment() {
         return EnchantmentRegistrar.GUST.get();
     }
 
@@ -79,8 +80,8 @@ public class EnchantGust extends EnchantAbility {
     }
 
     @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
+    public Holder<Enchantment> getMutuallyExclusiveEnchant(LivingEntity entity) {
+        for (Holder<Enchantment> enchantment : entity.getItemBySlot(equipmentSlot).getEnchantments().keySet()) {
             if (enchantment == Enchantments.MULTISHOT || enchantment == getEnchantment())
                 return enchantment;
         }

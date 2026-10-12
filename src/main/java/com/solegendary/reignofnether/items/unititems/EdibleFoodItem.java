@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.items.unititems;
 
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Mob;
@@ -9,10 +10,12 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 
+import static com.solegendary.reignofnether.items.UnitItems.descStr;
 import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class EdibleFoodItem extends UnitItem {
@@ -22,12 +25,13 @@ public class EdibleFoodItem extends UnitItem {
 
     public EdibleFoodItem(Item item) {
          super(UnitItemBuilder.of(item)
-             .descId(getFoodDescId(item))
+             .uuid(getFoodUUID(item).toString())
              .type(UnitItemType.CONSUMABLE)
-             .desc(item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE ?
-                     "item.reignofnether.edible_food_item.desc.golden_apple" :
-                     "item.reignofnether.edible_food_item.desc")
-             .pointDesc(getPointDescKey(item), getPointDescArg(item))
+             // golden apples get their own flavour text, as upstream does
+             .desc(descStr(item == Items.ENCHANTED_GOLDEN_APPLE || item == Items.GOLDEN_APPLE
+                     ? "item.reignofnether.edible_food_item.desc.golden_apple"
+                     : "item.reignofnether.edible_food_item.desc"))
+             .pointDesc(getPointDesc(item))
              .consumeOnUse()
              .buyCost(50)
              .sellValue(10)
@@ -39,7 +43,7 @@ public class EdibleFoodItem extends UnitItem {
                  boolean noAbsorb = mob.getAbsorptionAmount() <= 0;
                  boolean isHurt = mob.getHealth() < ((Mob) unit).getMaxHealth();
                  if ((isApple && noAbsorb) || (!isApple && isHurt)) {
-                     Unit.startEatingOrDrinking(unit, new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), new ItemStack(item)));
+                     Unit.startEatingFood(unit, new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), new ItemStack(item)));
                      return true;
                  }
                  return false;
@@ -47,28 +51,18 @@ public class EdibleFoodItem extends UnitItem {
          );
     }
 
-    public static String getFoodDescId(Item item) {
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
-        return "edible_food_item:" + id;
+    public static UUID getFoodUUID(Item item) {
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        return UUID.nameUUIDFromBytes(("edible_food_item:" + id).getBytes(StandardCharsets.UTF_8));
     }
 
-    private static String getPointDescKey(Item item) {
+    private static String getPointDesc(Item item) {
         if (item == Items.GOLDEN_APPLE) {
-            return "item.reignofnether.edible_food_item_absorb.point1";
+            return descStr("item.reignofnether.edible_food_item_absorb.point1", GOLDEN_APPLE_ABSORB);
         } else if (item == Items.ENCHANTED_GOLDEN_APPLE) {
-            return "item.reignofnether.edible_food_item_absorb.point1";
+            return descStr("item.reignofnether.edible_food_item_absorb.point1", ENCHANTED_GOLDEN_APPLE_ABSORB);
         } else {
-            return "item.reignofnether.edible_food_item_heal.point1";
-        }
-    }
-
-    private static int getPointDescArg(Item item) {
-        if (item == Items.GOLDEN_APPLE) {
-            return GOLDEN_APPLE_ABSORB;
-        } else if (item == Items.ENCHANTED_GOLDEN_APPLE) {
-            return ENCHANTED_GOLDEN_APPLE_ABSORB;
-        } else {
-            return (int) ItemUtil.getFoodHealAmount(new ItemStack(item));
+            return descStr("item.reignofnether.edible_food_item_heal.point1", (int) ItemUtil.getFoodHealAmount(new ItemStack(item)));
         }
     }
 

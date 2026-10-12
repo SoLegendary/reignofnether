@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.time;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -15,6 +16,14 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import com.solegendary.reignofnether.time.TimeUtils;
+import com.solegendary.reignofnether.time.TimeServerEvents;
+import com.solegendary.reignofnether.time.TimeClientEvents;
+import com.solegendary.reignofnether.time.NightUtils;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
 
 public class NightUtils {
 
@@ -41,7 +50,7 @@ public class NightUtils {
         }
         List<LivingEntity> units = clientSide ? UnitClientEvents.getAllUnits() : UnitServerEvents.getAllUnits();
         for (LivingEntity le : units) {
-            MobEffectInstance mei = le.getEffect(MobEffectRegistrar.NIGHT_WARPING.get());
+            MobEffectInstance mei = le.getEffect(MobEffectHelpers.holder(MobEffectRegistrar.NIGHT_WARPING.get()));
             if (mei != null) {
                 int range = mei.getAmplifier() + 1;
                 float nightRangeSqr = range * range;

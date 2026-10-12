@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.ToggleFlying;
@@ -169,12 +170,12 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
             SynchedEntityData.defineId(WindcallerUnit.class, EntityDataSerializers.BOOLEAN);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
-        this.entityData.define(isFlyingAccessor, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
+        builder.define(isFlyingAccessor, false);
     }
 
     // combat stats
@@ -304,9 +305,9 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
                 this.setDeltaMovement(0,1,0);
 
             this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeedFlying);
-            this.getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get()).setBaseValue(attacksPerSecondFlying);
-            this.getAttribute(AttributeRegistrar.ATTACK_RANGE.get()).setBaseValue(attackRangeFlying + (hasLongshot() ? LONGSHOT_BONUS_RANGE : 0));
-            this.getAttribute(AttributeRegistrar.SIGHT_RANGE.get()).setBaseValue(sightRangeFlying);
+            this.getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get())).setBaseValue(attacksPerSecondFlying);
+            this.getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get())).setBaseValue(attackRangeFlying + (hasLongshot() ? LONGSHOT_BONUS_RANGE : 0));
+            this.getAttribute(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get())).setBaseValue(sightRangeFlying);
 
             if (!level().isClientSide() && doAnimationAndSound) {
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.CHARGE_SPELL, this);
@@ -322,9 +323,9 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
                 pendingGroundMoveTarget = MiscUtil.getHighestGroundBlock(level(), moveTarget);
 
             this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(movementSpeed);
-            this.getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get()).setBaseValue(attacksPerSecond);
-            this.getAttribute(AttributeRegistrar.ATTACK_RANGE.get()).setBaseValue(attackRange + (hasLongshot() ? LONGSHOT_BONUS_RANGE : 0));
-            this.getAttribute(AttributeRegistrar.SIGHT_RANGE.get()).setBaseValue(sightRange);
+            this.getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get())).setBaseValue(attacksPerSecond);
+            this.getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get())).setBaseValue(attackRange + (hasLongshot() ? LONGSHOT_BONUS_RANGE : 0));
+            this.getAttribute(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get())).setBaseValue(sightRange);
 
             if (!level().isClientSide() && doAnimationAndSound)
                 UnitAnimationClientboundPacket.sendBasicPacket(UnitAnimationAction.STOP, this);
@@ -411,13 +412,13 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
                 .add(Attributes.MAX_HEALTH, WindcallerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, WindcallerUnit.armorValue)
-                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), WindcallerUnit.maxHealth)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), sightRange)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_HEALTH.get()), WindcallerUnit.maxHealth)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), sightRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0);
     }
 
     public void tick() {
@@ -465,7 +466,6 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
         }
         super.remove(pReason);
     }
-
 
     private Set<BlockPos> highlightBps = new HashSet<>();
     private BlockPos lastOnPos = new BlockPos(0,0,0);
@@ -607,7 +607,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
         return pSpawnData;
     }
 

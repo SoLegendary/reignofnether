@@ -15,7 +15,6 @@ import javax.annotation.Nullable;
 @Mixin(Minecraft.class)
 public abstract class MixinMinecraft {
 
-
     @Shadow @Nullable private Overlay overlay;
 
     @Shadow @Nullable public Screen screen;

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.TradeAction;
@@ -57,6 +58,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.MenuConstructor;
@@ -64,15 +66,12 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.ServerChatEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.ServerChatEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -84,7 +83,25 @@ import static com.solegendary.reignofnether.building.BuildingServerEvents.saveBu
 import static com.solegendary.reignofnether.items.RandomItemDropRule.ENABLED_NON_STRICT;
 import static com.solegendary.reignofnether.items.RandomItemDropRule.ENABLED_STRICT;
 import static com.solegendary.reignofnether.time.TimeUtils.getWaveSurvivalTimeModifier;
-import static net.minecraft.world.level.GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK;
+import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.entity.animal.Rabbit;
+import com.solegendary.reignofnether.player.RTSPlayerScoresCommand;
+import com.solegendary.reignofnether.player.RTSPlayerSaveData;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.player.PlayerClientboundPacket;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.Mth;
+import com.solegendary.reignofnether.player.MatchStatsClientboundPacket;
+import com.solegendary.reignofnether.matchstart.MatchEndScreen;
+import com.solegendary.reignofnether.building.Buildings;
+import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.building.BuildingServerEvents;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingClientboundPacket;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingBlock;
+import com.solegendary.reignofnether.building.Building;
 
 // this class tracks all available players so that any serverside functions that need to affect the player can be
 // performed here by sending a client->server packet containing MC.player.getId()
@@ -164,8 +181,6 @@ public class PlayerServerEvents {
                 }
             }
             UnitServerEvents.maxPopulation = level.getGameRules().getInt(GameRuleRegistrar.MAX_POPULATION);
-
-            level.getGameRules().getRule(RULE_DISABLE_ELYTRA_MOVEMENT_CHECK).set(true, evt.getServer());
         }
     }
 
@@ -229,7 +244,7 @@ public class PlayerServerEvents {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent evt) {
+    public static void onServerTick(ServerTickEvent.Post evt) {
         serverLevel = evt.getServer().getLevel(Level.OVERWORLD);
 
         if (FogChunkSnapshot.shouldRecapture) {
@@ -237,7 +252,7 @@ public class PlayerServerEvents {
         }
 
         synchronized (rtsPlayers) {
-            if (evt.phase == TickEvent.Phase.END) {
+            {
                 for (RTSPlayer rtsPlayer : rtsPlayers)
                     rtsPlayer.serverTick();
 
@@ -262,7 +277,7 @@ public class PlayerServerEvents {
                 }
             }
         }
-        if (evt.phase == TickEvent.Phase.END) {
+        {
             saveTicks += 1;
             if (saveTicks >= SAVE_TICKS_MAX) {
                 ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
@@ -376,7 +391,10 @@ public class PlayerServerEvents {
             PlayerClientboundPacket.removeRTSPlayer(playerName);
         }
         for (RTSPlayer rtsPlayer : rtsPlayers) {
-            PlayerClientboundPacket.addRTSPlayer(rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id, rtsPlayer.startPosColorId, rtsPlayer.isDogPerson);
+            PlayerClientboundPacket.addRTSPlayer(
+                    rtsPlayer.name, rtsPlayer.faction, (long) rtsPlayer.id,
+                    rtsPlayer.startPosColorId, rtsPlayer.isDogPerson, true
+            );
         }
 
         if (rtsLocked) {
@@ -444,8 +462,8 @@ public class PlayerServerEvents {
             }
             boolean isDogPerson = random.nextBoolean();
 
-            EntityType<?> workerEntityType = ForgeRegistries.ENTITY_TYPES.getValue(faction.workerEntityType);
-	        EntityType<?> scoutEntityType = ForgeRegistries.ENTITY_TYPES.getValue(faction.scoutEntityType);
+            EntityType<?> workerEntityType = BuiltInRegistries.ENTITY_TYPE.get(faction.workerEntityType);
+	        EntityType<?> scoutEntityType = BuiltInRegistries.ENTITY_TYPE.get(faction.scoutEntityType);
 			if (faction.equals(Factions.VILLAGERS) && !isDogPerson) scoutEntityType = EntityRegistrar.SCOUT_CAT_UNIT.get();
             // first RTS join into a fresh game: snapshot the playable area for late joiners
             if (rtsPlayers.isEmpty() && !FogChunkSnapshot.hasAny() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel)) {
@@ -473,7 +491,8 @@ public class PlayerServerEvents {
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignResources(playerName);
-            PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId, isDogPerson);
+            PlayerClientboundPacket.addRTSPlayer(playerName, faction, (long) serverPlayer.getId(), startPosColorId, isDogPerson, false);
+            HeroServerEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(playerName));
 
             ServerLevel level = (ServerLevel) serverPlayer.level();
             ArrayList<Entity> startingWorkers = new ArrayList<>();
@@ -575,9 +594,9 @@ public class PlayerServerEvents {
             if (coopMode)
                 AlliancesServerEvents.applyCoopAlliances();
 
+
             PlayerClientboundPacket.syncRtsGameTime(rtsGameTicks);
             saveRTSPlayers();
-
         }
     }
 
@@ -597,7 +616,7 @@ public class PlayerServerEvents {
                 level = (ServerLevel) players.get(0).level();
             }
 
-            EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(faction.workerEntityType);
+            EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(faction.workerEntityType);
             RTSPlayer bot = RTSPlayer.getNewBot(name, faction);
             rtsPlayers.add(bot);
             FogOfWarServerEvents.invalidateRtsCache();
@@ -674,7 +693,7 @@ public class PlayerServerEvents {
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();
             ResourcesServerEvents.assignScenarioResources(rtsPlayer);
-            PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0, true);
+            PlayerClientboundPacket.addRTSPlayer(playerName, role.faction, (long) serverPlayer.getId(), 0, true, false);
 
             for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                 if (building.scenarioRoleIndex == roleIndex) {
@@ -812,10 +831,9 @@ public class PlayerServerEvents {
             }
 
             // apply all cheats - NOTE can cause concurrentModificationException clientside
-            if (words.length == 1 && words[0].equalsIgnoreCase("allcheats") && (
-                playerName.equalsIgnoreCase("solegendary") ||
-                playerName.equalsIgnoreCase("altsolegendary"))
-            ) {
+            // typed cheats already require permission 4, so the hardcoded account allowlist that used
+            // to be here only made the cheat unreachable for every other operator
+            if (words.length == 1 && words[0].equalsIgnoreCase("allcheats")) {
                 ResourcesServerEvents.addSubtractResources(new Resources(playerName, 99999, 99999, 99999));
                 UnitServerEvents.maxPopulation = 99999;
                 enableAllCheats(playerName);
@@ -847,6 +865,9 @@ public class PlayerServerEvents {
         if (leaving != null) {
             // drop fog bookkeeping so normal view-distance behavior resumes
             com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents.onPlayerExitOrthoview(leaving);
+            // Leaving the RTS camera must also drop the SPECTATOR mode that came with it, otherwise
+            // the player is left unable to break blocks anywhere afterwards - not just at buildings.
+            restoreGameModeOnLeave(leaving);
         }
     }
 
@@ -866,11 +887,16 @@ public class PlayerServerEvents {
             // Open GUI server-side
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
             MenuProvider namedProvider = new SimpleMenuProvider(provider, TopdownGuiContainer.TITLE);
-            NetworkHooks.openScreen(serverPlayer, namedProvider);
+            serverPlayer.openMenu(namedProvider);
 
             // Save original game mode only if it's not already saved for this session
             String playerName = serverPlayer.getName().getString();
-            playerDefaultGameModes.putIfAbsent(playerName, serverPlayer.gameMode.getGameModeForPlayer());
+            // SPECTATOR is never remembered as the mode to return to: it means the player was already
+            // spectating (or a previous RTS exit failed to restore), and saving it left players stuck
+            // in spectator - unable to break blocks anywhere - after leaving RTS.
+            GameType currentGameType = serverPlayer.gameMode.getGameModeForPlayer();
+            if (currentGameType != GameType.SPECTATOR)
+                playerDefaultGameModes.putIfAbsent(playerName, currentGameType);
 
             // Mark that this player has the GUI open
             playerGuiOpenStatus.put(playerName, true);
@@ -884,33 +910,25 @@ public class PlayerServerEvents {
 
     public static void closeTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
-
-        if (serverPlayer != null) {
-            String playerName = serverPlayer.getName().getString();
-
-            // Ensure player had GUI open before attempting to close
-            if (Boolean.TRUE.equals(playerGuiOpenStatus.get(playerName))) {
-                // Restore the player’s original game mode if saved
-                GameType originalGameType = playerDefaultGameModes.remove(playerName);
-
-                if (originalGameType != null) {
-                    serverPlayer.setGameMode(originalGameType);
-                } else {
-                    ReignOfNether.LOGGER.warn("No original game mode found for player {}", playerName);
-                }
-
-                if (SandboxServer.isSandboxPlayer(playerName)) {
-                    serverPlayer.setGameMode(GameType.CREATIVE);
-                }
-
-                // Mark that the GUI is now closed
-                playerGuiOpenStatus.remove(playerName);
-            } else {
-                ReignOfNether.LOGGER.warn("Attempted to close GUI for player {} who didn't have it open", playerName);
-            }
-        } else {
+        if (serverPlayer != null)
+            restoreGameModeOnLeave(serverPlayer);
+        else
             ReignOfNether.LOGGER.warn("serverPlayer is null, cannot close topdown GUI");
-        }
+    }
+
+    /**
+     * Returns a player to the game mode they had before entering RTS. Idempotent and safe to call
+     * from either the GUI-close or the orthoview-disable path, so whichever packet arrives does the
+     * restore exactly once. A player who was already spectating keeps spectating.
+     */
+    private static void restoreGameModeOnLeave(ServerPlayer serverPlayer) {
+        String playerName = serverPlayer.getName().getString();
+        playerGuiOpenStatus.remove(playerName);
+        GameType originalGameType = playerDefaultGameModes.remove(playerName);
+        if (originalGameType != null && originalGameType != GameType.SPECTATOR)
+            serverPlayer.setGameMode(originalGameType);
+        if (SandboxServer.isSandboxPlayer(playerName))
+            serverPlayer.setGameMode(GameType.CREATIVE);
     }
 
     public static void movePlayer(int playerId, double x, double y, double z) {
@@ -1056,18 +1074,8 @@ public class PlayerServerEvents {
 
                     PlayerClientboundPacket.defeat(playerName);
 
-                    // Remove ownership from all units and buildings of the defeated player
-                    for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
-                        if (entity instanceof Unit unit && unit.getOwnerName().equals(playerName)) {
-                            unit.resetBehaviours();
-                            Unit.resetBehaviours(unit);
-                            if (unit instanceof AttackerUnit aUnit)
-                                AttackerUnit.resetBehaviours(aUnit);
-                            if (unit instanceof WorkerUnit wUnit)
-                                WorkerUnit.resetBehaviours(wUnit);
-                            unit.setOwnerName("");
-                        }
-                    }
+                    // H.4: the defeated player's units go neutral right away, not on the next match reset
+                    neutraliseUnitsOf(playerName);
                     for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
                         if (building.ownerName.equals(playerName)) {
                             if (building instanceof ProductionPlacement productionBuilding)
@@ -1147,6 +1155,30 @@ public class PlayerServerEvents {
                 String n = p.name;
                 if (AlliancesServerEvents.isAllied(playerName, n) || n.equals(playerName)) continue;
                 defeat(n, Component.translatable("server.reignofnether.beacon_defeat").getString());
+            }
+        }
+    }
+
+    /**
+     * H.4: a defeated player's units become neutral (owned by nobody) immediately, not on the next
+     * match reset. The owner name is cleared first, then the behaviour resets run in a try/catch per
+     * unit: previously a single reset that threw aborted the whole loop, leaving every remaining unit
+     * still owned by the defeated player.
+     */
+    public static void neutraliseUnitsOf(String playerName) {
+        for (LivingEntity entity : new ArrayList<>(UnitServerEvents.getAllUnits())) {
+            if (!(entity instanceof Unit unit) || !unit.getOwnerName().equals(playerName))
+                continue;
+            unit.setOwnerName("");
+            try {
+                unit.resetBehaviours();
+                Unit.resetBehaviours(unit);
+                if (unit instanceof AttackerUnit aUnit)
+                    AttackerUnit.resetBehaviours(aUnit);
+                if (unit instanceof WorkerUnit wUnit)
+                    WorkerUnit.resetBehaviours(wUnit);
+            } catch (Exception e) {
+                ReignOfNether.LOGGER.error("Failed to reset behaviours of neutralised unit {}", entity.getId(), e);
             }
         }
     }
@@ -1270,7 +1302,9 @@ public class PlayerServerEvents {
         for (ServerPlayer player : serverLevel.players())
             player.setGameMode(GameType.SPECTATOR);
 
-        playerDefaultGameModes.replaceAll((key, oldValue) -> GameType.SPECTATOR);
+        // deliberately NOT rewriting the saved pre-RTS modes to SPECTATOR: doing so meant a player who
+        // later left the RTS camera was restored straight back into spectator and could not break
+        // blocks anywhere. The saved originals must survive a match reset.
         AlliancesServerEvents.playersWithAlliedControl.clear();
         TimeServerEvents.resetBloodMoon();
 
@@ -1332,7 +1366,9 @@ public class PlayerServerEvents {
         for (ServerPlayer player : serverLevel.players())
             player.setGameMode(GameType.SPECTATOR);
 
-        playerDefaultGameModes.replaceAll((key, oldValue) -> GameType.SPECTATOR);
+        // deliberately NOT rewriting the saved pre-RTS modes to SPECTATOR: doing so meant a player who
+        // later left the RTS camera was restored straight back into spectator and could not break
+        // blocks anywhere. The saved originals must survive a match reset.
         AlliancesServerEvents.playersWithAlliedControl.clear();
         TimeServerEvents.resetBloodMoon();
 

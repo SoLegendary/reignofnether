@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
-import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -31,7 +30,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
-import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.*;
+import net.minecraft.core.Holder;
 
 // Shared base for UnitItemInventoryButton and UnitItemShopButton.
 public abstract class AbstractUnitItemButton extends Button {
@@ -104,7 +103,7 @@ public abstract class AbstractUnitItemButton extends Button {
 
         if (hotkey != null && hotkey.getKey() == key) {
             if (MC.player != null)
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.2f, 1.0f);
             this.onLeftClickRelease.run();
         }
     }
@@ -130,7 +129,7 @@ public abstract class AbstractUnitItemButton extends Button {
 
             guiGraphics.pose().translate(drawX, drawY, 0);
             guiGraphics.pose().scale(SMALL_SCALE, SMALL_SCALE, 1.0f);
-            guiGraphics.pose().translate(-drawX, -drawY, 5);
+            guiGraphics.pose().translate(-drawX, -drawY, 0);
 
             guiGraphics.drawCenteredString(MC.font,
                     hotkeyStr,
@@ -153,7 +152,10 @@ public abstract class AbstractUnitItemButton extends Button {
 
         // ---- band 1: name (+qty) | type ----
         Style nameStyle = unitItem.rarity.getStyleModifier().apply(NAME_STYLE);
-        MutableComponent nameComp = Component.translatable("item.reignofnether." + unitItem.descId).withStyle(nameStyle);
+        String nameKey = "item.reignofnether." + unitItem.descId;
+        MutableComponent nameComp = Component.translatable(nameKey).withStyle(nameStyle);
+        if (nameComp.getString().equals(nameKey))
+            nameComp = Component.literal(itemStack.getDisplayName().getString()).withStyle(nameStyle);
         if (itemStack.getCount() > 1)
             nameComp.append(Component.literal(" (" + itemStack.getCount() + ")").withStyle(QTY_STYLE));
         FormattedCharSequence nameSeq = nameComp.getVisualOrderText();
@@ -168,7 +170,7 @@ public abstract class AbstractUnitItemButton extends Button {
 
         int descLineCount = bodyLines.size(); // marks where desc ends and points begin
 
-        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
+        List<String> points = new ArrayList<>(unitItem.getPointDescs());
         points.addAll(getEnchantmentDescs(itemStack));
         points.addAll(getAttributeDescs(unitItem));
         for (String point : points)
@@ -267,10 +269,10 @@ public abstract class AbstractUnitItemButton extends Button {
 
             if (footerLeftWidth > 0) {
                 int statX = x;
-                if (hasCooldown)
+                if (hasMana)
                     statX += drawStat(guiGraphics, font, COOLDOWN_ICON_RL, cooldownText, COOLDOWN_STYLE, statX, lineY, SMALL_SCALE);
-                if (hasMana) {
-                    if (hasCooldown)
+                if (hasCooldown) {
+                    if (hasMana)
                         statX += STAT_GAP - 1;
                     statX += drawStat(guiGraphics, font, MANA_ICON_RL, manaText, MANA_STYLE, statX, lineY, SMALL_SCALE);
                 }
@@ -292,8 +294,8 @@ public abstract class AbstractUnitItemButton extends Button {
     // "Sharpness V", "Unbreaking III", ... in NBT order
     protected static List<String> getEnchantmentDescs(ItemStack itemStack) {
         List<String> descs = new ArrayList<>();
-        for (Map.Entry<Enchantment, Integer> entry : EnchantmentHelper.getEnchantments(itemStack).entrySet())
-            descs.add(entry.getKey().getFullname(entry.getValue()).getString());
+        for (Map.Entry<Holder<Enchantment>, Integer> entry : itemStack.getEnchantments().entrySet())
+            descs.add(Enchantment.getFullname(entry.getKey(), entry.getValue()).getString());
         return descs;
     }
 
@@ -301,12 +303,43 @@ public abstract class AbstractUnitItemButton extends Button {
     public static List<String> getAttributeDescs(UnitItem unitItem) {
         List<String> descs = new ArrayList<>();
         for (Map.Entry<Attribute, AttributeModifier> entry : unitItem.attributes.entrySet()) {
-            Attribute attr = entry.getKey();
+            Attribute attribute = entry.getKey();
             AttributeModifier modifier = entry.getValue();
-            String attrStr = MiscUtil.getAttrString(attr, modifier);
-            descs.add(attrStr);
+            String descId = attribute.getDescriptionId();
+            boolean isMoveSpeed = attribute == Attributes.MOVEMENT_SPEED;
+            if (isMoveSpeed) {
+                descId = "attribute.reignofnether.tooltip.movement_speed";
+            }
+            String attrName = Component.translatable(descId).getString();
+            // attributes stored as fractions that read as percentages on the tooltip (upstream
+            // MiscUtil#getAttrString). Without this the 1.5.0 gear shows "+0.33 faster cooldowns"
+            // instead of "+33%".
+            boolean isPercentStat = List.of(
+                    AttributeRegistrar.EVASION_CHANCE.get(),
+                    AttributeRegistrar.CRITICAL_HIT_CHANCE.get(),
+                    AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(),
+                    AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(),
+                    AttributeRegistrar.LIFESTEAL.get(),
+                    AttributeRegistrar.MANA_ON_HIT.get(),
+                    AttributeRegistrar.FASTER_COOLDOWNS.get()
+            ).contains(attribute);
+            String valueStr = switch (modifier.operation()) {
+                case ADD_VALUE -> formatSigned(isPercentStat ? (int) (modifier.amount() * 100)
+                        : (isMoveSpeed ? modifier.amount() * 100 : modifier.amount()));
+                // truncation is deliberate: 0.33 * 100 is 33.000000000000004 as a double
+                case ADD_MULTIPLIED_BASE, ADD_MULTIPLIED_TOTAL -> formatSigned((int) (modifier.amount() * 100)) + "%";
+            };
+            descs.add(valueStr + " " + attrName);
         }
         return descs;
+    }
+
+    // drops trailing ".0" on whole numbers, always shows a sign
+    private static String formatSigned(double value) {
+        String num = (value == Math.floor(value))
+                ? String.valueOf((int) value)
+                : String.valueOf(value);
+        return (value >= 0 ? "+" : "") + num;
     }
 
     // on-screen width needed to fit both halves of a justified row without them touching

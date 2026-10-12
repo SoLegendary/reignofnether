@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import net.minecraft.core.HolderLookup;
 import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import com.solegendary.reignofnether.util.SavedDataCompat;
 
 public class NetherZoneSaveData extends SavedData {
 
@@ -26,9 +28,7 @@ public class NetherZoneSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld()
-            .getDataStorage()
-            .computeIfAbsent(NetherZoneSaveData::load, NetherZoneSaveData::create, "saved-netherzone-data");
+        return SavedDataCompat.computeIfAbsent(server, "saved-netherzone-data", NetherZoneSaveData::create, NetherZoneSaveData::load);
     }
 
     public static NetherZoneSaveData load(CompoundTag tag) {
@@ -61,7 +61,7 @@ public class NetherZoneSaveData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         //ReignOfNether.LOGGER.info("NetherZoneSaveData.save");
 
         ListTag list = new ListTag();

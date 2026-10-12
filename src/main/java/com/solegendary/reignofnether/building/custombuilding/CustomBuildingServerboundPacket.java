@@ -4,13 +4,24 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.util.MiscUtil;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class CustomBuildingServerboundPacket {
+public class CustomBuildingServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<CustomBuildingServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "custom_building_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<CustomBuildingServerboundPacket> type() {
+        return TYPE;
+    }
 
     public CustomBuildingAction action;
     public String buildingName;
@@ -20,32 +31,32 @@ public class CustomBuildingServerboundPacket {
 
     public static void deregisterBuilding(String buildingName) {
         if (!MiscUtil.isConnected()) return;
-        PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(CustomBuildingAction.DEREGISTER, buildingName, false, 0, ""));
+        PacketHandler.sendToServer(new CustomBuildingServerboundPacket(CustomBuildingAction.DEREGISTER, buildingName, false, 0, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, boolean boolValue) {
         if (!MiscUtil.isConnected()) return;
-        PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, boolValue, 0, ""));
+        PacketHandler.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, boolValue, 0, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, int intValue) {
         if (!MiscUtil.isConnected()) return;
-        PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, intValue, ""));
+        PacketHandler.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, intValue, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, String strValue) {
         if (!MiscUtil.isConnected()) return;
-        PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, 0, strValue));
+        PacketHandler.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, 0, strValue));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName) {
         if (!MiscUtil.isConnected()) return;
-        PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, 0, ""));
+        PacketHandler.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, 0, ""));
     }
 
     public static void customiseBuilding(CustomBuildingAction action, String buildingName, int intValue, String strValue) {
         if (!MiscUtil.isConnected()) return;
-        PacketHandler.INSTANCE.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, intValue, strValue));
+        PacketHandler.sendToServer(new CustomBuildingServerboundPacket(action, buildingName, false, intValue, strValue));
     }
 
     public CustomBuildingServerboundPacket(CustomBuildingAction action,
@@ -60,7 +71,7 @@ public class CustomBuildingServerboundPacket {
         this.strValue = strValue;
     }
 
-    public CustomBuildingServerboundPacket(FriendlyByteBuf buffer) {
+    public CustomBuildingServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(CustomBuildingAction.class);
         this.buildingName = buffer.readUtf();
         this.boolValue = buffer.readBoolean();
@@ -68,7 +79,7 @@ public class CustomBuildingServerboundPacket {
         this.strValue = buffer.readUtf();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeUtf(this.buildingName);
         buffer.writeBoolean(this.boolValue);
@@ -77,9 +88,8 @@ public class CustomBuildingServerboundPacket {
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
             if (!SandboxServer.isAnyoneASandboxPlayer())
                 return;
 
@@ -115,9 +125,7 @@ public class CustomBuildingServerboundPacket {
                     case SET_MAX_HEALTH -> customBuilding.maxHealth = this.intValue;
                 }
             }
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

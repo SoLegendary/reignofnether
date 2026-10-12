@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
@@ -99,11 +99,11 @@ public abstract class ClientChunkCacheMixin {
     // Snapshot the remembered terrain before the client forgets the chunk. The live client chunk already
     // holds the masked view (this mixin has been maintaining it), so capturing it verbatim is correct.
     @Inject(method = "drop", at = @At("HEAD"))
-    private void reignofnether$rememberDroppedChunk(int x, int z, CallbackInfo ci) {
+    // 1.21.1 changed ClientChunkCache#drop from (int, int) to taking a ChunkPos.
+    private void reignofnether$rememberDroppedChunk(ChunkPos cpos, CallbackInfo ci) {
         if (!FogOfWarClientEvents.isEnabled()) return;
-        LevelChunk chunk = ((ClientChunkCache) (Object) this).getChunk(x, z, ChunkStatus.FULL, false);
+        LevelChunk chunk = ((ClientChunkCache) (Object) this).getChunk(cpos.x, cpos.z, ChunkStatus.FULL, false);
         if (chunk == null || chunk.isEmpty()) return;
-        ChunkPos cpos = new ChunkPos(x, z);
         Map<ChunkPos, PalettedContainer<BlockState>[]> memory = ron_memory();
         memory.remove(cpos); // re-insert so iteration order stays newest-last
         memory.put(cpos, ron_snapshot(chunk));

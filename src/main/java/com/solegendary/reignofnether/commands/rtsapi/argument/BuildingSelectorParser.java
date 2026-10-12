@@ -76,8 +76,8 @@ public class BuildingSelectorParser {
 	public BuildingSelector getSelector() {
 		AABB aabb;
 		if (this.deltaX == null && this.deltaY == null && this.deltaZ == null) {
-			if (this.distance.getMax() != null) {
-				double d0 = this.distance.getMax();
+			if (this.distance.max().isPresent()) {
+				double d0 = this.distance.max().get();
 				aabb = new AABB(-d0, -d0, -d0, d0 + 1.0D, d0 + 1.0D, d0 + 1.0D);
 			} else {
 				aabb = null;

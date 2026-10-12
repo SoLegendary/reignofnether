@@ -10,6 +10,7 @@ import static com.solegendary.reignofnether.resources.ResourcesServerEvents.NEUT
 
 import com.google.common.collect.Sets;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.util.ChunkTicketUtil;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.attackwarnings.AttackWarningClientboundPacket;
@@ -100,9 +101,9 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.world.ForgeChunkManager;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+
 
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
@@ -381,7 +382,6 @@ public class BuildingPlacement {
     public static Button getBuildButton() {
         return null;
     }
-
 
     public boolean canAfford(String ownerName) {
         if (SandboxServer.isAnyoneASandboxPlayer() &&
@@ -671,7 +671,11 @@ public class BuildingPlacement {
             return true;
         }
         if (isBuilt) {
-            return getBlocksPlacedPercent() <= this.minBlocksPercent;
+            // getHealth() subtracts fractional damage (partialBlocksDestroyed), which the block
+            // percentage does not, so the HP bar can hit 0 a little before 50% of the blocks are
+            // gone. Treating 0 HP as destroyed as well keeps the bar and the collapse in step and
+            // stops a building standing there with no HP left.
+            return getBlocksPlacedPercent() <= this.minBlocksPercent || getHealth() <= 0;
         } else // if the building is still under construction, we instead use the highest health we've ever reached as
         // the effective max health
         {
@@ -869,9 +873,8 @@ public class BuildingPlacement {
         if (!level.isClientSide()) {
             BlockPos centreBp = this.centrePos;
             ChunkAccess chunk = level.getChunk(centreBp);
-            ForgeChunkManager.forceChunk((ServerLevel) level,
-                ReignOfNether.MOD_ID,
-                centreBp,
+            ChunkTicketUtil.forceChunk((ServerLevel) level,
+                this,
                 chunk.getPos().x,
                 chunk.getPos().z,
                 add,
@@ -1096,11 +1099,11 @@ public class BuildingPlacement {
                         safeTag.remove("event_distance");
                         safeTag.remove("selector");
                         safeTag.remove("source");
-                        be.load(safeTag);
+                        be.loadWithComponents(safeTag, level.registryAccess());
                         be.setChanged();
                     }
                 } else {
-                    BlockEntity be = BlockEntity.loadStatic(bp, bs, bNbt);
+                    BlockEntity be = BlockEntity.loadStatic(bp, bs, bNbt, level.registryAccess());
                     if (be != null)
                         level.setBlockEntity(be);
                 }
@@ -1250,7 +1253,6 @@ public class BuildingPlacement {
                     origins.add(new BlockPos(x, y, z));
         return origins;
     }
-
 
     public int getUpgradeLevel() {
         return getBuilding().getUpgradeLevel(this);

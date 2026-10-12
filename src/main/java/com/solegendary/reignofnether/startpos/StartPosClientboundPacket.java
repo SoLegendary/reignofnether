@@ -5,16 +5,26 @@ import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class StartPosClientboundPacket {
+public class StartPosClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<StartPosClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "start_pos_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<StartPosClientboundPacket> type() {
+        return TYPE;
+    }
 
     StartPosAction action;
     Faction faction;
@@ -23,62 +33,62 @@ public class StartPosClientboundPacket {
     int colorId;
 
     public static void addPos(StartPos startPos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.ADD, startPos.pos, startPos.faction, startPos.playerName, startPos.colorId));
     }
 
     public static void addDisabledPos(StartPos startPos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.ADD_DISABLED, startPos.pos, startPos.faction, startPos.playerName, startPos.colorId));
     }
 
     public static void removePos(BlockPos pos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.REMOVE, pos, Factions.NONE, "", 0));
     }
 
     public static void reservePos(BlockPos pos, Faction faction, String playerName) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.RESERVE, pos, faction, playerName, 0));
     }
 
     public static void unreservePos(BlockPos pos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.UNRESERVE, pos, Factions.NONE, "", 0));
     }
 
     public static void reset() {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.RESET, new BlockPos(0,0,0), Factions.NONE, "", 0));
     }
 
     public static void startGameCountdown() {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.SET_GAME_STARTING, new BlockPos(0,0,0), Factions.NONE, "", 0));
     }
 
     public static void cancelStartGameCountdown() {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.UNSET_GAME_STARTING, new BlockPos(0,0,0), Factions.NONE, "", 0));
     }
 
     public static void readyPlayer(String playerName) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.PLAYER_READY, new BlockPos(0,0,0), Factions.NONE, playerName, 0));
     }
 
     public static void unreadyPlayer(String playerName) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.PLAYER_UNREADY, new BlockPos(0,0,0), Factions.NONE, playerName, 0));
     }
 
     public static void enablePos(BlockPos pos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.ENABLE, pos, Factions.NONE, "", 0));
     }
 
     public static void disablePos(BlockPos pos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new StartPosClientboundPacket(StartPosAction.DISABLE, pos, Factions.NONE, "", 0));
     }
 
@@ -90,7 +100,7 @@ public class StartPosClientboundPacket {
         this.colorId = colorId;
     }
 
-    public StartPosClientboundPacket(FriendlyByteBuf buffer) {
+    public StartPosClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(StartPosAction.class);
         this.blockPos = buffer.readBlockPos();
         this.faction = Factions.getFaction(buffer.readResourceLocation());
@@ -98,7 +108,7 @@ public class StartPosClientboundPacket {
         this.colorId = buffer.readInt();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeBlockPos(this.blockPos);
         buffer.writeResourceLocation(this.faction.key);
@@ -107,11 +117,10 @@ public class StartPosClientboundPacket {
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         switch (action) {
                             case ADD -> {
@@ -154,10 +163,8 @@ public class StartPosClientboundPacket {
                             case ENABLE -> StartPosClientEvents.setPosEnabled(blockPos, true);
                             case DISABLE -> StartPosClientEvents.setPosEnabled(blockPos, false);
                         }
-                        success.set(true);
                     });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

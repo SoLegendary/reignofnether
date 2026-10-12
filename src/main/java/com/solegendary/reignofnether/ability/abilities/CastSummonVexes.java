@@ -3,7 +3,7 @@ package com.solegendary.reignofnether.ability.abilities;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.enchantments.VigorEnchantment;
+import com.solegendary.reignofnether.enchantments.RTSEnchantments;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.research.ResearchClient;
@@ -81,10 +81,9 @@ public class CastSummonVexes extends Ability {
         if (evokerUnit == null) return;
         int vigorLevel = evokerUnit.getVigorLevel();
         if (vigorLevel > 0)
-            cooldown *= Math.pow(VigorEnchantment.CD_MULTIPLIER, vigorLevel);
+            cooldown *= Math.pow(RTSEnchantments.VIGOR_CD_MULTIPLIER, vigorLevel);
         super.setCooldown(cooldown, evokerUnit);
     }
-
 
     @Override
     public void setToMaxCooldown(Unit unit) {
@@ -93,7 +92,7 @@ public class CastSummonVexes extends Ability {
         float cd = cooldownMax;
         int vigorLevel = evokerUnit.getVigorLevel();
         if (vigorLevel > 0)
-            cd *= Math.pow(VigorEnchantment.CD_MULTIPLIER, vigorLevel);
+            cd *= Math.pow(RTSEnchantments.VIGOR_CD_MULTIPLIER, vigorLevel);
         setCooldown(cd, evokerUnit);
     }
 

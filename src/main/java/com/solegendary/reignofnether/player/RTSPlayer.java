@@ -17,6 +17,9 @@ import java.util.*;
 import static com.solegendary.reignofnether.ability.TradeAction.*;
 import static com.solegendary.reignofnether.ability.abilities.TradeResources.*;
 import static com.solegendary.reignofnether.player.PlayerServerEvents.TICKS_TO_REVEAL;
+import com.solegendary.reignofnether.player.RTSPlayerScores;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 
 public class RTSPlayer {
     public String name;

@@ -52,7 +52,9 @@ public class BuildingSelectorOptions {
 			register("distance", (p_121421_) -> {
 				int i = p_121421_.getReader().getCursor();
 				MinMaxBounds.Doubles minmaxbounds$doubles = MinMaxBounds.Doubles.fromReader(p_121421_.getReader());
-				if ((minmaxbounds$doubles.getMin() == null || !(minmaxbounds$doubles.getMin() < 0.0D)) && (minmaxbounds$doubles.getMax() == null || !(minmaxbounds$doubles.getMax() < 0.0D))) {
+				// 1.21.1 turned MinMaxBounds.Doubles into a record of Optionals, so the old
+				// nullable getMin()/getMax() became min()/max() returning Optional.
+				if ((minmaxbounds$doubles.min().isEmpty() || !(minmaxbounds$doubles.min().get() < 0.0D)) && (minmaxbounds$doubles.max().isEmpty() || !(minmaxbounds$doubles.max().get() < 0.0D))) {
 					p_121421_.setDistance(minmaxbounds$doubles);
 				} else {
 					p_121421_.getReader().setCursor(i);
@@ -114,7 +116,7 @@ public class BuildingSelectorOptions {
 				ResourceLocation resourcelocation = ResourceLocation.read(p_121534_.getReader());
 				Building building = resolveBuilding(resourcelocation.toString());
 				if (building == null) {
-					throw ERROR_BUILDING_TYPE_INVALID.createWithContext(p_121534_.getReader(), resourcelocation);
+					throw ERROR_BUILDING_TYPE_INVALID.createWithContext(p_121534_.getReader(), resourcelocation.toString());
 				}
 				p_121534_.limitToType(building.name);
 			}, (p_121532_) -> !p_121532_.isTypeLimited(), Component.translatable("argument.reignofnether.building.options.type.description"));
@@ -142,7 +144,7 @@ public class BuildingSelectorOptions {
 			register("health", (p_121417_) -> {
 				int i = p_121417_.getReader().getCursor();
 				MinMaxBounds.Ints minmaxbounds$ints = MinMaxBounds.Ints.fromReader(p_121417_.getReader());
-				if ((minmaxbounds$ints.getMin() == null || minmaxbounds$ints.getMin() >= 0) && (minmaxbounds$ints.getMax() == null || minmaxbounds$ints.getMax() >= 0)) {
+				if ((minmaxbounds$ints.min().isEmpty() || minmaxbounds$ints.min().get() >= 0) && (minmaxbounds$ints.max().isEmpty() || minmaxbounds$ints.max().get() >= 0)) {
 					p_121417_.setHealth(minmaxbounds$ints);
 				} else {
 					p_121417_.getReader().setCursor(i);

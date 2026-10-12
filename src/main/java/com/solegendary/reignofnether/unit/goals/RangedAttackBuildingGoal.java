@@ -18,7 +18,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 
-
 public class RangedAttackBuildingGoal<T extends Mob> extends Goal {
     private final T mob;
     private BlockPos blockTarget = null;

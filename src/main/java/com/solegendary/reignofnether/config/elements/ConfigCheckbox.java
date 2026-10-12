@@ -1,46 +1,59 @@
 package com.solegendary.reignofnether.config.elements;
 
-
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Checkbox;
-import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
-public class ConfigCheckbox extends Checkbox {
+/**
+ * Checkbox bound to a {@code ModConfigSpec.ConfigValue<Boolean>}, with a different label for the
+ * on and off states.
+ *
+ * <p>In 1.20.1 this subclassed {@code Checkbox} and called its {@code (x, y, w, h, message,
+ * selected, showTooltip)} constructor. 1.21.1 dropped that constructor — the checkbox now sizes
+ * itself from a {@code Font} and is built through {@code Checkbox.builder} — and the result is no
+ * longer a type we can subclass usefully, since the constructor is package-private. So this is
+ * now a small builder that wraps a vanilla {@link Checkbox} and forwards positioning to it.
+ */
+public class ConfigCheckbox {
 
-    private final ForgeConfigSpec.ConfigValue<Boolean> configValue;
+    private final ModConfigSpec.ConfigValue<Boolean> configValue;
     private final String labelOn;
     private final String labelOff;
+    private final Checkbox checkbox;
 
-    public ConfigCheckbox(ForgeConfigSpec.ConfigValue<Boolean> configValue, String label) {
-        super(0, 0, 1, 1, Component.literal(label), configValue.get(), true);
-        this.configValue = configValue;
-        this.labelOn = label;
-        this.labelOff = label;
+    public ConfigCheckbox(ModConfigSpec.ConfigValue<Boolean> configValue, String label) {
+        this(configValue, label, label);
     }
 
-    public ConfigCheckbox(ForgeConfigSpec.ConfigValue<Boolean> configValue, String labelOn, String labelOff) {
-        super(0, 0, 1, 1, Component.literal(configValue.get() ? labelOn : labelOff), configValue.get(), true);
+    public ConfigCheckbox(ModConfigSpec.ConfigValue<Boolean> configValue, String labelOn, String labelOff) {
         this.configValue = configValue;
         this.labelOn = labelOn;
         this.labelOff = labelOff;
+
+        this.checkbox = Checkbox
+                .builder(Component.literal(configValue.get() ? labelOn : labelOff), Minecraft.getInstance().font)
+                .selected(configValue.get())
+                .onValueChange((button, selected) -> {
+                    configValue.set(selected);
+                    button.setMessage(Component.literal(selected ? labelOn : labelOff));
+                })
+                .build();
     }
 
-    @Override
-    public void onPress() {
-        super.onPress();
-        configValue.set(this.selected());
-        setMessage(Component.literal(this.selected() ? labelOn : labelOff));
-    }
-
+    /**
+     * Positions the wrapped checkbox and keeps the chain going; {@link #size(int, int)} finishes it
+     * and hands back the widget to add to the screen.
+     */
     public ConfigCheckbox pos(int x, int y) {
-        super.setPosition(x, y);
+        checkbox.setX(x);
+        checkbox.setY(y);
         return this;
     }
 
-    public ConfigCheckbox size(int w, int h) {
-        super.setWidth(w);
-        super.setHeight(h);
-        return this;
+    public Checkbox size(int w, int h) {
+        checkbox.setWidth(w);
+        checkbox.setHeight(h);
+        return checkbox;
     }
 }

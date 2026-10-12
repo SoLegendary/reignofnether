@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.IPlantable;
+import net.neoforged.neoforge.common.SpecialPlantable;
 
 import java.util.*;
 
@@ -101,7 +101,7 @@ public class WaveSpawner {
         for (BlockPos pos : bps) {
             BlockState bsAdj = level.getBlockState(pos);
             if (!bsAdj.getFluidState().isEmpty() ||
-                    (bsAdj instanceof IPlantable plantable && plantable instanceof LiquidBlockContainer))
+                    (bsAdj instanceof SpecialPlantable plantable && plantable instanceof LiquidBlockContainer))
                 level.setBlockAndUpdate(pos, bsToPlace);
         }
     }

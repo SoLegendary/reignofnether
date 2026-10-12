@@ -8,23 +8,25 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffectInstance;
 
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import com.solegendary.reignofnether.hud.effecticons.MobEffectIcon;
 
 // "Buttons" that are just to show off mob effects
 public class MobEffectIcon extends Button {
 
     public static final int ICON_SIZE = 8;
-    public final MobEffect effect;
+    public final Holder<MobEffect> effect;
     private final String descId;
     private final Long startTime = TimeClientEvents.getClientTime();
     public int duration = 0;
     private static final int MIN_DURATION_SHOWN = 40; // don't show really short effects as most of them are just auras
 
-    public MobEffectIcon(MobEffect effect, ResourceLocation iconRl, String descId) {
+    public MobEffectIcon(Holder<MobEffect> effect, ResourceLocation iconRl, String descId) {
         super("Passive Icon", ICON_SIZE, iconRl, null, () -> false, () -> true, () -> true, null, null, List.of());
         this.frameResource = getFrameRl(effect);
         this.effect = effect;
@@ -37,8 +39,8 @@ public class MobEffectIcon extends Button {
         this.innerIconSizeModifier = -1;
     }
 
-    private ResourceLocation getFrameRl(MobEffect effect) {
-        return switch (effect.getCategory()) {
+    private ResourceLocation getFrameRl(Holder<MobEffect> effect) {
+        return switch (effect.value().getCategory()) {
             case BENEFICIAL -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_diamond.png");
             case HARMFUL -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_red.png");
             case NEUTRAL -> ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");

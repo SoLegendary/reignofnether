@@ -20,12 +20,12 @@ public class EnchantmentIcons {
 
     private static ItemStack getEnchantedItemStack(Item item) {
         ItemStack itemStack = new ItemStack(item);
-        itemStack.enchant(Enchantments.UNBREAKING, 1);
+        itemStack.enchant(EnchantmentRegistrar.vanilla(Enchantments.UNBREAKING), 1);
         return itemStack;
     }
 
     public static final EnchantmentIcon MULTISHOT = new EnchantmentIcon(
-            Enchantments.MULTISHOT,
+            EnchantmentRegistrar.vanilla(Enchantments.MULTISHOT),
             EquipmentSlot.MAINHAND,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/multishot.png"),
             List.of(
@@ -34,7 +34,7 @@ public class EnchantmentIcons {
             )
     );
     public static final EnchantmentIcon QUICK_CHARGE = new EnchantmentIcon(
-            Enchantments.QUICK_CHARGE,
+            EnchantmentRegistrar.vanilla(Enchantments.QUICK_CHARGE),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.CROSSBOW),
             List.of(
@@ -52,7 +52,7 @@ public class EnchantmentIcons {
             )
     );
     public static final EnchantmentIcon SHARPNESS = new EnchantmentIcon(
-            Enchantments.SHARPNESS,
+            EnchantmentRegistrar.vanilla(Enchantments.SHARPNESS),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.IRON_SWORD),
             List.of(
@@ -79,7 +79,7 @@ public class EnchantmentIcons {
             )
     );
     public static final EnchantmentIcon POWER = new EnchantmentIcon(
-            Enchantments.POWER_ARROWS,
+            EnchantmentRegistrar.vanilla(Enchantments.POWER),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.BOW),
             List.of(
@@ -106,7 +106,7 @@ public class EnchantmentIcons {
             )
     );
     public static final EnchantmentIcon PUNCH = new EnchantmentIcon(
-            Enchantments.PUNCH_ARROWS,
+            EnchantmentRegistrar.vanilla(Enchantments.PUNCH),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.BOW),
             List.of(
@@ -124,7 +124,7 @@ public class EnchantmentIcons {
             )
     );
     public static final EnchantmentIcon PIERCING = new EnchantmentIcon(
-            Enchantments.PIERCING,
+            EnchantmentRegistrar.vanilla(Enchantments.PIERCING),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.ARROW),
             List.of(
@@ -142,7 +142,7 @@ public class EnchantmentIcons {
             )
     );
     public static final EnchantmentIcon THORNS = new EnchantmentIcon(
-            Enchantments.THORNS,
+            EnchantmentRegistrar.vanilla(Enchantments.THORNS),
             EquipmentSlot.CHEST,
             getEnchantedItemStack(Items.CHAINMAIL_CHESTPLATE),
             List.of(
@@ -151,7 +151,7 @@ public class EnchantmentIcons {
             )
     );
     public static final EnchantmentIcon FIRE_ASPECT = new EnchantmentIcon(
-            Enchantments.FIRE_ASPECT,
+            EnchantmentRegistrar.vanilla(Enchantments.FIRE_ASPECT),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.NETHERITE_SWORD),
             List.of(
@@ -160,7 +160,7 @@ public class EnchantmentIcons {
             )
     );
     public static final EnchantmentIcon FLAME = new EnchantmentIcon(
-            Enchantments.FLAMING_ARROWS,
+            EnchantmentRegistrar.vanilla(Enchantments.FLAME),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.TRIDENT),
             List.of(
@@ -170,7 +170,7 @@ public class EnchantmentIcons {
     );
 
     public static final EnchantmentIcon LOOTING = new EnchantmentIcon(
-            Enchantments.MOB_LOOTING,
+            EnchantmentRegistrar.vanilla(Enchantments.LOOTING),
             EquipmentSlot.MAINHAND,
             getEnchantedItemStack(Items.EMERALD),
             List.of(

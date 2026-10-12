@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -9,6 +10,7 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.WindcallerUnit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,6 +26,8 @@ import java.util.EnumSet;
 import java.util.Random;
 
 import static com.solegendary.reignofnether.unit.goals.UnitCrossbowAttackGoal.CrossbowState.*;
+import com.solegendary.reignofnether.unit.goals.UnitCrossbowAttackGoal;
+import com.solegendary.reignofnether.unit.goals.RangedAttackBuildingGoal;
 // - has an attack cooldown parameter in the constructor
 // - has no pathfinding delay
 // - stops when the target is dead
@@ -120,15 +124,15 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
     public void tickChargeCrossbow() {
         ItemStack itemstack = this.mob.getItemBySlot(EquipmentSlot.MAINHAND);
         if (this.crossbowState == UNCHARGED) {
-            int ticks = CrossbowItem.getChargeDuration(itemstack);
-            this.mob.addEffect(new MobEffectInstance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), ticks, 3, true, false));
+            int ticks = CrossbowItem.getChargeDuration(itemstack, this.mob);
+            this.mob.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.MINOR_MOVEMENT_SLOWDOWN.get(), ticks, 3, true, false));
             this.mob.startUsingItem(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof CrossbowItem));
             this.crossbowState = CHARGING;
             this.mob.setChargingCrossbow(true);
         }
         else if (this.crossbowState == CHARGING) {
             int i = this.mob.getTicksUsingItem();
-            if (i >= CrossbowItem.getChargeDuration(itemstack) + windupTime) {
+            if (i >= CrossbowItem.getChargeDuration(itemstack, this.mob) + windupTime) {
                 this.mob.releaseUsingItem();
                 this.crossbowState = CHARGED;
                 this.attackCooldown = attackCooldownMax;
@@ -223,7 +227,8 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
     public void performAttack() {
         this.mob.performCrossbowAttack(this.mob, 1.6F);
         ItemStack itemstack1 = this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof CrossbowItem));
-        CrossbowItem.setCharged(itemstack1, false);
+        // 1.21.1 dropped CrossbowItem#setCharged in favour of the CHARGED_PROJECTILES component.
+        itemstack1.remove(DataComponents.CHARGED_PROJECTILES);
         this.crossbowState = UNCHARGED;
     }
 

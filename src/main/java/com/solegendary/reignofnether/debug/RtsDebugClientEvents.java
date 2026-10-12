@@ -2,10 +2,11 @@ package com.solegendary.reignofnether.debug;
 
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.util.GuiLayerCompat;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 // RTS debug mode toggle + top-right perf-stats HUD. The F-key cycles the shared display mode; the navmesh and
@@ -52,11 +53,13 @@ public class RtsDebugClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiOverlayEvent.Pre evt) {
+    public static void onRenderOverlay(RenderGuiLayerEvent.Pre evt) {
+        if (!GuiLayerCompat.isTopLayer(evt))
+            return;
         if (displayMode == DebugDisplayMode.NONE)
             return;
 
-        int x = evt.getWindow().getGuiScaledWidth() - (displayMode == DebugDisplayMode.NONE ? 85 : 95);
+        int x = MC.getWindow().getGuiScaledWidth() - (displayMode == DebugDisplayMode.NONE ? 85 : 95);
         int y = 25;
         int lineH = 10;
 

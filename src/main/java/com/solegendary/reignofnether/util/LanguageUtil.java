@@ -2,8 +2,8 @@ package com.solegendary.reignofnether.util;
 
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.locale.Language;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 public class LanguageUtil {
     public static String getTranslation(String translation, Object... objects) {

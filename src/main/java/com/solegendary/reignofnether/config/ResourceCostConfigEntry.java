@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.config;
 
 import com.solegendary.reignofnether.resources.ResourceCost;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,11 +9,11 @@ import java.util.List;
 public class ResourceCostConfigEntry {
     public static final List<ResourceCostConfigEntry> ENTRIES = new ArrayList<>();
 
-    private ForgeConfigSpec.ConfigValue<Integer> FOOD;
-    private ForgeConfigSpec.ConfigValue<Integer> WOOD;
-    private ForgeConfigSpec.ConfigValue<Integer> ORE;
-    private ForgeConfigSpec.ConfigValue<Integer> SECONDS;
-    private ForgeConfigSpec.ConfigValue<Integer> POPULATION;
+    private ModConfigSpec.ConfigValue<Integer> FOOD;
+    private ModConfigSpec.ConfigValue<Integer> WOOD;
+    private ModConfigSpec.ConfigValue<Integer> ORE;
+    private ModConfigSpec.ConfigValue<Integer> SECONDS;
+    private ModConfigSpec.ConfigValue<Integer> POPULATION;
 
     private final int default_food;
     private final int default_wood;
@@ -48,7 +48,7 @@ public class ResourceCostConfigEntry {
     }
 
     //Defines each config value for the given ResourceCostConfigEntry
-    public void define(ForgeConfigSpec.Builder builder) {
+    public void define(ModConfigSpec.Builder builder) {
         builder.push(this.comment);
         this.FOOD = builder.define("Food cost", this.default_food);
         this.WOOD = builder.define("Wood cost", this.default_wood);

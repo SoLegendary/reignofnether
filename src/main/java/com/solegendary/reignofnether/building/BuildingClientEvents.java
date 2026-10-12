@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.util.GuiLayerCompat;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -33,9 +34,11 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.util.LevelRenderCompat;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.gui.screens.inventory.BeaconScreen;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.renderer.RenderType;
@@ -44,6 +47,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
@@ -56,10 +60,10 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
@@ -153,7 +157,6 @@ public class BuildingClientEvents {
         }));
         UnitClientEvents.clearSelectedUnits();
     }
-
 
     // switch to the building with the least production, so we can spread out production items
     public static void switchHudToIdlestBuilding() {
@@ -260,8 +263,8 @@ public class BuildingClientEvents {
         int maxX = -999999;
         int maxY = -999999;
         int maxZ = -999999;
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
-        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
+        ResourceLocation rl = ResourceLocation.parse("neoforge:textures/white.png");
+        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(BUILDING_FILL);
         for (BuildingBlock block : blocks) {
             if (isBridge(buildingToPlace)
                     && MC.level != null && AbstractBridge.shouldCullBlock(originPos.offset(0, 1, 0), block, MC.level, true)) {
@@ -273,7 +276,7 @@ public class BuildingClientEvents {
             // ModelData modelData = renderer.getBlockModel(bs).getModelData(MC.level, bp, bs, ModelDataManager
             // .getModelData(MC.level, bp));
 
-            matrix.pushPose();
+matrix.pushPose();
             Entity cam = MC.cameraEntity;
             matrix.translate( // bp is center of block whereas render is corner, so offset by 0.5
                     bp.getX() - cam.getX(), bp.getY() - cam.getY() - 0.6, bp.getZ() - cam.getZ());
@@ -291,7 +294,7 @@ public class BuildingClientEvents {
                     15728880,
                     // red if invalid, else green
                     overlayColour,
-                    net.minecraftforge.client.model.data.ModelData.EMPTY,
+                    net.neoforged.neoforge.client.model.data.ModelData.EMPTY,
                     null
             );
 
@@ -349,16 +352,28 @@ public class BuildingClientEvents {
 
     /*
     @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+    public static void onRenderOverLay(RenderGuiLayerEvent.Pre evt) {
+        if (!GuiLayerCompat.isTopLayer(evt))
+            return;
         if (MC.level == null)
             return;
 
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+        MiscUtil.drawDebugStrings(evt.getGuiGraphics().pose(), MC.font, new String[] {
                 "dist to border: " + MC.level.getWorldBorder().getDistanceToBorder(cursorPos.getX(), cursorPos.getZ()),
         });
     }
      */
 
+    /**
+     * Stable render type for the building overlays.
+     *
+     * <p>A RenderType instance is the buffer source's key, so building one per frame queues a batch
+     * that nothing ever flushes at that point; the leftovers are later drawn by an unrelated flush
+     * with whatever pose happens to be current, which is what left building outlines stuck on screen
+     * while the camera moved. One instance plus an explicit endBatch fixes it.
+     */
+    private static final RenderType BUILDING_FILL =
+            RenderType.entityTranslucent(ResourceLocation.parse("neoforge:textures/white.png"));
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) throws NoSuchFieldException {
@@ -397,7 +412,13 @@ public class BuildingClientEvents {
             boolean isInBrightChunk = FogOfWarClientEvents.isBuildingInBrightChunk(building);
             boolean inWorldBorderOrInSandbox = SandboxClientEvents.isSandboxPlayer() || !building.isOutsideWorldBorder();
 
-            AABB aabb = new AABB(building.minCorner, building.maxCorner.offset(1, 1, 1));
+            // minCorner/maxCorner are inclusive block positions, so the footprint runs to maxCorner + 1.
+            // Build it from the lower corners, not BlockPos#getCenter(): the latter spans the two
+            // corner blocks' centres and so shifts the box half a block on every axis, which shows up
+            // as a constant world-space offset no camera change can undo. 1.21.1 dropped
+            // AABB(BlockPos, BlockPos), which is what atLowerCornerOf() replaces.
+            AABB aabb = new AABB(Vec3.atLowerCornerOf(building.minCorner),
+                                 Vec3.atLowerCornerOf(building.maxCorner.offset(1, 1, 1)));
 
             var colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(building.ownerName));
             float r = colorHex.getRed() / 255.0f;
@@ -424,10 +445,13 @@ public class BuildingClientEvents {
         }
 
         // draw rally points and lines
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
-        var vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
-        var vertexConsumerNoDepthLine = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST);
-        var vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
+        ResourceLocation rl = ResourceLocation.parse("neoforge:textures/white.png");
+        // 1.21.1 hands out one shared BufferBuilder per RenderType that has no fixed buffer of its own,
+        // and asking for the next one ends the previous batch. Consumers fetched up front therefore stop
+        // accepting vertices as soon as the following getBuffer() runs: the first one used here threw
+        // "Not building!" (BufferBuilder#ensureBuilding) whenever a production building's rally point was
+        // drawn. Fetch each consumer immediately before its own draw instead - UnitClientEvents draws its
+        // checkpoints in this stage the same way.
         for (BuildingPlacement selBuilding : selectedBuildings) {
             if (selBuilding instanceof ProductionPlacement selProdBuilding) {
                 float a = MiscUtil.getOscillatingFloat(0.25f, 0.75f);
@@ -436,34 +460,39 @@ public class BuildingClientEvents {
                     Vec3 lastPos = Vec3.atBottomCenterOf(selProdBuilding.centrePos.above());
                     for (BlockPos bp : selProdBuilding.getRallyPoints()) {
                         boolean isRed = selProdBuilding.attackRally;
-                        MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, lastPos, Vec3.atBottomCenterOf(bp.above()), isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
+                        MyRenderer.drawLine(evt.getPoseStack(), MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES), lastPos, Vec3.atBottomCenterOf(bp.above()), isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
                         if (MiscUtil.isSnowLayerBlock(MC.level.getBlockState(bp.offset(0,1,0)).getBlock())) {
                             AABB aabb = new AABB(bp);
                             aabb = aabb.setMaxY(aabb.maxY + 0.13f);
-                            MyRenderer.drawSolidBox(evt.getPoseStack(), vertexConsumerEntityTranslucent, aabb, Direction.UP,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a,
-                                    ResourceLocation.fromNamespaceAndPath("forge", "textures/white.png"));
+                            MyRenderer.drawSolidBox(evt.getPoseStack(), MC.renderBuffers().bufferSource().getBuffer(BUILDING_FILL), aabb, Direction.UP,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a,
+                                    rl);
                         } else {
-                            MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, bp,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
+                            MyRenderer.drawBlockFace(evt.getPoseStack(), MC.renderBuffers().bufferSource().getBuffer(BUILDING_FILL), Direction.UP, bp,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
                         }
                         lastPos = Vec3.atBottomCenterOf(bp.above());
                     }
                 } else if (selProdBuilding.getRallyPointEntity() != null) {
                     LivingEntity le = selProdBuilding.getRallyPointEntity();
                     boolean isRed = selProdBuilding.attackRally;
-                    MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, new Vec3(selBuilding.centrePos.getX(),
+                    MyRenderer.drawLine(evt.getPoseStack(), MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES), new Vec3(selBuilding.centrePos.getX(),
                         selBuilding.centrePos.getY(),
                         selBuilding.centrePos.getZ()
                     ), new Vec3(le.getX(), le.getEyeY(), le.getZ()),  isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
-                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vertexConsumerNoDepthLine, le.getBoundingBox(), isRed ? 1 : 0, isRed ? 0 : 1, 0, a, false);
+                    MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST), le.getBoundingBox(), isRed ? 1 : 0, isRed ? 0 : 1, 0, a, false);
                 }
             }
             if (selBuilding instanceof PortalPlacement portal && portal.hasDestination()) {
                 float a = MiscUtil.getOscillatingFloat(0.25f, 0.75f);
-                MyRenderer.drawLine(evt.getPoseStack(), vertexConsumerLine, selBuilding.centrePos, portal.destination, 0, 1, 0, a);
+                MyRenderer.drawLine(evt.getPoseStack(), MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES), selBuilding.centrePos, portal.destination, 0, 1, 0, a);
             }
         }
 
-
+        // Flush everything this stage queued. Vanilla empties both buffer sources before it dispatches
+        // AFTER_TRANSLUCENT_BLOCKS (LevelRenderer lines 1170-1173 in the fabulous branch), so
+        // otherwise the geometry survives into the GUI pass, whose GuiGraphics#flush is the next
+        // endBatch() to run - with an orthographic projection and a Z-translated model-view.
+        // drawBuilding() also queues block models into the crumbling source.
+        LevelRenderCompat.flushWorldGeometry();
     }
 
     // on scroll rotate the building placement by 90deg by resorting the blocks list
@@ -481,7 +510,7 @@ public class BuildingClientEvents {
     public static void onMouseScroll(ScreenEvent.MouseScrolled.Post evt) {
         if (buildingToPlace != null) {
             if (buildingToPlace instanceof AbstractBridge bridge) {
-                bridgePlaceState += evt.getScrollDelta() > 0 ? 1 : -1;
+                bridgePlaceState += evt.getScrollDeltaY() > 0 ? 1 : -1;
                 if (bridgePlaceState < 0) {
                     bridgePlaceState = 3;
                 } else if (bridgePlaceState > 3) {
@@ -503,7 +532,7 @@ public class BuildingClientEvents {
                 blocksToDraw.replaceAll(buildingBlock -> buildingBlock.rotate(MC.level, rotationDelta));
             } else {
                 Rotation rotationDelta =
-                    evt.getScrollDelta() > 0 ? Rotation.CLOCKWISE_90 : Rotation.COUNTERCLOCKWISE_90;
+                    evt.getScrollDeltaY() > 0 ? Rotation.CLOCKWISE_90 : Rotation.COUNTERCLOCKWISE_90;
                 buildingRotation = buildingRotation.getRotated(rotationDelta);
                 blocksToDraw.replaceAll(buildingBlock -> buildingBlock.rotate(MC.level, rotationDelta));
             }
@@ -764,10 +793,7 @@ public class BuildingClientEvents {
     private static int ticksToNextVisCheck = VIS_CHECK_TICKS_MAX;
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END) {
-            return;
-        }
+    public static void onClientTick(ClientTickEvent.Post evt) {
 
         if (!SandboxClientEvents.isSandboxPlayer())
             selectedBuildings.removeIf(BuildingPlacement::isOutsideWorldBorder);
@@ -827,7 +853,11 @@ public class BuildingClientEvents {
 
     // place a building clientside that has already been registered on serverside
     public static void placeBuilding(
-        Building building,
+        // A PLACE/PLACE_CUSTOM packet can arrive before this client has the datapack that
+        // registers the building (a join, or the host re-entering the world); 52 of them in one
+        // session NPE'd here once per queued block update. Skip it - the client's
+        // SYNC_BLOCKS_AND_OWNER path asks the server for a replacement and it is resent later.
+        @Nullable Building building,
         BlockPos pos,
         Rotation rotation,
         String ownerName,
@@ -838,6 +868,8 @@ public class BuildingClientEvents {
         PortalPlacement.PortalType portalType,
         BlockPos portalDestination
     ) {
+        if (building == null)
+            return;
         BuildingPlacement newBuilding = BuildingUtils.getNewBuildingPlacement(building,
             MC.level,
             pos,
@@ -932,6 +964,19 @@ public class BuildingClientEvents {
         return false;
     }
 
+    // does the player own one of these buildings?
+    public static int numFinishedBuildings(Building building) {
+        int count = 0;
+        for (BuildingPlacement bpl : buildings) {
+            if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt &&
+                    ((MC.player != null && bpl.ownerName.equals(MC.player.getName().getString())) ||
+                            allyHasFinishedBuilding(building))) {
+                count += 1;
+            }
+        }
+        return count;
+    }
+
     // does the selected ally's unit own one of these buildings?
     public static boolean allyHasFinishedBuilding(Building building) {
         if (!AlliancesClient.canControlAlly(hudSelectedEntity))
@@ -956,7 +1001,7 @@ public class BuildingClientEvents {
             return;
 
         if (activate) {
-            MobEffect effect = BeaconPlacement.getMobEffectForAction(action);
+            Holder<MobEffect> effect = BeaconPlacement.getMobEffectForAction(action);
             if (effect != null)
                 beacon.activate(effect);
         } else {

@@ -13,7 +13,6 @@ public class MeleeWindupAttackUnitGoal extends AbstractMeleeAttackUnitGoal {
     private final KeyframeAnimated kfa;
     private int windupTicksLeft;
 
-
     public MeleeWindupAttackUnitGoal(KeyframeAnimated kfaMob, boolean followingTargetEvenIfNotSeen) {
         super((Mob) kfaMob, followingTargetEvenIfNotSeen);
         this.kfa = kfaMob;

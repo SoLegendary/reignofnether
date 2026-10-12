@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import com.solegendary.reignofnether.ReignOfNether;
@@ -69,8 +70,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -80,6 +81,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession.*;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import com.solegendary.reignofnether.util.EnchantmentUtil;
 
 public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, AttackerUnit, ArmSwingingUnit, VillagerDataHolder, ConvertableUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -353,13 +355,13 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                 .add(Attributes.MAX_HEALTH, VillagerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, VillagerUnit.armorValue)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     @Override
@@ -384,10 +386,14 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             WorkerUnit.tick(this);
             this.callToArmsGoal.tick();
 
-            if (tickCount % 20 == 0) {
-                if (getMainHandItem().getAllEnchantments().containsKey(Enchantments.BLOCK_EFFICIENCY) &&
+            // Server-only: UnitServerEvents.getAllUnits() is the integrated server's live list, and
+            // walking it from the client thread while the server thread adds and removes units threw
+            // ConcurrentModificationException at VillagerUnit.java:396 (crash-2026-10-12_00.48.14 and
+            // _01.06.36). Converting to militia is a server action anyway.
+            if (!this.level().isClientSide() && tickCount % 20 == 0) {
+                if (getMainHandItem().getEnchantments().keySet().contains(EnchantmentRegistrar.vanilla(Enchantments.EFFICIENCY)) &&
                     !hasEffectWithDuration(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
-                    EnchantmentHelper.setEnchantments(new HashMap<>(), getMainHandItem());
+                    EnchantmentUtil.clearEnchantments(getMainHandItem());
                 }
 
                 boolean inRangeOfBellHolder = false;
@@ -548,7 +554,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
         return pSpawnData;
     }
 
@@ -571,12 +577,12 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     private static final EntityDataAccessor<VillagerData> VILLAGER_DATA;
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
-        this.entityData.define(VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
+        builder.define(VILLAGER_DATA, new VillagerData(VillagerType.PLAINS, VillagerProfession.NONE, 1));
     }
 
     @Override
@@ -615,7 +621,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public void setItemSlot(EquipmentSlot pSlot, ItemStack pStack) {
         if (pStack.getItem() != Items.AIR && pSlot == EquipmentSlot.MAINHAND &&
             this.hasEffectWithDuration(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
-            pStack.enchant(Enchantments.BLOCK_EFFICIENCY, 1);
+            pStack.enchant(EnchantmentRegistrar.vanilla(Enchantments.EFFICIENCY), 1);
         }
         super.setItemSlot(pSlot, pStack);
     }

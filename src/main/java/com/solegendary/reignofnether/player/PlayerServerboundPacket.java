@@ -17,21 +17,32 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class PlayerServerboundPacket {
+public class PlayerServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<PlayerServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "player_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<PlayerServerboundPacket> type() {
+        return TYPE;
+    }
     PlayerAction action;
     public Faction faction;
     public int playerId;
@@ -42,7 +53,7 @@ public class PlayerServerboundPacket {
     public static void teleportPlayer(Double x, Double y, Double z) {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.TELEPORT,
+            PacketHandler.sendToServer(new PlayerServerboundPacket(PlayerAction.TELEPORT,
                 MC.player.getId(),
                 x, y, z
             ));
@@ -52,7 +63,7 @@ public class PlayerServerboundPacket {
     public static void enableOrthoview() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.ENABLE_ORTHOVIEW,
+            PacketHandler.sendToServer(new PlayerServerboundPacket(PlayerAction.ENABLE_ORTHOVIEW,
                 MC.player.getId(),
                 0d, 0d, 0d
             ));
@@ -62,7 +73,7 @@ public class PlayerServerboundPacket {
     public static void disableOrthoview() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.DISABLE_ORTHOVIEW,
+            PacketHandler.sendToServer(new PlayerServerboundPacket(PlayerAction.DISABLE_ORTHOVIEW,
                 MC.player.getId(),
                 0d, 0d, 0d
             ));
@@ -81,7 +92,7 @@ public class PlayerServerboundPacket {
             if (faction == Factions.NEUTRAL)
                 faction = Factions.NONE;
             PlayerAction playerAction = faction.equals(Factions.NONE) ? PlayerAction.START_RTS_SANDBOX : PlayerAction.START_RTS;
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(playerAction, faction, MC.player.getId(), x, y, z));
+            PacketHandler.sendToServer(new PlayerServerboundPacket(playerAction, faction, MC.player.getId(), x, y, z));
             GameModeServerboundPacket.setAndLockAllClientGameModes(ClientGameModeHelper.gameMode);
             if (ClientGameModeHelper.gameMode == GameMode.SURVIVAL) {
                 SurvivalServerboundPacket.startSurvivalMode(SurvivalClientEvents.difficulty);
@@ -144,14 +155,14 @@ public class PlayerServerboundPacket {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null && MC.level != null) {
             GameModeServerboundPacket.setAndLockAllClientGameModes(ClientGameModeHelper.gameMode);
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
+            PacketHandler.sendToServer(new PlayerServerboundPacket(PlayerAction.START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
         }
     }
 
         public static void cancelStartRTSEveryone() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null && MC.level != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.CANCEL_START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
+            PacketHandler.sendToServer(new PlayerServerboundPacket(PlayerAction.CANCEL_START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
         }
     }
      */
@@ -159,23 +170,22 @@ public class PlayerServerboundPacket {
     public static void startRTSScenario(int roleIndex) {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null && MC.level != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.START_RTS_SCENARIO, MC.player.getId(), (double) roleIndex, 0d, 0d));
+            PacketHandler.sendToServer(new PlayerServerboundPacket(PlayerAction.START_RTS_SCENARIO, MC.player.getId(), (double) roleIndex, 0d, 0d));
         }
     }
 
-
     public static void resetRTS() {
-        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.RESET_RTS, -1, 0d, 0d, 0d));
+        PacketHandler.sendToServer(new PlayerServerboundPacket(PlayerAction.RESET_RTS, -1, 0d, 0d, 0d));
     }
 
     public static void publishScenario() {
-        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.PUBLISH_SCENARIO_MAP, -1, 0d, 0d, 0d));
+        PacketHandler.sendToServer(new PlayerServerboundPacket(PlayerAction.PUBLISH_SCENARIO_MAP, -1, 0d, 0d, 0d));
     }
 
     public static void surrender() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+            PacketHandler.sendToServer(new PlayerServerboundPacket(
                 PlayerAction.DEFEAT,
                 MC.player.getId(),
                 0d, 0d, 0d
@@ -184,14 +194,14 @@ public class PlayerServerboundPacket {
     }
 
     public static void enableRTSSyncing() {
-        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+        PacketHandler.sendToServer(new PlayerServerboundPacket(
             PlayerAction.ENABLE_RTS_SYNCING,
             -1, 0d, 0d, 0d
         ));
     }
 
     public static void disableRTSSyncing() {
-        PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+        PacketHandler.sendToServer(new PlayerServerboundPacket(
             PlayerAction.DISABLE_RTS_SYNCING,
             -1, 0d, 0d, 0d
         ));
@@ -200,7 +210,7 @@ public class PlayerServerboundPacket {
     public static void requestMarketRates() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(
+            PacketHandler.sendToServer(new PlayerServerboundPacket(
                 PlayerAction.REQUEST_MARKET_RATES,
                 MC.player.getId(),
                 0d, 0d, 0d
@@ -234,8 +244,7 @@ public class PlayerServerboundPacket {
         this.z = 0;
     }
 
-
-    public PlayerServerboundPacket(FriendlyByteBuf buffer) {
+    public PlayerServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(PlayerAction.class);
 		if (this.action == PlayerAction.START_RTS)
 			this.faction = Factions.getFaction(buffer.readResourceLocation());
@@ -245,7 +254,7 @@ public class PlayerServerboundPacket {
         this.z = buffer.readDouble();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         if (this.action == PlayerAction.START_RTS) 
 			buffer.writeResourceLocation(this.faction.key);
@@ -261,22 +270,18 @@ public class PlayerServerboundPacket {
     );
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
 
-            ServerPlayer player = ctx.get().getSender();
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) {
                 ReignOfNether.LOGGER.warn("PlayerServerboundPacket: Sender was null");
-                success.set(false);
                 return;
             } else if (playerId != -1 && player.getId() != playerId) {
                 ReignOfNether.LOGGER.warn("PlayerServerboundPacket: Tried to process packet from " + player.getName() + " for id: " + this.playerId);
-                success.set(false);
                 return;
             } else if (opOnlyActions.contains(action) && !player.hasPermissions(4)) {
                 ReignOfNether.LOGGER.warn("PlayerServerboundPacket: Non-op player " + player.getName() + " tried to run action: " + this.action.name());
-                success.set(false);
                 return;
             }
 
@@ -305,9 +310,7 @@ public class PlayerServerboundPacket {
                 case DISABLE_RTS_SYNCING -> PlayerServerEvents.setRTSSyncingEnabled(false);
                 case REQUEST_MARKET_RATES -> PlayerServerEvents.updateMarketRates(this.playerId);
             }
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

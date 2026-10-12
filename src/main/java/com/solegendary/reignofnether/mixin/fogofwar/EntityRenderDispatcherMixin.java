@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -13,6 +14,7 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import org.joml.Quaternionf;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -42,9 +44,9 @@ public abstract class EntityRenderDispatcherMixin {
 
     @Unique private static boolean reignofnether$shouldRenderSoulfire(Entity entity) {
         if (entity instanceof LivingEntity le) {
-            return le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get());
+            return le.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get()));
         } else if (entity instanceof Projectile proj && proj.getOwner() instanceof LivingEntity le) {
-            return le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get());
+            return le.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get()));
         }
         return false;
     }
@@ -54,7 +56,8 @@ public abstract class EntityRenderDispatcherMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void onRenderFlame(PoseStack poseStack, MultiBufferSource pBuffer, Entity pEntity, CallbackInfo ci) {
+    // 1.21.1 added a Quaternionf to renderFlame, so the descriptor has to name it too.
+    private void onRenderFlame(PoseStack poseStack, MultiBufferSource pBuffer, Entity pEntity, Quaternionf pRotation, CallbackInfo ci) {
         if (!FogOfWarClientEvents.isInBrightChunk(pEntity))
             ci.cancel();
         else if (reignofnether$shouldRenderSoulfire(pEntity)) {

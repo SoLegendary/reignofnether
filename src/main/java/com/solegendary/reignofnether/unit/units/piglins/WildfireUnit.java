@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
@@ -28,7 +30,6 @@ import com.solegendary.reignofnether.unit.interfaces.*;
 import com.solegendary.reignofnether.unit.modelling.animations.WildfireAnimations;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
-import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
 import net.minecraft.client.resources.language.I18n;
@@ -188,11 +189,11 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         SynchedEntityData.defineId(WildfireUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -369,26 +370,26 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return HeroUnit.createDefaultAttributes()
+        return Monster.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, WildfireUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, WildfireUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WildfireUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, WildfireUnit.armorValue)
                 .add(Attributes.ATTACK_KNOCKBACK, 0)
-                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), WildfireUnit.maxHealth)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
-                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
-                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
-                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
-                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
-                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
+                .add(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_HEALTH.get()), WildfireUnit.maxHealth)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), HeroUnit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), magicDamageResist)
+                .add(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_MANA.get()), baseMaxMana)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MANA_REGEN_PER_SECOND.get()), manaRegenPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get()), manaBonusPerLevel)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get()), maxHealthBonusPerLevel)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get()), attackBonusPerLevel);
     }
 
     public void tick() {
@@ -438,7 +439,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
                 double t = (distSqr - minSqr) / (maxSqr - minSqr);
                 t = 1 - Mth.clamp(t, 0.0, 1.0);
                 int amp = (int) Math.round(t * maxAmp);
-                mob.addEffect(new MobEffectInstance(MobEffectRegistrar.INTENSE_HEAT.get(), 15, amp, true, true));
+                mob.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.INTENSE_HEAT.get(), 15, amp, true, true));
             }
         }
     }
@@ -642,22 +643,22 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
             SoundClientboundPacket.playSoundAtPos(SoundAction.WILDFIRE_SCORCHING_GAZE_END, blockPosition());
         }
         int durationTicks = getScorchingGaze().durationSeconds * 20;
-        targetEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks, getScorchingGaze().durationSeconds));
-        targetEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, durationTicks,0, true, true));
-        if (hasEffect(MobEffectRegistrar.SOULS_AFLAME.get())) {
-            targetEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks + 20, 0, true, true));
+        targetEntity.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks, getScorchingGaze().durationSeconds));
+        targetEntity.addEffect(MobEffectHelpers.instance(MobEffects.GLOWING, durationTicks,0, true, true));
+        if (hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get()))) {
+            targetEntity.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.SCORCHING_FIRE.get(), durationTicks + 20, 0, true, true));
         }
-        targetEntity.setSecondsOnFire(getScorchingGaze().durationSeconds);
+        targetEntity.setRemainingFireTicks(getScorchingGaze().durationSeconds);
         if (targetEntity instanceof Unit unit)
             unit.aggroToEnemyIfIdle(this);
     }
 
     public void soulsAflame() {
-        if (hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()))
+        if (hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get())))
             return;
 
-        ParticleUtil.addParticleExplosion(ParticleRegistrar.BIG_SOUL_FLAME.get(), 15, level(), position().add(0,2,0));
-        addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), SoulsAflame.DURATION, 0, true, true));
+        MiscUtil.addParticleExplosion(ParticleRegistrar.BIG_SOUL_FLAME.get(), 15, level(), position().add(0,2,0));
+        addEffect(MobEffectHelpers.instance(MobEffectRegistrar.SOULS_AFLAME.get(), SoulsAflame.DURATION, 0, true, true));
         if (!level().isClientSide()) {
             convertNearbyBlazes();
             convertNearbyFires();
@@ -668,7 +669,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
         List<LivingEntity> nearbyUnits = MiscUtil.getEntitiesWithinRange(position(), SoulsAflame.RANGE, LivingEntity.class, level());
         for (LivingEntity le : nearbyUnits) {
             if (le instanceof BlazeUnit blazeUnit && UnitServerEvents.getUnitToEntityRelationship(this, blazeUnit) == Relationship.FRIENDLY) {
-                le.addEffect(new MobEffectInstance(MobEffectRegistrar.SOULS_AFLAME.get(), SoulsAflame.DURATION, 0, true, true));
+                le.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.SOULS_AFLAME.get(), SoulsAflame.DURATION, 0, true, true));
             }
         }
     }

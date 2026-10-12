@@ -1,11 +1,13 @@
 package com.solegendary.reignofnether.blocks;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.registrars.BlockEntityRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -40,8 +42,19 @@ import javax.annotation.Nullable;
 
 public class WraithSnowLayerBlock extends BaseEntityBlock {
 
+    // Upstream 1.5.0 applied COLD per layer, and 1.21.1 scales a mob effect's attribute
+    // modifiers by (amplifier + 1), so COLD's -0.1 movement and attack speed become -10% per
+    // layer - the penalty upstream had. (Instant effects keep their modifiers for as long as
+    // the instance lives; only the per-tick hook is instant-specific.)
     private static final int COLD_AMP_PER_LAYER = 1;
     private static final int DMG_TAKEN_INCREASE_AMP_PER_LAYER = 2;
+
+    public static final MapCodec<WraithSnowLayerBlock> CODEC = simpleCodec(WraithSnowLayerBlock::new);
+
+    @Override
+    protected MapCodec<? extends BaseEntityBlock> codec() {
+        return CODEC;
+    }
 
     public WraithSnowLayerBlock(BlockBehaviour.Properties pProperties) {
         super(pProperties);
@@ -77,7 +90,7 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
     }
 
     @Override
-    public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
+    protected boolean isPathfindable(BlockState pState, PathComputationType pType) {
         return true;
     }
 
@@ -100,13 +113,13 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
                 rs = UnitServerEvents.getUnitToEntityRelationship(unit, pLevel, snowBe.getOwnerId());
             }
             if (rs != Relationship.FRIENDLY && rs != Relationship.OWNED) {
-                MobEffectInstance existingCold = livingEntity.getEffect(MobEffectRegistrar.COLD.get());
+                MobEffectInstance existingCold = livingEntity.getEffect(MobEffectHelpers.holder(MobEffectRegistrar.COLD.get()));
                 if (existingCold == null || existingCold.getAmplifier() < coldAmp) {
-                    livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.COLD.get(), 10, coldAmp, true, false));
+                    livingEntity.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.COLD.get(), 10, coldAmp, true, false));
                 }
-                MobEffectInstance existingDamageIncrease = livingEntity.getEffect(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get());
+                MobEffectInstance existingDamageIncrease = livingEntity.getEffect(MobEffectHelpers.holder(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get()));
                 if (existingDamageIncrease == null || existingDamageIncrease.getAmplifier() < dmgIncreaseAmp) {
-                    livingEntity.addEffect(new MobEffectInstance(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(), 10, dmgIncreaseAmp, true, false));
+                    livingEntity.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get(), 10, dmgIncreaseAmp, true, false));
                 }
             }
         }

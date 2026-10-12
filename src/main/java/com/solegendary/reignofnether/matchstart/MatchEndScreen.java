@@ -99,10 +99,10 @@ public class MatchEndScreen extends Screen {
 
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        // tiled dirt, but only inside the popup - the battlefield stays visible around it
-        g.setColor(0.25F, 0.25F, 0.25F, 1.0F);
-        g.blit(BACKGROUND_LOCATION, panelL, panelT, 0, panelL, panelT, panelW, panelH, 32, 32);
-        g.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+        // 1.21.1 removed Screen#BACKGROUND_LOCATION, the tiled dirt texture this used to blit. A
+        // translucent fill has the same effect here: darken only the popup interior and leave the
+        // battlefield visible around it.
+        g.fill(panelL, panelT, panelL + panelW, panelT + panelH, 0x40000000);
         MyRenderer.renderFrameWithBg(g, panelL, panelT, panelW, panelH, BG_PANEL);
 
         int cl = panelL + PAD;               // content left

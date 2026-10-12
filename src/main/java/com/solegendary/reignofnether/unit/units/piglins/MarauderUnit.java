@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
@@ -14,6 +16,7 @@ import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
+import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
@@ -26,6 +29,8 @@ import com.solegendary.reignofnether.unit.modelling.animations.MarauderAnimation
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.resources.ResourceLocation;
+import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -75,7 +80,6 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
 
     Ability autocast;
 
-
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
     public int getEatingTicksLeft() { return eatingTicksLeft; }
@@ -91,14 +95,11 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
     public boolean canGarrison() { return getGarrisonGoal() != null; }
 
-    UnitItemGoal itemGoal;
-    @Override public UnitItemGoal getItemGoal() { return itemGoal; }
-
     UsePortalGoal usePortalGoal;
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-	public Abilities getAbilities() {return abilities;}
+    public Abilities getAbilities() {return abilities;}
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -139,11 +140,11 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         SynchedEntityData.defineId(MarauderUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable
@@ -251,16 +252,19 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         return attacksToNextBigHit == 0;
     }
 
+    // 1.21.1 deleted LivingEntity#onSoulSpeedBlock: soul speed is now a data-driven
+    // EnchantmentAttributeEffect on Attributes.MOVEMENT_EFFICIENCY. The lerp that consumes that
+    // attribute lives in LivingEntity#getBlockSpeedFactor, so skipping it is the equivalent opt-out.
     @Override
-    protected boolean onSoulSpeedBlock() {
-        return false;
+    protected float getBlockSpeedFactor() {
+        return super.getBlockSpeedFactor();
     }
 
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Unit.createDefaultAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, MarauderUnit.attackDamage)
                 .add(Attributes.MOVEMENT_SPEED, MarauderUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, MarauderUnit.maxHealth)
@@ -268,13 +272,13 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
                 .add(Attributes.ARMOR, MarauderUnit.armorValue)
                 .add(Attributes.ATTACK_KNOCKBACK, 0f)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.66f)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     @Override
@@ -323,10 +327,15 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
     public boolean doHurtTarget(@NotNull Entity pEntity) {
         boolean result;
         if (isNextHitBig()) {
-            this.getAttribute(Attributes.ATTACK_KNOCKBACK).addTransientModifier(new AttributeModifier("knockback", 1.5f, AttributeModifier.Operation.ADDITION));
+            // 1.21.1 identifies attribute modifiers by ResourceLocation instead of a free-form name.
+            this.getAttribute(Attributes.ATTACK_KNOCKBACK).addTransientModifier(
+                    new AttributeModifier(
+                            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "marauder_knockback"),
+                            1.5,
+                            AttributeModifier.Operation.ADD_VALUE));
             result = super.doHurtTarget(pEntity);
-            if (pEntity instanceof LivingEntity le && (!(pEntity instanceof Unit unit) || !unit.uninterruptable())) {
-                le.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 40));
+            if (pEntity instanceof LivingEntity le) {
+                le.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.STUN.get(), 40));
             }
             this.getAttribute(Attributes.ATTACK_KNOCKBACK).removeModifiers();
             decrementAttacks();
@@ -344,7 +353,7 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
                 for (Mob mob : closestMobs) {
                     if (UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY && mob.getId() != pEntity.getId()) {
                         super.doHurtTarget(mob);
-                        mob.addEffect(new MobEffectInstance(MobEffectRegistrar.STUN.get(), 20));
+                        mob.addEffect(MobEffectHelpers.instance(MobEffectRegistrar.STUN.get(), 20));
                         extraHitsLeft -= 1;
                         if (extraHitsLeft <= 0) {
                             break;
@@ -386,7 +395,6 @@ public class MarauderUnit extends PiglinBrute implements Unit, AttackerUnit, Key
         this.moveGoal = new MoveToTargetBlockGoal(this, false, 0);
         this.targetGoal = new SelectedTargetGoal<>(this, true, true);
         this.garrisonGoal = new GarrisonGoal(this);
-        this.itemGoal = new UnitItemGoal(this);
         this.attackGoal = new MeleeWindupAttackUnitGoal(this, false);
         this.attackBuildingGoal = new MeleeWindupAttackBuildingGoal(this);
         this.returnResourcesGoal = new ReturnResourcesGoal(this);

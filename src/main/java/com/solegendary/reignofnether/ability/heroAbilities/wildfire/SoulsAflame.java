@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.heroAbilities.wildfire;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
@@ -108,7 +109,7 @@ public class SoulsAflame extends HeroAbility {
 
     private void use(Level level, Unit unitUsing) {
         LivingEntity le = (LivingEntity) unitUsing;
-        boolean isSoulsAflameActive = le.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get());
+        boolean isSoulsAflameActive = le.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get()));
 
         if (level.isClientSide() && isSoulsAflameActive) {
             HudClientEvents.showTemporaryMessage(I18n.get("abilities.reignofnether.souls_aflame.already_active"));

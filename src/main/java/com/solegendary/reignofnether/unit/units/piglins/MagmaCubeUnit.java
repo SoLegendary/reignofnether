@@ -167,7 +167,6 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
         super.onFinishedRoll();
     }
 
-
     public void createMagma() {
         if (getSize() < 4 || level().isClientSide())
             return;

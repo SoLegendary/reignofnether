@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.production;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
@@ -50,8 +51,16 @@ public abstract class HeroProductionItem extends ProductionItem {
         if (!BuildingUtils.castleOwned(pp.level.isClientSide(), pp.ownerName)) {
             allowedHeroes = Math.min(1, allowedHeroes);
         }
-        if (HeroUnit.getNumHeroesOwnedOrInTraining(pp.level.isClientSide(), pp.ownerName) >= allowedHeroes)
+        int ownedOrTraining = HeroUnit.getNumHeroesOwnedOrInTraining(pp.level.isClientSide(), pp.ownerName);
+        if (ownedOrTraining >= allowedHeroes) {
+            ReignOfNether.LOGGER.info("[Hero] refused building " + getItemName() + " for " + pp.ownerName
+                    + ": ownedOrTraining=" + ownedOrTraining + " (live="
+                    + HeroUnit.getHeroes(false, pp.ownerName).size() + " fallen="
+                    + HeroUnit.getFallenHeroes(false, pp.ownerName).size() + " training="
+                    + HeroUnit.getHeroesInTraining(false, pp.ownerName).size() + ") allowed=" + allowedHeroes
+                    + " castleOwned=" + BuildingUtils.castleOwned(false, pp.ownerName));
             return "hud.hero.reignofnether.error.too_many_heroes";
+        }
 
         return null;
     }

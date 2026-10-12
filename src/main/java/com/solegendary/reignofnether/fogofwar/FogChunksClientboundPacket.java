@@ -1,31 +1,41 @@
 package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 // per-client vision state: the sent (bright) chunk set plus the covered-column bitmask of each edge chunk.
 // Server-authoritative — the client renders exactly these masks. Resent whenever either changes.
-public class FogChunksClientboundPacket {
+public class FogChunksClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<FogChunksClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "fog_chunks_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<FogChunksClientboundPacket> type() {
+        return TYPE;
+    }
 
     public final Set<ChunkPos> bright;
     public final Map<ChunkPos, long[]> edgeMasks;
 
     public static void send(ServerPlayer player, Set<ChunkPos> bright, Map<ChunkPos, long[]> edgeMasks) {
-        PacketHandler.INSTANCE.send(
-                PacketDistributor.PLAYER.with(() -> player),
+        PacketHandler.send(
+                PacketHandler.toPlayer(() -> player),
                 new FogChunksClientboundPacket(bright, edgeMasks)
         );
     }
@@ -35,7 +45,7 @@ public class FogChunksClientboundPacket {
         this.edgeMasks = edgeMasks;
     }
 
-    public FogChunksClientboundPacket(FriendlyByteBuf buf) {
+    public FogChunksClientboundPacket(RegistryFriendlyByteBuf buf) {
         int n = buf.readVarInt();
         this.bright = new HashSet<>(n * 2);
         for (int i = 0; i < n; i++)
@@ -49,7 +59,7 @@ public class FogChunksClientboundPacket {
         }
     }
 
-    public void encode(FriendlyByteBuf buf) {
+    public void encode(RegistryFriendlyByteBuf buf) {
         buf.writeVarInt(bright.size());
         for (ChunkPos p : bright) buf.writeLong(p.toLong());
         buf.writeVarInt(edgeMasks.size());
@@ -63,15 +73,12 @@ public class FogChunksClientboundPacket {
         }
     }
 
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 FogOfWarClientEvents.applyServerFogState(bright, edgeMasks);
-                success.set(true);
             });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

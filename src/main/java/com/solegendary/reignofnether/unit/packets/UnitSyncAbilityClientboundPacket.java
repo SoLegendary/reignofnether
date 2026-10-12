@@ -4,17 +4,27 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitSyncAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class UnitSyncAbilityClientboundPacket {
+public class UnitSyncAbilityClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<UnitSyncAbilityClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "unit_sync_ability_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<UnitSyncAbilityClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final UnitSyncAction syncAction;
     private final int entityId;
@@ -32,7 +42,7 @@ public class UnitSyncAbilityClientboundPacket {
             for (int i = 0; i < abilities.size(); i++) {
                 abilityCharges[i] = abilities.get(i).getCharges(unit);
             }
-            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            PacketHandler.send(PacketHandler.allPlayers(),
                     new UnitSyncAbilityClientboundPacket(
                         UnitSyncAction.SYNC_ABILITIES,
                         entity.getId(),
@@ -57,14 +67,14 @@ public class UnitSyncAbilityClientboundPacket {
         this.abilityCharges = abilityCharges;
     }
 
-    public UnitSyncAbilityClientboundPacket(FriendlyByteBuf buffer) {
+    public UnitSyncAbilityClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.syncAction = buffer.readEnum(UnitSyncAction.class);
         this.entityId = buffer.readInt();
         this.abilityCooldowns = buffer.readVarIntArray();
         this.abilityCharges = buffer.readVarIntArray();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.syncAction);
         buffer.writeInt(this.entityId);
         buffer.writeVarIntArray(this.abilityCooldowns);
@@ -72,11 +82,10 @@ public class UnitSyncAbilityClientboundPacket {
     }
 
     // client-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
                     switch (this.syncAction) {
                         case SYNC_ABILITIES -> {
@@ -96,7 +105,6 @@ public class UnitSyncAbilityClientboundPacket {
                     }
                 });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

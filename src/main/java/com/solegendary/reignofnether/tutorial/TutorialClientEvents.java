@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.tutorial;
+import com.solegendary.reignofnether.faction.Factions;
 
+import com.solegendary.reignofnether.util.GuiLayerCompat;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -7,7 +9,6 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.buildings.villagers.*;
-import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
@@ -24,8 +25,9 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SkeletonUnit;
 import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
-
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Vec3i;
@@ -36,10 +38,8 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -71,7 +71,6 @@ public class TutorialClientEvents {
     private static int villagersHoldingFood = 0;
 
     private static final ArrayList<BuildingPlacement> damagedBuildings = new ArrayList<>();
-
 
     // all these positions are for camera only, actual spawn locations differ slightly on the serverside
     private static final Vec3i SPAWN_CAM_POS = new Vec3i(-2960, 0, -1156);
@@ -241,8 +240,8 @@ public class TutorialClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || MC.isPaused() || !isEnabled() || !OrthoviewClientEvents.isEnabled()) {
+    public static void onClientTick(ClientTickEvent.Post evt) {
+        if (MC.isPaused() || !isEnabled() || !OrthoviewClientEvents.isEnabled()) {
             return;
         }
 
@@ -270,7 +269,7 @@ public class TutorialClientEvents {
         }
     }
 
-    private static void msg(String msg, boolean bold, RegistryObject<SoundEvent> soundEvt, Object... params) {
+    private static void msg(String msg, boolean bold, Supplier<SoundEvent> soundEvt, Object... params) {
         if (MC.player == null) {
             return;
         }
@@ -292,7 +291,6 @@ public class TutorialClientEvents {
         msg(msg, true, ALLY, params);
     }
 
-
     public static boolean isAtOrPastStage(TutorialStage stage) {
         if (!isEnabled()) {
             return true;
@@ -302,14 +300,15 @@ public class TutorialClientEvents {
 
     /*
     @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
+    public static void onRenderOverLay(RenderGuiLayerEvent.Pre evt) {
+        if (!GuiLayerCompat.isTopLayer(evt))
+            return;
+        MiscUtil.drawDebugStrings(evt.getGuiGraphics().pose(), MC.font, new String[] {
                 "stage: " + getStage(),
                 "progress: " + stageProgress,
                 "ticks: " + ticksOnStage
         });
     } */
-
 
     private static void progressStage() {
         blockUpdateStage = false;

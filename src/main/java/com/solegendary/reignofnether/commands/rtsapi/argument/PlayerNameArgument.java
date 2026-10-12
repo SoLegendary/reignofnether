@@ -16,6 +16,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,6 +28,18 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 public class PlayerNameArgument implements ArgumentType<PlayerNameArgument.Result> {
+
+    /** The one Info instance for this type; see BuildingArgument#INFO for why it has to be shared. */
+    public static final Info INFO = new Info();
+
+    static {
+        // Commands.validate() runs during bootstrap, before NeoForge constructs the mods,
+        // so an ArgumentTypeInfo has to be in ArgumentTypeInfos by the time this class is
+        // loaded - which happens while the commands using it are registered. Registering
+        // from the mod constructor or from common setup is too late and fails startup with
+        // "Unregistered argument types".
+        ArgumentTypeInfos.registerByClass(PlayerNameArgument.class, INFO);
+    }
 	
 	private static final Collection<String> EXAMPLES = Arrays.asList("@b", "@b[type=foo]", "name");
 	private static final SimpleCommandExceptionType ERROR_NOT_ALLOWED_ALL =
@@ -76,7 +89,9 @@ public class PlayerNameArgument implements ArgumentType<PlayerNameArgument.Resul
 			return new Result(null, null);
 		}
 		int startCursor = pReader.getCursor();
-		EntitySelectorParser parser = new EntitySelectorParser(pReader);
+		// 1.21.1 added a second flag that says whether the selector may reach offline players;
+		// this argument resolves names itself, so the vanilla "online players only" rule applies.
+		EntitySelectorParser parser = new EntitySelectorParser(pReader, true);
 		EntitySelector selector = parser.parse();
 		
 		if (selector.getMaxResults() > 1) {
@@ -97,7 +112,7 @@ public class PlayerNameArgument implements ArgumentType<PlayerNameArgument.Resul
 		if (s instanceof SharedSuggestionProvider sharedsuggestionprovider) {
 			StringReader stringreader = new StringReader(pBuilder.getInput());
 			stringreader.setCursor(pBuilder.getStart());
-			EntitySelectorParser entityselectorparser = new EntitySelectorParser(stringreader, net.minecraftforge.common.ForgeHooks.canUseEntitySelectors(sharedsuggestionprovider));
+			EntitySelectorParser entityselectorparser = new EntitySelectorParser(stringreader, net.neoforged.neoforge.common.CommonHooks.canUseEntitySelectors(sharedsuggestionprovider));
 			
 			try {
 				entityselectorparser.parse();

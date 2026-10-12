@@ -6,68 +6,54 @@
 package com.solegendary.reignofnether.unit.modelling.models;
 
 import com.solegendary.reignofnether.unit.units.monsters.BatUnit;
+import net.minecraft.client.animation.KeyframeAnimations;
+import net.minecraft.client.animation.definitions.BatAnimation;
 import net.minecraft.client.model.HierarchicalModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.model.geom.builders.CubeListBuilder;
-import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.model.geom.builders.MeshDefinition;
-import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.ambient.Bat;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import org.joml.Vector3f;
 
+/**
+ * The model the bat unit is drawn with: vanilla's own bat mesh (the renderer bakes
+ * {@code ModelLayers.BAT}) animated with vanilla's flying keyframes.
+ *
+ * <p>It deliberately carries no mesh of its own. The 64x64 decompiled mesh that used to live here in
+ * {@code createBodyLayer()} is the 1.20.1 bat layout, while 1.21.1 redrew the bat for a 32x32
+ * {@code textures/entity/bat.png} - baking that mesh against the current texture garbles every face.
+ *
+ * <p>{@code BatUnit} is not a {@code Bat}, so it cannot carry vanilla's fly/rest animation states; the
+ * flying keyframes are driven from the render tick instead.
+ */
 @OnlyIn(Dist.CLIENT)
 public class BatUnitModel extends HierarchicalModel<BatUnit> {
+    private static final Vector3f ANIMATION_CACHE = new Vector3f();
+
     private final ModelPart root;
     private final ModelPart head;
-    private final ModelPart body;
-    private final ModelPart rightWing;
-    private final ModelPart leftWing;
-    private final ModelPart rightWingTip;
-    private final ModelPart leftWingTip;
 
     public BatUnitModel(ModelPart pRoot) {
         this.root = pRoot;
         this.head = pRoot.getChild("head");
-        this.body = pRoot.getChild("body");
-        this.rightWing = this.body.getChild("right_wing");
-        this.rightWingTip = this.rightWing.getChild("right_wing_tip");
-        this.leftWing = this.body.getChild("left_wing");
-        this.leftWingTip = this.leftWing.getChild("left_wing_tip");
-    }
-
-    public static LayerDefinition createBodyLayer() {
-        MeshDefinition $$0 = new MeshDefinition();
-        PartDefinition $$1 = $$0.getRoot();
-        PartDefinition $$2 = $$1.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 6.0F, 6.0F), PartPose.ZERO);
-        $$2.addOrReplaceChild("right_ear", CubeListBuilder.create().texOffs(24, 0).addBox(-4.0F, -6.0F, -2.0F, 3.0F, 4.0F, 1.0F), PartPose.ZERO);
-        $$2.addOrReplaceChild("left_ear", CubeListBuilder.create().texOffs(24, 0).mirror().addBox(1.0F, -6.0F, -2.0F, 3.0F, 4.0F, 1.0F), PartPose.ZERO);
-        PartDefinition $$3 = $$1.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 16).addBox(-3.0F, 4.0F, -3.0F, 6.0F, 12.0F, 6.0F).texOffs(0, 34).addBox(-5.0F, 16.0F, 0.0F, 10.0F, 6.0F, 1.0F), PartPose.ZERO);
-        PartDefinition $$4 = $$3.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(42, 0).addBox(-12.0F, 1.0F, 1.5F, 10.0F, 16.0F, 1.0F), PartPose.ZERO);
-        $$4.addOrReplaceChild("right_wing_tip", CubeListBuilder.create().texOffs(24, 16).addBox(-8.0F, 1.0F, 0.0F, 8.0F, 12.0F, 1.0F), PartPose.offset(-12.0F, 1.0F, 1.5F));
-        PartDefinition $$5 = $$3.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(42, 0).mirror().addBox(2.0F, 1.0F, 1.5F, 10.0F, 16.0F, 1.0F), PartPose.ZERO);
-        $$5.addOrReplaceChild("left_wing_tip", CubeListBuilder.create().texOffs(24, 16).mirror().addBox(0.0F, 1.0F, 0.0F, 8.0F, 12.0F, 1.0F), PartPose.offset(12.0F, 1.0F, 1.5F));
-        return LayerDefinition.create($$0, 64, 64);
     }
 
     public ModelPart root() {
         return this.root;
     }
 
+    /**
+     * Replaces the 1.20.1-era hand-written animation, which moved the parts themselves
+     * ({@code head.setPos(0,0,0)} and both wings into the body's centre) as 1.20.1's mesh expected.
+     * On the 1.21.1 mesh those calls drop the head at the bat's feet and fold the wings together, so
+     * the unit rendered mangled; 1.21.1 also animates the bat with keyframes, which is what replaces
+     * those rotations. {@code resetPose()} first, so the result does not depend on the previous frame.
+     */
     public void setupAnim(BatUnit pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
-        this.head.xRot = pHeadPitch * 0.017453292F;
-        this.head.yRot = pNetHeadYaw * 0.017453292F;
-        this.head.zRot = 0.0F;
-        this.head.setPos(0.0F, 0.0F, 0.0F);
-        this.rightWing.setPos(0.0F, 0.0F, 0.0F);
-        this.leftWing.setPos(0.0F, 0.0F, 0.0F);
-        this.body.xRot = 0.7853982F + Mth.cos(pAgeInTicks * 0.1F) * 0.15F;
-        this.body.yRot = 0.0F;
-        this.rightWing.yRot = Mth.cos(pAgeInTicks * 74.48451F * 0.017453292F) * 3.1415927F * 0.25F;
-        this.leftWing.yRot = -this.rightWing.yRot;
-        this.rightWingTip.yRot = this.rightWing.yRot * 0.5F;
-        this.leftWingTip.yRot = -this.rightWing.yRot * 0.5F;
+        this.root().getAllParts().forEach(ModelPart::resetPose);
+        // Head yaw first, then the flight keyframes: ROTATION and POSITION channels are additive
+        // (AnimationChannel.Targets -> ModelPart#offsetRotation/#offsetPos), so the head keeps looking
+        // where the unit does while the flight bob is layered on top - vanilla's order in BatModel.
+        this.head.yRot = pNetHeadYaw * (float) (Math.PI / 180.0);
+        KeyframeAnimations.animate(this, BatAnimation.BAT_FLYING, (long) (pAgeInTicks * 50.0F), 1.0F, ANIMATION_CACHE);
     }
 }

@@ -2,9 +2,9 @@ package com.solegendary.reignofnether.matchstart;
 
 import com.solegendary.reignofnether.player.MatchStatsClientboundPacket.MatchStatRow;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +49,8 @@ public class MatchEndClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+    public static void onClientTick(ClientTickEvent.Post evt) {
         /*
-        if (evt.phase != TickEvent.Phase.END) return;
         if (!pendingOpen) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;

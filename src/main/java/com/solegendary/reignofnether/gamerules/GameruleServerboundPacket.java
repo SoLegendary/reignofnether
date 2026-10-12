@@ -2,89 +2,103 @@ package com.solegendary.reignofnether.gamerules;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
-import com.solegendary.reignofnether.registrars.PacketHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import com.solegendary.reignofnether.gamerules.GameruleServerboundPacket;
+import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
+import com.solegendary.reignofnether.gamerules.GameruleAction;
 
-public class GameruleServerboundPacket {
+public class GameruleServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<GameruleServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "gamerule_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<GameruleServerboundPacket> type() {
+        return TYPE;
+    }
 
     GameruleAction action;
     String playerName;
     Long value;
 
     public static void setLogFalling(boolean logFalling) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_LOG_FALLING, "", logFalling ? 1L : 0L));
     }
     public static void setNeutralAggro(boolean neutralAggro) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_NEUTRAL_AGGRO, "", neutralAggro ? 1L : 0L));
     }
     public static void setMaxPopulation(long maxPopulation) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_MAX_POPULATION, "", maxPopulation));
     }
     public static void setUnitGriefing(boolean unitGriefing) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_UNIT_GRIEFING, "", unitGriefing ? 1L : 0L));
     }
     public static void setPlayerGriefing(boolean playerGriefing) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_PLAYER_GRIEFING, "", playerGriefing ? 1L : 0L));
     }
     public static void setGroundYLevel(long groundYLevel) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_GROUND_Y_LEVEL, "", groundYLevel));
     }
     public static void setFlyingMaxYLevel(long flyingMaxYLevel) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_FLYING_MAX_Y_LEVEL, "", flyingMaxYLevel));
     }
     public static void setAllowBeacons(boolean allowBeacons) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_ALLOW_BEACONS, "", allowBeacons ? 1L : 0L));
     }
     public static void setPvpModesOnly(boolean pvpModesOnly) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
             new GameruleServerboundPacket(GameruleAction.SET_PVP_MODES_ONLY, "", pvpModesOnly ? 1L : 0L));
     }
     public static void setBeaconWinMinutes(long beaconWinMinutes) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_BEACON_WIN_MINUTES, "", beaconWinMinutes));
     }
     public static void setSlantedBuilding(boolean slantedBuilding) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_SLANTED_BUILDING, "", slantedBuilding ? 1L : 0L));
     }
     public static void setAllowedHeroes(long allowedHeroes) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_ALLOWED_HEROES, "", allowedHeroes));
     }
     public static void setLockAlliances(boolean lockAlliances) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_LOCK_ALLIANCES, "", lockAlliances ? 1L : 0L));
     }
     public static void setCoopMode(boolean coopMode) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_COOP_MODE, "", coopMode ? 1L : 0L));
     }
     public static void setRtsPathfinding(boolean rtsPathfinding) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_RTS_PATHFINDING, "", rtsPathfinding ? 1L : 0L));
     }
     public static void setAnimalSpawnYDiff(long animalSpawnYDiff) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_ANIMAL_SPAWN_Y_DIFF, "", animalSpawnYDiff));
     }
     public static void setRandomItemDrops(long randomItemDrops) {
-        PacketHandler.INSTANCE.sendToServer(
+        PacketDistributor.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_RANDOM_ITEM_DROPS, "", randomItemDrops));
     }
 
@@ -94,32 +108,28 @@ public class GameruleServerboundPacket {
         this.value = value;
     }
 
-    public GameruleServerboundPacket(FriendlyByteBuf buffer) {
+    public GameruleServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(GameruleAction.class);
         this.playerName = buffer.readUtf();
         this.value = buffer.readLong();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeUtf(this.playerName);
         buffer.writeLong(this.value);
     }
 
-
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
-            ServerPlayer player = ctx.get().getSender();
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) {
                 ReignOfNether.LOGGER.warn("GameruleServerboundPacket: Sender was null");
-                success.set(false);
                 return;
             }
             else if (!player.hasPermissions(4)) {
                 ReignOfNether.LOGGER.warn("GameruleServerboundPacket: Tried to process packet from " + player.getName() + " with insufficient permissions");
-                success.set(false);
                 return;
             }
             MinecraftServer server = player.level().getServer();
@@ -200,9 +210,7 @@ public class GameruleServerboundPacket {
                     GameruleClientboundPacket.setRandomItemDrops(value);
                 }
             }
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

@@ -11,7 +11,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import com.solegendary.reignofnether.util.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
@@ -34,8 +34,10 @@ public class ThrownHeroExperienceBottle extends ThrowableItemProjectile {
         return ItemRegistrar.THROWN_HERO_EXPERIENCE_BOTTLE.get();
     }
 
-    protected float getGravity() {
-        return 0.07F;
+    // Entity#getGravity is final in 1.21.1; getDefaultGravity is the overridable half.
+    @Override
+    protected double getDefaultGravity() {
+        return 0.07D;
     }
 
     protected void onHit(HitResult pResult) {

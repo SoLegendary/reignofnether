@@ -35,20 +35,22 @@ public class BeaconBlockEntityMixin extends BlockEntity {
 
         if (beacon != null && beacon.getUpgradeLevel() > 0 && worldPosition.equals(beacon.beaconPos)) {
             if (beacon.isBeaconActive()) {
-                float[] colour;
+                // 1.21.1 changed BeaconBeamSection to hold one packed ARGB int instead of a
+                // float[3], so the per-aura colours are written as ARGB literals.
+                int colour;
 
                 if (beacon.getAuraEffect() == MobEffects.LUCK)
-                    colour = new float[] { 110/255f, 255/255f, 129/255f }; // pale green
+                    colour = 0xFF6EFF81; // pale green
                 else if (beacon.getAuraEffect() == MobEffects.DIG_SPEED)
-                    colour = new float[] { 255/255f, 232/255f, 102/255f }; // pale yellow
+                    colour = 0xFFFFE866; // pale yellow
                 else if (beacon.getAuraEffect() == MobEffects.REGENERATION)
-                    colour = new float[] { 240/255f, 91/255f, 153/255f }; // pink
+                    colour = 0xFFF05B99; // pink
                 else if (beacon.getAuraEffect() == MobEffects.DAMAGE_BOOST)
-                    colour = new float[] { 245/255f, 170/255f, 95/255f }; // bronze
+                    colour = 0xFFF5AA5F; // bronze
                 else if (beacon.getAuraEffect() == MobEffects.DAMAGE_RESISTANCE)
-                    colour = new float[] { 180/255f, 180/255f, 180/255f }; // silver
+                    colour = 0xFFB4B4B4; // silver
                 else
-                    colour = new float[] { 1.0f, 1.0f, 1.0f }; // white
+                    colour = 0xFFFFFFFF; // white
 
                 BeaconBlockEntity.BeaconBeamSection beam = new BeaconBlockEntity.BeaconBeamSection(colour);
                 cir.setReturnValue(List.of(beam));

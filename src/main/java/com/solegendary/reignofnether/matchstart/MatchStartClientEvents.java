@@ -5,12 +5,12 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.event.ClientChatReceivedEvent;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.ClientChatEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayDeque;
@@ -35,9 +35,11 @@ public class MatchStartClientEvents {
     }
 
     @SubscribeEvent
-    public static void onChatReceived(ClientChatReceivedEvent evt) {
-        Component msg = evt.getMessage();
-        if (msg == null) return;
+    public static void onChatReceived(ClientChatEvent evt) {
+        // ClientChatEvent carries the raw string; the chat buffer stores Components.
+        String raw = evt.getMessage();
+        if (raw == null) return;
+        Component msg = Component.literal(raw);
         if (chatBuffer.size() >= CHAT_BUFFER_MAX) chatBuffer.pollFirst();
         chatBuffer.addLast(msg);
     }
@@ -50,8 +52,7 @@ public class MatchStartClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post evt) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
 

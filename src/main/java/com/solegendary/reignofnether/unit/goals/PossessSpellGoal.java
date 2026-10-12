@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.abilities.Possess;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -51,8 +52,8 @@ public class PossessSpellGoal extends GenericTargetedSpellGoal {
             } else {
                 doPossessParticles();
                 if (wraithUnit.tickCount % 10 == 0) {
-                    targetEntity.addEffect(new MobEffectInstance(MobEffects.GLOWING, 15, 0, true, false));
-                    targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 15, 0, true, false));
+                    targetEntity.addEffect(MobEffectHelpers.instance(MobEffects.GLOWING, 15, 0, true, false));
+                    targetEntity.addEffect(MobEffectHelpers.instance(MobEffects.MOVEMENT_SLOWDOWN, 15, 0, true, false));
                 }
             }
         }

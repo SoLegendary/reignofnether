@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.entities;
 
-
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;

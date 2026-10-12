@@ -11,6 +11,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
+import com.solegendary.reignofnether.hud.buttons.UnitItemShopButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.buttons.AbstractUnitItemButton;
 
 // A buy button shown in an open item shop, purchasing the item for the shop's served unit.
 public class UnitItemShopButton extends AbstractUnitItemButton {

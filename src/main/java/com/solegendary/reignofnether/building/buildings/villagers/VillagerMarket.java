@@ -82,13 +82,14 @@ public class VillagerMarket extends AbstractMarket {
         return new ArrayList<>(List.of(
                 new StockedShopItem(UnitItems.FROST_WALKER_BOOTS, 1, 600 * 20),
                 new StockedShopItem(UnitItems.WAR_HORN, 1, 600 * 20),
-                new StockedShopItem(UnitItems.BELL_OF_ARMS, 1, 600 * 20)
+                new StockedShopItem(UnitItems.BELL_OF_ARMS, 1, 600 * 20),
+                new StockedShopItem(UnitItems.HEROS_ARMOUR, 1, 600 * 20)
         ));
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
+        String name = key != null ? Component.translatable("buildings." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/emerald_block.png"),

@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.keybinds;
 
-import net.minecraftforge.client.settings.IKeyConflictContext;
-import net.minecraftforge.client.settings.KeyConflictContext;
+import net.neoforged.neoforge.client.settings.IKeyConflictContext;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
 
 // Splits the mod's bindings into disjoint "contexts" so the Controls UI
 // doesn't flag intentional default-key overlaps (LEFT for both panPlusX

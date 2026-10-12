@@ -2,17 +2,27 @@ package com.solegendary.reignofnether.research;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class ResearchClientboundPacket {
+public class ResearchClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<ResearchClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "research_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<ResearchClientboundPacket> type() {
+        return TYPE;
+    }
 
     public String playerName;
     public String itemName;
@@ -21,19 +31,19 @@ public class ResearchClientboundPacket {
     public int value;
 
     public static void addCheat(String playerName, String itemName) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new ResearchClientboundPacket(playerName, itemName, true, true, 0));
     }
     public static void addCheatWithValue(String playerName, String itemName, int value) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new ResearchClientboundPacket(playerName, itemName, true, true, value));
     }
     public static void removeCheat(String playerName, String itemName) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new ResearchClientboundPacket(playerName, itemName, false, true, 0));
     }
     public static void addResearch(String playerName, String itemName) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new ResearchClientboundPacket(playerName, itemName, true, false, 0));
     }
 
@@ -45,7 +55,7 @@ public class ResearchClientboundPacket {
         this.value = value;
     }
 
-    public ResearchClientboundPacket(FriendlyByteBuf buffer) {
+    public ResearchClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.playerName = buffer.readUtf();
         this.itemName = buffer.readUtf();
         this.add = buffer.readBoolean();
@@ -53,7 +63,7 @@ public class ResearchClientboundPacket {
         this.value = buffer.readInt();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeUtf(this.playerName);
         buffer.writeUtf(this.itemName);
         buffer.writeBoolean(this.add);
@@ -62,11 +72,10 @@ public class ResearchClientboundPacket {
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         if (Minecraft.getInstance().player.getName().getString().equals(this.playerName)) {
                             if (isCheat) {
@@ -81,10 +90,8 @@ public class ResearchClientboundPacket {
                                     ResearchClient.addResearch(this.playerName, ResourceLocation.tryParse(this.itemName));
                             }
                         }
-                        success.set(true);
                     });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

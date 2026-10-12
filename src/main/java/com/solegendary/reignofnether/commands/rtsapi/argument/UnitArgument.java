@@ -16,6 +16,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -29,6 +30,18 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class UnitArgument implements ArgumentType<EntitySelector> {
+
+    /** The one Info instance for this type; see BuildingArgument#INFO for why it has to be shared. */
+    public static final Info INFO = new Info();
+
+    static {
+        // Commands.validate() runs during bootstrap, before NeoForge constructs the mods,
+        // so an ArgumentTypeInfo has to be in ArgumentTypeInfos by the time this class is
+        // loaded - which happens while the commands using it are registered. Registering
+        // from the mod constructor or from common setup is too late and fails startup with
+        // "Unregistered argument types".
+        ArgumentTypeInfos.registerByClass(UnitArgument.class, INFO);
+    }
 	
 	public static final SimpleCommandExceptionType ERROR_NOT_SINGLE_UNIT = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.unit.too_many.error"));
 	public static final SimpleCommandExceptionType NO_UNITS_FOUND = new SimpleCommandExceptionType(Component.translatable("argument.reignofnether.unit.not_found.error"));

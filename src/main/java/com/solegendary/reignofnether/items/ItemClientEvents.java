@@ -9,7 +9,6 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.RectZone;
-import com.solegendary.reignofnether.hud.buttons.AbstractUnitItemButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.UnitItemInventoryButton;
 import com.solegendary.reignofnether.items.unititems.EmptyUnitItem;
@@ -23,21 +22,29 @@ import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.LevelRenderCompat;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import com.solegendary.reignofnether.hud.buttons.AbstractUnitItemButton;
+import com.solegendary.reignofnether.util.ItemTagCompat;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
@@ -52,6 +59,8 @@ public class ItemClientEvents {
     // Used for: dropping, giving to another unit, selling and rearranging inventory
     public static UnitItem actionableUnitItem = null;
     public static UnitItem actionableUnitItemDrag = null;
+    // unit item merely hovered in the HUD inventory (shares the range preview with actionableUnitItem)
+    public static UnitItem hoveredInvItem = null;
     public static int actionableInvIndex = 0;
     public static UUID actionableInvUUID = null;
     public static boolean leftClickUseItem = true;
@@ -66,11 +75,22 @@ public class ItemClientEvents {
     private static BlockPos lastCursorPos = new BlockPos(0,0,0);
 
     public static final ArrayList<Button> renderedButtons = new ArrayList<>();
-    public static UnitItem hoveredInvItem = null;
 
     // items moused over
     private static final ArrayList<ItemEntity> preselectedItems = new ArrayList<>();
+
+    // every item entity the cursor pass saw this frame, whatever is done with it
     private static final ArrayList<ItemEntity> renderedItems = new ArrayList<>();
+
+    public static void addRenderedItem(ItemEntity itemEntity) {
+        if (!FogOfWarClientEvents.isInBrightChunk(itemEntity))
+            return;
+        renderedItems.add(itemEntity);
+    }
+
+    public static void clearRenderedItems() {
+        renderedItems.clear();
+    }
 
     public static ItemShopPlacement openItemShop = null;
 
@@ -86,27 +106,13 @@ public class ItemClientEvents {
         return preselectedItems;
     }
 
-    public static void addRenderedItem(ItemEntity itemEntity) {
-        if (!FogOfWarClientEvents.isInBrightChunk(itemEntity))
-            return;
-        renderedItems.add(itemEntity);
-    }
-    public static void clearRenderedItems() {
-        renderedItems.clear();
-    }
-    public static ArrayList<ItemEntity> getRenderedItems() {
-        return renderedItems;
-    }
-
     public static boolean hasDragActionItem() {
         return actionableUnitItemDrag != null && (mouseX != mouseLeftDownX || mouseY != mouseLeftDownY) && !hasLeftClickAction();
     }
 
-    public static boolean shouldRenderUnitInventory(LivingEntity le) {
-        return ENABLED &&
-                le instanceof UnitInventory inv &&
-                le instanceof Unit unit &&
-                (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null));
+    public static boolean shouldRenderUnitInventory(Unit unit) {
+        return unit instanceof UnitInventory &&
+                unit.getItemGoal() != null;
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {
@@ -181,24 +187,22 @@ public class ItemClientEvents {
         for (Button button : ItemClientEvents.renderedButtons) {
             if (button.isMouseOver(mouseX, mouseY)) {
                 button.renderTooltip(guiGraphics, mouseX, mouseY);
-                if (button instanceof UnitItemInventoryButton uiInvButton) {
-                    if (hoveredInvItem == null) {
-                        hoveredInvItem = uiInvButton.unitItem;
-                        hoveredInvItem.updateHighlightBps(MC.level);
-                    }
+                if (button instanceof UnitItemInventoryButton uiInvButton && hoveredInvItem == null) {
+                    hoveredInvItem = uiInvButton.unitItem;
+                    hoveredInvItem.updateHighlightBps(MC.level);
                 }
             }
         }
+
         return RectZone.getZoneByLW(x, y, INV_WIDTH, INV_HEIGHT);
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+    public static void onClientTick(ClientTickEvent.Post evt) {
         if (HudClientEvents.hudSelectedEntity != null && actionableUnitItem != null &&
                 (actionableUnitItem.showRadiusCircle ||
                  actionableUnitItem.showRangeCircle ||
-                 actionableUnitItem.showRangeLine ||
-                 actionableUnitItem.showRadiusAtCursor) &&
+                 actionableUnitItem.showRangeLine) &&
                 (actionableUnitItem.range > 0 || actionableUnitItem.radius > 0)) {
             LivingEntity le = HudClientEvents.hudSelectedEntity;
             if (!lastOnPos.equals(le.getOnPos()) || !lastCursorPos.equals(CursorClientEvents.getPreselectedBlockPos())) {
@@ -211,7 +215,7 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onLeftMouseRelease(ScreenEvent.MouseButtonReleased.Post evt) {
-        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity) || MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
+        if (!ENABLED || MC.player == null || evt.getButton() != GLFW.GLFW_MOUSE_BUTTON_1)
             return;
 
         for (Button button : renderedButtons)
@@ -227,8 +231,9 @@ public class ItemClientEvents {
                 inv.swapSlots(actionableInvIndex, uiButton.invIndex);
                 ItemServerboundPacket.swap(((Entity) inv).getId(), actionableInvIndex, uiButton.invIndex);
             } else if (hudMousedOverButton != null &&
+                    hudMousedOverButton.entity instanceof HeroUnit &&
                     hudMousedOverButton.entity != HudClientEvents.hudSelectedEntity &&
-                    hudMousedOverButton.entity instanceof UnitInventory inv1 && inv1.canPickupUnitItems()) {
+                    hudMousedOverButton.entity instanceof UnitInventory) {
                 Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(hudMousedOverButton.entity);
                 if (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED) {
                     // Give via group button
@@ -243,8 +248,8 @@ public class ItemClientEvents {
                 if (!UnitClientEvents.getPreselectedUnits().isEmpty()) {
                     LivingEntity le = UnitClientEvents.getPreselectedUnits().get(0);
                     Relationship rlu = UnitClientEvents.getPlayerToEntityRelationship(le);
-                    if (le instanceof UnitInventory inv1 &&
-                        inv1.canPickupUnitItems() &&
+                    if (le instanceof HeroUnit &&
+                        le instanceof UnitInventory &&
                         le != HudClientEvents.hudSelectedEntity &&
                         (rlu == Relationship.FRIENDLY || rlu == Relationship.OWNED)) {
                         // Give via direct entity
@@ -280,17 +285,14 @@ public class ItemClientEvents {
     // for some reason some bound vanilla keys like Q and E don't trigger KeyPressed but still trigger keyReleased
     @SubscribeEvent
     public static void onKeyRelease(ScreenEvent.KeyReleased.KeyReleased.Post evt) {
-        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity))
-            return;
         for (Button button : renderedButtons)
             button.checkPressed(evt.getKeyCode());
     }
 
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        if (!shouldRenderUnitInventory(HudClientEvents.hudSelectedEntity) || !(MC.screen instanceof TopdownGui) || MC.player == null)
+        if (!ENABLED || !(MC.screen instanceof TopdownGui) || MC.player == null)
             return;
-
         for (Button button : renderedButtons) {
             if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
                 button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
@@ -355,7 +357,11 @@ public class ItemClientEvents {
             return;
 
         if (MC.level != null && OrthoviewClientEvents.isEnabled()) {
-            for (ItemEntity itemEntity : renderedItems) { // faint always-shown outline for visibility
+            // see LevelRenderCompat: at AFTER_CUTOUT_BLOCKS RenderSystem's model-view does not have
+            // the camera rotation yet, so the draw and the flush both have to happen under it
+            LevelRenderCompat.drawAndFlush(evt, () -> {
+            // 1.5.0: a faint always-shown outline so unit items stay visible on the ground
+            for (ItemEntity itemEntity : renderedItems) {
                 if (ItemUtil.isUnitItem(itemEntity)) {
                     MyRenderer.drawBoxBottom(
                             evt.getPoseStack(),
@@ -365,6 +371,7 @@ public class ItemClientEvents {
                     );
                 }
             }
+            // 1.5.0 keeps the faint outlines drawn even while the cursor is over the HUD
             if (HudClientEvents.isMouseOverAnyButtonOrHud()) return;
 
             for (ItemEntity itemEntity : preselectedItems) {
@@ -379,6 +386,7 @@ public class ItemClientEvents {
                     );
                 }
             }
+            });
         }
     }
 
@@ -411,6 +419,11 @@ public class ItemClientEvents {
     private static final Style HINT_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x888780));
     private static final Style COST_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x945a35));
 
+    /**
+     * 1.5.0's unit item tooltip: hovering an item shows its type, the wrapped description, its dot
+     * points and attribute lines, and the mana/cooldown/range/buy-sell footer. Without shift it
+     * just shows the same hint the shop buttons show.
+     */
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent evt) {
         ItemStack stack = evt.getItemStack();
@@ -418,7 +431,7 @@ public class ItemClientEvents {
         if (unitItem == null)
             return;
 
-        // line 0 is the vanilla item name, so everything we add goes after it
+        // entry 0 is the vanilla item name, so everything we add goes after it
         List<Component> tooltips = new ArrayList<>();
 
         if (!Screen.hasShiftDown()) {
@@ -427,27 +440,22 @@ public class ItemClientEvents {
         }
 
         if (evt.getToolTip().size() > 1) {
-            Component type = Component.literal( evt.getToolTip().get(0).getString() + " (" + unitItem.type.getLabel() + ")");
+            Component type = Component.literal(evt.getToolTip().get(0).getString() + " (" + unitItem.type.getLabel() + ")");
             evt.getToolTip().set(0, type);
         }
 
-        // description, wrapped manually since vanilla tooltips don't wrap at a fixed width
         String desc = unitItem.getDescription();
-        if (!desc.isBlank()) {
-            for (FormattedText part : Minecraft.getInstance().font.getSplitter()
-                    .splitLines(desc, WRAP_WIDTH, AbstractUnitItemButton.DESC_STYLE))
-                tooltips.add(Component.literal(part.getString())
-                        .withStyle(AbstractUnitItemButton.DESC_STYLE));
+        if (desc != null && !desc.isBlank()) {
+            for (FormattedText part : MC.font.getSplitter().splitLines(desc, WRAP_WIDTH, AbstractUnitItemButton.DESC_STYLE))
+                tooltips.add(Component.literal(part.getString()).withStyle(AbstractUnitItemButton.DESC_STYLE));
         }
 
-        // dot points (enchantments omitted: vanilla already shows them)
-        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
+        // dot points; enchantments are left out because vanilla already lists them
+        List<String> points = new ArrayList<>(unitItem.getPointDescs());
         points.addAll(AbstractUnitItemButton.getAttributeDescs(unitItem));
         for (String point : points)
             tooltips.add(MyRenderer.styledWithIcons(point.replace(" ", "   "), AbstractUnitItemButton.POINTS_STYLE));
-        // ^ assumes this returns a Component; if it returns FormattedText, convert it
 
-        // footer stats as plain text, since the icon textures can't go in a text tooltip
         List<Component> stats = new ArrayList<>();
         if (unitItem.manaCost > 0)
             stats.add(Component.translatable("item.reignofnether.hud.mana", unitItem.manaCost)
@@ -467,14 +475,15 @@ public class ItemClientEvents {
             tooltips.add(line);
         }
 
+        // the stack's own tags carry the per-shop price when it came out of a shop
+        CompoundTag tag = ItemTagCompat.tag(stack);
         List<Component> buysell = new ArrayList<>();
-        if (unitItem.buyCost > 0)
-            buysell.add(Component.translatable("item.reignofnether.hud.buy", unitItem.buyCost)
-                    .withStyle(COST_STYLE));
-        if (unitItem.sellValue > 0)
-            buysell.add(Component.translatable("item.reignofnether.hud.sell", unitItem.sellValue)
-                    .withStyle(COST_STYLE));
-
+        int buyCost = tag != null && tag.contains("buyCost") ? tag.getInt("buyCost") : unitItem.buyCost;
+        if (buyCost > 0)
+            buysell.add(Component.translatable("item.reignofnether.hud.buy", buyCost).withStyle(COST_STYLE));
+        int sellValue = tag != null && tag.contains("sellValue") ? tag.getInt("sellValue") : unitItem.sellValue;
+        if (sellValue > 0)
+            buysell.add(Component.translatable("item.reignofnether.hud.sell", sellValue).withStyle(COST_STYLE));
         if (!buysell.isEmpty()) {
             MutableComponent line = Component.empty();
             for (int i = 0; i < buysell.size(); i++) {

@@ -4,10 +4,10 @@ import com.solegendary.reignofnether.hud.TextInputClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 /**
  * Handler for TopdownGui, the GUI screen that allows for cursor movement on screen
@@ -25,10 +25,8 @@ public class TopdownGuiClientEvents {
 
     // if no other screen is open and we've got orthoview enabled, open a screen based on shouldPause
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
-            return;
-
+    public static void onClientTick(ClientTickEvent.Post evt) {
+        
         if (OrthoviewClientEvents.isEnabled() && Minecraft.getInstance().screen == null) {
             noScreenTicks += 1;
             if (noScreenTicks >= 3) {

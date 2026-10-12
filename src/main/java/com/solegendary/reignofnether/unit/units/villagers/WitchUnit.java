@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
@@ -39,8 +40,9 @@ import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import com.solegendary.reignofnether.util.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -137,11 +139,11 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
         SynchedEntityData.defineId(WitchUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable
@@ -195,7 +197,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     @Override
     public boolean removeWhenFarAway(double d) { return false; }
 
-    public void throwPotion(Vec3 targetBp, Potion potion) {
+    public void throwPotion(Vec3 targetBp, Holder<Potion> potion) {
         ThrownPotion thrownPotion = new ThrownPotion(this.level(), this);
 
         if (potion == Potions.STRONG_HARMING || potion == Potions.STRONG_REGENERATION)
@@ -215,13 +217,13 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Unit.createDefaultAttributes()
+        return Mob.createMobAttributes()
                 .add(Attributes.MOVEMENT_SPEED, WitchUnit.movementSpeed)
                 .add(Attributes.MAX_HEALTH, WitchUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, WitchUnit.armorValue)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist);
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), magicDamageResist);
     }
 
     public void tick() {
@@ -319,4 +321,5 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
             }
         }
     }
+
 }

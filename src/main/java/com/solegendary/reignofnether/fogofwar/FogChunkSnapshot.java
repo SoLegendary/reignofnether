@@ -2,9 +2,10 @@ package com.solegendary.reignofnether.fogofwar;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -84,9 +85,11 @@ public class FogChunkSnapshot {
 
     // encode the packet and flush it to its chunk file; register in the index on success
     private static boolean writeChunk(ChunkPos pos, ClientboundLevelChunkWithLightPacket packet) {
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        // 1.21.1 removed Packet#write; every packet ships a StreamCodec that replaces it.
+        RegistryFriendlyByteBuf buf =
+                new RegistryFriendlyByteBuf(Unpooled.buffer(), ServerLifecycleHooks.getCurrentServer().registryAccess());
         try {
-            packet.write(buf);
+            ClientboundLevelChunkWithLightPacket.STREAM_CODEC.encode(buf, packet);
             byte[] bytes = new byte[buf.readableBytes()];
             buf.readBytes(bytes);
             Files.write(fileFor(pos), bytes);
@@ -106,8 +109,10 @@ public class FogChunkSnapshot {
         if (cached != null) return cached;
         try {
             byte[] bytes = Files.readAllBytes(fileFor(pos));
-            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(bytes));
-            ClientboundLevelChunkWithLightPacket packet = new ClientboundLevelChunkWithLightPacket(buf);
+            RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(bytes),
+                    ServerLifecycleHooks.getCurrentServer().registryAccess());
+            ClientboundLevelChunkWithLightPacket packet =
+                    ClientboundLevelChunkWithLightPacket.STREAM_CODEC.decode(buf);
             lru.put(pos, packet);
             return packet;
         } catch (IOException e) {

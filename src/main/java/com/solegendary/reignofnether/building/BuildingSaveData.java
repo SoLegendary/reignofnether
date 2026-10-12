@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building;
 
+import net.minecraft.core.HolderLookup;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.buildings.monsters.*;
@@ -20,10 +21,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import com.solegendary.reignofnether.util.SavedDataCompat;
 
 public class BuildingSaveData extends SavedData {
 
@@ -39,9 +41,7 @@ public class BuildingSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld()
-            .getDataStorage()
-            .computeIfAbsent(tag -> BuildingSaveData.load(tag, server), BuildingSaveData::create, "saved-building-data");
+        return SavedDataCompat.computeIfAbsent(server, "saved-building-data", BuildingSaveData::create, tag -> BuildingSaveData.load(tag, server));
     }
 
     public static BuildingSaveData load(CompoundTag tag, MinecraftServer server) {
@@ -107,7 +107,7 @@ public class BuildingSaveData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         //ReignOfNether.LOGGER.info("BuildingSaveData.save");
 
         ListTag list = new ListTag();

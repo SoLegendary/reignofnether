@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
+import net.minecraft.core.HolderLookup;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.Resources;
@@ -12,10 +13,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import com.solegendary.reignofnether.util.SavedDataCompat;
 
 public class CustomBuildingSaveData extends SavedData {
 
@@ -31,9 +33,7 @@ public class CustomBuildingSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld()
-            .getDataStorage()
-            .computeIfAbsent(CustomBuildingSaveData::load, CustomBuildingSaveData::create, "saved-custom-building-data");
+        return SavedDataCompat.computeIfAbsent(server, "saved-custom-building-data", CustomBuildingSaveData::create, CustomBuildingSaveData::load);
     }
 
     public static CustomBuildingSaveData load(CompoundTag tag) {
@@ -65,7 +65,7 @@ public class CustomBuildingSaveData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         ListTag list = new ListTag();
         this.customBuildings.forEach(b -> {
             CompoundTag cTag = new CompoundTag();

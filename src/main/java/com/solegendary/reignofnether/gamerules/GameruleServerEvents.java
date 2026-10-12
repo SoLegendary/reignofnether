@@ -2,17 +2,15 @@ package com.solegendary.reignofnether.gamerules;
 
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
-import com.solegendary.reignofnether.items.RandomItemDropRule;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.pathfinding.PathfinderWorkerPool;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Mth;
-import net.minecraftforge.event.CommandEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.CommandEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -130,13 +128,6 @@ public class GameruleServerEvents {
                 double animalSpawnYDiff = ((Integer) args.get("value").getResult()).doubleValue();
                 GameruleClientboundPacket.setAnimalSpawnYDiff((long) animalSpawnYDiff);
             }
-        } else if (nodes.get(1).getNode().getName().equals("randomItemDrops")) {
-            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
-            if (args.containsKey("value")) {
-                double randomItemDrops = ((Integer) args.get("value").getResult()).doubleValue();
-                randomItemDrops = Mth.clamp(randomItemDrops, 0, 2);
-                GameruleClientboundPacket.setRandomItemDrops((long) randomItemDrops);
-            }
         }
     }
 
@@ -181,8 +172,6 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setRtsPathfinding(rtsPathfinding);
             int animalSpawnYDiff = server.getGameRules().getRule(GameRuleRegistrar.ANIMAL_SPAWN_Y_DIFF).get();
             GameruleClientboundPacket.setAnimalSpawnYDiff(animalSpawnYDiff);
-            int randomItemDrops = server.getGameRules().getRule(GameRuleRegistrar.RANDOM_ITEM_DROPS).get();
-            GameruleClientboundPacket.setAnimalSpawnYDiff(randomItemDrops);
         }
     }
 }

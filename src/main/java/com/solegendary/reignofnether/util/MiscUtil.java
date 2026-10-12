@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.util;
 
-
+import com.solegendary.reignofnether.util.ItemTagCompat;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
@@ -18,8 +19,11 @@ import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.nether.NetherBlocks;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.*;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
+import com.solegendary.reignofnether.registrars.EntityRegistrar;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.blocks.NightCircleMode;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
@@ -28,9 +32,9 @@ import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.BoggedUnit;
+import com.solegendary.reignofnether.unit.units.neutral.BeeUnit;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
-import com.solegendary.reignofnether.unit.units.neutral.BeeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
@@ -48,7 +52,6 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -63,9 +66,6 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.AbstractFish;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -99,9 +99,6 @@ import static com.solegendary.reignofnether.blocks.BlockUtils.isLeafBlock;
 import static com.solegendary.reignofnether.blocks.BlockUtils.isLogBlock;
 import static net.minecraft.util.Mth.cos;
 import static net.minecraft.util.Mth.sin;
-import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE;
-import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL;
-
 
 public class MiscUtil {
 
@@ -127,7 +124,7 @@ public class MiscUtil {
         CompoundTag fireworks = new CompoundTag();
         fireworks.put("Fireworks", explosionsAndFlight);
         ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET);
-        itemStack.setTag(fireworks);
+        ItemTagCompat.setTag(itemStack, fireworks);
         FireworkRocketEntity entity = new FireworkRocketEntity(level, null, vec3.x, vec3.y(), vec3.z, itemStack);
         level.addFreshEntity(entity);
         entity.moveTo(vec3);
@@ -147,7 +144,7 @@ public class MiscUtil {
         CompoundTag fireworks = new CompoundTag();
         fireworks.put("Fireworks", explosionsAndFlight);
         ItemStack itemStack = new ItemStack(Items.FIREWORK_ROCKET);
-        itemStack.setTag(fireworks);
+        ItemTagCompat.setTag(itemStack, fireworks);
         FireworkRocketEntity entity = new FireworkRocketEntity(level, null, vec3.x, vec3.y(), vec3.z, itemStack);
         level.addFreshEntity(entity);
         entity.moveTo(vec3);
@@ -353,7 +350,7 @@ public class MiscUtil {
             e -> {
                 double dist = e.position().distanceTo(pos); // deprioritise over actual enemy units
                 boolean isMeleeAgainstFlyer = isMelee && e instanceof Unit unit && unit.isFlyingUnit();
-                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer || (e instanceof BeeUnit))
+                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer || (e instanceof BeeUnit) || e.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.PARTIALLY_POSSESSED.get())))
                     dist += 100;
                 return dist;
             }
@@ -364,7 +361,7 @@ public class MiscUtil {
         if (unitMob instanceof BoggedUnit) {
             priorityFilter = e -> !e.hasEffect(MobEffects.POISON);
         } else if (unitMob instanceof WraithUnit) {
-            priorityFilter = e -> !e.hasEffect(MobEffectRegistrar.FEARFUL.get());
+            priorityFilter = e -> !e.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.FEARFUL.get()));
         } else if (unitMob instanceof WitherSkeletonUnit) {
             priorityFilter = e -> e.hasEffect(MobEffects.WITHER);
         } else if (unitMob instanceof WindcallerUnit) {
@@ -429,8 +426,6 @@ public class MiscUtil {
         boolean isPassiveNonUnit = !(targetEntity instanceof Unit) &&
                 (targetEntity instanceof Animal || targetEntity instanceof AbstractFish || targetEntity instanceof Villager);
 
-
-
         // Checks if neutral units can be attacked based on neutralAggro flag and other conditions
         boolean canAttackNeutral =
                 rs == Relationship.NEUTRAL && neutralAggro &&
@@ -442,7 +437,6 @@ public class MiscUtil {
         return (rs == Relationship.HOSTILE || canAttackNeutral) &&
                 targetEntity.getId() != unitMob.getId();
     }
-
 
     public static BuildingPlacement findClosestAttackableBuilding(Mob unitMob, float range) {
         List<BuildingPlacement> buildings = unitMob.level().isClientSide() ?
@@ -487,7 +481,6 @@ public class MiscUtil {
 
         return relationship == Relationship.HOSTILE;
     }
-
 
     private static boolean hasLineOfSightForAttacks(Mob mob, LivingEntity targetEntity) {
         return mob.hasLineOfSight(targetEntity) || mob instanceof GhastUnit ||
@@ -535,7 +528,6 @@ public class MiscUtil {
         } else
             return new ArrayList<>();
     }
-
 
     // accepts a list of strings to draw at the top left to track debug data
     //MiscUtil.drawDebugStrings(evt.getMatrixStack(), MC.font, new String[] {
@@ -727,16 +719,6 @@ public class MiscUtil {
             if (radius <= 0)
                 return new HashSet<>();
 
-            // skip rendering entirely if we are fully inside another circle
-            if (BlockClientEvents.nightCircleMode == NightCircleMode.NO_OVERLAPS) {
-                for (Pair<BlockPos, Integer> os : overlapSources) {
-                    Vec2 centre1 = new Vec2(center.getX(), center.getZ());
-                    Vec2 centre2 = new Vec2(os.getFirst().getX(), os.getFirst().getZ());
-                    int overlapRange = os.getSecond();
-                    if (!center.equals(os.getFirst()) && radius < overlapRange && centre1.distanceToSqr(centre2) < radius * radius)
-                        return Set.of();
-                }
-            }
             Set<BlockPos> circleBps = getCircle(center, radius);
 
             for (Pair<BlockPos, Integer> os : overlapSources) {
@@ -900,6 +882,63 @@ public class MiscUtil {
         );
     }
 
+    public static void addParticleExplosion(SimpleParticleType particleType, int amount, Level level, Vec3 pos) {
+        addParticleExplosion(particleType, amount, level, pos, 0.2f);
+    }
+
+    public static void addParticleExplosion(SimpleParticleType particleType, int amount, Level level, Vec3 pos, double velocityScale) {
+        RandomSource rand = RandomSource.create();
+        for (int j = 0; j < amount; ++j) {
+            double d0 = rand.nextGaussian() * velocityScale;
+            double d1 = rand.nextGaussian() * velocityScale;
+            double d2 = rand.nextGaussian() * velocityScale;
+            if (level.isClientSide()) {
+                level.addParticle(particleType, pos.x, pos.y, pos.z, d0, d1, d2);
+            } else {
+                ((ServerLevel) level).sendParticles(particleType, pos.x, pos.y, pos.z, 1, d0, d1, d2, 0);
+            }
+        }
+    }
+
+    // called for flying windcallers and levitating mobs
+    public static void spawnFlyingCloudParticles(Entity entity) {
+        double px = entity.getX();
+        double py = entity.getY();
+        double pz = entity.getZ();
+
+        // Spawn a loose ring of cloud puffs around the feet
+        int numPuffs = 1;
+        for (int i = 0; i < numPuffs; i++) {
+            double angle = (entity.tickCount * 0.25 + (Math.PI * 2.0 / numPuffs) * i) % (Math.PI * 2.0);
+            double radius = 0.3 + RANDOM.nextDouble() * 0.2;
+            double ox = Math.cos(angle) * radius;
+            double oz = Math.sin(angle) * radius;
+            double oy = -0.1 + RANDOM.nextDouble() * 0.1; // slightly below/at foot level
+
+            // Gentle upward and outward drift
+            double vx = ox * 0.015;
+            double vy = 0.005 + RANDOM.nextDouble() * 0.01;
+            double vz = oz * 0.015;
+
+            entity.level().addParticle(
+                    ParticleTypes.CLOUD,
+                    px + ox, py + oy, pz + oz,
+                    vx, vy, vz
+            );
+        }
+
+        // Occasional extra wisp for density variation
+        if (entity.tickCount % 10 == 0) {
+            double ox = (RANDOM.nextDouble() - 0.5) * 0.5;
+            double oz = (RANDOM.nextDouble() - 0.5) * 0.5;
+            entity.level().addParticle(
+                    ParticleTypes.CLOUD,
+                    px + ox, py - 0.05, pz + oz,
+                    0, 0.008, 0
+            );
+        }
+    }
+
     public static ResourceLocation getTextureForBlock(@NotNull Block block) {
         if (block == Blocks.COMMAND_BLOCK)
             return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/blocks/command_block_back.png");
@@ -1003,7 +1042,6 @@ public class MiscUtil {
         }
         return list.get(RANDOM.nextInt(list.size()));
     }
-
     public static <T> T getNextItem(List<T> list, T object) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("List must not be null or empty");
@@ -1018,39 +1056,5 @@ public class MiscUtil {
         }
         int index = list.indexOf(object);
         return index == -1 ? list.get(0) : list.get((index - 1 + list.size()) % list.size());
-    }
-
-    public static String getAttrString(Attribute attr, AttributeModifier modifier) {
-        String descId = attr.getDescriptionId();
-        boolean isMoveSpeed = attr == Attributes.MOVEMENT_SPEED;
-        if (isMoveSpeed) {
-            descId = "attribute.reignofnether.tooltip.movement_speed";
-        }
-        String attrName = Component.translatable(descId).getString();
-
-        boolean isPercentStat = List.of(
-                AttributeRegistrar.EVASION_CHANCE.get(),
-                AttributeRegistrar.CRITICAL_HIT_CHANCE.get(),
-                AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get(),
-                AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(),
-                AttributeRegistrar.LIFESTEAL.get(),
-                AttributeRegistrar.MANA_ON_HIT.get()
-        ).contains(attr);
-
-        String valueStr;
-        if (List.of(MULTIPLY_BASE, MULTIPLY_TOTAL).contains(modifier.getOperation()) || isPercentStat) {
-            valueStr = formatSigned(modifier.getAmount() * 100) + "%";
-        } else {
-            valueStr = formatSigned(isMoveSpeed ? modifier.getAmount() * 100 : modifier.getAmount());
-        }
-        return valueStr + " " + attrName;
-    }
-
-    // drops trailing ".0" on whole numbers, always shows a sign
-    public static String formatSigned(double value) {
-        String num = (value == Math.floor(value))
-                ? String.valueOf((int) value)
-                : String.valueOf(value);
-        return (value >= 0 ? "+" : "") + num;
     }
 }

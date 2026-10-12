@@ -4,17 +4,27 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.resources.ResourcesAction;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class AllianceClientboundPacket {
+public class AllianceClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<AllianceClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "alliance_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<AllianceClientboundPacket> type() {
+        return TYPE;
+    }
 
     // pos is used to identify the building object serverside
     AllianceAction action;
@@ -23,32 +33,32 @@ public class AllianceClientboundPacket {
     public boolean boolValue;
 
     public static void addAlliance(String playerName1, String playerName2) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AllianceClientboundPacket(AllianceAction.ACCEPT_REQUEST, playerName1, playerName2, true));
     }
 
     public static void addPendingAlliance(String toPlayer, String fromPlayer) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AllianceClientboundPacket(AllianceAction.REQUEST, toPlayer, fromPlayer, true));
     }
 
     public static void cancelPendingAlliance(String toPlayer, String fromPlayer) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AllianceClientboundPacket(AllianceAction.CANCEL_REQUEST, toPlayer, fromPlayer, true));
     }
 
     public static void removeAlliance(String playerName1, String playerName2) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AllianceClientboundPacket(AllianceAction.DISBAND, playerName1, playerName2, false));
     }
 
     public static void resetAlliances() {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AllianceClientboundPacket(AllianceAction.DISBAND, "", "", true));
     }
 
     public static void setAllyControl(String playerName1, boolean setValue) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new AllianceClientboundPacket(AllianceAction.SET_ALLY_CONTROL, playerName1, "", setValue));
     }
 
@@ -64,14 +74,14 @@ public class AllianceClientboundPacket {
         this.boolValue = boolValue;
     }
 
-    public AllianceClientboundPacket(FriendlyByteBuf buffer) {
+    public AllianceClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(AllianceAction.class);
         this.player1 = buffer.readUtf();
         this.player2 = buffer.readUtf();
         this.boolValue = buffer.readBoolean();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeUtf(this.player1);
         buffer.writeUtf(this.player2);
@@ -79,11 +89,10 @@ public class AllianceClientboundPacket {
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 switch (this.action) {
 
                     case REQUEST -> {
@@ -110,10 +119,8 @@ public class AllianceClientboundPacket {
                             AlliancesClient.playersWithAlliedControl.remove(player1);
                     }
                 }
-                success.set(true);
             });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

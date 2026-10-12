@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import net.minecraft.core.Holder;
 import com.solegendary.reignofnether.ability.EnchantAbility;
 import com.solegendary.reignofnether.ability.BuildingAbilityServerboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -22,6 +23,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 import java.util.List;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 
 public class EnchantQuickCharge extends EnchantAbility {
 
@@ -33,8 +35,8 @@ public class EnchantQuickCharge extends EnchantAbility {
     }
 
     @Override
-    public Enchantment getEnchantment() {
-        return Enchantments.QUICK_CHARGE;
+    public Holder<Enchantment> getEnchantment() {
+        return EnchantmentRegistrar.vanilla(Enchantments.QUICK_CHARGE);
     }
 
     @Override
@@ -77,8 +79,8 @@ public class EnchantQuickCharge extends EnchantAbility {
     }
 
     @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
+    public Holder<Enchantment> getMutuallyExclusiveEnchant(LivingEntity entity) {
+        for (Holder<Enchantment> enchantment : entity.getItemBySlot(equipmentSlot).getEnchantments().keySet()) {
             if (enchantment == Enchantments.MULTISHOT || enchantment == getEnchantment())
                 return enchantment;
         }

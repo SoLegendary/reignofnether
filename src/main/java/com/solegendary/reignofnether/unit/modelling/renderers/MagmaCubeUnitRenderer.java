@@ -15,8 +15,8 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class MagmaCubeUnitRenderer extends MobRenderer<SlimeUnit, LavaSlimeModel<SlimeUnit>> {
@@ -46,8 +46,8 @@ public class MagmaCubeUnitRenderer extends MobRenderer<SlimeUnit, LavaSlimeModel
 
     @Override
     protected void setupRotations(SlimeUnit entity, PoseStack poseStack, float ageInTicks,
-                                  float rotationYaw, float partialTicks) {
-        super.setupRotations(entity, poseStack, ageInTicks, rotationYaw, partialTicks);
+                                  float rotationYaw, float partialTicks, float scale) {
+        super.setupRotations(entity, poseStack, ageInTicks, rotationYaw, partialTicks, scale);
 
         float rollDegrees = Mth.lerp(partialTicks, entity.oRollAngle, entity.rollAngle);
 

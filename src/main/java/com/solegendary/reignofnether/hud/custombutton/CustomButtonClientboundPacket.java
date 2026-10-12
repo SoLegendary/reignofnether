@@ -2,17 +2,30 @@ package com.solegendary.reignofnether.hud.custombutton;
 
 import com.solegendary.reignofnether.ReignOfNether;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class CustomButtonClientboundPacket {
+public class CustomButtonClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<CustomButtonClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "custom_button_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<CustomButtonClientboundPacket> type() {
+        return TYPE;
+    }
 	
 	public static final ResourceLocation ALWAYS_KEY =
 		ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "always");
@@ -58,7 +71,7 @@ public class CustomButtonClientboundPacket {
 		this.isEnabled = isEnabled;
 	}
 	
-	public static CustomButtonClientboundPacket decode(FriendlyByteBuf buf) {
+	public static CustomButtonClientboundPacket decode(RegistryFriendlyByteBuf buf) {
 		byte type = buf.readByte();
 		return switch (type) {
 			case 0 -> new CustomButtonClientboundPacket(type, null, null, null, 0, 0, 0, null, false, false, false, false);
@@ -84,10 +97,7 @@ public class CustomButtonClientboundPacket {
 				0,
 				0,
 				0,
-				buf.readMap(
-					FriendlyByteBuf::readResourceLocation,
-					b -> b.readList(FriendlyByteBuf::readResourceLocation)
-				),
+				readMappings(buf),
 				false,
 				false,
 				false,
@@ -97,7 +107,7 @@ public class CustomButtonClientboundPacket {
 		};
 	}
 	
-	public void encode(FriendlyByteBuf buf) {
+	public void encode(RegistryFriendlyByteBuf buf) {
 		buf.writeByte(this.type);
 		switch (this.type) {
 			case 0 -> {
@@ -114,17 +124,36 @@ public class CustomButtonClientboundPacket {
 				buf.writeBoolean(this.lightUpOnHover);
 				buf.writeBoolean(this.isEnabled);
 			}
-			case 2, 3, 4 -> buf.writeMap(
-				this.mappings,
-				FriendlyByteBuf::writeResourceLocation,
-				(b, list) -> b.writeCollection(list, FriendlyByteBuf::writeResourceLocation)
-			);
+			case 2, 3, 4 -> writeMappings(buf, this.mappings);
+		}
+	}
+
+	/**
+	 * Spelled out rather than delegating to {@code FriendlyByteBuf#readMap}: that overload takes
+	 * {@code StreamDecoder<? super RegistryFriendlyByteBuf, ?>}, and javac cannot resolve a member
+	 * call on a lambda whose parameter type is such a capture. The wire format is the same one
+	 * writeMap produced - a varint size followed by key/value pairs.
+	 */
+	private static Map<ResourceLocation, List<ResourceLocation>> readMappings(RegistryFriendlyByteBuf buf) {
+		int size = buf.readVarInt();
+		Map<ResourceLocation, List<ResourceLocation>> map = new HashMap<>(Math.max(size, 0));
+		for (int i = 0; i < size; i++) {
+            ResourceLocation key = buf.readResourceLocation();
+            map.put(key, buf.readList(b -> b.readResourceLocation()));
+		}
+		return map;
+	}
+
+	private static void writeMappings(RegistryFriendlyByteBuf buf, Map<ResourceLocation, List<ResourceLocation>> map) {
+		buf.writeVarInt(map.size());
+		for (Map.Entry<ResourceLocation, List<ResourceLocation>> entry : map.entrySet()) {
+			buf.writeResourceLocation(entry.getKey());
+            buf.writeCollection(entry.getValue(), (b, rl) -> b.writeResourceLocation(rl));
 		}
 	}
 	
-	public void handle(Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::handlePacket));
-		ctx.get().setPacketHandled(true);
+	public void handle(IPayloadContext ctx) {
+		ctx.enqueueWork(() -> DistHelper.unsafeRunWhenOn(Dist.CLIENT, () -> this::handlePacket));
 	}
 	
 	public void handlePacket() {

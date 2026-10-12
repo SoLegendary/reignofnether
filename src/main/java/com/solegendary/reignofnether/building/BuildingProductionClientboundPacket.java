@@ -8,22 +8,32 @@ import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
 
-public class BuildingProductionClientboundPacket {
+public class BuildingProductionClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<BuildingProductionClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "building_production_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<BuildingProductionClientboundPacket> type() {
+        return TYPE;
+    }
     public static final ResourceLocation EMPTY = ResourceLocation.fromNamespaceAndPath("", "");
 
     // pos is used to identify the building object serverside
@@ -40,7 +50,7 @@ public class BuildingProductionClientboundPacket {
         for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
             if (ownerName.equals(sp.getName().getString()) ||
                 (b != null && FogOfWarServerEvents.canPlayerSeeBuilding(sp, b))) {
-                PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> sp), packet);
+                PacketHandler.send(PacketHandler.toPlayer(() -> sp), packet);
             }
         }
     }
@@ -110,14 +120,14 @@ public class BuildingProductionClientboundPacket {
         this.ticksLeft = ticksLeft;
     }
 
-    public BuildingProductionClientboundPacket(FriendlyByteBuf buffer) {
+    public BuildingProductionClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(BuildingAction.class);
         this.itemName = buffer.readUtf();
         this.buildingPos = buffer.readBlockPos();
         this.ticksLeft = buffer.readFloat();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeUtf(this.itemName);
         buffer.writeBlockPos(this.buildingPos);
@@ -125,11 +135,10 @@ public class BuildingProductionClientboundPacket {
     }
 
     // client-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 BuildingPlacement building = findBuilding(true, this.buildingPos);
                 if (building == null) {
                     return;
@@ -181,10 +190,8 @@ public class BuildingProductionClientboundPacket {
                     }
                     default -> { }
                 }
-                success.set(true);
             });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

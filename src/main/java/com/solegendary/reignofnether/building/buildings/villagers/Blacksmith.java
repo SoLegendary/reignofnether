@@ -63,7 +63,6 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
         return nbt;
     });
 
-
     public final static String buildingName = "Blacksmith";
     public final static String structureName = "blacksmith";
     public final static String upgradedStructureName = "blacksmith_superior";
@@ -95,7 +94,7 @@ public class Blacksmith extends ProductionBuilding implements RangeIndicatorAddo
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
+        String name = key != null ? Component.translatable("buildings." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/smithing_table_front.png"),

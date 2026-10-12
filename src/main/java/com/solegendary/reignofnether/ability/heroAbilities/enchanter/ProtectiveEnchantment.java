@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.heroAbilities.enchanter;
 
+import net.minecraft.core.Holder;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
@@ -130,12 +131,11 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
         );
     }
 
-
     @Override
     public boolean canEnchant(LivingEntity le) {
         return le instanceof Unit &&
                 !le.getItemBySlot(EquipmentSlot.CHEST).isEmpty() &&
-                !le.getItemBySlot(EquipmentSlot.CHEST).getAllEnchantments().containsKey(EnchantmentRegistrar.FORTYIFYING.get());
+                !le.getItemBySlot(EquipmentSlot.CHEST).getEnchantments().keySet().contains(EnchantmentRegistrar.FORTYIFYING.get());
     }
 
     @Override
@@ -145,7 +145,7 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error6"));
             return;
         }
-        if (targetEntity.getItemBySlot(EquipmentSlot.CHEST).getAllEnchantments().containsKey(EnchantmentRegistrar.FORTYIFYING.get())) {
+        if (targetEntity.getItemBySlot(EquipmentSlot.CHEST).getEnchantments().keySet().contains(EnchantmentRegistrar.FORTYIFYING.get())) {
             if (level.isClientSide())
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error4"));
             return;

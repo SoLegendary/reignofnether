@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 
@@ -18,7 +19,7 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class BeaconWealth extends BeaconAbility {
 
-    public final static MobEffect AURA_EFFECT = MobEffects.LUCK;
+    public final static Holder<MobEffect> AURA_EFFECT = MobEffects.LUCK;
 
     public BeaconWealth() {
         super(UnitAction.BEACON_WEALTH, AURA_EFFECT);

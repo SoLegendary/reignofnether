@@ -641,23 +641,23 @@ public class MatchStartScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         int mx = (int) mouseX, my = (int) mouseY;
         if (mx >= rosX1 && mx <= rosX2 && my >= rosY1 && my <= rosY2) {
-            rosterScroll -= (int) (delta * 18);
+            rosterScroll -= (int) (scrollY * 18);
             int maxScroll = Math.max(0, rosterContentH - rosterViewH);
             if (rosterScroll > maxScroll) rosterScroll = maxScroll;
             if (rosterScroll < 0) rosterScroll = 0;
             return true;
         }
         if (mx >= chatX1 && mx <= chatX2 && my >= chatY1 && my <= chatY2) {
-            chatScroll += (int) (delta * 3);
+            chatScroll += (int) (scrollY * 3);
             int maxScroll = Math.max(0, chatTotalLines - chatViewLines);
             if (chatScroll > maxScroll) chatScroll = maxScroll;
             if (chatScroll < 0) chatScroll = 0;
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
@@ -779,7 +779,7 @@ public class MatchStartScreen extends Screen {
         if (chatInput != null && keyCode == GLFW.GLFW_KEY_SLASH) {
             chatInput.setFocused(true);
             chatInput.setValue("/");
-            chatInput.moveCursorToEnd();
+            chatInput.moveCursorToEnd(false);
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

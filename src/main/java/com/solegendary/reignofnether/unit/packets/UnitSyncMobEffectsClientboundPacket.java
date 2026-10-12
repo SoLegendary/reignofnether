@@ -2,19 +2,31 @@ package com.solegendary.reignofnether.unit.packets;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class UnitSyncMobEffectsClientboundPacket {
+public class UnitSyncMobEffectsClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<UnitSyncMobEffectsClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "unit_sync_mob_effects_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<UnitSyncMobEffectsClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final int entityId;
     private final int effectId;
@@ -22,14 +34,16 @@ public class UnitSyncMobEffectsClientboundPacket {
     private final int duration;
 
     public static void addEffectClientside(LivingEntity entity, MobEffectInstance mei) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new UnitSyncMobEffectsClientboundPacket(entity.getId(), MobEffect.getId(mei.getEffect()), mei.getAmplifier(), mei.getDuration())
+        PacketHandler.send(PacketHandler.allPlayers(),
+                // 1.21.1's Registry#getId takes the registered value, and effects are handed out
+                // as holders now, so unwrap before looking up the numeric id.
+                new UnitSyncMobEffectsClientboundPacket(entity.getId(), BuiltInRegistries.MOB_EFFECT.getId(mei.getEffect().value()), mei.getAmplifier(), mei.getDuration())
         );
     }
 
-    public static void removeEffectClientside(LivingEntity entity, MobEffect me) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
-                new UnitSyncMobEffectsClientboundPacket(entity.getId(), MobEffect.getId(me), 0, 0)
+    public static void removeEffectClientside(LivingEntity entity, Holder<MobEffect> me) {
+        PacketHandler.send(PacketHandler.allPlayers(),
+                new UnitSyncMobEffectsClientboundPacket(entity.getId(), BuiltInRegistries.MOB_EFFECT.getId(me.value()), 0, 0)
         );
     }
 
@@ -46,14 +60,14 @@ public class UnitSyncMobEffectsClientboundPacket {
         this.duration = duration;
     }
 
-    public UnitSyncMobEffectsClientboundPacket(FriendlyByteBuf buffer) {
+    public UnitSyncMobEffectsClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.entityId = buffer.readInt();
         this.effectId = buffer.readInt();
         this.amplifier = buffer.readInt();
         this.duration = buffer.readInt();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeInt(this.entityId);
         buffer.writeInt(this.effectId);
         buffer.writeInt(this.amplifier);
@@ -61,17 +75,15 @@ public class UnitSyncMobEffectsClientboundPacket {
     }
 
     // client-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
                     // rest is handled by MobEffectEvent.Added event
                     UnitClientEvents.syncMobEffect(this.entityId, this.effectId, this.amplifier, this.duration);
                 });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

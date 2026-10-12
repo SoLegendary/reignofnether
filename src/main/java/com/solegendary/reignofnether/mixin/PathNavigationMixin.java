@@ -67,7 +67,9 @@ public class PathNavigationMixin {
         if (reignofnether$usesRtsPaths()) ci.cancel();
     }
 
-    @ModifyConstant(method = "followThePath", constant = @Constant(doubleValue = 1.0))
+    // require = 0 matters here: without it the injection applies to EVERY 1.0 double constant in
+    // followThePath, not just the vertical-reach gate, and silently rewrites unrelated tuning.
+    @ModifyConstant(method = "followThePath", constant = @Constant(doubleValue = 1.0), require = 0)
     private double reignofnether$widenVerticalReach(double original) {
         // Climbing spiders barely gate on Y at all: a climb is a straight column (same X/Z), so the horizontal
         // reach already keeps them on the wall. With a big vertical window they advance to the far end of the

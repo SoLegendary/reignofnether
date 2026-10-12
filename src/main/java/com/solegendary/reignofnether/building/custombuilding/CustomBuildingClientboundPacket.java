@@ -6,20 +6,31 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class CustomBuildingClientboundPacket {
+public class CustomBuildingClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<CustomBuildingClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "custom_building_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<CustomBuildingClientboundPacket> type() {
+        return TYPE;
+    }
 
     // pos is used to identify the building object serverside
     public String playerName;
@@ -36,7 +47,7 @@ public class CustomBuildingClientboundPacket {
     public static void registerCustomBuilding(String playerName, CustomBuilding building) {
         CompoundTag commandsTag = new CompoundTag();
         commandsTag.put("commands", building.commandsNbt);
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new CustomBuildingClientboundPacket(
+        PacketHandler.send(PacketHandler.allPlayers(), new CustomBuildingClientboundPacket(
                 playerName, building.name, new BlockPos(building.structureSize), building.structureNbt, building.attributesNbt, commandsTag
         ));
     }
@@ -57,7 +68,7 @@ public class CustomBuildingClientboundPacket {
         this.commandsNbt = commandsNbt;
     }
 
-    private static void writeCompressedNbt(FriendlyByteBuf buffer, CompoundTag tag) {
+    private static void writeCompressedNbt(RegistryFriendlyByteBuf buffer, CompoundTag tag) {
         try {
             if (tag == null)
                 tag = new CompoundTag();
@@ -71,7 +82,7 @@ public class CustomBuildingClientboundPacket {
         }
     }
 
-    private static CompoundTag readCompressedNbt(FriendlyByteBuf buffer) {
+    private static CompoundTag readCompressedNbt(RegistryFriendlyByteBuf buffer) {
         try {
             int len = buffer.readInt();
             if (len <= 0 || len > 10_000_000) {
@@ -79,13 +90,13 @@ public class CustomBuildingClientboundPacket {
                 return new CompoundTag();
             }
             byte[] data = buffer.readByteArray(len);
-            return NbtIo.readCompressed(new ByteArrayInputStream(data));
+            return NbtIo.readCompressed(new ByteArrayInputStream(data), NbtAccounter.unlimitedHeap());
         } catch (Exception e) {
             return new CompoundTag();
         }
     }
 
-    public CustomBuildingClientboundPacket(FriendlyByteBuf buffer) {
+    public CustomBuildingClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.playerName = buffer.readUtf();
         this.name = buffer.readUtf();
         this.structureSize = buffer.readBlockPos();
@@ -94,7 +105,7 @@ public class CustomBuildingClientboundPacket {
         this.commandsNbt = buffer.readNbt();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeUtf(this.playerName);
         buffer.writeUtf(this.name);
         buffer.writeBlockPos(this.structureSize);
@@ -104,17 +115,14 @@ public class CustomBuildingClientboundPacket {
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 CustomBuildingClientEvents.registerCustomBuilding(
                         playerName, name, structureSize, structureNbt, attributesNbt, commandsNbt.getList("commands", Tag.TAG_COMPOUND)
                 );
-                success.set(true);
             });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

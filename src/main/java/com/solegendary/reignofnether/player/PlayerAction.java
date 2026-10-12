@@ -28,5 +28,7 @@ public enum PlayerAction {
     SYNC_BEACON_OWNER_TICKS,
     SET_RTS_CAMERA,
     REQUEST_MARKET_RATES,
-    SET_MARKET_RATE
+    SET_MARKET_RATE,
+    // the enum travels with writeEnum/readEnum, so new values always go at the end
+    SYNC_ITEMS_DROPPED
 }

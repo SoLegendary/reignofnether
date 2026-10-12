@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.building.BuildingBlockData;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.RectZone;
+import com.solegendary.reignofnether.util.LevelRenderCompat;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -18,9 +19,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -108,6 +109,10 @@ public class CustomBuildingClientEvents {
                         1f, 1f, 1f, 1f);
             }
         }
+
+        // vanilla empties the buffer source before dispatching this stage, so the boxes would
+        // otherwise linger until the GUI pass flushes them with an orthographic matrix
+        LevelRenderCompat.flushWorldGeometry();
     }
 
     @SubscribeEvent
@@ -116,9 +121,9 @@ public class CustomBuildingClientEvents {
         renderedButtons.clear();
         if (customBuildingToEdit != null && MC.screen instanceof TopdownGui) {
             int blitX = 120;
-            int blitY = 30;
+            int blitY = 20;
             int width = 315;
-            int height = 240;
+            int height = 260;
             MyRenderer.renderFrameWithBg(evt.getGuiGraphics(), blitX, blitY, width, height, 0xA0000000);
 
             renderedButtons.add(CustomBuildingMenu.renderIconButtonNameAndPortrait(evt, customBuildingToEdit, blitX + 18, blitY + 18));
@@ -155,13 +160,8 @@ public class CustomBuildingClientEvents {
     @SubscribeEvent
     public static void onMouseScroll(ScreenEvent.MouseScrolled.Post evt) {
         if (customBuildingToEdit != null && showCommandsMenu) {
-            CustomBuildingMenu.scrollCommands(-sign(evt.getScrollDelta()));
+            CustomBuildingMenu.scrollCommands(-sign(evt.getScrollDeltaY()));
         }
     }
 }
-
-
-
-
-
 

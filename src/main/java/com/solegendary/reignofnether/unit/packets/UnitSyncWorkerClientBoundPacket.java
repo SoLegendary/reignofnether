@@ -5,17 +5,27 @@ import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class UnitSyncWorkerClientBoundPacket {
+public class UnitSyncWorkerClientBoundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<UnitSyncWorkerClientBoundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "unit_sync_worker_client_bound"));
+
+    @Override
+    public CustomPacketPayload.Type<UnitSyncWorkerClientBoundPacket> type() {
+        return TYPE;
+    }
 
     private final int entityId;
     private final boolean isBuilding; // for workers to show arms swinging
@@ -28,7 +38,7 @@ public class UnitSyncWorkerClientBoundPacket {
         if (entity instanceof WorkerUnit workerUnit) {
             BlockPos bp = workerUnit.getGatherResourceGoal().getGatherTarget();
 
-            PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+            PacketHandler.send(PacketHandler.allPlayers(),
                 new UnitSyncWorkerClientBoundPacket(entity.getId(),
                     workerUnit.getBuildRepairGoal().isBuilding(),
                     workerUnit.getGatherResourceGoal().isGathering(),
@@ -57,7 +67,7 @@ public class UnitSyncWorkerClientBoundPacket {
         this.gatherTicks = gatherTicks;
     }
 
-    public UnitSyncWorkerClientBoundPacket(FriendlyByteBuf buffer) {
+    public UnitSyncWorkerClientBoundPacket(RegistryFriendlyByteBuf buffer) {
         this.entityId = buffer.readInt();
         this.isBuilding = buffer.readBoolean();
         this.isGathering = buffer.readBoolean();
@@ -66,7 +76,7 @@ public class UnitSyncWorkerClientBoundPacket {
         this.gatherTicks = buffer.readInt();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeInt(this.entityId);
         buffer.writeBoolean(this.isBuilding);
         buffer.writeBoolean(this.isGathering);
@@ -76,11 +86,10 @@ public class UnitSyncWorkerClientBoundPacket {
     }
 
     // client-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
                     UnitClientEvents.syncWorkerUnit(
                         this.entityId,
@@ -91,7 +100,6 @@ public class UnitSyncWorkerClientBoundPacket {
                         this.gatherTicks);
                 });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

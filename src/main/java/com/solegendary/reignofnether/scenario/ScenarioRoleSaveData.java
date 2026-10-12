@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.scenario;
 
+import net.minecraft.core.HolderLookup;
 import com.solegendary.reignofnether.ReignOfNether;
 
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import com.solegendary.reignofnether.util.SavedDataCompat;
 
 public class ScenarioRoleSaveData extends SavedData {
 
@@ -26,9 +28,7 @@ public class ScenarioRoleSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld()
-            .getDataStorage()
-            .computeIfAbsent(ScenarioRoleSaveData::load, ScenarioRoleSaveData::create, "saved-scenario-data");
+        return SavedDataCompat.computeIfAbsent(server, "saved-scenario-data", ScenarioRoleSaveData::create, ScenarioRoleSaveData::load);
     }
 
     public static ScenarioRoleSaveData load(CompoundTag tag) {
@@ -49,7 +49,7 @@ public class ScenarioRoleSaveData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         ListTag list = new ListTag();
         this.scenarioRoleSaves.forEach(r -> {
             r.packNbt();

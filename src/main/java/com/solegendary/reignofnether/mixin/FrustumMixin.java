@@ -1,16 +1,7 @@
 package com.solegendary.reignofnether.mixin;
 
-import com.solegendary.reignofnether.building.BuildingClientEvents;
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.buildings.neutral.EndPortal;
-import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.extensions.IForgeBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -32,28 +23,26 @@ public class FrustumMixin {
         }
     }
 
-    // see IForgeBlockEntity.getRenderBoundingBox()
-    @Inject(
-            method = "isVisible(Lnet/minecraft/world/phys/AABB;)Z",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    public void isVisible(AABB aabb, CallbackInfoReturnable<Boolean> cir) {
-        // aabb is infinite only for some block entities: structure, beacon, end portal
-        boolean infAABB = aabb.equals(IForgeBlockEntity.INFINITE_EXTENT_AABB);
-
-        Player player = Minecraft.getInstance().player;
-        float zoom = Math.max(30, OrthoviewClientEvents.getZoom()) * 2;
-
-        if (player != null && OrthoviewClientEvents.isEnabled() && infAABB) {
-            for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
-                if (building instanceof BeaconPlacement ||
-                    building.getBuilding() instanceof EndPortal) {
-                    BlockPos equalYBp = new BlockPos(player.getOnPos().getX(), building.centrePos.getY(), player.getOnPos().getZ());
-                    if (building.centrePos.distSqr(equalYBp) < (zoom * zoom))
-                        cir.setReturnValue(true);
-                }
-            }
-        }
-    }
+    /*
+     * The beacon / end-portal exemption upstream carried in this class is not a loss in 1.21.1 -
+     * NeoForge already implements it, so re-adding the injection here would be dead code:
+     *
+     * - Upstream needed it because in 1.20.1 those block entities answered
+     *   IForgeBlockEntity.INFINITE_EXTENT_AABB with a world-sized box, and Forge's frustum test
+     *   could reject an infinite box at some camera angles (GH-9321). That fix now lives inside
+     *   NeoForge's own Frustum#isVisible ("exit early for infinite bounds, these would otherwise
+     *   fail in the intersection test at certain camera angles"), and AABB.INFINITE still exists -
+     *   it is still what StructureBlockRenderer#getRenderBoundingBox answers.
+     * - The render box itself moved from IForgeBlockEntity#getRenderBoundingBox to
+     *   BlockEntityRenderer#getRenderBoundingBox, which LevelRenderer reaches through
+     *   ClientHooks#isBlockEntityRendererVisible(dispatcher, blockEntity, frustum).
+     * - Nothing left needs an exemption: BeaconRenderer answers a box that runs from the beacon to
+     *   the top of the world (y up to MAX_RENDER_Y) and TheEndPortalRenderer answers the renderer
+     *   default of one block. Both are finite and culled correctly, so the ortho camera already
+     *   shows every beacon beam and end portal it should.
+     *
+     * If one of them is ever seen culled from the ortho camera, the place to fix it is that
+     * renderer's getRenderBoundingBox, not this class: by the time a box gets here it is finite and
+     * vanilla's test is right.
+     */
 }

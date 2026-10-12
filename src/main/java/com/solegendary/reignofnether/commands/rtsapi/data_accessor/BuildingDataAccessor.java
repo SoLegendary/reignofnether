@@ -208,6 +208,6 @@ public class BuildingDataAccessor implements DataAccessor {
 	
 	@Override
 	public @NotNull Component getPrintSuccess(NbtPathArgument.@NotNull NbtPath pPath, double pScale, int pValue) {
-		return Component.translatable("commands.data.entity.get", pPath, building.getBuilding().name, String.format(Locale.ROOT, "%.2f", pScale), pValue);
+		return Component.translatable("commands.data.entity.get", pPath.asString(), building.getBuilding().name, String.format(Locale.ROOT, "%.2f", pScale), pValue);
 	}
 }

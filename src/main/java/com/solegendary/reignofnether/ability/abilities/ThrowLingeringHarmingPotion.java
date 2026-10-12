@@ -13,6 +13,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
@@ -26,7 +27,7 @@ public class ThrowLingeringHarmingPotion extends Ability {
 
     public static final int CD_MAX_SECONDS = 10;
 
-    public final Potion potion = Potions.STRONG_HARMING;
+    public final Holder<Potion> potion = Potions.STRONG_HARMING;
 
     public ThrowLingeringHarmingPotion(int potionThrowRange) {
         super(UnitAction.THROW_LINGERING_HARMING_POTION,

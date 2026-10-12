@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.solegendary.reignofnether.util.EnchantmentUtil;
 
 @Mixin(CampfireBlock.class)
 public abstract class CampfireBlockMixin extends BaseEntityBlock {
@@ -31,7 +32,7 @@ public abstract class CampfireBlockMixin extends BaseEntityBlock {
     )
     public void entityInside(BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity, CallbackInfo ci) {
         ci.cancel();
-        if (pState.getValue(CampfireBlock.LIT) && pEntity instanceof LivingEntity && !EnchantmentHelper.hasFrostWalker((LivingEntity)pEntity) &&
+        if (pState.getValue(CampfireBlock.LIT) && pEntity instanceof LivingEntity && !EnchantmentUtil.hasFrostWalker((LivingEntity)pEntity) &&
             pEntity.tickCount % DAMAGE_DELAY == 0) {
             pEntity.hurt(pLevel.damageSources().inFire(), pState.getBlock() == Blocks.SOUL_CAMPFIRE ? 2 : 1);
         }

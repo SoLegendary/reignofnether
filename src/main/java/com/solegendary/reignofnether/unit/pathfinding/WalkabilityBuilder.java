@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.pathfinding;
 
+import net.minecraft.world.level.pathfinder.PathType;
 import com.solegendary.reignofnether.blocks.BlockUtils;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
@@ -68,7 +69,7 @@ public final class WalkabilityBuilder {
     }
 
     // fences, walls and closed fence gates are 1.5-block barriers units can't pass or stand on (open gates are
-    // walkable, so excluded). mirrors vanilla WalkNodeEvaluator's BlockPathTypes.FENCE handling.
+    // walkable, so excluded). mirrors vanilla WalkNodeEvaluator's PathType.FENCE handling.
     public static boolean isFenceLike(BlockState bs) {
         if (bs.is(BlockTags.FENCES) || bs.is(BlockTags.WALLS) || bs.getBlock() instanceof SculkCatalystBlock || bs.getBlock() instanceof SculkShriekerBlock) return true;
         return bs.getBlock() instanceof FenceGateBlock && !bs.getValue(FenceGateBlock.OPEN);

@@ -15,15 +15,25 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.IronGolemProd;
-
+import com.solegendary.reignofnether.faction.Faction;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
@@ -49,7 +59,7 @@ public class IronGolemBuilding extends Building {
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
+        String name = key != null ? Component.translatable("buildings." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(name,
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/iron_block.png"),
             hotkey,
@@ -75,8 +85,7 @@ public class IronGolemBuilding extends Building {
     public void onBuilt(BuildingPlacement placement) {
         if (!placement.getLevel().isClientSide()) {
             placement.destroy((ServerLevel) placement.getLevel());
-            Entity entity = EntityRegistrar.IRON_GOLEM_UNIT.get().spawn((ServerLevel) placement.getLevel(),
-                    (CompoundTag) null,
+            Entity entity = EntityRegistrar.IRON_GOLEM_UNIT.get().spawn((ServerLevel) placement.getLevel(), ItemStack.EMPTY,
                     null,
                     placement.centrePos.offset(0, -1, 0),
                     MobSpawnType.SPAWNER,

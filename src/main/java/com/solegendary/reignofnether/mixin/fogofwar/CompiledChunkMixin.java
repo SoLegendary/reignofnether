@@ -2,7 +2,7 @@ package com.solegendary.reignofnether.mixin.fogofwar;
 
 import com.google.common.collect.Lists;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
-import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
+import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +14,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(ChunkRenderDispatcher.CompiledChunk.class)
+// ChunkRenderDispatcher.CompiledChunk was replaced by SectionRenderDispatcher.CompiledSection in
+// 1.21.1; the field and the accessor this mixin hooks are unchanged, only the owner class moved.
+@Mixin(SectionRenderDispatcher.CompiledSection.class)
 public abstract class CompiledChunkMixin {
 
     @Shadow @Final List<BlockEntity> renderableBlockEntities = Lists.newArrayList();

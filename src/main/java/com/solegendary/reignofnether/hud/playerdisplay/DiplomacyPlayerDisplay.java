@@ -53,7 +53,6 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
                     (int) (Button.DEFAULT_ICON_FRAME_SIZE * 2.5f) +
                     ALLIANCE_FRAME_WIDTH;
 
-
     private boolean isAllied() {
         return MC.player != null && AlliancesClient.isAllied(MC.player.getName().getString(), playerName);
     }

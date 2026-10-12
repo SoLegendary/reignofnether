@@ -27,11 +27,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.server.command.EnumArgument;
+import net.neoforged.neoforge.server.command.EnumArgument;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class UnitCommands {
 	
@@ -53,10 +54,9 @@ public class UnitCommands {
 				.then(Commands.literal("summon")
 					.then(Commands.argument("entity", ResourceLocationArgument.id())
 						.suggests(
-							(ctx, builder) -> SharedSuggestionProvider.suggestResource(
-								net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getEntries().stream()
-									.filter(e -> e.getKey().location().getNamespace().equals(com.solegendary.reignofnether.ReignOfNether.MOD_ID))
-									.map(e -> e.getKey().location()),
+							(ctx, builder) -> SharedSuggestionProvider.suggestResource(BuiltInRegistries.ENTITY_TYPE.registryKeySet().stream()
+										.filter(e -> e.location().getNamespace().equals(com.solegendary.reignofnether.ReignOfNether.MOD_ID))
+										.map(e -> e.location()),
 								builder))
 						.executes(ctx -> {
 							Entity source = ctx.getSource().getEntity();

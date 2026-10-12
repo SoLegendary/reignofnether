@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProdDupeRule;
 import com.solegendary.reignofnether.building.production.ProductionItem;
@@ -46,7 +48,9 @@ public class ResearchSpiderWebs extends ProductionItem {
                 hotkey,
                 () -> ProductionItems.RESEARCH_SPIDER_WEBS.itemIsBeingProduced(prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ProductionItems.RESEARCH_SPIDER_WEBS),
-                () -> true,
+                // the tooltip says "Requires a Spider Lair", as do spider_jockeys and poison_spiders
+            // which are both gated on it - this one was missed
+            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.SPIDER_LAIR),
                 List.of(
                         fcs(I18n.get("research.reignofnether.spider_webs"), true),
                         ResourceCosts.getFormattedCost(cost),

@@ -120,7 +120,7 @@ public abstract class FireBlockMixin {
         fireblock.setFlammable(Blocks.MANGROVE_LEAVES, 0, 5);
         fireblock.setFlammable(Blocks.BOOKSHELF, 0, 20);
         fireblock.setFlammable(Blocks.TNT, 0, 10);
-        fireblock.setFlammable(Blocks.GRASS, 0, 10);
+        fireblock.setFlammable(Blocks.SHORT_GRASS, 0, 10);
         fireblock.setFlammable(Blocks.FERN, 0, 10);
         fireblock.setFlammable(Blocks.DEAD_BUSH, 0, 10);
         fireblock.setFlammable(Blocks.SUNFLOWER, 0, 10);

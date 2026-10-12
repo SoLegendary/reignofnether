@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -21,15 +22,17 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.event.TickEvent.PlayerTickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 public class HealthBarClientEvents {
 
@@ -56,12 +59,12 @@ public class HealthBarClientEvents {
             return;
 
         Camera camera = MC.gameRenderer.getMainCamera();
-        renderBarsInWorld(evt.getPartialTick(), evt.getPoseStack(), camera);
+        renderBarsInWorld(evt.getPartialTick().getGameTimeDeltaPartialTick(false), evt.getPoseStack(), camera);
     }
     @SubscribeEvent
-    public static void playerTick(PlayerTickEvent evt) {
-        if (!evt.player.level().isClientSide)
-            return;
+    public static void playerTick(ClientTickEvent.Post evt) {
+        // This is client-only by construction now: it used to be a PlayerTickEvent handler that
+        // bailed out when the entity's level was not the client, which could never be true here.
         BarStates.tick();
     }
 
@@ -75,7 +78,10 @@ public class HealthBarClientEvents {
     }
 
     private static boolean hasAnyEquippedItem(Entity entity) {
-        for (var stack : entity.getAllSlots())
+        // getAllSlots only exists on LivingEntity in 1.21.1
+        if (!(entity instanceof LivingEntity living))
+            return false;
+        for (var stack : living.getAllSlots())
             if (!stack.isEmpty())
                 return true;
         return false;
@@ -259,18 +265,17 @@ public class HealthBarClientEvents {
         float zOffsetAmount = renderMode == RenderMode.IN_WORLD_FIRST_PERSON || renderMode == RenderMode.IN_WORLD_ORTHOVIEW ? -0.1F : 0.1F;
 
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        BufferBuilder buffer = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
-        buffer.vertex(matrix4f, (float) (-half + x), (float) y, zOffset * zOffsetAmount)
-                .uv(u * c, v * c).endVertex();
-        buffer.vertex(matrix4f, (float) (-half + x), (float) (h + y), zOffset * zOffsetAmount)
-                .uv(u * c, (v + vh) * c).endVertex();
-        buffer.vertex(matrix4f, (float) (-half + size + x), (float) (h + y), zOffset * zOffsetAmount)
-                .uv((u + uw) * c, (v + vh) * c).endVertex();
-        buffer.vertex(matrix4f, (float) (-half + size + x), (float) y, zOffset * zOffsetAmount)
-                .uv(((u + uw) * c), v * c).endVertex();
-        tessellator.end();
+        buffer.addVertex(matrix4f, (float) (-half + x), (float) y, zOffset * zOffsetAmount)
+                .setUv(u * c, v * c);
+        buffer.addVertex(matrix4f, (float) (-half + x), (float) (h + y), zOffset * zOffsetAmount)
+                .setUv(u * c, (v + vh) * c);
+        buffer.addVertex(matrix4f, (float) (-half + size + x), (float) (h + y), zOffset * zOffsetAmount)
+                .setUv((u + uw) * c, (v + vh) * c);
+        buffer.addVertex(matrix4f, (float) (-half + size + x), (float) y, zOffset * zOffsetAmount)
+                .setUv(((u + uw) * c), v * c);
+        BufferUploader.drawWithShader(buffer.build());
 
         // reset color
         RenderSystem.setShaderColor(1,1,1,1);

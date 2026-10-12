@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.minimap;
 
+import com.solegendary.reignofnether.util.GuiLayerCompat;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -37,6 +38,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -59,10 +61,9 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -76,6 +77,10 @@ import java.util.Set;
 import static com.solegendary.reignofnether.blocks.BlockClientEvents.nightCircleMode;
 import static com.solegendary.reignofnether.hud.HudClientEvents.*;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 
 public class MinimapClientEvents {
 
@@ -106,7 +111,7 @@ public class MinimapClientEvents {
 	public static boolean minimapRightClickDown = false;
 
     private static DynamicTexture mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
-    private static ResourceLocation mapTexLoc = Minecraft.getInstance().textureManager.register(
+    private static ResourceLocation mapTexLoc = Minecraft.getInstance().getTextureManager().register(
         ReignOfNether.MOD_ID + "_" + "minimap",
         mapTexture
     );
@@ -216,7 +221,7 @@ public class MinimapClientEvents {
         }
         BlockPos markerPos = getWorldPosOnMinimap(mouseX, mouseY, false);
         if (markerPos != null) {
-            PacketHandler.INSTANCE.sendToServer(new MapMarkerServerboundPacket(markerPos.getX(), markerPos.getZ()));
+            PacketHandler.sendToServer(new MapMarkerServerboundPacket(markerPos.getX(), markerPos.getZ()));
         }
     }
 
@@ -323,7 +328,7 @@ public class MinimapClientEvents {
             mapGuiRadius = 60;
         }
         mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
-        mapTexLoc = Minecraft.getInstance().textureManager.register(
+        mapTexLoc = Minecraft.getInstance().getTextureManager().register(
             ReignOfNether.MOD_ID + "_" + "minimap",
             mapTexture
         );
@@ -716,8 +721,6 @@ public class MinimapClientEvents {
         forceUpdateAllPartitions = false;
     }
 
-
-
     private static void updateNightCircles() {
 
         // get list of night source centre:range pairs
@@ -961,7 +964,7 @@ public class MinimapClientEvents {
                                 z0 < START_POS_THICKNESS || z0 >= (START_POS_RADIUS * 2) - START_POS_THICKNESS
                         )) {
                             //rgb = PlayerColors.getPlayerDisplayColorHex(startPos.playerName);
-                            //if (startPos.faction == Factions.NONE)
+                            //if (startPos.faction == Faction.NONE)
                             //    rgb = 0xFFFF00;
                             rgb = startPos.getHexColor();
                         }
@@ -1042,7 +1045,6 @@ public class MinimapClientEvents {
         return (r << 16) | (g << 8) | b;
     }
 
-
     // checks whether a given X Z in the world is part of our map
     public static boolean isWorldXZinsideMap(int x, int z) {
         return x >= xc_world - worldRadius && x < xc_world + worldRadius && z >= zc_world - worldRadius
@@ -1083,22 +1085,21 @@ public class MinimapClientEvents {
         RenderSystem.setShaderTexture(0, iconFrameResource);
         // code taken from GuiComponent.blit()
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(matrix4f, xc_bg, yb_bg, 0.0F).uv(0.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, xr_bg, yc_bg, 0.0F).uv(1.0F, 1.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, xc_bg, yt_bg, 0.0F).uv(1.0F, 0.0F).endVertex();
-        bufferbuilder.vertex(matrix4f, xl_bg, yc_bg, 0.0F).uv(0.0F, 0.0F).endVertex();
+        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.addVertex(matrix4f, xc_bg, yb_bg, 0.0F).setUv(0.0F, 1.0F);
+        bufferbuilder.addVertex(matrix4f, xr_bg, yc_bg, 0.0F).setUv(1.0F, 1.0F);
+        bufferbuilder.addVertex(matrix4f, xc_bg, yt_bg, 0.0F).setUv(1.0F, 0.0F);
+        bufferbuilder.addVertex(matrix4f, xl_bg, yc_bg, 0.0F).setUv(0.0F, 0.0F);
 
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferUploader.drawWithShader(bufferbuilder.build());
 
         // render map itself
-        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(256));
         VertexConsumer consumer = buffer.getBuffer(mapRenderType);
-        consumer.vertex(matrix4f, xc, yb, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xr, yc, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xc, yt, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xl, yc, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(255).endVertex();
+        consumer.addVertex(matrix4f, xc, yb, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 1.0F).setLight(255);
+        consumer.addVertex(matrix4f, xr, yc, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 1.0F).setLight(255);
+        consumer.addVertex(matrix4f, xc, yt, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 0.0F).setLight(255);
+        consumer.addVertex(matrix4f, xl, yc, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 0.0F).setLight(255);
 
         buffer.endBatch();
     }
@@ -1136,13 +1137,12 @@ public class MinimapClientEvents {
                 ReignOfNether.MOD_ID, "textures/hud/map_background.png");
         RenderSystem.setShaderTexture(0, bg);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bb.vertex(matrix4f, xl_bg, yb_bg, 0.0F).uv(0.0F, 1.0F).endVertex();
-        bb.vertex(matrix4f, xr_bg, yb_bg, 0.0F).uv(1.0F, 1.0F).endVertex();
-        bb.vertex(matrix4f, xr_bg, yt_bg, 0.0F).uv(1.0F, 0.0F).endVertex();
-        bb.vertex(matrix4f, xl_bg, yt_bg, 0.0F).uv(0.0F, 0.0F).endVertex();
-        BufferUploader.drawWithShader(bb.end());
+        BufferBuilder bb = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bb.addVertex(matrix4f, xl_bg, yb_bg, 0.0F).setUv(0.0F, 1.0F);
+        bb.addVertex(matrix4f, xr_bg, yb_bg, 0.0F).setUv(1.0F, 1.0F);
+        bb.addVertex(matrix4f, xr_bg, yt_bg, 0.0F).setUv(1.0F, 0.0F);
+        bb.addVertex(matrix4f, xl_bg, yt_bg, 0.0F).setUv(0.0F, 0.0F);
+        BufferUploader.drawWithShader(bb.build());
 
         // clip the rotated content to the visible square (after the frame, so frame isn't clipped)
         guiGraphics.enableScissor((int) x1, (int) y1, (int) x2, (int) y2);
@@ -1150,12 +1150,12 @@ public class MinimapClientEvents {
         // render the texture as a rotated quad that fully circumscribes the visible square
         // (d = 2*half makes the diamond's edges meet the square's corners — no black borders)
         float d = 2 * half;
-        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource buffer = MultiBufferSource.immediate(new ByteBufferBuilder(256));
         VertexConsumer consumer = buffer.getBuffer(mapRenderType);
-        consumer.vertex(matrix4f, xc, yc + d, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xc + d, yc, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xc, yc - d, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(255).endVertex();
-        consumer.vertex(matrix4f, xc - d, yc, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(255).endVertex();
+        consumer.addVertex(matrix4f, xc, yc + d, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 1.0F).setLight(255);
+        consumer.addVertex(matrix4f, xc + d, yc, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 1.0F).setLight(255);
+        consumer.addVertex(matrix4f, xc, yc - d, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 0.0F).setLight(255);
+        consumer.addVertex(matrix4f, xc - d, yc, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 0.0F).setLight(255);
         buffer.endBatch();
 
         guiGraphics.disableScissor();
@@ -1321,7 +1321,7 @@ public class MinimapClientEvents {
 					} else {
 						MiscUtil.addUnitCheckpoint(unit, targetBp, true);
 					}
-					PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
+					PacketHandler.sendToServer(new UnitActionServerboundPacket(
 						MC.player.getName().getString(),
 						UnitAction.MOVE, -1, singleUnitId,
 						targetBp,
@@ -1349,13 +1349,13 @@ public class MinimapClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRenderOverlay(RenderGuiOverlayEvent.Post evt) {
+    public static void onRenderOverlay(RenderGuiLayerEvent.Post evt) {
+        if (!GuiLayerCompat.isTopLayer(evt))
+            return;
         if (!OrthoviewClientEvents.isEnabled() || MC.isPaused() || !HudClientEvents.enabled
             || !TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) || MC.screen instanceof MatchStartScreen) {
-            return;
-        }
-
-        // toggle here to ensure it doesn't happen in the middle of the updates
+        return;
+    }
         if (shouldToggleSize) {
             shouldToggleSize = false;
             toggleMapSize();
@@ -1369,8 +1369,8 @@ public class MinimapClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || !OrthoviewClientEvents.isEnabled())
+    public static void onClientTick(ClientTickEvent.Post evt) {
+        if (!OrthoviewClientEvents.isEnabled())
             return;
 
         long t0 = System.nanoTime();

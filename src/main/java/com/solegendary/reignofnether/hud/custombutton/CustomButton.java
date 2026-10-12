@@ -22,7 +22,12 @@ import javax.annotation.Nullable;
 
 public class CustomButton extends Button {
 	
-	public static final Codec<CustomButton> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
+	/**
+	 * 1.21.1 dropped {@code ExtraCodecs#lazyInitializedCodec}; {@code Codec#lazyInitialized} is
+	 * the same idea and is still needed here, because {@link #CODEC} refers back to this class
+	 * through {@code CustomButton::new} and the action codecs below.
+	 */
+	public static final Codec<CustomButton> CODEC = Codec.lazyInitialized(() -> RecordCodecBuilder.create(instance -> instance.group(
 		Codec.STRING.fieldOf("name").forGetter(CustomButton::name),
 		ResourceLocation.CODEC.fieldOf("icon").forGetter(CustomButton::icon),
 		Codec.INT.fieldOf("x").forGetter(CustomButton::offsetX),
@@ -190,10 +195,10 @@ public class CustomButton extends Button {
 		
 		if (isMouseOver(mouseX, mouseY) && MC.player != null) {
 			if (leftClick && this.onLeftClick != null && !this.leftClickActions.isEmpty()) {
-				MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+				MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.2f, 1.0f);
 				CustomButtonActionServerboundPacket.runLeftClickCommand(id);
 			} else if (!leftClick && this.onRightClick != null && !rightClickActions.isEmpty()) {
-				MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+				MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.2f, 1.0f);
 				CustomButtonActionServerboundPacket.runRightClickCommand(id);
 			}
 		}

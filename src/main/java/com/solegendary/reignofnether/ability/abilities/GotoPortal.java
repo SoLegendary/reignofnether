@@ -25,7 +25,6 @@ public class GotoPortal extends Ability {
     private static final int CD_MAX = 0;
     private static final int RANGE = 0;
 
-
     public GotoPortal() {
         super(
             UnitAction.GOTO_PORTAL,

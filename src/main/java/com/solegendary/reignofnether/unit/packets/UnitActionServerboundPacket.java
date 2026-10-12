@@ -6,14 +6,25 @@ import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class UnitActionServerboundPacket {
+public class UnitActionServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<UnitActionServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "unit_action_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<UnitActionServerboundPacket> type() {
+        return TYPE;
+    }
 
     private final String ownerName; // player that is issuing this command
     private final UnitAction action;
@@ -42,7 +53,7 @@ public class UnitActionServerboundPacket {
         this.shiftQueue = shiftQueue;
     }
 
-    public UnitActionServerboundPacket(FriendlyByteBuf buffer) {
+    public UnitActionServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.ownerName = buffer.readUtf();
         this.action = buffer.readEnum(UnitAction.class);
         this.unitId = buffer.readInt();
@@ -52,7 +63,7 @@ public class UnitActionServerboundPacket {
         this.shiftQueue = buffer.readBoolean();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeUtf(this.ownerName);
         buffer.writeEnum(this.action);
         buffer.writeInt(this.unitId);
@@ -63,9 +74,8 @@ public class UnitActionServerboundPacket {
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
             if (this.action == UnitAction.DEBUG1) {
                 UnitServerEvents.debug1(this.preselectedBlockPos);
             }
@@ -73,16 +83,14 @@ public class UnitActionServerboundPacket {
                 UnitServerEvents.debug2();
             }
 
-            ServerPlayer player = ctx.get().getSender();
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) {
                 ReignOfNether.LOGGER.warn("Sender for unit action packet was null");
-                success.set(false);
             }
             else if (!player.getName().getString().equals(ownerName) &&
                     !SandboxServer.isSandboxPlayer(ownerName) &&
                     !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
                 ReignOfNether.LOGGER.warn("UnitActionServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
-                success.set(false);
             }
             else {
                 //ReignOfNether.LOGGER.info("[UnitAction] {} issued {} (unitIds: {})", player.getName(), this.action, java.util.Arrays.toString(this.unitIds));
@@ -95,10 +103,8 @@ public class UnitActionServerboundPacket {
                         this.selectedBuildingPos,
                         this.shiftQueue
                 );
-                success.set(true);
             }
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

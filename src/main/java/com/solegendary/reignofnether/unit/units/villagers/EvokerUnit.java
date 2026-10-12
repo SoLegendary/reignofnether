@@ -1,12 +1,13 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.production.ProductionItems;
-import com.solegendary.reignofnether.enchantments.VigorEnchantment;
+import com.solegendary.reignofnether.enchantments.RTSEnchantments;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientboundPacket;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -57,6 +58,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.Holder;
 
 public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -87,7 +89,6 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -164,18 +165,19 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         SynchedEntityData.defineId(EvokerUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
     public boolean getWillRetaliate() {return willRetaliate;}
     public float getAttackCooldown() {
-        return (int) ((20 * (Math.pow(VigorEnchantment.CD_MULTIPLIER, getVigorLevel())) / getNonBaseAttacksPerSecond())
-                * getAttackCooldownMultiplier());
+        float speed = 1f + Math.max(0f, getFasterCooldownsPercent());
+        float base = 20f * (float) Math.pow(RTSEnchantments.VIGOR_CD_MULTIPLIER, getVigorLevel()) / getNonBaseAttacksPerSecond();
+        return Math.max(1, Math.round(base * getAttackCooldownMultiplier() / speed));
     }
     public float getAttacksPerSecond() {return 20f / (getAttackCooldown() + 25);}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
@@ -251,11 +253,11 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
                 .add(Attributes.MAX_HEALTH, EvokerUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, EvokerUnit.armorValue)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), EvokerUnit.attacksPerSecond)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), EvokerUnit.attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     @Override
@@ -472,7 +474,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
             Vex vex = EntityType.VEX.create(this.level());
             if (vex != null) {
                 vex.moveTo(blockpos, 0.0F, 0.0F);
-                vex.finalizeSpawn((ServerLevel) this.level(), this.level().getCurrentDifficultyAt(blockpos), MobSpawnType.MOB_SUMMONED, null, null);
+                vex.finalizeSpawn((ServerLevel) this.level(), this.level().getCurrentDifficultyAt(blockpos), MobSpawnType.MOB_SUMMONED, null);
                 vex.setOwner(this);
                 vex.setBoundOrigin(blockpos);
                 vex.setLimitedLife(CastSummonVexes.VEX_DURATION_SECONDS * ResourceCost.TICKS_PER_SECOND);
@@ -513,7 +515,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
 
     public boolean hasAnyEnchant() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return !itemStack.getAllEnchantments().isEmpty();
+        return !itemStack.getEnchantments().isEmpty();
     }
 
     public int getVigorLevel() {
@@ -521,10 +523,10 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
         return itemStack.getEnchantmentLevel(EnchantmentRegistrar.VIGOR.get());
     }
 
-    public Enchantment getEnchant() {
+    public Holder<Enchantment> getEnchant() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        Optional<Enchantment> enchant = Optional.empty();
-        for (Enchantment enchantment : itemStack.getAllEnchantments().keySet()) {
+        Optional<Holder<Enchantment>> enchant = Optional.empty();
+        for (Holder<Enchantment> enchantment : itemStack.getEnchantments().keySet()) {
             enchant = Optional.of(enchantment);
             break;
         }
@@ -533,7 +535,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
         return pSpawnData;
     }
 

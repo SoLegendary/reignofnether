@@ -1,0 +1,19 @@
+{
+  "replace": false,
+  "values": [
+    "reignofnether:zombie_unit",
+    "reignofnether:husk_unit",
+    "reignofnether:drowned_unit",
+    "reignofnether:zombie_piglin_unit",
+    "reignofnether:zoglin_unit",
+    "reignofnether:zombie_villager_unit",
+    "reignofnether:skeleton_unit",
+    "reignofnether:stray_unit",
+    "reignofnether:bogged_unit",
+    "reignofnether:wither_skeleton_unit",
+    "reignofnether:necromancer_unit",
+    "reignofnether:phantom_summon",
+    "reignofnether:wraith_unit",
+    "reignofnether:wretched_wraith_unit"
+  ]
+}

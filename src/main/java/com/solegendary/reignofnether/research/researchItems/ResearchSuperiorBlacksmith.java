@@ -24,7 +24,6 @@ public class ResearchSuperiorBlacksmith extends ProductionItem {
     public static final String itemName = "Superior Blacksmith";
     public static final ResourceCost cost = ResourceCosts.RESEARCH_SUPERIOR_BLACKSMITH;
 
-
     public ResearchSuperiorBlacksmith() {
         super(cost, ProdDupeRule.DISALLOW_FOR_BUILDING);
         this.onComplete = (Level level, ProductionPlacement placement) -> {

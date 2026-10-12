@@ -11,14 +11,25 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class BuildingAbilityServerboundPacket {
+public class BuildingAbilityServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<BuildingAbilityServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "building_ability_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<BuildingAbilityServerboundPacket> type() {
+        return TYPE;
+    }
 
     UnitAction abilityAction;
     BlockPos buildingPos;
@@ -27,13 +38,13 @@ public class BuildingAbilityServerboundPacket {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
             if (oneClickOneUse) {
-                PacketHandler.INSTANCE.sendToServer(new BuildingAbilityServerboundPacket(ability, buildingPos));
+                PacketHandler.sendToServer(new BuildingAbilityServerboundPacket(ability, buildingPos));
             } else {
                 BuildingPlacement firstBpl = BuildingUtils.findBuilding(true, buildingPos);
                 if (firstBpl != null)
                     for (BuildingPlacement bpl : BuildingClientEvents.getSelectedBuildings())
                         if (bpl.getBuilding().structureName.equals(firstBpl.getBuilding().structureName))
-                            PacketHandler.INSTANCE.sendToServer(new BuildingAbilityServerboundPacket(ability, bpl.originPos));
+                            PacketHandler.sendToServer(new BuildingAbilityServerboundPacket(ability, bpl.originPos));
             }
         }
     }
@@ -44,32 +55,29 @@ public class BuildingAbilityServerboundPacket {
         this.buildingPos = buildingPos;
     }
 
-    public BuildingAbilityServerboundPacket(FriendlyByteBuf buffer) {
+    public BuildingAbilityServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.abilityAction = buffer.readEnum(UnitAction.class);
         this.buildingPos = buffer.readBlockPos();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(abilityAction);
         buffer.writeBlockPos(buildingPos);
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
 
-            ServerPlayer player = ctx.get().getSender();
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) {
                 ReignOfNether.LOGGER.warn("BuildingAbilityServerboundPacket: Sender was null");
-                success.set(false);
                 return;
             }
             BuildingPlacement building = BuildingUtils.findBuilding(false, buildingPos);
             if (building != null) {
                 if (!player.getName().getString().equals(building.ownerName)) {
                     ReignOfNether.LOGGER.warn("BuildingAbilityServerboundPacket: Tried to process packet from " + player.getName() + " for: " + building.ownerName);
-                    success.set(false);
                     return;
                 }
                 ReignOfNether.LOGGER.info("[BuildingAbility] {} performed {} at {}", player.getName(), abilityAction, buildingPos);
@@ -106,9 +114,7 @@ public class BuildingAbilityServerboundPacket {
                     BuildingAbilityClientboundPacket.doAbility(abilityAction, buildingPos);
                 }
             }
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Explode;
@@ -25,6 +27,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
@@ -36,14 +39,15 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.ForgeEventFactory;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import net.minecraft.world.level.GameRules;
 
 public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -130,11 +134,11 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
         SynchedEntityData.defineId(CreeperUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-                this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+                builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -180,15 +184,34 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
         this.abilities.add(explodeAbility);
     }
 
-    @Override
+    // 1.21.1 made Creeper#explodeCreeper and #spawnLingeringCloud private, so the unit keeps its
+    // own copy rather than overriding; the body is vanilla's, with the mob-griefing game rule
+    // this mod has always honoured instead of Level.ExplosionInteraction.MOB.
     public void explodeCreeper() {
         if (!this.level().isClientSide) {
-            Level.ExplosionInteraction explosion$blockinteraction = ForgeEventFactory.getMobGriefingEvent(this.level(), this) ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE;
+            Level.ExplosionInteraction explosion$blockinteraction = this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? Level.ExplosionInteraction.TNT : Level.ExplosionInteraction.NONE;
             float radius = this.isPowered() ? CHARGED_EXPLOSION_RADIUS : EXPLOSION_RADIUS;
             this.dead = true;
             this.level().explode(this, this.getX(), this.getY(), this.getZ(), radius, explosion$blockinteraction);
             this.discard();
             this.spawnLingeringCloud();
+        }
+    }
+
+    private void spawnLingeringCloud() {
+        Collection<MobEffectInstance> effects = this.getActiveEffects();
+        if (!effects.isEmpty()) {
+            AreaEffectCloud cloud = new AreaEffectCloud(this.level(), this.getX(), this.getY(), this.getZ());
+            cloud.setRadius(2.5F);
+            cloud.setRadiusOnUse(-0.5F);
+            cloud.setWaitTime(10);
+            cloud.setDuration(cloud.getDuration() / 2);
+            cloud.setRadiusPerTick(-cloud.getRadius() / (float)cloud.getDuration());
+
+            for (MobEffectInstance effect : effects)
+                cloud.addEffect(new MobEffectInstance(effect));
+
+            this.level().addFreshEntity(cloud);
         }
     }
 
@@ -208,13 +231,13 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
                 .add(Attributes.MAX_HEALTH, CreeperUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, CreeperUnit.armorValue)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     public void tick() {
@@ -295,14 +318,10 @@ public class CreeperUnit extends Creeper implements Unit, AttackerUnit {
         forceSwelling = true;
     }
 
-
-
-
-
     @Override
     public void thunderHit(ServerLevel pLevel, LightningBolt pLightning) {
         super.thunderHit(pLevel, pLightning);
-        this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 30 * 20, 0));
+        this.addEffect(MobEffectHelpers.instance(MobEffects.MOVEMENT_SPEED, 30 * 20, 0));
     }
 
     @Override

@@ -1,0 +1,36 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="GNU GPLv3"
+
+[[mods]]
+modId="reignofnether"
+# Literal, not a gradle placeholder: nothing expands it in a dev run (the mod is loaded from
+# build/classes/java/main, which has no manifest), and FML then falls back to the source set name
+# and refuses to start with "Illegal version number specified mod_version (main)".
+# Keep in sync with mod_version in gradle.properties.
+version="1.4.4d"
+displayName="Reign of Nether"
+authors="SoLegendary, Goodbird (ported to 1.20.1), NeoForge 1.21.1 port"
+description='''
+Minecraft, except it's an RTS
+'''
+
+# Mixins are declared here rather than through the jar manifest: on NeoForge 1.21.1 the
+# manifest attribute is not what the loader reads, and a mixin config that is silently not
+# applied looks exactly like "the feature just does not work".
+[[mixins]]
+config="reignofnether.mixins.json"
+
+[[dependencies.reignofnether]]
+modId="neoforge"
+type="required"
+versionRange="${neo_version_range}"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.reignofnether]]
+modId="minecraft"
+type="required"
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"

@@ -11,19 +11,30 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.findBuilding;
 
-public class BuildingProductionServerboundPacket {
+public class BuildingProductionServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<BuildingProductionServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "building_production_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<BuildingProductionServerboundPacket> type() {
+        return TYPE;
+    }
     public String itemName; // resource location string of the ProductionItem
     public BlockPos buildingPos; // used to identify the relevant production building
     public BuildingAction action;
@@ -38,7 +49,7 @@ public class BuildingProductionServerboundPacket {
                 prodItemName = ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString();
             }
             if (prodItemName != null) {
-                PacketHandler.INSTANCE.sendToServer(new BuildingProductionServerboundPacket(
+                PacketHandler.sendToServer(new BuildingProductionServerboundPacket(
                         BuildingAction.START_PRODUCTION,
                         prodItemName,
                         pp.originPos));
@@ -55,14 +66,14 @@ public class BuildingProductionServerboundPacket {
             prodItemName = ReignOfNetherRegistries.PRODUCTION_ITEM.getKey(item).toString();
         }
         if (prodItemName != null) {
-            PacketHandler.INSTANCE.sendToServer(new BuildingProductionServerboundPacket(
+            PacketHandler.sendToServer(new BuildingProductionServerboundPacket(
                     frontItem ? BuildingAction.CANCEL_PRODUCTION : BuildingAction.CANCEL_BACK_PRODUCTION,
                     prodItemName, buildingPos));
         }
     }
 
     public static void requestSync(BlockPos buildingPos) {
-        PacketHandler.INSTANCE.sendToServer(new BuildingProductionServerboundPacket(
+        PacketHandler.sendToServer(new BuildingProductionServerboundPacket(
                 BuildingAction.REQUEST_PRODUCTION_SYNC, "", buildingPos));
     }
 
@@ -72,38 +83,41 @@ public class BuildingProductionServerboundPacket {
         this.buildingPos = buildingPos;
     }
 
-    public BuildingProductionServerboundPacket(FriendlyByteBuf buffer) {
+    public BuildingProductionServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(BuildingAction.class);
         this.itemName = buffer.readUtf();
         this.buildingPos = buffer.readBlockPos();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeUtf(this.itemName);
         buffer.writeBlockPos(this.buildingPos);
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
             BuildingPlacement building = findBuilding(false, this.buildingPos);
             if (building == null)
                 return;
 
-            ServerPlayer player = ctx.get().getSender();
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) {
                 ReignOfNether.LOGGER.warn("Sender for unit action packet was null");
-                success.set(false);
                 return;
             }
             else if (!player.getName().getString().equals(building.ownerName) &&
                     !SandboxServer.isAnyoneASandboxPlayer() &&
                     !AlliancesServerEvents.canControlAlly(player.getName().getString(), "")) {
 
-                ReignOfNether.LOGGER.warn("BuildingProductionServerboundPacket: Tried to process packet from " + player.getName() + " for " + building.ownerName);
-                success.set(false);
+                // Every client asks for a production sync for each building it learns about, owned or not
+                // (BuildingClientEvents), so a dropped sync request is the expected case, not an attempt to
+                // control someone else's production. Only the latter is worth a warning.
+                if (this.action == BuildingAction.REQUEST_PRODUCTION_SYNC)
+                    ReignOfNether.LOGGER.debug("BuildingProductionServerboundPacket: ignoring out-of-ownership sync from " + player.getName() + " for " + building.ownerName);
+                else
+                    ReignOfNether.LOGGER.warn("BuildingProductionServerboundPacket: Tried to process packet from " + player.getName() + " for " + building.ownerName);
                 return;
             }
             if (building instanceof ProductionPlacement pBuilding) {
@@ -146,9 +160,7 @@ public class BuildingProductionServerboundPacket {
                 }
             }
             ReignOfNether.LOGGER.info("[Building] {} performed {} (itemName: {}, pos: {})", player.getName(), this.action, this.itemName, this.buildingPos);
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

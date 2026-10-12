@@ -9,7 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ public class BuildingBlock {
         }
         var isIgnored = false;
         if (state.is(BlockTags.LEAVES)) isIgnored = true;
-        else if (state.is(Tags.Blocks.GLASS)) isIgnored = true;
+        else if (state.is(Tags.Blocks.GLASS_BLOCKS)) isIgnored = true;
         else if (SculkCatalystPlacement.isSculk(state.getBlock())) isIgnored = true;
         ignoredCache.put(state, isIgnored);
         return isIgnored;

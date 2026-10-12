@@ -1,5 +1,9 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobCategoryCompat;
+import net.minecraft.world.entity.MobCategory;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
@@ -42,14 +46,30 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.living.MobEffectEvent;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.neoforged.bus.api.Event;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
+import com.solegendary.reignofnether.unit.units.monsters.ZombieUnit;
+import com.solegendary.reignofnether.unit.goals.UsePortalGoal;
+import net.minecraft.world.entity.SpawnGroupData;
+import com.solegendary.reignofnether.unit.goals.SelectedTargetGoal;
+import com.solegendary.reignofnether.unit.goals.ReturnResourcesGoal;
+import com.solegendary.reignofnether.unit.goals.RandomLookAroundUnitGoal;
+import com.solegendary.reignofnether.unit.goals.MoveToTargetBlockGoal;
+import net.minecraft.world.entity.MobSpawnType;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackUnitGoal;
+import com.solegendary.reignofnether.unit.goals.MeleeAttackBuildingGoal;
+import net.minecraft.world.entity.LivingEntity;
+import com.solegendary.reignofnether.unit.goals.GarrisonGoal;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EntityType;
+import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
 
 public class ZombieUnit extends Zombie implements Unit, AttackerUnit, ConvertableUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -67,7 +87,6 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -138,14 +157,13 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     public void setIsSummoned(boolean index) { this.entityData.set(isSummonedAccessor, index); }
     public static final EntityDataAccessor<Boolean> isSummonedAccessor = SynchedEntityData.defineId(ZombieUnit.class, EntityDataSerializers.BOOLEAN);
 
-
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(isSummonedAccessor, false);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(isSummonedAccessor, false);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -208,13 +226,13 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
                 .add(Attributes.ARMOR, ZombieUnit.armorValue)
                 .add(Attributes.MAX_HEALTH, ZombieUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), rangedDamageResist)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), rangedDamageResist)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0)
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE, 0); // needs to be added for parent to work
     }
 
@@ -228,7 +246,7 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
             AttackerUnit.tick(this);
 
             if (isSummoned() && !hasEffectWithDuration(MobEffectRegistrar.LIMITED_LIFESPAN.get()) && tickCount < RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY) {
-                this.addEffect(new MobEffectInstance(MobEffectRegistrar.LIMITED_LIFESPAN.get(), RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY, 0, true, false));
+                this.addEffect(new MobEffectInstance(MobEffectHelpers.holder(MobEffectRegistrar.LIMITED_LIFESPAN.get()), RaiseDead.ZOMBIE_TICKS_BEFORE_DECAY, 0, true, false));
             }
 
             if (tickCount % 20 == 0 && !level().isClientSide()) {
@@ -325,11 +343,11 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
 
     public int getThornsLevel() {
         int thornsLevel = 0;
-        if (this.getItemBySlot(EquipmentSlot.CHEST).getEnchantmentLevel(Enchantments.THORNS) > 0)
+        if (this.getItemBySlot(EquipmentSlot.CHEST).getEnchantmentLevel(EnchantmentRegistrar.vanilla(Enchantments.THORNS)) > 0)
             thornsLevel += 1;
-        if (this.getItemBySlot(EquipmentSlot.LEGS).getEnchantmentLevel(Enchantments.THORNS) > 0)
+        if (this.getItemBySlot(EquipmentSlot.LEGS).getEnchantmentLevel(EnchantmentRegistrar.vanilla(Enchantments.THORNS)) > 0)
             thornsLevel += 1;
-        if (this.getItemBySlot(EquipmentSlot.FEET).getEnchantmentLevel(Enchantments.THORNS) > 0)
+        if (this.getItemBySlot(EquipmentSlot.FEET).getEnchantmentLevel(EnchantmentRegistrar.vanilla(Enchantments.THORNS)) > 0)
             thornsLevel += 1;
         return thornsLevel;
     }
@@ -341,18 +359,19 @@ public class ZombieUnit extends Zombie implements Unit, AttackerUnit, Convertabl
     // prevent spawning baby zombie
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
         return pSpawnData;
     }
 
     @Override
     public boolean canBeAffected(MobEffectInstance pEffectInstance) {
-        MobEffectEvent.Applicable event = new MobEffectEvent.Applicable(this, pEffectInstance);
-        MinecraftForge.EVENT_BUS.post(event);
-        if (event.getResult() != Event.Result.DEFAULT) {
-            return event.getResult() == Event.Result.ALLOW;
+        // 1.21.1 added the effect's source as a third argument; this call site has none.
+        MobEffectEvent.Applicable event = new MobEffectEvent.Applicable(this, pEffectInstance, null);
+        NeoForge.EVENT_BUS.post(event);
+        if (event.getResult() != MobEffectEvent.Applicable.Result.DEFAULT) {
+            return event.getResult() == MobEffectEvent.Applicable.Result.APPLY;
         } else {
-            if (this.getMobType() == MobType.UNDEAD) {
+            if (MobCategoryCompat.isUndead(this)) {
                 return pEffectInstance.getEffect() != MobEffects.REGENERATION;
             }
             return true;

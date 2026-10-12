@@ -82,8 +82,8 @@ public abstract class AbstractPlayerDisplay {
         }
 
         // render player head
-        if (this.player != null && this.player.isSkinLoaded()) {
-            var iconLocation = player.getSkinTextureLocation();
+        if (this.player != null) {
+            var iconLocation = player.getSkin().texture();
             //RenderSystem.setShaderTexture(0, iconLocation);
             // draw base layer
             guiGraphics.blit(iconLocation,

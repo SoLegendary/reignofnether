@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.survival;
 
+import net.minecraft.core.HolderLookup;
 import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
@@ -7,6 +8,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nonnull;
+import com.solegendary.reignofnether.util.SavedDataCompat;
 
 public class SurvivalSaveData extends SavedData {
 
@@ -25,9 +27,7 @@ public class SurvivalSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld()
-                .getDataStorage()
-                .computeIfAbsent(SurvivalSaveData::load, SurvivalSaveData::create, "saved-survival-data");
+        return SavedDataCompat.computeIfAbsent(server, "saved-survival-data", SurvivalSaveData::create, SurvivalSaveData::load);
     }
 
     public static SurvivalSaveData load(CompoundTag tag) {
@@ -41,7 +41,7 @@ public class SurvivalSaveData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         //ReignOfNether.LOGGER.info("SurvivalSaveData.save: " + waveNumber);
         tag.putBoolean("isEnabled", this.isEnabled);
         tag.putInt("waveNumber", this.waveNumber);

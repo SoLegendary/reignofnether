@@ -22,6 +22,8 @@ import net.minecraft.world.level.Level;
 
 import java.util.HashSet;
 import java.util.Set;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 
 public interface RangeIndicator {
 
@@ -51,13 +53,13 @@ public interface RangeIndicator {
                 }
             }
             if (!hasAbilityWithRange) {
-                MobEffectInstance mei = ((LivingEntity) unit).getEffect(MobEffectRegistrar.NIGHT_WARPING.get());
+                MobEffectInstance mei = ((LivingEntity) unit).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.NIGHT_WARPING.get()));
                 if (mei != null) {
                     range = mei.getAmplifier() + 1;
                     bp = ((LivingEntity) unit).getOnPos();
                     showRangeCircle = true;
                 }
-                MobEffectInstance mei2 = ((LivingEntity) unit).getEffect(MobEffectRegistrar.VILLAGER_INSPIRATION.get());
+                MobEffectInstance mei2 = ((LivingEntity) unit).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.VILLAGER_INSPIRATION.get()));
                 if (mei2 != null) {
                     range = UnitItems.BELL_OF_ARMS_RANGE;
                     bp = ((LivingEntity) unit).getOnPos();
@@ -76,7 +78,8 @@ public interface RangeIndicator {
                 }
             }
         } else if (this instanceof UnitItem unitItem) {
-            if ((ItemClientEvents.hoveredInvItem == unitItem || ItemClientEvents.actionableUnitItem == unitItem) &&
+            if ((ItemClientEvents.hoveredInvItem == unitItem ||
+                    ItemClientEvents.actionableUnitItem == unitItem) &&
                     HudClientEvents.hudSelectedEntity != null) {
                 range = unitItem.range;
                 radius = unitItem.radius;

@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -42,7 +44,8 @@ public class ResearchPossession extends ProductionItem {
                 hotkey,
                 () -> ProductionItems.RESEARCH_POSSESSION.itemIsBeingProduced(prodBuilding.ownerName) ||
                         ResearchClient.hasResearch(ProductionItems.RESEARCH_POSSESSION),
-                () -> true,
+                // the tooltip says "Requires a Dungeon", as does lab_lightning_rod which is gated on it
+            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.DUNGEON),
                 List.of(
                         FormattedCharSequence.forward(I18n.get("research.reignofnether.possession"), Style.EMPTY.withBold(true)),
                         ResourceCosts.getFormattedCost(cost),

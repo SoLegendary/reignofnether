@@ -5,12 +5,12 @@ import com.solegendary.reignofnether.building.Building;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class CustomButtonClientEvents {
 	
@@ -38,7 +38,7 @@ public class CustomButtonClientEvents {
 	
 	public static void registerEntityMappings(Map<ResourceLocation, List<ResourceLocation>> buttons) {
 		for (ResourceLocation id : buttons.keySet()) {
-			entityMappings.put(ForgeRegistries.ENTITY_TYPES.getValue(id), new ArrayList<>(buttons.get(id)));
+			entityMappings.put(BuiltInRegistries.ENTITY_TYPE.get(id), new ArrayList<>(buttons.get(id)));
 		}
 	}
 	

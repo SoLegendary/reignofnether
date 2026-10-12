@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class AbstractMagicProjectile extends AbstractHurtingProjectile {
 
@@ -25,7 +26,9 @@ public abstract class AbstractMagicProjectile extends AbstractHurtingProjectile 
     public AbstractMagicProjectile(EntityType<? extends AbstractHurtingProjectile> pEntityType,
                                    LivingEntity pShooter, double offsetX, double offsetY, double offsetZ,
                                    Level pLevel, SimpleParticleType particleType) {
-        super(pEntityType, pShooter, offsetX, offsetY, offsetZ, pLevel);
+        // 1.21.1 replaced the (type, shooter, dx, dy, dz, level) constructor with
+        // (type, shooter, Vec3 motion, level).
+        super(pEntityType, pShooter, new Vec3(offsetX, offsetY, offsetZ), pLevel);
         this.particleType = particleType;
     }
 
@@ -55,7 +58,6 @@ public abstract class AbstractMagicProjectile extends AbstractHurtingProjectile 
     protected ParticleOptions getTrailParticle() {
         return particleType;
     }
-
 
     @Override
     public boolean isPickable() {

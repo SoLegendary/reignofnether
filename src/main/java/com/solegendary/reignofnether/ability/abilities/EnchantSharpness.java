@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import net.minecraft.core.Holder;
 import com.solegendary.reignofnether.ability.EnchantAbility;
 import com.solegendary.reignofnether.ability.BuildingAbilityServerboundPacket;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -32,8 +33,8 @@ public class EnchantSharpness extends EnchantAbility {
     }
 
     @Override
-    public Enchantment getEnchantment() {
-        return Enchantments.SHARPNESS;
+    public Holder<Enchantment> getEnchantment() {
+        return EnchantmentRegistrar.vanilla(Enchantments.SHARPNESS);
     }
 
     @Override
@@ -76,8 +77,8 @@ public class EnchantSharpness extends EnchantAbility {
     }
 
     @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
+    public Holder<Enchantment> getMutuallyExclusiveEnchant(LivingEntity entity) {
+        for (Holder<Enchantment> enchantment : entity.getItemBySlot(equipmentSlot).getEnchantments().keySet()) {
             if (enchantment == EnchantmentRegistrar.MAIMING.get() || enchantment == getEnchantment())
                 return enchantment;
         }

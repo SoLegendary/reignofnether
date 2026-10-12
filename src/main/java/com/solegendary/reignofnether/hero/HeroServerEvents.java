@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hero;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
@@ -21,12 +22,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
+import com.solegendary.reignofnether.hero.HeroServerEvents;
+import com.solegendary.reignofnether.hero.HeroExperienceOrb;
+import com.solegendary.reignofnether.hero.FallenHeroClientboundPacket;
 
 public class HeroServerEvents {
 
@@ -41,7 +45,7 @@ public class HeroServerEvents {
             ItemStack itemStack = inv.get(UnitItems.TOTEM_OF_UNDYING);
             if (itemStack != null) {
                 evt.getEntity().setHealth(evt.getEntity().getMaxHealth() / 2);
-                evt.getEntity().addEffect(new MobEffectInstance(MobEffectRegistrar.INVINCIBLE.get(),
+                evt.getEntity().addEffect(new MobEffectInstance(MobEffectHelpers.holder(MobEffectRegistrar.INVINCIBLE.get()),
                         UnitItems.TOTEM_OF_UNDYING_INVINCIBILITY_DURATION_SECONDS * 20, 0, true, false));
                 itemStack.setCount(itemStack.getCount() - 1);
                 if (itemStack.isEmpty())

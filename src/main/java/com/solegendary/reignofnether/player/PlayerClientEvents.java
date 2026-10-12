@@ -1,13 +1,13 @@
 package com.solegendary.reignofnether.player;
+import com.solegendary.reignofnether.faction.Factions;
 
+import com.solegendary.reignofnether.util.GuiLayerCompat;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
-import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
@@ -29,24 +29,31 @@ import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.time.TimeClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
-
+import com.solegendary.reignofnether.faction.Faction;
 import net.minecraft.client.Minecraft;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.player.PlayerColors;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
+import net.minecraft.world.level.material.MapColor;
 
 public class PlayerClientEvents {
 
@@ -248,7 +255,7 @@ public class PlayerClientEvents {
         MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 
-    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson) {
+    public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson, boolean isSyncing) {
         if (!isRTSPlayer(playerName)) {
             rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId, isDogPerson, -1L));
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
@@ -256,10 +263,14 @@ public class PlayerClientEvents {
                 GameruleClient.gamerulesMenuOpen = false;
                 if (faction != Factions.NONE) {
                     MC.getMusicManager().stopPlaying();
-                    ResearchClient.removeAllCheats();
+                    // 1.5.0: a re-login sync must not wipe the player's unlocked cheats
+                    if (!isSyncing)
+                        ResearchClient.removeAllCheats();
                 }
                 PlayerServerboundPacket.requestMarketRates();
             }
+            if (!isSyncing)
+                HeroClientEvents.fallenHeroes.removeIf(hero -> hero.ownerName.equals(playerName));
         }
     }
 
@@ -271,7 +282,7 @@ public class PlayerClientEvents {
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
-                    if (faction != Factions.NONE) {
+                if (faction != Factions.NONE) {
                     MC.getMusicManager().stopPlaying();
                     ResearchClient.removeAllCheats();
                 }
@@ -291,7 +302,12 @@ public class PlayerClientEvents {
     public static void onPlayerLogoutEvent(PlayerEvent.PlayerLoggedOutEvent evt) {
         // LOG OUT FROM SINGLEPLAYER WORLD ONLY
         if (MC.player != null && evt.getEntity().getId() == MC.player.getId()) {
-            resetAll();
+            // This fires on the server thread when the host leaves an integrated-server world, but
+            // everything resetAll() touches is client state: resetRTS() reaches
+            // FogOfWarClientEvents.resetFogChunks() -> levelRenderer.allChanged() ->
+            // RenderSystem.glDeleteBuffers, which asserts on the render thread and took the whole
+            // server down with "Rendersystem called from wrong thread" (crash-2026-10-11_23.08.25).
+            MC.execute(PlayerClientEvents::resetAll);
         }
     }
 
@@ -332,8 +348,8 @@ public class PlayerClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase == TickEvent.Phase.END) {
+    public static void onClientTick(ClientTickEvent.Post evt) {
+        {
             rtsGameTicks += 1;
         }
     }
@@ -350,7 +366,7 @@ public class PlayerClientEvents {
 
     // allow tab player list menu on the orthoview screen
     @SubscribeEvent
-    public static void onScreenRender(ScreenEvent.Render evt) {
+    public static void onScreenRender(ScreenEvent.Render.Post evt) {
         if (OrthoviewClientEvents.isEnabled() && Keybindings.tab.isDown() && MC.level != null) {
             if (!MC.isLocalServer()) {
                 MC.gui.getTabList().setVisible(true);
@@ -482,14 +498,15 @@ public class PlayerClientEvents {
 
     /*
     @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
+    public static void onRenderOverLay(RenderGuiLayerEvent.Pre evt) {
+        if (!GuiLayerCompat.isTopLayer(evt))
+            return;
         MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
                 "red: " + red,
                 "green: " + green,
                 "blue: " + blue,
         });
     }
-
 
     public static int titleX = -56;
     public static int titleY = 5;
@@ -535,4 +552,10 @@ public class PlayerClientEvents {
         }
     }
      */
+
+    public static void setItemsDropped(String playerName, int itemsDropped) {
+        for (RTSPlayer rtsPlayer : rtsPlayers)
+            if (playerName.equals(rtsPlayer.name))
+                rtsPlayer.itemsDropped = itemsDropped;
+    }
 }

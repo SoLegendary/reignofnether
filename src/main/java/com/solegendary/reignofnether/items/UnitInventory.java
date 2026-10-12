@@ -35,4 +35,11 @@ public interface UnitInventory {
     boolean isHoldingActive(UnitItem unitItem);
     boolean canPickupUnitItems();
     boolean canUseUnitItems();
+
+    /**
+     * 1.5.0: whether the holder may activate this item at all - heroes may use everything, and
+     * items flagged {@link UnitItem#nonHeroUseable} (plus merchant gear the holder can wear) may be
+     * used by any unit.
+     */
+    boolean canUseItem(UnitItem item);
 }

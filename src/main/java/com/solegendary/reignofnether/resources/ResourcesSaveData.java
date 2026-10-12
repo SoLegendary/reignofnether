@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.resources;
 
+import net.minecraft.core.HolderLookup;
 import com.solegendary.reignofnether.ReignOfNether;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -10,6 +11,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import com.solegendary.reignofnether.util.SavedDataCompat;
 
 public class ResourcesSaveData extends SavedData {
 
@@ -25,9 +27,7 @@ public class ResourcesSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld()
-            .getDataStorage()
-            .computeIfAbsent(ResourcesSaveData::load, ResourcesSaveData::create, "saved-resources-data");
+        return SavedDataCompat.computeIfAbsent(server, "saved-resources-data", ResourcesSaveData::create, ResourcesSaveData::load);
     }
 
     public static ResourcesSaveData load(CompoundTag tag) {
@@ -55,7 +55,7 @@ public class ResourcesSaveData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         //ReignOfNether.LOGGER.info("ResourcesSaveData.save");
 
         ListTag list = new ListTag();

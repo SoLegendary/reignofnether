@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
@@ -25,9 +26,8 @@ import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.*;
 
@@ -44,8 +44,8 @@ public class NonUnitServerEvents {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD) {
+    public static void onWorldTick(LevelTickEvent.Post evt) {
+        if (evt.getLevel().isClientSide() || evt.getLevel().dimension() != Level.OVERWORLD) {
             return;
         }
 
@@ -71,13 +71,13 @@ public class NonUnitServerEvents {
             moveSuppressedNonUnits.removeIf(mob -> (mob.isDeadOrDying() || mob.isRemoved() || (mob.getNavigation().isDone() && mob.getTarget() == null)));
         }
 
-        if (evt.level.getServer() != null && evt.level.getServer().getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get()) {
+        if (evt.getLevel().getServer() != null && evt.getLevel().getServer().getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get()) {
             Set<PathfinderMob> pfMobs = new HashSet<>();
             for (LivingEntity unit : UnitServerEvents.getAllUnits()) {
                 if (unit.tickCount % 20 != 0)
                     continue;
-                AABB aabb = new AABB(unit.blockPosition().offset(-10, -10, -10), unit.blockPosition().offset(10, 10, 10));
-                pfMobs.addAll(evt.level.getNearbyEntities(PathfinderMob.class, TargetingConditions.forCombat(), unit, aabb));
+                AABB aabb = new AABB(unit.blockPosition().offset(-10, -10, -10).getCenter(), unit.blockPosition().offset(10, 10, 10).getCenter());
+                pfMobs.addAll(evt.getLevel().getNearbyEntities(PathfinderMob.class, TargetingConditions.forCombat(), unit, aabb));
             }
             for (PathfinderMob pfMob : pfMobs) {
                 if (!(shouldMobBeAggressive(pfMob)))
@@ -89,7 +89,7 @@ public class NonUnitServerEvents {
                         hasAttackGoal = true;
 
                 if (pfMob.getTarget() == null && hasAttackGoal && !attackSuppressedNonUnits.contains(pfMob)) {
-                    LivingEntity target = MiscUtil.findClosestAttackableEntity(pfMob, 10, (ServerLevel) evt.level);
+                    LivingEntity target = MiscUtil.findClosestAttackableEntity(pfMob, 10, (ServerLevel) evt.getLevel());
                     if (target != null)
                         pfMob.setTarget(target);
                 }
@@ -112,7 +112,7 @@ public class NonUnitServerEvents {
         LivingEntity le = evt.getEntity();
 
         // prevent vanilla mobs attacking their RoN faction equivalents
-        if (!(le instanceof Unit) && evt.getNewTarget() instanceof Unit unit)
+        if (!(le instanceof Unit) && evt.getNewAboutToBeSetTarget() instanceof Unit unit)
             if (Factions.getFaction(unit).equals(getNonUnitFaction(le)))
                 evt.setCanceled(true);
     }

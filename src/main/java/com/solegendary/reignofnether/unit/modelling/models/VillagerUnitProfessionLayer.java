@@ -28,8 +28,8 @@ import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerDataHolder;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -65,13 +65,13 @@ public class VillagerUnitProfessionLayer<T extends LivingEntity & VillagerDataHo
             M vHeadModel = this.getParentModel();
             ((VillagerUnitModel<?>) vHeadModel).getHatRim().visible = (profession == VillagerProfession.FARMER);
             ResourceLocation biomeTypeRL = this.getResourceLocation("type", BuiltInRegistries.VILLAGER_TYPE.getKey(biomeType));
-            renderColoredCutoutModel(vHeadModel, biomeTypeRL, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, 1.0F, 1.0F, 1.0F);
+            renderColoredCutoutModel(vHeadModel, biomeTypeRL, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, 0xFFFFFFFF);
             if (profession != VillagerProfession.NONE && !pLivingEntity.isBaby()) {
                 ResourceLocation profRL = this.getResourceLocation("profession", BuiltInRegistries.VILLAGER_PROFESSION.getKey(profession));
-                renderColoredCutoutModel(vHeadModel, profRL, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, 1.0F, 1.0F, 1.0F);
+                renderColoredCutoutModel(vHeadModel, profRL, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, 0xFFFFFFFF);
                 if (profession != VillagerProfession.NITWIT) {
                     ResourceLocation profLevelRL = this.getResourceLocation("profession_level", LEVEL_LOCATIONS.get(Mth.clamp(vData.getLevel(), 1, LEVEL_LOCATIONS.size())));
-                    renderColoredCutoutModel(vHeadModel, profLevelRL, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, 1.0F, 1.0F, 1.0F);
+                    renderColoredCutoutModel(vHeadModel, profLevelRL, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, 0xFFFFFFFF);
                 }
             }
             ((VillagerUnitModel<?>) vHeadModel).getHatRim().visible = false;

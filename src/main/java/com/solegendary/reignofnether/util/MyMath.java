@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.util;
 
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
@@ -19,7 +18,6 @@ public class MyMath {
     public static boolean isBetween(double a, double b, double c) {
         return (b - a) * (c - b) >= 0;
     }
-
 
     // returns whether the given 2d point (m) is inside a rectangle with corners a,b,c,d
     // https://math.stackexchange.com/questions/190111/how-to-check-if-a-point-is-inside-a-rectangle
@@ -72,7 +70,6 @@ public class MyMath {
         return uvwp;
     }
 
-
     public static boolean isPointInsideRect3d(List<Vec3> uvwp, Vec3 x) {
         if (uvwp == null || uvwp.size() < 7) return false;
 
@@ -102,7 +99,6 @@ public class MyMath {
                 MyMath.isBetween(vp1, vx, vp4) &&
                 MyMath.isBetween(wp1, wx, wp5);
     }
-
 
     // returns vec3d with a set amount of the given unit vector added to it
     public static Vector3d addVector3d(Vector3d vec, Vector3d unitVec, float scale) {
@@ -137,7 +133,6 @@ public class MyMath {
         return tmax >= 0 && tmin <= tmax;
     }
 
-
     public static Vec2 rotateCoords(float x, float y, double deg) {
         float xRotRads = (float) Math.toRadians(deg);
         float moveXRotated = (x * cos(xRotRads)) - (y * sin(xRotRads));
@@ -150,7 +145,6 @@ public class MyMath {
         double dy = y2 - y1;
         return Math.sqrt(dx * dx + dy * dy);
     }
-
 
     // https://stackoverflow.com/questions/11907947/how-to-check-if-a-point-lies-on-a-line-between-2-other-points
     // the greater quad_threshold, the thicker the lines will be; ptc is the tested point
@@ -171,7 +165,6 @@ public class MyMath {
 
         return isWithinXBounds && isWithinYBounds;
     }
-
 
     public static int randRangeInt(int min, int max) {
         int posRandInt = (int) ((max - min) * Math.random());

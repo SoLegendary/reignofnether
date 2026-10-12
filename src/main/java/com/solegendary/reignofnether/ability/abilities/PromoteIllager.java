@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.abilities;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -15,6 +16,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -62,7 +64,7 @@ public class PromoteIllager extends Ability {
                 if (mob instanceof Unit unit && unit.getOwnerName().equals(captainUnit.getOwnerName()) &&
                     !(mob instanceof RavagerUnit) &&
                     !(mob instanceof WindcallerUnit windcallerUnit && windcallerUnit.isFlying()))
-                    mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 2, 0));
+                    mob.addEffect(MobEffectHelpers.instance(MobEffects.MOVEMENT_SPEED, 2, 0));
         }
     }
 
@@ -130,7 +132,7 @@ public class PromoteIllager extends Ability {
                 promotedIllager.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
             }
             buildingUsing.getDataStorage().setData(Castle.PROMOTED_ILLAGER, targetEntity);
-            targetEntity.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance());
+            targetEntity.setItemSlot(EquipmentSlot.HEAD, Raid.getLeaderBannerInstance(level.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN)));
 
             // spawn a firework
             if (!level.isClientSide()) {

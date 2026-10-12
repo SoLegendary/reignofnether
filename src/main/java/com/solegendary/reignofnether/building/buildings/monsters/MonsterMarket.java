@@ -84,13 +84,14 @@ public class MonsterMarket extends AbstractMarket {
         return new ArrayList<>(List.of(
                 new StockedShopItem(UnitItems.FROST_WALKER_BOOTS, 1, 600 * 20),
                 new StockedShopItem(UnitItems.STAFF_OF_LIGHTNING, 1, 600 * 20),
-                new StockedShopItem(UnitItems.SHADOW_SHIFTER, 1, 600 * 20)
+                new StockedShopItem(UnitItems.SHADOW_SHIFTER, 1, 600 * 20),
+                new StockedShopItem(UnitItems.HUNGRY_HORROR_ARMOUR, 1, 600 * 20)
         ));
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
+        String name = key != null ? Component.translatable("buildings." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/polished_deepslate.png"),

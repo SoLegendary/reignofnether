@@ -10,16 +10,18 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.item.*;
-import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraft.world.item.component.DyedItemColor;
+import net.neoforged.neoforge.client.ClientHooks;
 
 import javax.annotation.Nullable;
-import java.util.Locale;
+import java.util.List;
 import java.util.Map;
 
 // based on HumanoidArmorLayer
@@ -51,24 +53,36 @@ public class VillagerUnitArmorLayer<T extends LivingEntity, M extends HumanoidMo
                 this.setPartVisibility(model, slot);
                 Model armorModel = this.getArmorModelHook(entity, itemstack, slot, model);
                 boolean flag = this.usesInnerModel(slot);
-                if (armoritem instanceof DyeableLeatherItem) {
-                    int i = ((DyeableLeatherItem)armoritem).getColor(itemstack);
-                    float f = (float)(i >> 16 & 255) / 255.0F;
-                    float f1 = (float)(i >> 8 & 255) / 255.0F;
-                    float f2 = (float)(i & 255) / 255.0F;
-                    this.renderModel(poseStack, buffer, packedLight, armoritem, armorModel, flag, f, f1, f2, this.getArmorResource(entity, itemstack, slot, (String)null));
-                    this.renderModel(poseStack, buffer, packedLight, armoritem, armorModel, flag, 1.0F, 1.0F, 1.0F, this.getArmorResource(entity, itemstack, slot, "overlay"));
-                } else {
-                    this.renderModel(poseStack, buffer, packedLight, armoritem, armorModel, flag, 1.0F, 1.0F, 1.0F, this.getArmorResource(entity, itemstack, slot, (String)null));
+                ArmorMaterial.Layer layer = layerFor(armoritem, slot);
+                if (layer != null) {
+                    ResourceLocation texture = this.getArmorResource(entity, itemstack, slot, layer);
+                    // 1.21.1 dropped DyeableLeatherItem and the separate *_overlay texture: the dye
+                    // is a DyedItemColor component, so a dyed piece is one texture drawn twice with
+                    // different vertex colours.
+                    DyedItemColor dye = itemstack.get(DataComponents.DYED_COLOR);
+                    if (dye != null) {
+                        this.renderModel(poseStack, buffer, packedLight, armorModel, flag, 0xFF000000 | dye.rgb(), texture);
+                    }
+                    this.renderModel(poseStack, buffer, packedLight, armorModel, flag, 0xFFFFFFFF, texture);
                 }
-                //ArmorTrim.getTrim(entity.level().registryAccess(), itemstack).ifPresent((p_289638_) -> {
-                //    this.renderTrim(armoritem.getMaterial(), poseStack, buffer, packedLight, p_289638_, armorModel, flag);
-                //});
                 if (itemstack.hasFoil()) {
                     this.renderGlint(poseStack, buffer, packedLight, armorModel);
                 }
             }
         }
+    }
+
+    /**
+     * The armour texture for one equipped slot.
+     *
+     * <p>{@link ArmorMaterial#layers()} is ordered like {@link ArmorItem.Type} - boots, legs,
+     * chest, helmet - which is the same order as {@link EquipmentSlot#getIndex()}, so the slot
+     * index picks the layer directly.
+     */
+    private static @Nullable ArmorMaterial.Layer layerFor(ArmorItem item, EquipmentSlot slot) {
+        List<ArmorMaterial.Layer> layers = item.getMaterial().value().layers();
+        int index = slot.getIndex();
+        return index >= 0 && index < layers.size() ? layers.get(index) : null;
     }
 
     private void setPartVisibility(HumanoidModel<T> model, EquipmentSlot slot) {
@@ -95,9 +109,9 @@ public class VillagerUnitArmorLayer<T extends LivingEntity, M extends HumanoidMo
         }
     }
 
-    private void renderModel(PoseStack p_289664_, MultiBufferSource p_289689_, int p_289681_, ArmorItem p_289650_, Model p_289658_, boolean p_289668_, float p_289678_, float p_289674_, float p_289693_, ResourceLocation armorResource) {
+    private void renderModel(PoseStack p_289664_, MultiBufferSource p_289689_, int p_289681_, Model p_289658_, boolean p_289668_, int color, ResourceLocation armorResource) {
         VertexConsumer vertexconsumer = p_289689_.getBuffer(RenderType.armorCutoutNoCull(armorResource));
-        p_289658_.renderToBuffer(p_289664_, vertexconsumer, p_289681_, OverlayTexture.NO_OVERLAY, p_289678_, p_289674_, p_289693_, 1.0F);
+        p_289658_.renderToBuffer(p_289664_, vertexconsumer, p_289681_, OverlayTexture.NO_OVERLAY, color);
     }
 
     /*
@@ -113,7 +127,7 @@ public class VillagerUnitArmorLayer<T extends LivingEntity, M extends HumanoidMo
      */
 
     private void renderGlint(PoseStack p_289673_, MultiBufferSource p_289654_, int p_289649_, Model p_289659_) {
-        p_289659_.renderToBuffer(p_289673_, p_289654_.getBuffer(RenderType.armorEntityGlint()), p_289649_, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        p_289659_.renderToBuffer(p_289673_, p_289654_.getBuffer(RenderType.armorEntityGlint()), p_289649_, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
     }
 
     private A getArmorModel(EquipmentSlot pSlot) {
@@ -125,26 +139,21 @@ public class VillagerUnitArmorLayer<T extends LivingEntity, M extends HumanoidMo
     }
 
     protected Model getArmorModelHook(T entity, ItemStack itemStack, EquipmentSlot slot, A model) {
-        return ForgeHooksClient.getArmorModel(entity, itemStack, slot, model);
+        return ClientHooks.getArmorModel(entity, itemStack, slot, model);
     }
 
-    public ResourceLocation getArmorResource(Entity entity, ItemStack stack, EquipmentSlot slot, @Nullable String type) {
-        ArmorItem item = (ArmorItem)stack.getItem();
-        String texture = item.getMaterial().getName();
-        String domain = "minecraft";
-        int idx = texture.indexOf(58);
-        if (idx != -1) {
-            domain = texture.substring(0, idx);
-            texture = texture.substring(idx + 1);
+    public ResourceLocation getArmorResource(Entity entity, ItemStack stack, EquipmentSlot slot, ArmorMaterial.Layer layer) {
+        boolean inner = this.usesInnerModel(slot);
+        ResourceLocation texture = layer.texture(inner);
+
+        // 1.21.1 hands the hook the Layer (plus which half is wanted) rather than a resolved
+        // path, so a resource pack can override the layer without the string being rebuilt here.
+        ResourceLocation overridden = ClientHooks.getArmorTexture(entity, stack, layer, inner, slot);
+        ResourceLocation cached = ARMOR_LOCATION_CACHE.get(overridden.toString());
+        if (cached == null) {
+            ARMOR_LOCATION_CACHE.put(overridden.toString(), overridden);
+            return overridden;
         }
-        String s1 = String.format(Locale.ROOT, "%s:textures/models/armor/%s_layer_%d%s.png", domain, texture,
-                this.usesInnerModel(slot) ? 2 : 1, type == null ? "" : String.format(Locale.ROOT, "_%s", type));
-        s1 = ForgeHooksClient.getArmorTexture(entity, stack, s1, slot, type);
-        ResourceLocation resourcelocation = ARMOR_LOCATION_CACHE.get(s1);
-        if (resourcelocation == null) {
-            resourcelocation = ResourceLocation.tryParse(s1);
-            ARMOR_LOCATION_CACHE.put(s1, resourcelocation);
-        }
-        return resourcelocation;
+        return cached;
     }
 }

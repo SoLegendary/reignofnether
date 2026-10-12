@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProdDupeRule;
 import com.solegendary.reignofnether.building.production.ProductionItem;
@@ -46,7 +48,9 @@ public class ResearchSlimeConversion extends ProductionItem {
             hotkey,
             () -> ProductionItems.RESEARCH_SLIME_CONVERSION.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_SLIME_CONVERSION),
-            () -> true,
+            // the tooltip says "Requires a Slime Pit" and every sibling research enforces the
+            // building it names; this one and two others were left ungated
+            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.SLIME_PIT),
             List.of(fcs(I18n.get("research.reignofnether.slime_conversion"),
                     Style.EMPTY.withBold(true)
                 ),

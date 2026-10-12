@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud.custombutton;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.Building;
@@ -10,12 +11,10 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,8 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.core.registries.BuiltInRegistries;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class CustomButtonServerEvents {
 	
 	
@@ -50,7 +50,7 @@ public class CustomButtonServerEvents {
 		Map<ResourceLocation, List<ResourceLocation>> buildingMappings = new HashMap<>();
 		
 		for (Map.Entry<ResourceLocation, List<ResourceLocation>> entry : data.entities().entrySet()) {
-			EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(entry.getKey());
+			EntityType<?> entityType = BuiltInRegistries.ENTITY_TYPE.get(entry.getKey());
 			if (entityType != null) {
 				ArrayList<ResourceLocation> list = new ArrayList<>(entry.getValue());
 				list.retainAll(customButtons.keySet());
@@ -103,7 +103,7 @@ public class CustomButtonServerEvents {
 	}
 	
 	private static void syncCustomButtons(Map<ResourceLocation, List<ResourceLocation>> entityMappings, Map<ResourceLocation, List<ResourceLocation>> buildingMappings) {
-		PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new CustomButtonClientboundPacket(
+		PacketHandler.send(PacketHandler.allPlayers(), new CustomButtonClientboundPacket(
 			(byte) 0,
 			null,
 			null,
@@ -118,7 +118,7 @@ public class CustomButtonServerEvents {
 			false
 		));
 		for (CustomButton button : customButtons.values()) {
-			PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new CustomButtonClientboundPacket(
+			PacketHandler.send(PacketHandler.allPlayers(), new CustomButtonClientboundPacket(
 				(byte) 1,
 				button.id,
 				button.name,
@@ -133,7 +133,7 @@ public class CustomButtonServerEvents {
 				button.isEnabled
 			));
 		}
-		PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new CustomButtonClientboundPacket(
+		PacketHandler.send(PacketHandler.allPlayers(), new CustomButtonClientboundPacket(
 			(byte) 2,
 			null,
 			null,
@@ -147,7 +147,7 @@ public class CustomButtonServerEvents {
 			false,
 			false
 		));
-		PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new CustomButtonClientboundPacket(
+		PacketHandler.send(PacketHandler.allPlayers(), new CustomButtonClientboundPacket(
 			(byte) 3,
 			null,
 			null,
@@ -161,7 +161,7 @@ public class CustomButtonServerEvents {
 			false,
 			false
 		));
-		PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new CustomButtonClientboundPacket(
+		PacketHandler.send(PacketHandler.allPlayers(), new CustomButtonClientboundPacket(
 			(byte) 4,
 			null,
 			null,

@@ -24,7 +24,6 @@ public class AttackGround extends Ability {
 
     private static final int CD_MAX = 0;
 
-
     public AttackGround(float attackRange) {
         super(
                 UnitAction.ATTACK_GROUND,

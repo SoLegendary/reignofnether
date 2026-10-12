@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.ability.heroAbilities.wretchedwraith.Blizza
 import com.solegendary.reignofnether.registrars.BlockEntityRegistrar;
 import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
@@ -112,16 +113,18 @@ public class WraithSnowBlockEntity extends BlockEntity {
         super.setRemoved();
     }
 
+    // 1.21.1 renamed BlockEntity#load to #loadAdditional and threaded a HolderLookup.Provider
+    // through both save and load.
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         tag.putInt("ownerId", ownerId);
         tag.putInt("ticksToNextMelt", ticksToNextMelt);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         ownerId = tag.getInt("ownerId");
         ticksToNextMelt = tag.getInt("ticksToNextMelt");
     }

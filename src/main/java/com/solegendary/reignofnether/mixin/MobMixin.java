@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -68,7 +69,7 @@ public abstract class MobMixin extends LivingEntity {
             at = @At("HEAD")
     )
     public void tick(CallbackInfo ci) {
-        MobEffectInstance mei = this.getEffect(MobEffectRegistrar.FROST_DAMAGE.get());
+        MobEffectInstance mei = this.getEffect(MobEffectHelpers.holder(MobEffectRegistrar.FROST_DAMAGE.get()));
         BlockState inBlockState = level().getBlockState(getOnPos().above());
         if (mei != null && mei.getDuration() > 0 && mei.getDuration() % 20 == 0 && onGround()) {
             int layers = BlockUtils.getWraithSnowLayers(inBlockState);

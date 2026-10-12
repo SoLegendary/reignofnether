@@ -1,9 +1,12 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeModifierCompat;
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.PromoteIllager;
-import com.solegendary.reignofnether.enchantments.MaimingEnchantment;
+import com.solegendary.reignofnether.enchantments.RTSEnchantments;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -50,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.Holder;
 
 public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -67,7 +71,6 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
     @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -136,11 +139,11 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         SynchedEntityData.defineId(VindicatorUnit.class, EntityDataSerializers.STRING);
     
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -215,13 +218,13 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
                 .add(Attributes.ARMOR, VindicatorUnit.armorValue)
                 .add(Attributes.MAX_HEALTH, VindicatorUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), rangedDamageResist)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), rangedDamageResist)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     public void tick() {
@@ -297,15 +300,14 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         Item axe = Items.IRON_AXE;
         int damageMod = 0;
         ItemStack axeStack = new ItemStack(axe);
-        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), damageMod, AttributeModifier.Operation.ADDITION);
-        axeStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+        AttributeModifierCompat.addModifier(axeStack, Attributes.ATTACK_DAMAGE, damageMod, AttributeModifier.Operation.ADD_VALUE, EquipmentSlot.MAINHAND);
 
         this.setItemSlot(EquipmentSlot.MAINHAND, axeStack);
     }
 
     public boolean hasAnyEnchant() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return !itemStack.getAllEnchantments().isEmpty();
+        return !itemStack.getEnchantments().isEmpty();
     }
 
     public int getMaimingLevel() {
@@ -315,13 +317,13 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
 
     public int getSharpnessLevel() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getEnchantmentLevel(Enchantments.SHARPNESS);
+        return itemStack.getEnchantmentLevel(EnchantmentRegistrar.vanilla(Enchantments.SHARPNESS));
     }
 
-    public Enchantment getEnchant() {
+    public Holder<Enchantment> getEnchant() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        Optional<Enchantment> enchant = Optional.empty();
-        for (Enchantment enchantment : itemStack.getAllEnchantments().keySet()) {
+        Optional<Holder<Enchantment>> enchant = Optional.empty();
+        for (Holder<Enchantment> enchantment : itemStack.getEnchantments().keySet()) {
             enchant = Optional.of(enchantment);
             break;
         }
@@ -333,7 +335,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
         boolean hurt = super.doHurtTarget(pEntity);
         int maimingLevel = getMaimingLevel();
         if (hurt && maimingLevel > 0 && pEntity instanceof LivingEntity le)
-            le.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, MaimingEnchantment.SLOWNESS_DURATION, maimingLevel));
+            le.addEffect(MobEffectHelpers.instance(MobEffects.MOVEMENT_SLOWDOWN, RTSEnchantments.MAIMING_SLOWNESS_DURATION, maimingLevel));
         return hurt;
     }
 
@@ -343,8 +345,7 @@ public class VindicatorUnit extends Vindicator implements Unit, AttackerUnit {
             @NotNull ServerLevelAccessor pLevel,
             @NotNull DifficultyInstance pDifficulty,
             @NotNull MobSpawnType pReason,
-            @Nullable SpawnGroupData pSpawnData,
-            @Nullable CompoundTag pDataTag
+            @Nullable SpawnGroupData pSpawnData
     ) {
         return pSpawnData;
     }

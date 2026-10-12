@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.unit.pathfinding.GridNeighbors;
 import com.solegendary.reignofnether.unit.pathfinding.MobilityClass;
 import com.solegendary.reignofnether.unit.pathfinding.RtsPathfinder;
 import com.solegendary.reignofnether.util.MyRenderer;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -21,9 +22,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 
@@ -102,10 +102,8 @@ public class RtsDebugNavmesh {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
-            return;
-
+    public static void onClientTick(ClientTickEvent.Post evt) {
+        
         // Recompute the scored tiles a few times a second (cheap thanks to the chunk cache).
         if (RtsDebugClientEvents.displayMode == DebugDisplayMode.NAVMESH) {
             if (scoreRecalcCooldown <= 0) {

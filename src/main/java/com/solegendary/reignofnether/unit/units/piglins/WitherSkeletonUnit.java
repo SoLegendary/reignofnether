@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.util.AttributeModifierCompat;
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.WitherCloud;
@@ -27,6 +30,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -56,6 +60,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 
 public class WitherSkeletonUnit extends WitherSkeleton implements Unit, AttackerUnit {
     public static final Abilities ABILITIES = new Abilities();
@@ -138,11 +143,11 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
         SynchedEntityData.defineId(WitherSkeletonUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable
@@ -187,8 +192,8 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     }
 
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
-        SpawnGroupData spawnGroupData = super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
+        SpawnGroupData spawnGroupData = super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData);
         this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(attackDamage);
         return spawnGroupData;
     }
@@ -205,20 +210,20 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
                 .add(Attributes.ATTACK_KNOCKBACK, 0.5f)
                 .add(Attributes.ARMOR, WitherSkeletonUnit.armorValue)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.5f)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     @Override
     public void setRemainingFireTicks(int pRemainingFireTicks) {
         if (!level().isClientSide()) {
             boolean hasImmunityResearch = ResearchServerEvents.playerHasResearch(getOwnerName(), ProductionItems.RESEARCH_FIRE_RESISTANCE);
-            if (hasImmunityResearch && !hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()))
+            if (hasImmunityResearch && !hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get())))
                 pRemainingFireTicks = 0;
         }
         super.setRemainingFireTicks(pRemainingFireTicks);
@@ -253,7 +258,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
             aec.setDurationOnUse(0);
             aec.setDuration(2 * 20); // cloud duration
             aec.setRadiusPerTick(-aec.getRadius() / (float)aec.getDuration());
-            aec.addEffect(new MobEffectInstance(MobEffects.WITHER, 2 * 20, 1));
+            aec.addEffect(MobEffectHelpers.instance(MobEffects.WITHER, 2 * 20, 1));
             level().addFreshEntity(aec);
 
             AreaEffectCloud aec2 = new AreaEffectCloud(level(), getX(), getY(), getZ());
@@ -263,7 +268,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
             aec2.setDurationOnUse(0);
             aec2.setDuration(2 * 20);
             aec2.setRadiusPerTick(-aec2.getRadius() / (float)aec2.getDuration());
-            aec2.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 2 * 20, 0));
+            aec2.addEffect(MobEffectHelpers.instance(MobEffects.WEAKNESS, 2 * 20, 0));
             level().addFreshEntity(aec2);
         }
         if (deathCloudTicks > 0)
@@ -334,8 +339,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     @Override
     public void setupEquipmentAndUpgradesServer() {
         ItemStack swordStack = new ItemStack(Items.NETHERITE_SWORD);
-        AttributeModifier mod = new AttributeModifier(UUID.randomUUID().toString(), 0, AttributeModifier.Operation.ADDITION);
-        swordStack.addAttributeModifier(Attributes.ATTACK_DAMAGE, mod, EquipmentSlot.MAINHAND);
+        AttributeModifierCompat.addModifier(swordStack, Attributes.ATTACK_DAMAGE, 0, AttributeModifier.Operation.ADD_VALUE, EquipmentSlot.MAINHAND);
         this.setItemSlot(EquipmentSlot.MAINHAND, swordStack);
     }
 
@@ -350,7 +354,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
     public static final int WEAKNESS_MAX_AMPLIFIER = 3; // 4 stacks, -80% dmg
     public static final int WEAKNESS_MAX_AMPLIFIER_HERO = 1; // 2 stacks, -40% dmg
 
-    public static void applyStackingEffect(LivingEntity le, MobEffect mobEffect, int maxAmp) {
+    public static void applyStackingEffect(LivingEntity le, Holder<MobEffect> mobEffect, int maxAmp) {
         int amplifier = 0;
         MobEffectInstance mei = null;
         for (MobEffectInstance activeMei : (le).getActiveEffects())
@@ -407,7 +411,7 @@ public class WitherSkeletonUnit extends WitherSkeleton implements Unit, Attacker
 
     public int getSharpnessLevel() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
-        return itemStack.getEnchantmentLevel(Enchantments.SHARPNESS);
+        return itemStack.getEnchantmentLevel(EnchantmentRegistrar.vanilla(Enchantments.SHARPNESS));
     }
 
     @Override

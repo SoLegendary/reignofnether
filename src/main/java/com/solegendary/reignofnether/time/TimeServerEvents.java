@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.time;
 
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -22,8 +23,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,15 +91,15 @@ public class TimeServerEvents {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
+    public static void onWorldTick(LevelTickEvent.Post evt) {
+        if (evt.getLevel().isClientSide() || evt.getLevel().dimension() != Level.OVERWORLD)
             return;
 
         if (serverStartTime == 0)
-            serverStartTime = evt.level.getDayTime();
+            serverStartTime = evt.getLevel().getDayTime();
 
-        if (PlayerServerEvents.rtsPlayers.isEmpty() && evt.level.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get()) {
-            ((ServerLevel) evt.level).setDayTime(serverStartTime);
+        if (PlayerServerEvents.rtsPlayers.isEmpty() && evt.getLevel().getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get()) {
+            ((ServerLevel) evt.getLevel()).setDayTime(serverStartTime);
         }
 
         if (bloodMoonTicksLeft > 0 && bloodMoonOwner != null) {
@@ -107,14 +107,14 @@ public class TimeServerEvents {
             if (bloodMoonTicksLeft <= 0) {
                 sendMessageToAllPlayers("abilities.reignofnether.blood_moon.end", 0xFFFFFF, true);
             } else if (bloodMoonTicksLeft % BloodMoon.SPAWN_INTERVAL_TICKS == 0) {
-                doRandomBloodMoonSpawn(evt.level);
+                doRandomBloodMoonSpawn(evt.getLevel());
             }
             if (bloodMoonTicksLeft % 20 == 0) {
                 AbilityClientboundPacket.doAbility(bloodMoonOwner.getId(), UnitAction.BLOOD_MOON, bloodMoonTicksLeft, bloodMoonTarget);
             }
         }
 
-        long normTime = TimeUtils.normaliseTime(evt.level.getDayTime());
+        long normTime = TimeUtils.normaliseTime(evt.getLevel().getDayTime());
         if (!SurvivalServerEvents.isEnabled() && !PlayerServerEvents.rtsPlayers.isEmpty() && lastTime >= 0) {
             if (lastTime <= TimeUtils.DUSK && normTime > TimeUtils.DUSK) {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.dusk", true);
@@ -128,17 +128,4 @@ public class TimeServerEvents {
         lastTime = normTime;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 

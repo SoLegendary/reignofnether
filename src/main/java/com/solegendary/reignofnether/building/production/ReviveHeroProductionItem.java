@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.production;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
@@ -104,8 +105,13 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
         int allowedHeroes = pp.level.getGameRules().getInt(GameRuleRegistrar.ALLOWED_HEROES);
         int liveHeroes = HeroUnit.getHeroes(pp.level.isClientSide(), pp.ownerName, heroName).size();
         int trainingHeroes = HeroUnit.getHeroesInTraining(pp.level.isClientSide(), pp.ownerName).size();
-        if ((liveHeroes + trainingHeroes) >= allowedHeroes)
+        if ((liveHeroes + trainingHeroes) >= allowedHeroes) {
+            ReignOfNether.LOGGER.info("[Hero] refused reviving " + getItemName() + " for " + pp.ownerName
+                    + ": live=" + liveHeroes + " training=" + trainingHeroes
+                    + " allowed=" + allowedHeroes + " castleOwned="
+                    + BuildingUtils.castleOwned(false, pp.ownerName));
             return "hud.hero.reignofnether.error.too_many_heroes";
+        }
 
         return null;
     }

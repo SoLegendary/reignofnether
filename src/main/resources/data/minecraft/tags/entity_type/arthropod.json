@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "reignofnether:spider_unit",
+    "reignofnether:poison_spider_unit",
+    "reignofnether:silverfish_unit",
+    "reignofnether:bee_unit"
+  ]
+}

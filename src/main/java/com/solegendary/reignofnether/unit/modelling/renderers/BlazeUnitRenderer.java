@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.modelling.renderers;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.units.piglins.BlazeUnit;
 import net.minecraft.client.renderer.entity.BlazeRenderer;
@@ -18,7 +19,7 @@ public class BlazeUnitRenderer extends BlazeRenderer {
 
     @Override
     public ResourceLocation getTextureLocation(Blaze blazeUnit) {
-        if (blazeUnit.hasEffect(MobEffectRegistrar.SOULS_AFLAME.get()))
+        if (blazeUnit.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.SOULS_AFLAME.get())))
             return SOULFIRE_BLAZE_LOCATION;
         else
             return BLAZE_LOCATION;

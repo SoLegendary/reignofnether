@@ -3,20 +3,30 @@ package com.solegendary.reignofnether.attackwarnings;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class AttackWarningClientboundPacket {
+public class AttackWarningClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<AttackWarningClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "attack_warning_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<AttackWarningClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final String attackedPlayerName;
     private final BlockPos attackPos;
 
     public static void sendWarning(String attackedPlayerName, BlockPos attackPos) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
             new AttackWarningClientboundPacket(
                 attackedPlayerName,
                 attackPos
@@ -32,24 +42,21 @@ public class AttackWarningClientboundPacket {
         this.attackPos = attackPos;
     }
 
-    public AttackWarningClientboundPacket(FriendlyByteBuf buffer) {
+    public AttackWarningClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.attackedPlayerName = buffer.readUtf();
         this.attackPos = buffer.readBlockPos();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeUtf(this.attackedPlayerName);
         buffer.writeBlockPos(this.attackPos);
     }
 
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
             AttackWarningClientEvents.checkAndTriggerAttackWarning(attackedPlayerName, attackPos);
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

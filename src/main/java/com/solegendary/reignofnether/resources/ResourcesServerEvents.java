@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.resources;
 
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -34,15 +35,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.block.CropGrowEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.*;
 
@@ -137,10 +138,8 @@ public class ResourcesServerEvents {
     private static final int SAVE_TICKS_MAX = 600;
     private static int saveTicks = 0;
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
-            return;
-        saveTicks += 1;
+    public static void onServerTick(ServerTickEvent.Post evt) {
+                saveTicks += 1;
         if (saveTicks >= SAVE_TICKS_MAX) {
             ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
             if (level != null) {
@@ -260,9 +259,9 @@ public class ResourcesServerEvents {
 
     // prevent vanilla growth mechanics because they're slow and random, see FarmPlacement instead
     @SubscribeEvent
-    public static void onCropGrow(BlockEvent.CropGrowEvent.Pre evt) {
+    public static void onCropGrow(CropGrowEvent.Pre evt) {
         if (BuildingUtils.isPosInsideAnyBuilding(evt.getLevel().isClientSide(), evt.getPos()))
-            evt.setResult(Event.Result.DENY);
+            evt.setResult(CropGrowEvent.Pre.Result.DO_NOT_GROW);
     }
 
     @SubscribeEvent
@@ -341,22 +340,29 @@ public class ResourcesServerEvents {
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
 
+        // Moving resources between players moves a whole balance sheet, so these need an operator
+        // permission like the rest of the resource and building commands; they used to have no
+        // requirement at all, which let any player drain another's resources.
         evt.getDispatcher().register(Commands.literal("sendfood")
+            .requires(cs -> cs.hasPermission(2))
             .then(Commands.argument("player", EntityArgument.player())
             .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
             .executes((command) -> trySendingResources(command, ResourceName.FOOD)))));
 
         evt.getDispatcher().register(Commands.literal("sendwood")
+            .requires(cs -> cs.hasPermission(2))
             .then(Commands.argument("player", EntityArgument.player())
             .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
             .executes((command) -> trySendingResources(command, ResourceName.WOOD)))));
 
         evt.getDispatcher().register(Commands.literal("sendore")
+            .requires(cs -> cs.hasPermission(2))
             .then(Commands.argument("player", EntityArgument.player())
             .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
             .executes((command) -> trySendingResources(command, ResourceName.ORE)))));
 
         evt.getDispatcher().register(Commands.literal("sendemerald")
+            .requires(cs -> cs.hasPermission(2))
             .then(Commands.argument("player", EntityArgument.player())
             .then(Commands.argument("amount", IntegerArgumentType.integer(1, Integer.MAX_VALUE))
             .executes((command) -> trySendingResources(command, ResourceName.EMERALD)))));
@@ -481,21 +487,4 @@ public class ResourcesServerEvents {
         FALLING_LOGS.put(Blocks.CRIMSON_HYPHAE, BlockRegistrar.FALLING_CRIMSON_STEM.get());
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.TooltipColours;
@@ -23,6 +25,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -53,25 +58,25 @@ public interface AttackerUnit {
     }
     public boolean getAggressiveWhenIdle();
     public default float getNonBaseAttacksPerSecond() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()));
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACKS_PER_SECOND.get().getDefaultValue());
     }
     public default float getBaseAttacksPerSecond() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()));
         return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACKS_PER_SECOND.get().getDefaultValue());
     }
     public default float getAggroRange() {
         float attackRange = getAttackRange();
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.AGGRO_RANGE.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()));
         float aggroRange = (float) (attr != null ?  attr.getValue() : AttributeRegistrar.AGGRO_RANGE.get().getDefaultValue());
         return Math.max(attackRange, aggroRange);
     }
     public default float getAttackRange() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()));
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
     }
     public default float getBaseAttackRange() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()));
         return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
     }
     public default float getBaseUnitAttackDamage() {
@@ -79,7 +84,7 @@ public interface AttackerUnit {
         if (this instanceof HeroUnit heroUnit) {
             bonus = heroUnit.getAttackBonusPerLevel() * heroUnit.getHeroLevel();
         }
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()));
         return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
     }
     public default float getUnitAttackDamage() {
@@ -87,7 +92,7 @@ public interface AttackerUnit {
         if (this instanceof HeroUnit heroUnit) {
             bonus = heroUnit.getAttackBonusPerLevel() * heroUnit.getHeroLevel();
         }
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()));
         float value = (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_DAMAGE.get().getDefaultValue()) + bonus;
 
         MobEffectInstance weakMei = ((LivingEntity) this).getEffect(MobEffects.WEAKNESS);
@@ -104,26 +109,26 @@ public interface AttackerUnit {
     }
 
     public default float getCriticalChance() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.CRITICAL_HIT_CHANCE.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.CRITICAL_HIT_CHANCE.get()));
         return (float) (attr != null ? attr.getValue() : AttributeRegistrar.CRITICAL_HIT_CHANCE.get().getDefaultValue());
     }
     public default float getExplosiveChance() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get()));
         return (float) (attr != null ? attr.getValue() : AttributeRegistrar.EXPLOSIVE_HIT_CHANCE.get().getDefaultValue());
     }
     public default float getBuildingDamageBonus() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get()));
         return (float) (attr != null ? (attr.getValue()) : (AttributeRegistrar.BUILDING_DAMAGE_BONUS.get().getDefaultValue()));
     }
     public default float getBuildingDamageMultiplier() {
         return getBuildingDamageBonus() + 1.0f;
     }
     public default float getLifeStealPercent() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.LIFESTEAL.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.LIFESTEAL.get()));
         return (float) (attr != null ? attr.getValue() : AttributeRegistrar.LIFESTEAL.get().getDefaultValue());
     }
     public default float getManaOnHitPercent() {
-        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.MANA_ON_HIT.get());
+        AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeHelpers.holder(AttributeRegistrar.MANA_ON_HIT.get()));
         return (float) (attr != null ? attr.getValue() : AttributeRegistrar.MANA_ON_HIT.get().getDefaultValue());
     }
 
@@ -257,8 +262,8 @@ public interface AttackerUnit {
         }
 
         if (!unitMob.level().isClientSide && unitMob.tickCount % 4 == 0) {
-            if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null ||
-                ((LivingEntity) unit).getEffect(MobEffectRegistrar.FREEZE.get()) != null) {
+            if (((LivingEntity) unit).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.STUN.get())) != null ||
+                ((LivingEntity) unit).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.FREEZE.get())) != null) {
                 Unit.fullResetBehaviours(unit);
                 return;
             }
@@ -392,10 +397,18 @@ public interface AttackerUnit {
     static double getWeaponDamageModifier(AttackerUnit attackerUnit) {
         ItemStack itemStack = ((LivingEntity) attackerUnit).getItemBySlot(EquipmentSlot.MAINHAND);
 
-        if (!itemStack.isEmpty())
-            for(AttributeModifier attr : itemStack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE))
-                if (attr.getOperation() == AttributeModifier.Operation.ADDITION)
-                    return attr.getAmount();
+        if (!itemStack.isEmpty()) {
+            // 1.21.1 moved attribute modifiers into an ItemAttributeModifiers component; the
+            // per-slot lookup is gone, so the flat entry list is filtered by slot group here.
+            ItemAttributeModifiers mods = itemStack.get(DataComponents.ATTRIBUTE_MODIFIERS);
+            if (mods == null) return 0;
+            for (ItemAttributeModifiers.Entry entry : mods.modifiers()) {
+                boolean applies = entry.slot() == EquipmentSlotGroup.MAINHAND || entry.slot() == EquipmentSlotGroup.HAND;
+                if (applies && entry.attribute().is(Attributes.ATTACK_DAMAGE)
+                        && entry.modifier().operation() == AttributeModifier.Operation.ADD_VALUE)
+                    return entry.modifier().amount();
+            }
+        }
         return 0;
     }
 
@@ -414,14 +427,14 @@ public interface AttackerUnit {
     }
 
     public default float getAttackCooldownMultiplier() {
-        MobEffectInstance disarm = ((LivingEntity) (this)).getEffect(MobEffectRegistrar.DISARM.get());
+        MobEffectInstance disarm = ((LivingEntity) (this)).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.DISARM.get()));
         if (disarm != null) {
             return 999999;
         }
-        MobEffectInstance attackSlowdown = ((LivingEntity) (this)).getEffect(MobEffectRegistrar.ATTACK_SLOWDOWN.get());
+        MobEffectInstance attackSlowdown = ((LivingEntity) (this)).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.ATTACK_SLOWDOWN.get()));
         int attackSlowdownAmp = attackSlowdown != null ? attackSlowdown.getAmplifier() + 1 : 0;
 
-        MobEffectInstance bloodlust = ((LivingEntity) (this)).getEffect(MobEffectRegistrar.BLOODLUST.get());
+        MobEffectInstance bloodlust = ((LivingEntity) (this)).getEffect(MobEffectHelpers.holder(MobEffectRegistrar.BLOODLUST.get()));
 
         return (1 + (attackSlowdownAmp * 0.05f)) / (bloodlust != null ? 1.6f : 1.0f);
     }

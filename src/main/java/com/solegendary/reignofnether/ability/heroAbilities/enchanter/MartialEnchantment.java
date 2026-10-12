@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.heroAbilities.enchanter;
 
+import net.minecraft.core.Holder;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
@@ -140,21 +141,21 @@ public class MartialEnchantment extends AbstractEnchantment {
     }
 
     @Nullable
-    public static Enchantment getEnchantmentForUnit(LivingEntity unit) {
+    public static Holder<Enchantment> getEnchantmentForUnit(LivingEntity unit) {
         if (unit instanceof MilitiaUnit militiaUnit)
-            return militiaUnit.isUsingBow() ? Enchantments.POWER_ARROWS : Enchantments.SHARPNESS;
+            return militiaUnit.isUsingBow() ? EnchantmentRegistrar.vanilla(Enchantments.POWER) : EnchantmentRegistrar.vanilla(Enchantments.SHARPNESS);
         if (unit instanceof VindicatorUnit)
             return EnchantmentRegistrar.BREACHING.get();
         if (unit instanceof PillagerUnit)
-            return Enchantments.PIERCING;
+            return EnchantmentRegistrar.vanilla(Enchantments.PIERCING);
         if (unit instanceof EvokerUnit)
             return EnchantmentRegistrar.ZEAL.get();
         if (unit instanceof WindcallerUnit)
             return EnchantmentRegistrar.LONGSHOT.get();
         if (unit instanceof SkeletonUnit || unit instanceof StrayUnit || unit instanceof HeadhunterUnit)
-            return Enchantments.POWER_ARROWS;
+            return EnchantmentRegistrar.vanilla(Enchantments.POWER);
         if (unit instanceof BruteUnit || unit instanceof WitherSkeletonUnit)
-            return Enchantments.SHARPNESS;
+            return EnchantmentRegistrar.vanilla(Enchantments.SHARPNESS);
         return null;
     }
 
@@ -180,7 +181,7 @@ public class MartialEnchantment extends AbstractEnchantment {
         return getAllowedMobTypes().contains(le.getType()) &&
                 le instanceof Unit &&
                 !le.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() &&
-                !le.getItemBySlot(EquipmentSlot.MAINHAND).getAllEnchantments().containsKey(getEnchantmentForUnit(le));
+                !le.getItemBySlot(EquipmentSlot.MAINHAND).getEnchantments().keySet().contains(getEnchantmentForUnit(le));
     }
 
     @Override
@@ -195,8 +196,8 @@ public class MartialEnchantment extends AbstractEnchantment {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error7"));
             return;
         }
-        Enchantment enchantment = getEnchantmentForUnit(targetEntity);
-        if (enchantment != null && targetEntity.getItemBySlot(EquipmentSlot.MAINHAND).getAllEnchantments().containsKey(enchantment)) {
+        Holder<Enchantment> enchantment = getEnchantmentForUnit(targetEntity);
+        if (enchantment != null && targetEntity.getItemBySlot(EquipmentSlot.MAINHAND).getEnchantments().keySet().contains(enchantment)) {
             if (level.isClientSide())
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error4"));
             return;

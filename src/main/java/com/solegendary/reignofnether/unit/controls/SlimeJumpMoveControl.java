@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.controls;
 
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -9,6 +10,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Random;
@@ -132,6 +135,24 @@ public class SlimeJumpMoveControl extends MoveControl {
         } else {
             this.mob.setSpeed(moveSpeed);
         }
+    }
+
+    /**
+     * Would one step forward in this direction still land on something we can stand on?
+     *
+     * <p>The slime hops rather than walks, so it needs to know the moment the ground runs out:
+     * without this it commits to a hop, lands in mid-air over a drop and gets stuck on the lip.
+     * Ground is "solid enough to land on" per the engine's own face-sturdy test, and the cell
+     * itself has to be free for a slime-sized body.
+     */
+    private boolean isWalkable(float relX, float relZ) {
+        Level level = this.mob.level();
+        BlockPos from = this.mob.blockPosition();
+        BlockPos ahead = from.offset(Mth.floor(relX), 0, Mth.floor(relZ));
+        if (ahead.equals(from)) return true;
+        BlockPos ground = ahead.below();
+        return level.getBlockState(ground).isFaceSturdy(level, ground, Direction.UP)
+                && level.noCollision(this.mob, new AABB(ahead));
     }
 
     // no pathnavigation, always tries to go in a direct straight line regardless of obstacles but is usually more block-accurate

@@ -67,9 +67,12 @@ public class CustomButtonMappingManager implements ResourceManagerReloadListener
 			ResourceLocation.CODEC.listOf()
 		);
 		
-		public static final Codec<MappingData> CODEC = ExtraCodecs.lazyInitializedCodec(() -> RecordCodecBuilder.create(instance -> instance.group(
+		// ExtraCodecs#lazyInitializedCodec is gone in 1.21.1, and nothing here needs it: the codec
+		// below refers to MappingData::entities / MappingData::buildings by method reference, so it
+		// is not part of a static-initialisation cycle. RecordCodecBuilder already defers building.
+		public static final Codec<MappingData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			MAPPING_CODEC.fieldOf("entities").forGetter(MappingData::entities),
 			MAPPING_CODEC.fieldOf("buildings").forGetter(MappingData::buildings)
-		).apply(instance, MappingData::new)));
+		).apply(instance, MappingData::new));
 	}
 }

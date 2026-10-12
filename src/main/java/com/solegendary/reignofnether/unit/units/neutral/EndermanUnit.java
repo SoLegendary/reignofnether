@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.neutral;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.Teleport;
@@ -61,7 +62,6 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
     @Override public Object2ObjectArrayMap<Ability, Integer> getAbilityCharges() { return charges; }
 
     Ability autocast;
-
 
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
@@ -130,11 +130,11 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
         SynchedEntityData.defineId(EndermanUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -192,13 +192,13 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
                 .add(Attributes.ATTACK_DAMAGE, EndermanUnit.attackDamage)
                 .add(Attributes.MAX_HEALTH, EndermanUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     public void tick() {
@@ -261,7 +261,9 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
             double d2 = this.getZ() + (this.random.nextDouble() - 0.5) * 16.0;
 
             if (level().getWorldBorder().isWithinBounds(d0, d2)) {
-                return this.teleport(d0, d1, d2);
+                // 1.21.1 replaced the boolean-returning teleport(x,y,z) with teleportTo(x,y,z).
+                this.teleportTo(d0, d1, d2);
+                return true;
             } else {
                 return false;
             }
@@ -309,8 +311,5 @@ public class EndermanUnit extends EnderMan implements Unit, AttackerUnit {
             this.playSound(SoundEvents.ENDERMAN_TELEPORT, 3.0F, 1.0F);
         }
     }
-
-
-
 
 }

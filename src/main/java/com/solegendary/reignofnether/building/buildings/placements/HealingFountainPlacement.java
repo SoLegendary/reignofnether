@@ -1,11 +1,13 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.util.MiscUtil;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -47,7 +49,7 @@ public class HealingFountainPlacement extends BuildingPlacement {
         for (LivingEntity le : nearbyEntities) {
             if (isBuilt && tickAgeAfterBuilt % 20 == 0)  {
                 // this actually isn't enough to cause a healing tick, but is just for effects
-                le.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20, 0));
+                le.addEffect(MobEffectHelpers.instance(MobEffects.REGENERATION, 20, 0));
                 le.heal(Math.min(1, le.getMaxHealth() / 100));
             }
         }
@@ -60,7 +62,11 @@ public class HealingFountainPlacement extends BuildingPlacement {
             double d0 = (double)(col >> 16 & 255) / 255.0;
             double d1 = (double)(col >> 8 & 255) / 255.0;
             double d2 = (double)(col >> 0 & 255) / 255.0;
-            this.level.addParticle(ParticleTypes.ENTITY_EFFECT, bp.getX(), bp.getY() + 1, bp.getZ(), d0, d1, d2);
+            // ENTITY_EFFECT is a bare ParticleType in 1.21.1; the colour travels inside the
+            // particle option instead of the three velocity arguments.
+            this.level.addParticle(
+                    ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, col),
+                    bp.getX() + 0.5, bp.getY() + 1, bp.getZ() + 0.5, 0.0, 0.0, 0.0);
         }
     }
 }

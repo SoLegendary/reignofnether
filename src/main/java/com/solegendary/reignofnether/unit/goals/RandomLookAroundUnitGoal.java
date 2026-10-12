@@ -5,6 +5,7 @@
 
 package com.solegendary.reignofnether.unit.goals;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.ScoutCatUnit;
@@ -26,8 +27,8 @@ public class RandomLookAroundUnitGoal extends Goal {
     }
 
     public boolean canUse() {
-        if (mob.hasEffect(MobEffectRegistrar.FREEZE.get()) ||
-            mob.hasEffect(MobEffectRegistrar.STUN.get()))
+        if (mob.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.FREEZE.get())) ||
+            mob.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.STUN.get())))
             return false;
 
         if (mob instanceof ScoutDogUnit scoutDogUnit && scoutDogUnit.isInSittingPose())

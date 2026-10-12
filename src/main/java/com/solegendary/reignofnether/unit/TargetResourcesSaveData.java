@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit;
 
+import net.minecraft.core.HolderLookup;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import com.solegendary.reignofnether.util.SavedDataCompat;
 
 public class TargetResourcesSaveData extends SavedData {
 
@@ -29,9 +31,7 @@ public class TargetResourcesSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld()
-            .getDataStorage()
-            .computeIfAbsent(TargetResourcesSaveData::load, TargetResourcesSaveData::create, "saved-target-resources-data");
+        return SavedDataCompat.computeIfAbsent(server, "saved-target-resources-data", TargetResourcesSaveData::create, TargetResourcesSaveData::load);
     }
 
     public static TargetResourcesSaveData load(CompoundTag tag) {
@@ -83,7 +83,7 @@ public class TargetResourcesSaveData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         //ReignOfNether.LOGGER.info("TargetResourcesSaveData.save");
 
         ListTag list = new ListTag();

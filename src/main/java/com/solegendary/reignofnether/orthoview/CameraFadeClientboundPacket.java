@@ -2,17 +2,27 @@ package com.solegendary.reignofnether.orthoview;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class CameraFadeClientboundPacket {
+public class CameraFadeClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<CameraFadeClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "camera_fade_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<CameraFadeClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final String playerName;
     private final BlockPos pos;
@@ -23,7 +33,7 @@ public class CameraFadeClientboundPacket {
     public static void fadeMoveCam(ServerPlayer player, BlockPos pos, int fadeOutTicks, int blackoutTicks, int fadeInTicks) {
         if (player == null)
             return;
-        PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
+        PacketHandler.send(PacketHandler.toPlayer(() -> player),
                 new CameraFadeClientboundPacket(player.getName().getString(), pos, fadeOutTicks, blackoutTicks, fadeInTicks)
         );
     }
@@ -36,7 +46,7 @@ public class CameraFadeClientboundPacket {
         this.fadeInTicks = fadeInTicks;
     }
 
-    public CameraFadeClientboundPacket(FriendlyByteBuf buffer) {
+    public CameraFadeClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.playerName = buffer.readUtf();
         this.pos = buffer.readBlockPos();
         this.fadeOutTicks = buffer.readInt();
@@ -44,7 +54,7 @@ public class CameraFadeClientboundPacket {
         this.fadeInTicks = buffer.readInt();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeUtf(this.playerName);
         buffer.writeBlockPos(this.pos);
         buffer.writeInt(this.fadeOutTicks);
@@ -52,18 +62,15 @@ public class CameraFadeClientboundPacket {
         buffer.writeInt(this.fadeInTicks);
     }
 
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                     () -> () -> {
                         CameraFadeClientEvents.fadeMoveCam(this.playerName, this.pos,
                                 this.fadeOutTicks, this.blackoutTicks, this.fadeInTicks);
-                        success.set(true);
                     });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

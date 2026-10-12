@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.units.piglins;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
@@ -18,7 +19,6 @@ import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.registrars.ItemRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
-import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.sounds.SoundAction;
 import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.Checkpoint;
@@ -102,7 +102,6 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     Ability autocast;
 
-
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
     public int getEatingTicksLeft() { return eatingTicksLeft; }
@@ -177,11 +176,11 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         SynchedEntityData.defineId(PiglinMerchantUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     @Nullable
@@ -330,19 +329,19 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 .add(Attributes.MAX_HEALTH, PiglinMerchantUnit.maxHealth)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
                 .add(Attributes.ARMOR, PiglinMerchantUnit.armorValue)
-                .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), PiglinMerchantUnit.maxHealth)
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
-                .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
-                .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
-                .add(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get(), manaBonusPerLevel)
-                .add(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get(), maxHealthBonusPerLevel)
-                .add(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get(), attackBonusPerLevel);
+                .add(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_HEALTH.get()), PiglinMerchantUnit.maxHealth)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), HeroUnit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), magicDamageResist)
+                .add(AttributeHelpers.holder(AttributeRegistrar.BASE_MAX_MANA.get()), baseMaxMana)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MANA_REGEN_PER_SECOND.get()), manaRegenPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAX_MANA_BONUS_PER_LEVEL.get()), manaBonusPerLevel)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAX_HEALTH_BONUS_PER_LEVEL.get()), maxHealthBonusPerLevel)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE_BONUS_PER_LEVEL.get()), attackBonusPerLevel);
     }
 
     @Override // prevent vanilla logic for picking up items
@@ -480,6 +479,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 SoundClientboundPacket.playSoundAtPos(SoundAction.PIGLIN_MERCHANT_LOOT_EXPLOSION, blockPosition());
             }
         });
+        this.returnResourcesGoal = new ReturnResourcesGoal(this);
     }
 
     @Override
@@ -487,6 +487,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         initialiseGoals();
         this.goalSelector.addGoal(2, usePortalGoal);
         this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, returnResourcesGoal);
         this.goalSelector.addGoal(2, attackGoal);
         this.goalSelector.addGoal(2, attackBuildingGoal);
         this.goalSelector.addGoal(2, itemGoal);
@@ -497,7 +498,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData) {
         return pSpawnData;
     }
 
@@ -551,13 +552,12 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         tnt.setDeltaMovement(dMove);
         tnt.setOwner(this);
         level().addFreshEntity(tnt);
-        level().playSound(null, getX(), getY(), getZ(), SoundEvents.EGG_THROW,
-                SoundSource.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
+        SoundClientboundPacket.playSoundAtPos(SoundAction.THROW_EGG, blockPosition());
 
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.WOOD, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
         float cooldown = Math.max(0, throwTNT.cooldownMax - (resourceBonus * ThrowTNT.LESS_COOLDOWN_PER_CHUNK_RESOURCES));
         throwTNT.setCooldown(cooldown, this);
@@ -571,13 +571,13 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.FOOD, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
         int numItems = FancyFeast.BASE_ITEMS + (FancyFeast.BONUS_ITEMS_PER_CHUNK_RESOURCES * resourceBonus);
 
         for (int i = 0; i < numItems; i++) {
             ItemEntity foodEntity = new ItemEntity(level(), pos.x, pos.y, pos.z, new ItemStack(getFancyFeast().getFoodItem(this)));
-            foodEntity.setThrower(getUUID());
+            foodEntity.setThrower(this);
             Vec3 dMove = Vec3.atCenterOf(targetBp).subtract(pos)
                     .multiply(1,0,1)
                     .scale(0.04)
@@ -660,14 +660,14 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         GreedIsGoodPassive greedIsGood = getGreedIsGood();
         int resourceBonus = 0;
         if (greedIsGood.isAutocasting(this))
-            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(ResourceName.ORE, this);
+            resourceBonus = greedIsGood.spendResourcesAndGetChunksSpent(this);
 
         int numItems = LootExplosion.BASE_ITEMS + (LootExplosion.BONUS_ITEMS_PER_CHUNK_RESOURCES * resourceBonus);
         List<ItemStack> items = getRandomLoot(numItems);
 
         for (ItemStack itemStack : items) {
             ItemEntity item = new ItemEntity(level(), pos.x, pos.y, pos.z, itemStack);
-            item.setThrower(getUUID());
+            item.setThrower(this);
             Vec3 dMove = new Vec3(
                     (random.nextFloat() - 0.5f) / 2,
                     0.5,
@@ -676,7 +676,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
             item.setDeltaMovement(dMove);
             level().addFreshEntity(item);
         }
-        level().explode(this, null, null, getX(), getY(), getZ(),
+        level().explode(null, null, null, getX(), getY(), getZ(),
                 2.0f, false, Level.ExplosionInteraction.NONE);
         setMana(getMana() + (resourceBonus * LootExplosion.MANA_REFUND_PER_CHUNK_RESOURCES));
     }

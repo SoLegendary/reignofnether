@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.items.UnitInventory;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -13,6 +14,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import com.solegendary.reignofnether.util.SavedDataCompat;
 
 public class HeroUnitSaveData extends SavedData {
 
@@ -28,12 +30,10 @@ public class HeroUnitSaveData extends SavedData {
         if (server == null) {
             return create();
         }
-        return server.overworld()
-            .getDataStorage()
-            .computeIfAbsent(HeroUnitSaveData::load, HeroUnitSaveData::create, "saved-herounit-data");
+        return SavedDataCompat.computeIfAbsent(server, "saved-herounit-data", HeroUnitSaveData::create, tag -> HeroUnitSaveData.load(tag, server));
     }
 
-    public static HeroUnitSaveData load(CompoundTag tag) {
+    public static HeroUnitSaveData load(CompoundTag tag, MinecraftServer server) {
         ReignOfNether.LOGGER.info("HeroUnitSaveData.load");
 
         HeroUnitSaveData data = create();
@@ -61,7 +61,7 @@ public class HeroUnitSaveData extends SavedData {
                     ListTag itemsTag = htag.getList("items", Tag.TAG_COMPOUND);
                     for (int i = 0; i < items.size(); i++) {
                         items.set(i, i < itemsTag.size()
-                                ? ItemStack.of(itemsTag.getCompound(i))
+                                ? ItemStack.parseOptional(server.registryAccess(), itemsTag.getCompound(i))
                                 : ItemStack.EMPTY);
                     }
                 }
@@ -81,7 +81,7 @@ public class HeroUnitSaveData extends SavedData {
     }
 
     @Override
-    public CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
         //ReignOfNether.LOGGER.info("UnitSaveData.save");
 
         ListTag list = new ListTag();
@@ -102,7 +102,7 @@ public class HeroUnitSaveData extends SavedData {
             for (ItemStack stack : h.items) {
                 CompoundTag itemTag = new CompoundTag();
                 if (!stack.isEmpty()) {
-                    stack.save(itemTag);
+                    stack.save(provider, itemTag);
                 }
                 itemsTag.add(itemTag);
             }

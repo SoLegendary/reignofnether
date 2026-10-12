@@ -9,7 +9,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.Path;
 
 import javax.annotation.Nullable;
@@ -76,7 +76,7 @@ public final class RtsPathfinder {
     // route around. Called once per request (not per A* cell) since fireImmune() can do an expensive lookup.
     private static float fireCostFor(Mob mob) {
         if (mob.fireImmune()) return 1.0f;
-        float malus = mob.getPathfindingMalus(BlockPathTypes.DAMAGE_FIRE);
+        float malus = mob.getPathfindingMalus(PathType.DAMAGE_FIRE);
         return malus <= 0f ? 1.0f : PathfinderConfig.FIRE_AVOID_COST;
     }
 

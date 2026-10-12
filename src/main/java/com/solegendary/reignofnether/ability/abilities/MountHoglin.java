@@ -65,7 +65,6 @@ public class MountHoglin extends Ability {
         return null;
     }
 
-
     // right click
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {

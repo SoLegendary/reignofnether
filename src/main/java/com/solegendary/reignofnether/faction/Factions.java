@@ -20,7 +20,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -212,7 +213,7 @@ public class Factions {
 		registerBuildings(NEUTRAL, Buildings.END_PORTAL, Keybindings.abilitySlot3);
 		registerBuildings(NEUTRAL, Buildings.NEUTRAL_TRANSPORT_PORTAL, Keybindings.abilitySlot4);
 		
-		if (FMLEnvironment.dist.isClient())
+		if (FMLEnvironment.dist == Dist.CLIENT)
 			for (ResourceLocation faction : PLAYABLE_FACTIONS) {
 				getFaction(faction).addCustomBuildings();
 			}
@@ -242,7 +243,7 @@ public class Factions {
 	
 	public static void registerBuildings(Faction faction, Building building, Keybinding key) {
 		building.setFaction(faction.key);
-		if (FMLEnvironment.dist.isClient())
+		if (FMLEnvironment.dist == Dist.CLIENT)
 			faction.addBuilding(building, key);
 	}
 	
@@ -261,7 +262,7 @@ public class Factions {
 	}
 	
 	public static <T extends IUnitProductionItem> void registerEntity(Faction faction, EntityType<? extends Unit> unit, T productionItem) {
-		if (FMLEnvironment.dist.isClient())
+		if (FMLEnvironment.dist == Dist.CLIENT)
 			if (unit == EntityRegistrar.MILITIA_UNIT.get())
 				faction.addEntityButton(((VillagerProd) productionItem).getMilitiaPlaceButton());
 			else

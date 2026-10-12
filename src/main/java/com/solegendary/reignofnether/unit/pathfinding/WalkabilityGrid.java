@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -77,6 +78,14 @@ public final class WalkabilityGrid {
             buildMinY = Math.min(buildMinY, existing.minY());
             buildMaxY = Math.max(buildMaxY, existing.maxY());
         }
+        // Never read the world for a chunk that is not loaded: build() goes through Level#getBlockState,
+        // which blocks on a chunk load, pins the chunk with a TicketType.UNKNOWN at FULL (a type the
+        // shutdown loop keeps) and forces it to generate. A* expands over unloaded chunks, so that
+        // turned exploration into mass chunk generation. Answer KIND_BLOCKED instead, and don't cache
+        // it: a unit walking there will load the chunk and the next request builds it for real.
+        if (!isChunkLoaded(level, chunkX, chunkZ))
+            return WalkabilityGridChunk.blocked(level, buildMinY, buildMaxY);
+
         WalkabilityGridChunk built = WalkabilityGridChunk.build(level, new ChunkPos(chunkX, chunkZ), buildMinY, buildMaxY);
         synchronized (chunks) {
             WalkabilityGridChunk concurrent = chunks.get(key);
@@ -88,6 +97,13 @@ public final class WalkabilityGrid {
             while (chunks.size() > PathfinderConfig.MAX_CACHED_CHUNKS) chunks.removeLast();
         }
         return built;
+    }
+
+    /** Non-loading "is this chunk already in memory" test. Never blocks and never adds a ticket. */
+    static boolean isChunkLoaded(Level level, int chunkX, int chunkZ) {
+        if (level instanceof ServerLevel sl)
+            return sl.getChunkSource().getChunkNow(chunkX, chunkZ) != null;
+        return level.isLoaded(new BlockPos(chunkX << 4, level.getMinBuildHeight(), chunkZ << 4));
     }
 
     // peek whether a cached chunk already covers [wantMinY, wantMaxY) without building one - lets the deferred
@@ -180,6 +196,9 @@ public final class WalkabilityGrid {
             // null -> LRU-evicted while dirty; drop it, a later getOrBuild rebuilds fresh
             if (original == null) continue;
             ChunkPos cp = new ChunkPos(ChunkPos.getX(key), ChunkPos.getZ(key));
+            // the chunk can have unloaded between the mark and the drain; rebuilding would read the world
+            // and pin it again (see getOrBuild), so keep the stale snapshot - it's still walkable.
+            if (!isChunkLoaded(level, cp.x, cp.z)) continue;
             // a bbox spanning all 16x16 columns saves nothing over build(), so full-rebuild there; otherwise
             // reclassify just the footprint.
             boolean wholeChunk = d.minLX <= 0 && d.maxLX >= 15 && d.minLZ <= 0 && d.maxLZ >= 15;

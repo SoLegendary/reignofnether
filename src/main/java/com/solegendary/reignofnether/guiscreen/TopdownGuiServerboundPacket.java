@@ -4,26 +4,36 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.NetworkEvent;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class TopdownGuiServerboundPacket {
+public class TopdownGuiServerboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<TopdownGuiServerboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "topdown_gui_serverbound"));
+
+    @Override
+    public CustomPacketPayload.Type<TopdownGuiServerboundPacket> type() {
+        return TYPE;
+    }
     public boolean topdownGuiOpen = false;
     public int playerId = -1; // to track
 
     // client-side helper functions
     public static void openTopdownGui(int playerId) {
-        PacketHandler.INSTANCE.sendToServer(new TopdownGuiServerboundPacket(true, playerId));
+        PacketHandler.sendToServer(new TopdownGuiServerboundPacket(true, playerId));
     }
     public static void closeTopdownGui(int playerId) {
         Minecraft.getInstance().popGuiLayer();
-        PacketHandler.INSTANCE.sendToServer(new TopdownGuiServerboundPacket(false, playerId));
+        PacketHandler.sendToServer(new TopdownGuiServerboundPacket(false, playerId));
     }
-
 
     // packet-handler functions
     public TopdownGuiServerboundPacket(Boolean pos, int playerId) {
@@ -31,30 +41,26 @@ public class TopdownGuiServerboundPacket {
         this.playerId = playerId;
     }
 
-    public TopdownGuiServerboundPacket(FriendlyByteBuf buffer) {
+    public TopdownGuiServerboundPacket(RegistryFriendlyByteBuf buffer) {
         this.topdownGuiOpen = buffer.readBoolean();
         this.playerId = buffer.readInt();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeBoolean(this.topdownGuiOpen);
         buffer.writeInt(this.playerId);
     }
 
-
     // server-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
-        ctx.get().enqueueWork(() -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
 
-            ServerPlayer player = ctx.get().getSender();
+            ServerPlayer player = (ServerPlayer) ctx.player();
             if (player == null) {
                 ReignOfNether.LOGGER.warn("TopdownGuiServerboundPacket: Sender was null");
-                success.set(false);
                 return;
             } else if (player.getId() != playerId) {
                 ReignOfNether.LOGGER.warn("TopdownGuiServerboundPacket: Tried to process packet from " + player.getName() + " for id: " + this.playerId);
-                success.set(false);
                 return;
             }
 
@@ -63,9 +69,7 @@ public class TopdownGuiServerboundPacket {
             else
                 PlayerServerEvents.closeTopdownGui(this.playerId);
 
-            success.set(true);
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

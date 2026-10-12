@@ -1,15 +1,16 @@
 package com.solegendary.reignofnether.survival;
+import com.solegendary.reignofnether.faction.Faction;
+import com.solegendary.reignofnether.faction.Factions;
 
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
-import com.solegendary.reignofnether.faction.Faction;
-import com.solegendary.reignofnether.faction.Factions;
-import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.sounds.SoundAction;
@@ -22,14 +23,13 @@ import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -42,6 +42,9 @@ public class SurvivalServerEvents {
 
     private static boolean isEnabled = false;
     @Nullable public static Wave currentWave = null;
+
+    // last survival enemy to die, so wave completion can drop the reward where it fell
+    @Nullable private static LivingEntity lastKilledEnemy = null;
     public static Wave nextWave = Wave.getWave(1);
     private static WaveDifficulty difficulty = WaveDifficulty.BEGINNER;
     private static final ArrayList<WaveEnemy> enemies = new ArrayList<>();
@@ -97,11 +100,11 @@ public class SurvivalServerEvents {
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
+    public static void onLevelTick(LevelTickEvent.Post evt) {
+        if (evt.getLevel().isClientSide() || evt.getLevel().dimension() != Level.OVERWORLD)
             return;
 
-        serverLevel = (ServerLevel) evt.level;
+        serverLevel = (ServerLevel) evt.getLevel();
 
         if (!isEnabled())
             return;
@@ -110,7 +113,8 @@ public class SurvivalServerEvents {
         if (ticks % TICK_INTERVAL != 0)
             return;
 
-        long normTime = TimeUtils.normaliseTime(evt.level.getDayTime());
+        long time = evt.getLevel().getDayTime();
+        long normTime = TimeUtils.normaliseTime(evt.getLevel().getDayTime());
 
         if (!isStarted()) {
             setToGameStartTime();
@@ -129,7 +133,7 @@ public class SurvivalServerEvents {
             }
             if (lastTime <= TimeUtils.DUSK + getWaveSurvivalTimeModifier(difficulty) + 50 &&
                     normTime > TimeUtils.DUSK + getWaveSurvivalTimeModifier(difficulty) + 50) {
-                startNextWave((ServerLevel) evt.level);
+                startNextWave((ServerLevel) evt.getLevel());
             }
             if (lastTime <= TimeUtils.DAWN && normTime > TimeUtils.DAWN) {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.dawn", true);
@@ -139,9 +143,9 @@ public class SurvivalServerEvents {
 
         int enemyCount = getCurrentEnemies().size() + portals.size();
         if (enemyCount < lastEnemyCount && enemyCount <= 3) {
-            if (enemyCount == 0) {
-                waveCleared((ServerLevel) evt.level);
-            } else if (enemyCount == 1) {
+            if (enemyCount == 0)
+                waveCleared((ServerLevel) evt.getLevel());
+            else if (enemyCount == 1) {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.remaining_enemies_one");
             } else {
                 PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.remaining_enemies", false, enemyCount);
@@ -267,15 +271,6 @@ public class SurvivalServerEvents {
         }
     }
 
-    private static LivingEntity lastKilledEnemy = null;
-
-    @SubscribeEvent
-    public static void onLivingDeath(LivingDeathEvent evt) {
-        if (evt.getEntity() instanceof Unit unit && unit.getOwnerName().equals(ENEMY_OWNER_NAME)) {
-            lastKilledEnemy = evt.getEntity();
-        }
-    }
-
     @SubscribeEvent
     public static void onEntityLeave(EntityLeaveLevelEvent evt) {
         if (evt.getEntity() instanceof Unit unit &&
@@ -338,11 +333,19 @@ public class SurvivalServerEvents {
         SurvivalClientboundPacket.setWaveNumber(nextWave.number);
     }
 
+    @SubscribeEvent
+    public static void onLivingDeath(LivingDeathEvent evt) {
+        if (evt.getEntity() instanceof Unit unit && ENEMY_OWNER_NAME.equals(unit.getOwnerName()))
+            lastKilledEnemy = evt.getEntity();
+    }
+
     // triggered when last enemy is killed
     public static void waveCleared(ServerLevel level) {
         PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.wave_cleared", true);
         SoundClientboundPacket.playSoundForAllPlayers(SoundAction.ALLY);
         currentWave = null;
+
+        // 1.5.0: clearing a wave also hands every RTS player their next queued item drop
         if (lastKilledEnemy != null)
             for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
                 ItemServerEvents.dropNextItem(rtsPlayer, lastKilledEnemy);

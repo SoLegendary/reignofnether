@@ -1,21 +1,32 @@
 package com.solegendary.reignofnether.rtsmap;
 
 import com.solegendary.reignofnether.registrars.PacketHandler;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.function.Supplier;
 
-public class RTSMapInfoClientboundPacket {
+public class RTSMapInfoClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<RTSMapInfoClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "rts_map_info_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<RTSMapInfoClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final RTSMapInfoAction action;
     private final String value;
 
     public static void sendValue(RTSMapInfoAction action, String value) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new RTSMapInfoClientboundPacket(action, value));
     }
 
@@ -24,19 +35,19 @@ public class RTSMapInfoClientboundPacket {
         this.value = value;
     }
 
-    public RTSMapInfoClientboundPacket(FriendlyByteBuf buffer) {
+    public RTSMapInfoClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.action = buffer.readEnum(RTSMapInfoAction.class);
         this.value = buffer.readUtf();
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.action);
         buffer.writeUtf(this.value);
     }
 
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+    public void handle(IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 switch (action) {
                     case SET_MODE -> RTSMapInfoClientEvents.selectedMode = value;
                     case ADD_MODE -> {
@@ -50,7 +61,5 @@ public class RTSMapInfoClientboundPacket {
                 }
             });
         });
-        ctx.get().setPacketHandled(true);
-        return true;
     }
 }

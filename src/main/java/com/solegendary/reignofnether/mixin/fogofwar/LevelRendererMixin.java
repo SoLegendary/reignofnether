@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.mixin.fogofwar;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.DeltaTracker;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -22,7 +24,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.BlockDestructionProgress;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,10 +38,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents.isEnabled;
-
 
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
@@ -50,21 +50,15 @@ public abstract class LevelRendererMixin {
 
     @Shadow private ClientLevel level;
 
-    @Shadow @Final private final AtomicBoolean needsFrustumUpdate = new AtomicBoolean(false);
-
     // always recheck chunks being in frustum - without this normally only checks when the camera moves
     @Inject(
             method = "setupRender(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;ZZ)V",
             at = @At("HEAD")
     )
     private void setupRender(Camera pCamera, Frustum pFrustum, boolean pHasCapturedFrustum, boolean pIsSpectator, CallbackInfo ci) {
-        if (!isEnabled())
-            return;
-
-        if (!OrthoviewClientEvents.isEnabled())
-            return;
-
-        needsFrustumUpdate.set(true);
+        // 1.21.1 deleted LevelRenderer's AtomicBoolean needsFrustumUpdate along with the cached
+        // frustum it guarded: setupRender now always rebuilds the frustum from the camera, which is
+        // exactly what this hook was asking for - so there is nothing left to force here.
     }
 
     // rerun blockDestroyProgress overlays but with range extended to between 32-256 blocks
@@ -72,10 +66,16 @@ public abstract class LevelRendererMixin {
             method = "renderLevel",
             at = @At("TAIL")
     )
-    private void renderLevel(PoseStack pPoseStack, float pPartialTick, long pFinishNanoTime,
-                             boolean pRenderBlockOutline, Camera pCamera, GameRenderer pGameRenderer,
-                             LightTexture pLightTexture, Matrix4f pProjectionMatrix, CallbackInfo ci) {
+    // 1.21.1 changed the signature to (DeltaTracker, boolean, Camera, GameRenderer, LightTexture,
+    // Matrix4f, Matrix4f) and dropped the PoseStack the overlay used to be drawn with; projection
+    // and model-view are now handed over separately instead. A PoseStack is rebuilt from the live
+    // model-view matrix, which is the view-space transform vanilla used to pass in.
+    private void renderLevel(DeltaTracker pDeltaTracker, boolean pRenderBlockOutline, Camera pCamera,
+                             GameRenderer pGameRenderer, LightTexture pLightTexture,
+                             Matrix4f pProjectionMatrix, Matrix4f pModelViewMatrix, CallbackInfo ci) {
 
+        PoseStack pPoseStack = new PoseStack();
+        pPoseStack.mulPose(RenderSystem.getModelViewMatrix());
         Vec3 vec3 = pCamera.getPosition();
         double d0 = vec3.x();
         double d1 = vec3.y();
@@ -97,7 +97,9 @@ public abstract class LevelRendererMixin {
                     pPoseStack.pushPose();
                     pPoseStack.translate((double) blockpos2.getX() - d0, (double) blockpos2.getY() - d1, (double) blockpos2.getZ() - d2);
                     PoseStack.Pose posestack$pose = pPoseStack.last();
-                    VertexConsumer vertexconsumer1 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer((RenderType) ModelBakery.DESTROY_TYPES.get(k1)), posestack$pose.pose(), posestack$pose.normal(), 1);
+                    // SheetedDecalTextureGenerator lost its normal-matrix argument in 1.21.1 and now
+                    // takes the PoseStack.Pose itself.
+                    VertexConsumer vertexconsumer1 = new SheetedDecalTextureGenerator(this.renderBuffers.crumblingBufferSource().getBuffer(ModelBakery.DESTROY_TYPES.get(k1)), posestack$pose, 1);
                     ModelData modelData = this.level.getModelDataManager().getAt(blockpos2);
                     this.minecraft.getBlockRenderer().renderBreakingTexture(this.level.getBlockState(blockpos2), blockpos2, this.level, pPoseStack, vertexconsumer1, modelData == null ? ModelData.EMPTY : modelData);
                     pPoseStack.popPose();
@@ -136,49 +138,43 @@ public abstract class LevelRendererMixin {
         }
     }
 
-    @Final @Shadow private ObjectArrayList<LevelRenderer.RenderChunkInfo> renderChunksInFrustum;
-    private List<Pair<BlockPos, Integer>> chunksToReDirty = new ArrayList<>();
+    /**
+     * 1.21.1 replaced 16-block chunk sections and {@code LevelRenderer#compileChunks} with the
+     * finer 16³ render sections and {@code ViewArea}, so the old "walk the frustum and
+     * {@code chunk.setDirty(true)}" loop has no counterpart. {@code setBlocksDirty} is now the
+     * public entry point and takes block coordinates, which is exactly what
+     * {@link UnitClientEvents#windowPositions} holds, so the leaf-reveal re-render is expressed
+     * directly as "dirty the sections around each window position" — same behaviour, no frustum
+     * walk and no second bookkeeping pass needed.
+     */
+    @Shadow public abstract void setBlocksDirty(int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
+
+    private static final int LEAF_WINDOW_RADIUS = 25;
+    private static final int LEAF_WINDOW_RADIUS_MINUS_1 = LEAF_WINDOW_RADIUS - 1;
 
     @Inject(
-            method = "compileChunks(Lnet/minecraft/client/Camera;)V",
-            at = @At("HEAD"),
-            cancellable = true
+            method = "tick()V",
+            at = @At("HEAD")
     )
-    private void compileChunks(Camera pCamera, CallbackInfo ci) {
-
+    private void ron$reDirtyLeafWindowSections(CallbackInfo ci) {
         // hiding leaves around cursor
-        if (OrthoviewClientEvents.hideLeavesMethod == OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR &&
-                OrthoviewClientEvents.isEnabled()) {
-            UnitClientEvents.windowUpdateTicks -= 1;
-            if (UnitClientEvents.windowUpdateTicks <= 0) {
-                UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
-                for (LevelRenderer.RenderChunkInfo chunkInfo : this.renderChunksInFrustum) {
-                    BlockPos chunkCentreBp = chunkInfo.chunk.getOrigin().offset((int) 8.5d, (int) 8.5d, (int) 8.5d);
+        if (OrthoviewClientEvents.hideLeavesMethod != OrthoviewClientEvents.LeafHideMethod.AROUND_UNITS_AND_CURSOR ||
+                !OrthoviewClientEvents.isEnabled()) {
+            return;
+        }
 
-                    List<Pair<BlockPos, Integer>> newChunksToReDirty = new ArrayList<>();
+        UnitClientEvents.windowUpdateTicks -= 1;
+        if (UnitClientEvents.windowUpdateTicks > 0) {
+            return;
+        }
+        UnitClientEvents.windowUpdateTicks = UnitClientEvents.WINDOW_UPDATE_TICKS_MAX;
 
-                    // rerender each chunk a second time so we can unhide leaves as they go out of range
-                    synchronized (UnitClientEvents.windowPositions) {
-                        for (Pair<BlockPos, Integer> pair : chunksToReDirty) {
-                            int times = pair.getSecond();
-                            if (pair.getFirst().equals(chunkInfo.chunk.getOrigin())) {
-                                chunkInfo.chunk.setDirty(true);
-                                times -= 1;
-                            }
-                            if (times > 0)
-                                newChunksToReDirty.add(new Pair<>(pair.getFirst(), times));
-                        }
-                        chunksToReDirty.clear();
-                        chunksToReDirty.addAll(newChunksToReDirty);
-
-                        UnitClientEvents.windowPositions.forEach(bp -> {
-                            if (chunkCentreBp.distSqr(bp) < 625) {
-                                chunkInfo.chunk.setDirty(true);
-                                chunksToReDirty.add(new Pair<>(chunkInfo.chunk.getOrigin(), 10));
-                            }
-                        });
-                    }
-                }
+        synchronized (UnitClientEvents.windowPositions) {
+            for (BlockPos bp : UnitClientEvents.windowPositions) {
+                setBlocksDirty(
+                        bp.getX() - LEAF_WINDOW_RADIUS, bp.getY() - LEAF_WINDOW_RADIUS, bp.getZ() - LEAF_WINDOW_RADIUS,
+                        bp.getX() + LEAF_WINDOW_RADIUS, bp.getY() + LEAF_WINDOW_RADIUS, bp.getZ() + LEAF_WINDOW_RADIUS
+                );
             }
         }
     }

@@ -6,8 +6,8 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +37,6 @@ public class PlayerChunksClientEvents {
             return;
 
         PoseStack poseStack = event.getPoseStack();
-
 
         // sent chunks first (drawn underneath/behind in intent), live chunks on top
         for (UUID uuid : edgeChunks.keySet())

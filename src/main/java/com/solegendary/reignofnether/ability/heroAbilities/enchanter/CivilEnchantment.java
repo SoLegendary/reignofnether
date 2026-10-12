@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.ability.heroAbilities.enchanter;
 
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
@@ -170,8 +171,8 @@ public class CivilEnchantment extends AbstractEnchantment {
 
     public static float getEfficiencyMultiplier(WorkerUnit workerUnit) {
         LivingEntity le = (LivingEntity) workerUnit;
-        if (le.hasEffect(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get())) {
-            return le.hasEffect(MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get()) ?
+        if (le.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.TEMPORARY_EFFICIENCY.get()))) {
+            return le.hasEffect(MobEffectHelpers.holder(MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get())) ?
                     CivilEnchantment.SUPER_EFFICIENCY_SPEED_MULTIPLIER:
                     CivilEnchantment.EFFICIENCY_SPEED_MULTIPLIER;
         }

@@ -4,17 +4,27 @@ import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitAnimationAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.api.distmarker.Dist;
+import com.solegendary.reignofnether.util.DistHelper;
+import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.network.RTSSimplePayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class UnitAnimationClientboundPacket {
+public class UnitAnimationClientboundPacket  implements RTSSimplePayload {
+
+    public static final CustomPacketPayload.Type<UnitAnimationClientboundPacket> TYPE =
+            new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "unit_animation_clientbound"));
+
+    @Override
+    public CustomPacketPayload.Type<UnitAnimationClientboundPacket> type() {
+        return TYPE;
+    }
 
     private final UnitAnimationAction animAction;
     private final int entityId;
@@ -25,7 +35,7 @@ public class UnitAnimationClientboundPacket {
 
     // no targets
     public static void sendBasicPacket(UnitAnimationAction animAction, LivingEntity entity) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new UnitAnimationClientboundPacket(
                         animAction,
                         entity.getId(),
@@ -35,7 +45,7 @@ public class UnitAnimationClientboundPacket {
     }
 
     public static void sendEntityPacket(UnitAnimationAction animAction, LivingEntity entity, LivingEntity target) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new UnitAnimationClientboundPacket(
                         animAction,
                         entity.getId(), target.getId(),
@@ -44,7 +54,7 @@ public class UnitAnimationClientboundPacket {
     }
 
     public static void sendBlockPosPacket(UnitAnimationAction animAction, LivingEntity entity, BlockPos bp) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new UnitAnimationClientboundPacket(
                         animAction,
                         entity.getId(), 0,
@@ -53,7 +63,7 @@ public class UnitAnimationClientboundPacket {
     }
 
     public static void sendEatFoodPacket(LivingEntity entity, int itemId) {
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(),
+        PacketHandler.send(PacketHandler.allPlayers(),
                 new UnitAnimationClientboundPacket(
                         UnitAnimationAction.EAT_FOOD_ITEM,
                         entity.getId(), itemId,
@@ -79,7 +89,7 @@ public class UnitAnimationClientboundPacket {
         this.posZ = posZ;
     }
 
-    public UnitAnimationClientboundPacket(FriendlyByteBuf buffer) {
+    public UnitAnimationClientboundPacket(RegistryFriendlyByteBuf buffer) {
         this.animAction = buffer.readEnum(UnitAnimationAction.class);
         this.entityId = buffer.readInt();
         this.targetId = buffer.readInt();
@@ -89,7 +99,7 @@ public class UnitAnimationClientboundPacket {
 
     }
 
-    public void encode(FriendlyByteBuf buffer) {
+    public void encode(RegistryFriendlyByteBuf buffer) {
         buffer.writeEnum(this.animAction);
         buffer.writeInt(this.entityId);
         buffer.writeInt(this.targetId);
@@ -99,11 +109,10 @@ public class UnitAnimationClientboundPacket {
     }
 
     // client-side packet-consuming functions
-    public boolean handle(Supplier<NetworkEvent.Context> ctx) {
-        final var success = new AtomicBoolean(false);
+    public void handle(IPayloadContext ctx) {
 
-        ctx.get().enqueueWork(() -> {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT,
+        ctx.enqueueWork(() -> {
+            DistHelper.unsafeRunWhenOn(Dist.CLIENT,
                 () -> () -> {
                     switch (this.animAction) {
                         case EAT_FOOD_ITEM -> UnitClientEvents.syncUnitEatingFood(this.entityId, this.targetId);
@@ -116,7 +125,6 @@ public class UnitAnimationClientboundPacket {
                     }
                 });
         });
-        ctx.get().setPacketHandled(true);
-        return success.get();
+        return;
     }
 }

@@ -84,13 +84,14 @@ public class PiglinMarket extends AbstractMarket implements NetherConvertingAddo
         return new ArrayList<>(List.of(
                 new StockedShopItem(UnitItems.POCKET_PORTAL, 3, 60 * 20),
                 new StockedShopItem(UnitItems.MAGMA_WALKER_BOOTS, 1, 600 * 20),
-                new StockedShopItem(UnitItems.GONG_OF_WEAKENING, 1, 600 * 20)
+                new StockedShopItem(UnitItems.GONG_OF_WEAKENING, 1, 600 * 20),
+                new StockedShopItem(UnitItems.GOLDEN_PIGLIN_ARMOUR, 1, 600 * 20)
         ));
     }
 
     public BuildingPlaceButton getBuildButton(Keybinding hotkey) {
         ResourceLocation key = ReignOfNetherRegistries.BUILDING.getKey(this);
-        String name = key != null ? Component.translatable("buildings." + getFaction().getName() + "." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
+        String name = key != null ? Component.translatable("buildings." + key.getNamespace() + "." + key.getPath()).getString() : buildingName;
         return new BuildingPlaceButton(
                 name,
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/raw_gold_block.png"),

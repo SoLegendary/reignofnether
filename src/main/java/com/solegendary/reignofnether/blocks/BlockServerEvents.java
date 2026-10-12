@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.blocks;
 
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
@@ -14,9 +15,8 @@ import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.*;
 
@@ -51,15 +51,15 @@ public class BlockServerEvents {
     }
 
     @SubscribeEvent
-    public static void onWorldTick(TickEvent.LevelTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD) {
+    public static void onWorldTick(LevelTickEvent.Post evt) {
+        if (evt.getLevel().isClientSide() || evt.getLevel().dimension() != Level.OVERWORLD) {
             return;
         }
-        tempBlocks.removeIf(tb -> tb.tick((ServerLevel) evt.level));
+        tempBlocks.removeIf(tb -> tb.tick((ServerLevel) evt.getLevel()));
 
         for (BlockPos bp : blocksToPlace.keySet()) {
             BlockState bs = blocksToPlace.get(bp);
-            evt.level.setBlockAndUpdate(bp, bs);
+            evt.getLevel().setBlockAndUpdate(bp, bs);
         }
         blocksToPlace.clear();
     }

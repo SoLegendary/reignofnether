@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit.units.villagers;
 
+import com.solegendary.reignofnether.util.AttributeHelpers;
+import com.solegendary.reignofnether.util.MobEffectHelpers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.AttackGround;
@@ -80,7 +82,6 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     Ability autocast;
 
-
     private int eatingTicksLeft = 0;
     public void setEatingTicksLeft(int amount) { eatingTicksLeft = amount; }
     public int getEatingTicksLeft() { return eatingTicksLeft; }
@@ -145,11 +146,11 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         SynchedEntityData.defineId(RavagerUnit.class, EntityDataSerializers.STRING);
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ownerDataAccessor, "");
-        this.entityData.define(scenarioRoleDataAccessor, -1);
-        this.entityData.define(onDeathCommandDataAccessor, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ownerDataAccessor, "");
+        builder.define(scenarioRoleDataAccessor, -1);
+        builder.define(onDeathCommandDataAccessor, "");
     }
 
     // combat stats
@@ -212,13 +213,13 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                 .add(Attributes.ATTACK_KNOCKBACK, 1.5)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 0.75)
                 .add(Attributes.FOLLOW_RANGE, Unit.getFollowRange())
-                .add(AttributeRegistrar.ATTACK_DAMAGE.get(), attackDamage)
-                .add(AttributeRegistrar.ATTACKS_PER_SECOND.get(), attacksPerSecond)
-                .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
-                .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
-                .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_DAMAGE.get()), attackDamage)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACKS_PER_SECOND.get()), attacksPerSecond)
+                .add(AttributeHelpers.holder(AttributeRegistrar.ATTACK_RANGE.get()), attackRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.AGGRO_RANGE.get()), aggroRange)
+                .add(AttributeHelpers.holder(AttributeRegistrar.SIGHT_RANGE.get()), Unit.DEFAULT_SIGHT_RANGE)
+                .add(AttributeHelpers.holder(AttributeRegistrar.RANGED_DAMAGE_RESIST.get()), 0)
+                .add(AttributeHelpers.holder(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get()), 0);
     }
 
     // prevent shield blocks from stunning and triggering a roar
@@ -308,7 +309,9 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         }
     }
 
-    @Override
+    // 1.21.1 deleted Ravager#roar (the sound/animation now lives in the AI goal) and
+    // GameEvent.ENTITY_ROAR; the effect is the same explode + screen shake, so the override
+    // becomes a plain method the mod's own ability calls.
     public void roar() {
         if (this.isAlive()) {
             if (!level().isClientSide()) {
@@ -322,7 +325,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                     if (mob instanceof Unit unit && UnitServerEvents.getUnitToEntityRelationship(this, mob) != Relationship.FRIENDLY) {
                         this.strongKnockback(mob);
                         mob.hurt(damageSources().generic(), ROAR_DAMAGE);
-                        mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ROAR_SLOW_DURATION, 1));
+                        mob.addEffect(MobEffectHelpers.instance(MobEffects.MOVEMENT_SLOWDOWN, ROAR_SLOW_DURATION, 1));
                     }
                 }
 
@@ -342,8 +345,8 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
                 Vec3 vec3 = this.getBoundingBox().getCenter();
 
-                this.playSound(SoundEvents.GENERIC_EXPLODE, 1.0F, 1.0F);
-                this.gameEvent(GameEvent.ENTITY_ROAR);
+                this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 1.0F);
+                this.level().broadcastEntityEvent(this, (byte) 3);
                 this.level().explode(null, null, null,
                         vec3.x, vec3.y, vec3.z,
                         2.0f,
@@ -359,12 +362,9 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
                     double d2 = this.random.nextGaussian() * 0.2;
                     this.level().addParticle(ParticleTypes.POOF, vec3.x, vec3.y, vec3.z, d0, d1, d2);
                 }
-                this.playSound(SoundEvents.GENERIC_EXPLODE, 1.0F, 1.0F);
+                this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.0F, 1.0F);
             }
         }
     }
-
-
-
 
 }
