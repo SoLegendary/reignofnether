@@ -42,6 +42,9 @@ Quality of Life
     - "only works before game start and role is empty, not for in game"
 
 [✔] Added a population supply setting to custom buildings
+[🟡] You can set up to camera hotkeys using F4-F7 (rebindable)
+    - To set a hotkey, press Shift + Fkey, then use Fkey to jump to that saved location
+
 
 Bugfixes
 --------

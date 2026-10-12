@@ -703,6 +703,7 @@ public class UnitItems {
             .range(TNT_RANGE)
             .cooldownTicks(TNT_COOLDOWN_TICKS)
             .pointDesc("item.reignofnether.throwable_tnt.point1")
+            .nonHeroUseable()
             .onUseGround((unit, pos) -> {
                 LivingEntity le = (LivingEntity) unit;
                 if (!le.level().isClientSide())
