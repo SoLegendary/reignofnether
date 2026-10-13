@@ -145,7 +145,6 @@ public class UnitItems {
             .descId("iron_hide_amulet")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.COMMON)
-            .noRandomDrop()
             .attribute(Attributes.ARMOR, 5, ADDITION)
             .build();
 
@@ -225,7 +224,7 @@ public class UnitItems {
     public static final UnitItem BOOTS_OF_SWIFTNESS = UnitItemBuilder.of(ItemRegistrar.BOOTS_OF_SWIFTNESS.get())
             .descId("boots_of_swiftness")
             .type(UnitItemType.PASSIVE)
-            .rarity(Rarity.COMMON)
+            .rarity(Rarity.UNCOMMON)
             .attribute(Attributes.MOVEMENT_SPEED, 0.04, ADDITION)
             .build();
 

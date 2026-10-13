@@ -1115,9 +1115,7 @@ public class UnitServerEvents {
         attacker.level().explode(attacker, null, null, pEntity.getX(), pEntity.getEyeY(), pEntity.getZ(),
                 1.0f, false, Level.ExplosionInteraction.NONE);
 
-        AttributeInstance ai = attacker.getAttribute(Attributes.ATTACK_DAMAGE);
-
-        if (ai != null) {
+        if (attacker instanceof AttackerUnit aUnit) {
             for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(pEntity.getEyePosition(), EXPLOSIVE_HIT_SPLASH_RADIUS, LivingEntity.class, attacker.level())) {
                 if (hitEntity instanceof Unit unit) {
                     var relationShip = UnitServerEvents.getUnitToEntityRelationship(unit, attacker);
@@ -1126,7 +1124,7 @@ public class UnitServerEvents {
                 }
                 if (hitEntity == pEntity)
                     continue;
-                boolean hurt = hitEntity.hurt(attacker.damageSources().explosion(attacker, attacker), (float) ai.getValue() * EXPLOSIVE_HIT_SPLASH_MULT);
+                boolean hurt = hitEntity.hurt(attacker.damageSources().explosion(attacker, attacker), aUnit.getUnitAttackDamage() * EXPLOSIVE_HIT_SPLASH_MULT);
                 if (hurt) {
                     hitEntity.knockback(EXPLOSIVE_HIT_KNOCKBACK, Mth.sin(attacker.getYRot() * 0.017453292F), -Mth.cos(attacker.getYRot() * 0.017453292F));
                     attacker.setDeltaMovement(attacker.getDeltaMovement().multiply(0.6, 1.0, 0.6));
@@ -1213,7 +1211,8 @@ public class UnitServerEvents {
         // allow undead to be poisoned
         if (evt.getEntity().getMobType() == MobType.UNDEAD &&
             evt.getEntity() instanceof Unit &&
-            evt.getEffectInstance().getEffect() == MobEffects.POISON) {
+            (evt.getEffectInstance().getEffect() == MobEffects.POISON ||
+            evt.getEffectInstance().getEffect() == MobEffects.REGENERATION)) {
             evt.setResult(Event.Result.ALLOW);
         }
     }

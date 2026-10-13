@@ -71,7 +71,6 @@ public class VillagerMarket extends AbstractMarket {
                 new StockedShopItem(UnitItems.HEALTH_POTION, 3, 60 * 20),
                 new StockedShopItem(UnitItems.MANA_POTION, 3, 60 * 20),
                 new StockedShopItem(UnitItems.BROADSWORD, 1, 180 * 20),
-                new StockedShopItem(UnitItems.IRON_HIDE_AMULET, 1, 180 * 20),
                 new StockedShopItem(UnitItems.HEART_MEDALLION, 1, 180 * 20),
                 new StockedShopItem(UnitItems.AZURE_MEDALLION, 1, 180 * 20)
         ));

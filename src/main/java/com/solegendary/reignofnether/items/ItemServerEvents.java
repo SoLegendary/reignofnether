@@ -141,9 +141,10 @@ public class ItemServerEvents {
         if (unitItem == null)
             return;
 
-        dropper.level().addFreshEntity(new ItemEntity(
-                dropper.level(), dropper.getX(), dropper.getY(), dropper.getZ(),
-                new ItemStack(unitItem.item))); // adjust to however UnitItem exposes its Item
+        ItemStack itemStack = new ItemStack(unitItem.item);
+        itemStack.setCount(unitItem.defaultStackCount);
+        ItemEntity itemEntity = new ItemEntity(dropper.level(), dropper.getX(), dropper.getY(), dropper.getZ(), itemStack);
+        dropper.level().addFreshEntity(itemEntity);
 
         SoundClientboundPacket.playSoundAtPos(getItemDropSound(unitItem.rarity), dropper.blockPosition(), 2.5f);
 

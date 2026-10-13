@@ -205,7 +205,6 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
     // endregion
 
     final static public float attackDamage = 8.0f;
-    final static public float pushAttackDamage = 4.0f;
     final static public float attacksPerSecond = 0.30f;
     final static public float attackRange = 2; // only used by ranged units or melee building attackers
     final static public float aggroRange = 10;
@@ -293,7 +292,7 @@ public class PandaUnit extends Panda implements Unit, AttackerUnit {
                     if (entity instanceof LivingEntity le && getTarget() != entity && !recentlyHitIds.containsKey(entity.getId())) {
                         Relationship rs = UnitServerEvents.getUnitToEntityRelationship(this, entity);
                         if (!List.of(Relationship.OWNED, Relationship.FRIENDLY).contains(rs)) {
-                            entity.hurt(damageSources().generic(), pushAttackDamage);
+                            entity.hurt(damageSources().generic(), getUnitAttackDamage() / 2);
                             double dx = Mth.sin(getYRot() * ((float) Math.PI / 180F));
                             double dz = -Mth.cos(getYRot() * ((float) Math.PI / 180F));
                             Vector2d vec2 = new Vector2d(dx, dz);
