@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
+import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
@@ -173,6 +174,8 @@ public class ItemServerEvents {
                 killerName = unit.getOwnerName();
             else if (lastHurtBy != null && lastHurtBy.getPersistentData().contains("ownerName"))
                 killerName = lastHurtBy.getPersistentData().getString("ownerName");
+            else if (directEntity instanceof AdjustablePrimedTnt tnt && tnt.getOwner() instanceof Unit unit)
+                killerName = unit.getOwnerName();
 
             boolean isNeutral = unitKilled.getOwnerName().isBlank();
             boolean willDropOwnItem = unitKilled instanceof UnitInventory inv && !inv.isEmpty() && !(unitKilled instanceof HeroUnit);
