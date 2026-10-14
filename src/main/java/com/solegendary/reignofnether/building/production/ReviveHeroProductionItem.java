@@ -18,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -53,7 +54,7 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                     HeroClientboundPacket.setExperience(entity.getId(), oldHero.experience);
                     newHero.setSkillPoints(oldHero.skillPoints);
                     HeroClientboundPacket.setSkillPoints(entity.getId(), oldHero.skillPoints);
-                    newHero.setStatsForLevel(true);
+                    newHero.setStatsForLevel();
                     if (newHero.getHeroAbilities().size() > 0) {
                         newHero.getHeroAbilities().get(0).setRank(newHero, oldHero.ability1Rank);
                         HeroClientboundPacket.setAbilityRank(entity.getId(), oldHero.ability1Rank, 0);
@@ -76,6 +77,9 @@ public abstract class ReviveHeroProductionItem extends ProductionItem {
                     if (newHero instanceof UnitInventory inv)
                         for (int i = 0; i < inv.getAllItems().size() && i < oldHero.items.size(); i++)
                             inv.set(i, oldHero.items.get(i));
+
+                    ((LivingEntity) newHero).setHealth(((LivingEntity) newHero).getMaxHealth());
+                    newHero.setMana(newHero.getMaxMana());
 
                     HeroServerEvents.fallenHeroes.remove(oldHero);
                 }

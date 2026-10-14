@@ -354,7 +354,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
     }
 
     @Override
-    public void setStatsForLevel(boolean heal) {
+    public void setStatsForLevel() {
         AttributeInstance aiMaxHealth = this.getAttribute(Attributes.MAX_HEALTH);
         float newHealth = getBaseHealth() + ((getHeroLevel() - 1) * getHealthBonusPerLevel());
         if (getAvatarTicksLeft() > 0)
@@ -365,8 +365,6 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
         if (aiAttackDamage != null)
             aiAttackDamage.setBaseValue(getBaseAttack() + ((getHeroLevel() - 1) * getAttackBonusPerLevel()));
         this.setMaxMana(getBaseMaxMana() + ((getHeroLevel() - 1) * getManaBonusPerLevel()));
-        if (heal)
-            this.setHealth(this.getMaxHealth());
         if (getHealth() > getMaxHealth())
             setHealth(getMaxHealth());
     }

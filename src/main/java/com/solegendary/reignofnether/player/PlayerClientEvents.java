@@ -257,7 +257,7 @@ public class PlayerClientEvents {
 
     public static void addRTSPlayer(String playerName, Faction faction, Long id, int startPosColorId, boolean isDogPerson, boolean isSyncing) {
         if (!isRTSPlayer(playerName)) {
-            rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId, isDogPerson, -1L));
+            rtsPlayers.add(RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), startPosColorId, isDogPerson, -1L, -1L));
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
             if (MC.player != null && MC.player.getName().getString().equals(playerName)) {
                 GameruleClient.gamerulesMenuOpen = false;
@@ -275,7 +275,7 @@ public class PlayerClientEvents {
 
     public static void addScenarioNPCRTSPlayer(String playerName, Faction faction, Long id, int scenarioRoleIndex) {
         if (!isRTSPlayer(playerName)) {
-            RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0, true, -1L);
+            RTSPlayer rtsPlayer = RTSPlayer.getNewPlayer(playerName, faction, id.intValue(), 0, true, -1L, -1L);
             rtsPlayer.scenarioRoleIndex = scenarioRoleIndex;
             rtsPlayers.add(rtsPlayer);
             FogOfWarClientEvents.refreshLocalIsRTSPlayer();
@@ -330,6 +330,9 @@ public class PlayerClientEvents {
         MinimapClientEvents.clearVirtualUnits();
         PlayerDisplayClientEvents.clearAll();
         rtsPlayers.clear();
+        synchronized (UnitClientEvents.mobEffectIcons) {
+            UnitClientEvents.mobEffectIcons.clear();
+        }
     }
 
     @SubscribeEvent

@@ -1083,25 +1083,25 @@ public class UnitServerEvents {
         }
 
         if (evt.getEntity() instanceof UnitInventory inv && evt.getEntity() instanceof Unit unit && inv.isHolding(UnitItems.BEENEST_ARMOUR)) {
+            // Overkill damage shouldn't count: cap at the wearer's current health
+            float effectiveDamage = Math.min(evt.getAmount(), evt.getEntity().getHealth());
+
             for (ItemStack itemStack : inv.getAllItems()) {
                 if (itemStack.getItem() == ItemRegistrar.BEENEST_ARMOUR.get()) {
-                    CompoundTag tag = itemStack.getTag();
-                    if (tag != null) {
-                        if (!tag.contains("damageTaken")) {
-                            tag.putFloat("damageTaken", 0f);
+                    CompoundTag tag = itemStack.getOrCreateTag();
+
+                    float dmg = effectiveDamage + tag.getFloat("damageTaken");
+
+                    // Record overflow damage
+                    while (dmg >= UnitItems.BEENEST_ARMOUR_DAMAGE_PER_BEE) {
+                        Entity entity = UnitServerEvents.spawnMob(EntityRegistrar.BEE_UNIT.get(),
+                                serverLevel, evt.getEntity().blockPosition().above(), unit.getOwnerName());
+                        if (entity instanceof BeeUnit beeUnit) {
+                            beeUnit.setIsSummoned(true);
                         }
-                        float dmg = evt.getAmount() + tag.getFloat("damageTaken");
-                        if (dmg > UnitItems.BEENEST_ARMOUR_DAMAGE_PER_BEE) {
-                            Entity entity = UnitServerEvents.spawnMob(EntityRegistrar.BEE_UNIT.get(),
-                                    serverLevel, evt.getEntity().blockPosition().above(), unit.getOwnerName());
-                            if (entity instanceof BeeUnit beeUnit) {
-                                beeUnit.setIsSummoned(true);
-                                tag.putFloat("damageTaken", 0f);
-                            }
-                        } else {
-                            tag.putFloat("damageTaken", dmg);
-                        }
+                        dmg -= UnitItems.BEENEST_ARMOUR_DAMAGE_PER_BEE;
                     }
+                    tag.putFloat("damageTaken", dmg);
                 }
             }
         }

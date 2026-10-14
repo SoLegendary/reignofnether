@@ -311,7 +311,7 @@ public class CursorClientEvents {
         // **********************
         // Find items moused over
         // **********************
-        List<ItemEntity> nearbyItems = MiscUtil.getEntitiesWithinRange(cursorWorldPos, 30, ItemEntity.class, MC.level);
+        List<ItemEntity> nearbyItems = MiscUtil.getEntitiesWithinRange(cursorWorldPos, OrthoviewClientEvents.getZoom() * 2, ItemEntity.class, MC.level);
 
         ItemClientEvents.clearPreselectedItems();
         ItemClientEvents.clearRenderedItems();

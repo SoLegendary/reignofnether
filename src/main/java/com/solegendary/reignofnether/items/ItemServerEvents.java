@@ -6,9 +6,7 @@ import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
-import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
-import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
@@ -45,7 +43,8 @@ public class ItemServerEvents {
     public static final boolean ENABLED = UnitItem.ENABLED;
 
     // for making every RTS player have the same drops
-    public static final Long RANDOM_UNIT_ITEM_DROPS_SEED = new Random().nextLong(1, Long.MAX_VALUE);
+    public static final Long ITEM_DROPS_SEED = new Random().nextLong(1, Long.MAX_VALUE);
+    public static final Long ITEM_RARITY_SEED = new Random().nextLong(1, Long.MAX_VALUE);
 
     public static void buyItem(
             Unit unit,
@@ -113,6 +112,8 @@ public class ItemServerEvents {
                     }
                     if (canUseItem || !useItem) {
                         Unit.fullResetBehaviours(unit);
+                        if (action == ItemAction.USE_ON_BLOCK)
+                            buildingTarget = null;
                         unit.getItemGoal().start(itemInHand, itemTarget, leTarget, blockTarget, buildingTarget, useItem);
                     }
                 }

@@ -81,8 +81,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.building.BuildingServerEvents.random;
 import static com.solegendary.reignofnether.building.BuildingServerEvents.saveBuildings;
-import static com.solegendary.reignofnether.items.RandomItemDropRule.ENABLED_NON_STRICT;
-import static com.solegendary.reignofnether.items.RandomItemDropRule.ENABLED_STRICT;
 import static com.solegendary.reignofnether.time.TimeUtils.getWaveSurvivalTimeModifier;
 import static net.minecraft.world.level.GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK;
 
@@ -460,10 +458,10 @@ public class PlayerServerEvents {
             RandomItemDropRule randomItemDropRule = RandomItemDropRule.fromValue(
                     serverPlayer.level().getGameRules().getRule(GameRuleRegistrar.RANDOM_ITEM_DROPS).get()
             );
-            Long itemDropSeed = switch (randomItemDropRule) {
+            Long itemSeed = switch (randomItemDropRule) {
                 case DISABLED -> -1L;
-                case ENABLED_NON_STRICT -> random.nextLong(1, Long.MAX_VALUE);
-                case ENABLED_STRICT -> ItemServerEvents.RANDOM_UNIT_ITEM_DROPS_SEED;
+                case ENABLED_RANDOM, ENABLED_SAME_RARITY -> random.nextLong(1, Long.MAX_VALUE);
+                case ENABLED_SAME_ITEMS -> ItemServerEvents.ITEM_DROPS_SEED;
             };
             rtsPlayers.add(RTSPlayer.getNewPlayer(
                     serverPlayer.getName().getString(),
@@ -471,7 +469,10 @@ public class PlayerServerEvents {
                     serverPlayer.getId(),
                     startPosColorId,
                     isDogPerson,
-                    itemDropSeed
+                    itemSeed,
+                    randomItemDropRule == RandomItemDropRule.ENABLED_SAME_RARITY ||
+                    randomItemDropRule == RandomItemDropRule.ENABLED_SAME_ITEMS ?
+                        ItemServerEvents.ITEM_RARITY_SEED : -1L
             ));
             FogOfWarServerEvents.invalidateRtsCache();
             String playerName = serverPlayer.getName().getString();

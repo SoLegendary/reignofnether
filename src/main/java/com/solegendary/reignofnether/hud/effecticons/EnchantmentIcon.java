@@ -21,13 +21,13 @@ public class EnchantmentIcon extends Button {
     public final EquipmentSlot slot;
 
     public EnchantmentIcon(Enchantment enchantment, EquipmentSlot slot, ResourceLocation iconRl, @Nullable List<FormattedCharSequence> tooltipLines) {
-        super("Passive Icon", ICON_SIZE, iconRl, (Keybinding) null, () -> false, () -> true, () -> true, null, null, tooltipLines);
+        super("Passive Icon", ICON_SIZE, iconRl, (Keybinding) null, () -> false, () -> false, () -> true, null, null, tooltipLines);
         this.enchantment = enchantment;
         this.slot = slot;
     }
 
     public EnchantmentIcon(Enchantment enchantment, EquipmentSlot slot, ItemStack iconItem, @Nullable List<FormattedCharSequence> tooltipLines) {
-        super("Passive Icon", ICON_SIZE, null, (Keybinding) null, () -> false, () -> true, () -> true, null, null, tooltipLines);
+        super("Passive Icon", ICON_SIZE, null, (Keybinding) null, () -> false, () -> false, () -> true, null, null, tooltipLines);
         this.iconItem = iconItem;
         this.enchantment = enchantment;
         this.slot = slot;

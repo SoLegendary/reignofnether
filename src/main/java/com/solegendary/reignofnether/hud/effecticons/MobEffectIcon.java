@@ -61,6 +61,7 @@ public class MobEffectIcon extends Button {
                 return Math.max(0f, Math.min(1f, percent));
             };
         }
+        icon.isHidden = () -> instance.getDuration() <= 0;
         icon.bottomLeftText = () -> {
             int amp = instance.getAmplifier();
             return amp > 0 ? String.valueOf(amp + 1) : "";

@@ -41,7 +41,7 @@ public class GameruleClient {
     public static boolean buildingsOutsideBorder = false;
     public static boolean rtsPathfinding = false; // only for GUI
     public static int animalSpawnYDiff = 5;
-    public static RandomItemDropRule randomItemDrops = RandomItemDropRule.ENABLED_NON_STRICT;
+    public static RandomItemDropRule randomItemDrops = RandomItemDropRule.ENABLED_SAME_RARITY;
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -270,12 +270,12 @@ public class GameruleClient {
         buttons.add(new GameruleIntegerButton("randomItemDrops: " + Math.round(randomItemDrops.getValue()),
                 () -> {
                     int value = randomItemDrops.getValue() + 1;
-                    if (value > 2) value = 0;
+                    if (value > 3) value = 0;
                     GameruleServerboundPacket.setRandomItemDrops(value);
                 },
                 () -> {
                     int value = randomItemDrops.getValue() - 1;
-                    if (value < 0) value = 2;
+                    if (value < 0) value = 3;
                     GameruleServerboundPacket.setRandomItemDrops(value);
                 },
                 List.of(
@@ -283,7 +283,8 @@ public class GameruleClient {
                         fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point1")),
                         fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point2")),
                         fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point3")),
-                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point4"))
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point4")),
+                        fcs(I18n.get("commands.reignofnether.gamerule.random_item_drops.point5"))
                 )
         ));
 

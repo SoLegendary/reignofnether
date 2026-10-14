@@ -168,10 +168,6 @@ public interface HeroUnit extends Unit {
     default void setChargesFromSaveData(int charges) { }
 
     default void setStatsForLevel() {
-        setStatsForLevel(false);
-    }
-
-    default void setStatsForLevel(boolean heal) {
         AttributeInstance aiMaxHealth = ((LivingEntity) this).getAttribute(Attributes.MAX_HEALTH);
         if (aiMaxHealth != null)
             aiMaxHealth.setBaseValue(getBaseHealth() + ((getHeroLevel() - 1) * getHealthBonusPerLevel()));
@@ -179,8 +175,6 @@ public interface HeroUnit extends Unit {
         if (aiAttackDamage != null)
             aiAttackDamage.setBaseValue(getBaseAttack() + ((getHeroLevel() - 1) * getAttackBonusPerLevel()));
         this.setMaxMana(getBaseMaxMana() + ((getHeroLevel() - 1) * getManaBonusPerLevel()));
-        if (heal)
-            ((LivingEntity) this).setHealth(((LivingEntity) this).getMaxHealth());
     }
 
     default void addExperience(int amount) {
