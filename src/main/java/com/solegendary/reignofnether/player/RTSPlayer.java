@@ -63,6 +63,13 @@ public class RTSPlayer {
         initTradeRates();
         if (itemSeed >= 0)
             this.itemDropQueue = ItemUtil.getRandomItemDropsList(itemSeed, raritySeed);
+
+        System.out.println("");
+        System.out.println("Player: " + playerName);
+        System.out.println("----------------------");
+        for (UnitItem unitItem : this.itemDropQueue) {
+            System.out.println(unitItem.rarity.name() + " | " + unitItem.getName().getString());
+        }
     }
 
     public static RTSPlayer getNewBot(String name, Faction faction) {
@@ -113,6 +120,13 @@ public class RTSPlayer {
         this.itemDropQueue = ItemUtil.getRandomItemDropsList(itemSeed, raritySeed);
         for (int i = 0; i < itemsDropped; i++)
             this.itemDropQueue.pollFirst();
+
+        System.out.println("");
+        System.out.println("Player: " + name);
+        System.out.println("----------------------");
+        for (UnitItem unitItem : this.itemDropQueue) {
+            System.out.println(unitItem.rarity.name() + " | " + unitItem.getName().getString());
+        }
     }
 
     private void initTradeRates() {

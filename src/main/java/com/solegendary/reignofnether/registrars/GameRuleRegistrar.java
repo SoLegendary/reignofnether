@@ -127,13 +127,13 @@ public class GameRuleRegistrar {
         );
         // Difference in level that animals can spawn around capitols at
         RANDOM_ITEM_DROPS = GameRules.register("randomItemDrops", GameRules.Category.DROPS,
-                boundedInt(1, 0, 2)
+                boundedInt(1, 0, 3)
         );
     }
 
     private static GameRules.Type<GameRules.IntegerValue> boundedInt(int def, int min, int max) {
         return GameRules.IntegerValue.create(def, (server, value) -> {
-            int clamped = Mth.clamp(value.get(), 0, 2);
+            int clamped = Mth.clamp(value.get(), min, max);
             if (clamped != value.get())
                 value.set(clamped, server); // only re-set if different, avoids infinite recursion
         });
