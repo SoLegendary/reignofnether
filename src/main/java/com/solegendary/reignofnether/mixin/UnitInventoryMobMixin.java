@@ -433,8 +433,7 @@ public abstract class UnitInventoryMobMixin extends LivingEntity implements Unit
             if (instance != null) {
                 Set<Attribute> NON_STACKABLE_ATTRIBUTES = Set.of(
                         Attributes.MOVEMENT_SPEED,
-                        AttributeRegistrar.EVASION_CHANCE.get(),
-                        Attributes.ARMOR
+                        AttributeRegistrar.EVASION_CHANCE.get()
                 );
                 boolean isNonStackable = NON_STACKABLE_ATTRIBUTES.contains(attr);
                 boolean hasExistingMod = false;
