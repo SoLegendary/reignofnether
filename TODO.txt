@@ -1,5 +1,5 @@
 
-1.20.1-1.5.0
+1.20.1-1.5.0b
 
 [✔] Done and tested
 [🟡] Partially done and/or needs testing
@@ -27,32 +27,46 @@ Balance
     - Block animations with block displays for royal guard slam
         - And make slam single click like war stomp
 
-[✔] Cost of Item Backpacks raised from (75 wood, 75 ore) to (100 wood, 100 ore)
-[✔] Health potion healing raised from 50 to 60
-[✔] Heros' armour healing raised from 10 to 12
-[✔] Health and mana potion cooldown reduced from 10s to 5s
+[🟡] Changed the /gamerule randomItemDrops options:
+    0 - disabled (except items given to units by mapmakers)
+    1 - enabled, players get completely different drops
+    2 - enabled, players get the same rarity of drops (NEW DEFAULT)
+    3 - enabled, players get the exact same drops
+
+[🟡] A particular rarity of item is guaranteed for each item dropped if mode 2 or 3 is set:
+    - 1st drop: common
+    - 3rd drop: uncommon
+    - 5th drop: rare
+    - 7th drop: epic
+    - All other drops are: 40% common, 30% uncommon, 20% rare, 10% epic
+    - There are never any repeated items (if somehow you got all 40 items in one match, no more items will drop)
+
+[✔] Regeneration now works on undead mobs
+[✔] Iron hide amulets are no longer sold at the market
+[✔] Boots of swiftness are now uncommon
+
 
 Quality of Life
 ---------------
 [❌] Create a new homing projectile entity from the ground up
-[❌] Allow custom buildings to grant population
 [❌] Villager profession bonuses as passive icons
-[❌] Set camera hotkeys with (jump with Fnums, save with ctrl+Fnums)
 [❌] /rtsapi-set-scenario-role
     - "only works before game start and role is empty, not for in game"
 
-[✔] Added a population supply setting to custom buildings
 
 Bugfixes
 --------
-[❌] Bridges don't work on snow/ice?
-    - Test on villagers campaign #3
+[✔] Fixed bridges being unable to be built on some maps
 
-[✔] Fixed broken drowned tooltips
-[✔] Items with passive non-attribute effects no longer work on regular units
-[✔] Fixed throwable TNT being too weak
-[✔] Buildings with spawn eggs and hero items in chests now have those items removed on placement
-    - So that they can't be looted by FPV players or when damaged/destroyed
+[✔] Panda splash damage is now always 50% of its attack damage instead of being hardcoded at 4
+[✔] Explosive hits now use the RoN attack damage attribute instead of the vanilla one
+[🟡] Enderpearls now correctly drop in stacks of 3 instead of 1
+[✔] Fixed Totem of Shielding not working against arrows or tridents
+[✔] Beenest armour now correctly records overflow damage
+[✔] Using ground-targeted items on buildings no longer selects the building
+[✔] Heroes revived with items that grant max health and mana now have their health and mana fully restored
+[✔] Fixed mob effects sometimes appearing clientside incorrectly
+[❌] In combat, consumables don't work (only with latency?)
 
 Languages
 ---------

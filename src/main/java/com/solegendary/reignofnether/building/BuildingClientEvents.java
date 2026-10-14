@@ -19,6 +19,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -670,9 +671,8 @@ public class BuildingClientEvents {
                     if (Keybindings.shiftMod.isDown() && !deselected
                         && getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED) {
                         addSelectedBuilding(preSelBuilding);
-                    } else if (!deselected && UnitClientEvents.getPreselectedUnits().size()
-                        == 0) { // select a single building - this should be the only code path that allows you to
-                        // select a non-owned building
+                    } else if (!deselected && UnitClientEvents.getPreselectedUnits().size() == 0 && !ItemClientEvents.hasLeftClickAction()) {
+                        // select a single building - this should be the only code path that allows you to select a non-owned building
                         clearSelectedBuildings();
                         addSelectedBuilding(preSelBuilding);
                     }

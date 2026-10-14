@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.guiscreen.TopdownGuiServerboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.TextInputClientEvents;
+import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
@@ -44,10 +45,12 @@ import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Matrix4f;
+import org.joml.Vector3d;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.DoubleBuffer;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -121,6 +124,14 @@ public class OrthoviewClientEvents {
     public static double orthoviewPlayerBaseY = 100;
     public static double orthoviewPlayerMaxY = 160;
     private static double minOrthoviewY = 0;
+
+    private static final List<Keybinding> CAMERA_KEYBINDS = List.of(
+            Keybindings.getFnum(4),
+            Keybindings.getFnum(5),
+            Keybindings.getFnum(6),
+            Keybindings.getFnum(7)
+    );
+    private static final HashMap<Keybinding, Vec3> cameraHotkeys = new HashMap<>();
 
     public static void setMinOrthoviewY(double value) {
         minOrthoviewY = value;
@@ -461,12 +472,25 @@ public class OrthoviewClientEvents {
     public static void onInput(InputEvent.Key evt) {
         // Prevent repeated key actions
         if (evt.getAction() == GLFW.GLFW_PRESS) {
-
             if (evt.getKey() == Keybindings.getFnum(12).getKey()) {
                 tryToToggleEnable();
-            }
-            else if (evt.getKey() == Keybindings.reset.getKey()) {
+            } else if (evt.getKey() == Keybindings.reset.getKey()) {
                 reset();
+            }
+            int i = 1;
+            for (Keybinding keybind : CAMERA_KEYBINDS) {
+                if (enabled && MC.player != null && evt.getKey() == keybind.getKey()) {
+                    if (Keybindings.shiftMod.isDown()) {
+                        cameraHotkeys.put(keybind, MC.player.position());
+                        BlockPos bp = MC.player.blockPosition();
+                        String bpStr = "(" + bp.getX() + ", " + + bp.getY() + ", " + + bp.getZ() + ")";
+                        HudClientEvents.showTempMessageI18n(I18n.get("hud.reignofnether.camera_hotkey_set", i, bpStr));
+                    } else if (cameraHotkeys.containsKey(keybind)) {
+                        Vec3 vec3 = cameraHotkeys.get(keybind);
+                        PlayerServerboundPacket.teleportPlayer(vec3.x, vec3.y, vec3.z);
+                    }
+                }
+                i += 1;
             }
         }
     }

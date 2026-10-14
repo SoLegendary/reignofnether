@@ -226,10 +226,12 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         if (entity instanceof Unit unit) {
             for (Button passiveIcon : unit.getPassiveIcons()) {
                 int yr = unit instanceof HeroUnit ? y - 18 : y - 16;
-                passiveIcon.render(guiGraphics, x - 2, yr, mouseX, mouseY);
-                if (passiveIcon.isMouseOver(mouseX, mouseY))
-                    passiveIcon.renderTooltip(guiGraphics, mouseX, mouseY);
-                x += EnchantmentIcon.ICON_SIZE * 2;
+                if (!passiveIcon.isHidden.get()) {
+                    passiveIcon.render(guiGraphics, x - 2, yr, mouseX, mouseY);
+                    if (passiveIcon.isMouseOver(mouseX, mouseY))
+                        passiveIcon.renderTooltip(guiGraphics, mouseX, mouseY);
+                    x += EnchantmentIcon.ICON_SIZE * 2;
+                }
             }
             if (!unit.getPassiveIcons().isEmpty())
                 x += EnchantmentIcon.ICON_SIZE / 2;

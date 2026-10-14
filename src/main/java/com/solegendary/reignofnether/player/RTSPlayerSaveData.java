@@ -78,11 +78,12 @@ public class RTSPlayerSaveData extends SavedData {
                 int creepScore = ptag.contains("creepScore") ? ptag.getInt("creepScore") : 0;
                 int itemsDropped = ptag.contains("itemsDropped") ? ptag.getInt("itemsDropped") : 0;
                 Long itemSeed = ptag.contains("itemSeed") ? ptag.getLong("itemSeed") : new Random().nextLong();
+                Long raritySeed = ptag.contains("raritySeed") ? ptag.getLong("raritySeed") : new Random().nextLong();
 
                 data.rtsPlayers.add(RTSPlayer.getFromSave(
                         name, id, ticksWithoutCapitol, faction,
                         beaconOwnerTicks, scores, scenarioRoleIndex,
-                        tradeRates, creepScore, itemsDropped, itemSeed
+                        tradeRates, creepScore, itemsDropped, itemSeed, raritySeed
                 ));
 
                 ReignOfNether.LOGGER.info("RTSPlayerSaveData.load: " + name + "|" + id + "|" + faction);
@@ -114,6 +115,7 @@ public class RTSPlayerSaveData extends SavedData {
             cTag.putInt("creepScore", p.creepScore);
             cTag.putInt("itemsDropped", p.itemsDropped);
             cTag.putLong("itemSeed", p.itemSeed);
+            cTag.putLong("raritySeed", p.raritySeed);
             list.add(cTag);
 
             //ReignOfNether.LOGGER.info("RTSPlayerSaveData.save: " + p.name + "|" + p.id + "|" + p.faction);

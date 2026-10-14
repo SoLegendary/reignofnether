@@ -32,6 +32,7 @@ public class RTSPlayer {
     public int itemsDropped = 0;
     public int creepScore = 0; // value of neutral enemies killed, for credit towards item drops
     public Long itemSeed = 0L;
+    public Long raritySeed = 0L;
     public ArrayDeque<UnitItem> itemDropQueue = new ArrayDeque<>();
 
     public static RTSPlayer getNewScenarioPlayer(String playerName, Faction faction, int id, int scenarioRoleIndex) {
@@ -47,19 +48,28 @@ public class RTSPlayer {
         initTradeRates();
     }
 
-    public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id, int startPosColorId, boolean isDogPerson, Long itemSeed) {
-        return new RTSPlayer(playerName, faction, id, startPosColorId, isDogPerson, itemSeed);
+    public static RTSPlayer getNewPlayer(String playerName, Faction faction, int id, int startPosColorId, boolean isDogPerson, Long itemSeed, Long raritySeed) {
+        return new RTSPlayer(playerName, faction, id, startPosColorId, isDogPerson, itemSeed, raritySeed);
     }
 
-    private RTSPlayer(String playerName, Faction faction, int id, int startPosColorId, boolean isDogPerson, Long itemSeed) {
+    private RTSPlayer(String playerName, Faction faction, int id, int startPosColorId, boolean isDogPerson, Long itemSeed, Long raritySeed) {
         this.name = playerName;
         this.id = id;
         this.faction = faction;
         this.startPosColorId = startPosColorId;
         this.isDogPerson = isDogPerson;
+        this.itemSeed = itemSeed;
+        this.raritySeed = raritySeed;
         initTradeRates();
         if (itemSeed >= 0)
-            this.itemDropQueue = ItemUtil.getRandomItemDropsList(itemSeed);
+            this.itemDropQueue = ItemUtil.getRandomItemDropsList(itemSeed, raritySeed);
+
+        System.out.println("");
+        System.out.println("Player: " + playerName);
+        System.out.println("----------------------");
+        for (UnitItem unitItem : this.itemDropQueue) {
+            System.out.println(unitItem.rarity.name() + " | " + unitItem.getName().getString());
+        }
     }
 
     public static RTSPlayer getNewBot(String name, Faction faction) {
@@ -85,16 +95,16 @@ public class RTSPlayer {
 
     public static RTSPlayer getFromSave(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks,
                                         int[] scores, int scenarioRoleIndex, Map<TradeAction, Integer> tradeRates,
-                                        int creepScore, int itemsDropped, Long itemDropSeed) {
+                                        int creepScore, int itemsDropped, Long itemSeed, Long raritySeed) {
         return new RTSPlayer(
                 name, id, ticksWithoutCapitol, faction, beaconOwnerTicks, scores,
-                scenarioRoleIndex, tradeRates, creepScore, itemsDropped, itemDropSeed
+                scenarioRoleIndex, tradeRates, creepScore, itemsDropped, itemSeed, raritySeed
         );
     }
 
     private RTSPlayer(String name, int id, int ticksWithoutCapitol, Faction faction, int beaconOwnerTicks,
                       int[] scores, int scenarioRoleIndex, Map<TradeAction, Integer> tradeRates,
-                      int creepScore, int itemsDropped, Long itemSeed) {
+                      int creepScore, int itemsDropped, Long itemSeed, Long raritySeed) {
         this.name = name;
         this.id = id;
         this.ticksWithoutCapitol = ticksWithoutCapitol;
@@ -106,9 +116,17 @@ public class RTSPlayer {
         this.creepScore = creepScore;
         this.itemsDropped = itemsDropped;
         this.itemSeed = itemSeed;
-        this.itemDropQueue = ItemUtil.getRandomItemDropsList(itemSeed);
+        this.raritySeed = raritySeed;
+        this.itemDropQueue = ItemUtil.getRandomItemDropsList(itemSeed, raritySeed);
         for (int i = 0; i < itemsDropped; i++)
             this.itemDropQueue.pollFirst();
+
+        System.out.println("");
+        System.out.println("Player: " + name);
+        System.out.println("----------------------");
+        for (UnitItem unitItem : this.itemDropQueue) {
+            System.out.println(unitItem.rarity.name() + " | " + unitItem.getName().getString());
+        }
     }
 
     private void initTradeRates() {

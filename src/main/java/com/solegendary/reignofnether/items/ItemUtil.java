@@ -186,64 +186,85 @@ public class ItemUtil {
         }
     }
 
-    public static ArrayDeque<UnitItem> getRandomItemDropsList() {
-        return getRandomItemDropsList(new Random());
+    private static final Rarity[] FORCED_RARITIES = {
+            Rarity.COMMON, null, Rarity.UNCOMMON, null, Rarity.RARE, null, Rarity.EPIC
+    };
+
+    private static Rarity rollRarity(Random random) {
+        double r = random.nextDouble();
+        if (r < 0.40) return Rarity.COMMON;    // 40%
+        if (r < 0.70) return Rarity.UNCOMMON;  // 30%
+        if (r < 0.90) return Rarity.RARE;      // 20%
+        return Rarity.EPIC;                    // 10%
     }
 
-    public static ArrayDeque<UnitItem> getRandomItemDropsList(long seed) {
-        return getRandomItemDropsList(new Random(seed));
+    /**
+     * @param itemRandom   decides WHICH item of a given rarity drops
+     * @param rarityRandom decides the rarity of each drop slot; if null, no forced
+     *                     slots are used and rarities are rolled from itemRandom
+     */
+    private static ArrayDeque<UnitItem> getRandomItemDropsList(Random itemRandom, Random rarityRandom) {
+        // 1. Collect eligible, de-duplicated items (stable order) into per-rarity pools
+        Set<UnitItem> unique = new LinkedHashSet<>();
+        for (UnitItem item : UnitItems.ITEMS)
+            if (item != UnitItems.EMPTY && item.canRandomDrop)
+                unique.add(item);
+
+        Rarity[] rarities = Rarity.values();
+        Map<Rarity, List<UnitItem>> pools = new EnumMap<>(Rarity.class);
+        for (Rarity rarity : rarities)
+            pools.put(rarity, new ArrayList<>());
+        for (UnitItem item : unique)
+            pools.get(item.rarity).add(item);
+
+        // Shuffle each pool with itemRandom (fixed iteration order => deterministic per itemSeed)
+        for (Rarity rarity : rarities)
+            Collections.shuffle(pools.get(rarity), itemRandom);
+
+        // 2. Build the drop list slot by slot until every item has been used
+        boolean forced = rarityRandom != null;
+        Random raritySource = forced ? rarityRandom : itemRandom;
+
+        ArrayDeque<UnitItem> result = new ArrayDeque<>(unique.size());
+        int slot = 0;
+        while (result.size() < unique.size()) {
+            // Always roll exactly once per slot so the rarity sequence never
+            // depends on which items happened to be available.
+            Rarity wanted = rollRarity(raritySource);
+            if (forced && slot < FORCED_RARITIES.length && FORCED_RARITIES[slot] != null)
+                wanted = FORCED_RARITIES[slot];
+
+            List<UnitItem> pool = pools.get(wanted);
+            if (pool.isEmpty())
+                pool = nearestNonEmptyPool(pools, wanted, rarities);
+
+            // pool can't be null here: result.size() < unique.size() guarantees items remain
+            result.add(pool.remove(pool.size() - 1));
+            slot++;
+        }
+        return result;
     }
 
-    private static ArrayDeque<UnitItem> getRandomItemDropsList(Random random) {
-        // 1. Collect eligible, de-duplicated items
-        List<UnitItem> candidates = new ArrayList<>();
-        for (UnitItem item : UnitItems.ITEMS) {
-            if (item == UnitItems.EMPTY || !item.canRandomDrop || candidates.contains(item))
-                continue;
-            candidates.add(item);
-        }
-
-        // 2. Noisy sort by rarity
-        final double JITTER = 1.5;
-        Map<UnitItem, Double> sortKeys = new HashMap<>();
-        for (UnitItem item : candidates) {
-            sortKeys.put(item, item.rarity.ordinal() + random.nextDouble() * JITTER);
-        }
-        candidates.sort(Comparator.comparingDouble(sortKeys::get));
-
-        // 3. Force 1st = common, 3rd = uncommon
-        UnitItem firstCommon = null;
-        UnitItem firstUncommon = null;
-        for (UnitItem item : candidates) {
-            if (firstCommon == null && item.rarity == Rarity.COMMON)
-                firstCommon = item;
-            else if (firstUncommon == null && item.rarity == Rarity.UNCOMMON)
-                firstUncommon = item;
-            if (firstCommon != null && firstUncommon != null)
-                break;
-        }
-        if (firstUncommon != null) {
-            candidates.remove(firstUncommon);
-            candidates.add(Math.min(2, candidates.size()), firstUncommon);
-        }
-        if (firstCommon != null) {
-            candidates.remove(firstCommon);
-            candidates.add(0, firstCommon);
-        }
-
-        // 4. Force 5th = rare (earliest rare in the list, so overall ordering stays rough)
-        UnitItem firstRare = null;
-        for (UnitItem item : candidates) {
-            if (item.rarity == Rarity.RARE) {
-                firstRare = item;
-                break;
+    /** Fallback when the wanted rarity is used up: closest rarity (lower wins ties) that still has items. */
+    private static List<UnitItem> nearestNonEmptyPool(Map<Rarity, List<UnitItem>> pools, Rarity wanted, Rarity[] rarities) {
+        List<UnitItem> best = null;
+        int bestDist = Integer.MAX_VALUE;
+        for (Rarity rarity : rarities) {
+            List<UnitItem> pool = pools.get(rarity);
+            if (pool.isEmpty()) continue;
+            int dist = Math.abs(rarity.ordinal() - wanted.ordinal());
+            if (dist < bestDist) { // strict < keeps the lower rarity on ties
+                bestDist = dist;
+                best = pool;
             }
         }
-        if (firstRare != null) {
-            candidates.remove(firstRare);
-            candidates.add(Math.min(4, candidates.size()), firstRare);
-        }
+        return best;
+    }
 
-        return new ArrayDeque<>(candidates);
+    public static ArrayDeque<UnitItem> getRandomItemDropsList(long itemSeed, long raritySeed) {
+        return getRandomItemDropsList(
+                new Random(itemSeed),
+                raritySeed >= 0 ? new Random(raritySeed) : null
+        );
     }
 }

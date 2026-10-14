@@ -38,7 +38,7 @@ public class RtsDebugClientEvents {
     @SubscribeEvent
     public static void onInput(InputEvent.Key evt) {
         if (evt.getAction() == GLFW.GLFW_PRESS) {
-            if (evt.getKey() == Keybindings.getFnum(7).getKey()) {
+            if (!Keybindings.shiftMod.isDown() && evt.getKey() == Keybindings.getFnum(8).getKey()) {
                 if (displayMode == DebugDisplayMode.NONE)
                     displayMode = DebugDisplayMode.NO_PATHFINDING;
                 else if (displayMode == DebugDisplayMode.NO_PATHFINDING)

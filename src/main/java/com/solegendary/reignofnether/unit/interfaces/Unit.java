@@ -966,6 +966,7 @@ public interface Unit {
         synchronized (UnitClientEvents.mobEffectIcons) {
             HashMap<MobEffect, MobEffectIcon> mobEffects = UnitClientEvents.mobEffectIcons.get(entity.getId());
             if (mobEffects != null) {
+                mobEffects.entrySet().removeIf(e -> !entity.hasEffect(e.getKey()));
                 for (MobEffect effect : mobEffects.keySet()) {
                     if (mobEffects.get(effect) != null)
                         icons.add(mobEffects.get(effect));

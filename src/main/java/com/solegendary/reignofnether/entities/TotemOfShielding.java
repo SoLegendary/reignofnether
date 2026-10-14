@@ -26,27 +26,25 @@ public class TotemOfShielding extends AbstractTotem {
         Vec3 totemCentre = position().add(0, getBbHeight() / 2, 0);
 
         for (Projectile proj : MiscUtil.getEntitiesWithinRange(position(), AURA_RANGE, Projectile.class, level())) {
-            if (proj instanceof AbstractHurtingProjectile aproj) {
-                Vec3 motion = aproj.getDeltaMovement();
-                Vec3 horizDeltaMovement = new Vec3(motion.x, 0, motion.z);
+            Vec3 motion = proj.getDeltaMovement();
+            Vec3 horizDeltaMovement = new Vec3(motion.x, 0, motion.z);
 
-                // ignore arrows that are stuck in the ground or otherwise barely moving
-                if (horizDeltaMovement.length() <= 0.1) {
-                    continue;
-                }
-
-                // direction pointing from the totem's centre towards the arrow
-                Vec3 offset = aproj.position().subtract(totemCentre);
-                double dist = offset.length();
-                if (dist < 0.001) {
-                    continue;
-                }
-                Vec3 awayDir = offset.scale(1.0 / dist);
-
-                // stronger the closer the arrow is, fading to zero at the aura's edge
-                double falloff = Math.max(0, 1.0 - (dist / AURA_RANGE));
-                aproj.addDeltaMovement(awayDir.scale(MAX_REPEL_FORCE * falloff));
+            // ignore arrows that are stuck in the ground or otherwise barely moving
+            if (horizDeltaMovement.length() <= 0.1) {
+                continue;
             }
+
+            // direction pointing from the totem's centre towards the arrow
+            Vec3 offset = proj.position().subtract(totemCentre);
+            double dist = offset.length();
+            if (dist < 0.001) {
+                continue;
+            }
+            Vec3 awayDir = offset.scale(1.0 / dist);
+
+            // stronger the closer the arrow is, fading to zero at the aura's edge
+            double falloff = Math.max(0, 1.0 - (dist / AURA_RANGE));
+            proj.addDeltaMovement(awayDir.scale(MAX_REPEL_FORCE * falloff));
         }
     }
 }

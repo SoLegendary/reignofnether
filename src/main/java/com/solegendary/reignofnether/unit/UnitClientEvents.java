@@ -665,6 +665,9 @@ public class UnitClientEvents {
         //System.out.println("allUnits removed entity: " + entityId);
         MinimapClientEvents.removeVirtualUnit(entityId);
         markSelectedUnitsChanged();
+        synchronized (mobEffectIcons) {
+            mobEffectIcons.remove(entityId);
+        }
     }
     /**
      * Add and update entities from clientside action
