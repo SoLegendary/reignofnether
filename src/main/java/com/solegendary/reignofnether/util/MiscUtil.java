@@ -43,8 +43,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
@@ -57,7 +55,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -158,10 +155,8 @@ public class MiscUtil {
     // also used to move the camera Y pos up and down to prevent clipping inside of blocks
     public static boolean isGroundBlock(Level level, BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
-        if (isLogBlock(bs) || isLeafBlock(bs) || bs.isAir() ||
-                BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), bp))
-            return false;
-        return true;
+        return !isLogBlock(bs) && !isLeafBlock(bs) && !bs.isAir() &&
+                !BuildingUtils.isPosInsideAnyBuilding(level.isClientSide(), bp);
     }
 
     public static void addUnitCheckpoint(Unit unit, BlockPos blockPos, boolean green) {
@@ -336,8 +331,7 @@ public class MiscUtil {
     }
 
     public static LivingEntity findClosestAttackableEntity(Mob unitMob, float range, ServerLevel level) {
-        Vector3d unitPosition = new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z);
-        var pos = new Vec3(unitPosition.x, unitPosition.y, unitPosition.z);
+        Vec3 unitPosition = unitMob.position();
         boolean neutralAggro = unitMob.level().getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get();
         AABB aabb = new AABB(
                 unitPosition.x - range,
@@ -349,15 +343,7 @@ public class MiscUtil {
         );
         var entities = level.getEntitiesOfClass(LivingEntity.class, aabb);
         boolean isMelee = unitMob instanceof AttackerUnit aUnit && aUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal;
-        entities.sort(Comparator.comparingDouble(
-            e -> {
-                double dist = e.position().distanceTo(pos); // deprioritise over actual enemy units
-                boolean isMeleeAgainstFlyer = isMelee && e instanceof Unit unit && unit.isFlyingUnit();
-                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer || (e instanceof BeeUnit) || e.hasEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get()))
-                    dist += 100;
-                return dist;
-            }
-        ));
+        String ownerName = unitMob instanceof Unit unit ? unit.getOwnerName() : null;
 
         // Determine priority effect filter for specific unit types
         Predicate<LivingEntity> priorityFilter = null;
@@ -371,35 +357,53 @@ public class MiscUtil {
             priorityFilter = e -> !e.hasEffect(MobEffects.LEVITATION);
         }
 
-        Vec3 unitVec = new Vec3(unitPosition.x, unitPosition.y, unitPosition.z);
+        if (priorityFilter != null) {
+            LivingEntity priorityTarget = findClosestAttackableEntityInPass(
+                    unitMob, unitPosition, range, entities, neutralAggro, isMelee, ownerName, priorityFilter);
+            if (priorityTarget != null)
+                return priorityTarget;
+        }
+        return findClosestAttackableEntityInPass(
+                unitMob, unitPosition, range, entities, neutralAggro, isMelee, ownerName, null);
+    }
 
-        Predicate<LivingEntity> baseFilter = e ->
-                e.position().distanceTo(unitVec) <= range &&
-                e.level().getWorldBorder().isWithinBounds(e.blockPosition());
+    private static LivingEntity findClosestAttackableEntityInPass(
+            Mob unitMob, Vec3 unitPosition, float range, List<LivingEntity> entities,
+            boolean neutralAggro, boolean isMelee, String ownerName, Predicate<LivingEntity> priorityFilter) {
+        LivingEntity closest = null;
+        double closestScore = 0;
+        for (LivingEntity entity : entities) {
+            double distance = entity.position().distanceTo(unitPosition);
+            if (!(distance <= range) ||
+                    !entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()) ||
+                    (priorityFilter != null && !priorityFilter.test(entity)))
+                continue;
 
-        // Try priority pass first, then fall back to base filter
-        List<Predicate<LivingEntity>> passes = priorityFilter != null
-                ? List.of(baseFilter.and(priorityFilter), baseFilter)
-                : List.of(baseFilter);
+            boolean isMeleeAgainstFlyer = isMelee && entity instanceof Unit unit && unit.isFlyingUnit();
+            double score = distance;
+            if (entity instanceof PhantomSummon || (entity instanceof Unit unit && unit.isScout()) ||
+                    isMeleeAgainstFlyer || entity instanceof BeeUnit ||
+                    entity.hasEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get()))
+                score += 100;
 
-        for (Predicate<LivingEntity> filter : passes) {
-            for (LivingEntity entity : entities) {
-                if (filter.test(entity) &&
-                        isIdleOrMoveAttackable(unitMob, entity, neutralAggro) &&
-                        hasLineOfSightForAttacks(unitMob, entity) &&
-                        !(entity instanceof Unit unit && unit.isGarrisoned())) {
-                    return entity;
-                }
+            // List.sort is stable: for equal scores, retain the first entity from the level query.
+            if (closest != null && Double.compare(score, closestScore) >= 0)
+                continue;
+            if (isIdleOrMoveAttackable(unitMob, entity, neutralAggro, ownerName) &&
+                    hasLineOfSightForAttacks(unitMob, entity) &&
+                    !(entity instanceof Unit unit && unit.isGarrisoned())) {
+                closest = entity;
+                closestScore = score;
             }
         }
-        return null;
+        return closest;
     }
 
     // does not cover explicit attack commands
-    private static boolean isIdleOrMoveAttackable(Mob unitMob, LivingEntity targetEntity, boolean neutralAggro) {
+    private static boolean isIdleOrMoveAttackable(Mob unitMob, LivingEntity targetEntity, boolean neutralAggro, String ownerName) {
         Relationship rs = Relationship.NEUTRAL;
         if (unitMob instanceof Unit) {
-            rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, targetEntity);
+            rs = UnitServerEvents.getOwnerToEntityRelationship(ownerName, targetEntity);
 
             // don't aggro against blood moon enemies as a ghast so that buildings don't get friendly fired
             if (targetEntity instanceof Unit targetUnit &&
@@ -491,7 +495,7 @@ public class MiscUtil {
 
     private static boolean hasLineOfSightForAttacks(Mob mob, LivingEntity targetEntity) {
         return mob.hasLineOfSight(targetEntity) || mob instanceof GhastUnit ||
-                (mob instanceof Unit unit && GarrisonableBuildingAddon.getGarrison((Unit) mob) != null);
+                (mob instanceof Unit && GarrisonableBuildingAddon.getGarrison((Unit) mob) != null);
     }
 
     public static <T extends Entity> List<T> getEntitiesWithinRange(Vec3 pos, float range, Class<T> entityType, Level level) {
@@ -512,10 +516,10 @@ public class MiscUtil {
             List<T> entities = level.getEntitiesOfClass(entityType, aabb);
             List<T> entitiesInRange = new ArrayList<>();
 
-            for (Entity entity : entities)
+            for (T entity : entities)
                 if (entity.position().distanceTo(new Vec3(pos.x, pos.y, pos.z)) <= range &&
                         entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()))
-                    entitiesInRange.add((T) entity);
+                    entitiesInRange.add(entity);
 
             return entitiesInRange;
         } else
@@ -527,9 +531,9 @@ public class MiscUtil {
             List<T> entities = level.getEntitiesOfClass(entityType, aabb);
             List<T> entitiesInRange = new ArrayList<>();
 
-            for (Entity entity : entities)
+            for (T entity : entities)
                 if (entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()))
-                    entitiesInRange.add((T) entity);
+                    entitiesInRange.add(entity);
 
             return entitiesInRange;
         } else

@@ -25,7 +25,6 @@ import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -50,7 +49,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -58,8 +56,6 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -189,7 +185,7 @@ public class UnitServerEvents {
         data.heroUnits.addAll(HeroServerEvents.fallenHeroes);
         data.save();
         level.getDataStorage().save();
-        ReignOfNether.LOGGER.info("Saved " + getAllUnits().size() + " fallen hero units");
+        ReignOfNether.LOGGER.info("Saved {} fallen hero units", getAllUnits().size());
     }
 
     public static void saveGatherTargets(ServerLevel level) {
@@ -222,12 +218,12 @@ public class UnitServerEvents {
         if (level != null) {
             HeroUnitSaveData heroData = HeroUnitSaveData.getInstance(level);
             HeroServerEvents.fallenHeroes.addAll(heroData.heroUnits);
-            ReignOfNether.LOGGER.info("Loaded " + heroData.heroUnits.size() + " hero units in serverevents");
+            ReignOfNether.LOGGER.info("Loaded {} hero units in serverevents", heroData.heroUnits.size());
 
             synchronized (savedTargetResources) {
                 TargetResourcesSaveData data = TargetResourcesSaveData.getInstance(level);
                 savedTargetResources.addAll(data.targetData); // actually assign the data in TickEvent as entities don't exist here yet
-                ReignOfNether.LOGGER.info("Loaded " + data.targetData.size() + " gatherTargets in serverevents");
+                ReignOfNether.LOGGER.info("Loaded {} gatherTargets in serverevents", data.targetData.size());
             }
         }
     }
@@ -256,7 +252,7 @@ public class UnitServerEvents {
                     newIds.add(newEntity.getId());
             }
         }
-        if (oldIds.size() == newIds.size() && oldIds.size() > 0) {
+        if (oldIds.size() == newIds.size() && !oldIds.isEmpty()) {
             UnitConvertClientboundPacket.syncConvertedUnits(ownerName, oldIds, newIds);
         }
     }
@@ -346,8 +342,11 @@ public class UnitServerEvents {
     }
 
     public static Relationship getUnitToEntityRelationship(Unit unit, Entity entity) {
-        String ownerName1 = unit.getOwnerName();
-        String ownerName2 = "";
+        return getOwnerToEntityRelationship(unit.getOwnerName(), entity);
+    }
+
+    public static Relationship getOwnerToEntityRelationship(String ownerName1, Entity entity) {
+        String ownerName2;
 
         if (entity instanceof ItemEntity item && item.getOwner() instanceof Unit unitItemOwner) {
             ownerName2 = unitItemOwner.getOwnerName();
@@ -419,7 +418,7 @@ public class UnitServerEvents {
                         if (sr.unitUUID.equals(entity.getStringUUID())) {
                             wUnit.getGatherResourceGoal().saveData = sr;
                             wUnit.getGatherResourceGoal().loadState();
-                            ReignOfNether.LOGGER.info("loaded gatherTarget in serverevents: " + sr.gatherTarget);
+                            ReignOfNether.LOGGER.info("loaded gatherTarget in serverevents: {}", sr.gatherTarget);
                             return true;
                         }
                         return false;
