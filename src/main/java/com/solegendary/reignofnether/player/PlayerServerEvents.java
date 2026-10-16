@@ -286,7 +286,7 @@ public class PlayerServerEvents {
                 HeroClientboundPacket.setSkillPoints(entity.getId(), hero.getSkillPoints());
                 HeroClientboundPacket.setCharges(entity.getId(), hero.getChargesForSaveData());
                 List<HeroAbility> abls = hero.getHeroAbilities();
-                if (abls.size() > 0)
+                if (!abls.isEmpty())
                     HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(0).getRank(hero), 0);
                 if (abls.size() > 1)
                     HeroClientboundPacket.setAbilityRank(entity.getId(), abls.get(1).getRank(hero), 1);
@@ -321,8 +321,9 @@ public class PlayerServerEvents {
          */
         if (rtsSyncingEnabled) {
             MinecraftServer server = evt.getEntity().level().getServer();
-            if (server == null || !server.isDedicatedServer()) {
-                CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(PlayerServerEvents::syncUnits);
+            if (server != null && !server.isDedicatedServer()) {
+                CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS)
+                        .execute(() -> server.execute(PlayerServerEvents::syncUnits));
             } else {
                 syncUnits();
             }
@@ -359,7 +360,7 @@ public class PlayerServerEvents {
                 serverPlayer.sendSystemMessage(Component.literal(""));
                 serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.op_commands"));
                 serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.fog"));
-                serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.lock"));;
+                serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.lock"));
                 serverPlayer.sendSystemMessage(Component.translatable("tutorial.reignofnether.reset"));
                 serverPlayer.sendSystemMessage(Component.literal(""));
             }
@@ -536,7 +537,7 @@ public class PlayerServerEvents {
             ResourcesServerEvents.resetResources(playerName, readiedStart);
 
             if (readiedStart) {
-                Building building = ReignOfNetherRegistries.BUILDING.get(faction.capitolBuilding);;
+                Building building = ReignOfNetherRegistries.BUILDING.get(faction.capitolBuilding);
                 ArrayList<BuildingBlock> blocks;
                 if (building != null) {
                     blocks = building.getRelativeBlockData(level);
@@ -739,7 +740,7 @@ public class PlayerServerEvents {
 
             if (words.length == 1 && words[0].equalsIgnoreCase("elitetaurenchieftain")) {
                 for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
-                    if (entity instanceof HeroUnit heroUnit && ((Unit) heroUnit).getOwnerName().equals(playerName)) {
+                    if (entity instanceof HeroUnit heroUnit && heroUnit.getOwnerName().equals(playerName)) {
                         heroUnit.addExperience(10000);
                         heroUnit.setSkillPoints(10);
                         heroUnit.setMana(heroUnit.getMaxMana());
@@ -1227,7 +1228,7 @@ public class PlayerServerEvents {
             rtsPlayers.clear();
             FogOfWarServerEvents.invalidateRtsCache();
 
-            for (LivingEntity entity : UnitServerEvents.getAllUnits())
+            for (LivingEntity entity : new ArrayList<>(UnitServerEvents.getAllUnits()))
                 if (hardReset || (entity instanceof Unit unit && !Unit.hasAnchor(unit) && !isSandboxOrScenario))
                     entity.kill();
 

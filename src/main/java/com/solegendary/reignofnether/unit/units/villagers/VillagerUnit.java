@@ -6,8 +6,6 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.CallToArmsUnit;
-import com.solegendary.reignofnether.building.BuildingPlaceButton;
-import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClientEvents;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.TooltipColours;
@@ -109,7 +107,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public BlockPos getAnchor() { return anchorPos; }
 
     private final ArrayList<Checkpoint> checkpoints = new ArrayList<>();
-    public ArrayList<Checkpoint> getCheckpoints() { return checkpoints; };
+    public ArrayList<Checkpoint> getCheckpoints() { return checkpoints; }
 
     GarrisonGoal garrisonGoal;
     public GarrisonGoal getGarrisonGoal() { return garrisonGoal; }
@@ -390,6 +388,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                     EnchantmentHelper.setEnchantments(new HashMap<>(), getMainHandItem());
                 }
 
+                if (level().isClientSide) return;
                 boolean inRangeOfBellHolder = false;
                 for (LivingEntity le : UnitServerEvents.getAllUnits()) {
                     if (le instanceof UnitInventory inv && inv.isHoldingActive(UnitItems.BELL_OF_ARMS)) {
