@@ -148,6 +148,8 @@ dependencies {
 
     minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+
+    runtimeOnly fg.deobf('curse.maven:accelerated-rendering-1314021:8448250')
 }
 
 mixin {

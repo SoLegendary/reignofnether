@@ -341,9 +341,15 @@ public class MiscUtil {
                 unitPosition.y + range,
                 unitPosition.z + range
         );
-        var entities = level.getEntitiesOfClass(LivingEntity.class, aabb);
-        boolean isMelee = unitMob instanceof AttackerUnit aUnit && aUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal;
         String ownerName = unitMob instanceof Unit unit ? unit.getOwnerName() : null;
+        var entities = level.getEntitiesOfClass(
+                LivingEntity.class,
+                aabb,
+                (entity) -> isIdleOrMoveAttackable(unitMob, entity, neutralAggro, ownerName) &&
+                        hasLineOfSightForAttacks(unitMob, entity) &&
+                        !(entity instanceof Unit unit && unit.isGarrisoned())
+        );
+        boolean isMelee = unitMob instanceof AttackerUnit aUnit && aUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal;
 
         // Determine priority effect filter for specific unit types
         Predicate<LivingEntity> priorityFilter = null;
@@ -359,17 +365,21 @@ public class MiscUtil {
 
         if (priorityFilter != null) {
             LivingEntity priorityTarget = findClosestAttackableEntityInPass(
-                    unitMob, unitPosition, range, entities, neutralAggro, isMelee, ownerName, priorityFilter);
+                    unitPosition, range, entities, isMelee, priorityFilter);
             if (priorityTarget != null)
                 return priorityTarget;
         }
         return findClosestAttackableEntityInPass(
-                unitMob, unitPosition, range, entities, neutralAggro, isMelee, ownerName, null);
+                unitPosition, range, entities, isMelee, null);
     }
 
     private static LivingEntity findClosestAttackableEntityInPass(
-            Mob unitMob, Vec3 unitPosition, float range, List<LivingEntity> entities,
-            boolean neutralAggro, boolean isMelee, String ownerName, Predicate<LivingEntity> priorityFilter) {
+            Vec3 unitPosition,
+            float range,
+            List<LivingEntity> entities,
+            boolean isMelee,
+            Predicate<LivingEntity> priorityFilter
+    ) {
         LivingEntity closest = null;
         double closestScore = 0;
         for (LivingEntity entity : entities) {
@@ -389,15 +399,14 @@ public class MiscUtil {
             // List.sort is stable: for equal scores, retain the first entity from the level query.
             if (closest != null && Double.compare(score, closestScore) >= 0)
                 continue;
-            if (isIdleOrMoveAttackable(unitMob, entity, neutralAggro, ownerName) &&
-                    hasLineOfSightForAttacks(unitMob, entity) &&
-                    !(entity instanceof Unit unit && unit.isGarrisoned())) {
-                closest = entity;
-                closestScore = score;
-            }
+
+            closest = entity;
+            closestScore = score;
         }
         return closest;
     }
+
+    private record AttackCandidate(LivingEntity entity, double score) {}
 
     // does not cover explicit attack commands
     private static boolean isIdleOrMoveAttackable(Mob unitMob, LivingEntity targetEntity, boolean neutralAggro, String ownerName) {
