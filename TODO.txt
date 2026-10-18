@@ -42,7 +42,7 @@ Bugfixes
 [❌] High resistance amps aren't capped at 80%?
 
 [🟡] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
-[🟡] Fixed mob effects not showing if it was applied while outside of render range
+[🟡] Fixed mob effects not showing if it was applied while outside of render range or logged out
 
 Languages
 ---------

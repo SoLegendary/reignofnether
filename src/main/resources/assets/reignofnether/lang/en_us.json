@@ -604,7 +604,7 @@
     "abilities.reignofnether.march_of_progress.already_active": "March of Progress is already active",
     "abilities.reignofnether.march_of_progress.stats": "\uE004  %ds   \uE005  %d   \uE008  %d   per   second",
     "abilities.reignofnether.march_of_progress.tooltip1": "Toggle an aura that doubles the effect of all enchantments.",
-    "abilities.reignofnether.march_of_progress.effect": "Also adds +50%% of the enchanter's damage to tethered allies.",
+    "abilities.reignofnether.march_of_progress.tether_effect": "Also adds +50%% of the enchanter's damage to tethered allies.",
     "abilities.reignofnether.march_of_progress.tooltip2": "The aura drains %d mana per second while active.",
 
     "abilities.reignofnether.can_be_toggled": "Can be toggled on or off",

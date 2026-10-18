@@ -80,8 +80,8 @@ public class MarchOfProgress extends HeroAbility {
                 fcsIcons(I18n.get("abilities.reignofnether.march_of_progress.stats", CD_MAX / 20, radius, MANA_COST_PER_SECOND)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.march_of_progress.tooltip1")),
-                fcs(I18n.get("abilities.reignofnether.march_of_progress.tooltip2")),
-                fcs(I18n.get("abilities.reignofnether.march_of_progress.tooltip3", MANA_COST_PER_SECOND))
+                fcs(I18n.get("abilities.reignofnether.march_of_progress.tether_effect")),
+                fcs(I18n.get("abilities.reignofnether.march_of_progress.tooltip2", MANA_COST_PER_SECOND))
         );
     }
 
