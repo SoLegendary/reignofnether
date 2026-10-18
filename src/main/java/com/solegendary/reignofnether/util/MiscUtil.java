@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.BloodMoon;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.blocks.WraithSnowLayerBlock;
 import com.solegendary.reignofnether.building.*;
@@ -1043,5 +1044,12 @@ public class MiscUtil {
                 ? String.valueOf((int) value)
                 : String.valueOf(value);
         return (value >= 0 ? "+" : "") + num;
+    }
+
+    public static boolean isAlliedOrOwned(Level level, String owner1, String owner2) {
+        if (level.isClientSide())
+            return AlliancesClient.isAlliedOrOwned(owner1, owner2);
+        else
+            return AlliancesServerEvents.isAlliedOrOwned(owner1, owner2);
     }
 }

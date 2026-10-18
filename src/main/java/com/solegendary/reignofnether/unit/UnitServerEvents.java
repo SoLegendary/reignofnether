@@ -400,6 +400,7 @@ public class UnitServerEvents {
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.STICKY_HONEY, 1.0f);
+            mob.setPathfindingMalus(BlockPathTypes.STICKY_HONEY, 1.0f);
         }
 
         // for some reason some units need to be nudged a little on spawn or they can't move
@@ -1105,6 +1106,10 @@ public class UnitServerEvents {
                 }
             }
         }
+
+        if (evt.getEntity().hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
+            evt.setAmount(evt.getAmount() / 2);
+        }
     }
 
     private static final float EXPLOSIVE_HIT_SPLASH_MULT = 0.5f;
@@ -1204,6 +1209,12 @@ public class UnitServerEvents {
         }
         if (!evt.getEntity().level().isClientSide())
             UnitSyncMobEffectsClientboundPacket.removeEffectClientside(evt.getEntity(), evt.getEffectInstance().getEffect());
+
+        if (evt.getEffectInstance().getEffect() == MobEffectRegistrar.ENCHANTED_TETHER.get()) {
+            AttributeInstance inst = evt.getEntity().getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+            if (inst != null)
+                inst.removeModifier(MobEffectRegistrar.ENCHANTED_TETHER_UUID);
+        }
     }
 
     @SubscribeEvent

@@ -58,7 +58,7 @@ public class NetherBlocks {
     public static boolean isNetherBlock(Level level, BlockPos bp) {
         BlockState bs = level.getBlockState(bp);
 
-        if (bs.getBlock() == Blocks.OBSIDIAN)
+        if (bs.getBlock() == Blocks.OBSIDIAN || bs.getBlock() == BlockRegistrar.TEMPORARY_WALKABLE_MAGMA_BLOCK.get())
             return true;
 
         if (bs.getBlock().getName().getContents() instanceof TranslatableContents contents &&
@@ -96,6 +96,8 @@ public class NetherBlocks {
                         return Blocks.DIRT.defaultBlockState();
                     else if (entrySet.getKey().getName().getString().equals(netherBs.getBlock().getName().getString()))
                         return entrySet.getValue().get(0).defaultBlockState();
+                    else if (netherBs.getBlock() == BlockRegistrar.TEMPORARY_WALKABLE_MAGMA_BLOCK.get())
+                        return Blocks.COBBLESTONE.defaultBlockState();
                 }
             }
         } catch (NullPointerException e) {
@@ -174,9 +176,6 @@ public class NetherBlocks {
                 List.of(Blocks.COBBLESTONE)
         );
         MAPPINGS.put(BlockRegistrar.WALKABLE_MAGMA_BLOCK.get(),
-                List.of(Blocks.COBBLESTONE)
-        );
-        MAPPINGS.put(BlockRegistrar.TEMPORARY_WALKABLE_MAGMA_BLOCK.get(),
                 List.of(Blocks.COBBLESTONE)
         );
         MAPPINGS.put(Blocks.SHROOMLIGHT,

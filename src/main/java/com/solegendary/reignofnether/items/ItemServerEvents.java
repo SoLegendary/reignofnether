@@ -30,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -244,6 +245,14 @@ public class ItemServerEvents {
                 player.sendSystemMessage(Component.translatable("item.reignofnether.error.failed_other", mobName));
                 evt.setCancellationResult(InteractionResult.FAIL);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoin(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof ItemEntity item
+                && ItemUtil.isUnitItem(item.getItem())) {
+            item.setInvulnerable(true);
         }
     }
 }

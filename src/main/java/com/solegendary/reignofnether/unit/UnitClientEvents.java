@@ -691,6 +691,7 @@ public class UnitClientEvents {
             unit.setupEquipmentAndUpgradesClient();
 
             UnitSyncServerboundPacket.requestSyncAbilities(entity.getId());
+            UnitSyncServerboundPacket.requestSyncMobEffects(entity.getId());
 
             if (entity instanceof HeroUnit)
                 HeroServerboundPacket.requestHeroSync(entity.getId());

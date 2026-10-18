@@ -122,7 +122,7 @@ public class BatUnit extends Mob implements Unit {
 
     // endregion
 
-    final static public float maxHealth = 15.0f;
+    final static public float maxHealth = 10.0f;
     final static public float armorValue = 0.0f;
     final static public float movementSpeed = 0.28f;
 

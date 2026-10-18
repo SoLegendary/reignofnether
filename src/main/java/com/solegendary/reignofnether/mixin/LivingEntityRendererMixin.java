@@ -5,24 +5,21 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.EntityEaser;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> {
@@ -77,6 +74,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
         model.renderToBuffer(poseStack, buffer, packedLight, packedOverlay, red, green, blue, finalAlpha);
     }
 
+    private static final EntityEaser ENTITY_SCALER = new EntityEaser(20f, EntityEaser.EASE_IN_OUT);
 
     @Inject(
             method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
@@ -86,11 +84,11 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
                     shift = At.Shift.AFTER)
     )
     private void ron$applyScale(T entity, float entityYaw, float partialTicks,
-                               PoseStack poseStack, MultiBufferSource buffer, int packedLight,
-                               CallbackInfo ci) {
-        if (entity instanceof Unit unit) {
-            float scale = unit.getScaleAttribute();
-            poseStack.scale(scale, scale, scale);
-        }
+                                PoseStack poseStack, MultiBufferSource buffer, int packedLight,
+                                CallbackInfo ci) {
+        if (!(entity instanceof Unit unit)) return;
+
+        float scale = ENTITY_SCALER.get(entity, unit.getScaleAttribute(), partialTicks);
+        poseStack.scale(scale, scale, scale);
     }
 }

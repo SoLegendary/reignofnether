@@ -256,6 +256,10 @@ public class SoundRegistrar {
             SOUND_EVENTS.register("potion_pop", () ->
                     SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "potion_pop")));
 
+    public static final RegistryObject<SoundEvent> ENCHANTERS_TOME =
+            SOUND_EVENTS.register("enchanters_tome", () ->
+                    SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "enchanters_tome")));
+
     public static void init(FMLJavaModLoadingContext context) {
         SOUND_EVENTS.register(context.getModEventBus());
     }
