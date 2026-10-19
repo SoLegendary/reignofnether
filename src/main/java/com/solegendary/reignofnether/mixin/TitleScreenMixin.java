@@ -171,7 +171,7 @@ public class TitleScreenMixin extends Screen {
                 ResourceLocation buttonSprite = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,
                         this.isHoveredOrFocused() ? "textures/hud/title_button_highlighted.png" : "textures/hud/title_button.png");
                 guiGraphics.blit(buttonSprite, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
-                guiGraphics.blit(DISCORD_ICON, this.getX() + 2, this.getY() + 2, 16, 16, 0, 0, 32, 32, 32, 32);
+                guiGraphics.blit(DISCORD_ICON, this.getX() + 2, this.getY() + 2, 0, 0, 16, 16, 16, 16);
             }
         };
         this.discordButton.setTooltip(Tooltip.create(Component.literal("Join our Discord")));
