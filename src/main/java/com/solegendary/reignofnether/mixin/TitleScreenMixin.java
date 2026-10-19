@@ -46,8 +46,8 @@ public class TitleScreenMixin extends Screen {
             ResourceLocation.parse("textures/gui/title/minecraft.png");
     private static final ResourceLocation MINECRAFT_EDITION =
             ResourceLocation.parse("textures/gui/title/edition.png");
-    private static final ResourceLocation DISCORD_TEXTURE =
-            ResourceLocation.parse( "textures/gui/title/discord.png");
+    private static final ResourceLocation DISCORD_ICON =
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/discord_icon.png");
     private static final ResourceLocation LILYPAD_TEXTURE =
             ResourceLocation.parse( "textures/gui/title/lilypad.png");
 
@@ -116,49 +116,6 @@ public class TitleScreenMixin extends Screen {
         };
 
 
-        int discordX = lilypadX - 2;
-        int discordY = lilypadY - 38;
-
-        this.discordButton = new AbstractWidget(discordX, discordY, 114, 38, Component.empty()) {
-            @Override
-            public void onClick(double pMouseX, double pMouseY) {
-                openLink("https://discord.com/jJV5zK3hT9");
-            }
-
-            @Override
-            public void updateWidgetNarration(NarrationElementOutput output) {
-                output.add(NarratedElementType.TITLE, Component.literal("Join our Discord"));
-            }
-
-            @Override
-            public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-                PoseStack pPoseStack = guiGraphics.pose();
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderTexture(0, DISCORD_TEXTURE);
-
-                RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-                RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-
-                pPoseStack.pushPose();
-                float scaleX = 0.8f;
-                float scaleY = 0.8f;
-
-                pPoseStack.translate(this.getX(), this.getY(), 0);
-                pPoseStack.scale(scaleX, scaleY, 1.0f);
-
-                guiGraphics.blit(DISCORD_TEXTURE, 0, 0, 0, 0, this.width, this.height, this.width, this.height);
-
-                if (isHoveredOrFocused())
-                    guiGraphics.fill( // x1,y1, x2,y2,
-                            0,0,
-                            this.width,
-                            this.height,
-                            0x32FFFFFF); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-
-                pPoseStack.popPose();
-            }
-        };
-
         // --- "Get RTS maps!" button ---
         // Styled like the vanilla language-select button, to the right of the singleplayer button
         int mapsButtonSize = 20;
@@ -197,6 +154,27 @@ public class TitleScreenMixin extends Screen {
             }
         };
         this.mapsButton.setTooltip(Tooltip.create(Component.literal("Get RTS maps!")));
+
+        // --- "Join our Discord" button ---
+        // Same square style, two rows below the maps button (Essential's button sits in between)
+        this.discordButton = new AbstractWidget(mapsButtonX, mapsButtonY + 48, mapsButtonSize, mapsButtonSize, Component.empty()) {
+            @Override
+            public void onClick(double pMouseX, double pMouseY) {
+                openLink("https://discord.com/jJV5zK3hT9");
+            }
+            @Override
+            protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+                narrationElementOutput.add(NarratedElementType.TITLE, Component.literal("Join our Discord"));
+            }
+            @Override
+            public void renderWidget(GuiGraphics guiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+                ResourceLocation buttonSprite = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,
+                        this.isHoveredOrFocused() ? "textures/hud/title_button_highlighted.png" : "textures/hud/title_button.png");
+                guiGraphics.blit(buttonSprite, this.getX(), this.getY(), 0, 0, this.width, this.height, this.width, this.height);
+                guiGraphics.blit(DISCORD_ICON, this.getX() + 2, this.getY() + 2, 16, 16, 0, 0, 32, 32, 32, 32);
+            }
+        };
+        this.discordButton.setTooltip(Tooltip.create(Component.literal("Join our Discord")));
 
         this.addRenderableWidget(this.lilypadButton);
         this.addRenderableWidget(this.discordButton);
