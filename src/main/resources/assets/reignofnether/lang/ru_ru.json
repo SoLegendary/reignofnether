@@ -1051,8 +1051,6 @@
     "hud.map.reignofnether.rotate_cw.tooltip2": "(Alt + стрелка вправо)",
     "hud.map.reignofnether.rotate_ccw.tooltip1": "Повернуть камеру против часовой стрелки",
     "hud.map.reignofnether.rotate_ccw.tooltip2": "(Alt + стрелка влево)",
-    "hud.map.reignofnether.marker_mode_enabled": "Режим метки включён",
-    "hud.map.reignofnether.marker_mode_disabled": "Режим метки выключен",
     "hud.startbuttons.villagers.reignofnether.first": "Присоединиться к игре за Деревенских",
     "hud.startbuttons.villagers.reignofnether.second": "Создает %d деревенских жителей в указанном месте.",
     "hud.startbuttons.monsters.reignofnether.first": "Присоединиться к игре за Монстров",

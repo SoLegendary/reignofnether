@@ -4,6 +4,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
+import com.solegendary.reignofnether.gamerules.GameruleServerboundPacket;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
@@ -75,6 +76,7 @@ public class MatchStartScreen extends Screen {
     private int rosterViewH = 0;
 
     private record RowHit(StartPos pos, int x1, int y1, int x2, int y2) {}
+    private int[] hidePicksHit = null;
 
     public MatchStartScreen() {
         super(Component.literal("Match Setup"));
@@ -201,7 +203,15 @@ public class MatchStartScreen extends Screen {
             modeButton.render(g, modeX, modeY, lastMouseX, lastMouseY);
             hudButtons.add(modeButton);
             g.drawString(this.font, RTSMapInfoClientEvents.selectedMode, modeX + 26, modeY + 7, cdCol, false);
+            modeX += 26 + this.font.width(RTSMapInfoClientEvents.selectedMode) + 12;
         }
+        String hide = I18n.get(GameruleClient.hideEnemyPicks ? "matchstart.reignofnether.hide_picks.on" : "matchstart.reignofnether.hide_picks.off");
+        boolean canToggle = StartPosClientEvents.isHost() && !StartPosClientEvents.isStarting;
+        int hx1 = modeX, hx2 = hx1 + this.font.width(hide) + 8, hy1 = modeY + 2, hy2 = modeY + 18;
+        boolean hov = canToggle && lastMouseX >= hx1 && lastMouseX <= hx2 && lastMouseY >= hy1 && lastMouseY <= hy2;
+        g.fill(hx1, hy1, hx2, hy2, hov ? 0x80FFFFFF : 0x60000000);
+        g.drawString(this.font, hide, hx1 + 4, hy1 + 4, canToggle ? ACCENT : TEXT_DIM, false);
+        hidePicksHit = canToggle ? new int[]{hx1, hy1, hx2, hy2} : null;
         g.drawCenteredString(this.font, RTSMapInfoClientEvents.mapName + " " + RTSMapInfoClientEvents.version, this.width / 2, MARGIN + 12, ACCENT);
 
         int closeW = 20;
@@ -288,7 +298,8 @@ public class MatchStartScreen extends Screen {
                 continue;
             }
 
-            Button spButton = sp.getButton(localName, isOp);
+            StartPos shown = StartPosClientEvents.isHidden(sp) ? new StartPos(sp.pos, sp.colorId) : sp;
+            Button spButton = shown.getButton(localName, isOp);
             int bx = px - btnFrame / 2;
             int by = pz - btnFrame / 2;
             spButton.render(g, bx, by, mx, my);
@@ -351,7 +362,13 @@ public class MatchStartScreen extends Screen {
                     Component.translatable("matchstart.reignofnether.team", teamIdx).getString(),
                     x1 + 16, y + 1, 0xFFE0E0E0, false);
             y += 12;
-            for (StartPos sp : entry.getValue()) {
+            List<StartPos> rows = entry.getValue();
+            if (rows.stream().anyMatch(StartPosClientEvents::isHidden)) {
+                rows = rows.stream().map(sp -> StartPosClientEvents.isHidden(sp) ? StartPosClientEvents.masked(sp) : sp)
+                        .sorted(Comparator.comparing((StartPos sp) -> sp.playerName.isBlank()).thenComparing(sp -> sp.playerName))
+                        .toList();
+            }
+            for (StartPos sp : rows) {
                 renderSlotRow(g, sp, localName, x1 + 8, y, x2 - x1 - 16, mx, my, overlayActive);
                 y += ROW_H;
             }
@@ -690,6 +707,10 @@ public class MatchStartScreen extends Screen {
             b.checkClicked(mx, my, left);
         }
 
+        if (left && hidePicksHit != null && mx >= hidePicksHit[0] && mx <= hidePicksHit[2] && my >= hidePicksHit[1] && my <= hidePicksHit[3]) {
+            GameruleServerboundPacket.setHideEnemyPicks(!GameruleClient.hideEnemyPicks);
+            return true;
+        }
         if (left && !isMouseOverOverlay(mx, my)) {
             for (RowHit rh : rowHits) {
                 if (mx >= rh.x1 && mx <= rh.x2 && my >= rh.y1 && my <= rh.y2) {

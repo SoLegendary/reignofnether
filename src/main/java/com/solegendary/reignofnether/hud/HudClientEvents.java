@@ -1449,7 +1449,6 @@ public class HudClientEvents {
 
         Button attackWarningButton = AttackWarningClientEvents.getWarningButton();
         Button toggleMapSizeButton = MinimapClientEvents.getToggleSizeButton();
-        Button markerModeButton = MinimapClientEvents.getMarkerModeButton();
         Button camSensitivityButton = MinimapClientEvents.getCamSensitivityButton();
         Button mapLockButton = MinimapClientEvents.getMapLockButton();
         Button toggleUnderlinesButton = MinimapClientEvents.getToggleUnderlinesButton();
@@ -1489,10 +1488,6 @@ public class HudClientEvents {
             if (!toggleMapSizeButton.isHidden.get()) {
                 toggleMapSizeButton.render(evt.getGuiGraphics(), c0x, r0y, mouseX, mouseY);
                 renderedButtons.add(toggleMapSizeButton);
-            }
-            if (!markerModeButton.isHidden.get()) {
-                markerModeButton.render(evt.getGuiGraphics(), c1x, r0y, mouseX, mouseY);
-                renderedButtons.add(markerModeButton);
             }
             if (!mapLockButton.isHidden.get()) {
                 mapLockButton.render(evt.getGuiGraphics(), c2x, r0y, mouseX, mouseY);
@@ -1559,13 +1554,6 @@ public class HudClientEvents {
                         screenHeight - (toggleMapSizeButton.iconSize * 2),
                         mouseX, mouseY);
                 renderedButtons.add(toggleMapSizeButton);
-            }
-            if (!markerModeButton.isHidden.get()) {
-                markerModeButton.render(evt.getGuiGraphics(),
-                    screenWidth - (markerModeButton.iconSize * (MinimapClientEvents.isLargeMap() ? 12 : 8)),
-                    screenHeight - (markerModeButton.iconSize * 2),
-                    mouseX, mouseY);
-                renderedButtons.add(markerModeButton);
             }
             if (!camSensitivityButton.isHidden.get()) {
                 camSensitivityButton.render(evt.getGuiGraphics(),

@@ -73,6 +73,11 @@ public class StartPosServerEvents {
             StartPosClientboundPacket.unreadyPlayer(playerName);
     }
 
+    // the singleplayer/Essential host or an op
+    public static boolean isHost(ServerPlayer player) {
+        return player.hasPermissions(2) || player.server.isSingleplayerOwner(player.getGameProfile());
+    }
+
     public static void setPosEnabled(BlockPos pos, boolean enable) {
         if (startingGame)
             return;

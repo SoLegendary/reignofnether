@@ -62,6 +62,7 @@ public class Keybindings {
     public static final Keybinding chat        = new Keybinding("key.reignofnether.chat",         GLFW.GLFW_KEY_ENTER,         CATEGORY_RTS, "");
     public static final Keybinding deselect    = new Keybinding("key.reignofnether.deselect",     GLFW.GLFW_KEY_GRAVE_ACCENT,  CATEGORY_RTS, "~");
     public static final Keybinding tab         = new Keybinding("key.reignofnether.tab",          GLFW.GLFW_KEY_TAB,           CATEGORY_RTS, "");
+    public static final Keybinding ping        = new Keybinding("key.reignofnether.ping",         GLFW.GLFW_KEY_CAPS_LOCK,     CATEGORY_RTS, "");
     public static final Keybinding openShop    = new Keybinding("key.reignofnether.open_shop",         GLFW.GLFW_KEY_S,             CATEGORY_RTS, "S");
 
     public static final Keybinding item1 = new Keybinding("key.reignofnether.item1", GLFW.GLFW_KEY_T, CATEGORY_RTS, "T");
@@ -111,7 +112,7 @@ public class Keybindings {
             hotkey1, hotkey2, minimapToggle, hotkey3, hotkey4, hotkey5, hotkey6, hotkey7, hotkey8, hotkey9,
             attack, stop, hold,
             build, gather, garrison,
-            chat, deselect, tab, openShop,
+            chat, deselect, tab, openShop, ping,
             item1, item2, item3, item4, item5, item6
         ));
         Collections.addAll(list, nums);

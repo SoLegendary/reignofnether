@@ -36,6 +36,7 @@ public class GameruleClient {
     public static boolean slantedBuilding = true;
     public static int allowedHeroes = 2;
     public static boolean lockAlliances = false;
+    public static boolean hideEnemyPicks = true;
     public static boolean scenarioMode = false;
     public static boolean coopMode = false;
     public static boolean buildingsOutsideBorder = false;

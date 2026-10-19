@@ -71,6 +71,10 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_LOCK_ALLIANCES, "", lockAlliances ? 1L : 0L));
     }
+    public static void setHideEnemyPicks(boolean hideEnemyPicks) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_HIDE_ENEMY_PICKS, "", hideEnemyPicks ? 1L : 0L));
+    }
     public static void setCoopMode(boolean coopMode) {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_COOP_MODE, "", coopMode ? 1L : 0L));
@@ -117,7 +121,9 @@ public class GameruleServerboundPacket {
                 success.set(false);
                 return;
             }
-            else if (!player.hasPermissions(4)) {
+            // the lobby's hide-picks toggle is also open to the singleplayer/Essential host
+            else if (!player.hasPermissions(4) && !(action == GameruleAction.SET_HIDE_ENEMY_PICKS &&
+                    com.solegendary.reignofnether.startpos.StartPosServerEvents.isHost(player))) {
                 ReignOfNether.LOGGER.warn("GameruleServerboundPacket: Tried to process packet from " + player.getName() + " with insufficient permissions");
                 success.set(false);
                 return;
@@ -181,6 +187,10 @@ public class GameruleServerboundPacket {
                 case SET_LOCK_ALLIANCES -> {
                     gameRules.getRule(GameRuleRegistrar.LOCK_ALLIANCES).set(booleanValue, server);
                     GameruleClientboundPacket.setLockAlliances(booleanValue);
+                }
+                case SET_HIDE_ENEMY_PICKS -> {
+                    gameRules.getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(booleanValue, server);
+                    GameruleClientboundPacket.setHideEnemyPicks(booleanValue);
                 }
                 case SET_COOP_MODE -> {
                     gameRules.getRule(GameRuleRegistrar.COOP_MODE).set(booleanValue, server);

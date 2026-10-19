@@ -24,6 +24,7 @@ import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.ping.PingType;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
@@ -88,7 +89,6 @@ public class MinimapClientEvents {
     private static boolean largeMap = false;
     public static boolean isLargeMap() { return largeMap; }
     private static boolean shouldToggleSize = false;
-    private static boolean markerMode = false;
 
     private static final int UNIT_RADIUS = 3;
     private static final int UNIT_THICKNESS = 1;
@@ -96,8 +96,6 @@ public class MinimapClientEvents {
     private static final int PLAYER_THICKNESS = 1;
     private static final int START_POS_RADIUS = 7;
     private static final int START_POS_THICKNESS = 2;
-    private static final int MARKER_RADIUS = 16;
-    private static final int MARKER_THICKNESS = 3;
     private static final int MARKER_PIXEL_OFFSET = 4; // shift rendered marker to better align with cursor
 
     // rate-limit teleporting from dragging the minimap to prevent being kicked from packet spamming
@@ -180,17 +178,21 @@ public class MinimapClientEvents {
         neutralFogUnits.clear();
     }
 
-    private static class MapMarker {
+    public static class MapMarker {
         public final int x;
+        public final int y;
         public final int z;
         public final String playerName;
+        public final PingType type;
         public int ticksRemaining;
         public int ageTicks;
 
-        public MapMarker(int x, int z, String playerName) {
+        public MapMarker(int x, int y, int z, String playerName, PingType type) {
             this.x = x;
+            this.y = y;
             this.z = z;
             this.playerName = playerName;
+            this.type = type;
             this.ticksRemaining = 200; // 10 seconds
             this.ageTicks = 0;
         }
@@ -202,22 +204,8 @@ public class MinimapClientEvents {
         }
     }
 
-    public static void addMapMarker(int x, int z, String playerName) {
-        mapMarkers.add(new MapMarker(x, z, playerName));
-    }
-
-    public static void addMapMarkerForSelfAndAllies(int mouseX, int mouseY) {
-        if (Keybindings.altMod.isDown()){
-            mouseX += 2;
-            mouseY += 1;
-        } else {
-            mouseX -= 1;
-            mouseY += 1;
-        }
-        BlockPos markerPos = getWorldPosOnMinimap(mouseX, mouseY, false);
-        if (markerPos != null) {
-            PacketHandler.INSTANCE.sendToServer(new MapMarkerServerboundPacket(markerPos.getX(), markerPos.getZ()));
-        }
+    public static void addMapMarker(int x, int y, int z, String playerName, PingType type) {
+        mapMarkers.add(new MapMarker(x, y, z, playerName, type));
     }
 
     public static void removeVirtualUnit(int id) {
@@ -317,7 +305,8 @@ public class MinimapClientEvents {
         largeMap = !largeMap;
         if (largeMap) {
             worldRadius = 240;
-            mapGuiRadius = 120;
+            // fill most of the screen height so the large map is really bigger, not just a wider view
+            mapGuiRadius = Math.max(120, (int) (MC.getWindow().getGuiScaledHeight() * 0.45));
         } else {
             worldRadius = 120;
             mapGuiRadius = 60;
@@ -349,23 +338,6 @@ public class MinimapClientEvents {
                 List.of(FormattedCharSequence.forward(largeMap
                         ? I18n.get("hud.map.reignofnether.close")
                         : I18n.get("hud.map.reignofnether.open"), Style.EMPTY))
-        );
-    }
-
-    public static Button getMarkerModeButton() {
-        return new Button("Marker",
-                14,
-                ResourceLocation.fromNamespaceAndPath("minecraft", "textures/block/target_top.png"),
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                null,
-                () -> markerMode,
-                () -> !Keybindings.altMod.isDown() && !isLargeMap(),
-                () -> Keybindings.altMod.isDown() || isLargeMap(),
-                () -> markerMode = !markerMode,
-                null,
-                List.of(markerMode
-                        ? fcs(I18n.get("hud.map.reignofnether.marker_mode_enabled"))
-                        : fcs(I18n.get("hud.map.reignofnether.marker_mode_disabled")))
         );
     }
 
@@ -727,8 +699,8 @@ public class MinimapClientEvents {
 
             int xc = ns.getFirst().getX() + (7 / 2);
             int zc = ns.getFirst().getZ() + (7 / 2);
-            int xN = xc - xc_world + (mapGuiRadius * 2);
-            int zN = zc - zc_world + (mapGuiRadius * 2);
+            int xN = xc - xc_world + worldRadius;
+            int zN = zc - zc_world + worldRadius;
 
             nightSources.add(new Pair<>(new BlockPos(xN, 0, zN), ns.getSecond()));
         }
@@ -874,8 +846,8 @@ public class MinimapClientEvents {
                             ? 0x000000
                             : color;
 
-                    int xN = x - xc_world + (mapGuiRadius * 2);
-                    int zN = z - zc_world + (mapGuiRadius * 2);
+                    int xN = x - xc_world + worldRadius;
+                    int zN = z - zc_world + worldRadius;
 
                     mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                 }
@@ -896,8 +868,8 @@ public class MinimapClientEvents {
                             ? 0x000000
                             : color;
 
-                    int xN = x - xc_world + (mapGuiRadius * 2);
-                    int zN = z - zc_world + (mapGuiRadius * 2);
+                    int xN = x - xc_world + worldRadius;
+                    int zN = z - zc_world + worldRadius;
 
                     mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                 }
@@ -932,8 +904,8 @@ public class MinimapClientEvents {
                         else
                             rgb = 0xFF0000;
                     }
-                    int xN = x - xc_world + (mapGuiRadius * 2);
-                    int zN = z - zc_world + (mapGuiRadius * 2);
+                    int xN = x - xc_world + worldRadius;
+                    int zN = z - zc_world + worldRadius;
 
                     mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                 }
@@ -965,8 +937,8 @@ public class MinimapClientEvents {
                             //    rgb = 0xFFFF00;
                             rgb = startPos.getHexColor();
                         }
-                        int xN = x - xc_world + (mapGuiRadius * 2);
-                        int zN = z - zc_world + (mapGuiRadius * 2);
+                        int xN = x - xc_world + worldRadius;
+                        int zN = z - zc_world + worldRadius;
 
                         mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(rgb) | (0xFF << 24);
                     }
@@ -1007,21 +979,12 @@ public class MinimapClientEvents {
         float alphaPulse = MiscUtil.getOscillatingFloat(0.45d, 1.0d, marker.ageTicks * 35L);
         int alpha = Mth.clamp((int) (alphaPulse * 255f), 90, 255);
 
-        for (int x = xc - MARKER_RADIUS; x < xc + MARKER_RADIUS; x++) {
-            for (int z = zc - MARKER_RADIUS; z < zc + MARKER_RADIUS; z++) {
+        for (int x = xc - PING_RADIUS - 1; x <= xc + PING_RADIUS + 1; x++) {
+            for (int z = zc - PING_RADIUS - 1; z <= zc + PING_RADIUS + 1; z++) {
                 if (isWorldXZinsideMap(x, z)) {
-                    double dist = Math.sqrt(Math.pow(x - xc, 2) + Math.pow(z - zc, 2));
-
-                    boolean draw = false;
-
-                    // Draw concentric rings
-                    if (dist > MARKER_RADIUS - MARKER_THICKNESS && dist < MARKER_RADIUS) draw = true;
-                    if (dist > MARKER_RADIUS * 0.6 - MARKER_THICKNESS && dist < MARKER_RADIUS * 0.6) draw = true;
-                    if (dist > MARKER_RADIUS * 0.2 - MARKER_THICKNESS && dist < MARKER_RADIUS * 0.2) draw = true;
-
-                    if (draw) {
-                        int xN = x - xc_world + (mapGuiRadius * 2) + MARKER_PIXEL_OFFSET;
-                        int zN = z - zc_world + (mapGuiRadius * 2);
+                    if (isMarkerPixel(marker.type, x - xc, z - zc)) {
+                        int xN = x - xc_world + worldRadius + MARKER_PIXEL_OFFSET;
+                        int zN = z - zc_world + worldRadius;
                         if (xN >= 0 && xN < mapColoursOverlays.length && zN >= 0 && zN < mapColoursOverlays[0].length) {
                             mapColoursOverlays[xN][zN] = MiscUtil.reverseHexRGB(color) | (alpha << 24);
                         }
@@ -1031,15 +994,30 @@ public class MinimapClientEvents {
         }
     }
 
+    private static final int PING_RADIUS = 9;    // pings are smaller than the plain marker
+    private static final double PING_THICKNESS = 2.5;
+
+    // each ping type has its own small symbol. The map is drawn rotated 45°,
+    // so shapes are tested in screen-aligned axes (u, v); every symbol is symmetric, so the rotation's sign
+    // doesn't matter: Help = ring with a dot, Attack = X, Enemy = diamond, Defend = square, On my way = plus
+    static boolean isMarkerPixel(PingType type, int dx, int dz) {
+        double u = (dx - dz) / Math.sqrt(2), v = (dx + dz) / Math.sqrt(2);
+        double r = PING_RADIUS, t = PING_THICKNESS;
+        double au = Math.abs(u), av = Math.abs(v);
+        return switch (type) {
+            case HELP -> {
+                double d = Math.sqrt(u * u + v * v);
+                yield (d > r - t && d <= r) || d <= t;
+            }
+            case ATTACK -> au <= r * 0.8 && av <= r * 0.8 && Math.abs(au - av) <= t * 0.6;
+            case ENEMY -> au + av <= r && au + av > r - t;
+            case DEFEND -> Math.max(au, av) <= r * 0.8 && Math.max(au, av) > r * 0.8 - t;
+            default -> (au <= t * 0.5 && av <= r * 0.8) || (av <= t * 0.5 && au <= r * 0.8);
+        };
+    }
+
     private static int getPulsingMarkerColor(MapMarker marker) {
-        int baseColor = PlayerColors.getPlayerDisplayColorHex(marker.playerName);
-        float pulse = MiscUtil.getOscillatingFloat(0.35d, 1.0d, marker.ageTicks * 25L);
-
-        int r = Mth.clamp((int) (((baseColor >> 16) & 0xFF) * pulse), 0, 255);
-        int g = Mth.clamp((int) (((baseColor >> 8) & 0xFF) * pulse), 0, 255);
-        int b = Mth.clamp((int) ((baseColor & 0xFF) * pulse), 0, 255);
-
-        return (r << 16) | (g << 8) | b;
+        return marker.type.rgb; // each ping type has its own colour
     }
 
 
@@ -1173,7 +1151,7 @@ public class MinimapClientEvents {
     }
 
     // given an x and y on the screen that the player clicked, return the world position of that spot
-    private static BlockPos getWorldPosOnMinimap(float x, float y, boolean offsetForCamera) {
+    public static BlockPos getWorldPosOnMinimap(float x, float y, boolean offsetForCamera) {
         if (!isPointInsideMinimap(x, y) || CursorClientEvents.isBoxSelecting() || MC.level == null) {
             return null;
         }
@@ -1214,10 +1192,6 @@ public class MinimapClientEvents {
                 OrthoviewClientEvents.isCameraLocked() ||
                 HudClientEvents.isMouseOverAnyButton() ||
                 !(MC.screen instanceof TopdownGui)) {
-            return;
-        }
-
-        if (markerMode) {
             return;
         }
 
@@ -1268,9 +1242,7 @@ public class MinimapClientEvents {
                     getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), true);
 
             if (MC.player != null && moveTo != null) {
-                if (markerMode) {
-                    addMapMarkerForSelfAndAllies((int) evt.getMouseX(), (int) evt.getMouseY());
-                } else if (!altDown && Keybindings.shiftMod.isDown()) {
+                if (!altDown && Keybindings.shiftMod.isDown()) {
                     setMapCentre(moveTo.getX(), moveTo.getZ());
                     forceUpdateAllPartitions = true;
                     TutorialClientEvents.clickedMinimap = true;
@@ -1334,10 +1306,6 @@ public class MinimapClientEvents {
             } else {
                 BlockPos moveTo = getWorldPosOnMinimap((float) evt.getMouseX(), (float) evt.getMouseY(), false);
                 if (moveTo == null) return;
-                if (Keybindings.altMod.isDown()) {
-                    addMapMarkerForSelfAndAllies((int) evt.getMouseX(), (int) evt.getMouseY());
-                    return;
-                }
                 if (!UnitClientEvents.getSelectedUnits().isEmpty()) {
                     var ids = UnitClientEvents.getSelectedUnits();
                     var idArray = ArrayUtil.livingEntityListToIdArray(ids);

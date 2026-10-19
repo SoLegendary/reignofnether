@@ -1110,8 +1110,6 @@
     "hud.map.reignofnether.rotate_cw.tooltip2": "(Alt + right-arrow)",
     "hud.map.reignofnether.rotate_ccw.tooltip1": "Rotate camera counter-clockwise",
     "hud.map.reignofnether.rotate_ccw.tooltip2": "(Alt + left-arrow)",
-    "hud.map.reignofnether.marker_mode_enabled": "Marker mode enabled",
-    "hud.map.reignofnether.marker_mode_disabled": "Marker mode disabled",
 
     "hud.startbuttons.villagers.reignofnether.first": "Join the game as Villagers",
     "hud.startbuttons.villagers.reignofnether.second": "Spawns %d villagers at the target location.",
@@ -2358,5 +2356,16 @@
     "matchstart.reignofnether.hint.close": "Click Back to leave · F12 off + on to reopen.",
     "matchstart.reignofnether.settings.title": "GAME SETTINGS",
     "matchstart.reignofnether.settings.mode": "Mode",
-    "matchstart.reignofnether.settings.op_only": "Gamerule settings require op."
+    "matchstart.reignofnether.settings.op_only": "Gamerule settings require op.",
+    "matchstart.reignofnether.hide_picks.on": "Enemy picks: hidden",
+    "matchstart.reignofnether.hide_picks.off": "Enemy picks: visible",
+    "gamerule.hideEnemyPicks": "Hide other teams' factions and start positions in the match lobby",
+    "key.reignofnether.ping": "Ping wheel (hold)",
+    "chat.reignofnether.all": "[All]",
+    "chat.reignofnether.spectator": "[Spec]",
+    "chat.reignofnether.team": "[Team]",
+    "ping.reignofnether.help": "⚠ Help me!",
+    "ping.reignofnether.defend": "◆ Defend here",
+    "ping.reignofnether.attack": "⚔ Attack here",
+    "ping.reignofnether.enemy": "◎ Enemy spotted"
 }

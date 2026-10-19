@@ -919,8 +919,6 @@
     "hud.map.reignofnether.rotate_cw.tooltip2": "(Alt + flecha-der.)",
     "hud.map.reignofnether.rotate_ccw.tooltip1": "Gire la cámara en sentido antihorario.",
     "hud.map.reignofnether.rotate_ccw.tooltip2": "(Alt + flecha-izq.)",
-    "hud.map.reignofnether.marker_mode_enabled": "Modo Marcador: ON",
-    "hud.map.reignofnether.marker_mode_disabled": "Modo Marcador: OFF",
 
     "hud.startbuttons.villagers.reignofnether.first": "Unirse al juego como Aldeanos",
     "hud.startbuttons.villagers.reignofnether.second": "Genera %d aldeanos en la ubicación objetivo.",

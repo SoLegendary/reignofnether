@@ -87,6 +87,12 @@ public class GameruleServerEvents {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setLockAlliances(value);
             }
+        } else if (nodes.get(1).getNode().getName().equals("hideEnemyPicks")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setHideEnemyPicks(value);
+            }
         } else if (nodes.get(1).getNode().getName().equals("scenarioMode")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
             if (args.containsKey("value")) {
@@ -170,6 +176,7 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setAllowedHeroes(allowHeroes);
             boolean lockAlliances = server.getGameRules().getRule(GameRuleRegistrar.LOCK_ALLIANCES).get();
             GameruleClientboundPacket.setLockAlliances(lockAlliances);
+            GameruleClientboundPacket.setHideEnemyPicks(server.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).get());
             boolean scenarioMode = server.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();
             GameruleClientboundPacket.setScenarioMode(scenarioMode);
             boolean coopMode = server.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get();

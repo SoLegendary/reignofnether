@@ -1088,8 +1088,6 @@
   "hud.map.reignofnether.rotate_cw.tooltip2": "（Alt + 右箭头）",
   "hud.map.reignofnether.rotate_ccw.tooltip1": "逆时针旋转视角",
   "hud.map.reignofnether.rotate_ccw.tooltip2": "（Alt + 左箭头）",
-  "hud.map.reignofnether.marker_mode_enabled": "标记模式已启用",
-  "hud.map.reignofnether.marker_mode_disabled": "标记模式已禁用",
 
   "hud.startbuttons.villagers.reignofnether.first": "以村民身份加入游戏",
   "hud.startbuttons.villagers.reignofnether.second": "在目标位置生成 %d 名村民。",

@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
+import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
@@ -66,6 +67,29 @@ public class StartPosClientEvents {
                 }
             }
         }
+    }
+
+    // the singleplayer/Essential host or an op; the server checks this too
+    public static boolean isHost() {
+        return MC.hasSingleplayerServer() || (MC.player != null && MC.player.hasPermissions(2));
+    }
+
+    // with the hideEnemyPicks gamerule, a taken seat on another team only shows who sits there, not where or as what.
+    // ponytail: client-side only, the packets still carry the data; mask per player in StartPosClientboundPacket if ranked needs it
+    public static boolean isHidden(StartPos sp) {
+        if (!GameruleClient.hideEnemyPicks || sp.playerName.isBlank())
+            return false;
+        StartPos mine = getPos();
+        if (mine == sp)
+            return false;
+        return mine == null || mine.colorId != sp.colorId;
+    }
+
+    // what other players may see of a hidden seat: the player, but no faction
+    public static StartPos masked(StartPos sp) {
+        StartPos m = new StartPos(sp.pos, Factions.NONE, sp.playerName, sp.colorId);
+        m.ready = sp.ready;
+        return m;
     }
 
     public static boolean hasReservedPos() {
@@ -176,7 +200,7 @@ public class StartPosClientEvents {
             return;
 
         for (StartPos startPos : startPoses) {
-            if (startPos.faction != Factions.NONE) {
+            if (startPos.faction != Factions.NONE && !isHidden(startPos)) {
                 Building capitolBuilding = startPos.faction.getBuilding(startPos.faction.capitolBuilding);
                 int forceColour = 2;
                 if (startPos.playerName.equals(MC.player.getName().getString()))

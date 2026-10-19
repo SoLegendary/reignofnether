@@ -699,8 +699,6 @@
     "hud.map.reignofnether.rotate_cw.tooltip2": "(Alt + flèche-droite)",
     "hud.map.reignofnether.rotate_ccw.tooltip1": "Rotation caméra anti-horaire",
     "hud.map.reignofnether.rotate_ccw.tooltip2": "(Alt + flèche-gauche)",
-    "hud.map.reignofnether.marker_mode_enabled": "Mode marqueur activé",
-    "hud.map.reignofnether.marker_mode_disabled": "Mode marqueur désactivé",
 
     "hud.startbuttons.villagers.reignofnether.first": "Rejoindre la partie : Villageois",
     "hud.startbuttons.villagers.reignofnether.second": "Fait apparaître %d villageois à l'endroit ciblé.",
