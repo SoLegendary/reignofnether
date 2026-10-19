@@ -4,20 +4,24 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
 import com.solegendary.reignofnether.hud.TitleClientEvents;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
@@ -38,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import javax.annotation.Nullable;
 import java.net.URI;
+import java.util.List;
 
 @Mixin(TitleScreen.class)
 public class TitleScreenMixin extends Screen {
@@ -58,6 +63,7 @@ public class TitleScreenMixin extends Screen {
     private AbstractWidget lilypadButton;
     private AbstractWidget discordButton;
     private AbstractWidget mapsButton;
+    private static final String NETWORK_URL = "https://reignofnether.net";
 
     protected TitleScreenMixin(Component pTitle) {
         super(pTitle);
@@ -176,11 +182,50 @@ public class TitleScreenMixin extends Screen {
         };
         this.discordButton.setTooltip(Tooltip.create(Component.literal("Join our Discord")));
 
+        // RoN has no use for Realms: drop it and let the Mods button take the whole row.
+        // Multiplayer shows the network notice once before going on as normal.
+        for (GuiEventListener child : List.copyOf(this.children())) {
+            if (!(child instanceof Button button) || !(button.getMessage().getContents() instanceof TranslatableContents key))
+                continue;
+            switch (key.getKey()) {
+                case "menu.online" -> this.removeWidget(button);
+                case "fml.menu.mods" -> {
+                    button.setX(this.width / 2 - 100);
+                    button.setWidth(200);
+                }
+                case "menu.multiplayer" -> {
+                    Button multiplayer = Button.builder(button.getMessage(), b -> openMultiplayer(button))
+                            .bounds(button.getX(), button.getY(), button.getWidth(), button.getHeight()).build();
+                    multiplayer.active = button.active;
+                    multiplayer.setTooltip(button.getTooltip());
+                    this.removeWidget(button);
+                    this.addRenderableWidget(multiplayer);
+                }
+            }
+        }
+
         this.addRenderableWidget(this.lilypadButton);
         this.addRenderableWidget(this.discordButton);
         this.addRenderableWidget(this.mapsButton);
     }
 
+
+    private void openMultiplayer(Button vanillaButton) {
+        if (ReignOfNetherClientConfigs.SEEN_NETWORK_NOTICE.get()) {
+            vanillaButton.onPress();
+            return;
+        }
+        ReignOfNetherClientConfigs.SEEN_NETWORK_NOTICE.set(true);
+        ReignOfNetherClientConfigs.SEEN_NETWORK_NOTICE.save();
+        Minecraft.getInstance().setScreen(new ConfirmScreen(getWebsite -> {
+            if (getWebsite)
+                openLink(NETWORK_URL);
+            vanillaButton.onPress();
+        }, Component.translatable("title.reignofnether.network_notice.title"),
+                Component.translatable("title.reignofnether.network_notice.message"),
+                Component.translatable("title.reignofnether.network_notice.website"),
+                Component.translatable("title.reignofnether.network_notice.continue")));
+    }
 
     private void openLink(String url) {
         try {

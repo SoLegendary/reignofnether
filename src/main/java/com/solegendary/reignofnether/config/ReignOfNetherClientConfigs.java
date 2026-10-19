@@ -17,6 +17,7 @@ public class ReignOfNetherClientConfigs {
     public static final ForgeConfigSpec.ConfigValue<Boolean> USE_PLAYER_COLORS;
     public static final ForgeConfigSpec.ConfigValue<Integer> CAMERA_SENSITIVITY;
     public static final ForgeConfigSpec.ConfigValue<Boolean> SQUARE_MINIMAP;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> SEEN_NETWORK_NOTICE;
 
     static {
         BUILDER.push("Configuration File");
@@ -32,6 +33,7 @@ public class ReignOfNetherClientConfigs {
         USE_PLAYER_COLORS = BUILDER.define("use_player_colors", false);
         CAMERA_SENSITIVITY = BUILDER.define("camera_sensitivity", 10);
         SQUARE_MINIMAP = BUILDER.define("square_minimap", false);
+        SEEN_NETWORK_NOTICE = BUILDER.define("seen_network_notice", false);
         SPEC = BUILDER.build();
     }
 

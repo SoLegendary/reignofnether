@@ -2367,5 +2367,9 @@
     "ping.reignofnether.help": "Help me!",
     "ping.reignofnether.defend": "Defend here",
     "ping.reignofnether.attack": "Attack here",
-    "ping.reignofnether.enemy": "Enemy spotted"
+    "ping.reignofnether.enemy": "Enemy spotted",
+    "title.reignofnether.network_notice.title": "Play on the Reign of Nether Network",
+    "title.reignofnether.network_notice.message": "The best way to play online is on the official RoN Network: ranked and casual matches, always-on servers and players to fight. It can only be reached through the official RoN launcher, available on reignofnether.net.",
+    "title.reignofnether.network_notice.website": "Get the launcher",
+    "title.reignofnether.network_notice.continue": "Continue"
 }
