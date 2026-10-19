@@ -106,6 +106,8 @@ public class BlazeUnitFireball extends SmallFireball {
                 this.discard();
             if (this.getOwner() instanceof WildfireUnit wildfireUnit)
                 entityHitResult.getEntity().hurt(damageSources().mobProjectile(this, wildfireUnit), wildfireUnit.getUnitAttackDamage());
+            if (this.getOwner() instanceof BlazeUnit blazeUnit)
+                entityHitResult.getEntity().hurt(damageSources().mobProjectile(this, blazeUnit), blazeUnit.getUnitAttackDamage());
 
         } else if (hitresult$type == HitResult.Type.BLOCK && !isNoPhysics()) {
             BlockHitResult blockhitresult = (BlockHitResult)pResult;

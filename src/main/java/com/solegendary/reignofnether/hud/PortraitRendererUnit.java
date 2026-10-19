@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.effecticons.EnchantmentIcon;
 import com.solegendary.reignofnether.player.PlayerColors;
+import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
@@ -28,6 +29,7 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
+import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -45,6 +47,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -488,6 +491,14 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             armourStr = (int) (highestArmour * 100) + "%+";
             armourColor = LIGHT_BLUE;
         }
+        if (((Mob) unit).hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
+            armourColor = GREEN;
+            if (nonZeroArmourTypes > 0 && highestArmour > 0) {
+                armourStr = (int) (Mth.lerp(0.5, highestArmour, 1.0) * 100) + "%+";
+            } else {
+                armourStr = "50%";
+            }
+        }
         if (armourStr.contains("-")) {
             armourColor = RED;
         }
@@ -694,8 +705,15 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         RenderSystem.runAsFancy(() -> {
             try {
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-                entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate, 15728880);
-                immediate.endBatch();
+                if (entity instanceof EnchanterUnit enchanterUnit) {
+                    enchanterUnit.renderTether = false;
+                    entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate, 15728880);
+                    immediate.endBatch();
+                    enchanterUnit.renderTether = true;
+                } else {
+                    entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate, 15728880);
+                    immediate.endBatch();
+                }
             } catch (ReportedException e) {
                 //System.out.println("Caught reportedException: " + e);
             }

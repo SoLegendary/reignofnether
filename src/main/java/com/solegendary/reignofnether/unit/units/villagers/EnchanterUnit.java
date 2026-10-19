@@ -30,6 +30,7 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.KeyframeAnimated;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.modelling.animations.EnchanterAnimations;
+import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
@@ -289,6 +290,8 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     // non-looping animations
     public AnimationDefinition activeAnimDef = null;
     public AnimationState activeAnimState = null;
+
+    public boolean renderTether = true; // temporarily turned off during portrait rendering
 
     public void stopAllAnimations() {
         idleAnimState.stop();

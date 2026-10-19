@@ -85,6 +85,7 @@ public class EnchanterRenderer extends MobRenderer<EnchanterUnit, EnchanterModel
     public static void renderEnchantBeam(EnchanterUnit source, LivingEntity target, float partialTick,
                                          PoseStack poseStack, MultiBufferSource buffer, float alpha) {
         if (!target.isAlive()) return;
+        if (!source.renderTether) return;
 
         float time = source.tickCount + partialTick;
 
