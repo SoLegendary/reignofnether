@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -186,34 +187,32 @@ public class PlayerClientEvents {
             })));
         evt.getDispatcher().register(Commands.literal("rts-help").executes((command) -> {
             if (MC.player != null) {
-                MC.player.sendSystemMessage(Component.literal(""));
-                MC.player.sendSystemMessage(Component.translatable("commands.reignofnether.toggle_fow","/rts-fog enable/disable"));
-                MC.player.sendSystemMessage(Component.translatable("commands.reignofnether.surrender","/rts-surrender"));
-                MC.player.sendSystemMessage(Component.translatable("commands.reignofnether.reset", "/rts-reset"));
-                MC.player.sendSystemMessage(Component.translatable("commands.reignofnether.hard_reset", "/rts-hard-reset"));
-                MC.player.sendSystemMessage(Component.translatable("commands.reignofnether.lock", "/rts-lock enable/disable"));
-                MC.player.sendSystemMessage(Component.translatable("commands.reignofnether.ally", "/ally"));
-                MC.player.sendSystemMessage(Component.translatable("commands.reignofnether.disband", "/disband"));
-                MC.player.sendSystemMessage(Component.translatable("commands.reignofnether.send_resources", "/sendfood | wood | ore <playername> <amount>"));
-                MC.player.sendSystemMessage(Component.translatable("commands.reignofnether.camera", "/rts-camera"));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.toggle_fow","/rts-fog enable/disable")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.surrender","/rts-surrender")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.reset", "/rts-reset")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.hard_reset", "/rts-hard-reset")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.lock", "/rts-lock enable/disable")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.ally", "/ally")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.disband", "/disband")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.send_resources", "/sendfood | wood | ore <playername> <amount>")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("commands.reignofnether.camera", "/rts-camera")));
             }
             return 1;
         }));
         evt.getDispatcher().register(Commands.literal("rts-controls").executes((command) -> {
             if (MC.player != null) {
-                MC.player.sendSystemMessage(Component.literal(""));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.toggle_cam"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.refresh_chunks"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.toggle_fps_tps"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.deselect"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.command"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.create_group"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.recenter_map"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.select_same"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.destroy"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.rotate_cam"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.zoom"));
-                MC.player.sendSystemMessage(Component.translatable("controls.reignofnether.rotate"));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.toggle_cam")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.refresh_chunks")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.toggle_fps_tps")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.deselect")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.command")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.create_group")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.recenter_map")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.select_same")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.destroy")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.rotate_cam")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.zoom")));
+                MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("controls.reignofnether.rotate")));
             }
             return 1;
         }));

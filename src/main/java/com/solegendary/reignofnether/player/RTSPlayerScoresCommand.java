@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
@@ -29,11 +30,11 @@ public class RTSPlayerScoresCommand {
 
             for (RTSPlayer rtsPlayer : PlayerServerEvents.postGameRtsPlayers) {
                 if (Objects.equals(rtsPlayer.name, targetName)) {
-                    player.sendSystemMessage(Component.literal(displayScores(rtsPlayer)));
+                    player.sendSystemMessage(SystemMessage.info(Component.literal(displayScores(rtsPlayer))));
                     return Command.SINGLE_SUCCESS;
                 }
             }
-            player.sendSystemMessage(Component.translatable("message.reignofnether.commands.scores.player_not_available", targetName));
+            player.sendSystemMessage(SystemMessage.error(Component.translatable("message.reignofnether.commands.scores.player_not_available", targetName)));
         }
 
         return Command.SINGLE_SUCCESS;
@@ -42,7 +43,7 @@ public class RTSPlayerScoresCommand {
     public static int execute(CommandContext<CommandSourceStack> command) {
         if (command.getSource().getEntity() instanceof Player player) {
             List<RTSPlayer> rtsPlayers = PlayerServerEvents.postGameRtsPlayers;
-            player.sendSystemMessage(Component.literal(displayScores(rtsPlayers)));
+            player.sendSystemMessage(SystemMessage.info(Component.literal(displayScores(rtsPlayers))));
         }
 
         return Command.SINGLE_SUCCESS;

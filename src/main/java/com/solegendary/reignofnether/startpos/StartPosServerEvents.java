@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.startpos;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.RTSStartBlock;
@@ -115,7 +116,7 @@ public class StartPosServerEvents {
                 evt.setCanceled(true);
                 for (Player player : PlayerServerEvents.players)
                     if (player.distanceToSqr(Vec3.atCenterOf(evt.getPos())) < 100)
-                        player.sendSystemMessage(Component.translatable("startpos.reignofnether.max_positions"));
+                        player.sendSystemMessage(SystemMessage.error(Component.translatable("startpos.reignofnether.max_positions")));
             }
             if (evt.getLevel() instanceof ServerLevel serverLevel)
                 savePositions(serverLevel);
@@ -184,7 +185,7 @@ public class StartPosServerEvents {
             if (ticksToStart % 20 == 0) {
                 int secondsLeft = ticksToStart / 20;
                 if (secondsLeft > 0) {
-                    PlayerServerEvents.sendMessageToAllPlayersNoNewlines("startpos.reignofnether.starting_game", false, secondsLeft);
+                    PlayerServerEvents.sendMessageToAllPlayers("startpos.reignofnether.starting_game", false, secondsLeft);
                     SoundClientboundPacket.playSoundForAllPlayers(SoundAction.CHAT);
                 } else {
                     PlayerServerEvents.sendMessageToAllPlayers("startpos.reignofnether.started_game", true);

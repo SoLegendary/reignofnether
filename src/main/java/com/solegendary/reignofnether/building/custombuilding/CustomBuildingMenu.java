@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -305,10 +306,8 @@ public class CustomBuildingMenu {
                 I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.label") + ": " + customBuilding.productions.get().size(),
                 () -> {
                     if (MC.player != null) {
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint1"));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint2"));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint1")));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint2")));
                     }
                 },
                 null,
@@ -321,10 +320,8 @@ public class CustomBuildingMenu {
                 I18n.get("sandbox.reignofnether.custom_buildings.buyable_items.label") + ": " + customBuilding.stockedItems.size(),
                 () -> {
                     if (MC.player != null) {
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint1"));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint2"));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint1")));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint2")));
                     }
                 },
                 null,

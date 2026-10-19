@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.tutorial;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -148,11 +149,8 @@ public class TutorialClientEvents {
 
     public static void setEnabled(boolean value) {
         if (value && !enabled && MC.player != null) {
-            MC.player.sendSystemMessage(Component.literal(""));
-            MC.player.sendSystemMessage(Component.translatable("tutorial.reignofnether.welcome2")
-                .withStyle(Style.EMPTY.withBold(true)));
-            MC.player.sendSystemMessage(Component.translatable("tutorial.reignofnether.get_started"));
-            MC.player.sendSystemMessage(Component.literal(""));
+            MC.player.sendSystemMessage(SystemMessage.important(Component.translatable("tutorial.reignofnether.welcome2")));
+            MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("tutorial.reignofnether.get_started")));
         }
         enabled = value;
     }
@@ -275,13 +273,11 @@ public class TutorialClientEvents {
             return;
         }
         MC.player.playSound(soundEvt.get(), 1.2f, 1.0f);
-        MC.player.sendSystemMessage(Component.literal(""));
         if (bold) {
-            MC.player.sendSystemMessage(Component.translatable(msg, params).withStyle(Style.EMPTY.withBold(true)));
+            MC.player.sendSystemMessage(SystemMessage.important(Component.translatable(msg, params)));
         } else {
-            MC.player.sendSystemMessage(Component.translatable(msg, params));
+            MC.player.sendSystemMessage(SystemMessage.info(Component.translatable(msg, params)));
         }
-        MC.player.sendSystemMessage(Component.literal(""));
     }
 
     private static void msg(String msg) {

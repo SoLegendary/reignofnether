@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud.playerdisplay;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AllianceAction;
 import com.solegendary.reignofnether.alliance.AllianceServerboundPacket;
@@ -311,11 +312,11 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
 
     private void requestAlliance() {
         if (GameruleClient.lockAlliances && MC.player != null) {
-            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+            MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("alliance.reignofnether.alliances_lock")));
             return;
         }
         if (GameruleClient.coopMode && MC.player != null) {
-            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock_coop"));
+            MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("alliance.reignofnether.alliances_lock_coop")));
             return;
         }
         AllianceServerboundPacket.doAllianceAction(AllianceAction.REQUEST, playerName);
@@ -333,11 +334,11 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
 
     private void disbandAlliance() {
         if (GameruleClient.lockAlliances && MC.player != null) {
-            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock"));
+            MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("alliance.reignofnether.alliances_lock")));
             return;
         }
         if (GameruleClient.coopMode && MC.player != null) {
-            MC.player.sendSystemMessage(Component.translatable("alliance.reignofnether.alliances_lock_coop"));
+            MC.player.sendSystemMessage(SystemMessage.error(Component.translatable("alliance.reignofnether.alliances_lock_coop")));
             return;
         }
         AllianceServerboundPacket.doAllianceAction(AllianceAction.DISBAND, playerName);

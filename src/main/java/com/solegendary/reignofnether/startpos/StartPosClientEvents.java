@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.startpos;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.faction.Faction;
@@ -45,10 +46,10 @@ public class StartPosClientEvents {
                     startPos.ready = ready;
                     if (MC.player != null) {
                         if (startPos.ready) {
-                            MC.player.sendSystemMessage(Component.translatable("startpos.reignofnether.player_ready",
-                                    playerName, getNumPlayersReady(), getNumEnabledPoses()));
+                            MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("startpos.reignofnether.player_ready",
+                                    playerName, getNumPlayersReady(), getNumEnabledPoses())));
                         } else {
-                            MC.player.sendSystemMessage(Component.translatable("startpos.reignofnether.player_not_ready", playerName));
+                            MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("startpos.reignofnether.player_not_ready", playerName)));
                         }
                     }
                 }
