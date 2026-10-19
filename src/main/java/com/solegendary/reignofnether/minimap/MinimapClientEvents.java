@@ -999,7 +999,7 @@ public class MinimapClientEvents {
 
     // each ping type has its own small symbol. The map is drawn rotated 45°,
     // so shapes are tested in screen-aligned axes (u, v); every symbol is symmetric, so the rotation's sign
-    // doesn't matter: Help = ring with a dot, Attack = X, Enemy = diamond, Defend = square, On my way = plus
+    // doesn't matter. Same shapes as PingType.symbol: Help ◎ ring with a dot, Attack ⚔ X, Enemy ◇ diamond, Defend □ square
     static boolean isMarkerPixel(PingType type, int dx, int dz) {
         double u = (dx - dz) / Math.sqrt(2), v = (dx + dz) / Math.sqrt(2);
         double r = PING_RADIUS, t = PING_THICKNESS;
@@ -1012,7 +1012,6 @@ public class MinimapClientEvents {
             case ATTACK -> au <= r * 0.8 && av <= r * 0.8 && Math.abs(au - av) <= t * 0.6;
             case ENEMY -> au + av <= r && au + av > r - t;
             case DEFEND -> Math.max(au, av) <= r * 0.8 && Math.max(au, av) > r * 0.8 - t;
-            default -> (au <= t * 0.5 && av <= r * 0.8) || (av <= t * 0.5 && au <= r * 0.8);
         };
     }
 

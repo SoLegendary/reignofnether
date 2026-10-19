@@ -2364,8 +2364,8 @@
     "chat.reignofnether.all": "[All]",
     "chat.reignofnether.spectator": "[Spec]",
     "chat.reignofnether.team": "[Team]",
-    "ping.reignofnether.help": "⚠ Help me!",
-    "ping.reignofnether.defend": "◆ Defend here",
-    "ping.reignofnether.attack": "⚔ Attack here",
-    "ping.reignofnether.enemy": "◎ Enemy spotted"
+    "ping.reignofnether.help": "Help me!",
+    "ping.reignofnether.defend": "Defend here",
+    "ping.reignofnether.attack": "Attack here",
+    "ping.reignofnether.enemy": "Enemy spotted"
 }

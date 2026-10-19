@@ -11,7 +11,7 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -88,7 +88,7 @@ public class PingClientEvents {
         PingType hovered = pick(mouseX() - cx, mouseY() - cy);
 
         for (int i = 0; i < WHEEL.length; i++) {
-            String label = I18n.get(WHEEL[i].langKey());
+            Component label = WHEEL[i].label();
             int w = MC.font.width(label);
             // up/down are centred above/below; left/right start a gap away from the centre so long labels
             // grow outwards instead of into each other

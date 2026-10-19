@@ -48,7 +48,7 @@ public class MapMarkerClientboundPacket {
         ctx.get().enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
                 MinimapClientEvents.addMapMarker(x, y, z, playerName, type);
-                TeamChatClientboundPacket.show(playerName, TeamChatServerEvents.Scope.TEAM, Component.translatable(type.langKey()));
+                TeamChatClientboundPacket.show(playerName, TeamChatServerEvents.Scope.TEAM, type.label());
                 success.set(true);
             });
         });
