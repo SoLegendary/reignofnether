@@ -298,8 +298,7 @@ public class MatchStartScreen extends Screen {
                 continue;
             }
 
-            StartPos shown = StartPosClientEvents.isHidden(sp) ? new StartPos(sp.pos, sp.colorId) : sp;
-            Button spButton = shown.getButton(localName, isOp);
+            Button spButton = StartPosClientEvents.onMap(sp).getButton(localName, isOp);
             int bx = px - btnFrame / 2;
             int by = pz - btnFrame / 2;
             spButton.render(g, bx, by, mx, my);

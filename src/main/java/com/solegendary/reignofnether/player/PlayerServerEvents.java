@@ -930,7 +930,7 @@ public class PlayerServerEvents {
             text.withStyle(s -> s.withColor(color));
         Component line = important ? SystemMessage.important(text) : SystemMessage.info(text);
         for (ServerPlayer player : players)
-            player.sendSystemMessage(SystemMessage.info(line));
+            player.sendSystemMessage(line);
     }
 
     public static void sendMessageToAllPlayers(String msg, boolean important, Object... formatArgs) {
@@ -945,7 +945,7 @@ public class PlayerServerEvents {
         Component text = Component.translatable(msg, formatArgs);
         for (ServerPlayer player : players) {
             if (player.getName().getString().equals(playerName)) {
-                player.sendSystemMessage(SystemMessage.info(important ? SystemMessage.important(text) : SystemMessage.info(text)));
+                player.sendSystemMessage(important ? SystemMessage.important(text) : SystemMessage.info(text));
                 return;
             }
         }

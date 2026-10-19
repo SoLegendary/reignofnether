@@ -27,8 +27,9 @@ public class PingServerEvents {
         if (server == null || !allow(sender, System.currentTimeMillis()))
             return false;
         // a spectator (e.g. a defeated player still allied to their old team) only reaches other spectators
-        Set<String> team = PlayerServerEvents.isGameActive() && !PlayerServerEvents.isRTSPlayer(sender)
-                ? Set.of(sender) : AlliancesServerEvents.getAllConnectedAllies(sender); // includes the sender
+        Set<String> team = new HashSet<>(Set.of(sender));
+        if (!PlayerServerEvents.isGameActive() || PlayerServerEvents.isRTSPlayer(sender))
+            team.addAll(AlliancesServerEvents.getAllAllies(sender)); // direct allies only, like before
         MapMarkerClientboundPacket packet = new MapMarkerClientboundPacket(pos.getX(), pos.getY(), pos.getZ(), sender, type);
         SoundAction sound = type == PingType.HELP || type == PingType.ENEMY ? SoundAction.ENEMY : SoundAction.ALLY;
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {

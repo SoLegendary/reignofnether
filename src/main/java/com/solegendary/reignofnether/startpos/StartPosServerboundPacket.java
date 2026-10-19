@@ -87,6 +87,10 @@ public class StartPosServerboundPacket {
                 case RESERVE -> {
                     if (StartPosServerEvents.isStartingGame())
                         return;
+                    // never take someone else's seat (with hideEnemyPicks an enemy seat looks empty on the map)
+                    if (StartPosServerEvents.startPoses.stream().anyMatch(sp -> sp.pos.equals(blockPos) &&
+                            !sp.playerName.isBlank() && !sp.playerName.equals(playerName)))
+                        return;
                     for (StartPos startPos : StartPosServerEvents.startPoses) {
                         if (startPos.pos.equals(blockPos) && startPos.enabled) {
                             startPos.reset();

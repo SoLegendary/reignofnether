@@ -4,9 +4,11 @@ import com.solegendary.reignofnether.chat.TeamChatServerEvents.Scope;
 import com.solegendary.reignofnether.player.PlayerColors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
@@ -54,8 +56,15 @@ public class TeamChatClientboundPacket {
                 .append(message.copy().withStyle(ChatFormatting.GRAY));
     }
 
+    // respects the player's chat visibility setting and their blocked/hidden players, like vanilla chat
     public static void show(String sender, Scope scope, Component message) {
-        Minecraft.getInstance().gui.getChat().addMessage(format(sender, scope, message));
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.chatVisibility().get() != ChatVisiblity.FULL)
+            return;
+        PlayerInfo info = mc.getConnection() == null ? null : mc.getConnection().getPlayerInfo(sender);
+        if (info != null && mc.getPlayerSocialManager().shouldHideMessageFrom(info.getProfile().getId()))
+            return;
+        mc.gui.getChat().addMessage(format(sender, scope, message));
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {

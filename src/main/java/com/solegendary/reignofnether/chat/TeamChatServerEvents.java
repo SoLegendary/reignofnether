@@ -4,6 +4,8 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.ServerChatEvent;
@@ -26,7 +28,7 @@ public class TeamChatServerEvents {
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onChat(ServerChatEvent evt) {
-        if (evt.isCanceled() || !PlayerServerEvents.isGameActive())
+        if (evt.isCanceled() || !isMatch())
             return;
         String name = evt.getPlayer().getName().getString();
         String msg = evt.getRawText().trim();
@@ -36,6 +38,11 @@ public class TeamChatServerEvents {
             msg = msg.substring(1).trim();
         if (!msg.isEmpty())
             send(name, scope, msg);
+    }
+
+    // a real match; sandbox and survival chat stays as vanilla
+    static boolean isMatch() {
+        return PlayerServerEvents.isGameActive() && !SandboxServer.isAnyoneASandboxPlayer() && !SurvivalServerEvents.isEnabled();
     }
 
     // '!' talks to everyone, but only for players: spectators never reach the players, '!' or not
@@ -55,7 +62,7 @@ public class TeamChatServerEvents {
         for (ServerPlayer p : sentTo)
             PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> p), packet);
         // spectators follow every team's chat (players never see the other team's)
-        if (scope == Scope.TEAM && PlayerServerEvents.isGameActive()) {
+        if (scope == Scope.TEAM && isMatch()) {
             TeamChatClientboundPacket tagged = new TeamChatClientboundPacket(sender, Scope.TEAM_SPECTATED, text);
             for (ServerPlayer p : server.getPlayerList().getPlayers())
                 if (!sentTo.contains(p) && !PlayerServerEvents.isRTSPlayer(p.getName().getString()))
@@ -65,7 +72,7 @@ public class TeamChatServerEvents {
 
     static List<ServerPlayer> recipients(MinecraftServer server, String sender, Scope scope) {
         List<ServerPlayer> list = new ArrayList<>();
-        Set<String> team = scope == Scope.TEAM ? AlliancesServerEvents.getAllConnectedAllies(sender) : Set.of();
+        Set<String> team = scope == Scope.TEAM ? AlliancesServerEvents.getAllAllies(sender) : Set.of();
         for (ServerPlayer p : server.getPlayerList().getPlayers()) {
             String n = p.getName().getString();
             boolean add = switch (scope) {

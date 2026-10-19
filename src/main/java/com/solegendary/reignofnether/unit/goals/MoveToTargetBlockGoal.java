@@ -55,9 +55,13 @@ public class MoveToTargetBlockGoal extends Goal {
     // so the group arrives together instead of stringing out. 0 = no cap; cleared by the next order.
     public double groupSpeed = 0;
 
-    public float getSpeedMod(Unit u) {
+    private static float uncappedSpeedMod(Unit u) {
         float speedMod = u.getSpeedModifier();
-        if (speedMod < 1.0f) speedMod = (float) Math.sqrt(speedMod);
+        return speedMod < 1.0f ? (float) Math.sqrt(speedMod) : speedMod;
+    }
+
+    public float getSpeedMod(Unit u) {
+        float speedMod = uncappedSpeedMod(u);
         if (groupSpeed > 0) {
             double own = mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * speedMod;
             if (own > groupSpeed)
@@ -68,11 +72,7 @@ public class MoveToTargetBlockGoal extends Goal {
 
     // how fast this unit walks uncapped, for working out a group's speed
     public double getWalkSpeed(Unit u) {
-        double cap = groupSpeed;
-        groupSpeed = 0;
-        double speed = mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * getSpeedMod(u);
-        groupSpeed = cap;
-        return speed;
+        return mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * uncappedSpeedMod(u);
     }
 
     public MoveToTargetBlockGoal(Mob mob, boolean persistent, int reachRange) {

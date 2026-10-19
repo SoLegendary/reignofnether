@@ -1871,7 +1871,7 @@ public class HudClientEvents {
 
                 // Render the Button overlaid at the map screen position:
                 if (MinimapClientEvents.isWorldXZinsideMap(xc, zc)) {
-                    Button button = startPos.getButton(MC.player.getName().getString(), MC.player.hasPermissions(4));
+                    Button button = StartPosClientEvents.onMap(startPos).getButton(MC.player.getName().getString(), MC.player.hasPermissions(4));
                     Vec2 worldPos = new Vec2(xc, zc);
                     Vec2 screenPos = MinimapClientEvents.worldPosToMinimapScreen((int) worldPos.x, (int) worldPos.y);
                     int btnX = (int) screenPos.x - Button.DEFAULT_ICON_FRAME_SIZE / 2;

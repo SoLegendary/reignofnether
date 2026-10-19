@@ -86,7 +86,12 @@ public class StartPosClientEvents {
         return mine == null || mine.colorId != sp.colorId;
     }
 
-    // what other players may see of a hidden seat: the player, but no faction
+    // how a seat shows on the map: a hidden one looks like an empty spot
+    public static StartPos onMap(StartPos sp) {
+        return isHidden(sp) ? new StartPos(sp.pos, sp.colorId) : sp;
+    }
+
+    // what other players may see of a hidden seat in the roster: the player, but no faction
     public static StartPos masked(StartPos sp) {
         StartPos m = new StartPos(sp.pos, Factions.NONE, sp.playerName, sp.colorId);
         m.ready = sp.ready;
