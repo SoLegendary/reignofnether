@@ -1197,7 +1197,16 @@ public class UnitServerEvents {
     }
 
     @SubscribeEvent
+    public static void onMobEffectRemoved(MobEffectEvent.Remove evt) {
+        onMobEffectGone(evt);
+    }
+
+    @SubscribeEvent
     public static void onMobEffectExpired(MobEffectEvent.Expired evt) {
+        onMobEffectGone(evt);
+    }
+
+    private static void onMobEffectGone(MobEffectEvent evt) {
         // halve level of all enchants
         if (evt.getEffectInstance() != null) {
             MobEffect effect = evt.getEffectInstance().getEffect();
