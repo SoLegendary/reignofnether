@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.pathfinding.RtsPathfinder;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.level.pathfinder.Node;
@@ -49,6 +50,30 @@ public class MoveToTargetBlockGoal extends Goal {
     // -> reset) is deferred to onPathReady, which compares the new path against repathFromFinalNode.
     protected boolean pendingRepath = false;
     @Nullable protected BlockPos repathFromFinalNode = null;
+
+    // speed matching: units ordered to move as a group walk at the slowest member's speed (blocks per tick),
+    // so the group arrives together instead of stringing out. 0 = no cap; cleared by the next order.
+    public double groupSpeed = 0;
+
+    public float getSpeedMod(Unit u) {
+        float speedMod = u.getSpeedModifier();
+        if (speedMod < 1.0f) speedMod = (float) Math.sqrt(speedMod);
+        if (groupSpeed > 0) {
+            double own = mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * speedMod;
+            if (own > groupSpeed)
+                speedMod *= (float) (groupSpeed / own);
+        }
+        return speedMod;
+    }
+
+    // how fast this unit walks uncapped, for working out a group's speed
+    public double getWalkSpeed(Unit u) {
+        double cap = groupSpeed;
+        groupSpeed = 0;
+        double speed = mob.getAttributeValue(Attributes.MOVEMENT_SPEED) * getSpeedMod(u);
+        groupSpeed = cap;
+        return speed;
+    }
 
     public MoveToTargetBlockGoal(Mob mob, boolean persistent, int reachRange) {
         this.mob = mob;
@@ -180,9 +205,7 @@ public class MoveToTargetBlockGoal extends Goal {
             }
         }
          */
-        float speedMod = u.getSpeedModifier();
-        if (speedMod < 1.0f) speedMod = (float) Math.sqrt(speedMod);
-        this.mob.getNavigation().moveTo(path, speedMod);
+        this.mob.getNavigation().moveTo(path, getSpeedMod(u));
         // Broadcast the path so clients can render it briefly. Server-only — clients
         // that received the packet decide whether to render based on ownership/FOW.
         if (!this.mob.level().isClientSide()) {
@@ -227,9 +250,7 @@ public class MoveToTargetBlockGoal extends Goal {
             return;
         }
         // Follow even a partial (unreachable) path so the unit still makes progress toward the target.
-        float speedMod = u.getSpeedModifier();
-        if (speedMod < 1.0f) speedMod = (float) Math.sqrt(speedMod);
-        this.mob.getNavigation().moveTo(path, speedMod);
+        this.mob.getNavigation().moveTo(path, getSpeedMod(u));
         // The RTS pathfinder is async: node 0 is the unit's position when the request was SUBMITTED, a few
         // ticks ago. By delivery the unit has often drifted off it (crowd/formation separation, momentum),
         // and vanilla navigation always starts following at node 0 - so it would steer the unit BACK to the
@@ -318,6 +339,7 @@ public class MoveToTargetBlockGoal extends Goal {
     }
 
     public void stopMoving() {
+        groupSpeed = 0;
         recalcCooldown = 0;
         pathPending = false;
         pendingRepath = false;

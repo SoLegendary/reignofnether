@@ -50,6 +50,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     // How far below a resource block a worker may stand and still reach it: mining reach is REACH_RANGE (3D),
     // so standing ~4 below an adjacent column keeps it in range (sqrt(1^2 + 4^2) < 5).
     private static final int MAX_REACH_DOWN = 4;
+    // a worker this close to its target that still can't gather it gives up on the block for everyone (see dropTarget)
+    private static final int GIVE_UP_DIST = REACH_RANGE * 2;
     private static final int DEFAULT_MAX_GATHER_TICKS = 600; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private float gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
@@ -261,7 +263,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
             if (ticksStationaryWithTarget >= TICKS_STATIONARY_TIMEOUT) {
                 ticksStationaryWithTarget = 0;
-                data.gatherTarget = null;
+                dropTarget();
                 return;
             }
             lastOnPos = this.mob.getOnPos();
@@ -390,7 +392,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 if (mob.getNavigation().isDone())
                     ticksWithoutTarget += (TICK_CD / 2);
                 if (ticksWithoutTarget >= NO_TARGET_TIMEOUT)
-                    this.removeGatherTarget();
+                    dropTarget();
             }
         } else {
             ticksIdle += (TICK_CD / 2);
@@ -537,6 +539,19 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
         searchCdTicksLeft = 0;
         ticksWithoutTarget = 0;
+    }
+
+    // the worker got as close as it can and still can't reach the block: drop it from the shared resource index so
+    // no worker (or bot) picks it again. Only when standing near it (horizontally - the usual case is a log high up a
+    // tall tree) with room in its inventory, so a worker stuck far away or full doesn't hide a good block. It comes
+    // back if the block changes or its chunk is rescanned.
+    private void dropTarget() {
+        double dx = data.gatherTarget.getX() + 0.5 - mob.getX(), dz = data.gatherTarget.getZ() + 0.5 - mob.getZ();
+        if (!Unit.atMaxResources((Unit) mob) && dx * dx + dz * dz <= GIVE_UP_DIST * GIVE_UP_DIST) {
+            ResourceIndex.onBlockChange(mob.level(), data.gatherTarget, Blocks.AIR.defaultBlockState());
+            data.todoGatherTargets.remove(data.gatherTarget);
+        }
+        removeGatherTarget();
     }
 
     // stop gathering and searching entirely, and remove saved data for
