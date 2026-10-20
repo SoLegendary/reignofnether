@@ -57,9 +57,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.FormattedCharSequence;
@@ -80,7 +78,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -280,20 +277,7 @@ public interface Unit {
 
     static void tick(Unit unit) {
         Mob unitMob = (Mob) unit;
-        if (!unitMob.level().isClientSide() && unitMob.level() instanceof ServerLevel serverLevel) {
-            ServerChunkCache chunkProvider = serverLevel.getChunkSource();
-
-            BlockPos unitPos = unitMob.blockPosition();
-            ChunkPos currentChunkPos = new ChunkPos(unitPos);
-
-            // Load a 2-chunk radius around the unit
-            for (int dx = -2; dx <= 2; dx++) {
-                for (int dz = -2; dz <= 2; dz++) {
-                    ChunkPos chunkPos = new ChunkPos(currentChunkPos.x + dx, currentChunkPos.z + dz);
-                    chunkProvider.addRegionTicket(TicketType.FORCED, chunkPos, 2, chunkPos);
-                }
-            }
-        }
+        UnitChunkTickets.update(unitMob);
         boolean clientSide = ((Entity) unit).level().isClientSide();
         double ticksPerSec = clientSide ? RtsDebugClientEvents.getCappedTPS() : 20d;
 
