@@ -5,6 +5,7 @@ import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
@@ -126,10 +127,12 @@ public class NetherZone {
                 if (!ncz.isRestoring && bp.distSqr(ncz.origin) < ncz.maxRange * ncz.maxRange)
                     continue outerloop;
 
+            BlockState oldBs = level.getBlockState(bp);
             BlockState bs = NetherBlocks.getOverworldBlock(level, bp);
             BlockState bsPlant = NetherBlocks.getOverworldPlantBlock(level, bp.above(), true);
 
             if (bs != null && !isBlockInBuilding(level, bp)) {
+                bs = retainFluidState(oldBs, bs);
                 level.setBlockAndUpdate(bp, bs);
                 if (bsPlant != null)
                     level.setBlockAndUpdate(bp.above(), bsPlant);
@@ -168,10 +171,12 @@ public class NetherZone {
             if (random.nextDouble() > chance)
                 continue;
 
+            BlockState oldBs = level.getBlockState(bp);
             BlockState bs = NetherBlocks.getNetherBlock(level, bp);
             BlockState bsPlant = NetherBlocks.getNetherPlantBlock(level, bp.above());
 
             if (bs != null && !isBlockInBuilding(level, bp)) {
+                bs = retainFluidState(oldBs, bs);
                 if (bsPlant != null) {
                     level.destroyBlock(bp.above(), false);
                     level.setBlockAndUpdate(bp.above(), bsPlant);
@@ -179,5 +184,17 @@ public class NetherZone {
                 level.setBlockAndUpdate(bp, bs);
             }
         }
+    }
+
+    // if both the old and new blocks are fluids (water <-> lava), keep the flow level
+    // (0 = source, 1-7 = flowing, 8+ = falling) instead of resetting to a source block
+    private BlockState retainFluidState(BlockState oldBs, BlockState newBs) {
+        if (newBs.getBlock() instanceof LiquidBlock &&
+                oldBs.getBlock() instanceof LiquidBlock &&
+                oldBs.hasProperty(LiquidBlock.LEVEL) &&
+                newBs.hasProperty(LiquidBlock.LEVEL)) {
+            return newBs.setValue(LiquidBlock.LEVEL, oldBs.getValue(LiquidBlock.LEVEL));
+        }
+        return newBs;
     }
 }

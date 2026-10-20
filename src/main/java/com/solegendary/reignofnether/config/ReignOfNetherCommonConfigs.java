@@ -318,7 +318,7 @@ public class ReignOfNetherCommonConfigs {
     public static class ResearchCosts implements Costs {
         public static final ResourceCostConfigEntry RESEARCH_GOLEM_SMITHING = ResourceCostConfigEntry.Research(0, 150,200, 90, ResourceCosts.RESEARCH_GOLEM_SMITHING, "Golem Smithing Research Config");
         public static final ResourceCostConfigEntry RESEARCH_SUPERIOR_BLACKSMITH = ResourceCostConfigEntry.Research(0, 100,200, 90, ResourceCosts.RESEARCH_SUPERIOR_BLACKSMITH, "Superior Blacksmith Research Config");
-        public static final ResourceCostConfigEntry RESEARCH_MILITIA_BOWS = ResourceCostConfigEntry.Research(250,500,0, 160, ResourceCosts.RESEARCH_MILITIA_BOWS, "Militia Bows Research Config");
+        public static final ResourceCostConfigEntry RESEARCH_MILITIA_BOWS = ResourceCostConfigEntry.Research(200,400,0, 160, ResourceCosts.RESEARCH_MILITIA_BOWS, "Militia Bows Research Config");
         public static final ResourceCostConfigEntry RESEARCH_LAB_LIGHTNING_ROD = ResourceCostConfigEntry.Research(0,0,400, 120, ResourceCosts.RESEARCH_LAB_LIGHTNING_ROD, "Lightning Lab Research Config");
         public static final ResourceCostConfigEntry RESEARCH_RESOURCE_CAPACITY = ResourceCostConfigEntry.Research(200,200,0, 90, ResourceCosts.RESEARCH_RESOURCE_CAPACITY, "Stockpile Resource Capacity Research Config");
         public static final ResourceCostConfigEntry RESEARCH_ITEM_BACKPACK = ResourceCostConfigEntry.Research(0,100, 100, 90, ResourceCosts.RESEARCH_ITEM_BACKPACKS, "Item Backpacks Research Config");
@@ -377,7 +377,7 @@ public class ReignOfNetherCommonConfigs {
         public static final ResourceCostConfigEntry ENCHANT_VIGOR = ResourceCostConfigEntry.Ability(0,50, 50, ResourceCosts.ENCHANT_VIGOR, "Vigor Enchantment Config");
         public static final ResourceCostConfigEntry ENCHANT_GUST = ResourceCostConfigEntry.Ability(0,50, 50, ResourceCosts.ENCHANT_GUST, "Gust Enchantment Config");
         public static final ResourceCostConfigEntry EQUIP_LEATHER_ARMOR = ResourceCostConfigEntry.Ability(0,0, 30, ResourceCosts.EQUIP_LEATHER_ARMOR, "Equip Leather Armor Config");
-        public static final ResourceCostConfigEntry EQUIP_CHAINMAIL_ARMOR = ResourceCostConfigEntry.Ability(0,0, 40, ResourceCosts.EQUIP_CHAINMAIL_ARMOR, "Equip Chainmail Armor Config");
+        public static final ResourceCostConfigEntry EQUIP_CHAINMAIL_ARMOR = ResourceCostConfigEntry.Ability(0,0, 30, ResourceCosts.EQUIP_CHAINMAIL_ARMOR, "Equip Chainmail Armor Config");
     }
     public interface Costs {}
 }

@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.building.buildings.placements.SculkCatalyst
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.entities.GhastUnitFireball;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
@@ -1112,6 +1113,12 @@ public class UnitServerEvents {
             evt.setAmount(evt.getAmount() / 2);
         }
 
+        if (evt.getSource().getDirectEntity() instanceof AdjustablePrimedTnt tnt) {
+            if (tnt.getExplosionPower() == 2.0f) // lvl 1 piglin TNT
+                evt.setAmount(evt.getAmount() * 1.2f);
+            else if (tnt.getExplosionPower() >= 4.0f) // lvl 3 piglin TNT or TNT items
+                evt.setAmount(evt.getAmount() * 0.9f);
+        }
     }
 
     private static final float EXPLOSIVE_HIT_SPLASH_MULT = 0.5f;

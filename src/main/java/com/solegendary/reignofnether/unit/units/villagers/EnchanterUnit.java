@@ -283,8 +283,8 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
     private static final int ENCHANT_EXP = 40;
 
     // tether bonus ratios (fraction of the enchanter's attack damage and item bonuses given to tethered units)
-    private static final double TETHER_BONUS_RATIO = 0.5d;
-    private static final double TETHER_BONUS_RATIO_AMPLIFIED = 0.75d; // 0.5 * 1.5 under enchantment amplifier
+    private static final double TETHER_BONUS_RATIO = 1.0d;
+    private static final double TETHER_BONUS_RATIO_AMPLIFIED = 1.5d;
     private static final String TETHER_ITEM_MOD_PREFIX = "reignofnether:tether_item:";
 
     // non-looping animations

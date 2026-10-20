@@ -40,7 +40,7 @@ public interface RangeIndicator {
                     radius = ability.radius;
                     bp = ((LivingEntity) unit).getOnPos();
                     showRangeLine = ability.showRangeLine;
-                    showRadiusCircle = ability.showRadiusCircle;
+                    showRadiusAtCursor = ability.showRadiusCircle;
                     showRangeCircle = ability.showRangeCircle;
                     hasAbilityWithRange = true;
                     break;

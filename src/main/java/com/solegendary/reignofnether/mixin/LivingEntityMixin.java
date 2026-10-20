@@ -47,9 +47,13 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import javax.annotation.Nullable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -289,6 +293,13 @@ public abstract class LivingEntityMixin extends Entity {
         LivingEntity le = (LivingEntity) (Object) this;
         if (le.hasEffect(MobEffectRegistrar.PHASING.get())) {
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "setLastHurtByMob", at = @At("TAIL"))
+    private void extendHurtByMobTimer(@Nullable LivingEntity le, CallbackInfo ci) {
+        if (le instanceof Unit unit && unit.getOwnerName().isBlank()) {
+            this.getPersistentData().putString("lastHurtByRTSPlayer", unit.getOwnerName());
         }
     }
 }

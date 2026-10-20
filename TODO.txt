@@ -10,12 +10,18 @@ Balance
 -------
 [❌] Slimes and magma cubes now roll on attack too
 [❌] Add roof to dark watchtower
+
+[✔] Militia Bows cost reduced from (250 food, 500 wood) to (200 food, 400 wood)
+[✔] Blacksmith Chainmail Armour cost reduced from 40 ore to 30 ore
+
+[🟡] The Enchanter's Protective Enchantment has been replaced with Enchanted Tether
+    - Tether to up to 1/2/3 nearby allies for 30s
+    - Tethered units take half damage and gain the enchanter's damage and passive item stats
+    - March of Progress raises the damage and item bonus by 50%
+
 [❌] Villager reworks
     - Free-attacking vexes
     - Siege tank mode for ravager artillery (by burrowing them partially into the ground)
-    - Reduce cost of iron armor
-    - Reduce cost of militia archers
-    - Rework enchanter absorption to be like MC dungeons (active linked buff)
     - Royal guard ult strength from II to I but unpushable
     - Block animations with block displays for royal guard slam
         - And make slam single click like war stomp
@@ -24,7 +30,8 @@ Balance
 
 [✔] Bat HP reduced from 15hp to 10hp
 [🟡] Ghasts can now benefit from increased attack damage
-[❌] Piglin merchant TNT damage rescaled from 13.3/20/26.7 to 16/20/24
+[🟡] Piglin merchant TNT damage rescaled from 13.3/20/26.7 to 16/20/24 (radius unchanged)
+[🟡] Throwable TNT items are now equivalent to a level 3 merchant TNT
 
 Quality of Life
 ---------------
@@ -32,10 +39,12 @@ Quality of Life
 [❌] Villager profession bonuses as passive icons
 [❌] /rtsapi-set-scenario-role
     - "only works before game start and role is empty, not for in game"
-[❌] Flowing water is now converted into flowing lava with the same flow state
+[🟡] Flowing water and lava now retain the same liquid level state when converted between each other
+    - This means flowing water now becomes cobble & magma instead of lava source blocks
 [❌] Outlines of enemy buildings at the start of the game are no longer shown when fog of war is enabled
     - This is prevent inferring your opponent's faction when they selected random
-[❌] Credit neutral kills for fire and wither damage
+[🟡] Extended the kill credit timer from 5s to 30s
+[❌] Improved visibility of items on the ground
 
 Bugfixes
 --------
@@ -44,6 +53,7 @@ Bugfixes
 
 [🟡] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
 [🟡] Fixed mob effects not showing if it was applied while outside of render range or logged out
+[❌] Fixed an issue where pillagers did not benefit from their enchantment until after their next shot
 
 Languages
 ---------

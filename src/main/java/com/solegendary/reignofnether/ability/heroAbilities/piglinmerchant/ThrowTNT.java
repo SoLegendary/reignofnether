@@ -104,7 +104,7 @@ public class ThrowTNT extends HeroAbility {
         return List.of(
                 fcs(I18n.get("abilities.reignofnether.throw_tnt") + " " + rankString(hero), true),
                 fcsIcons(I18n.get("abilities.reignofnether.throw_tnt.stats",
-                        Math.round(explosionPower * AdjustablePrimedTnt.DAMAGE_PER_POWER),
+                        Math.round(8 + (explosionPower * 4)),
                         cooldownMax / 20, RANGE, manaCost)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.throw_tnt.tooltip1")),

@@ -936,7 +936,7 @@ public class BuildingServerEvents {
                     atkDmg = pillagerUnit.getUnitAttackDamage() / 2;
                     building.lastAttacker = pillagerUnit;
                 } else if (exp.getExploder() instanceof AdjustablePrimedTnt aTNT) {
-                    atkDmg = aTNT.getExplosionPower() *  AdjustablePrimedTnt.DAMAGE_PER_POWER;
+                    atkDmg = aTNT.getExplosionBuildingDamage();
                 } else if (exp.getExploder() instanceof PrimedTnt) {
                     atkDmg = TNT_BUILDING_BASE_DAMAGE;
                 }

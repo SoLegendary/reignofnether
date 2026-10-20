@@ -593,7 +593,7 @@
     "abilities.reignofnether.enchanted_tether": "Enchanted Tether",
     "abilities.reignofnether.enchanted_tether.stats": "\uE004  %ds   \uE008  %d",
     "abilities.reignofnether.enchanted_tether.tooltip1": "Tether to a non-hero ally, halving damage taken and ",
-    "abilities.reignofnether.enchanted_tether.tooltip2": "adding 50% of the enchanter's damage and item bonuses.",
+    "abilities.reignofnether.enchanted_tether.tooltip2": "adding the enchanter's damage and item bonuses.",
     "abilities.reignofnether.enchanted_tether.tooltip3": "Breaks if more than 15 blocks away.",
     "abilities.reignofnether.enchanted_tether.rank1": "Rank 1: %d max charges, %d cooldown",
     "abilities.reignofnether.enchanted_tether.rank2": "Rank 2: %d max charges, %d cooldown",
@@ -604,7 +604,7 @@
     "abilities.reignofnether.march_of_progress.already_active": "March of Progress is already active",
     "abilities.reignofnether.march_of_progress.stats": "\uE004  %ds   \uE005  %d   \uE008  %d   per   second",
     "abilities.reignofnether.march_of_progress.tooltip1": "Toggle an aura that doubles the effect of all enchantments.",
-    "abilities.reignofnether.march_of_progress.tether_effect": "Also increases enchanted tether bonuses to 75%",
+    "abilities.reignofnether.march_of_progress.tether_effect": "Also increases enchanted tether bonuses by 50%",
     "abilities.reignofnether.march_of_progress.tooltip2": "The aura drains %d mana per second while active.",
 
     "abilities.reignofnether.can_be_toggled": "Can be toggled on or off",
