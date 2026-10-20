@@ -765,11 +765,7 @@ public class BuildingPlacement {
             int food = (int) (cost.food * NEUTRAL_BUILDING_BOUNTY_PERCENT);
             int wood = (int) (cost.wood * NEUTRAL_BUILDING_BOUNTY_PERCENT);
             int ore =  (int) (cost.ore * NEUTRAL_BUILDING_BOUNTY_PERCENT);
-            if (ItemServerEvents.ENABLED) {
-                resources = Resources.emeralds(unit.getOwnerName(), food + wood + ore);
-            } else {
-                resources = new Resources(unit.getOwnerName(), food, wood, ore);
-            }
+            resources = new Resources(unit.getOwnerName(), food, wood, ore);
             if (resources.getTotalValue() > 0) {
                 ResourcesClientboundPacket.showFloatingText(resources, centrePos);
                 ResourcesServerEvents.addSubtractResources(resources);

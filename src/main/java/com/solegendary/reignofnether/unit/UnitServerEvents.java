@@ -603,25 +603,38 @@ public class UnitServerEvents {
                 vUnit.incrementHunterExp();
         }
 
-        if (evt.getEntity() instanceof Unit unitKilled && evt.getSource().getEntity() instanceof Unit unit) {
+        String killerName = "";
+        CompoundTag tag = evt.getEntity().getPersistentData();
+        Entity directEntity = evt.getSource().getDirectEntity();
+        Entity sourceEntity = evt.getSource().getEntity();
+
+        if (evt.getSource().getEntity() instanceof Unit unit)
+            killerName = unit.getOwnerName();
+        else if (tag.contains("lastHurtByRTSPlayer"))
+            killerName = tag.getString("lastHurtByRTSPlayer");
+        else if (directEntity != null && directEntity.getPersistentData().contains("ownerName"))
+            killerName = directEntity.getPersistentData().getString("ownerName");
+        else if (sourceEntity != null && sourceEntity.getPersistentData().contains("ownerName"))
+            killerName = sourceEntity.getPersistentData().getString("ownerName");
+
+        if (evt.getEntity() instanceof Unit unitKilled && !killerName.isBlank()) {
             float bountyPercent = 0;
             if (unitKilled.getOwnerName().isEmpty()) {
                 bountyPercent = NEUTRAL_UNIT_BOUNTY_PERCENT;
-            } else if (!AlliancesServerEvents.isAlliedOrOwned(unitKilled.getOwnerName(), unit.getOwnerName())) {
+            } else if (!AlliancesServerEvents.isAlliedOrOwned(unitKilled.getOwnerName(), killerName) && evt.getSource().getEntity() instanceof Unit unit) {
                 int lootingLevel = ((LivingEntity) unit).getMainHandItem().getEnchantmentLevel(Enchantments.MOB_LOOTING);
                 bountyPercent = lootingLevel * UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
             }
             if (bountyPercent > 0) {
-
                 ResourceCost cost = unitKilled.getCost();
                 Resources resources;
                 int food = (int) (cost.food * bountyPercent);
                 int wood = (int) (cost.wood * bountyPercent);
                 int ore =  (int) (cost.ore * bountyPercent);
                 if (ItemServerEvents.ENABLED) {
-                    resources = Resources.emeralds(unit.getOwnerName(), food + wood + ore);
+                    resources = Resources.emeralds(killerName, food + wood + ore);
                 } else {
-                    resources = new Resources(unit.getOwnerName(), food, wood, ore);
+                    resources = new Resources(killerName, food, wood, ore);
                 }
                 if (resources.getTotalValue() > 0) {
                     ResourcesClientboundPacket.showFloatingText(resources, evt.getEntity().getOnPos());
@@ -1246,10 +1259,7 @@ public class UnitServerEvents {
         }
     }
 
-    private static float KNOCKBACK_RESIST_PER_TICKS = 0.01f;
-
     public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();
-    public static ArrayList<Pair<Integer, Integer>> knockbackResistIds = new ArrayList<>();
 
     @SubscribeEvent
     public static void onLivingKnockBack(LivingKnockBackEvent evt) {

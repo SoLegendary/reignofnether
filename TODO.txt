@@ -33,6 +33,8 @@ Balance
 [🟡] Piglin merchant TNT damage rescaled from 13.3/20/26.7 to 16/20/24 (radius unchanged)
 [🟡] Throwable TNT items are now equivalent to a level 3 merchant TNT
 
+[❌] Neutral buildings now drop regular resources as bounty again instead of emeralds
+
 Quality of Life
 ---------------
 [✔] Items are no longer destroyed by explosions
@@ -43,8 +45,10 @@ Quality of Life
     - This means flowing water now becomes cobble & magma instead of lava source blocks
 [❌] Outlines of enemy buildings at the start of the game are no longer shown when fog of war is enabled
     - This is prevent inferring your opponent's faction when they selected random
-[🟡] Extended the kill credit timer from 5s to 30s
+[🟡] Improved the accuracy of crediting killed neutrals for item drops and bounties
 [❌] Improved visibility of items on the ground
+
+[❌] Look into lag from neutral aggro logic?
 
 Bugfixes
 --------
