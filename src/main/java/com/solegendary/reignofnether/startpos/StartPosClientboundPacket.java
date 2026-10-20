@@ -31,6 +31,13 @@ public class StartPosClientboundPacket {
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
     }
 
+    // only who and whether they're ready: no position, faction or team
+    public static void sendHiddenPlayer(ServerPlayer player, String playerName, boolean ready) {
+        StartPosClientboundPacket packet = new StartPosClientboundPacket(StartPosAction.HIDDEN_PLAYER, BlockPos.ZERO, Factions.NONE, playerName, 0);
+        packet.ready = ready;
+        PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
     public static void clear(ServerPlayer player) {
         PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
                 new StartPosClientboundPacket(StartPosAction.CLEAR, new BlockPos(0,0,0), Factions.NONE, "", 0));

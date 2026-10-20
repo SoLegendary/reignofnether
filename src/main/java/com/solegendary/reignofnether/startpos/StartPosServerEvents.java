@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.startpos;
 
+import java.util.Comparator;
 import javax.annotation.Nullable;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import net.minecraft.server.MinecraftServer;
@@ -92,15 +93,18 @@ public class StartPosServerEvents {
         String name = player.getName().getString();
         StartPos viewerSeat = startPoses.stream().filter(sp -> sp.playerName.equals(name)).findFirst().orElse(null);
         StartPosClientboundPacket.clear(player);
+        List<StartPos> hidden = new ArrayList<>();
         for (StartPos sp : startPoses) {
             StartPosAction action = sp.enabled ? StartPosAction.ADD : StartPosAction.ADD_DISABLED;
-            if (isHiddenFrom(sp, viewerSeat, hidePicks)) {
-                StartPosClientboundPacket.sendTo(player, action, new StartPos(sp.pos, sp.colorId));
-                StartPosClientboundPacket.sendTo(player, StartPosAction.HIDDEN_PLAYER, sp);
-            } else {
-                StartPosClientboundPacket.sendTo(player, action, sp);
-            }
+            boolean isHidden = isHiddenFrom(sp, viewerSeat, hidePicks);
+            if (isHidden)
+                hidden.add(sp);
+            StartPosClientboundPacket.sendTo(player, action, isHidden ? new StartPos(sp.pos, sp.colorId) : sp);
         }
+        // after all seats and sorted by name, so the order can't be matched back to a seat
+        hidden.sort(Comparator.comparing(sp -> sp.playerName));
+        for (StartPos sp : hidden)
+            StartPosClientboundPacket.sendHiddenPlayer(player, sp.playerName, sp.ready);
     }
 
     // after any seat change: who sees what depends on everyone's seat, so resend it all
