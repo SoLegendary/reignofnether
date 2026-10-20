@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.startpos;
 
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
@@ -190,18 +191,25 @@ public class StartPosServerEvents {
                 } else {
                     PlayerServerEvents.sendMessageToAllPlayers("startpos.reignofnether.started_game", true);
                     SoundClientboundPacket.playSoundForAllPlayers(SoundAction.ALLY);
-                    for (ServerPlayer serverPlayer : PlayerServerEvents.players) {
-                        for (StartPos startPos : startPoses) {
-                            if (startPos.playerName.equals(serverPlayer.getName().getString()) && startPos.faction != Factions.NONE) {
-                                PlayerServerEvents.startRTS(
-                                        serverPlayer.getId(),
-                                        new Vec3(startPos.pos.getX(), startPos.pos.getY(), startPos.pos.getZ()),
-                                        startPos.faction,
-                                        startPos.colorId
-                                );
-                                break;
+                    FogOfWarServerEvents.setStartingPlayers(startPoses.stream()
+                            .filter(sp -> !sp.playerName.isBlank() && sp.faction != Factions.NONE)
+                            .map(sp -> sp.playerName).toList());
+                    try {
+                        for (ServerPlayer serverPlayer : PlayerServerEvents.players) {
+                            for (StartPos startPos : startPoses) {
+                                if (startPos.playerName.equals(serverPlayer.getName().getString()) && startPos.faction != Factions.NONE) {
+                                    PlayerServerEvents.startRTS(
+                                            serverPlayer.getId(),
+                                            new Vec3(startPos.pos.getX(), startPos.pos.getY(), startPos.pos.getZ()),
+                                            startPos.faction,
+                                            startPos.colorId
+                                    );
+                                    break;
+                                }
                             }
                         }
+                    } finally {
+                        FogOfWarServerEvents.setStartingPlayers(List.of());
                     }
                     // ally all players who start at the same color of start block
                     for (int i = 0; i < PlayerServerEvents.rtsPlayers.size(); i++) {

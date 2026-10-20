@@ -108,9 +108,19 @@ public class FogOfWarServerEvents {
         isRtsPlayerCache.clear();
     }
 
+    // players being started together (StartPosServerEvents): they're started one by one in the same tick, so
+    // without this the later ones still count as non-RTS and get sent the earlier players' capitols unfiltered
+    private static final Set<String> startingPlayers = ConcurrentHashMap.newKeySet();
+
+    public static void setStartingPlayers(Collection<String> names) {
+        startingPlayers.clear();
+        startingPlayers.addAll(names);
+    }
+
     // match by name; entity ids change on reconnect
     public static boolean isFogActiveFor(ServerPlayer player) {
         if (!enabled) return false;
+        if (startingPlayers.contains(player.getName().getString())) return true;
         Boolean cached = isRtsPlayerCache.get(player.getUUID());
         if (cached != null) return cached;
         boolean v = PlayerServerEvents.isRTSPlayer(player.getName().getString());
