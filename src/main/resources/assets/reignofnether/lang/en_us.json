@@ -2359,6 +2359,7 @@
     "matchstart.reignofnether.settings.op_only": "Gamerule settings require op.",
     "matchstart.reignofnether.hide_picks.on": "Enemy picks: hidden",
     "matchstart.reignofnether.hide_picks.off": "Enemy picks: visible",
+    "matchstart.reignofnether.other_teams": "OTHER TEAMS",
     "gamerule.hideEnemyPicks": "Hide other teams' factions and start positions in the match lobby",
     "key.reignofnether.ping": "Ping wheel (hold)",
     "chat.reignofnether.all": "[All]",

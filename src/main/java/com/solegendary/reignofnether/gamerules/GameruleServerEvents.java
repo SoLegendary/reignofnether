@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.gamerules;
 
+import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.solegendary.reignofnether.items.RandomItemDropRule;
@@ -92,6 +93,7 @@ public class GameruleServerEvents {
             if (args.containsKey("value")) {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setHideEnemyPicks(value);
+                StartPosServerEvents.syncAll(value); // the rule itself only changes after this event
             }
         } else if (nodes.get(1).getNode().getName().equals("scenarioMode")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();

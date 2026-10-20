@@ -1,5 +1,9 @@
 package com.solegendary.reignofnether.startpos;
 
+import javax.annotation.Nullable;
+import net.minecraftforge.server.ServerLifecycleHooks;
+import net.minecraft.server.MinecraftServer;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
@@ -75,6 +79,45 @@ public class StartPosServerEvents {
             StartPosClientboundPacket.unreadyPlayer(playerName);
     }
 
+    // hideEnemyPicks: a taken seat on another team is never sent to this player, only who sits there and if
+    // they're ready. A player without a seat yet (or a spectator) sees no taken seats.
+    static boolean isHiddenFrom(StartPos sp, @Nullable StartPos viewerSeat, boolean hidePicks) {
+        if (!hidePicks || sp.playerName.isBlank() || sp == viewerSeat)
+            return false;
+        return viewerSeat == null || viewerSeat.colorId != sp.colorId;
+    }
+
+    // send the whole seat list as this player may see it
+    public static void syncTo(ServerPlayer player, boolean hidePicks) {
+        String name = player.getName().getString();
+        StartPos viewerSeat = startPoses.stream().filter(sp -> sp.playerName.equals(name)).findFirst().orElse(null);
+        StartPosClientboundPacket.clear(player);
+        for (StartPos sp : startPoses) {
+            StartPosAction action = sp.enabled ? StartPosAction.ADD : StartPosAction.ADD_DISABLED;
+            if (isHiddenFrom(sp, viewerSeat, hidePicks)) {
+                StartPosClientboundPacket.sendTo(player, action, new StartPos(sp.pos, sp.colorId));
+                StartPosClientboundPacket.sendTo(player, StartPosAction.HIDDEN_PLAYER, sp);
+            } else {
+                StartPosClientboundPacket.sendTo(player, action, sp);
+            }
+        }
+    }
+
+    // after any seat change: who sees what depends on everyone's seat, so resend it all
+    public static void syncAll(boolean hidePicks) {
+        for (ServerPlayer player : PlayerServerEvents.players)
+            syncTo(player, hidePicks);
+    }
+
+    public static void syncAll() {
+        syncAll(hidePicks());
+    }
+
+    private static boolean hidePicks() {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        return server != null && server.getGameRules().getBoolean(GameRuleRegistrar.HIDE_ENEMY_PICKS);
+    }
+
     // the singleplayer/Essential host or an op
     public static boolean isHost(ServerPlayer player) {
         return player.hasPermissions(2) || player.server.isSingleplayerOwner(player.getGameProfile());
@@ -93,10 +136,7 @@ public class StartPosServerEvents {
                 }
             }
         }
-        if (enable)
-            StartPosClientboundPacket.enablePos(pos);
-        else
-            StartPosClientboundPacket.disablePos(pos);
+        syncAll();
     }
 
     @SubscribeEvent
@@ -112,7 +152,7 @@ public class StartPosServerEvents {
                             rtsStartBlock.defaultMapColor()).id
                 );
                 startPoses.add(newStartPos);
-                StartPosClientboundPacket.addPos(newStartPos);
+                syncAll();
             } else {
                 evt.setCanceled(true);
                 for (Player player : PlayerServerEvents.players)
@@ -139,12 +179,8 @@ public class StartPosServerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
-        for (StartPos startPos : startPoses) {
-            if (startPos.enabled)
-                StartPosClientboundPacket.addPos(startPos);
-            else
-                StartPosClientboundPacket.addDisabledPos(startPos);
-        }
+        if (evt.getEntity() instanceof ServerPlayer player)
+            syncTo(player, hidePicks());
     }
 
     private static void cullInvalidPoses(ServerLevel serverLevel) {
@@ -290,8 +326,7 @@ public class StartPosServerEvents {
         for (StartPos oldStartPos : oldStartPoses)
             if (!newBlockPoses.contains(oldStartPos.pos))
                 StartPosClientboundPacket.removePos(oldStartPos.pos);
-        for (StartPos startPos : startPoses)
-            StartPosClientboundPacket.addPos(startPos);
+        syncAll();
     }
 
     @SubscribeEvent
@@ -300,11 +335,12 @@ public class StartPosServerEvents {
         for (StartPos startPos : startPoses) {
             if (evt.getEntity() instanceof ServerPlayer player &&
                     startPos.playerName.equals(player.getName().getString())) {
-                StartPosClientboundPacket.unreservePos(startPos.pos);
                 startPos.reset();
                 shouldStopCountdown = true;
             }
         }
+        if (shouldStopCountdown)
+            syncAll();
         if (shouldStopCountdown && startingGame) {
             cancelStartGameCountdown(false);
         }

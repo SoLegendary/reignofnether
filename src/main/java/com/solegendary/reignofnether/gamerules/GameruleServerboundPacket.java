@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.gamerules;
 
+import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
@@ -123,7 +124,7 @@ public class GameruleServerboundPacket {
             }
             // the lobby's hide-picks toggle is also open to the singleplayer/Essential host
             else if (!player.hasPermissions(4) && !(action == GameruleAction.SET_HIDE_ENEMY_PICKS &&
-                    com.solegendary.reignofnether.startpos.StartPosServerEvents.isHost(player))) {
+                    StartPosServerEvents.isHost(player))) {
                 ReignOfNether.LOGGER.warn("GameruleServerboundPacket: Tried to process packet from " + player.getName() + " with insufficient permissions");
                 success.set(false);
                 return;
@@ -191,6 +192,7 @@ public class GameruleServerboundPacket {
                 case SET_HIDE_ENEMY_PICKS -> {
                     gameRules.getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(booleanValue, server);
                     GameruleClientboundPacket.setHideEnemyPicks(booleanValue);
+                    StartPosServerEvents.syncAll(booleanValue);
                 }
                 case SET_COOP_MODE -> {
                     gameRules.getRule(GameRuleRegistrar.COOP_MODE).set(booleanValue, server);

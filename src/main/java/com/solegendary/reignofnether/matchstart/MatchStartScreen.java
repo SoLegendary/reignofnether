@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.matchstart;
 
+import net.minecraft.core.BlockPos;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
@@ -298,7 +299,7 @@ public class MatchStartScreen extends Screen {
                 continue;
             }
 
-            Button spButton = StartPosClientEvents.onMap(sp).getButton(localName, isOp);
+            Button spButton = sp.getButton(localName, isOp);
             int bx = px - btnFrame / 2;
             int by = pz - btnFrame / 2;
             spButton.render(g, bx, by, mx, my);
@@ -323,6 +324,14 @@ public class MatchStartScreen extends Screen {
             byColor.computeIfAbsent(sp.colorId, k -> new ArrayList<>()).add(sp);
             if (!sp.playerName.isBlank()) seatedPlayers.add(sp.playerName);
         }
+        // seats on other teams the server hides (hideEnemyPicks): only who and whether they're ready
+        List<StartPos> otherTeams = new ArrayList<>();
+        for (Map.Entry<String, Boolean> e : StartPosClientEvents.hiddenPlayers.entrySet()) {
+            StartPos sp = new StartPos(BlockPos.ZERO, Factions.NONE, e.getKey(), 0);
+            sp.ready = e.getValue();
+            otherTeams.add(sp);
+            seatedPlayers.add(e.getKey());
+        }
 
         List<String> spectators = new ArrayList<>();
         if (mc.level != null) {
@@ -342,6 +351,7 @@ public class MatchStartScreen extends Screen {
         for (List<StartPos> team : byColor.values()) {
             contentH += 12 + team.size() * ROW_H + 4;
         }
+        if (!otherTeams.isEmpty()) contentH += 12 + otherTeams.size() * ROW_H + 4;
         contentH += 12 + Math.max(spectators.size(), 1) * ROW_H;
         if (localSeated) contentH += ROW_H + 2;
         rosterContentH = contentH;
@@ -361,18 +371,24 @@ public class MatchStartScreen extends Screen {
                     Component.translatable("matchstart.reignofnether.team", teamIdx).getString(),
                     x1 + 16, y + 1, 0xFFE0E0E0, false);
             y += 12;
-            List<StartPos> rows = entry.getValue();
-            if (rows.stream().anyMatch(StartPosClientEvents::isHidden)) {
-                rows = rows.stream().map(sp -> StartPosClientEvents.isHidden(sp) ? StartPosClientEvents.masked(sp) : sp)
-                        .sorted(Comparator.comparing((StartPos sp) -> sp.playerName.isBlank()).thenComparing(sp -> sp.playerName))
-                        .toList();
-            }
-            for (StartPos sp : rows) {
+            for (StartPos sp : entry.getValue()) {
                 renderSlotRow(g, sp, localName, x1 + 8, y, x2 - x1 - 16, mx, my, overlayActive);
                 y += ROW_H;
             }
             y += 4;
             teamIdx++;
+        }
+        if (!otherTeams.isEmpty()) {
+            g.fill(x1 + 8, y, x1 + 12, y + 10, 0xFF8E8E86);
+            g.drawString(this.font,
+                    Component.translatable("matchstart.reignofnether.other_teams").getString(),
+                    x1 + 16, y + 1, 0xFFE0E0E0, false);
+            y += 12;
+            for (StartPos sp : otherTeams) {
+                renderSlotRow(g, sp, localName, x1 + 8, y, x2 - x1 - 16, mx, my, overlayActive);
+                y += ROW_H;
+            }
+            y += 4;
         }
 
         if (byColor.isEmpty() && spectators.isEmpty()) {

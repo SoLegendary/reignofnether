@@ -83,6 +83,8 @@ public class StartPosServerboundPacket {
                 return;
             }
 
+            // act as the sender, never as whatever name the client wrote into the packet
+            String playerName = player.getName().getString();
             switch (action) {
                 case RESERVE -> {
                     if (StartPosServerEvents.isStartingGame())
@@ -96,20 +98,21 @@ public class StartPosServerboundPacket {
                             startPos.reset();
                             startPos.faction = faction;
                             startPos.playerName = playerName;
-                            StartPosClientboundPacket.reservePos(blockPos, faction, playerName);
                         } else if (startPos.playerName.equals(playerName)) {
                             startPos.reset();
                         }
                     }
+                    StartPosServerEvents.syncAll();
                     StartPosServerEvents.setPlayerReady(playerName, false);
                 }
                 case UNRESERVE -> {
                     if (StartPosServerEvents.isStartingGame())
                         return;
                     for (StartPos startPos : StartPosServerEvents.startPoses) {
-                        if (startPos.pos.equals(blockPos)) {
+                        if (startPos.pos.equals(blockPos) &&
+                                (startPos.playerName.equals(playerName) || StartPosServerEvents.isHost(player))) {
                             startPos.reset();
-                            StartPosClientboundPacket.unreservePos(blockPos);
+                            StartPosServerEvents.syncAll();
                             break;
                         }
                     }
