@@ -1234,14 +1234,14 @@ public class UnitServerEvents {
     }
 
     private static void onMobEffectGone(MobEffectEvent evt) {
+        if (evt.getEffectInstance() == null) return;
+
         // halve level of all enchants
-        if (evt.getEffectInstance() != null) {
-            MobEffect effect = evt.getEffectInstance().getEffect();
-            if (effect == MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get()) {
-                EnchantmentUtil.updateEnchantLevels(evt.getEntity(), true);
-            } else if (effect == MobEffectRegistrar.TEMPORARY_EFFICIENCY.get()) {
-                EnchantmentHelper.setEnchantments(new HashMap<>(), evt.getEntity().getMainHandItem());
-            }
+        MobEffect effect = evt.getEffectInstance().getEffect();
+        if (effect == MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get()) {
+            EnchantmentUtil.updateEnchantLevels(evt.getEntity(), true);
+        } else if (effect == MobEffectRegistrar.TEMPORARY_EFFICIENCY.get()) {
+            EnchantmentHelper.setEnchantments(new HashMap<>(), evt.getEntity().getMainHandItem());
         }
         if (!evt.getEntity().level().isClientSide())
             UnitSyncMobEffectsClientboundPacket.removeEffectClientside(evt.getEntity(), evt.getEffectInstance().getEffect());

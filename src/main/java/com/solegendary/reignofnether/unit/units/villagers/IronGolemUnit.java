@@ -263,21 +263,4 @@ public class IronGolemUnit extends IronGolem implements Unit, AttackerUnit {
         this.goalSelector.addGoal(3, moveGoal);
         this.goalSelector.addGoal(4, new RandomLookAroundUnitGoal(this));
     }
-
-    @Override
-    public List<FormattedCharSequence> getAttackDamageStatTooltip() {
-        String attrStr = MiscUtil.formatSigned(getBuildingDamageBonus() * 100) + "%";
-        return List.of(
-                fcs(I18n.get("unitstats.reignofnether.attack_damage"), true),
-                fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", attrStr))
-        );
-    }
-    @Override
-    public int getDamageTooltipColour() {
-        return TooltipColours.GREEN;
-    }
-
-
-
-
 }

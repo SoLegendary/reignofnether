@@ -920,13 +920,20 @@ public interface Unit {
     }
 
     public default List<FormattedCharSequence> getStatTooltip(UnitStatType unitStatType) {
-        return switch (unitStatType) {
-            case ATTACK_DAMAGE -> getAttackDamageStatTooltip();
-            case ATTACK_SPEED -> getAttackSpeedStatTooltip();
-            case RANGE -> getRangeStatTooltip();
-            case ARMOUR -> getArmourStatTooltip();
-            case MOVEMENT_SPEED -> getMovementSpeedStatTooltip();
-        };
+        ArrayList<FormattedCharSequence> fcsList = new ArrayList<>(
+            switch (unitStatType) {
+                case ATTACK_DAMAGE -> getAttackDamageStatTooltip();
+                case ATTACK_SPEED -> getAttackSpeedStatTooltip();
+                case RANGE -> getRangeStatTooltip();
+                case ARMOUR -> getArmourStatTooltip();
+                case MOVEMENT_SPEED -> getMovementSpeedStatTooltip();
+            }
+        );
+        if (unitStatType == UnitStatType.ATTACK_DAMAGE && this instanceof AttackerUnit aUnit && aUnit.getBuildingDamageBonus() > 0) {
+            String attrStr = MiscUtil.formatSigned(aUnit.getBuildingDamageBonus() * 100) + "%";
+            fcsList.add(fcs(I18n.get("unitstats.reignofnether.attack_damage_bonus_buildings", attrStr)));
+        }
+        return fcsList;
     }
 
     default void setCooldown(Ability abilityClass, float cooldown) {

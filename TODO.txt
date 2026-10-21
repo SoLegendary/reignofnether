@@ -22,17 +22,19 @@ Balance
 [❌] Villager reworks
     - Free-attacking vexes
     - Siege tank mode for ravager artillery (by burrowing them partially into the ground)
-    - Royal guard ult strength from II to I but unpushable
     - Block animations with block displays for royal guard slam
         - And make slam single click like war stomp
     - Make custom arrow entity to control logic better
         - Halve pierce and multishot damage and improve other enchants
 
+[❌] Great hammers now affect abilities and summoned units at 50% effectiveness (2x building damage)
+[❌] Wildfire Molten Bombs now deal 20 damage to buildings
+
+[🟡] Royal Guard slow from Taunting Cry reduced 60% to 40% and resistance increased from 60% to 80%
 [✔] Bat HP reduced from 15hp to 10hp
 [🟡] Ghasts can now benefit from increased attack damage (explosion damage is scaled accordingly)
 [🟡] Piglin merchant TNT damage rescaled from 13.3/20/26.7 to 16/20/24 (radius unchanged)
 [🟡] Throwable TNT items are now equivalent to a level 3 merchant TNT
-
 [🟡] Neutral buildings now drop regular resources as bounty again instead of emeralds
 
 Quality of Life
@@ -54,9 +56,7 @@ Quality of Life
 
 Bugfixes
 --------
-[❌] In combat, consumables don't work (only with latency?)
-[❌] High resistance amps aren't capped at 80%?
-
+[🟡] Fixed resistance effects being twice as effective as intended
 [🟡] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
 [🟡] Fixed mob effects not showing if it was applied while outside of render range or logged out
 [❌] Fixed an issue where pillagers did not benefit from their enchantment until after their next shot

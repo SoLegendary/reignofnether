@@ -444,8 +444,8 @@ public class ItemClientEvents {
         }
 
         // dot points (enchantments omitted: vanilla already shows them)
-        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
-        points.addAll(AbstractUnitItemButton.getAttributeDescs(unitItem));
+        List<String> points = new ArrayList<>(AbstractUnitItemButton.getAttributeDescs(unitItem));
+        points.addAll(unitItem.getPointDescriptions());
         for (String point : points)
             tooltips.add(MyRenderer.styledWithIcons(point.replace(" ", "   "), AbstractUnitItemButton.POINTS_STYLE));
         // ^ assumes this returns a Component; if it returns FormattedText, convert it

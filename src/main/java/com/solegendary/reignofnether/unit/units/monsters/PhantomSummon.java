@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.unit.units.monsters;
 
 import com.solegendary.reignofnether.ability.heroAbilities.necromancer.InsomniaCurse;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.time.NightUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -52,7 +53,8 @@ public class PhantomSummon extends Phantom {
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.ATTACK_DAMAGE, InsomniaCurse.PHANTOM_DAMAGE)
-                .add(Attributes.MAX_HEALTH, PhantomSummon.maxHealth);
+                .add(Attributes.MAX_HEALTH, PhantomSummon.maxHealth)
+                .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 0f);
     }
 
     @Override

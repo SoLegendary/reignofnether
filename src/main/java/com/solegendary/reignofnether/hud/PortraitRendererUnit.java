@@ -411,6 +411,9 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             else if (attackDmg > baseAttackDmg)
                 damageTooltipColour = GREEN;
 
+            if (damageTooltipColour == WHITE && attackerUnit.getBuildingDamageBonus() > 0)
+                damageTooltipColour = GREEN;
+
             renderedStats.add(new RenderedStat(
                     ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/sword.png"),
                     atkStr,

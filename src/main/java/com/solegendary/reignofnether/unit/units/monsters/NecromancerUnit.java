@@ -604,6 +604,11 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 zombieUnit.setItemSlot(EquipmentSlot.LEGS, leggings);
                 zombieUnit.setItemSlot(EquipmentSlot.FEET, boots);
                 zombieUnit.setItemSlot(EquipmentSlot.MAINHAND, sword);
+
+                AttributeInstance ai2 = zombieUnit.getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
+                if (ai2 != null) {
+                    ai2.setBaseValue(getBuildingDamageBonus() * 0.5f);
+                }
             }
         }
     }
@@ -637,6 +642,10 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
             AttributeInstance ai = phantom.getAttribute(Attributes.ATTACK_DAMAGE);
             if (ai != null) {
                 ai.setBaseValue(InsomniaCurse.PHANTOM_DAMAGE + (soulRank * InsomniaCurse.PHANTOM_DAMAGE_BONUS_PER_SOUL_RANK));
+            }
+            AttributeInstance ai2 = phantom.getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
+            if (ai2 != null) {
+                ai2.setBaseValue(getBuildingDamageBonus() * 0.5f);
             }
             this.level().addFreshEntity(phantom);
             phantom.getPersistentData().putString("ownerName", getOwnerName());

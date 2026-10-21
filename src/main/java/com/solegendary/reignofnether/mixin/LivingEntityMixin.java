@@ -205,7 +205,7 @@ public abstract class LivingEntityMixin extends Entity {
                 dmg *= (1 - unit.getUnitPhysicalArmorPercentage());
                 if (pDamageSource.is(DamageTypeTags.IS_PROJECTILE))
                     dmg *= (1 - unit.getUnitRangedArmorPercentage());
-                dmg *= (1 - unit.getUnitResistPercentage());
+                //dmg *= (1 - unit.getUnitResistPercentage()); already counted in getDamageAfterMagicAbsorb
 
                 if (!this.level().isClientSide() && getRandom().nextFloat() < attackerUnit.getCriticalChance()) {
                     dmg *= CRITICAL_HIT_MULTIPLIER;

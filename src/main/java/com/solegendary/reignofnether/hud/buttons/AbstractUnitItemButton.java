@@ -179,9 +179,9 @@ public abstract class AbstractUnitItemButton extends Button {
 
         int descLineCount = bodyLines.size(); // marks where desc ends and points begin
 
-        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
+        List<String> points = new ArrayList<>(getAttributeDescs(unitItem));
         points.addAll(getEnchantmentDescs(itemStack));
-        points.addAll(getAttributeDescs(unitItem));
+        points.addAll(unitItem.getPointDescriptions());
         for (String point : points)
             bodyLines.addAll(font.split(
                     MyRenderer.styledWithIcons(point.replace(" ", "   "), POINTS_STYLE), smallWrapWidth));
