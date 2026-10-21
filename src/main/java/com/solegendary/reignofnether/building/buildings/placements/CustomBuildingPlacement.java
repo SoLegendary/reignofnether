@@ -90,6 +90,10 @@ public class CustomBuildingPlacement extends ItemShopPlacement {
             pos.add(DoubleTag.valueOf(entity.getZ()));
             nbt.put("Pos", pos);
             entity.load(nbt);
+            if (nbt.contains("popCost", Tag.TAG_INT))
+                entity.getPersistentData().putInt("popCost", nbt.getInt("popCost"));
+            if (nbt.contains("emeraldBounty", Tag.TAG_INT))
+                entity.getPersistentData().putInt("emeraldBounty", nbt.getInt("emeraldBounty"));
         }
         if (entity instanceof Unit unit) {
             unit.setOwnerName(ownerName);

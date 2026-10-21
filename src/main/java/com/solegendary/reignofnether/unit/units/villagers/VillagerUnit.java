@@ -12,6 +12,7 @@ import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.TooltipColours;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.effecticons.ProfessionIcons;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -618,6 +619,14 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
             pStack.enchant(Enchantments.BLOCK_EFFICIENCY, 1);
         }
         super.setItemSlot(pSlot, pStack);
+    }
+
+    @Override
+    public List<Button> getPassiveIcons() {
+        ArrayList<Button> icons = new ArrayList<>(Unit.super.getPassiveIcons());
+        if (hasUnitProfession())
+            icons.add(0, ProfessionIcons.getProfessionIcon(getUnitProfession(), isVeteran()));
+        return icons;
     }
 
     static {

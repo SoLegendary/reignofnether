@@ -632,7 +632,12 @@ public class UnitServerEvents {
                 int wood = (int) (cost.wood * bountyPercent);
                 int ore =  (int) (cost.ore * bountyPercent);
                 if (ItemServerEvents.ENABLED) {
-                    resources = Resources.emeralds(killerName, food + wood + ore);
+                    CompoundTag etag = evt.getEntity().getPersistentData();
+                    if (etag.contains("emeraldBounty")) {
+                        resources = Resources.emeralds(killerName, etag.getInt("emeraldBounty"));
+                    } else {
+                        resources = Resources.emeralds(killerName, food + wood + ore);
+                    }
                 } else {
                     resources = new Resources(killerName, food, wood, ore);
                 }

@@ -263,6 +263,8 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             ArrayList<FormattedCharSequence> newTooltipLines = new ArrayList<>();
                             ArrayList<FormattedCharSequence> newToolTip = new ArrayList<>();
 
+                            int emeraldBounty = -1;
+
                             if (stackNbt != null) {
                                 if (stackNbt.contains("foodCost", Tag.TAG_INT))
                                     newCost.food = stackNbt.getInt("foodCost");
@@ -270,8 +272,12 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                                     newCost.wood = stackNbt.getInt("woodCost");
                                 if (stackNbt.contains("oreCost", Tag.TAG_INT))
                                     newCost.ore = stackNbt.getInt("oreCost");
+                                if (stackNbt.contains("popCost", Tag.TAG_INT))
+                                    newCost.population = stackNbt.getInt("popCost");
                                 if (stackNbt.contains("ticksToTrain", Tag.TAG_INT))
                                     newCost.ticks = stackNbt.getInt("ticksToTrain");
+                                if (stackNbt.contains("emeraldBounty", Tag.TAG_INT))
+                                    emeraldBounty = stackNbt.getInt("emeraldBounty");
 
                                 if (stackNbt.contains("tooltipTitle", Tag.TAG_STRING))
                                     newTooltipTitle = fcs(stackNbt.getString("tooltipTitle"), true);
@@ -300,6 +306,9 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
                             this.productions.add(prodItem, hotkey);
                             if (stackNbt != null && stackNbt.contains("EntityTag")) {
+                                stackNbt.getCompound("EntityTag").putInt("popCost", newCost.population);
+                                if (emeraldBounty >= 0)
+                                    stackNbt.getCompound("EntityTag").putInt("emeraldBounty", emeraldBounty);
                                 this.unitProductionNbts.put(type, stackNbt.getCompound("EntityTag"));
                             }
                             hotkeyIndex += 1;

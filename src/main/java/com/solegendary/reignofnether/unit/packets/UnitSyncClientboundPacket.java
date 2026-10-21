@@ -8,6 +8,8 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitSyncAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -66,13 +68,22 @@ public class UnitSyncClientboundPacket {
 
         for (ServerPlayer player : players) {
             if (FogOfWarServerEvents.isBlockVisibleFor(player, entity.getOnPos().getX(), entity.getOnPos().getZ())) {
+                int pop = 0;
+                if (entity instanceof Unit unit) {
+                    CompoundTag tag = entity.getPersistentData();
+                    if (tag.contains("popCost", Tag.TAG_INT)) {
+                        pop = tag.getInt("popCost");
+                    } else {
+                        pop = unit.getCost().population;
+                    }
+                }
                 PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
                         new UnitSyncClientboundPacket(UnitSyncAction.SYNC_STATS,
                                 entity.getId(), 0,
                                 entity.getHealth(),
                                 entity.getAbsorptionAmount(),
                                 entity.getX(), entity.getY(), entity.getZ(),
-                                0,0,0,0, entity instanceof Unit unit ? unit.getCost().population : 0, owner)
+                                0,0,0,0, pop, owner)
                 );
             }
         }
