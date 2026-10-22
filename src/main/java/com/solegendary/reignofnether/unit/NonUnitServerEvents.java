@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.targeting.EntityTargetIndex;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -24,7 +25,6 @@ import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.Path;
-import net.minecraft.world.phys.AABB;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
@@ -101,24 +101,13 @@ public class NonUnitServerEvents {
 
         private LivingEntity findTarget(ServerLevel level) {
             Faction faction = getNonUnitFaction(mob);
-            AABB searchArea = mob.getBoundingBox().inflate(SEARCH_RANGE);
-            List<LivingEntity> candidates = level.getEntitiesOfClass(LivingEntity.class, searchArea,
-                    entity -> isCandidate(entity, faction));
-            candidates.sort(Comparator.comparingDouble(mob::distanceToSqr));
-
-            // Only inspect garrison state and cast rays for the nearest remaining candidates.
-            for (LivingEntity candidate : candidates) {
-                if (!((Unit) candidate).isGarrisoned() && mob.getSensing().hasLineOfSight(candidate))
-                    return candidate;
-            }
-            return null;
-        }
-
-        private boolean isCandidate(LivingEntity entity, Faction faction) {
-            return entity instanceof Unit unit && entity.isAlive() && !unit.getOwnerName().isBlank() &&
-                    !faction.equals(Factions.getFaction(unit)) &&
-                    mob.level().getWorldBorder().isWithinBounds(entity.blockPosition()) &&
-                    candidateConditions.test(mob, entity);
+            return EntityTargetIndex.get(level).findClosest(mob.position(), SEARCH_RANGE,
+                    group -> group.unit() && !group.ownerName().isBlank() && !faction.equals(group.faction()),
+                    null, entity -> 0,
+                    entity -> entity.isAlive() &&
+                            level.getWorldBorder().isWithinBounds(entity.blockPosition()) &&
+                            candidateConditions.test(mob, entity) &&
+                            !((Unit) entity).isGarrisoned() && mob.getSensing().hasLineOfSight(entity));
         }
 
         @Override
