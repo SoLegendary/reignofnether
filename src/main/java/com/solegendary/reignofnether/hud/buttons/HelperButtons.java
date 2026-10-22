@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud.buttons;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
@@ -119,7 +120,7 @@ public class HelperButtons {
                 () -> true,
                 () -> {
                     if (MC.player != null)
-                        BuildingServerboundPacket.cancelBuilding(hudSelectedPlacement.minCorner, MC.player.getName().getString());
+                        BuildingServerboundPacket.cancelBuilding(hudSelectedPlacement.minCorner, PlayerRolesClient.myOwner());
                     hudSelectedPlacement = null;
                 },
                 null,

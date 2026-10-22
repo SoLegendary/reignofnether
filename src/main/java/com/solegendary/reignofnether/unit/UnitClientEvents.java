@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
@@ -261,12 +263,12 @@ public class UnitClientEvents {
                         currentPopulation += ResourceCosts.IRON_GOLEM.population;
                     }
         }
-        return currentPopulation;
+        return currentPopulation + PlayerRolesClient.soldiersOf(playerName).size(); // each soldier takes 1
     }
 
     public static void sendUnitCommandManual(String playerName, UnitAction action, int unitId, int[] unitIds,
                                              BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
-        if (MC.player != null && playerName.equals(MC.player.getName().getString()))
+        if (MC.player != null && playerName.equals(PlayerRolesClient.myOwner()))
             sendUnitCommandManual(action, unitId, unitIds, preselectedBlockPos, selectedBuildingPos);
     }
 
@@ -297,7 +299,7 @@ public class UnitClientEvents {
                                              BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
         if (MC.player != null) {
             UnitActionItem actionItem = new UnitActionItem(
-                MC.player.getName().getString(),
+                PlayerRolesClient.myOwner(),
                 action, unitId, unitIds,
                 preselectedBlockPos,
                 selectedBuildingPos
@@ -309,7 +311,7 @@ public class UnitClientEvents {
             }
 
             PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-                MC.player.getName().getString(),
+                PlayerRolesClient.myOwner(),
                 action, unitId, unitIds,
                 preselectedBlockPos,
                 selectedBuildingPos,
@@ -324,7 +326,7 @@ public class UnitClientEvents {
         if (MC.player != null) {
             if (clientside) {
                 UnitActionItem actionItem = new UnitActionItem(
-                        MC.player.getName().getString(),
+                        PlayerRolesClient.myOwner(),
                         action, unitId, unitIds,
                         preselectedBlockPos,
                         selectedBuildingPos
@@ -333,7 +335,7 @@ public class UnitClientEvents {
             }
             if (serverside) {
                 PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-                        MC.player.getName().getString(),
+                        PlayerRolesClient.myOwner(),
                         action, unitId, unitIds,
                         preselectedBlockPos,
                         selectedBuildingPos,
@@ -386,7 +388,7 @@ public class UnitClientEvents {
                 if (includeUnit == null || includeUnit.test(livingEntity))
                     selUnits.add(livingEntity);
             }
-            String playerName = MC.player.getName().getString();
+            String playerName = PlayerRolesClient.myOwner();
 
             UnitActionItem actionItem = new UnitActionItem(
                 playerName,
@@ -764,7 +766,7 @@ public class UnitClientEvents {
                 );
                 if (getPlayerToEntityRelationship(selectedUnit) == Relationship.OWNED ||
                         NonUnitClientEvents.canControlAllMobs() ||
-                        AlliancesClient.canControlAlly(selectedUnit)) {
+                        SharingClient.canControl(selectedUnit)) {
 
                     for (LivingEntity entity : nearbyEntities) {
                         boolean bothVillagers = entity instanceof VillagerUnit &&
@@ -778,7 +780,7 @@ public class UnitClientEvents {
                         if (entity == selectedUnit) continue;
                         if ((getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
                                 NonUnitClientEvents.canControlAllMobs() ||
-                                AlliancesClient.canControlAlly(entity)) &&
+                                SharingClient.canControl(entity)) &&
                                 (!bothVillagers || sameProfession) && garrionStatusMatches) {
                             addSelectedUnit(entity);
                         }
@@ -812,7 +814,7 @@ public class UnitClientEvents {
 
                 if (Keybindings.shiftMod.isDown() && !deselected &&
                     ((preselectedUnits.get(0) instanceof Unit && getPlayerToEntityRelationship(preselectedUnits.get(0)) == Relationship.OWNED) ||
-                    AlliancesClient.canControlAlly(preselectedUnits.get(0)) ||
+                    SharingClient.canControl(preselectedUnits.get(0)) ||
                     NonUnitClientEvents.canControlAllMobs())) {
                         addSelectedUnit(preselectedUnits.get(0));
                 }
@@ -827,7 +829,7 @@ public class UnitClientEvents {
             // and disallow selecting > 1 non-owned unit or the client player
             if (selectedUnits.size() > 1) {
                 selectedUnits.removeIf(e ->
-                    (getPlayerToEntityRelationship(e) != Relationship.OWNED && !NonUnitClientEvents.canControlAllMobs() && !AlliancesClient.canControlAlly(e)) ||
+                    (getPlayerToEntityRelationship(e) != Relationship.OWNED && !NonUnitClientEvents.canControlAllMobs() && !SharingClient.canControl(e)) ||
                             e.getId() == MC.player.getId()
                 );
             }
@@ -900,7 +902,7 @@ public class UnitClientEvents {
                 }
                 // right click -> build or repair preselected building
                 else if (hudSelectedEntity instanceof WorkerUnit && preSelBuilding != null &&
-                        (getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED || AlliancesClient.canControlAlly(hudSelectedEntity)) ||
+                        (getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED || SharingClient.canControl(hudSelectedEntity)) ||
                         (preSelBuilding != null && preSelBuilding.getBuilding() instanceof AbstractBridge)) {
 
                     if (preSelBuilding.getBuilding() instanceof AbstractFarm && preSelBuilding.isBuilt)
@@ -944,7 +946,7 @@ public class UnitClientEvents {
         for (LivingEntity unit : selUnits) {
             if ((getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
                     NonUnitClientEvents.canControlAllMobs() ||
-                    AlliancesClient.canControlAlly(unit)) && unit instanceof Unit) {
+                    SharingClient.canControl(unit)) && unit instanceof Unit) {
                 actionableUnits.add(unit);
             }
         }
@@ -977,7 +979,7 @@ public class UnitClientEvents {
                 for (LivingEntity unit : selUnits) {
                     if ((getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
                             NonUnitClientEvents.canControlAllMobs() ||
-                            AlliancesClient.canControlAlly(unit)) && unit instanceof Unit) {
+                            SharingClient.canControl(unit)) && unit instanceof Unit) {
                         actionableUnits.add(unit);
                     }
                 }
@@ -996,7 +998,7 @@ public class UnitClientEvents {
         if (MC.player == null || MC.level == null) return;
 
         List<com.mojang.datafixers.util.Pair<LivingEntity, BlockPos>> pairs = FormationDragMove.endDrag(units);
-        String playerName = MC.player.getName().getString();
+        String playerName = PlayerRolesClient.myOwner();
 
         for (var pair : pairs) {
             LivingEntity le = pair.getFirst();
@@ -1292,7 +1294,7 @@ public class UnitClientEvents {
                 return Relationship.NEUTRAL;
             }
 
-            String playerName = MC.player.getName().getString();
+            String playerName = PlayerRolesClient.myOwner();
             if (playerName.equals(ownerName)) {
                 return Relationship.OWNED;
             } else if (AlliancesClient.isAllied(playerName, ownerName)) {
@@ -1307,7 +1309,7 @@ public class UnitClientEvents {
     }
     public static Relationship getPlayerToEntityRelationship(LivingEntity entity) {
         if (MC.level != null && MC.player != null) {
-            String playerName = MC.player.getName().getString();
+            String playerName = PlayerRolesClient.myOwner();
 
             // Check if the entity is a Unit with no owner (neutral)
             if (entity instanceof Unit unit && unit.getOwnerName().isBlank()) {

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud.playerdisplay;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.faction.Faction;
@@ -45,7 +46,7 @@ public abstract class AbstractPlayerDisplay {
                     break;
                 }
             }
-        } else if (MC.player != null && MC.player.getName().getString().equals(rtsPlayer.name)) {
+        } else if (PlayerRolesClient.myOwner().equals(rtsPlayer.name)) {
             found = MC.player;
         }
         this.player = found;
@@ -64,7 +65,7 @@ public abstract class AbstractPlayerDisplay {
     protected boolean hiddenByFog() {
         if (!FogOfWarClientEvents.isMatchFogOn() || MC.player == null || !com.solegendary.reignofnether.player.PlayerClientEvents.isRTSPlayer())
             return false;
-        return !AlliancesClient.isAlliedOrOwned(MC.player.getName().getString(), playerName);
+        return !AlliancesClient.isAlliedOrOwned(PlayerRolesClient.myOwner(), playerName);
     }
 
     public boolean isPlayerLoggedIn() {

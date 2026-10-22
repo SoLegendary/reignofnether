@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
@@ -59,7 +60,7 @@ public class FogOfWarClientEvents {
 
     public static void refreshLocalIsRTSPlayer() {
         boolean was = localIsRTSPlayer;
-        localIsRTSPlayer = MC.player != null && PlayerClientEvents.isRTSPlayer();
+        localIsRTSPlayer = MC.player != null && PlayerRolesClient.myRole().hasFog;
         if (was != localIsRTSPlayer && enabled) resetFogChunks();
     }
 
@@ -310,7 +311,7 @@ public class FogOfWarClientEvents {
     }
 
     public static void revealRangedUnit(String playerBeingAttacked, int unitId) {
-        if (MC.player != null && MC.player.getName().getString().equals(playerBeingAttacked))
+        if (MC.player != null && PlayerRolesClient.myCommander().equals(playerBeingAttacked))
             for (LivingEntity entity : UnitClientEvents.getAllUnits())
                 if (entity.getId() == unitId && entity instanceof RangedAttackerUnit unit)
                     unit.setFogRevealDuration(RangedAttackerUnit.FOG_REVEAL_TICKS_MAX);

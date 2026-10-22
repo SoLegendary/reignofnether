@@ -60,6 +60,7 @@ public class Keybindings {
     public static final Keybinding chat        = new Keybinding("key.reignofnether.chat",         GLFW.GLFW_KEY_ENTER,         CATEGORY_RTS, "");
     public static final Keybinding deselect    = new Keybinding("key.reignofnether.deselect",     GLFW.GLFW_KEY_GRAVE_ACCENT,  CATEGORY_RTS, "~");
     public static final Keybinding tab         = new Keybinding("key.reignofnether.tab",          GLFW.GLFW_KEY_TAB,           CATEGORY_RTS, "");
+    public static final Keybinding ping        = new Keybinding("key.reignofnether.ping",         GLFW.GLFW_KEY_CAPS_LOCK,     CATEGORY_RTS, "");
     public static final Keybinding openShop    = new Keybinding("key.reignofnether.open_shop",         GLFW.GLFW_KEY_S,             CATEGORY_RTS, "S");
 
     // hero items; the command card's bottom row is empty for heroes, so its keys are free here
@@ -113,6 +114,12 @@ public class Keybindings {
     // RTS view only, like the command card; off the grid so Z stays a command
     public static final Keybinding diplomacy = new Keybinding("key.reignofnether.diplomacy", GLFW.GLFW_KEY_M, CATEGORY_RTS, RtsConflictContext.COMMAND, "M");
 
+    // soldiers: full map while waiting to respawn. Not M: Simple Voice Chat mutes on M outside screens.
+    public static final Keybinding soldierMap = new Keybinding("key.reignofnether.soldier_map", GLFW.GLFW_KEY_J, CATEGORY_RTS, RtsConflictContext.SOLDIER, "J");
+
+    // cycles your voice channel during a match (with Simple Voice Chat)
+    public static final Keybinding voiceChannel = new Keybinding("key.reignofnether.voice_channel", GLFW.GLFW_KEY_B, CATEGORY_RTS, "B");
+
     private static final List<Keybinding> ALL;
     static {
         // Only global keys are registered. The per-button keys above (ability slots, hotkey1-10, attack...)
@@ -123,7 +130,7 @@ public class Keybindings {
             panPlusX, panMinusX, panPlusZ, panMinusZ,
             rotCW, rotCCW, reset,
             hotkey6, hotkey7, jumpToAlert, diplomacy,
-            chat, deselect, tab,
+            chat, deselect, tab, ping, soldierMap, voiceChannel,
             item1, item2, item3, item4, item5, item6
         ));
         Collections.addAll(list, grid);

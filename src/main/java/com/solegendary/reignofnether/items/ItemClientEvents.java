@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import javax.annotation.Nullable;
 
 import com.solegendary.reignofnether.alliance.AlliancesClient;
@@ -110,7 +111,7 @@ public class ItemClientEvents {
                 le instanceof UnitInventory inv &&
                 le instanceof Unit unit &&
                 (!inv.isEmpty() || (le instanceof HeroUnit && unit.getItemGoal() != null && MC.player != null &&
-                        AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), MC.player.getName().getString())));
+                        AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), PlayerRolesClient.myOwner())));
     }
 
     public static void syncInventory(int unitId, List<ItemStack> items) {

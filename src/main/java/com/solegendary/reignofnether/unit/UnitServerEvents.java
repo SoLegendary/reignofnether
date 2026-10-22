@@ -26,6 +26,7 @@ import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -279,7 +280,7 @@ public class UnitServerEvents {
                     currentPopulation += ResourceCosts.IRON_GOLEM.population;
                 }
             }
-        return currentPopulation;
+        return currentPopulation + PlayerRoles.soldiersOf(ownerName).size(); // each soldier takes 1
     }
 
     // manually provide all the variables required to do unit actions
@@ -352,7 +353,7 @@ public class UnitServerEvents {
         if (entity instanceof ItemEntity item && item.getOwner() instanceof Unit unitItemOwner) {
             ownerName2 = unitItemOwner.getOwnerName();
         } else if (entity instanceof Player player) {
-            ownerName2 = player.getName().getString();
+            ownerName2 = PlayerRoles.commanderOf(player.getName().getString()); // soldiers fight for their commander
         } else if (entity instanceof Unit) {
             ownerName2 = ((Unit) entity).getOwnerName();
         } else {

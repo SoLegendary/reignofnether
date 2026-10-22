@@ -39,6 +39,11 @@ public class GameruleClient {
     public static boolean rtsPathfinding = false; // only for GUI
     public static int animalSpawnYDiff = 5;
     public static RandomItemDropRule randomItemDrops = RandomItemDropRule.ENABLED_SAME_RARITY;
+    public static final int MAX_SOLDIERS_PER_TEAM = 4;
+    public static int soldiersPerTeam = 0;
+    public static boolean coCommanders = false;
+    public static int soldierRespawnSeconds = 30;
+    public static boolean allChat = true;
 
     public static boolean gamerulesMenuOpen = false;
 
@@ -109,6 +114,10 @@ public class GameruleClient {
                 () -> GameruleServerboundPacket.setRandomItemDrops((randomItemDrops.getValue() + 3) % 4)));
         rules.add(toggle("neutral_aggro", true, () -> neutralAggro, GameruleServerboundPacket::setNeutralAggro));
         rules.add(toggle("lock_alliances", true, () -> lockAlliances, GameruleServerboundPacket::setLockAlliances));
+        rules.add(number("soldiers_per_team", true, () -> soldiersPerTeam, 0, MAX_SOLDIERS_PER_TEAM, 1, 1, GameruleServerboundPacket::setSoldiersPerTeam));
+        rules.add(toggle("co_commanders", true, () -> coCommanders, GameruleServerboundPacket::setCoCommanders));
+        rules.add(number("soldier_respawn_seconds", true, () -> soldierRespawnSeconds, 0, 300, 5, 30, GameruleServerboundPacket::setSoldierRespawnSeconds));
+        rules.add(toggle("all_chat", true, () -> allChat, GameruleServerboundPacket::setAllChat));
         rules.add(toggle("allow_beacons", true, () -> allowBeacons, GameruleServerboundPacket::setAllowBeacons));
         rules.add(number("beacon_win_minutes", true, () -> (int) beaconWinMinutes, 1, 1000, 1, 10, GameruleServerboundPacket::setBeaconWinMinutes));
         rules.add(toggle("coop_mode", false, () -> coopMode, GameruleServerboundPacket::setCoopMode));

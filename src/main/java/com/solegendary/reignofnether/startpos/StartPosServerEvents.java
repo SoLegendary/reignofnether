@@ -12,6 +12,9 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.blocks.RTSStartBlock;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerColors;
+import com.solegendary.reignofnether.soldier.SoldierServerEvents;
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
@@ -45,6 +48,8 @@ public class StartPosServerEvents {
     public static final int MAX_START_POSES = 16;
 
     public static ArrayList<StartPos> startPoses = new ArrayList<>();
+    // lobby players without a seat of their own: soldiers and co-commanders
+    public static final List<SeatJoin> joins = new ArrayList<>();
 
     private static int TICKS_TO_START_MAX = 100;
     private static int ticksToStart = TICKS_TO_START_MAX;
@@ -61,6 +66,7 @@ public class StartPosServerEvents {
         for (StartPos startPos : startPoses) {
             startPos.reset();
         }
+        joins.clear();
         savePositions(serverLevel);
     }
 
@@ -70,6 +76,12 @@ public class StartPosServerEvents {
             if (startPos.playerName.equals(playerName))
                 startPos.ready = ready;
             if (startPos.enabled && (!startPos.ready || startPos.playerName.isBlank()))
+                shouldStartGame = false;
+        }
+        for (SeatJoin join : joins) {
+            if (join.playerName.equals(playerName))
+                join.ready = ready;
+            if (!join.ready)
                 shouldStartGame = false;
         }
         if (shouldStartGame) {
@@ -85,18 +97,24 @@ public class StartPosServerEvents {
 
     // hideEnemyPicks: a taken seat on another team is never sent to this player, only who sits there and if
     // they're ready. A player without a team yet (or a spectator) sees no taken seats.
-    // viewerColor: the viewer's team, from their seat
+    // viewerColor: the viewer's team, from their seat or their soldier/co-commander join
     static boolean isHiddenFrom(StartPos sp, @Nullable StartPos viewerSeat, @Nullable Integer viewerColor, boolean hidePicks) {
         if (!hidePicks || sp.playerName.isBlank() || sp == viewerSeat)
             return false;
         return viewerColor == null || viewerColor != sp.colorId;
     }
 
+    static boolean isHiddenFrom(SeatJoin join, String viewerName, @Nullable Integer viewerColor, boolean hidePicks) {
+        if (!hidePicks || join.playerName.equals(viewerName))
+            return false;
+        return viewerColor == null || viewerColor != join.colorId;
+    }
+
     // send the whole seat list as this player may see it
     public static void syncTo(ServerPlayer player, boolean hidePicks) {
         String name = player.getName().getString();
         StartPos viewerSeat = startPoses.stream().filter(sp -> sp.playerName.equals(name)).findFirst().orElse(null);
-        Integer viewerColor = viewerSeat != null ? viewerSeat.colorId : null;
+        Integer viewerColor = viewerColor(name);
         StartPosClientboundPacket.clear(player);
         List<String> hidden = new ArrayList<>();
         Map<String, Boolean> hiddenReady = new HashMap<>();
@@ -114,10 +132,89 @@ public class StartPosServerEvents {
             }
             StartPosClientboundPacket.sendTo(player, action, sent);
         }
+        for (SeatJoin join : joins) {
+            if (isHiddenFrom(join, name, viewerColor, hidePicks)) {
+                hidden.add(join.playerName);
+                hiddenReady.put(join.playerName, join.ready);
+            } else {
+                StartPosClientboundPacket.sendJoin(player, join);
+            }
+        }
         // after all seats and sorted by name, so the order can't be matched back to a seat
         hidden.sort(Comparator.naturalOrder());
         for (String hiddenName : hidden)
             StartPosClientboundPacket.sendHiddenPlayer(player, hiddenName, hiddenReady.get(hiddenName));
+    }
+
+    // the player's team, from their seat or their join
+    @Nullable
+    private static Integer viewerColor(String playerName) {
+        StartPos seat = startPoses.stream().filter(sp -> sp.playerName.equals(playerName)).findFirst().orElse(null);
+        if (seat != null)
+            return seat.colorId;
+        SeatJoin join = getJoin(playerName);
+        return join != null ? join.colorId : null;
+    }
+
+    @Nullable
+    public static SeatJoin getJoin(String playerName) {
+        for (SeatJoin join : joins)
+            if (join.playerName.equals(playerName))
+                return join;
+        return null;
+    }
+
+    // play as a soldier on the team of the seat at seatPos, or as a co-commander sharing that seat
+    public static void join(String playerName, PlayerRole role, BlockPos seatPos) {
+        if (startingGame)
+            return;
+        StartPos seat = startPoses.stream().filter(sp -> sp.pos.equals(seatPos) && sp.enabled).findFirst().orElse(null);
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (seat == null || server == null)
+            return;
+        if (role == PlayerRole.SOLDIER) {
+            long teamSoldiers = joins.stream().filter(j -> j.isSoldier() && j.colorId == seat.colorId &&
+                    !j.playerName.equals(playerName)).count();
+            if (teamSoldiers >= server.getGameRules().getInt(GameRuleRegistrar.SOLDIERS_PER_TEAM))
+                return;
+        } else {
+            if (!server.getGameRules().getBoolean(GameRuleRegistrar.CO_COMMANDERS) ||
+                    isHiddenFrom(seat, null, viewerColor(playerName), hidePicks()) ||
+                    seat.playerName.isBlank() || seat.playerName.equals(playerName) ||
+                    joins.stream().anyMatch(j -> !j.isSoldier() && j.seat.equals(seat.pos) && !j.playerName.equals(playerName)))
+                return;
+        }
+        for (StartPos sp : startPoses)
+            if (sp.playerName.equals(playerName))
+                sp.reset();
+        joins.removeIf(j -> j.playerName.equals(playerName));
+        joins.add(new SeatJoin(playerName, role, seat.colorId, role == PlayerRole.SOLDIER ? BlockPos.ZERO : seat.pos));
+        trimJoins();
+        setPlayerReady(playerName, false);
+    }
+
+    public static void leaveJoin(String playerName) {
+        if (joins.removeIf(j -> j.playerName.equals(playerName))) {
+            syncAll();
+            setPlayerReady(playerName, false);
+        }
+    }
+
+    // drop joins the rules or seats no longer allow: soldiers over the team cap, co-commanders on an empty seat
+    public static void trimJoins() {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null)
+            return;
+        int soldierCap = server.getGameRules().getInt(GameRuleRegistrar.SOLDIERS_PER_TEAM);
+        boolean coCommanders = server.getGameRules().getBoolean(GameRuleRegistrar.CO_COMMANDERS);
+        Map<Integer, Integer> soldiersByTeam = new HashMap<>();
+        joins.removeIf(j -> {
+            if (j.isSoldier())
+                return soldiersByTeam.merge(j.colorId, 1, Integer::sum) > soldierCap ||
+                        startPoses.stream().noneMatch(sp -> sp.enabled && sp.colorId == j.colorId);
+            return !coCommanders || startPoses.stream().noneMatch(sp -> sp.enabled && sp.pos.equals(j.seat) && !sp.playerName.isBlank());
+        });
+        syncAll();
     }
 
     // after any seat change: who sees what depends on everyone's seat, so resend it all
@@ -274,6 +371,7 @@ public class StartPosServerEvents {
                             }
                         }
                     }
+                    startJoins(evt.getServer());
                     PlayerServerEvents.setRTSLock(true, true);
                     StartPosServerEvents.reset(evt.getServer().getLevel(Level.OVERWORLD));
                     StartPosClientboundPacket.reset();
@@ -288,6 +386,25 @@ public class StartPosServerEvents {
             if (cullTicks >= cullTicksMax) {
                 cullTicks = 0;
                 cullInvalidPoses(evt.getServer().getLevel(Level.OVERWORLD));
+            }
+        }
+    }
+
+    // after every seat has started: co-commanders take on their seat's faction, soldiers join their team's commander
+    private static void startJoins(MinecraftServer server) {
+        for (SeatJoin join : joins) {
+            ServerPlayer player = server.getPlayerList().getPlayerByName(join.playerName);
+            StartPos seat = startPoses.stream()
+                    .filter(sp -> !sp.playerName.isBlank() && PlayerServerEvents.inRtsList(sp.playerName) &&
+                            (join.isSoldier() ? sp.colorId == join.colorId : sp.pos.equals(join.seat)))
+                    .findFirst().orElse(null);
+            if (player == null || seat == null)
+                continue;
+            if (join.isSoldier()) {
+                SoldierServerEvents.bind(player, seat.playerName, seat.pos);
+            } else {
+                PlayerRoles.setCoCommander(join.playerName, seat.playerName);
+                PlayerClientboundPacket.teleport(join.playerName, seat.pos);
             }
         }
     }
@@ -348,7 +465,7 @@ public class StartPosServerEvents {
 
     @SubscribeEvent
     public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent evt) {
-        boolean shouldStopCountdown = false;
+        boolean shouldStopCountdown = joins.removeIf(j -> j.playerName.equals(evt.getEntity().getName().getString()));
         for (StartPos startPos : startPoses) {
             if (evt.getEntity() instanceof ServerPlayer player &&
                     startPos.playerName.equals(player.getName().getString())) {
@@ -357,7 +474,7 @@ public class StartPosServerEvents {
             }
         }
         if (shouldStopCountdown)
-            syncAll();
+            trimJoins();
         if (shouldStopCountdown && startingGame) {
             cancelStartGameCountdown(false);
         }

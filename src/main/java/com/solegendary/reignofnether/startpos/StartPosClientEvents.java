@@ -32,6 +32,7 @@ public class StartPosClientEvents {
     public static boolean isStarting = false; // game is counting down to start
     // players on other teams whose seats the server hides (hideEnemyPicks): name -> ready
     public static final Map<String, Boolean> hiddenPlayers = new LinkedHashMap<>();
+    public static final List<SeatJoin> joins = new ArrayList<>(); // soldiers and co-commanders this player may see
 
     public static boolean isEnabled() {
         return ClientGameModeHelper.gameMode == GameMode.CLASSIC && !startPoses.isEmpty();
@@ -42,6 +43,12 @@ public class StartPosClientEvents {
         for (StartPos startPos : startPoses) {
             if (startPos.playerName.equals(playerName) && startPos.ready != ready) {
                 startPos.ready = ready;
+                changed = true;
+            }
+        }
+        for (SeatJoin join : joins) {
+            if (join.playerName.equals(playerName) && join.ready != ready) {
+                join.ready = ready;
                 changed = true;
             }
         }
@@ -82,10 +89,22 @@ public class StartPosClientEvents {
         return getPos() != null;
     }
 
+    // the local player's soldier/co-commander join, if any
+    @Nullable
+    public static SeatJoin getJoin() {
+        for (SeatJoin join : joins)
+            if (MC.player != null && MC.player.getName().getString().equals(join.playerName))
+                return join;
+        return null;
+    }
+
     public static int getNumPlayersReady() {
         int readyPlayers = 0;
         for (StartPos startPose : startPoses)
             if (startPose.faction != Factions.NONE && startPose.ready && !startPose.playerName.isBlank())
+                readyPlayers++;
+        for (SeatJoin join : joins)
+            if (join.ready)
                 readyPlayers++;
         for (boolean ready : hiddenPlayers.values())
             if (ready)
@@ -93,8 +112,8 @@ public class StartPosClientEvents {
         return readyPlayers;
     }
     public static int getNumEnabledPoses() {
-        // a hidden seat is counted through its hidden player instead
-        int enabledPoses = hiddenPlayers.size();
+        // hidden seats are counted with the seats, so hidden players beyond them are hidden joins
+        int enabledPoses = joins.size() + hiddenPlayers.size();
         for (StartPos startPose : startPoses) {
             if (startPose.enabled)
                 enabledPoses++;
@@ -149,6 +168,7 @@ public class StartPosClientEvents {
         selectedFaction = Factions.NONE;
         isStarting = false;
         hiddenPlayers.clear();
+        joins.clear();
         for (StartPos startPos : startPoses)
             startPos.reset();
     }

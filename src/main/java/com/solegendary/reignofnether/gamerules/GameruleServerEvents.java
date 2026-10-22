@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.gamerules;
 
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
+import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
@@ -143,6 +144,26 @@ public class GameruleServerEvents {
                 randomItemDrops = Mth.clamp(randomItemDrops, 0, 2);
                 GameruleClientboundPacket.setRandomItemDrops((long) randomItemDrops);
             }
+        } else if (nodes.get(1).getNode().getName().equals("soldiersPerTeam")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                GameruleClientboundPacket.setSoldiersPerTeam(Mth.clamp((Integer) args.get("value").getResult(), 0, 4));
+                TaskSchedulerServerEvents.schedule(1, StartPosServerEvents::trimJoins); // once the rule has changed
+            }
+        } else if (nodes.get(1).getNode().getName().equals("coCommanders")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                GameruleClientboundPacket.setCoCommanders((boolean) args.get("value").getResult());
+                TaskSchedulerServerEvents.schedule(1, StartPosServerEvents::trimJoins); // once the rule has changed
+            }
+        } else if (nodes.get(1).getNode().getName().equals("soldierRespawnSeconds")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value"))
+                GameruleClientboundPacket.setSoldierRespawnSeconds(Mth.clamp((Integer) args.get("value").getResult(), 0, 300));
+        } else if (nodes.get(1).getNode().getName().equals("allChat")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value"))
+                GameruleClientboundPacket.setAllChat((boolean) args.get("value").getResult());
         }
     }
 
@@ -190,6 +211,10 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setAnimalSpawnYDiff(animalSpawnYDiff);
             int randomItemDrops = server.getGameRules().getRule(GameRuleRegistrar.RANDOM_ITEM_DROPS).get();
             GameruleClientboundPacket.setRandomItemDrops(randomItemDrops);
+            GameruleClientboundPacket.setSoldiersPerTeam(server.getGameRules().getInt(GameRuleRegistrar.SOLDIERS_PER_TEAM));
+            GameruleClientboundPacket.setCoCommanders(server.getGameRules().getBoolean(GameRuleRegistrar.CO_COMMANDERS));
+            GameruleClientboundPacket.setSoldierRespawnSeconds(server.getGameRules().getInt(GameRuleRegistrar.SOLDIER_RESPAWN_SECONDS));
+            GameruleClientboundPacket.setAllChat(server.getGameRules().getBoolean(GameRuleRegistrar.ALL_CHAT));
         }
     }
 }

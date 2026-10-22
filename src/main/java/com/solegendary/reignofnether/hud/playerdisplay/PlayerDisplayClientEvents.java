@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud.playerdisplay;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.alliance.AllianceAction;
 import com.solegendary.reignofnether.alliance.AllianceServerboundPacket;
@@ -152,7 +153,7 @@ public class PlayerDisplayClientEvents {
     }
 
     private static void renderDiplomacy(HudFrame f) {
-        String self = MC.player.getName().getString();
+        String self = PlayerRolesClient.myOwner();
         List<String> rtsNames = PlayerClientEvents.rtsPlayers.stream().map(p -> p.name).toList();
         List<String> levelNames = MC.level.players().stream().map(p -> p.getName().getString()).toList();
         rtsDiplomacyPlayerDisplays.removeIf(d -> !rtsNames.contains(d.playerName));
