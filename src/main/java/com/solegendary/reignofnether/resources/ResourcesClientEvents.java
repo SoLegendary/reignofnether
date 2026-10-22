@@ -162,10 +162,12 @@ public class ResourcesClientEvents {
     }
 
     public static void addFloatingTextsFromResources(Resources res, BlockPos pos) {
-        if (!OrthoviewClientEvents.isEnabled()) {
+        Player player = Minecraft.getInstance().player;
+        if (player == null || !player.getName().getString().equals(res.ownerName)) {
             return;
         }
-        if (!Minecraft.getInstance().player.getName().getString().equals(res.ownerName)) {
+        IncomeTracker.record(res.food, res.wood, res.ore);
+        if (!OrthoviewClientEvents.isEnabled()) {
             return;
         }
 

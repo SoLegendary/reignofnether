@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.blocks.RTSStructureBlockEntity;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
@@ -73,7 +74,7 @@ public class CustomBuildingClientEvents {
 
         for (CustomBuilding customBuilding : customBuildings) {
             if (customBuilding.name.equals(name)) {
-                MC.player.sendSystemMessage(Component.literal("ERROR (client): custom building '" + name + "' already exists"));
+                MC.player.sendSystemMessage(SystemMessage.error(Component.literal("ERROR (client): custom building '" + name + "' already exists")));
                 return;
             }
         }

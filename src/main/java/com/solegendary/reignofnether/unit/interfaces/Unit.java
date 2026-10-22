@@ -526,7 +526,8 @@ public interface Unit {
 
     private static void checkAndPickupResources(Unit unit) {
         Mob unitMob = (Mob) unit;
-        if (unitMob.canPickUpLoot() && (!(unit instanceof UnitInventory inv) || inv.isEmpty())) {
+        // resources and unit items are carried side by side; the HUD shows both
+        if (unitMob.canPickUpLoot()) {
             for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
                 if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive()) {
                     if (!Unit.atMaxResources(unit)) {

@@ -1,10 +1,12 @@
 package com.solegendary.reignofnether.hud.buttons;
 
+import com.solegendary.reignofnether.ui.Icon;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.neutral.Beacon;
 import com.solegendary.reignofnether.building.buildings.placements.BeaconPlacement;
+import com.solegendary.reignofnether.chat.ChatPanel;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -18,7 +20,6 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
@@ -51,12 +52,12 @@ public class HelperButtons {
         chatButton = new Button(
                 "Chat",
                 ICON_SIZE,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/speech_bubble.png"),
+                Icon.MESSAGE.texture,
                 (Keybinding) null,
                 () -> false,
                 () -> false,
                 () -> true,
-                () -> MC.setScreen(new ChatScreen("")),
+                () -> MC.setScreen(new ChatPanel()),
                 null,
                 List.of(FormattedCharSequence.forward(I18n.get("hud.helperbuttons.reignofnether.chat"), Style.EMPTY))
         );

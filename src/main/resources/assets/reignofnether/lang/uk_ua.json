@@ -1108,8 +1108,8 @@
     "alliance.reignofnether.disbanding": "Скасування союзу с %s через 30 секунд...",
     "alliance.reignofnether.disband_self": "Ти не можешь себе скасувати.",
     "alliance.reignofnether.disband_pending": "Запит на скасування союзу з цим гравцем вже надіслан.",
-    "alliance.reignofnether.now_allied_third_party": "\n%s тепер у союзі з %s.\n",
-    "alliance.reignofnether.disbanded_third_party": "\n%s розірвав(ла) союз із %s.\n",
+    "alliance.reignofnether.now_allied_third_party": "%s тепер у союзі з %s.",
+    "alliance.reignofnether.disbanded_third_party": "%s розірвав(ла) союз із %s.",
 
     "survival.reignofnether.dawn": "Світанок розгортається",
     "survival.reignofnether.dusk": "Настає ніч...",

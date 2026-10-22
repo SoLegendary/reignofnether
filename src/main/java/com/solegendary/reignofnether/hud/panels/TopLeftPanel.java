@@ -1,0 +1,401 @@
+package com.solegendary.reignofnether.hud.panels;
+
+import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.gamerules.GameruleClient;
+import com.solegendary.reignofnether.hud.ControlGroup;
+import com.solegendary.reignofnether.hud.GlobalProductionQueue;
+import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
+import com.solegendary.reignofnether.hud.layout.HudLayout;
+import com.solegendary.reignofnether.items.ItemClientEvents;
+import com.solegendary.reignofnether.items.RandomItemDropRule;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.player.PlayerColors;
+import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.resources.IncomeTracker;
+import com.solegendary.reignofnether.resources.ResourceName;
+import com.solegendary.reignofnether.resources.ResourceSources;
+import com.solegendary.reignofnether.resources.Resources;
+import com.solegendary.reignofnether.resources.ResourcesClientEvents;
+import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.ui.Icon;
+import com.solegendary.reignofnether.ui.Rect;
+import com.solegendary.reignofnether.ui.Text;
+import com.solegendary.reignofnether.ui.Theme;
+import com.solegendary.reignofnether.ui.Tooltip;
+import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.util.MyRenderer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+
+/** Top-left of the HUD: resource bar, then control groups and the global production queue below it. */
+public final class TopLeftPanel {
+
+    private TopLeftPanel() { }
+
+    private static final int CELL_H = HudLayout.TOP_CARD_H;
+    private static final int CELL_MIN_W = 58;
+    private static final int TILE = 28;
+    private static final int TILE_GAP = 5;
+    private static final float VALUE = Text.px(22);
+    private static final ResourceLocation WORKER_ICON =
+            ResourceLocation.fromNamespaceAndPath(com.solegendary.reignofnether.ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
+
+    public static void render(HudFrame f) {
+        int x = HudLayout.MARGIN;
+        int y = HudLayout.MARGIN;
+
+        String viewed = viewedPlayer();
+        Resources resources = viewed != null ? ResourcesClientEvents.getResources(viewed) : null;
+        String self = selfName();
+
+        // an eye when looking at someone else's economy or spectating; the explanation is on hover
+        if (viewed != null && !viewed.equals(self) && resources != null) {
+            eyeBanner(f, x, y, viewed, I18n.get("hud.reignofnether.players_resources", viewed));
+            y += 14;
+        } else if (resources == null && !PlayerClientEvents.isRTSPlayer() && !TutorialClientEvents.isEnabled()) {
+            eyeBanner(f, x, y, "", I18n.get("hud.reignofnether.you_are_spectator"));
+            y += 14;
+        }
+
+        int rowY = y;
+        if (resources != null) {
+            Rect bar = renderResources(f, x, y, viewed, resources, viewed.equals(self));
+            rowY = bar.bottom() + HudLayout.GAP;
+        }
+        renderGroupsAndQueue(f, x, rowY, viewed);
+    }
+
+    private static void eyeBanner(HudFrame f, int x, int y, String name, String tooltip) {
+        Icon.EYE.draw(f.g, x, y, 12, Theme.GOLD);
+        if (!name.isEmpty())
+            Text.draw(f.g, name, x + 15, y + 2, Theme.GOLD);
+        Rect r = new Rect(x, y, 15 + (name.isEmpty() ? 0 : Text.width(name)), 12);
+        f.register(new ButtonBuilder("viewing").build(), r, null, () -> Tooltip.of(tooltip));
+    }
+
+    /**
+     * The player whose economy is shown: the owner of the selection when it's you or an ally (or you
+     * are spectating), otherwise yourself. Selecting an enemy no longer hides your own resources.
+     */
+    @Nullable
+    private static String viewedPlayer() {
+        String self = selfName();
+        String sel = null;
+        if (!UnitClientEvents.getSelectedUnits().isEmpty() && UnitClientEvents.getSelectedUnits().get(0) instanceof Unit u)
+            sel = u.getOwnerName();
+        if (!BuildingClientEvents.getSelectedBuildings().isEmpty())
+            sel = BuildingClientEvents.getSelectedBuildings().get(0).ownerName;
+
+        boolean canSee = sel != null && (sel.equals(self) || AlliancesClient.isAllied(self, sel)
+                || !PlayerClientEvents.isRTSPlayer() || SandboxClientEvents.isSandboxPlayer());
+        if (canSee)
+            return sel;
+        return PlayerClientEvents.isRTSPlayer() ? self : sel;
+    }
+
+    private static String selfName() {
+        var player = Minecraft.getInstance().player;
+        return player != null ? player.getName().getString() : "";
+    }
+
+    // ------------------------------------------------------------------ resources
+
+    private record Cell(ResourceLocation icon, String value, String sub, int subColour, @Nullable String workers,
+                        boolean alarm, Supplier<Tooltip> tooltip) { }
+
+    private static Rect renderResources(HudFrame f, int x, int y, String owner, Resources res, boolean isSelf) {
+        List<Cell> cells = new ArrayList<>();
+        RTSPlayer rtsPlayer = PlayerClientEvents.getPlayer(owner);
+        int[] workers = countWorkers(owner);
+        cells.add(resourceCell(ResourceName.FOOD, ButtonCell.ICON_FOOD, res.food, workers[0], isSelf));
+        cells.add(resourceCell(ResourceName.WOOD, ButtonCell.ICON_WOOD, res.wood, workers[1], isSelf));
+        cells.add(resourceCell(ResourceName.ORE, ButtonCell.ICON_ORE, res.ore, workers[2], isSelf));
+        if (ItemClientEvents.ENABLED) {
+            int found = rtsPlayer != null ? rtsPlayer.itemsDropped : 0;
+            cells.add(new Cell(ButtonCell.ICON_EMERALD, String.valueOf(res.emerald),
+                    I18n.get("hud.reignofnether.items_found_short", found), Theme.MUTED, null, false, () -> {
+                Tooltip t = Tooltip.of(I18n.get("resources.reignofnether.emerald")).tag(I18n.get("hud.reignofnether.tag.resource"), Theme.EMERALD);
+                if (GameruleClient.randomItemDrops != RandomItemDropRule.DISABLED)
+                    t.body(I18n.get("hud.reignofnether.items_hint"));
+                return t;
+            }));
+        }
+        cells.add(populationCell(owner, workers[3]));
+
+        int[] widths = new int[cells.size()];
+        int total = 0;
+        for (int i = 0; i < cells.size(); i++) {
+            Cell c = cells.get(i);
+            int textW = Math.max(Text.bigWidth(c.value, VALUE), Text.smallWidth(c.sub) + (c.workers != null ? Text.smallWidth(c.workers) + 14 : 0));
+            widths[i] = Math.max(CELL_MIN_W, 7 + 15 + 6 + textW + 8);
+            total += widths[i];
+        }
+        Rect bar = new Rect(x, y, total, CELL_H);
+        Theme.panel(f.g, x, y, total, CELL_H);
+        f.zone(bar);
+
+        int cx = x;
+        for (int i = 0; i < cells.size(); i++) {
+            Cell c = cells.get(i);
+            int w = widths[i];
+            Rect r = new Rect(cx, y, w, CELL_H);
+            if (c.alarm)
+                f.g.fill(cx, y, cx + w, y + CELL_H, Theme.ALARM_TINT);
+            if (f.hovered(r))
+                f.g.fill(cx, y, cx + w, y + CELL_H, Theme.HOVER);
+            MyRenderer.renderIcon(f.g, c.icon, cx + 7, y + 8, 15);
+            int tx = cx + 7 + 15 + 6;
+            Text.big(f.g, c.value, tx, y + 6, c.alarm ? Theme.ERROR : Theme.TEXT, VALUE);
+            Text.small(f.g, c.sub, tx, y + 17, c.alarm ? Theme.ERROR : c.subColour);
+            if (c.workers != null) {
+                int wx = tx + Text.smallWidth(c.sub) + 5;
+                MyRenderer.renderIcon(f.g, workerIcon(owner), wx, y + 19, 6);
+                Text.small(f.g, c.workers, wx + 8, y + 17, Theme.MUTED);
+            }
+            if (i < cells.size() - 1)
+                Theme.divider(f.g, cx + w - 1, y + 1, 1, CELL_H - 2);
+            if (f.hovered(r))
+                c.tooltip.get().show(r.x(), r.y(), r.w(), r.h());
+            cx += w;
+        }
+        return bar;
+    }
+
+    private static ResourceLocation workerIcon(String owner) {
+        RTSPlayer player = PlayerClientEvents.getPlayer(owner);
+        return player != null && player.faction != null ? player.faction.idleWorkerIcon : WORKER_ICON;
+    }
+
+    private static Cell resourceCell(ResourceName name, ResourceLocation icon, int value, int workers, boolean isSelf) {
+        String lower = name.name().toLowerCase();
+        int rate = isSelf ? IncomeTracker.perMinute(name) : -1;
+        String sub = rate >= 0 ? I18n.get("hud.reignofnether.per_minute", rate) : "";
+        return new Cell(icon, String.valueOf(value), sub, Theme.MUTED, String.valueOf(workers), false, () -> {
+            Tooltip t = Tooltip.of(I18n.get("resources.reignofnether." + lower))
+                    .tag(I18n.get("hud.reignofnether.tag.resource"), Theme.ORANGE)
+                    .status(I18n.get("hud.reignofnether.workers_on_" + lower) + ": " + workers, Theme.MUTED);
+            if (rate >= 0)
+                t.status(I18n.get("hud.reignofnether.income_per_minute", rate), Theme.MUTED);
+            return t;
+        });
+    }
+
+    private static Cell populationCell(String owner, int workers) {
+        int pop = UnitClientEvents.getCurrentPopulation(owner);
+        int supply = BuildingClientEvents.getTotalPopulationSupply(owner);
+        int max = GameruleClient.maxPopulation;
+        boolean full = pop >= Math.min(supply, max);
+        String sub = full ? I18n.get("hud.reignofnether.housing_full") : I18n.get("hud.reignofnether.max_short", max);
+        return new Cell(PlayerColors.getPlayerColorBedIcon(owner), pop + "/" + supply, sub, Theme.MUTED,
+                String.valueOf(workers), full, () -> {
+            Tooltip t = Tooltip.of(I18n.get("resources.reignofnether.population"))
+                    .tag(I18n.get("hud.reignofnether.tag.resource"), Theme.ORANGE)
+                    .status(I18n.get("hud.reignofnether.total_workers", workers), Theme.MUTED)
+                    .status(I18n.get("hud.reignofnether.max_population", max), Theme.MUTED);
+            if (full)
+                t.status(I18n.get("hud.reignofnether.housing_full_hint"), Theme.ERROR);
+            return t;
+        });
+    }
+
+    /**
+     * One pass over the owner's workers: {food, wood, ore, total}. A worker counts towards a resource when
+     * gathering or carrying it (unless idle); hunters count towards food.
+     */
+    private static int[] countWorkers(String owner) {
+        int[] counts = new int[4];
+        for (LivingEntity le : UnitClientEvents.getAllUnits()) {
+            if (!(le instanceof Unit u) || !(le instanceof WorkerUnit wu) || !u.getOwnerName().equals(owner))
+                continue;
+            counts[3]++;
+            boolean hunting = ResourceSources.isHuntableAnimal(u.getTargetGoal().getTarget());
+            if (hunting)
+                counts[0]++;
+            if (UnitClientEvents.idleWorkerIds.contains(le.getId()))
+                continue;
+            boolean returning = u.getReturnResourcesGoal() != null;
+            Resources carried = returning ? Resources.getTotalResourcesFromItems(u.getItems()) : null;
+            ResourceName target = wu.getGatherResourceGoal().getTargetResourceName();
+            if (!hunting && (target == ResourceName.FOOD || (returning && carried.food > 0)))
+                counts[0]++;
+            if (target == ResourceName.WOOD || (returning && carried.wood > 0))
+                counts[1]++;
+            if (target == ResourceName.ORE || (returning && carried.ore > 0))
+                counts[2]++;
+        }
+        return counts;
+    }
+
+    // ------------------------------------------------------------------ control groups + queue
+
+    private static void renderGroupsAndQueue(HudFrame f, int x, int y, @Nullable String owner) {
+        int cx = x;
+        for (ControlGroup group : HudClientEvents.controlGroups) {
+            group.clean();
+            if (group.isEmpty())
+                continue;
+            renderGroup(f, group, cx, y);
+            cx += TILE + TILE_GAP;
+        }
+
+        if (owner == null || !canSeeQueue(owner))
+            return;
+        List<GlobalProductionQueue.Group> queue = GlobalProductionQueue.forPlayer(owner);
+        if (queue.isEmpty())
+            return;
+
+        if (cx > x) {
+            Theme.divider(f.g, cx, y + 2, 1, TILE - 4);
+            cx += TILE_GAP + 1;
+        }
+        Text.smallShadowed(f.g, I18n.get("hud.reignofnether.queue"), cx, y + (TILE - 8) / 2, Theme.GOLD);
+        cx += Text.smallWidth(I18n.get("hud.reignofnether.queue")) + TILE_GAP;
+        boolean own = owner.equals(selfName());
+        for (GlobalProductionQueue.Group group : queue) {
+            renderQueueTile(f, group, cx, y, own);
+            cx += TILE + TILE_GAP;
+        }
+    }
+
+    private static boolean canSeeQueue(String owner) {
+        return owner.equals(selfName()) || !PlayerClientEvents.isRTSPlayer() || SandboxClientEvents.isSandboxPlayer()
+                || AlliancesClient.isAllied(selfName(), owner);
+    }
+
+    private static void renderGroup(HudFrame f, ControlGroup group, int x, int y) {
+        Button b = group.getButton();
+        Rect r = new Rect(x, y, TILE, TILE);
+        boolean selected = isGroupSelected(group);
+        Theme.cell(f.g, x, y, TILE, TILE, selected ? Theme.CellState.ACTIVE : Theme.CellState.READY, f.hovered(r));
+        if (group.getIcon() != null)
+            MyRenderer.renderIcon(f.g, group.getIcon(), x + 7, y + 6, 14);
+
+        List<LivingEntity> members = groupEntities(group);
+        int count = members.isEmpty() ? group.buildingBps.size() : members.size();
+        float hp = averageHealth(group, members);
+        String label = group.getKeybinding() != null ? group.getKeybinding().buttonLabel : "";
+        Theme.keyCap(f.g, label, x + 1, y + 1, selected ? Theme.GOLD : Theme.MUTED);
+        String n = String.valueOf(count);
+        Text.smallShadowed(f.g, n, x + TILE - Text.smallWidth(n) - 2, y + TILE - 13, Theme.TEXT);
+        Theme.bar(f.g, x + 3, y + TILE - 4, TILE - 6, 2, hp, Theme.hpColor(hp));
+
+        f.register(b, r, group.getKeybinding(), () -> Tooltip.of(I18n.get("hud.control_group.reignofnether.title", label))
+                .body(composition(members))
+                .status(I18n.get("hud.control_group.reignofnether.keys", label), Theme.LABEL)
+                .status(I18n.get("hud.control_group.reignofnether.mouse"), Theme.LABEL));
+    }
+
+    private static boolean isGroupSelected(ControlGroup group) {
+        var selected = UnitClientEvents.getSelectedUnits();
+        if (!group.entityIds.isEmpty()) {
+            if (selected.size() != group.entityIds.size())
+                return false;
+            Set<Integer> ids = new HashSet<>(group.entityIds);
+            return selected.stream().allMatch(e -> ids.contains(e.getId()));
+        }
+        var buildings = BuildingClientEvents.getSelectedBuildings();
+        return !group.buildingBps.isEmpty() && buildings.size() == group.buildingBps.size()
+                && buildings.stream().allMatch(b -> group.buildingBps.contains(b.originPos));
+    }
+
+    private static List<LivingEntity> groupEntities(ControlGroup group) {
+        List<LivingEntity> list = new ArrayList<>();
+        Set<Integer> ids = new HashSet<>(group.entityIds);
+        for (LivingEntity e : UnitClientEvents.getAllUnits())
+            if (ids.contains(e.getId()))
+                list.add(e);
+        return list;
+    }
+
+    private static float averageHealth(ControlGroup group, List<LivingEntity> members) {
+        float sum = 0;
+        int n = 0;
+        for (LivingEntity e : members) {
+            sum += e.getHealth() / Math.max(1, e.getMaxHealth());
+            n++;
+        }
+        if (n == 0)
+            for (BuildingPlacement b : BuildingClientEvents.getBuildings())
+                if (group.buildingBps.contains(b.originPos)) {
+                    sum += b.getHealth() / (float) Math.max(1, b.getMaxHealth());
+                    n++;
+                }
+        return n == 0 ? 1f : sum / n;
+    }
+
+    private static String composition(List<LivingEntity> members) {
+        java.util.Map<String, Integer> counts = new java.util.LinkedHashMap<>();
+        for (LivingEntity e : members)
+            counts.merge(SelectionPanel.displayName(e), 1, Integer::sum);
+        StringBuilder sb = new StringBuilder();
+        counts.forEach((name, n) -> sb.append(sb.isEmpty() ? "" : ", ").append(n).append(" ").append(name));
+        return sb.toString();
+    }
+
+    private static void renderQueueTile(HudFrame f, GlobalProductionQueue.Group group, int x, int y, boolean own) {
+        Rect r = new Rect(x, y, TILE, TILE);
+        Theme.cell(f.g, x, y, TILE, TILE, Theme.CellState.READY, f.hovered(r));
+
+        Button cancel = group.item.getCancelButton(group.soonestPlacement, group.inProgress);
+        if (cancel.iconResource != null)
+            MyRenderer.renderIcon(f.g, cancel.iconResource, x + 7, y + 3, 14);
+        if (group.count > 1) {
+            String n = "×" + group.count;
+            Text.smallShadowed(f.g, n, x + TILE - Text.smallWidth(n) - 1, y - 1, Theme.TEXT);
+        }
+        boolean blocked = group.isPopBlocked();
+        String time = blocked ? I18n.get("hud.reignofnether.pop_short") : group.inProgress ? formatTime(group.secondsLeft()) : "";
+        Text.smallShadowed(f.g, time, x + (TILE - Text.smallWidth(time)) / 2, y + TILE - 12, blocked ? Theme.ERROR : Theme.BODY);
+        Theme.bar(f.g, x + 3, y + TILE - 3, TILE - 6, 2, group.progress(), blocked ? Theme.ERROR : Theme.ORANGE);
+
+        Runnable cancelOne = cancel.onLeftClick;
+        Button b = new ButtonBuilder(cancel.name)
+                .onLeftClick(() -> selectNextProducer(group))
+                .onRightClick(own ? cancelOne : null)
+                .build();
+        f.register(b, r, null, () -> {
+            Tooltip t = Tooltip.of(cancel.name + (group.count > 1 ? " ×" + group.count : ""))
+                    .tag(I18n.get("hud.reignofnether.tag.in_production"), Theme.ORANGE);
+            if (blocked)
+                t.status(I18n.get("hud.reignofnether.paused_population"), Theme.ERROR);
+            else if (group.inProgress)
+                t.status(I18n.get("hud.reignofnether.next_ready_in", formatTime(group.secondsLeft())), Theme.MUTED);
+            t.status(I18n.get(own ? "hud.reignofnether.queue_hint" : "hud.reignofnether.queue_hint_view"), Theme.LABEL);
+            return t;
+        });
+    }
+
+    private static void selectNextProducer(GlobalProductionQueue.Group group) {
+        if (group.placements.isEmpty())
+            return;
+        ProductionPlacement next = group.placements.get(0);
+        if (HudClientEvents.hudSelectedPlacement instanceof ProductionPlacement current && group.placements.contains(current))
+            next = group.placements.get((group.placements.indexOf(current) + 1) % group.placements.size());
+        BuildingClientEvents.clearSelectedBuildings();
+        UnitClientEvents.clearSelectedUnits();
+        BuildingClientEvents.addSelectedBuilding(next);
+        OrthoviewClientEvents.centreCameraOnPos(next.centrePos);
+    }
+
+    public static String formatTime(int seconds) {
+        return (seconds / 60) + ":" + String.format("%02d", seconds % 60);
+    }
+}

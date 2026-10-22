@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class StartPosServerboundPacket {
@@ -43,6 +44,10 @@ public class StartPosServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(new StartPosServerboundPacket(StartPosAction.DISABLE, pos, Factions.NONE));
     }
 
+    public static void closeEmptyPositions() {
+        PacketHandler.INSTANCE.sendToServer(new StartPosServerboundPacket(StartPosAction.CLOSE_EMPTY, BlockPos.ZERO, Factions.NONE));
+    }
+
     public StartPosServerboundPacket(StartPosAction action, BlockPos pos, Faction faction) {
         this.action = action;
         this.blockPos = pos;
@@ -72,8 +77,8 @@ public class StartPosServerboundPacket {
                 success.set(false);
                 return;
             }
-            else if ((action == StartPosAction.ENABLE || action == StartPosAction.DISABLE) &&
-                    !player.hasPermissions(4)) {
+            else if ((action == StartPosAction.ENABLE || action == StartPosAction.DISABLE || action == StartPosAction.CLOSE_EMPTY) &&
+                    !StartPosServerEvents.isHost(player)) {
                 ReignOfNether.LOGGER.warn("StartPosServerboundPacket: Tried to process packet from " + player.getName() + " with insufficient permissions");
                 success.set(false);
                 return;
@@ -104,20 +109,28 @@ public class StartPosServerboundPacket {
                 case UNRESERVE -> {
                     if (StartPosServerEvents.isStartingGame())
                         return;
-                    // only your own seat
+                    // the host can also clear someone else's seat (kick); unready whoever sat there
                     for (StartPos startPos : StartPosServerEvents.startPoses) {
-                        if (startPos.pos.equals(blockPos) && startPos.playerName.equals(playerName)) {
+                        if (startPos.pos.equals(blockPos) &&
+                                (startPos.playerName.equals(playerName) || StartPosServerEvents.isHost(player))) {
+                            String seated = startPos.playerName;
                             startPos.reset();
                             StartPosServerEvents.syncAll();
+                            if (!seated.isBlank())
+                                StartPosServerEvents.setPlayerReady(seated, false);
                             break;
                         }
                     }
-                    StartPosServerEvents.setPlayerReady(playerName, false);
                 }
                 case PLAYER_READY -> StartPosServerEvents.setPlayerReady(playerName, true);
                 case PLAYER_UNREADY -> StartPosServerEvents.setPlayerReady(playerName, false);
                 case ENABLE -> StartPosServerEvents.setPosEnabled(blockPos, true);
                 case DISABLE -> StartPosServerEvents.setPosEnabled(blockPos, false);
+                case CLOSE_EMPTY -> {
+                    for (StartPos startPos : List.copyOf(StartPosServerEvents.startPoses))
+                        if (startPos.enabled && startPos.playerName.isBlank())
+                            StartPosServerEvents.setPosEnabled(startPos.pos, false);
+                }
             }
             success.set(true);
         });

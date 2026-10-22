@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.orthoview;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -526,7 +527,7 @@ public class OrthoviewClientEvents {
                     MC.gameMode.getPlayerMode() == GameType.ADVENTURE
                             || MC.gameMode.getPlayerMode() == GameType.SURVIVAL
             )) {
-                MC.player.sendSystemMessage(Component.literal(I18n.get("hud.orthoview.reignofnether.ortho_error")));
+                MC.player.sendSystemMessage(SystemMessage.error(Component.literal(I18n.get("hud.orthoview.reignofnether.ortho_error"))));
             } else {
                 toggleEnable();
             }
