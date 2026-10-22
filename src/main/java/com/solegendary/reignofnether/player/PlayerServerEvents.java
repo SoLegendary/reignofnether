@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.taskscheduler.TaskSchedulerServerEvents;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.TradeAction;
@@ -1043,13 +1044,10 @@ public class PlayerServerEvents {
             // Remove the defeated player from the list
             FogOfWarServerEvents.invalidateRtsCache();
 
-            CompletableFuture.delayedExecutor(3000, TimeUnit.MILLISECONDS).execute(() -> {
-                for (ServerPlayer sp : players) {
-                    if (sp.getName().getString().equals(playerName)) {
-                        FogOfWarServerEvents.resendAllTrackedChunks(sp);
-                        break;
-                    }
-                }
+            TaskSchedulerServerEvents.schedule(60, () -> {
+                ServerPlayer sp = serverLevel.getServer().getPlayerList().getPlayerByName(playerName);
+                if (sp != null)
+                    FogOfWarServerEvents.resendAllTrackedChunks(sp);
             });
 
             rtsPlayers.removeIf(rtsPlayer -> {

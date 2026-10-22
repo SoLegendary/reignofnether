@@ -36,6 +36,7 @@ public class GameruleClient {
     public static boolean slantedBuilding = true;
     public static int allowedHeroes = 2;
     public static boolean lockAlliances = false;
+    public static boolean hideEnemyPicks = true;
     public static boolean scenarioMode = false;
     public static boolean coopMode = false;
     public static boolean buildingsOutsideBorder = false;
@@ -169,6 +170,10 @@ public class GameruleClient {
         buttons.add(new GameruleBooleanButton("lockAlliances", lockAlliances,
                 () -> GameruleServerboundPacket.setLockAlliances(!lockAlliances),
                 I18n.get("commands.reignofnether.gamerule.lock_alliances")
+        ));
+        buttons.add(new GameruleBooleanButton("hideEnemyPicks", hideEnemyPicks,
+                () -> GameruleServerboundPacket.setHideEnemyPicks(!hideEnemyPicks),
+                I18n.get("commands.reignofnether.gamerule.hide_enemy_picks")
         ));
         buttons.add(new GameruleBooleanButton("coopMode", coopMode,
                 () -> GameruleServerboundPacket.setCoopMode(!coopMode),

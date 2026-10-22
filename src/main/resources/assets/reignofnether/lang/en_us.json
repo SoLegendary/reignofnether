@@ -901,6 +901,8 @@
     "commands.reignofnether.gamerule.beacon_win_minutes": "Time needed to win with beacon control",
     "commands.reignofnether.gamerule.slanted_buildings": "Allow building on non-flat terrain",
     "commands.reignofnether.gamerule.lock_alliances": "Disallow changing allies during a match",
+    "commands.reignofnether.gamerule.hide_enemy_picks": "Players only see the factions picked by their own team before the match.",
+    "gamerule.hideEnemyPicks": "Hide other teams' factions and start positions in the match lobby",
     "commands.reignofnether.gamerule.allowed_heroes": "How many heroes players can train",
     "commands.reignofnether.gamerule.coop_mode": "All human players are allied; victory only via commands or beacon",
     "commands.reignofnether.gamerule.animal_spawn_y_diff": "Y level difference that animals can spawn at near capitols",
