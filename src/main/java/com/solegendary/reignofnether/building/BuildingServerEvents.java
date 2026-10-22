@@ -34,6 +34,7 @@ import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
@@ -936,9 +937,17 @@ public class BuildingServerEvents {
                     atkDmg = pillagerUnit.getUnitAttackDamage() / 2;
                     building.lastAttacker = pillagerUnit;
                 } else if (exp.getExploder() instanceof AdjustablePrimedTnt aTNT) {
-                    atkDmg = aTNT.getExplosionBuildingDamage();
-                } else if (exp.getExploder() instanceof PrimedTnt) {
-                    atkDmg = TNT_BUILDING_BASE_DAMAGE;
+                    float mult = 1.0f;
+                    if (aTNT.getOwner() instanceof AttackerUnit aUnit) {
+                        mult = aUnit.getBuildingDamageMultiplier();
+                    }
+                    atkDmg = aTNT.getExplosionBuildingDamage() * mult;
+                } else if (exp.getExploder() instanceof PrimedTnt tnt) {
+                    float mult = 1.0f;
+                    if (tnt.getOwner() instanceof AttackerUnit aUnit) {
+                        mult = aUnit.getBuildingDamageMultiplier();
+                    }
+                    atkDmg = TNT_BUILDING_BASE_DAMAGE * mult;
                 }
 
                 if (atkDmg > 0) {

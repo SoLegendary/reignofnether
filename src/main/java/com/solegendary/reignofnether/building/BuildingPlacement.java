@@ -623,6 +623,10 @@ public class BuildingPlacement {
         return block.isPlaced(getLevel());
     }
 
+    public void damage(double amount) {
+        destroyRandomBlocks(amount / 2);
+    }
+
     public void destroyRandomBlocks(double amount) {
         if (getLevel().isClientSide())
             return;

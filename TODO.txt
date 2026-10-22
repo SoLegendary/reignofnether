@@ -27,8 +27,8 @@ Balance
     - Make custom arrow entity to control logic better
         - Halve pierce and multishot damage and improve other enchants
 
-[❌] Great hammers now affect abilities and summoned units at 50% effectiveness (2x building damage)
-[❌] Wildfire Molten Bombs now deal 20 damage to buildings
+[🟡] Great hammers now affect abilities and summoned units at 50% effectiveness (2x building damage)
+[🟡] Wildfire Molten Bombs now deal 20 damage to buildings
 
 [🟡] Royal Guard slow from Taunting Cry reduced 60% to 40% and resistance increased from 60% to 80%
 [✔] Bat HP reduced from 15hp to 10hp
@@ -56,7 +56,7 @@ Quality of Life
 
 Bugfixes
 --------
-[🟡] Fixed resistance effects being twice as effective as intended
+[🟡] Fixed resistance effects being more effective than 20% per level
 [🟡] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
 [🟡] Fixed mob effects not showing if it was applied while outside of render range or logged out
 [❌] Fixed an issue where pillagers did not benefit from their enchantment until after their next shot

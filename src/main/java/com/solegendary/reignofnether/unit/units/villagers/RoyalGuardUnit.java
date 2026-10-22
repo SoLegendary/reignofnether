@@ -661,7 +661,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 }
             }
             for (BuildingPlacement building : buildings) {
-                building.destroyRandomBlocks(maceSlam.damage / 2);
+                building.destroyRandomBlocks((maceSlam.damage * getBuildingDamageMultiplier()) / 2);
             }
 
             for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(blockPos.above()), MaceSlam.RADIUS, LivingEntity.class, level())) {
