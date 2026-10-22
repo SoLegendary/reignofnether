@@ -312,6 +312,11 @@
     "abilities.reignofnether.roar.tooltip1": "\uE006  %d   \uE004  %ds  \uE005   ",
     "abilities.reignofnether.roar.tooltip2": "Emit a deafening roar, knocking away, damaging",
     "abilities.reignofnether.roar.tooltip3": "and briefly slowing down all nearby enemies. ",
+    "abilities.reignofnether.siege_mode": "Siege Mode",
+    "abilities.reignofnether.siege_mode.enable.tooltip1": "Burrow into the ground, becoming immovable ",
+    "abilities.reignofnether.siege_mode.enable.tooltip2": "and gaining long range explosive arrows.",
+    "abilities.reignofnether.siege_mode.disable.tooltip1": "Unburrow out of the ground, becoming mobile",
+    "abilities.reignofnether.siege_mode.disable.tooltip2": "but losing long range explosive arrows. ",
 
     "abilities.reignofnether.flying_enable": "Lift off",
     "abilities.reignofnether.flying_enable.tooltip1": "Have the windcaller start flying in the air.",

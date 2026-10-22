@@ -295,7 +295,7 @@ public abstract class AbstractArrowMixin extends Projectile {
                     pResult.getEntity().getEyePosition().x,
                     pResult.getEntity().getEyePosition().y,
                     pResult.getEntity().getEyePosition().z,
-                    1f,
+                    this.getTags().contains(PillagerUnit.SIEGE_ARROW_TAG) ? 2f : 1f,
                     false,
                     Level.ExplosionInteraction.BLOCK);
         }

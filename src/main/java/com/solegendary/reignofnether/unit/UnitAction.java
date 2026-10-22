@@ -41,6 +41,7 @@ public enum UnitAction {
     EJECT, // vehicle removes itself from passengers
     PROMOTE_ILLAGER,
     ROAR,
+    TOGGLE_SIEGE_MODE,
     THROW_HEALING_POTION,
     THROW_HEALING_POTION_AUTOCAST_ENABLE,
     THROW_HEALING_POTION_AUTOCAST_DISABLE,

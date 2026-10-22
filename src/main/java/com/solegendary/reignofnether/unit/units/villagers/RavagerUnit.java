@@ -2,10 +2,7 @@ package com.solegendary.reignofnether.unit.units.villagers;
 
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
-import com.solegendary.reignofnether.ability.abilities.AttackGround;
-import com.solegendary.reignofnether.ability.abilities.CastSummonVexes;
-import com.solegendary.reignofnether.ability.abilities.Eject;
-import com.solegendary.reignofnether.ability.abilities.Roar;
+import com.solegendary.reignofnether.ability.abilities.*;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.keybinds.Keybindings;
@@ -24,6 +21,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -31,12 +29,14 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -45,6 +45,8 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +65,8 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         ABILITIES.add(new Roar(), Keybindings.abilitySlot1);
         ABILITIES.add(new Eject(), Keybindings.abilitySlot2);
         ABILITIES.add(new CastSummonVexes(), Keybindings.abilitySlot3);
-        ABILITIES.add(new AttackGround(PillagerUnit.attackRange), Keybindings.abilitySlot3);
+        ABILITIES.add(new ToggleSiegeMode(), Keybindings.abilitySlot4);
+        ABILITIES.add(new AttackGround(PillagerUnit.attackRange), Keybindings.abilitySlot5);
     }
 
     //region
@@ -99,7 +102,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public UsePortalGoal getUsePortalGoal() { return usePortalGoal; }
     public boolean canUsePortal() { return getUsePortalGoal() != null; }
 
-	public Abilities getAbilities() {return abilities;};
+    public Abilities getAbilities() {return abilities;};
     public List<ItemStack> getItems() {return items;};
     public MoveToTargetBlockGoal getMoveGoal() {return moveGoal;}
     public SelectedTargetGoal<? extends LivingEntity> getTargetGoal() {return targetGoal;}
@@ -138,11 +141,15 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public void setScenarioRoleIndex(int index) { this.entityData.set(scenarioRoleDataAccessor, index); }
     public static final EntityDataAccessor<Integer> scenarioRoleDataAccessor =
             SynchedEntityData.defineId(RavagerUnit.class, EntityDataSerializers.INT);
-    
+
     public String getOnDeathCommand() { return this.entityData.get(onDeathCommandDataAccessor); }
     public void setOnDeathCommand(String command) { this.entityData.set(onDeathCommandDataAccessor, command); }
     public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
-        SynchedEntityData.defineId(RavagerUnit.class, EntityDataSerializers.STRING);
+            SynchedEntityData.defineId(RavagerUnit.class, EntityDataSerializers.STRING);
+
+    // siege mode state, synced so the client can animate and sink the model
+    public static final EntityDataAccessor<Integer> siegeStateAccessor =
+            SynchedEntityData.defineId(RavagerUnit.class, EntityDataSerializers.INT);
 
     @Override
     protected void defineSynchedData() {
@@ -150,6 +157,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         this.entityData.define(ownerDataAccessor, "");
         this.entityData.define(scenarioRoleDataAccessor, -1);
         this.entityData.define(onDeathCommandDataAccessor, "");
+        this.entityData.define(siegeStateAccessor, 0);
     }
 
     // combat stats
@@ -190,6 +198,16 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
 
     private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = e -> e.isAlive() && !(e instanceof Ravager);
 
+    // ---- siege mode ----
+    public enum SiegeState { NONE, BURROWING, SIEGED, UNBURROWING }
+
+    public static final int SIEGE_TRANSITION_TICKS = 40;
+    public static final float SIEGE_SINK_DEPTH = 0.45f;       // blocks, visual only
+    public static final double SIEGE_FRONT_HALF_ANGLE = 60;   // degrees either side of facing
+
+    private int siegeTicks = 0;   // ticks into the current state (both sides)
+    private float lockedYRot = 0; // facing captured when siege began
+
     public RavagerUnit(EntityType<? extends Ravager> entityType, Level level) {
         super(entityType, level);
 
@@ -225,25 +243,187 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     @Override
     protected void blockedByShield(LivingEntity pEntity) { }
 
+    // ------------------------------------------------------------------
+    // Siege mode API
+    // ------------------------------------------------------------------
+
+    public SiegeState getSiegeState() {
+        int i = this.entityData.get(siegeStateAccessor);
+        SiegeState[] values = SiegeState.values();
+        return values[Mth.clamp(i, 0, values.length - 1)];
+    }
+
+    private void setSiegeState(SiegeState s) {
+        this.entityData.set(siegeStateAccessor, s.ordinal());
+        this.siegeTicks = 0;
+    }
+
+    @Override
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> accessor) {
+        super.onSyncedDataUpdated(accessor);
+        // client only: the server manages siegeTicks itself
+        if (accessor == siegeStateAccessor && level().isClientSide())
+            siegeTicks = (getSiegeState() == SiegeState.SIEGED) ? SIEGE_TRANSITION_TICKS : 0;
+    }
+
+    public boolean isSiegeLocked() { return getSiegeState() != SiegeState.NONE; }
+    public boolean hasPillagerRider() { return getFirstPassenger() instanceof PillagerUnit; }
+    public boolean canStartSiege() { return getSiegeState() == SiegeState.NONE && hasPillagerRider(); }
+
+    public void startSiege() {
+        if (!canStartSiege()) return;
+        lockedYRot = getYRot();
+        setSiegeState(SiegeState.BURROWING);
+        digFx(true);
+    }
+
+    public void stopSiege() {
+        SiegeState s = getSiegeState();
+        if (s != SiegeState.BURROWING && s != SiegeState.SIEGED) return;
+        // if cancelled mid-burrow, start unburrowing from the same depth
+        int startTicks = (s == SiegeState.BURROWING) ? SIEGE_TRANSITION_TICKS - siegeTicks : 0;
+        setSiegeState(SiegeState.UNBURROWING);
+        siegeTicks = Mth.clamp(startTicks, 0, SIEGE_TRANSITION_TICKS);
+        digFx(true);
+    }
+
+    public void toggleSiege() {
+        if (getSiegeState() == SiegeState.NONE) startSiege();
+        else stopSiege();
+    }
+
+    /** 0 = fully surfaced, 1 = fully sunk. Eased. Used by renderer + passenger offset. */
+    public float getSiegeProgress(float partialTick) {
+        float t = Math.min(1f, (siegeTicks + partialTick) / SIEGE_TRANSITION_TICKS);
+        float p = switch (getSiegeState()) {
+            case NONE -> 0f;
+            case BURROWING -> t;
+            case SIEGED -> 1f;
+            case UNBURROWING -> 1f - t;
+        };
+        return p * p * (3 - 2 * p); // smoothstep
+    }
+
+    public float getSiegeSinkOffset(float partialTick) { return getSiegeProgress(partialTick) * SIEGE_SINK_DEPTH; }
+
+    /** true while the model should play its digging animation */
+    public boolean isSiegeTransitioning() {
+        SiegeState s = getSiegeState();
+        return s == SiegeState.BURROWING || s == SiegeState.UNBURROWING;
+    }
+
+    public boolean isInFront(LivingEntity target) {
+        if (!isSiegeLocked()) return true;
+        double dx = target.getX() - getX(), dz = target.getZ() - getZ();
+        double len = Math.sqrt(dx * dx + dz * dz);
+        if (len < 1.0E-4) return true;
+        float yaw = lockedYRot * Mth.DEG_TO_RAD;
+        double dot = (dx * -Mth.sin(yaw) + dz * Mth.cos(yaw)) / len;
+        return dot >= Math.cos(Math.toRadians(SIEGE_FRONT_HALF_ANGLE));
+    }
+
+    private void tickSiege() {
+        SiegeState state = getSiegeState();
+        if (state == SiegeState.NONE) return;
+        siegeTicks++;
+
+        // freeze facing + motion (runs on both sides so the client doesn't jitter)
+        setYRot(lockedYRot); yRotO = lockedYRot;
+        yBodyRot = lockedYRot; yBodyRotO = lockedYRot;
+        yHeadRot = lockedYRot; yHeadRotO = lockedYRot;
+        getNavigation().stop();
+        Vec3 dm = getDeltaMovement();
+        setDeltaMovement(0, Math.min(dm.y, 0), 0);
+
+        if (level().isClientSide()) return;
+
+        // pillager gone (ejected, dead, dismounted) -> unburrow
+        if (state != SiegeState.UNBURROWING && !hasPillagerRider()) {
+            stopSiege();
+            return;
+        }
+
+        // front-only targeting
+        LivingEntity target = getTarget();
+        if (target != null && !isInFront(target))
+            setTarget(null);
+
+        if (state != SiegeState.SIEGED && siegeTicks % 5 == 0)
+            digFx(false);
+
+        if (siegeTicks >= SIEGE_TRANSITION_TICKS) {
+            if (state == SiegeState.BURROWING) {
+                setSiegeState(SiegeState.SIEGED);
+                digFx(true);
+            } else if (state == SiegeState.UNBURROWING) {
+                setSiegeState(SiegeState.NONE);
+            }
+        }
+    }
+
+    private void digFx(boolean big) {
+        if (!(level() instanceof ServerLevel sl)) return;
+        BlockState below = sl.getBlockState(blockPosition().below());
+        if (below.isAir()) return;
+        SoundType st = below.getSoundType();
+        playSound(big ? st.getBreakSound() : st.getHitSound(), big ? 1.4f : 0.9f, 0.6f);
+        sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, below),
+                getX(), getY(), getZ(), big ? 25 : 8, 1.0, 0.1, 1.0, 0.15);
+    }
+
+    // ---- immobility overrides ----
+
+    @Override
+    public void move(@NotNull MoverType type, @NotNull Vec3 vec) {
+        super.move(type, isSiegeLocked() ? new Vec3(0, vec.y, 0) : vec);
+    }
+
+    @Override public boolean isPushable() { return !isSiegeLocked() && super.isPushable(); }
+
+    @Override
+    public void push(double x, double y, double z) {
+        if (!isSiegeLocked()) super.push(x, y, z);
+    }
+
+    @Override
+    public void knockback(double strength, double x, double z) {
+        if (!isSiegeLocked()) super.knockback(strength, x, z);
+    }
+
+    @Override
+    public boolean doHurtTarget(@NotNull Entity target) {
+        if (isSiegeLocked() && target instanceof LivingEntity le && !isInFront(le)) return false;
+        return super.doHurtTarget(target);
+    }
+
+    // keep the rider visually sunk with the ravager
+    @Override
+    public double getPassengersRidingOffset() {
+        return super.getPassengersRidingOffset() - getSiegeSinkOffset(1f);
+    }
+
+    // ------------------------------------------------------------------
+
     public void tick() {
         this.setCanPickUpLoot(false);
         super.tick();
         Unit.tick(this);
         AttackerUnit.tick(this);
+        tickSiege();
     }
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
+        if (this.level() instanceof ServerLevel serverLevel) {
             String command = this.getOnDeathCommand();
             if (command != null && !command.isEmpty()) {
                 CommandSourceStack source;
                 source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
+                        .createCommandSourceStack()
+                        .withEntity(this)
+                        .withPosition(this.position())
+                        .withLevel(serverLevel)
+                        .withPermission(2);
                 serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
             }
         }
@@ -254,12 +434,17 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.addAdditionalSaveData(pCompound);
         this.addUnitSaveData(pCompound);
+        pCompound.putInt("SiegeState", getSiegeState().ordinal());
+        pCompound.putFloat("SiegeYRot", lockedYRot);
     }
 
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         this.readUnitSaveData(pCompound);
+        lockedYRot = pCompound.getFloat("SiegeYRot");
+        this.entityData.set(siegeStateAccessor, pCompound.getInt("SiegeState"));
+        siegeTicks = SIEGE_TRANSITION_TICKS; // finish any transition rather than restarting it
     }
 
     public void initialiseGoals() {
@@ -363,8 +548,4 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
             }
         }
     }
-
-
-
-
 }
