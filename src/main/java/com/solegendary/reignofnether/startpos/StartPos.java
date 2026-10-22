@@ -25,6 +25,7 @@ public class StartPos {
     public boolean isFromStartBlock = true;
     public boolean enabled = true;
     public boolean ready = false; // player on this spot is ready to start the game
+    public boolean hidden = false; // client only: taken by an enemy whose pick is hidden (hideEnemyPicks)
 
     public static final String BUTTON_NAME = "Start Pos";
 
@@ -111,7 +112,7 @@ public class StartPos {
                     if (StartPosClientEvents.getPos() == this)
                         StartPosServerboundPacket.unreservePos(pos);
                     else {
-                        StartPosServerboundPacket.reservePos(pos, StartPosClientEvents.selectedFaction, localPlayerName);
+                        StartPosServerboundPacket.reservePos(pos, StartPosClientEvents.selectedFaction);
                     }
                 })
                 .onRightClick(() -> {

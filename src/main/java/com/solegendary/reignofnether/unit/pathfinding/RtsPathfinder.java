@@ -41,6 +41,10 @@ public final class RtsPathfinder {
         // Only spiders with wall-climbing toggled on may scale vertical walls; PoisonSpiderUnit inherits this.
         boolean canClimb = mob instanceof SpiderUnit su && su.isWallClimbing();
         int footprintRadius = footprintRadiusFor(mob);
+        // Snap the start too: a unit standing on a slab/dais edge or still falling (eg. a hero just spawned on
+        // its altar) is a block off its node 0, and narrow units can't advance to a node 1 block above/below,
+        // so they spun in place until moved by hand.
+        start = snapToWalkable(level, start, mobility, footprintRadius, clearanceCells, fireCost, 1);
         // Snap the goal onto a standable cell. If none exists nearby (eg. an airborne canopy leaf) the goal is
         // unreachable as an exact cell: path best-effort with a capped budget so A* can't flood MAX_RADIUS
         // proving the obvious (the 250ms freeze on leaf orders).
