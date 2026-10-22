@@ -26,6 +26,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -36,10 +37,13 @@ import static com.solegendary.reignofnether.unit.UnitServerEvents.spawnMobs;
 
 public class TutorialServerEvents {
 
-    private static final String TUTORIAL_MAP_NAME = "reign_of_nether_tutorial";
-    private static final Long TUTORIAL_MAP_SEED = 4756899154123723533L;
+    public static final String TUTORIAL_MAP_NAME = "reign_of_nether_tutorial";
+    public static final long TUTORIAL_MAP_SEED = 4756899154123723533L;
     private static final String TUTORIAL_ENEMY_NAME = "Monsters";
     private static boolean enabled = false;
+
+    // Where the original tutorial map put players; a world freshly generated from the seed spawns near 0,0
+    private static final BlockPos PLAYER_SPAWN_POS = new BlockPos(-2949, 68, -1189);
 
     private static final Vec3i ARMY_SPAWN_POS = new Vec3i(-2946, 68, -1177);
     private static final Vec3i ANIMAL_POS = new Vec3i(-2923, 67, -1184);
@@ -100,6 +104,13 @@ public class TutorialServerEvents {
         String levelName = server.getWorldData().getLevelSettings().levelName();
         if (evt.getEntity().level() instanceof ServerLevel serverLevel && serverLevel.getSeed() == TUTORIAL_MAP_SEED
             && levelName.equals(TUTORIAL_MAP_NAME)) {
+
+            if (!serverLevel.getSharedSpawnPos().equals(PLAYER_SPAWN_POS)) {
+                serverLevel.setDefaultSpawnPos(PLAYER_SPAWN_POS, 0);
+                evt.getEntity().teleportTo(PLAYER_SPAWN_POS.getX() + 0.5,
+                        serverLevel.getHeight(Heightmap.Types.MOTION_BLOCKING, PLAYER_SPAWN_POS.getX(), PLAYER_SPAWN_POS.getZ()),
+                        PLAYER_SPAWN_POS.getZ() + 0.5);
+            }
 
             TutorialStage stage = loadStage(server.getLevel(Level.OVERWORLD));
 

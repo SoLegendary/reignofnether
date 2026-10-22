@@ -27,7 +27,9 @@ import net.minecraft.world.phys.AABB;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -50,6 +52,8 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     // How far below a resource block a worker may stand and still reach it: mining reach is REACH_RANGE (3D),
     // so standing ~4 below an adjacent column keeps it in range (sqrt(1^2 + 4^2) < 5).
     private static final int MAX_REACH_DOWN = 4;
+    // a worker this close to its target that still can't gather it gives up on the block (see dropTarget)
+    private static final int GIVE_UP_DIST = REACH_RANGE * 2;
     private static final int DEFAULT_MAX_GATHER_TICKS = 600; // ticks to gather blocks - actual ticks may be lower, depending on the ResourceSource targeted
     private float gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
     private static final int MAX_SEARCH_CD_TICKS = 40; // while idle, worker will look for a new block once every this number of ticks (searching is expensive!)
@@ -81,7 +85,16 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
     }
 
     // whenever we attempt to assign a block as a target it must pass this test
-    private final Predicate<BlockPos> BLOCK_CONDITION = bp -> {
+    // blocks this worker got close to and still couldn't gather (dropTarget)
+    // ponytail: never shrinks while the goal lives; clear it if workers start ignoring regrown or rebuilt blocks
+    private final Set<BlockPos> unreachable = new HashSet<>();
+
+    private final Predicate<BlockPos> BLOCK_CONDITION = bp -> canGather(bp, data.targetResourceName);
+
+    // would this worker gather bp as a block of type? Bots check this before sending an idle worker somewhere
+    public boolean canGather(BlockPos bp, ResourceName type) {
+        if (unreachable.contains(bp))
+            return false;
         BlockState bs = mob.level().getBlockState(bp);
         BlockState bsAbove = mob.level().getBlockState(bp.above());
         ResourceSource resBlock = ResourceSources.getFromBlockPos(bp, mob.level());
@@ -90,7 +103,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             return false;
 
         // is a valid resource block and meets the target ResourceSource's blockstate condition
-        if (resBlock == null || resBlock.resourceName != data.targetResourceName) // || resBlock.name.equals("Leaves")
+        if (resBlock == null || resBlock.resourceName != type) // || resBlock.name.equals("Leaves")
             return false;
         if (!resBlock.blockStateTest.test(bs))
             return false;
@@ -138,7 +151,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
             }
         }
         return true;
-    };
+    }
 
     // set move goal as range -1, so we aren't slightly out of range
     public GatherResourcesGoal(Mob mob) {
@@ -261,7 +274,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
 
             if (ticksStationaryWithTarget >= TICKS_STATIONARY_TIMEOUT) {
                 ticksStationaryWithTarget = 0;
-                data.gatherTarget = null;
+                dropTarget();
                 return;
             }
             lastOnPos = this.mob.getOnPos();
@@ -390,7 +403,7 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
                 if (mob.getNavigation().isDone())
                     ticksWithoutTarget += (TICK_CD / 2);
                 if (ticksWithoutTarget >= NO_TARGET_TIMEOUT)
-                    this.removeGatherTarget();
+                    dropTarget();
             }
         } else {
             ticksIdle += (TICK_CD / 2);
@@ -537,6 +550,18 @@ public class GatherResourcesGoal extends MoveToTargetBlockGoal {
         gatherTicksLeft = DEFAULT_MAX_GATHER_TICKS;
         searchCdTicksLeft = 0;
         ticksWithoutTarget = 0;
+    }
+
+    // the worker got as close as it can and still can't reach the block (the usual case is a log high up a tall
+    // tree): this worker skips it from now on. Only this worker - one stuck in a crowd mustn't hide a good block
+    // from the others. Only when standing near it (horizontally) with room in its inventory, never on a farm.
+    private void dropTarget() {
+        double dx = data.gatherTarget.getX() + 0.5 - mob.getX(), dz = data.gatherTarget.getZ() + 0.5 - mob.getZ();
+        if (data.targetFarm == null && !Unit.atMaxResources((Unit) mob) && dx * dx + dz * dz <= GIVE_UP_DIST * GIVE_UP_DIST) {
+            unreachable.add(data.gatherTarget);
+            data.todoGatherTargets.remove(data.gatherTarget);
+        }
+        removeGatherTarget();
     }
 
     // stop gathering and searching entirely, and remove saved data for
