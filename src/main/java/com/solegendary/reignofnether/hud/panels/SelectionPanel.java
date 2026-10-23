@@ -221,7 +221,6 @@ public final class SelectionPanel {
             renderer.drawEntity(f.g, e, x, y, w, h);
         else
             MyRenderer.renderIcon(f.g, headIcon(e), x + (w - 32) / 2, y + (h - 32) / 2, 32);
-            jobBadge(f.g, e, x + (w - 32) / 2 + 22, y + (h - 32) / 2 + 22, 12);
         Clip.pop(f.g);
         portraitRect = new Rect(x, y, w, h);
         f.zone(portraitRect);
@@ -611,7 +610,6 @@ public final class SelectionPanel {
         Rect r = new Rect(x, y, STACK_W, STACK_H);
         Theme.cell(f.g, x, y, STACK_W, STACK_H, active ? Theme.CellState.ACTIVE : Theme.CellState.READY, f.hovered(r));
         MyRenderer.renderIcon(f.g, headIcon(first), x + 5, y + 5, 20);
-        jobBadge(f.g, first, x + 18, y + 16, 10);
         String count = "×" + units.size();
         Text.bigRight(f.g, count, x + STACK_W - 5, y + 5, active ? Theme.GOLD : Theme.TEXT, Text.px(20));
         float hp = 0;
@@ -640,25 +638,6 @@ public final class SelectionPanel {
                 .build();
         f.register(b, r, null, () -> Tooltip.of(displayName(first) + " ×" + units.size())
                 .status(I18n.get("hud.reignofnether.stack_hint"), Theme.LABEL));
-    }
-
-    // a worker's job on the corner of its head when the head itself doesn't show it: villager miners and
-    // masons (their profession only changes the body), and other factions' workers by what they gather
-    private static void jobBadge(GuiGraphics g, LivingEntity e, int x, int y, int size) {
-        if (!(e instanceof WorkerUnit w))
-            return;
-        String tool = e instanceof VillagerUnit v ? switch (v.getUnitProfession()) {
-            case MINER -> "pickaxe";
-            case MASON -> "shovel";
-            default -> null;
-        } : switch (w.getGatherResourceGoal().getTargetResourceName()) {
-            case FOOD -> "hoe";
-            case WOOD -> "axe";
-            case ORE -> "pickaxe";
-            default -> null;
-        };
-        if (tool != null)
-            MyRenderer.renderIcon(g, ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/" + tool + ".png"), x, y, size);
     }
 
     private static void keepOnly(List<LivingEntity> units) {
@@ -692,7 +671,6 @@ public final class SelectionPanel {
             if (f.hovered(r))
                 Theme.ring(f.g, tx, ty, TILE, TILE, 1, Theme.ORANGE);
             MyRenderer.renderIcon(f.g, headIcon(e), tx + 4, ty + 2, 12);
-            jobBadge(f.g, e, tx + TILE - 9, ty + 1, 8);
             float hp = e.getHealth() / Math.max(1, e.getMaxHealth());
             Theme.bar(f.g, tx + 2, ty + TILE - 5, TILE - 4, 3, hp, Theme.hpColor(hp));
 

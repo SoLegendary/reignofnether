@@ -428,7 +428,7 @@ public final class CommandCard {
             list.add(SandboxActionButtons.resetToAnchor);
             list.add(SandboxActionButtons.removeAnchor);
         }
-        list.removeIf(b -> b.isHidden.get());
+        list.removeIf(b -> b != null && b.isHidden.get()); // null: a worker's kept-empty slot
     }
 
     private static Contents sandboxContents() {
