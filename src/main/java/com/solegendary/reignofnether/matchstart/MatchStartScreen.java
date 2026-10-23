@@ -784,7 +784,7 @@ public class MatchStartScreen extends Screen {
 
         int right = rx + rw - ROW_PAD;
         String status = I18n.get(join.ready ? "matchstart.reignofnether.status.ready" : "matchstart.reignofnether.status.not_ready");
-        Text.smallRight(g, status, right, y + (ROW_H - 8) / 2, join.ready ? Theme.OK : Theme.LABEL);
+        Text.mediumRight(g, status, right, y + (ROW_H - 8) / 2, join.ready ? Theme.OK : Theme.LABEL);
         right -= 52 + 8;
         if (visible && mine && !StartPosClientEvents.isStarting)
             right = rowButton(I18n.get("matchstart.reignofnether.action.leave"), right, y + (ROW_H - 20) / 2, 20, false,

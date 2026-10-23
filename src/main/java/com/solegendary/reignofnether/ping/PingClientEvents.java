@@ -164,8 +164,8 @@ public class PingClientEvents {
         g.fill(-14, -14, 14, -11, 0x73FFFFFF);
         g.fill(-14, 11, 14, 14, 0x59000000);
         g.pose().popPose();
-        g.pose().scale(1.5f, 1.5f, 1);
-        g.drawCenteredString(MC.font, type.symbol, 0, -4, 0xFF380000);
+        for (int[] r : symbol(type))
+            g.fill(r[0], r[1], r[2], r[3], SYMBOL);
         g.pose().popPose();
         g.pose().popPose();
 
@@ -180,8 +180,9 @@ public class PingClientEvents {
         g.pose().pushPose();
         g.pose().scale(k, k, 1);
         g.fill(lx, top, lx + w, top + h, 0xD90B0A0F);
-        Text.small(g, label, lx + 4, top + (h - Math.round(5 * Text.smallScale())) / 2, colour);
-        Text.bigRight(g, dist, lx + w - 4, top + (h - Text.bigHeight(big)) / 2, Theme.TEXT, big);
+        // both centred on the chip: small caps centre at y + 4.5, big caps are 7/8 of its line
+        Text.small(g, label, lx + 4, top + Math.round(h / 2f - 4.5f), colour);
+        Text.bigRight(g, dist, lx + w - 4, top + Math.round((h - Text.bigHeight(big) * 7 / 8f) / 2), Theme.TEXT, big);
         g.pose().popPose();
     }
 
@@ -260,11 +261,16 @@ public class PingClientEvents {
         quad(vc, m, -14, -14, 14, -11, 0x73FFFFFF, 0x73FFFFFF);
         quad(vc, m, -14, 11, 14, 14, 0x59000000, 0x59000000);
         pose.popPose();
+        pose.pushPose();
+        pose.translate(0, bob, 0);
+        for (int[] s : symbol(type))
+            quad(vc, pose.last().pose(), s[0], s[1], s[2], s[3], SYMBOL, SYMBOL);
+        pose.popPose();
 
         Font font = MC.font;
         Component label = Component.literal(Component.translatable("ping.reignofnether." + type.name().toLowerCase(Locale.ROOT))
                 .getString().toUpperCase(Locale.ROOT)).withStyle(Text.SMALL_STYLE.withColor(type.rgb));
-        Component dist = Component.literal(Math.round(d) + " m").withStyle(Text.BIG_STYLE.withColor(Theme.TEXT & 0xFFFFFF));
+        Component dist = Component.literal(Math.round(d) + " m").withStyle(s -> s.withColor(Theme.TEXT & 0xFFFFFF));
         float k = 1.5f; // both fonts at the prototype's 10/15 px
         float lw = font.width(label) * k, dw = font.width(dist) * k;
         float chipW = 8 + lw + 8 + dw + 8, chipH = 27, top = -58;
@@ -273,19 +279,51 @@ public class PingClientEvents {
 
         int light = LightTexture.FULL_BRIGHT;
         pose.pushPose();
-        pose.translate(0, bob, -0.1f);
-        pose.scale(k, k, 1);
-        String symbol = type.symbol;
-        font.drawInBatch(symbol, -font.width(symbol) / 2f, -4, 0xFF380000, false, pose.last().pose(), buffers, Font.DisplayMode.SEE_THROUGH, 0, light);
-        pose.popPose();
-        pose.pushPose();
         pose.translate(-chipW / 2 + 8, top + (chipH - 8 * k) / 2, -0.1f);
         pose.scale(k, k, 1);
-        font.drawInBatch(label, 0, 1.5f, 0xFFFFFFFF, false, pose.last().pose(), buffers, Font.DisplayMode.SEE_THROUGH, 0, light);
-        font.drawInBatch(dist, (lw + 8) / k, 0, 0xFFFFFFFF, false, pose.last().pose(), buffers, Font.DisplayMode.SEE_THROUGH, 0, light);
+        // caps centres line up: Silkscreen's at 4.5 font pixels down, the vanilla font's at 3.5
+        font.drawInBatch(label, 0, -0.5f, 0xFFFFFFFF, false, pose.last().pose(), buffers, Font.DisplayMode.SEE_THROUGH, 0, light);
+        font.drawInBatch(dist, (lw + 8) / k, 0.5f, 0xFFFFFFFF, false, pose.last().pose(), buffers, Font.DisplayMode.SEE_THROUGH, 0, light);
         pose.popPose();
         buffers.endBatch();
         pose.popPose();
+    }
+
+    private static final int SYMBOL = 0xFF380000;
+
+    /**
+     * The ping's symbol in the diamond as pixel rectangles {x0, y0, x1, y1}, design pixels around the centre:
+     * the font's ◎ □ ⚔ ◇ come from the unicode fallback and smear.
+     */
+    private static java.util.List<int[]> symbol(PingType type) {
+        java.util.List<int[]> r = new java.util.ArrayList<>();
+        switch (type) {
+            case HELP -> { // a ring with a dot
+                r.add(new int[]{-4, -7, 4, -5}); r.add(new int[]{-4, 5, 4, 7});
+                r.add(new int[]{-7, -4, -5, 4}); r.add(new int[]{5, -4, 7, 4});
+                r.add(new int[]{-6, -6, -4, -4}); r.add(new int[]{4, -6, 6, -4});
+                r.add(new int[]{-6, 4, -4, 6}); r.add(new int[]{4, 4, 6, 6});
+                r.add(new int[]{-2, -2, 2, 2});
+            }
+            case DEFEND -> { // a square
+                r.add(new int[]{-6, -6, 6, -4}); r.add(new int[]{-6, 4, 6, 6});
+                r.add(new int[]{-6, -4, -4, 4}); r.add(new int[]{4, -4, 6, 4});
+            }
+            case ATTACK -> { // crossed blades
+                for (int i = -7; i <= 5; i += 2) {
+                    r.add(new int[]{i, i, i + 2, i + 2});
+                    r.add(new int[]{i, -i - 2, i + 2, -i});
+                }
+            }
+            case ENEMY -> { // a diamond outline
+                for (int x = -6; x <= 6; x += 2) {
+                    int y = 6 - Math.abs(x);
+                    r.add(new int[]{x - 1, y - 1, x + 1, y + 1});
+                    r.add(new int[]{x - 1, -y - 1, x + 1, -y + 1});
+                }
+            }
+        }
+        return r;
     }
 
     private static void quad(VertexConsumer vc, Matrix4f m, float x0, float y0, float x1, float y1, int top, int bottom) {

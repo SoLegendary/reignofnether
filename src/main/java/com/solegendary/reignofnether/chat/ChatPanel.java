@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.chat;
 
+import com.solegendary.reignofnether.voice.VoiceClientEvents;
+
 import com.solegendary.reignofnether.chat.ChatLog.Channel;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -84,6 +86,11 @@ public class ChatPanel extends Screen {
         return teamChannel ? Channel.TEAM : Channel.ALL;
     }
 
+    /** Whether chat (and so voice, VoiceClientEvents) is on the TEAM channel. */
+    public static boolean isTeamChannel() {
+        return teamChannel;
+    }
+
     private static void toggleChannel() {
         if (inMatch() && PlayerRolesClient.myRole().inMatch)
             teamChannel = !teamChannel;
@@ -135,6 +142,17 @@ public class ChatPanel extends Screen {
         Rect close = new Rect(x + W - 8 - 13, y + 4, 13, 13);
         int hintX = x + 8 + Text.smallWidth(title) + 6;
         int right = close.x() - 6;
+        // voice follows the chat channel, so its state sits here instead of a tag of its own
+        if (VoiceClientEvents.connected() && inMatch()) {
+            String voice = I18n.get("voice.reignofnether.tag", I18n.get("voice.reignofnether.channel."
+                    + VoiceClientEvents.current().name().toLowerCase(java.util.Locale.ROOT)));
+            int vw = Text.smallWidth(voice);
+            Text.small(g, voice, right - vw, y + 7, Theme.OK_TEXT);
+            Rect vr = new Rect(right - vw, y + 4, vw, 13);
+            frame.register(new ButtonBuilder("voice").build(), vr, null,
+                    () -> com.solegendary.reignofnether.ui.Tooltip.of(voice).body(I18n.get("voice.reignofnether.tooltip")));
+            right -= vw + 8;
+        }
         String hints = I18n.get("chat.reignofnether.panel.hints");
         if (Text.smallWidth(hints) <= right - hintX)
             Text.tiny(g, hints, hintX, y + 7, Theme.DIM);

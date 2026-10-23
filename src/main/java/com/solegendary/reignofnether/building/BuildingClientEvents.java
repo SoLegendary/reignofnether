@@ -1,9 +1,10 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.player.PlayerClientEvents;
+
 import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.alliance.SharingClient;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.alliance.AlliancesClient;

@@ -15,10 +15,12 @@ class VoiceChannelTest {
     }
 
     @Test
-    void commandersTalkToCommandersOnTheirSide() {
+    void commandersTalkToEveryoneOnTheirSide() {
         assertTrue(hears(TEAM, COMMANDER, COMMANDER, false, true, 500, false));
         assertFalse(hears(TEAM, COMMANDER, COMMANDER, false, false, 500, false));
-        assertFalse(hears(TEAM, COMMANDER, SOLDIER, true, true, 5, false));
+        assertTrue(hears(TEAM, COMMANDER, SOLDIER, false, true, 500, false)); // allied soldiers too
+        assertFalse(hears(TEAM, COMMANDER, SOLDIER, false, false, 5, false));
+        assertFalse(hears(TEAM, COMMANDER, SPECTATOR, false, true, 5, false));
         assertFalse(hears(LOCAL, COMMANDER, SOLDIER, false, false, 5, true)); // their body follows the camera
     }
 

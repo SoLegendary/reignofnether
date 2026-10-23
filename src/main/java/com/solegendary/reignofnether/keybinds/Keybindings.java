@@ -117,8 +117,6 @@ public class Keybindings {
     // soldiers: full map while waiting to respawn. Not M: Simple Voice Chat mutes on M outside screens.
     public static final Keybinding soldierMap = new Keybinding("key.reignofnether.soldier_map", GLFW.GLFW_KEY_J, CATEGORY_RTS, RtsConflictContext.SOLDIER, "J");
 
-    // cycles your voice channel during a match (with Simple Voice Chat)
-    public static final Keybinding voiceChannel = new Keybinding("key.reignofnether.voice_channel", GLFW.GLFW_KEY_B, CATEGORY_RTS, "B");
 
     private static final List<Keybinding> ALL;
     static {
@@ -130,7 +128,7 @@ public class Keybindings {
             panPlusX, panMinusX, panPlusZ, panMinusZ,
             rotCW, rotCCW, reset,
             hotkey6, hotkey7, jumpToAlert, diplomacy,
-            chat, deselect, tab, ping, soldierMap, voiceChannel,
+            chat, deselect, tab, ping, soldierMap,
             item1, item2, item3, item4, item5, item6
         ));
         Collections.addAll(list, grid);

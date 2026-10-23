@@ -9,7 +9,7 @@ import java.util.List;
 public enum VoiceChannel {
     LOCAL, // soldiers close by, any team
     SQUAD, // your commander(s) and their soldiers
-    TEAM,  // commanders: the commanders on your side; spectators: other spectators
+    TEAM,  // commanders: everyone playing on your side; spectators: other spectators
     ALL;   // everyone, when the allChat rule is on (from a spectator: other spectators only)
 
     public static final double LOCAL_RANGE = 32;
@@ -36,7 +36,7 @@ public enum VoiceChannel {
             return false;
         return switch (channel) {
             case ALL -> allChat && (speaker.inMatch || !listener.inMatch); // spectators can't call out to players
-            case TEAM -> speaker == PlayerRole.COMMANDER ? listener == PlayerRole.COMMANDER && sameTeam
+            case TEAM -> speaker == PlayerRole.COMMANDER ? listener.inMatch && sameTeam
                     : listener == PlayerRole.SPECTATOR;
             case SQUAD -> listener.inMatch && sameFaction;
             case LOCAL -> listener == PlayerRole.SOLDIER && distance <= LOCAL_RANGE;

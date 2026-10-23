@@ -1,75 +1,72 @@
 package com.solegendary.reignofnether.voice;
 
-import com.solegendary.reignofnether.hud.layout.HudGeometry;
-import com.solegendary.reignofnether.keybinds.Keybindings;
+import com.solegendary.reignofnether.chat.ChatPanel;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerRole;
 import com.solegendary.reignofnether.player.PlayerRolesClient;
-import com.solegendary.reignofnether.ui.HudScale;
-import com.solegendary.reignofnether.ui.Text;
-import com.solegendary.reignofnether.ui.Theme;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 
-import java.util.List;
-import java.util.Locale;
+import javax.annotation.Nullable;
+import java.lang.reflect.Method;
 
-// the voice channel key cycles your channels during a match; a small tag shows the current one.
-// Only with Simple Voice Chat installed
+/**
+ * Voice follows the chat channel: switching TEAM / ALL in chat switches who hears you too, so there is one
+ * channel to think about. Only with Simple Voice Chat installed and connected to the server's voice chat.
+ */
 public class VoiceClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
-    private static VoiceChannel channel = VoiceChannel.TEAM;
-    private static boolean keyWasDown = false;
+    @Nullable private static VoiceChannel sent = null;
 
     public static void reset() {
-        channel = VoiceChannel.TEAM;
+        sent = null;
     }
 
-    private static boolean active() {
-        return MC.player != null && ModList.get().isLoaded("voicechat") && !PlayerClientEvents.rtsPlayers.isEmpty();
+    /** Whether Simple Voice Chat is connected to this server's voice chat (read by reflection, no dependency). */
+    public static boolean connected() {
+        if (MC.player == null || !ModList.get().isLoaded("voicechat"))
+            return false;
+        try {
+            Object client = clientMethod().invoke(null);
+            if (client == null)
+                return false;
+            Object connection = client.getClass().getMethod("getConnection").invoke(client);
+            return connection != null && (boolean) connection.getClass().getMethod("isInitialized").invoke(connection);
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return false;
+        }
     }
 
-    // the channel the server will use: ours if the role allows it, else the role's default
-    private static VoiceChannel current() {
+    private static Method getClient;
+
+    private static Method clientMethod() throws ReflectiveOperationException {
+        if (getClient == null)
+            getClient = Class.forName("de.maxhenkel.voicechat.voice.client.ClientManager").getMethod("getClient");
+        return getClient;
+    }
+
+    /** The voice channel matching the chat channel: TEAM chat is your side, ALL chat is everyone (or nearby). */
+    public static VoiceChannel current() {
         PlayerRole role = PlayerRolesClient.myRole();
-        return VoiceChannel.allowedFor(role).contains(channel) ? channel : VoiceChannel.defaultFor(role);
+        boolean team = ChatPanel.isTeamChannel();
+        return switch (role) {
+            case COMMANDER -> team ? VoiceChannel.TEAM : VoiceChannel.ALL;
+            case SOLDIER -> team ? VoiceChannel.SQUAD : VoiceChannel.LOCAL;
+            case SPECTATOR -> VoiceChannel.TEAM;
+        };
     }
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        if (evt.phase != TickEvent.Phase.END)
+        if (evt.phase != TickEvent.Phase.END || PlayerClientEvents.rtsPlayers.isEmpty() || !connected())
             return;
-        boolean down = Keybindings.voiceChannel.isDown() && MC.screen == null;
-        if (down && !keyWasDown && active()) {
-            List<VoiceChannel> allowed = VoiceChannel.allowedFor(PlayerRolesClient.myRole());
-            channel = allowed.get((allowed.indexOf(current()) + 1) % allowed.size());
-            VoiceChannelServerboundPacket.choose(channel);
+        VoiceChannel want = current();
+        if (want != sent) {
+            VoiceChannelServerboundPacket.choose(want);
+            sent = want;
         }
-        keyWasDown = down;
-    }
-
-    @SubscribeEvent
-    public static void onRenderGui(RenderGuiEvent.Post evt) {
-        if (!active() || MC.options.hideGui)
-            return;
-        GuiGraphics g = evt.getGuiGraphics();
-        HudScale scale = HudGeometry.scale();
-        g.pose().pushPose();
-        g.pose().scale(scale.poseScale(), scale.poseScale(), 1);
-        String label = I18n.get("voice.reignofnether.tag", I18n.get("voice.reignofnether.channel." + current().name().toLowerCase(Locale.ROOT)));
-        String key = Keybindings.voiceChannel.getCurrentLabel();
-        int w = Text.smallWidth(label) + Text.smallWidth(key) + 14;
-        int x = (scale.width() - w) / 2;
-        int y = 34;
-        g.fill(x, y, x + w, y + 11, 0xD90B0A0F);
-        int kw = Theme.keyCap(g, key, x + 3, y + 2, Theme.GOLD);
-        Text.small(g, label, x + 3 + kw + 4, y + 2, Theme.MUTED);
-        g.pose().popPose();
     }
 }
