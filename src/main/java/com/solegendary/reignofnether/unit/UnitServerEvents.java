@@ -25,7 +25,6 @@ import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -50,7 +49,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -58,8 +56,6 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -84,6 +80,7 @@ import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -170,6 +167,7 @@ public class UnitServerEvents {
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent evt) {
         isServerStopping = true;
+        UnitChunkTickets.clear();
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null) {
             saveFallenHeroUnits(level);
@@ -177,6 +175,12 @@ public class UnitServerEvents {
             allUnits.clear();
             forcedUnitChunks.clear();
         }
+    }
+
+    @SubscribeEvent
+    public static void onLevelUnload(LevelEvent.Unload evt) {
+        if (evt.getLevel() instanceof ServerLevel level)
+            UnitChunkTickets.clear(level);
     }
 
     public static void addUnitPoofs(Level level, Entity entity) {
@@ -189,7 +193,7 @@ public class UnitServerEvents {
         data.heroUnits.addAll(HeroServerEvents.fallenHeroes);
         data.save();
         level.getDataStorage().save();
-        ReignOfNether.LOGGER.info("Saved " + getAllUnits().size() + " fallen hero units");
+        ReignOfNether.LOGGER.info("Saved {} fallen hero units", getAllUnits().size());
     }
 
     public static void saveGatherTargets(ServerLevel level) {
@@ -222,12 +226,12 @@ public class UnitServerEvents {
         if (level != null) {
             HeroUnitSaveData heroData = HeroUnitSaveData.getInstance(level);
             HeroServerEvents.fallenHeroes.addAll(heroData.heroUnits);
-            ReignOfNether.LOGGER.info("Loaded " + heroData.heroUnits.size() + " hero units in serverevents");
+            ReignOfNether.LOGGER.info("Loaded {} hero units in serverevents", heroData.heroUnits.size());
 
             synchronized (savedTargetResources) {
                 TargetResourcesSaveData data = TargetResourcesSaveData.getInstance(level);
                 savedTargetResources.addAll(data.targetData); // actually assign the data in TickEvent as entities don't exist here yet
-                ReignOfNether.LOGGER.info("Loaded " + data.targetData.size() + " gatherTargets in serverevents");
+                ReignOfNether.LOGGER.info("Loaded {} gatherTargets in serverevents", data.targetData.size());
             }
         }
     }
@@ -256,7 +260,7 @@ public class UnitServerEvents {
                     newIds.add(newEntity.getId());
             }
         }
-        if (oldIds.size() == newIds.size() && oldIds.size() > 0) {
+        if (oldIds.size() == newIds.size() && !oldIds.isEmpty()) {
             UnitConvertClientboundPacket.syncConvertedUnits(ownerName, oldIds, newIds);
         }
     }
@@ -346,8 +350,11 @@ public class UnitServerEvents {
     }
 
     public static Relationship getUnitToEntityRelationship(Unit unit, Entity entity) {
-        String ownerName1 = unit.getOwnerName();
-        String ownerName2 = "";
+        return getOwnerToEntityRelationship(unit.getOwnerName(), entity);
+    }
+
+    public static Relationship getOwnerToEntityRelationship(String ownerName1, Entity entity) {
+        String ownerName2;
 
         if (entity instanceof ItemEntity item && item.getOwner() instanceof Unit unitItemOwner) {
             ownerName2 = unitItemOwner.getOwnerName();
@@ -419,7 +426,7 @@ public class UnitServerEvents {
                         if (sr.unitUUID.equals(entity.getStringUUID())) {
                             wUnit.getGatherResourceGoal().saveData = sr;
                             wUnit.getGatherResourceGoal().loadState();
-                            ReignOfNether.LOGGER.info("loaded gatherTarget in serverevents: " + sr.gatherTarget);
+                            ReignOfNether.LOGGER.info("loaded gatherTarget in serverevents: {}", sr.gatherTarget);
                             return true;
                         }
                         return false;
@@ -463,10 +470,12 @@ public class UnitServerEvents {
             allUnits.removeIf(e -> e.getId() == entity.getId());
             UnitSyncClientboundPacket.sendLeavePacket(entity);
 
-            //ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
-            //ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos()
-            // .x, chunk.getPos().z, false, true);
-            //forcedUnitChunks.removeIf(p -> p.getFirst() == entity.getId());
+            UnitChunkTickets.remove((ServerLevel) evt.getLevel(), entity);
+            ChunkAccess chunk = forcedUnitChunks.remove(entity.getId());
+            if (chunk != null) {
+                ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID,
+                        entity, chunk.getPos().x, chunk.getPos().z, false, true);
+            }
         }
 
         // if a player has no more units, then they are defeated

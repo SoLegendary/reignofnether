@@ -4,17 +4,15 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSources;
-import com.solegendary.reignofnether.resources.ResourcesClientEvents;
-import com.solegendary.reignofnether.unit.UnitServerEvents;
-import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.unit.targeting.EntityTargetIndex;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,6 +24,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
+
+    @Inject(method = "setPosRaw(DDD)V", at = @At("TAIL"))
+    private void reignofnether$updateTargetPosition(double x, double y, double z, CallbackInfo ci) {
+        EntityTargetIndex.positionChanged((Entity) (Object) this);
+    }
+
+    @Inject(method = "onSyncedDataUpdated(Lnet/minecraft/network/syncher/EntityDataAccessor;)V", at = @At("TAIL"))
+    private void reignofnether$updateTargetOwner(EntityDataAccessor<?> accessor, CallbackInfo ci) {
+        EntityTargetIndex.ownerMayHaveChanged((Entity) (Object) this);
+    }
 
     @Shadow private static double viewScale;
     @Shadow private AABB bb;
