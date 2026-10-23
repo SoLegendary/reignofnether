@@ -21,11 +21,16 @@ Balance
 
 [❌] Villager reworks
     - Free-attacking vexes
-    - Siege tank mode for ravager artillery (by burrowing them partially into the ground)
     - Block animations with block displays for royal guard slam
         - And make slam single click like war stomp
-    - Make custom arrow entity to control logic better
+    - Add tags to control arrow logic better
         - Halve pierce and multishot damage and improve other enchants
+
+[❌] Siege tank mode for ravager artillery (by burrowing them partially into the ground)
+    - Sound for digging in/out
+    - More ground particles
+    - Show range on hover on toggle button
+    - louder arrow firing sounds
 
 [🟡] Great hammers now affect abilities and summoned units at 50% effectiveness (2x building damage)
 [🟡] Wildfire Molten Bombs now deal 20 damage to buildings
