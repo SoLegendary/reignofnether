@@ -22,6 +22,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderStateShard;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -88,6 +89,18 @@ public class MyRenderer {
                     .createCompositeState(false)
     );
 
+
+    // translucent coloured quads drawn over terrain (first-person ping waypoints)
+    public static final RenderType QUADS_NO_DEPTH_TEST = RenderType.create(
+            ReignOfNether.MOD_ID + ":quads_no_depth_test",
+            DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS, 256, false, true,
+            RenderType.CompositeState.builder().setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
+                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+                    .setWriteMaskState(COLOR_WRITE)
+                    .setCullState(NO_CULL)
+                    .setDepthTestState(NO_DEPTH_TEST)
+                    .createCompositeState(false)
+    );
 
     public static final Style iconStyle = Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"));
 
@@ -559,13 +572,21 @@ public class MyRenderer {
         );
     }
 
+    /** Legacy tooltip lines, drawn now in the HUD's tooltip style next to the cursor (GUI coordinates). */
     public static void renderTooltip(GuiGraphics guiGraphics, List<FormattedCharSequence> tooltipLines, int mouseX, int mouseY) {
-        if (MC.screen != null && tooltipLines != null && tooltipLines.size() > 0) {
-            if (mouseY < MC.screen.height / 2)
-                mouseY += (tooltipLines.size() * 10);
+        if (tooltipLines != null && tooltipLines.size() > 0)
+            renderTooltip(guiGraphics, com.solegendary.reignofnether.ui.Tooltip.fromLines(tooltipLines), mouseX, mouseY);
+    }
+
+    public static void renderTooltip(GuiGraphics guiGraphics, com.solegendary.reignofnether.ui.Tooltip tooltip, int mouseX, int mouseY) {
+        if (MC.screen != null) {
+            var scale = com.solegendary.reignofnether.hud.layout.HudGeometry.scale();
+            float k = scale.poseScale();
+            guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(0, 0, 3000);
-            guiGraphics.renderTooltip(MC.font, tooltipLines, mouseX, mouseY - (9 * (tooltipLines.size() - 1)));
-            guiGraphics.pose().translate(0, 0, -3000);
+            guiGraphics.pose().scale(k, k, 1);
+            tooltip.render(guiGraphics, scale.toUnits(mouseX), scale.toUnits(mouseY), 12, 12, scale.width(), scale.height());
+            guiGraphics.pose().popPose();
         }
     }
 

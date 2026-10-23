@@ -1,11 +1,15 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.hud.panels.ButtonCell;
+import com.solegendary.reignofnether.ui.Theme;
+import com.solegendary.reignofnether.ui.Tooltip;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
@@ -78,17 +82,16 @@ public class ResourcesClientEvents {
             boolean notInBuilding = !BuildingUtils.isPosInsideAnyBuilding(true, preSelBp);
 
             if (res != null && res.resourceValue > 0 && (isItem || (workerSelected && notInBuilding))) {
-                String str = switch (res.resourceName) {
-                    case FOOD -> "\uE000  " + (res.resourceValue * itemCount);
-                    case WOOD -> "\uE001  " + (res.resourceValue * itemCount);
-                    case ORE -> "\uE002  " + (res.resourceValue * itemCount);
-                    case EMERALD -> "\uE010  " + (res.resourceValue * itemCount);
-                    case NONE -> "";
+                var icon = switch (res.resourceName) {
+                    case FOOD -> ButtonCell.ICON_FOOD;
+                    case WOOD -> ButtonCell.ICON_WOOD;
+                    case ORE -> ButtonCell.ICON_ORE;
+                    default -> ButtonCell.ICON_EMERALD;
                 };
+                String name = I18n.get("resources.reignofnether." + res.resourceName.name().toLowerCase());
                 MyRenderer.renderTooltip(evt.getGuiGraphics(),
-                        List.of(FormattedCharSequence.forward(str, MyRenderer.iconStyle)),
-                        evt.getMouseX(), evt.getMouseY()
-                );
+                        Tooltip.of(name).cost(icon, String.valueOf(res.resourceValue * itemCount), Theme.TEXT),
+                        evt.getMouseX(), evt.getMouseY());
             }
         }
     }
@@ -116,7 +119,7 @@ public class ResourcesClientEvents {
     public static Resources getOwnResources() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
-            return getResources(MC.player.getName().getString());
+            return getResources(PlayerRolesClient.myOwner());
         }
         return null;
     }
@@ -162,10 +165,12 @@ public class ResourcesClientEvents {
     }
 
     public static void addFloatingTextsFromResources(Resources res, BlockPos pos) {
-        if (!OrthoviewClientEvents.isEnabled()) {
+        // every player's drop-offs reach every client, so spectators get everyone's income
+        IncomeTracker.record(res.ownerName, res.food, res.wood, res.ore);
+        if (!PlayerRolesClient.myOwner().equals(res.ownerName)) {
             return;
         }
-        if (!Minecraft.getInstance().player.getName().getString().equals(res.ownerName)) {
+        if (!OrthoviewClientEvents.isEnabled()) {
             return;
         }
 

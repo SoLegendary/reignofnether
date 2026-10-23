@@ -1,25 +1,21 @@
 package com.solegendary.reignofnether.hud.buttons;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.mixin.UnitInventoryMobMixin;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
-import com.solegendary.reignofnether.sandbox.SandboxServer;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -45,8 +41,8 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 () -> false,
                 () -> {
                     Player player = Minecraft.getInstance().player;
-                    boolean ownsUnit = player != null && player.getName().getString().equals(unit.getOwnerName());
-                    return ownsUnit || AlliancesClient.canControlAlly(unit) || SandboxClientEvents.isSandboxPlayer();
+                    boolean ownsUnit = player != null && PlayerRolesClient.myOwner().equals(unit.getOwnerName());
+                    return ownsUnit || SharingClient.canControl(unit) || SandboxClientEvents.isSandboxPlayer();
                 },
                 () -> { // onLeftClick
                     ItemClientEvents.actionableUnitItem = unitItem;
@@ -87,7 +83,7 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
+    public void refresh() {
         if (MC.level != null && unitItem.cooldownTicksMax > 0) {
             Long cooldownTicksLeft = ItemUtil.getCooldownTicksLeft(itemStack, ((Entity) unit).level());
             this.greyPercent = 1 - Math.min(1f, (float) cooldownTicksLeft / unitItem.cooldownTicksMax);
@@ -99,7 +95,6 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 return String.valueOf(this.itemStack.getCount());
             return "";
         };
-        super.render(guiGraphics, x, y, mouseX, mouseY);
     }
 
     // render a translucent version of this button

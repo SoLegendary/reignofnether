@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.Building;
@@ -90,7 +91,7 @@ public class ItemShopPlacement extends ProductionPlacement {
 
         if (level.isClientSide() && next instanceof LivingEntity le) {
             Relationship rs = UnitClientEvents.getPlayerToEntityRelationship(le);
-            if (rs == Relationship.OWNED || (rs == Relationship.FRIENDLY && AlliancesClient.canControlAlly(servedUnit.getOwnerName())))
+            if (rs == Relationship.OWNED || (rs == Relationship.FRIENDLY && SharingClient.canControl(servedUnit.getOwnerName())))
                 HudClientEvents.setHudSelectedEntity(le);
         }
     }

@@ -1,7 +1,7 @@
 package com.solegendary.reignofnether.cursor;
 
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -26,7 +26,9 @@ import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
+import com.solegendary.reignofnether.ui.Theme;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
@@ -361,17 +363,26 @@ public class CursorClientEvents {
                 cursorLeftClickDragPos.y >= 0;
     }
 
-    // draw box selection rectangle
+    // draw box selection rectangle, once per frame (the overlay event fires once per overlay, stacking the fill)
     @SubscribeEvent
-    public static void renderOverlay(RenderGuiOverlayEvent.Post evt) {
+    public static void renderOverlay(net.minecraftforge.client.event.RenderGuiEvent.Post evt) {
 
         if (leftClickDown && !Keybindings.altMod.isDown()) {
-            evt.getGuiGraphics().fill( // x1,y1, x2,y2,
-                    Math.round(cursorLeftClickDownPos.x),
-                    Math.round(cursorLeftClickDownPos.y),
-                    Math.round(cursorLeftClickDragPos.x),
-                    Math.round(cursorLeftClickDragPos.y),
-                    0x0341e868); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
+            // a faint green fill with a thin, half-transparent green border, in HUD units
+            var scale = com.solegendary.reignofnether.hud.layout.HudGeometry.scale();
+            int x0 = scale.toUnits(Math.min(cursorLeftClickDownPos.x, cursorLeftClickDragPos.x));
+            int y0 = scale.toUnits(Math.min(cursorLeftClickDownPos.y, cursorLeftClickDragPos.y));
+            int x1 = scale.toUnits(Math.max(cursorLeftClickDownPos.x, cursorLeftClickDragPos.x));
+            int y1 = scale.toUnits(Math.max(cursorLeftClickDownPos.y, cursorLeftClickDragPos.y));
+            if (x1 - x0 <= 4 && y1 - y0 <= 4)
+                return;
+            GuiGraphics g = evt.getGuiGraphics();
+            float k = scale.poseScale();
+            g.pose().pushPose();
+            g.pose().scale(k, k, 1);
+            g.fill(x0, y0, x1, y1, 0x1A41E868);
+            Theme.ring(g, x0, y0, x1 - x0, y1 - y0, 1, 0x8041E868);
+            g.pose().popPose();
         }
     }
 
@@ -428,7 +439,7 @@ public class CursorClientEvents {
                 for (LivingEntity unit : preselectedUnit)
                     if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
                             NonUnitClientEvents.canControlAllMobs() ||
-                            AlliancesClient.canControlAlly(unit))
+                            SharingClient.canControl(unit))
                         ownedEntities += 1;
 
                 if (ownedEntities > 0) {
@@ -436,7 +447,7 @@ public class CursorClientEvents {
                     for (LivingEntity unit : preselectedUnit)
                         if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
                                 NonUnitClientEvents.canControlAllMobs() ||
-                                AlliancesClient.canControlAlly(unit))
+                                SharingClient.canControl(unit))
                             unitsToAdd.add(unit);
 
                     if (Keybindings.shiftMod.isDown()) {

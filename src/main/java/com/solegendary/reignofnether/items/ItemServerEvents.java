@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.items;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
@@ -231,17 +232,17 @@ public class ItemServerEvents {
             evt.setCanceled(true);
 
             if (inv.isFull(unitItem)) {
-                player.sendSystemMessage(Component.translatable("item.reignofnether.error.full_inventory", mobName));
+                player.sendSystemMessage(SystemMessage.error(Component.translatable("item.reignofnether.error.full_inventory", mobName)));
                 evt.setCancellationResult(InteractionResult.FAIL);
             } else if (inv.tryAdding(new ItemStack(stack.getItem(), 1))) {
-                player.sendSystemMessage(Component.translatable("item.reignofnether.hud.give_to_unit", itemName, mobName));
+                player.sendSystemMessage(SystemMessage.info(Component.translatable("item.reignofnether.hud.give_to_unit", itemName, mobName)));
                 if (!player.isCreative()) {
                     stack.setCount(stack.getCount() - 1);
                 }
                 evt.setCancellationResult(InteractionResult.SUCCESS);
             }
             else {
-                player.sendSystemMessage(Component.translatable("item.reignofnether.error.failed_other", mobName));
+                player.sendSystemMessage(SystemMessage.error(Component.translatable("item.reignofnether.error.failed_other", mobName)));
                 evt.setCancellationResult(InteractionResult.FAIL);
             }
         }

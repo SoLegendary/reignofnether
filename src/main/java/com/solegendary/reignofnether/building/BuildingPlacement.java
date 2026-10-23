@@ -887,6 +887,8 @@ public class BuildingPlacement {
 
     public void onBuilt() {
         isBuilt = true;
+        if (this.level.isClientSide())
+            com.solegendary.reignofnether.chat.SpectatorFeed.built(ownerName, com.solegendary.reignofnether.hud.panels.SelectionPanel.buildingName(this));
         if (!this.level.isClientSide()) {
             FrozenChunkClientboundPacket.setBuildingBuiltServerside(this.originPos);
             if (isCapitol && BuildingUtils.getTotalCompletedBuildingsOwned(false, ownerName) <= 1) {

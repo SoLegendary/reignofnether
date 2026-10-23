@@ -1,10 +1,11 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.alliance.SharingClient;
+import com.solegendary.reignofnether.alliance.Share;
+import com.solegendary.reignofnether.alliance.Sharing;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
@@ -153,10 +154,10 @@ public class UnitActionItem {
                 boolean alliedControl;
                 boolean fullControl;
                 if (level.isClientSide()) {
-                    alliedControl = AlliancesClient.canControlAlly(unit.getOwnerName());
+                    alliedControl = SharingClient.canControl(unit.getOwnerName());
                     fullControl = NonUnitClientEvents.canControlAllMobs();
                 } else {
-                    alliedControl = AlliancesServerEvents.canControlAlly(this.ownerName, unit.getOwnerName());
+                    alliedControl = Sharing.shares(unit.getOwnerName(), this.ownerName, Share.CONTROL);
                     fullControl = NonUnitServerEvents.canControlAllMobs(entity.level(), this.ownerName);
                 }
                 if (this.ownerName == null || unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer || alliedControl || fullControl) {
@@ -166,6 +167,7 @@ public class UnitActionItem {
         }
 
         ArrayList<Unit> formationUnits = new ArrayList<>();
+        ArrayList<Unit> groupMovers = new ArrayList<>(); // MOVE / ATTACK_MOVE units that get speed matched
 
         actionableUnitsLoop:
         for (Unit unit : actionableUnits) {
@@ -278,9 +280,11 @@ public class UnitActionItem {
                         unit.setMoveTarget(preselectedBlockPos);
                     } else {
                         formationUnits.add(unit);
+                        groupMovers.add(unit);
                     }
                 }
                 case ATTACK_MOVE -> {
+                    groupMovers.add(unit);
                     // if the unit can't actually attack just treat this as a move action
                     if (unit instanceof AttackerUnit attackerUnit) {
                         MiscUtil.addUnitCheckpoint(unit, preselectedBlockPos, false);
@@ -456,6 +460,19 @@ public class UnitActionItem {
             }
         }
 
+        // a group moves at its slowest ground unit's speed; flyers keep their own (they don't path with the group)
+        // ponytail: the cap lasts until the next order, so a group that loses its slowest unit stays slow until then
+        if (!level.isClientSide() && groupMovers.size() >= 2) {
+            double slowest = Double.MAX_VALUE;
+            for (Unit u : groupMovers)
+                if (!u.isFlyingUnit())
+                    slowest = Math.min(slowest, u.getMoveGoal().getWalkSpeed(u));
+            if (slowest < Double.MAX_VALUE)
+                for (Unit u : groupMovers)
+                    if (!u.isFlyingUnit())
+                        u.getMoveGoal().groupSpeed = slowest;
+        }
+
         // if we have multiple units performing the same MOVE action, calculate a spread of blockPoses for them to go to
         if (!formationUnits.isEmpty()) {
             List<LivingEntity> list = new ArrayList<>();
@@ -502,7 +519,7 @@ public class UnitActionItem {
         if (actionableBuilding != null && (
             actionableBuilding.ownerName.equals(ownerName) ||
             SandboxServer.isSandboxPlayer(ownerName) ||
-            AlliancesServerEvents.canControlAlly(ownerName, actionableBuilding.ownerName))
+            Sharing.shares(actionableBuilding.ownerName, ownerName, Share.CONTROL))
         ) {
             for (Ability ability : actionableBuilding.getAbilities()) {
                 if (ability.action == action && (ability.isOffCooldown(actionableBuilding) || ability.canBypassCooldown(actionableBuilding))) {

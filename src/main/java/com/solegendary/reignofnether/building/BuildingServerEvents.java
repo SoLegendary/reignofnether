@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.alliance.Sharing;
+import com.solegendary.reignofnether.alliance.Share;
 import com.google.common.collect.Sets;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.EnchantAbility;
@@ -972,9 +974,8 @@ public class BuildingServerEvents {
 
             if (evt.getEntity() instanceof ServerPlayer player &&
                 !player.isSpectator() &&
-                (AlliancesServerEvents.isAllied(player.getName().getString(), building.ownerName) ||
-                building.getBuilding() instanceof NeutralTransportPortal ||
-                player.getName().getString().equals(building.ownerName)) &&
+                (Sharing.shares(building.ownerName, player.getName().getString(), Share.VISION) ||
+                building.getBuilding() instanceof NeutralTransportPortal) &&
                 building instanceof PortalPlacement portal &&
                 portal.hasDestination()) {
 

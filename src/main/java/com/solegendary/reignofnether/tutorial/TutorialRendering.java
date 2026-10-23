@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.tutorial;
 
+import com.solegendary.reignofnether.hud.layout.HudGeometry;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.util.MiscUtil;
@@ -73,8 +75,8 @@ public class TutorialRendering {
                 // x1,y1, x2,y2,
                 activeButton.x,
                 activeButton.y,
-                activeButton.x + Button.DEFAULT_ICON_FRAME_SIZE,
-                activeButton.y + Button.DEFAULT_ICON_FRAME_SIZE,
+                activeButton.x + activeButton.drawnSize,
+                activeButton.y + activeButton.drawnSize,
                 0x32FFFFFF
             ); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
         }
@@ -90,7 +92,7 @@ public class TutorialRendering {
         int yOffset = 0;
 
         ResourceLocation texture;
-        if (vertical && y < MC.screen.height / 2) {
+        if (vertical && y < HudGeometry.layout().height() / 2) {
             xOffset = -5;
             RenderSystem.setShaderTexture(0, TEXTURE_ARROW_UP);
             yOffset = (int) MiscUtil.getOscillatingFloat(20, 36);
@@ -100,7 +102,7 @@ public class TutorialRendering {
             RenderSystem.setShaderTexture(0, TEXTURE_ARROW_DOWN);
             yOffset = (int) MiscUtil.getOscillatingFloat(-46, -30, 500);
             texture = TEXTURE_ARROW_DOWN;
-        } else if (x < MC.screen.width / 2) {
+        } else if (x < HudGeometry.layout().width() / 2) {
             yOffset = -5;
             RenderSystem.setShaderTexture(0, TEXTURE_ARROW_LEFT);
             xOffset = (int) MiscUtil.getOscillatingFloat(20, 36);

@@ -202,7 +202,6 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
 
     public void sendWarning(String msg) {
         if (!level.isClientSide) {
-            PlayerServerEvents.sendMessageToAllPlayersNoNewlines("");
             BeaconPlacement beacon = BuildingUtils.getBeacon(level.isClientSide);
             if (beacon != null && msg.equals("upgraded_warning")) {
                 String upgradeName = "";
@@ -212,17 +211,16 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
                 else if (beacon.getUpgradeLevel() == 4) upgradeName = Component.translatable("buildings.reignofnether.beacon.upgrade.beacon_level4").getString();
                 else if (beacon.getUpgradeLevel() == 5) upgradeName = Component.translatable("buildings.reignofnether.beacon.upgrade.beacon_level5").getString();
 
-                PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.reignofnether.beacon.upgrade_warning",
+                PlayerServerEvents.sendMessageToAllPlayers("buildings.reignofnether.beacon.upgrade_warning",
                         true, ownerName, upgradeName, beacon.getUpgradeLevel(), Beacon.MAX_UPGRADE_LEVEL);
             } else {
-                PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.reignofnether.beacon." + msg,
+                PlayerServerEvents.sendMessageToAllPlayers("buildings.reignofnether.beacon." + msg,
                         true, ownerName);
             }
             if (beacon != null && beacon.getUpgradeLevel() >= Beacon.MAX_UPGRADE_LEVEL && !msg.equals("destroy_warning")) {
-                PlayerServerEvents.sendMessageToAllPlayersNoNewlines("buildings.reignofnether.beacon.time_to_win",
+                PlayerServerEvents.sendMessageToAllPlayers("buildings.reignofnether.beacon.time_to_win",
                         false, ownerName, PlayerServerEvents.getBeaconWinTime(ownerName));
             }
-            PlayerServerEvents.sendMessageToAllPlayersNoNewlines("");
             if (SurvivalServerEvents.isEnabled() && !msg.equals("destroy_warning"))
                 SoundClientboundPacket.playSoundForAllPlayers(SoundAction.ALLY);
             else

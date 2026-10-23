@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.registrars;
 
+import com.solegendary.reignofnether.voice.VoiceChannelServerboundPacket;
+import com.solegendary.reignofnether.soldier.SoldierStateClientboundPacket;
+import com.solegendary.reignofnether.player.PlayerRoleClientboundPacket;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.AbilityClientboundPacket;
 import com.solegendary.reignofnether.ability.AbilityServerboundPacket;
@@ -23,6 +26,7 @@ import com.solegendary.reignofnether.hero.HeroServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientboundPacket;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonActionServerboundPacket;
 import com.solegendary.reignofnether.hud.custombutton.CustomButtonClientboundPacket;
+import com.solegendary.reignofnether.chat.TeamChatClientboundPacket;
 import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.items.ItemShopClientboundPacket;
@@ -435,6 +439,30 @@ public final class PacketHandler {
                 .encoder(ItemShopClientboundPacket::encode)
                 .decoder(ItemShopClientboundPacket::new)
                 .consumerMainThread(ItemShopClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(TeamChatClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(TeamChatClientboundPacket::encode)
+                .decoder(TeamChatClientboundPacket::new)
+                .consumerMainThread(TeamChatClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(PlayerRoleClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(PlayerRoleClientboundPacket::encode)
+                .decoder(PlayerRoleClientboundPacket::new)
+                .consumerMainThread(PlayerRoleClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(SoldierStateClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SoldierStateClientboundPacket::encode)
+                .decoder(SoldierStateClientboundPacket::new)
+                .consumerMainThread(SoldierStateClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(VoiceChannelServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(VoiceChannelServerboundPacket::encode)
+                .decoder(VoiceChannelServerboundPacket::new)
+                .consumerMainThread(VoiceChannelServerboundPacket::handle)
                 .add();
     }
 }

@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.orthoview;
 
+import com.solegendary.reignofnether.player.PlayerRole;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -330,6 +333,7 @@ public class OrthoviewClientEvents {
 
         if (isEnabled() && MC.gameMode != null && (
             MC.gameMode.getPlayerMode() == GameType.ADVENTURE || MC.gameMode.getPlayerMode() == GameType.SURVIVAL
+                || PlayerRolesClient.myRole() == PlayerRole.SOLDIER
         )) {
             toggleEnable();
         }
@@ -393,6 +397,7 @@ public class OrthoviewClientEvents {
         }
 
         enabled = !enabled;
+        FaceCulling.setRtsView(enabled);
 
         if (enabled) {
             MC.options.tutorialStep = TutorialSteps.NONE;
@@ -525,8 +530,9 @@ public class OrthoviewClientEvents {
             if (MC.player != null && (
                     MC.gameMode.getPlayerMode() == GameType.ADVENTURE
                             || MC.gameMode.getPlayerMode() == GameType.SURVIVAL
+                            || (!enabled && PlayerRolesClient.myRole() == PlayerRole.SOLDIER)
             )) {
-                MC.player.sendSystemMessage(Component.literal(I18n.get("hud.orthoview.reignofnether.ortho_error")));
+                MC.player.sendSystemMessage(SystemMessage.error(Component.literal(I18n.get("hud.orthoview.reignofnether.ortho_error"))));
             } else {
                 toggleEnable();
             }

@@ -1,7 +1,8 @@
 package com.solegendary.reignofnether.building;
 
+import com.solegendary.reignofnether.alliance.Share;
+import com.solegendary.reignofnether.alliance.Sharing;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.buildings.piglins.PortalCivilian;
 import com.solegendary.reignofnether.building.buildings.placements.PortalPlacement;
@@ -166,12 +167,11 @@ public class BuildingServerboundPacket {
                 success.set(false);
                 return;
             }
-            else if (((newBuildingAuthActions.contains(this.action) &&
-                    !player.getName().getString().equals(ownerName)) ||
+            else if (!SandboxServer.isAnyoneASandboxPlayer() && (
+                    (newBuildingAuthActions.contains(this.action) &&
+                            !Sharing.shares(ownerName, player.getName().getString(), Share.CONTROL)) ||
                     (existingBuildingAuthActions.contains(this.action) && building != null &&
-                            !player.getName().getString().equals(building.ownerName))) &&
-                    !SandboxServer.isAnyoneASandboxPlayer() &&
-                    !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
+                            !Sharing.shares(building.ownerName, player.getName().getString(), Share.CONTROL)))) {
 
                 ReignOfNether.LOGGER.warn("BuildingServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
                 success.set(false);

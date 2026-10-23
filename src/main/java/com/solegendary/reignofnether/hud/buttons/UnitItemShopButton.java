@@ -6,8 +6,6 @@ import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemServerboundPacket;
 import com.solegendary.reignofnether.items.StockedShopItem;
-import com.solegendary.reignofnether.util.MyRenderer;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.List;
@@ -48,23 +46,11 @@ public class UnitItemShopButton extends AbstractUnitItemButton {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
-        if (stockedShopItem.stock == 0) {
+    public void refresh() {
+        if (stockedShopItem.stock == 0)
             this.greyPercent = 1 - ((float) stockedShopItem.getTicksToNextRestock() / stockedShopItem.maxRestockTicks);
-        } else {
+        else
             this.greyPercent = 0;
-        }
-        super.render(guiGraphics, x, y, mouseX, mouseY);
-
-        if (stockedShopItem.maxStock >= 0) {
-            guiGraphics.pose().translate(0,0,1);
-            MyRenderer.drawScaledString(guiGraphics,
-                    MC.font,
-                    String.valueOf(stockedShopItem.stock),
-                    x + 3,
-                    y + 3,
-                    0xFFFFFF,
-                    0.75f);
-        }
+        this.bottomLeftText = () -> stockedShopItem.maxStock >= 0 ? String.valueOf(stockedShopItem.stock) : "";
     }
 }

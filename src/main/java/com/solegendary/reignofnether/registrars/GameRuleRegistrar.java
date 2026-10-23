@@ -30,6 +30,11 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_CHUNK_BUILDS;
     public static GameRules.Key<GameRules.IntegerValue> ANIMAL_SPAWN_Y_DIFF;
     public static GameRules.Key<GameRules.IntegerValue> RANDOM_ITEM_DROPS;
+    public static GameRules.Key<GameRules.BooleanValue> HIDE_ENEMY_PICKS;
+    public static GameRules.Key<GameRules.IntegerValue> SOLDIERS_PER_TEAM;
+    public static GameRules.Key<GameRules.BooleanValue> CO_COMMANDERS;
+    public static GameRules.Key<GameRules.IntegerValue> SOLDIER_RESPAWN_SECONDS;
+    public static GameRules.Key<GameRules.BooleanValue> ALL_CHAT;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -88,6 +93,10 @@ public class GameRuleRegistrar {
         SCENARIO_MODE = GameRules.register("scenarioMode", GameRules.Category.MISC,
                 GameRules.BooleanValue.create(false)
         );
+        // in the match lobby, other teams' factions and chosen start positions are hidden
+        HIDE_ENEMY_PICKS = GameRules.register("hideEnemyPicks", GameRules.Category.PLAYER,
+                GameRules.BooleanValue.create(true)
+        );
         // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands
         COOP_MODE = GameRules.register("coopMode", GameRules.Category.PLAYER,
                 GameRules.BooleanValue.create(false)
@@ -128,6 +137,21 @@ public class GameRuleRegistrar {
         // Difference in level that animals can spawn around capitols at
         RANDOM_ITEM_DROPS = GameRules.register("randomItemDrops", GameRules.Category.DROPS,
                 boundedInt(1, 0, 3)
+        );
+        // first-person soldier seats each team gets in the match lobby (0 = no soldiers)
+        SOLDIERS_PER_TEAM = GameRules.register("soldiersPerTeam", GameRules.Category.PLAYER,
+                boundedInt(0, 0, 4)
+        );
+        // players can join an occupied seat to share that player's faction
+        CO_COMMANDERS = GameRules.register("coCommanders", GameRules.Category.PLAYER,
+                GameRules.BooleanValue.create(false)
+        );
+        SOLDIER_RESPAWN_SECONDS = GameRules.register("soldierRespawnSeconds", GameRules.Category.PLAYER,
+                boundedInt(30, 0, 300)
+        );
+        // '!' chat (and the voice ALL channel) reaches every player during a match
+        ALL_CHAT = GameRules.register("allChat", GameRules.Category.CHAT,
+                GameRules.BooleanValue.create(true)
         );
     }
 
