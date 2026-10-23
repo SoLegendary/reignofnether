@@ -1,15 +1,20 @@
 package com.solegendary.reignofnether.gamerules;
 
+import com.solegendary.reignofnether.player.PlayerServerEvents;
+import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import net.minecraft.network.FriendlyByteBuf;
+import com.solegendary.reignofnether.fogofwar.FogOfWarServerEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -71,6 +76,14 @@ public class GameruleServerboundPacket {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_LOCK_ALLIANCES, "", lockAlliances ? 1L : 0L));
     }
+    public static void setFogOfWar(boolean fog) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_FOG_OF_WAR, "", fog ? 1L : 0L));
+    }
+    public static void setHideEnemyPicks(boolean hideEnemyPicks) {
+        PacketHandler.INSTANCE.sendToServer(
+                new GameruleServerboundPacket(GameruleAction.SET_HIDE_ENEMY_PICKS, "", hideEnemyPicks ? 1L : 0L));
+    }
     public static void setCoopMode(boolean coopMode) {
         PacketHandler.INSTANCE.sendToServer(
                 new GameruleServerboundPacket(GameruleAction.SET_COOP_MODE, "", coopMode ? 1L : 0L));
@@ -97,7 +110,7 @@ public class GameruleServerboundPacket {
     public GameruleServerboundPacket(FriendlyByteBuf buffer) {
         this.action = buffer.readEnum(GameruleAction.class);
         this.playerName = buffer.readUtf();
-        this.value = buffer.readLong();
+        this.value = Math.max(Integer.MIN_VALUE, Math.min(Integer.MAX_VALUE, buffer.readLong()));
     }
 
     public void encode(FriendlyByteBuf buffer) {
@@ -106,6 +119,19 @@ public class GameruleServerboundPacket {
         buffer.writeLong(this.value);
     }
 
+
+    // rules the match host can change from the match setup screen without being a full operator
+    private static final Set<GameruleAction> LOBBY_RULES = EnumSet.of(
+            GameruleAction.SET_HIDE_ENEMY_PICKS,
+            GameruleAction.SET_FOG_OF_WAR,
+            GameruleAction.SET_MAX_POPULATION,
+            GameruleAction.SET_ALLOWED_HEROES,
+            GameruleAction.SET_RANDOM_ITEM_DROPS,
+            GameruleAction.SET_NEUTRAL_AGGRO,
+            GameruleAction.SET_LOCK_ALLIANCES,
+            GameruleAction.SET_ALLOW_BEACONS,
+            GameruleAction.SET_BEACON_WIN_MINUTES
+    );
 
     // server-side packet-consuming functions
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
@@ -117,7 +143,9 @@ public class GameruleServerboundPacket {
                 success.set(false);
                 return;
             }
-            else if (!player.hasPermissions(4)) {
+            // the match setup's rules are also open to the match host (op 2 or the singleplayer/Essential host)
+            else if (!player.hasPermissions(4) && !(LOBBY_RULES.contains(action) && StartPosServerEvents.isHost(player)
+                    && PlayerServerEvents.rtsPlayers.isEmpty() && !StartPosServerEvents.isStartingGame())) {
                 ReignOfNether.LOGGER.warn("GameruleServerboundPacket: Tried to process packet from " + player.getName() + " with insufficient permissions");
                 success.set(false);
                 return;
@@ -181,6 +209,12 @@ public class GameruleServerboundPacket {
                 case SET_LOCK_ALLIANCES -> {
                     gameRules.getRule(GameRuleRegistrar.LOCK_ALLIANCES).set(booleanValue, server);
                     GameruleClientboundPacket.setLockAlliances(booleanValue);
+                }
+                case SET_FOG_OF_WAR -> FogOfWarServerEvents.setEnabled(booleanValue);
+                case SET_HIDE_ENEMY_PICKS -> {
+                    gameRules.getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(booleanValue, server);
+                    GameruleClientboundPacket.setHideEnemyPicks(booleanValue);
+                    StartPosServerEvents.syncAll(booleanValue);
                 }
                 case SET_COOP_MODE -> {
                     gameRules.getRule(GameRuleRegistrar.COOP_MODE).set(booleanValue, server);

@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud;
 
+import com.solegendary.reignofnether.hud.playerdisplay.DiplomacyPlayerDisplay;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -28,6 +29,8 @@ public class TextInputClientEvents {
     }
 
     public static boolean isAnyInputFocused() {
+        if (DiplomacyPlayerDisplay.isTyping())
+            return true;
         for (MyEditBox input : registeredInputs)
             if (input.isFocused())
                 return true;

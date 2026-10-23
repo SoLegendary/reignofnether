@@ -1,11 +1,11 @@
 package com.solegendary.reignofnether.rtsmap;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -41,15 +41,14 @@ public class RTSMapInfoServerEvents {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent evt) {
         if (rtsMapInfo != null) {
-            evt.getEntity().sendSystemMessage(Component.literal(rtsMapInfo.getName() + " " + rtsMapInfo.getVersion()).withStyle(Style.EMPTY.withBold(true)));
+            evt.getEntity().sendSystemMessage(SystemMessage.important(Component.literal(rtsMapInfo.getName() + " " + rtsMapInfo.getVersion())));
             MutableComponent authors = rtsMapInfo.getAuthor().size() > 1
                     ? Component.translatable("message.reignofnether.rts_map_info_author.multiple")
                     : Component.translatable("message.reignofnether.rts_map_info_author.singular");
             for (String author : rtsMapInfo.getAuthor())
                 authors.append(" ").append(author);
-            evt.getEntity().sendSystemMessage(authors);
-            evt.getEntity().sendSystemMessage(Component.literal(""));
-            evt.getEntity().sendSystemMessage(Component.literal(rtsMapInfo.getDescription()));
+            evt.getEntity().sendSystemMessage(SystemMessage.info(authors));
+            evt.getEntity().sendSystemMessage(SystemMessage.info(Component.literal(rtsMapInfo.getDescription())));
 
             StringBuilder modesStr = new StringBuilder();
             for (String modeName : rtsMapInfo.getModes().keySet()) {
@@ -60,8 +59,7 @@ public class RTSMapInfoServerEvents {
             }
             if (modesStr.length() > 0) {
                 modesStr.setLength(modesStr.length() - 2);
-                evt.getEntity().sendSystemMessage(Component.literal(""));
-                evt.getEntity().sendSystemMessage(Component.translatable("message.reignofnether.rts_map_info_modes", modesStr));
+                evt.getEntity().sendSystemMessage(SystemMessage.info(Component.translatable("message.reignofnether.rts_map_info_modes", modesStr)));
             }
             RTSMapInfoClientboundPacket.sendValue(RTSMapInfoAction.SET_MAP_NAME, rtsMapInfo.getName());
             for (String author : rtsMapInfo.getAuthor())
@@ -74,8 +72,7 @@ public class RTSMapInfoServerEvents {
 
             MinecraftServer server = evt.getEntity().level().getServer();
             if (server != null && server.getGameRules().getRule(GameRuleRegistrar.RTS_PATHFINDING).get() && WorldBorderServerEvents.prewarmedNavmesh) {
-                evt.getEntity().sendSystemMessage(Component.literal(""));
-                evt.getEntity().sendSystemMessage(Component.translatable("server.reignofnether.prewarmed_navmesh"));
+                evt.getEntity().sendSystemMessage(SystemMessage.info(Component.translatable("server.reignofnether.prewarmed_navmesh")));
             }
         }
     }

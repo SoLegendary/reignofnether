@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.config;
 
+import com.solegendary.reignofnether.hud.panels.SettingsMenu;
 import com.solegendary.reignofnether.player.PlayerColors;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.client.ConfigScreenHandler;
@@ -16,6 +17,7 @@ public class ReignOfNetherClientConfigs {
 
     public static final ForgeConfigSpec.ConfigValue<Boolean> USE_PLAYER_COLORS;
     public static final ForgeConfigSpec.ConfigValue<Integer> CAMERA_SENSITIVITY;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> SEEN_NETWORK_NOTICE;
     public static final ForgeConfigSpec.ConfigValue<Boolean> SQUARE_MINIMAP;
 
     static {
@@ -31,6 +33,7 @@ public class ReignOfNetherClientConfigs {
         PLAYER_COLOR_ENEMY = BUILDER.define("player_color_enemy", PlayerColors.COLOR_HOSTILE.id);
         USE_PLAYER_COLORS = BUILDER.define("use_player_colors", false);
         CAMERA_SENSITIVITY = BUILDER.define("camera_sensitivity", 10);
+        SEEN_NETWORK_NOTICE = BUILDER.define("seen_network_notice", false);
         SQUARE_MINIMAP = BUILDER.define("square_minimap", false);
         SPEC = BUILDER.build();
     }
@@ -39,7 +42,8 @@ public class ReignOfNetherClientConfigs {
         return new ConfigScreenHandler.ConfigScreenFactory(ReignOfNetherClientConfigs::buildConfigScreen);
     }
 
+    // Forge's mod list "Config" button opens the same settings screen as the pause menu
     private static Screen buildConfigScreen(Screen screen) {
-        return new ReignOfNetherConfigScreen(screen);
+        return SettingsMenu.settingsScreen(screen);
     }
 }

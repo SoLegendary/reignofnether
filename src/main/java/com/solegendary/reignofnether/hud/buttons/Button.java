@@ -6,7 +6,7 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
+import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
@@ -37,6 +37,8 @@ public class Button {
     public static int DEFAULT_ICON_SIZE = 14;
     public static int DEFAULT_ICON_FRAME_SIZE = 22;
     public int tooltipOffsetY = 0;
+    // size the HUD last drew this button at (for tutorial highlights)
+    public int drawnSize = DEFAULT_ICON_FRAME_SIZE;
     public int imageSize = DEFAULT_ICON_SIZE;
     public static final int itemIconSize = DEFAULT_ICON_SIZE;
     public int innerIconSizeModifier = 0;
@@ -72,6 +74,10 @@ public class Button {
     public boolean lightUpOnHover = true;
 
     public Supplier<Boolean> isFlashing = () -> false;
+
+    // what this button costs to use (production, buildings), shown on the command card
+    @Nullable
+    public Supplier<ResourceCost> cost = null;
 
     // used for cooldown indication, productionItem progress, etc.
     // @ 0.0, appears clear and normal
@@ -152,7 +158,11 @@ public class Button {
         }
     }
 
+    /** Updates state that changes every frame (cooldown fill, counts). Called before drawing. */
+    public void refresh() { }
+
     public void render(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY) {
+        refresh();
         this.x = x;
         this.y = y;
 
@@ -282,6 +292,12 @@ public class Button {
         }
     }
 
+    /** The HUD's tooltip for this button: its legacy lines restyled, or null when it has none. */
+    @Nullable
+    public com.solegendary.reignofnether.ui.Tooltip hudTooltip() {
+        return tooltipLines == null || tooltipLines.isEmpty() ? null : com.solegendary.reignofnether.ui.Tooltip.fromLines(tooltipLines);
+    }
+
     public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         MyRenderer.renderTooltip(guiGraphics, tooltipLines, mouseX, mouseY + tooltipOffsetY);
     }
@@ -323,18 +339,11 @@ public class Button {
         }
     }
 
-    // must be done from key press event
-    public void checkPressed(int key) {
-        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
-            return;
-
-        if (hotkey != null && hotkey.getKey() == key) {
-            if (MC.player != null)
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
-            if (this.onLeftClick != null)
-                this.onLeftClick.run();
-            if (this.onLeftClickRelease != null)
-                this.onLeftClickRelease.run();
-        }
+    /** What pressing this button's hotkey does: a full click (press then release). */
+    public void pressHotkey() {
+        if (this.onLeftClick != null)
+            this.onLeftClick.run();
+        if (this.onLeftClickRelease != null)
+            this.onLeftClickRelease.run();
     }
 }

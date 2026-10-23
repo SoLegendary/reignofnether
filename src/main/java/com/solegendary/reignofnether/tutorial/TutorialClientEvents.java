@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.tutorial;
 
+import com.solegendary.reignofnether.hud.layout.HudGeometry;
+
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -148,11 +151,8 @@ public class TutorialClientEvents {
 
     public static void setEnabled(boolean value) {
         if (value && !enabled && MC.player != null) {
-            MC.player.sendSystemMessage(Component.literal(""));
-            MC.player.sendSystemMessage(Component.translatable("tutorial.reignofnether.welcome2")
-                .withStyle(Style.EMPTY.withBold(true)));
-            MC.player.sendSystemMessage(Component.translatable("tutorial.reignofnether.get_started"));
-            MC.player.sendSystemMessage(Component.literal(""));
+            MC.player.sendSystemMessage(SystemMessage.important(Component.translatable("tutorial.reignofnether.welcome2")));
+            MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("tutorial.reignofnether.get_started")));
         }
         enabled = value;
     }
@@ -189,16 +189,16 @@ public class TutorialClientEvents {
     public static void checkAndRenderNextAction(GuiGraphics poseStack, ArrayList<Button> buttons) {
         if (tutorialStage == PAN_CAMERA && MC.screen != null) {
             if (!pannedUp) {
-                TutorialRendering.pointAtWithArrow(poseStack, MC.screen.width / 2, -Button.DEFAULT_ICON_FRAME_SIZE, true);
+                TutorialRendering.pointAtWithArrow(poseStack, HudGeometry.layout().width() / 2, -Button.DEFAULT_ICON_FRAME_SIZE, true);
             }
             if (!pannedDown) {
-                TutorialRendering.pointAtWithArrow(poseStack, MC.screen.width / 2, MC.screen.height, true);
+                TutorialRendering.pointAtWithArrow(poseStack, HudGeometry.layout().width() / 2, HudGeometry.layout().height(), true);
             }
             if (!pannedLeft) {
-                TutorialRendering.pointAtWithArrow(poseStack, -Button.DEFAULT_ICON_FRAME_SIZE, MC.screen.height / 2, false);
+                TutorialRendering.pointAtWithArrow(poseStack, -Button.DEFAULT_ICON_FRAME_SIZE, HudGeometry.layout().height() / 2, false);
             }
             if (!pannedRight) {
-                TutorialRendering.pointAtWithArrow(poseStack, MC.screen.width, MC.screen.height / 2, false);
+                TutorialRendering.pointAtWithArrow(poseStack, HudGeometry.layout().width(), HudGeometry.layout().height() / 2, false);
             }
         } else {
             TutorialRendering.highlightNextButton(poseStack, buttons);
@@ -275,13 +275,11 @@ public class TutorialClientEvents {
             return;
         }
         MC.player.playSound(soundEvt.get(), 1.2f, 1.0f);
-        MC.player.sendSystemMessage(Component.literal(""));
         if (bold) {
-            MC.player.sendSystemMessage(Component.translatable(msg, params).withStyle(Style.EMPTY.withBold(true)));
+            MC.player.sendSystemMessage(SystemMessage.important(Component.translatable(msg, params)));
         } else {
-            MC.player.sendSystemMessage(Component.translatable(msg, params));
+            MC.player.sendSystemMessage(SystemMessage.info(Component.translatable(msg, params)));
         }
-        MC.player.sendSystemMessage(Component.literal(""));
     }
 
     private static void msg(String msg) {

@@ -1,13 +1,12 @@
 package com.solegendary.reignofnether.gamerules;
 
+import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
-import com.solegendary.reignofnether.items.RandomItemDropRule;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.pathfinding.PathfinderWorkerPool;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Mth;
 import net.minecraftforge.event.CommandEvent;
@@ -86,6 +85,13 @@ public class GameruleServerEvents {
             if (args.containsKey("value")) {
                 boolean value = (boolean) args.get("value").getResult();
                 GameruleClientboundPacket.setLockAlliances(value);
+            }
+        } else if (nodes.get(1).getNode().getName().equals("hideEnemyPicks")) {
+            Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
+            if (args.containsKey("value")) {
+                boolean value = (boolean) args.get("value").getResult();
+                GameruleClientboundPacket.setHideEnemyPicks(value);
+                StartPosServerEvents.syncAll(value); // the rule itself only changes after this event
             }
         } else if (nodes.get(1).getNode().getName().equals("scenarioMode")) {
             Map<String, ParsedArgument<CommandSourceStack, ?>> args = evt.getParseResults().getContext().getArguments();
@@ -170,6 +176,7 @@ public class GameruleServerEvents {
             GameruleClientboundPacket.setAllowedHeroes(allowHeroes);
             boolean lockAlliances = server.getGameRules().getRule(GameRuleRegistrar.LOCK_ALLIANCES).get();
             GameruleClientboundPacket.setLockAlliances(lockAlliances);
+            GameruleClientboundPacket.setHideEnemyPicks(server.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).get());
             boolean scenarioMode = server.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get();
             GameruleClientboundPacket.setScenarioMode(scenarioMode);
             boolean coopMode = server.getGameRules().getRule(GameRuleRegistrar.COOP_MODE).get();
@@ -182,7 +189,7 @@ public class GameruleServerEvents {
             int animalSpawnYDiff = server.getGameRules().getRule(GameRuleRegistrar.ANIMAL_SPAWN_Y_DIFF).get();
             GameruleClientboundPacket.setAnimalSpawnYDiff(animalSpawnYDiff);
             int randomItemDrops = server.getGameRules().getRule(GameRuleRegistrar.RANDOM_ITEM_DROPS).get();
-            GameruleClientboundPacket.setAnimalSpawnYDiff(randomItemDrops);
+            GameruleClientboundPacket.setRandomItemDrops(randomItemDrops);
         }
     }
 }

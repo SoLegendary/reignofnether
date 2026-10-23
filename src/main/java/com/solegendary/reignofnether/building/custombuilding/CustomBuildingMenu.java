@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.custombuilding;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -33,7 +34,6 @@ public class CustomBuildingMenu {
     
     private static Minecraft MC = Minecraft.getInstance();
     
-    public static PortraitRendererBuilding portraitRendererBuilding = new PortraitRendererBuilding();
     
     public static Button renderIconButtonNameAndPortrait(ScreenEvent.Render.Post evt, CustomBuilding building, int x, int y) {
         Button iconButton = new Button("Change Building Icon",
@@ -47,7 +47,7 @@ public class CustomBuildingMenu {
             () -> building.cycleIconAndPortrait(true),
             List.of(fcs(I18n.get("sandbox.reignofnether.custom_buildings.change_icon.tooltip1")))
         );
-        portraitRendererBuilding.drawBlockOnScreen(x + 2, y - 22, building.portraitBlock, 4.0f);
+        PortraitRendererBuilding.drawBlock(evt.getGuiGraphics(), building.portraitBlock, x + 2 + 31, y - 22 + 25, 4.0f);
         evt.getGuiGraphics().drawString(MC.font, fcs(building.name, true), x + 52, y, 0xFFFFFF);
         renderButton(iconButton, x - 8, y - 8, evt);
         return iconButton;
@@ -305,10 +305,8 @@ public class CustomBuildingMenu {
                 I18n.get("sandbox.reignofnether.custom_buildings.trainable_units.label") + ": " + customBuilding.productions.get().size(),
                 () -> {
                     if (MC.player != null) {
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint1"));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint2"));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint1")));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("sandbox.reignofnether.custom_buildings.trainable_units.hint2")));
                     }
                 },
                 null,
@@ -321,10 +319,8 @@ public class CustomBuildingMenu {
                 I18n.get("sandbox.reignofnether.custom_buildings.buyable_items.label") + ": " + customBuilding.stockedItems.size(),
                 () -> {
                     if (MC.player != null) {
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint1"));
-                        MC.player.sendSystemMessage(Component.literal(""));
-                        MC.player.sendSystemMessage(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint2"));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint1")));
+                        MC.player.sendSystemMessage(SystemMessage.info(Component.translatable("sandbox.reignofnether.custom_buildings.buyable_items.hint2")));
                     }
                 },
                 null,

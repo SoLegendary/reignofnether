@@ -76,6 +76,14 @@ public class MobEffectIcon extends Button {
     }
 
     @Override
+    public com.solegendary.reignofnether.ui.Tooltip hudTooltip() {
+        String name = I18n.get("effect.reignofnether." + descId);
+        if (duration >= MIN_DURATION_SHOWN)
+            name += " " + I18n.get("effect.reignofnether.duration", getSecondsRemaining());
+        return com.solegendary.reignofnether.ui.Tooltip.of(name).body(I18n.get("effect.reignofnether." + descId + ".desc"));
+    }
+
+    @Override
     public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         String name = I18n.get("effect.reignofnether." + descId);
         String desc = I18n.get("effect.reignofnether." + descId + ".desc");

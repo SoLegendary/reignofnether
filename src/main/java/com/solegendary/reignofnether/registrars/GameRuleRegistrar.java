@@ -30,6 +30,7 @@ public class GameRuleRegistrar {
     public static GameRules.Key<GameRules.IntegerValue> PATHFINDING_CHUNK_BUILDS;
     public static GameRules.Key<GameRules.IntegerValue> ANIMAL_SPAWN_Y_DIFF;
     public static GameRules.Key<GameRules.IntegerValue> RANDOM_ITEM_DROPS;
+    public static GameRules.Key<GameRules.BooleanValue> HIDE_ENEMY_PICKS;
 
     public static void init() {
         // do cut trees convert their logs into falling logs?
@@ -87,6 +88,10 @@ public class GameRuleRegistrar {
         // map is set to be played as a scenario by the player that opens it
         SCENARIO_MODE = GameRules.register("scenarioMode", GameRules.Category.MISC,
                 GameRules.BooleanValue.create(false)
+        );
+        // in the match lobby, other teams' factions and chosen start positions are hidden
+        HIDE_ENEMY_PICKS = GameRules.register("hideEnemyPicks", GameRules.Category.PLAYER,
+                GameRules.BooleanValue.create(true)
         );
         // all players are allied and cannot change alliances, normal victory is disabled and can only be achieved via commands
         COOP_MODE = GameRules.register("coopMode", GameRules.Category.PLAYER,

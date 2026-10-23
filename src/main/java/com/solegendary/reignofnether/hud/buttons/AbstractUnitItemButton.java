@@ -6,23 +6,19 @@ import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybinding;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
-import com.solegendary.reignofnether.registrars.AttributeRegistrar;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -104,16 +100,11 @@ public abstract class AbstractUnitItemButton extends Button {
         }
     }
 
+    // the hotkey uses the item straight away; the press part of a click would start dragging it
     @Override
-    public void checkPressed(int key) {
-        if (!OrthoviewClientEvents.isEnabled() || !isEnabled.get())
-            return;
-
-        if (hotkey != null && hotkey.getKey() == key) {
-            if (MC.player != null)
-                MC.player.playSound(SoundEvents.UI_BUTTON_CLICK.get(), 0.2f, 1.0f);
+    public void pressHotkey() {
+        if (this.onLeftClickRelease != null)
             this.onLeftClickRelease.run();
-        }
     }
 
     public boolean hasUseAction() {
@@ -148,6 +139,39 @@ public abstract class AbstractUnitItemButton extends Button {
 
             guiGraphics.pose().popPose();
         }
+    }
+
+    @Override
+    public com.solegendary.reignofnether.ui.Tooltip hudTooltip() {
+        if (!unitItem.enableTooltip)
+            return null;
+        String nameKey = "item.reignofnether." + unitItem.descId;
+        String name = I18n.get(nameKey);
+        if (name.equals(nameKey))
+            name = itemStack.getDisplayName().getString();
+        if (itemStack.getCount() > 1)
+            name += " (" + itemStack.getCount() + ")";
+        TextColor rarity = unitItem.rarity.getStyleModifier().apply(NAME_STYLE).getColor();
+        var t = com.solegendary.reignofnether.ui.Tooltip.of(name)
+                .titleColour(rarity != null ? 0xFF000000 | rarity.getValue() : com.solegendary.reignofnether.ui.Theme.TEXT)
+                .tag(unitItem.type.getLabel(), com.solegendary.reignofnether.ui.Theme.ORANGE);
+        String desc = unitItem.getDescription();
+        if (!desc.isBlank())
+            t.body(desc);
+        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
+        points.addAll(getEnchantmentDescs(itemStack));
+        points.addAll(getAttributeDescs(unitItem));
+        for (String point : points)
+            t.body(MyRenderer.styledWithIcons(point, POINTS_STYLE).getVisualOrderText());
+        if (unitItem.manaCost > 0)
+            t.cost(com.solegendary.reignofnether.hud.panels.ButtonCell.ICON_MANA, String.valueOf(unitItem.manaCost), 0xFF6EA8D9);
+        if (unitItem.cooldownTicksMax > 0)
+            t.cost(com.solegendary.reignofnether.hud.panels.ButtonCell.ICON_CLOCK, (unitItem.cooldownTicksMax / 20) + "s", 0xFFD9C46E);
+        if (unitItem.range > 0)
+            t.status(I18n.get("hud.reignofnether.range", (int) unitItem.range), com.solegendary.reignofnether.ui.Theme.MUTED);
+        if (emeraldValue > 0)
+            t.cost(com.solegendary.reignofnether.hud.panels.ButtonCell.ICON_EMERALD, String.valueOf(emeraldValue), 0xFF5DCAA5);
+        return t;
     }
 
     @Override

@@ -1,7 +1,9 @@
 package com.solegendary.reignofnether.hud;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import javax.annotation.Nullable;
+
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -22,7 +24,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getSelectedBuildings;
@@ -52,6 +56,16 @@ public class ControlGroup {
         return keybinding != null ? keybinding.getKey() : -1;
     }
 
+    @Nullable
+    public Keybinding getKeybinding() {
+        return keybinding;
+    }
+
+    @Nullable
+    public ResourceLocation getIcon() {
+        return iconRl;
+    }
+
     public void clearAll() {
         this.entityIds.clear();
         this.buildingBps.clear();
@@ -63,17 +77,14 @@ public class ControlGroup {
 
     // removes any entities/buildings that are no longer being tracked (likely dead/left world)
     public void clean() {
-        var ids = new ArrayList<>();
-        for (LivingEntity livingEntity : getAllUnits()) {
-            Integer id = livingEntity.getId();
-            ids.add(id);
-        }
+        // runs every frame for every group, so sets rather than list lookups
+        Set<Integer> ids = new HashSet<>();
+        for (LivingEntity livingEntity : getAllUnits())
+            ids.add(livingEntity.getId());
         this.entityIds.removeIf(e -> !ids.contains(e));
-        var poses = new ArrayList<>();
-        for (BuildingPlacement b2 : BuildingClientEvents.getBuildings()) {
-            BlockPos originPos = b2.originPos;
-            poses.add(originPos);
-        }
+        Set<BlockPos> poses = new HashSet<>();
+        for (BuildingPlacement b2 : BuildingClientEvents.getBuildings())
+            poses.add(b2.originPos);
         this.buildingBps.removeIf(b -> !poses.contains(b));
     }
 
@@ -180,10 +191,7 @@ public class ControlGroup {
                 if (!Keybindings.shiftMod.isDown())
                     loadToSelected();
             },
-            () -> {
-                if (Keybindings.shiftMod.isDown())
-                    clearAll();
-            },
+            this::clearAll,
             List.of(FormattedCharSequence.forward(
                 I18n.get("hud.control_group.reignofnether.control_group", keybinding.buttonLabel),
                 Style.EMPTY

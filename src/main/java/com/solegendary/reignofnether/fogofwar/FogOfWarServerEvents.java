@@ -6,6 +6,8 @@ import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
+import com.solegendary.reignofnether.gamerules.GameruleClientboundPacket;
+import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
@@ -108,9 +110,19 @@ public class FogOfWarServerEvents {
         isRtsPlayerCache.clear();
     }
 
+    // players being started together (StartPosServerEvents): they're started one by one in the same tick, so
+    // without this the later ones still count as non-RTS and get sent the earlier players' capitols unfiltered
+    private static final Set<String> startingPlayers = ConcurrentHashMap.newKeySet();
+
+    public static void setStartingPlayers(Collection<String> names) {
+        startingPlayers.clear();
+        startingPlayers.addAll(names);
+    }
+
     // match by name; entity ids change on reconnect
     public static boolean isFogActiveFor(ServerPlayer player) {
         if (!enabled) return false;
+        if (startingPlayers.contains(player.getName().getString())) return true;
         Boolean cached = isRtsPlayerCache.get(player.getUUID());
         if (cached != null) return cached;
         boolean v = PlayerServerEvents.isRTSPlayer(player.getName().getString());
@@ -296,6 +308,13 @@ public class FogOfWarServerEvents {
         pendingResends.clear();
 
         syncClientFog();
+
+        // fog means a competitive match: enemy picks hidden (the host can turn it back)
+        if (!wasEnabled && enabled && serverLevel != null) {
+            serverLevel.getGameRules().getRule(GameRuleRegistrar.HIDE_ENEMY_PICKS).set(true, serverLevel.getServer());
+            GameruleClientboundPacket.setHideEnemyPicks(true);
+            StartPosServerEvents.syncAll(true);
+        }
 
         // vanilla only diffs tracking on movement; force a resync for stale chunks
         if (wasEnabled && !enabled && serverLevel != null)

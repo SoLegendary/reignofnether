@@ -69,6 +69,6 @@ public class TimeUtils {
         int min = sec / 60;
         sec %= 60;
 
-        return min == 0 ? sec + "s" : min + "m" + sec + "s";
+        return String.format("%02d:%02d", min, sec);
     }
 }

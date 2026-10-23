@@ -24,6 +24,7 @@ public class AbilityButton extends Button {
     public Ability ability;
     @Nullable private Unit unit;
     @Nullable private BuildingPlacement placement;
+    public final boolean isPassive; // nothing happens on left click
 
     public AbilityButton(String name, ResourceLocation rl, Keybinding hotkey, Supplier<Boolean> isSelected,
                          Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, Runnable onLeftClick, Runnable onRightClick,
@@ -33,6 +34,7 @@ public class AbilityButton extends Button {
         super(name, Button.itemIconSize, rl, hotkey, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
 
         this.ability = ability;
+        this.isPassive = onLeftClick == null;
 
         Runnable originalOnLeftClick = this.onLeftClick;
         this.onLeftClick = () -> {
@@ -54,16 +56,41 @@ public class AbilityButton extends Button {
         super(name, Button.itemIconSize, rl, hotkey, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
 
         this.ability = ability;
+        this.isPassive = onLeftClick == null;
 
         Runnable originalOnLeftClick = this.onLeftClick;
         this.onLeftClick = () -> {
-            if (this.ability != null && (this.ability.getCooldown(placement) > 0 && !this.ability.canBypassCooldown(building)))
+            if (this.ability != null && (this.ability.getCooldown(placement) > 0 && !this.ability.canBypassCooldown(placement)))
                 HudClientEvents.showTemporaryMessage(I18n.get("hud.buttons.reignofnether.on_cooldown", getCooldown()));
             else if (originalOnLeftClick != null)
                 originalOnLeftClick.run();
         };
 
         this.placement = placement;
+    }
+
+    @Nullable
+    public Unit getUnit() {
+        return unit;
+    }
+
+    public boolean isAutocasting() {
+        return unit != null ? ability.isAutocasting(unit) : placement != null && ability.isAutocasting(placement);
+    }
+
+    /** Remaining cooldown and its maximum in ticks, or 0 when the button has no cooldown. */
+    public float getCooldownTicks() {
+        if (ability == null || ability.cooldownMax <= 0)
+            return 0;
+        if (unit != null)
+            return ability.getCooldown(unit);
+        return placement != null ? ability.getCooldown(placement) : 0;
+    }
+
+    public int getCharges() {
+        if (ability == null || !ability.usesCharges())
+            return -1;
+        return unit != null ? unit.getAbilityCharges(ability) : placement != null ? placement.getCharges(ability) : -1;
     }
 
     private int getCooldown() {
@@ -98,15 +125,16 @@ public class AbilityButton extends Button {
 
         // charges remaining number
         if (this.ability != null && this.ability.usesCharges()) {
-            String chargeStr = String.valueOf(unit != null ? unit.getAbilityCharges(ability) : building.getCharges(ability));
+            int charges = getCharges();
+            String chargeStr = String.valueOf(charges);
             guiGraphics.pose().translate(0,0,2);
 
             int colour = 0xFFFFFF;
-            if ((unit != null ? unit.getAbilityCharges(ability) : building.getCharges(ability)) >= this.ability.maxCharges)
+            if (charges >= this.ability.maxCharges)
                 colour = 0x00FF00;
-            else if ((unit != null ? unit.getAbilityCharges(ability) : building.getCharges(ability)) <= 0)
+            else if (charges <= 0)
                 colour = 0xFF0000;
-            else if ((unit != null ? unit.getAbilityCharges(ability) : building.getCharges(ability)) == 1)
+            else if (charges == 1)
                 colour = 0xFFFF00;
 
             guiGraphics.drawCenteredString(MC.font,
