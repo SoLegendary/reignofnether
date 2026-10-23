@@ -559,13 +559,21 @@ public class MyRenderer {
         );
     }
 
+    /** Legacy tooltip lines, drawn now in the HUD's tooltip style next to the cursor (GUI coordinates). */
     public static void renderTooltip(GuiGraphics guiGraphics, List<FormattedCharSequence> tooltipLines, int mouseX, int mouseY) {
-        if (MC.screen != null && tooltipLines != null && tooltipLines.size() > 0) {
-            if (mouseY < MC.screen.height / 2)
-                mouseY += (tooltipLines.size() * 10);
+        if (tooltipLines != null && tooltipLines.size() > 0)
+            renderTooltip(guiGraphics, com.solegendary.reignofnether.ui.Tooltip.fromLines(tooltipLines), mouseX, mouseY);
+    }
+
+    public static void renderTooltip(GuiGraphics guiGraphics, com.solegendary.reignofnether.ui.Tooltip tooltip, int mouseX, int mouseY) {
+        if (MC.screen != null) {
+            var scale = com.solegendary.reignofnether.hud.layout.HudGeometry.scale();
+            float k = scale.poseScale();
+            guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(0, 0, 3000);
-            guiGraphics.renderTooltip(MC.font, tooltipLines, mouseX, mouseY - (9 * (tooltipLines.size() - 1)));
-            guiGraphics.pose().translate(0, 0, -3000);
+            guiGraphics.pose().scale(k, k, 1);
+            tooltip.render(guiGraphics, scale.toUnits(mouseX), scale.toUnits(mouseY), 12, 12, scale.width(), scale.height());
+            guiGraphics.pose().popPose();
         }
     }
 

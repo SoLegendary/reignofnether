@@ -52,7 +52,7 @@ public class ItemShopMenu {
                 .onLeftClick(() -> ItemClientEvents.openItemShop = null)
                 .build();
         Rect closeRect = new Rect(right - 11, y + PAD, 11, 11);
-        Theme.cross(f.g, closeRect.x() + 2, closeRect.y() + 2, 7, f.hovered(closeRect) ? Theme.DANGER_TEXT : Theme.MUTED);
+        Theme.cross(f.g, closeRect, f.hovered(closeRect) ? Theme.DANGER_TEXT : Theme.MUTED);
         f.register(close, closeRect, null, () -> Tooltip.of(I18n.get("itemshop.reignofnether.close")));
 
         Unit served = shop.getServedUnit();

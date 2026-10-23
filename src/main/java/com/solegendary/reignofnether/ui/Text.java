@@ -15,9 +15,9 @@ import java.util.List;
 /**
  * Text drawing for the RTS UI, in the design's three sizes:
  * <ul>
- *   <li>{@link #small}: Silkscreen pixel font (caps labels, key chips, tags, hints), 5 units tall</li>
- *   <li>{@link #draw}: the vanilla font for body text</li>
- *   <li>{@link #big}: Pixelify Sans for values, names and numbers; {@link #title} adds the gold gradient</li>
+ *   <li>{@link #small}: Silkscreen caps labels, tags and hints (the design's 8-10px); {@link #medium}: its 11-12px ones</li>
+ *   <li>{@link #draw}: the vanilla font for body text, like chat; {@link #medium} is it in capitals</li>
+ *   <li>{@link #big}: the vanilla font for values, names and numbers; {@link #heading} and {@link #title} (gold) are Pixelify Sans, for titles only</li>
  * </ul>
  * Small and vanilla text share a baseline when drawn at the same y.
  */
@@ -36,6 +36,21 @@ public final class Text {
     private static final int[] TITLE_BANDS = { Theme.GOLD, Theme.YELLOW, Theme.ORANGE, Theme.ORANGE_DARK };
     private static final float[] TITLE_STOPS = { 0f, 0.3f, 0.6f, 0.85f, 1f };
 
+    /**
+     * Medium and body text are the vanilla font at 2 screen pixels per font pixel (like chat), small and tiny
+     * are Silkscreen at 1, big is the vanilla font at 3.
+     * Every size sits on whole screen pixels, so nothing is soft.
+     */
+    public static float bodyScale() {
+        return 1f; // the vanilla font at 1 font pixel per unit: 2 screen pixels at GUI scale 3-4, like chat
+    }
+
+    /** Distance between two lines of body text. */
+    public static int lineHeight() {
+        return Math.max(5, Math.round(10 * bodyScale()));
+    }
+
+    /** Width of body text. */
     public static int width(String s) {
         return Theme.font().width(s);
     }
@@ -44,45 +59,73 @@ public final class Text {
         return Theme.font().width(s);
     }
 
-    // ---- small: Silkscreen ----
+    // ---- small and tiny: Silkscreen capitals at 1x (labels, tags, hints; key chips and counts in cells) ----
 
-    /**
-     * Small labels are three quarters of a HUD unit per font pixel: between the design's half unit (too
-     * small to read) and a whole unit (too big). Not always a whole number of screen pixels, never under
-     * one. Caps are 5 font pixels tall.
-     */
-    public static float smallScale() {
+    /** Tiny is the design's 9px Silkscreen on whole screen pixels: 1 screen pixel per font pixel at GUI scale 3-4. */
+    public static float tinyScale() {
         int p = HudGeometry.scale().pixelsPerUnit();
-        return Math.max(1f / p, 0.75f);
+        return Math.max(1, Math.round(9 * p / 16f)) / (float) p;
     }
 
-    // small labels are always capitals, like the design, whatever case the caller passes
-    private static FormattedCharSequence small(String s) {
+    // labels are always capitals, like the design, whatever case the caller passes
+    private static FormattedCharSequence caps(String s) {
         return Component.literal(s.toUpperCase(java.util.Locale.ROOT)).withStyle(SMALL_STYLE).getVisualOrderText();
     }
 
+    // medium: the vanilla font in capitals
+    private static FormattedCharSequence label(String s) {
+        return Component.literal(s.toUpperCase(java.util.Locale.ROOT)).getVisualOrderText();
+    }
+
     public static int smallWidth(String s) {
-        return (int) Math.ceil(Theme.font().width(small(s)) * smallScale());
+        return tinyWidth(s);
+    }
+
+    public static int tinyWidth(String s) {
+        return (int) Math.ceil(Theme.font().width(caps(s)) * tinyScale());
     }
 
     /** Small caps text, vertically centred where an 8-unit vanilla line at y would sit. */
     public static void small(GuiGraphics g, String s, int x, int y, int colour) {
-        drawSmall(g, s, x, y, colour, false);
+        // Silkscreen's caps sit on rows 2..6 of the glyph: their centre is 4.5 font pixels down
+        draw(g, caps(s), tinyScale(), 4.5f, x, y, colour, false);
     }
 
     public static void smallShadowed(GuiGraphics g, String s, int x, int y, int colour) {
-        drawSmall(g, s, x, y, colour, true);
+        draw(g, caps(s), tinyScale(), 4.5f, x, y, colour, true);
     }
 
-    private static void drawSmall(GuiGraphics g, String s, int x, int y, int colour, boolean shadow) {
-        float k = smallScale();
+    /** Key chips, counts and costs inside cells, where there is no room for small labels. */
+    public static void tiny(GuiGraphics g, String s, int x, int y, int colour) {
+        draw(g, caps(s), tinyScale(), 4.5f, x, y, colour, false);
+    }
+
+    public static void tinyShadowed(GuiGraphics g, String s, int x, int y, int colour) {
+        draw(g, caps(s), tinyScale(), 4.5f, x, y, colour, true);
+    }
+
+    public static void tinyRight(GuiGraphics g, String s, int rightX, int y, int colour) {
+        tiny(g, s, rightX - tinyWidth(s), y, colour);
+    }
+
+    private static final int[][] OUTLINE = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+    /** Keeps the caps' centre (capsCentre font units down the line) at y + 4.5, on a whole screen pixel. */
+    private static void draw(GuiGraphics g, FormattedCharSequence text, float k, float capsCentre, int x, int y, int colour, boolean outline) {
+        int p = HudGeometry.scale().pixelsPerUnit();
         g.pose().pushPose();
-        // caps sit on rows 2..6 of the glyph; keep their centre at y + 4.5 whatever the scale
-        g.pose().translate(x, y + 4.5f * (1 - k), 0);
+        g.pose().translate(x, y + Math.round((4.5f - capsCentre * k) * p) / (float) p, 0);
         g.pose().scale(k, k, 1);
-        FormattedCharSequence text = small(s);
-        if (shadow)
-            g.drawString(Theme.font(), text, 1, 1, 0xFF000000, false);
+        // a black outline exactly one screen pixel wide, whatever the scale, so it never eats the letters
+        if (outline) {
+            float px = 1f / (k * p);
+            for (int[] d : OUTLINE) {
+                g.pose().pushPose();
+                g.pose().translate(d[0] * px, d[1] * px, 0);
+                g.drawString(Theme.font(), text, 0, 0, 0xFF000000, false);
+                g.pose().popPose();
+            }
+        }
         g.drawString(Theme.font(), text, 0, 0, colour, false);
         g.pose().popPose();
     }
@@ -122,7 +165,32 @@ public final class Text {
         return cut + "…";
     }
 
-    // ---- big: values and names, vanilla font scaled up (readable) ----
+    // ---- medium: statuses and headers, bigger than small ----
+
+    /** Medium is Silkscreen at 2 screen pixels per font pixel at GUI scale 3-4, one step over tiny. */
+    public static float mediumScale() {
+        return bodyScale();
+    }
+
+    public static int mediumWidth(String s) {
+        return Theme.font().width(label(s));
+    }
+
+    /** Medium text (body font capitals), centred where an 8-unit vanilla line at y would sit. */
+    public static void medium(GuiGraphics g, String s, int x, int y, int colour) {
+        // the vanilla font's caps sit on rows 0..6: their centre is 3.5 font pixels down
+        draw(g, label(s), 1f, 3.5f, x, y, colour, false);
+    }
+
+    public static void mediumRight(GuiGraphics g, String s, int rightX, int y, int colour) {
+        medium(g, s, rightX - mediumWidth(s), y, colour);
+    }
+
+    public static void mediumCentered(GuiGraphics g, String s, int cx, int y, int colour) {
+        medium(g, s, cx - mediumWidth(s) / 2, y, colour);
+    }
+
+    // ---- big: values, names and numbers, the vanilla font scaled up (Pixelify is for titles only) ----
 
     /** Snaps a scale so each font pixel is a whole number of screen pixels. */
     private static float crisp(float scale) {
@@ -130,18 +198,33 @@ public final class Text {
         return Math.max(1, Math.round(scale * p)) / (float) p;
     }
 
+    /** Pixelify is baked at 2x, so one texel is half a font unit: snap to whole screen pixels per texel. */
+    private static float crispBig(float scale) {
+        int p = HudGeometry.scale().pixelsPerUnit();
+        int n = Math.round(scale * p / 2f);
+        return n >= 1 ? 2f * n / p : 1f / p;
+    }
+
+    private static FormattedCharSequence bigText(String s) {
+        return Component.literal(s).withStyle(BIG_STYLE).getVisualOrderText();
+    }
+
+    private static float bigK(float scale) {
+        return crisp(scale);
+    }
+
     /** Height of a line of big text, top to baseline plus descender. */
     public static int bigHeight(float scale) {
-        return Math.round(8 * crisp(scale));
+        return Math.round(8 * bigK(scale));
     }
 
     public static int bigWidth(String s, float scale) {
-        return Math.round(width(s) * crisp(scale));
+        return Math.round(Theme.font().width(s) * bigK(scale));
     }
 
     /** Big value or name with a black drop shadow; y is the top of the text. */
     public static void big(GuiGraphics g, String s, int x, int y, int colour, float scale) {
-        float k = crisp(scale);
+        float k = bigK(scale);
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
         g.pose().scale(k, k, 1);
@@ -174,23 +257,26 @@ public final class Text {
     }
 
     public static void heading(GuiGraphics g, String s, int x, int y, int colour, float scale) {
-        FormattedCharSequence text = Component.literal(s).withStyle(BIG_STYLE).getVisualOrderText();
+        FormattedCharSequence text = bigText(s);
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
-        g.pose().scale(scale, scale, 1);
+        float k = crispBig(scale);
+        g.pose().scale(k, k, 1);
         g.drawString(Theme.font(), text, 1, 1, 0xFF000000, false);
         g.drawString(Theme.font(), text, 0, 0, colour, false);
         g.pose().popPose();
     }
 
-    // ---- body: vanilla font ----
+    // ---- body: the vanilla font, as in chat ----
 
     public static void draw(GuiGraphics g, String s, int x, int y, int colour) {
-        g.drawString(Theme.font(), s, x, y, colour, false);
+        draw(g, Component.literal(s).getVisualOrderText(), x, y, colour);
     }
 
+    /** Body text with Minecraft's drop shadow, like chat, but none under dark text (on orange buttons). */
     public static void draw(GuiGraphics g, FormattedCharSequence s, int x, int y, int colour) {
-        g.drawString(Theme.font(), s, x, y, colour, false);
+        int lum = ((colour >> 16) & 0xFF) * 3 + ((colour >> 8) & 0xFF) * 6 + (colour & 0xFF);
+        g.drawString(Theme.font(), s, x, y, colour, lum > 128 * 10);
     }
 
     public static void drawCentered(GuiGraphics g, String s, int cx, int y, int colour) {
@@ -202,16 +288,23 @@ public final class Text {
         if (width(s) <= maxWidth)
             return s;
         String ell = "…";
-        String cut = Theme.font().plainSubstrByWidth(s, Math.max(0, maxWidth - width(ell)));
+        String cut = s;
+        while (!cut.isEmpty() && width(cut + ell) > maxWidth)
+            cut = cut.substring(0, cut.length() - 1);
         return cut + ell;
     }
 
     public static List<FormattedCharSequence> wrap(String s, int maxWidth) {
-        return Theme.font().split(Component.literal(s), maxWidth);
+        return wrap(Component.literal(s), maxWidth);
+    }
+
+    /** Splits styled text so each line fits maxWidth units at the body size. */
+    public static List<FormattedCharSequence> wrap(Component c, int maxWidth) {
+        return Theme.font().split(c, maxWidth);
     }
 
     public static int titleWidth(String s, float scale) {
-        return Math.round(Theme.font().width(Component.literal(s).withStyle(BIG_STYLE)) * scale);
+        return Math.round(Theme.font().width(bigText(s)) * crispBig(scale));
     }
 
     /**
@@ -219,22 +312,28 @@ public final class Text {
      * with the scissor, which works in screen space, so band edges are taken from the current pose.
      */
     public static void title(GuiGraphics g, String s, int x, int y, float scale) {
+        title(g, s, x, y, scale, TITLE_BANDS, Theme.ON_ORANGE);
+    }
+
+    /** {@link #title} with its own gradient (4 bands, top to bottom) and drop shadow colour. */
+    public static void title(GuiGraphics g, String s, int x, int y, float scale, int[] bands, int shadow) {
         FormattedCharSequence text = Component.literal(s).withStyle(BIG_STYLE).getVisualOrderText();
         int w = Theme.font().width(text);
         int h = 8;
 
         g.pose().pushPose();
         g.pose().translate(x, y, 0);
-        g.pose().scale(scale, scale, 1);
-        g.drawString(Theme.font(), text, 1, 1, Theme.ON_ORANGE, false);
+        float k = crispBig(scale);
+        g.pose().scale(k, k, 1);
+        g.drawString(Theme.font(), text, 1, 1, shadow, false);
 
         var matrix = g.pose().last().pose();
-        for (int i = 0; i < TITLE_BANDS.length; i++) {
+        for (int i = 0; i < bands.length; i++) {
             Vector4f top = matrix.transform(new Vector4f(0, h * TITLE_STOPS[i], 0, 1));
             Vector4f bottom = matrix.transform(new Vector4f(w + 1, h * TITLE_STOPS[i + 1], 0, 1));
-            int y2 = i == TITLE_BANDS.length - 1 ? (int) Math.ceil(bottom.y) + 4 : Math.round(bottom.y);
+            int y2 = i == bands.length - 1 ? (int) Math.ceil(bottom.y) + 4 : Math.round(bottom.y);
             g.enableScissor((int) Math.floor(top.x), Math.round(top.y), (int) Math.ceil(bottom.x) + 1, y2);
-            g.drawString(Theme.font(), text, 0, 0, TITLE_BANDS[i], false);
+            g.drawString(Theme.font(), text, 0, 0, bands[i], false);
             g.disableScissor();
         }
         g.pose().popPose();

@@ -236,7 +236,7 @@ public class PlayerClientEvents {
             return;
 
         if (!SandboxClientEvents.isSandboxPlayer(playerName)) {
-            MC.gui.setTitle(Component.translatable("titles.reignofnether.defeated"));
+            com.solegendary.reignofnether.matchstart.ResultBanner.show(false);
             MC.player.playSound(SoundRegistrar.DEFEAT.get(), 0.5f, 1.0f);
         }
         ResearchClient.removeAllResearch();
@@ -248,7 +248,7 @@ public class PlayerClientEvents {
         if (MC.player == null || !MC.player.getName().getString().equals(playerName)) {
             return;
         }
-        MC.gui.setTitle(Component.translatable("titles.reignofnether.victorious"));
+        com.solegendary.reignofnether.matchstart.ResultBanner.show(true);
         MC.player.playSound(SoundRegistrar.VICTORY.get(), 0.5f, 1.0f);
     }
 

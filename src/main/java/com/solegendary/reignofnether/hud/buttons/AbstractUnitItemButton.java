@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -138,6 +139,39 @@ public abstract class AbstractUnitItemButton extends Button {
 
             guiGraphics.pose().popPose();
         }
+    }
+
+    @Override
+    public com.solegendary.reignofnether.ui.Tooltip hudTooltip() {
+        if (!unitItem.enableTooltip)
+            return null;
+        String nameKey = "item.reignofnether." + unitItem.descId;
+        String name = I18n.get(nameKey);
+        if (name.equals(nameKey))
+            name = itemStack.getDisplayName().getString();
+        if (itemStack.getCount() > 1)
+            name += " (" + itemStack.getCount() + ")";
+        TextColor rarity = unitItem.rarity.getStyleModifier().apply(NAME_STYLE).getColor();
+        var t = com.solegendary.reignofnether.ui.Tooltip.of(name)
+                .titleColour(rarity != null ? 0xFF000000 | rarity.getValue() : com.solegendary.reignofnether.ui.Theme.TEXT)
+                .tag(unitItem.type.getLabel(), com.solegendary.reignofnether.ui.Theme.ORANGE);
+        String desc = unitItem.getDescription();
+        if (!desc.isBlank())
+            t.body(desc);
+        List<String> points = new ArrayList<>(unitItem.getPointDescriptions());
+        points.addAll(getEnchantmentDescs(itemStack));
+        points.addAll(getAttributeDescs(unitItem));
+        for (String point : points)
+            t.body(MyRenderer.styledWithIcons(point, POINTS_STYLE).getVisualOrderText());
+        if (unitItem.manaCost > 0)
+            t.cost(com.solegendary.reignofnether.hud.panels.ButtonCell.ICON_MANA, String.valueOf(unitItem.manaCost), 0xFF6EA8D9);
+        if (unitItem.cooldownTicksMax > 0)
+            t.cost(com.solegendary.reignofnether.hud.panels.ButtonCell.ICON_CLOCK, (unitItem.cooldownTicksMax / 20) + "s", 0xFFD9C46E);
+        if (unitItem.range > 0)
+            t.status(I18n.get("hud.reignofnether.range", (int) unitItem.range), com.solegendary.reignofnether.ui.Theme.MUTED);
+        if (emeraldValue > 0)
+            t.cost(com.solegendary.reignofnether.hud.panels.ButtonCell.ICON_EMERALD, String.valueOf(emeraldValue), 0xFF5DCAA5);
+        return t;
     }
 
     @Override

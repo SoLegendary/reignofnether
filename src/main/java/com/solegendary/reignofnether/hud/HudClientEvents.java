@@ -20,6 +20,8 @@ import com.solegendary.reignofnether.chat.ChatPanel;
 import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.hud.panels.MinimapTools;
 import com.solegendary.reignofnether.hud.panels.SelectionPanel;
+import com.solegendary.reignofnether.hud.panels.SpectatorHud;
+import com.solegendary.reignofnether.chat.SpectatorFeed;
 import com.solegendary.reignofnether.hud.panels.TopLeftPanel;
 import com.solegendary.reignofnether.hud.panels.TopRightPanel;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
@@ -307,7 +309,10 @@ public class HudClientEvents {
         CommandCard.render(f);
         SelectionPanel.render(f);
         MinimapTools.render(f);
-        TopLeftPanel.render(f);
+        if (SpectatorHud.isActive())
+            SpectatorHud.render(f);
+        else
+            TopLeftPanel.render(f);
         TopRightPanel.render(f);
         PlayerDisplayClientEvents.render(f);
         renderItemShop(f);
@@ -399,14 +404,14 @@ public class HudClientEvents {
             return;
         int y = bottom - toastH - (toastH > 0 ? HudLayout.GAP : 0);
         float titleScale = Text.px(17);
-        int w = Math.max(Text.bigWidth(hint[0], titleScale), Text.smallWidth(hint[1])) + 16;
+        int w = Math.max(Text.bigWidth(hint[0], titleScale), Text.tinyWidth(hint[1])) + 16;
         int h = 23;
         int x = cx - w / 2;
         Theme.outline(f.g, x, y - h, w, h, 1, Theme.INK);
         f.g.fill(x, y - h, x + w, y, Theme.HINT_BG);
         Theme.ring(f.g, x, y - h, w, h, 1, Theme.ORANGE);
         Text.bigCentered(f.g, hint[0], cx, y - h + 4, Theme.GOLD, titleScale);
-        Text.smallCentered(f.g, hint[1].toUpperCase(Locale.ROOT), cx, y - h + 12, Theme.HINT);
+        Text.tiny(f.g, hint[1], cx - Text.tinyWidth(hint[1]) / 2, y - h + 12, Theme.HINT);
     }
 
     @Nullable
@@ -547,6 +552,8 @@ public class HudClientEvents {
         if (evt.phase != TickEvent.Phase.END)
             return;
         Toast.tick();
+        SpectatorHud.tick();
+        SpectatorFeed.tick();
         if (OrthoviewClientEvents.isEnabled())
             portraitRendererUnit.tickAnimation();
 

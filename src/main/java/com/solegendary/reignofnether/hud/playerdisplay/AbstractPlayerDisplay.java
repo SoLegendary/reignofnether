@@ -62,7 +62,7 @@ public abstract class AbstractPlayerDisplay {
 
     /** With fog of war, only you and your allies' faction and economy are shown. */
     protected boolean hiddenByFog() {
-        if (!FogOfWarClientEvents.isMatchFogOn() || MC.player == null)
+        if (!FogOfWarClientEvents.isMatchFogOn() || MC.player == null || !com.solegendary.reignofnether.player.PlayerClientEvents.isRTSPlayer())
             return false;
         return !AlliancesClient.isAlliedOrOwned(MC.player.getName().getString(), playerName);
     }

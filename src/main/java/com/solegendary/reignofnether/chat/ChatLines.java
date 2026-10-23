@@ -64,7 +64,7 @@ public final class ChatLines {
             List<FormattedCharSequence> wrapped = wrap(e, maxW - 10);
             int textW = 0;
             for (FormattedCharSequence s : wrapped)
-                textW = Math.max(textW, Text.width(s));
+                textW = Math.max(textW, Theme.font().width(s));
             int h = wrapped.size() * LINE_H + 3;
             y -= h;
             g.fill(x, y, x + textW + 10, y + h, Theme.withAlpha(STRIP, alpha));

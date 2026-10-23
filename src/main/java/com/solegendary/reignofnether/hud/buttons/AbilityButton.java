@@ -24,6 +24,7 @@ public class AbilityButton extends Button {
     public Ability ability;
     @Nullable private Unit unit;
     @Nullable private BuildingPlacement placement;
+    public final boolean isPassive; // nothing happens on left click
 
     public AbilityButton(String name, ResourceLocation rl, Keybinding hotkey, Supplier<Boolean> isSelected,
                          Supplier<Boolean> isHidden, Supplier<Boolean> isEnabled, Runnable onLeftClick, Runnable onRightClick,
@@ -33,6 +34,7 @@ public class AbilityButton extends Button {
         super(name, Button.itemIconSize, rl, hotkey, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
 
         this.ability = ability;
+        this.isPassive = onLeftClick == null;
 
         Runnable originalOnLeftClick = this.onLeftClick;
         this.onLeftClick = () -> {
@@ -54,6 +56,7 @@ public class AbilityButton extends Button {
         super(name, Button.itemIconSize, rl, hotkey, isSelected, isHidden, isEnabled, onLeftClick, onRightClick, tooltipLines);
 
         this.ability = ability;
+        this.isPassive = onLeftClick == null;
 
         Runnable originalOnLeftClick = this.onLeftClick;
         this.onLeftClick = () -> {
@@ -69,6 +72,10 @@ public class AbilityButton extends Button {
     @Nullable
     public Unit getUnit() {
         return unit;
+    }
+
+    public boolean isAutocasting() {
+        return unit != null ? ability.isAutocasting(unit) : placement != null && ability.isAutocasting(placement);
     }
 
     /** Remaining cooldown and its maximum in ticks, or 0 when the button has no cooldown. */

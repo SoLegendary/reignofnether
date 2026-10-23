@@ -56,7 +56,7 @@ public class PlayerDisplayClientEvents {
     private static final int HEADER_H = 40; // title row and column labels
     private static final int ROW_GAP = 4;
     private static final int MAP = 200;
-    private static final MapZoom ZOOM = new MapZoom(1f); // opens on the whole map
+    private static final MapZoom ZOOM = new MapZoom(1.5f); // opens filling the card; only the diamond's tips are cut
 
     public static void resetDisplay() {
         displayType = DisplayType.NONE;
@@ -222,7 +222,7 @@ public class PlayerDisplayClientEvents {
         Rect close = new Rect(panel.right() - PAD - 16, TOP + 8, 16, 16);
         boolean hovered = f.hovered(close);
         Theme.secondaryButton(f.g, close.x(), close.y(), close.w(), close.h(), hovered);
-        Theme.cross(f.g, close.x() + 5, close.y() + 5, 6, hovered ? Theme.GOLD : Theme.BODY);
+        Theme.cross(f.g, close, hovered ? Theme.GOLD : Theme.BODY);
         f.register(new ButtonBuilder("Close player panel").onLeftClick(PlayerDisplayClientEvents::resetDisplay).build(),
                 close, null, () -> null);
         return panel;

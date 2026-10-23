@@ -30,7 +30,6 @@ public class TimeClientEvents {
     public static double ticksSinceLastUpdate = 0; // for counting partial ticks since serverGameTime is only updated once per second
 
     // clicking the clock keeps its tooltip open
-    public static boolean showClockTooltip = false;
 
     private static int bloodMoonTicksLeft = 0;
     private static BlockPos bloodMoonPos = null;
@@ -78,13 +77,13 @@ public class TimeClientEvents {
             t = Tooltip.of(I18n.get("time.reignofnether.time_is_distorted"))
                     .body(I18n.get("time.reignofnether.real_time", timeStr));
         else
-            t = Tooltip.of(I18n.get("time.reignofnether.time", timeStr));
+            t = Tooltip.of(I18n.get(isDay ? "hud.reignofnether.clock.day_n" : "hud.reignofnether.clock.night_n", dayNumber()));
 
         t.tag(I18n.get(isDay ? "hud.reignofnether.clock.tag_day" : "hud.reignofnether.clock.tag_night"),
                 isDay ? Theme.GOLD : Theme.MANA_TEXT);
         t.body(I18n.get(isDay ? "hud.reignofnether.clock.desc_day" : "hud.reignofnether.clock.desc_night"));
         t.status(isDay ? I18n.get("time.reignofnether.time_until_night", getTimeUntilStr(serverNormDayTime, DUSK))
-                : I18n.get("time.reignofnether.time_until_day", getTimeUntilStr(serverNormDayTime, DAWN)), Theme.MUTED);
+                : I18n.get("time.reignofnether.time_until_day", getTimeUntilStr(serverNormDayTime, DAWN)), Theme.BODY);
 
         if (SurvivalClientEvents.isEnabled) {
             long timeOffset = -getWaveSurvivalTimeModifier(SurvivalClientEvents.difficulty);
@@ -92,6 +91,16 @@ public class TimeClientEvents {
                     getTimeUntilStrWithOffset(serverNormDayTime, DUSK, isDay ? 0 : timeOffset)), Theme.ORANGE);
         }
         return t;
+    }
+
+    /**
+     * Which day of the match it is: 1 + the dawns since the match started, so a night is numbered after
+     * the day before it. ponytail: assumes the clock ran at normal speed since the start, distortion skews it.
+     */
+    public static int dayNumber() {
+        long now = normaliseTime(serverNormDayTime);
+        long start = now - PlayerClientEvents.rtsGameTicks;
+        return 1 + (int) (Math.floorDiv(now - DAWN, 24000L) - Math.floorDiv(start - DAWN, 24000L));
     }
 
     @SubscribeEvent

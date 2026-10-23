@@ -66,6 +66,7 @@ public final class SettingsMenu {
                 back = w;
         if (back == null)
             return;
+        tidyPauseMenu(evt, back);
         int x = back.getX() - 24;
         int y = back.getY() + 24;
         evt.addListener(new IconButton(x, y, Icon.SETTINGS, Component.translatable("hud.reignofnether.settings"),
@@ -73,6 +74,95 @@ public final class SettingsMenu {
         if (canOpenGamerules())
             evt.addListener(new IconButton(x, y + 24, Icon.LIST, Component.translatable("hud.gamerule.reignofnether.title"),
                     () -> Minecraft.getInstance().setScreen(new Panel(pause, "hud.gamerule.reignofnether.title", GameruleClient::ruleRows, 190))));
+        // surrender, red, under the last pause button; a second click within 3 s confirms
+        if (PlayerClientEvents.isRTSPlayer() && !SandboxClientEvents.isSandboxPlayer()) {
+            int bottom = back.getY();
+            for (var l : evt.getListenersList())
+                if (l instanceof AbstractWidget w && w.getX() <= back.getX() + back.getWidth() && w.getX() + w.getWidth() >= back.getX())
+                    bottom = Math.max(bottom, w.getY() + w.getHeight());
+            evt.addListener(new SurrenderButton(back.getX(), bottom + 4, back.getWidth()));
+        }
+    }
+
+    private static String key(AbstractWidget w) {
+        return w.getMessage().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents t ? t.getKey() : "";
+    }
+
+    /**
+     * Drops Advancements, Give Feedback and Report Bugs. Statistics takes Advancements' half of its row and Mods
+     * the other half, then the rows of the menu's column close up, 24 apart from Back to Game down.
+     */
+    private static void tidyPauseMenu(ScreenEvent.Init.Post evt, AbstractWidget back) {
+        AbstractWidget advancements = null, stats = null, mods = null;
+        for (var l : List.copyOf(evt.getListenersList())) {
+            if (!(l instanceof AbstractWidget w))
+                continue;
+            switch (key(w)) {
+                case "gui.advancements" -> advancements = w;
+                case "menu.sendFeedback", "menu.reportBugs" -> evt.removeListener(w);
+                case "gui.stats" -> stats = w;
+                case "fml.menu.mods" -> mods = w;
+                default -> { }
+            }
+        }
+        if (advancements != null && stats != null) {
+            int ax = advancements.getX(), ay = advancements.getY(), aw = advancements.getWidth();
+            evt.removeListener(advancements);
+            if (mods != null) {
+                mods.setX(stats.getX());
+                mods.setY(stats.getY());
+                mods.setWidth(stats.getWidth());
+            }
+            stats.setX(ax);
+            stats.setY(ay);
+            stats.setWidth(aw);
+        }
+        // close the gaps: each remaining row of the column goes right under the one above
+        int left = back.getX(), right = back.getX() + back.getWidth();
+        java.util.TreeSet<Integer> rows = new java.util.TreeSet<>();
+        List<AbstractWidget> column = new ArrayList<>();
+        for (var l : evt.getListenersList())
+            if (l instanceof AbstractWidget w && w.getX() >= left && w.getX() + w.getWidth() <= right && w.getY() >= back.getY()) {
+                column.add(w);
+                rows.add(w.getY());
+            }
+        List<Integer> order = new ArrayList<>(rows);
+        for (AbstractWidget w : column)
+            w.setY(back.getY() + order.indexOf(w.getY()) * 24);
+    }
+
+    private static class SurrenderButton extends AbstractButton {
+        private long armedAt = 0;
+
+        SurrenderButton(int x, int y, int w) {
+            super(x, y, w, 20, Component.translatable("hud.reignofnether.surrender"));
+        }
+
+        private boolean armed() {
+            return System.currentTimeMillis() - armedAt < 3000;
+        }
+
+        @Override
+        public void onPress() {
+            if (armed()) {
+                com.solegendary.reignofnether.player.PlayerServerboundPacket.surrender();
+                Minecraft.getInstance().setScreen(null);
+            } else {
+                armedAt = System.currentTimeMillis();
+            }
+        }
+
+        @Override
+        protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+            Theme.dangerButton(g, getX(), getY(), width, height, isHoveredOrFocused());
+            String label = I18n.get(armed() ? "hud.reignofnether.surrender_confirm" : "hud.reignofnether.surrender");
+            g.drawCenteredString(Minecraft.getInstance().font, label, getX() + width / 2, getY() + (height - 8) / 2, Theme.DANGER_TEXT);
+        }
+
+        @Override
+        protected void updateWidgetNarration(NarrationElementOutput out) {
+            defaultButtonNarrationText(out);
+        }
     }
 
     public static Screen settingsScreen(Screen parent) {
@@ -145,7 +235,7 @@ public final class SettingsMenu {
                     (layout.width() + w) / 2, top, layout.height() - margin, colW);
             Rect x = new Rect(panel.right() - 18, panel.y() + 6, 12, 12);
             Theme.secondaryButton(g, x.x(), x.y(), x.w(), x.h(), frame.hovered(x));
-            Theme.cross(g, x.x() + 3, x.y() + 3, 6, frame.hovered(x) ? Theme.GOLD : Theme.BODY);
+            Theme.cross(g, x, frame.hovered(x) ? Theme.GOLD : Theme.BODY);
             frame.register(new ButtonBuilder("close").onLeftClick(this::onClose).build(), x, null, null);
             frame.showHoveredTooltip();
             Tooltip.renderPending(g, layout.width(), layout.height());

@@ -74,6 +74,8 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import com.solegendary.reignofnether.chat.SpectatorFeed;
+import com.solegendary.reignofnether.hud.panels.SelectionPanel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -552,6 +554,12 @@ public class UnitClientEvents {
         }
     }
 
+    public static void syncVillagerExp(int entityId, int[] exp) {
+        for (LivingEntity entity : allUnits)
+            if (entity.getId() == entityId && entity instanceof VillagerUnit vUnit)
+                vUnit.syncExp(exp);
+    }
+
     public static void syncUnitResources(int entityId, Resources res) {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
@@ -657,6 +665,9 @@ public class UnitClientEvents {
      * Therefore, only remove entities if they leave serverside via UnitClientboundPacket.
      */
     public static void onEntityLeave(int entityId) {
+        for (LivingEntity e : allUnits)
+            if (e.getId() == entityId && e instanceof Unit u && e.isDeadOrDying())
+                SpectatorFeed.unitLost(u.getOwnerName(), SelectionPanel.displayName(e));
         selectedUnits.removeIf(e -> e.getId() == entityId);
         //System.out.println("selectedUnits removed entity: " + entityId);
         preselectedUnits.removeIf(e -> e.getId() == entityId);

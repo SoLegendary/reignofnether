@@ -105,10 +105,13 @@ public class ChatPanel extends Screen {
         Text.small(g, title, x + 8, y + 7, Theme.LABEL);
         Rect close = new Rect(x + W - 8 - 13, y + 4, 13, 13);
         int hintX = x + 8 + Text.smallWidth(title) + 6;
-        Text.small(g, Text.fitSmall(I18n.get("chat.reignofnether.panel.hints"), close.x() - 6 - hintX), hintX, y + 7, Theme.DIM);
+        int right = close.x() - 6;
+        String hints = I18n.get("chat.reignofnether.panel.hints");
+        if (Text.smallWidth(hints) <= right - hintX)
+            Text.tiny(g, hints, hintX, y + 7, Theme.DIM);
         boolean hovered = frame.hovered(close);
         Theme.secondaryButton(g, close.x(), close.y(), close.w(), close.h(), hovered);
-        Theme.cross(g, close.x() + 4, close.y() + 4, 5, hovered ? Theme.GOLD : Theme.BODY);
+        Theme.cross(g, close, hovered ? Theme.GOLD : Theme.BODY);
         frame.register(new ButtonBuilder("chat close").onLeftClick(this::onClose).build(), close, null, null);
     }
 

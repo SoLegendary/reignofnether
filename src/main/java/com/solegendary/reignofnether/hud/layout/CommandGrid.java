@@ -21,7 +21,7 @@ public final class CommandGrid {
     public static final int ROWS = 3;
     public static final int SLOTS = COLS * ROWS;
 
-    public static final int SLOT_Q = 0, SLOT_A = 5, SLOT_S = 6, SLOT_D = 7, SLOT_F = 8, SLOT_G = 9, SLOT_B = 14;
+    public static final int SLOT_Q = 0, SLOT_Z = 10, SLOT_A = 5, SLOT_S = 6, SLOT_D = 7, SLOT_F = 8, SLOT_G = 9, SLOT_B = 14;
     public static final int NO_PREFERENCE = -1;
 
     private static final int[] ABILITY_ORDER = { 0, 1, 2, 3, 4, 10, 11, 12, 13, 14, 5, 6, 7, 8, 9 };

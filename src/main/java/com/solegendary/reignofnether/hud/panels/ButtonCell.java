@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.hud.panels;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
+import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -104,9 +105,11 @@ public final class ButtonCell {
         if (b.isFlashing.get())
             g.fill(x, y, x + size, y + size, (int) (0x60 * MiscUtil.getOscillatingFloat(0, 1)) << 24 | 0xFFFFFF);
 
-        if (key != null && size >= 18)
+        boolean passive = b instanceof AbilityButton ab && ab.isPassive;
+        if (key != null && size >= 18 && !passive)
             Theme.keyCap(g, key, x + 1, y + 1, state == CellState.ACTIVE ? Theme.GOLD
                     : state == CellState.EMPTY ? Theme.FAINT : Theme.MUTED);
+        drawKind(g, b, x, y, size, passive, state);
 
         drawCostChip(g, b, x, y, size, state);
         drawCharges(g, b, x, y, size);
@@ -115,7 +118,7 @@ public final class ButtonCell {
         if (b.bottomLeftText != null) {
             String t = b.bottomLeftText.get();
             if (t != null && !t.isEmpty())
-                Text.smallShadowed(g, t, x + 2, y + size - 9, b.bottomLeftTextColor | 0xFF000000);
+                Text.tinyShadowed(g, t, x + 2, y + size - 9, b.bottomLeftTextColor | 0xFF000000);
         }
     }
 
@@ -171,12 +174,65 @@ public final class ButtonCell {
         if (icon == null)
             return;
         String text = compact(amount);
-        int w = Text.smallWidth(text) + 8;
+        int w = Text.tinyWidth(text) + 8;
         int cx = x + size - w - 1;
         int cy = y + size - 8;
         g.fill(cx, cy, x + size - 1, y + size - 1, 0xCC0B0A0F);
         MyRenderer.renderIcon(g, icon, cx + 1, cy + 1, 5);
-        Text.small(g, text, cx + 7, cy - 1, colour);
+        Text.tiny(g, text, cx + 7, cy - 1, colour);
+    }
+
+    /**
+     * What kind of button it is, at a glance: corner ticks for autocast (gold and pulsing while on),
+     * a dim flat ring for passives (no key: there is nothing to press), an up arrow for research.
+     */
+    /**
+     * Active abilities: a 1-unit orange frame, solid in the top-left corner and fading out towards the bottom
+     * right, in 2-unit steps so it stays sharp. While armed (picked and waiting for a target, or toggled on)
+     * the whole frame blinks gold.
+     */
+    private static void abilityFrame(GuiGraphics g, int x, int y, int size, boolean armed) {
+        if (armed) {
+            boolean on = (System.currentTimeMillis() / 400) % 2 == 0;
+            Theme.ring(g, x, y, size, size, 1, on ? Theme.GOLD : Theme.withAlpha(Theme.ORANGE, 0.35f));
+            return;
+        }
+        float span = size * 2 * 0.8f; // fully faded 80% of the way to the opposite corner
+        for (int i = 0; i < size; i += 2) {
+            int len = Math.min(2, size - i);
+            int top = Theme.withAlpha(Theme.ORANGE, Math.max(0, 1 - i / span));
+            int side = Theme.withAlpha(Theme.ORANGE, Math.max(0, 1 - (i + size) / span));
+            g.fill(x + i, y, x + i + len, y + 1, top);                   // top edge
+            g.fill(x, y + i, x + 1, y + i + len, top);                   // left edge
+            g.fill(x + i, y + size - 1, x + i + len, y + size, side);    // bottom edge
+            g.fill(x + size - 1, y + i, x + size, y + i + len, side);    // right edge
+        }
+    }
+
+    private static void drawKind(GuiGraphics g, Button b, int x, int y, int size, boolean passive, CellState state) {
+        if (b instanceof AbilityButton ab && ab.ability != null && !passive && state != CellState.LOCKED)
+            abilityFrame(g, x, y, size, state == CellState.ACTIVE);
+        if (b instanceof AbilityButton ab && ab.ability != null && ab.ability.autocastEnableAction != null) {
+            boolean on = ab.isAutocasting();
+            int c = on ? Theme.GOLD : Theme.MUTED;
+            if (on)
+                Theme.ring(g, x, y, size, size, 1, (int) (0x80 + 0x7F * MiscUtil.getOscillatingFloat(0, 1)) << 24 | (Theme.GOLD & 0xFFFFFF));
+            int t = 4, r = x + size - 1, btm = y + size - 1;
+            g.fill(x, y, x + t, y + 1, c); g.fill(x, y, x + 1, y + t, c);
+            g.fill(r - t + 1, y, r + 1, y + 1, c); g.fill(r, y, r + 1, y + t, c);
+            g.fill(x, btm, x + t, btm + 1, c); g.fill(x, btm - t + 1, x + 1, btm + 1, c);
+            g.fill(r - t + 1, btm, r + 1, btm + 1, c); g.fill(r, btm - t + 1, r + 1, btm + 1, c);
+        } else if (passive) {
+            Theme.ring(g, x + 1, y + 1, size - 2, size - 2, 1, Theme.FAINT);
+        }
+        if (b instanceof StartProductionButton sp && sp.production.getClass().getPackageName().contains(".research")) {
+            // a small up arrow in the top right corner
+            int ax = x + size - 7, ay = y + 2;
+            g.fill(ax + 2, ay, ax + 3, ay + 1, Theme.BUFF);
+            g.fill(ax + 1, ay + 1, ax + 4, ay + 2, Theme.BUFF);
+            g.fill(ax, ay + 2, ax + 5, ay + 3, Theme.BUFF);
+            g.fill(ax + 2, ay + 3, ax + 3, ay + 5, Theme.BUFF);
+        }
     }
 
     private static void drawCharges(GuiGraphics g, Button b, int x, int y, int size) {
@@ -187,7 +243,7 @@ public final class ButtonCell {
             return;
         int colour = charges >= ab.ability.maxCharges ? Theme.OK : charges <= 0 ? Theme.ERROR : charges == 1 ? Theme.YELLOW : Theme.TEXT;
         String s = String.valueOf(charges);
-        Text.smallShadowed(g, s, x + size - Text.smallWidth(s) - 2, y, colour);
+        Text.tinyShadowed(g, s, x + size - Text.tinyWidth(s) - 2, y, colour);
     }
 
     private static void drawRankPips(GuiGraphics g, Button b, int x, int y, int size) {

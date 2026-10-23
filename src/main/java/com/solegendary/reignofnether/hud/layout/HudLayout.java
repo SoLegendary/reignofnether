@@ -8,7 +8,8 @@ import com.solegendary.reignofnether.ui.Rect;
  *
  * <pre>
  *  [resources........]                              [clock][utility bar]
- *  [groups][queue]                                           [alert]
+ *  [groups]                                                  [alert]
+ *  [queue]
  *
  *                          [targeting hint]
  *                              [toast]
@@ -65,7 +66,9 @@ public record HudLayout(
 
         Rect card = new Rect(MARGIN + CONSOLE_PAD, innerTop, cardWidth(), innerH);
 
-        Rect map = new Rect(width - MARGIN - MAP, height - MAP_PAD - MAP, MAP, MAP);
+        // the diamond's bottom tip can sit near the edge; a square gets the card's padding all round
+        int mapPad = squareMap() ? CONSOLE_PAD : MAP_PAD;
+        Rect map = new Rect(width - MARGIN - MAP, height - mapPad - MAP, MAP, MAP);
 
         int toolsW = TOOL_COLS * TOOL + (TOOL_COLS - 1) * TOOL_GAP;
         int toolsH = TOOL_ROWS * TOOL + (TOOL_ROWS - 1) * TOOL_GAP;
@@ -97,5 +100,14 @@ public record HudLayout(
 
     public int toolY(int index) {
         return tools.y() + (index / TOOL_COLS) * (TOOL + TOOL_GAP);
+    }
+
+    // read from the config, not MinimapClientEvents, whose textures can't load outside the game (tests)
+    private static boolean squareMap() {
+        try {
+            return com.solegendary.reignofnether.config.ReignOfNetherClientConfigs.SQUARE_MINIMAP.get();
+        } catch (IllegalStateException notLoaded) {
+            return false;
+        }
     }
 }

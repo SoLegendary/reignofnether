@@ -123,11 +123,8 @@ public final class HudFrame {
         if (p == null)
             return;
         Button b = p.button();
-        if (b instanceof AbstractUnitItemButton || p.tooltip() == null) {
-            b.renderTooltip(g, mouseX, mouseY);
-            return;
-        }
-        Tooltip t = p.tooltip().get();
+        // items, effects and buttons without their own HUD tooltip restyle their legacy one
+        Tooltip t = b instanceof AbstractUnitItemButton || p.tooltip() == null ? b.hudTooltip() : p.tooltip().get();
         if (t != null)
             t.show(p.rect().x(), p.rect().y(), p.rect().w(), p.rect().h());
     }

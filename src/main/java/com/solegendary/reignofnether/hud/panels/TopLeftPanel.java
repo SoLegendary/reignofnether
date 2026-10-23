@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-/** Top-left of the HUD: resource bar, then control groups and the global production queue below it. */
+/** Top-left of the HUD: resource bar, then control groups and the global production queue on one row below it. */
 public final class TopLeftPanel {
 
     private TopLeftPanel() { }
@@ -54,7 +54,7 @@ public final class TopLeftPanel {
     private static final int CELL_MIN_W = 58;
     private static final int TILE = 28;
     private static final int TILE_GAP = 5;
-    private static final float VALUE = Text.px(22);
+    private static final float VALUE = Text.px(30); // 3x, over the 2x body text
     private static final ResourceLocation WORKER_ICON =
             ResourceLocation.fromNamespaceAndPath(com.solegendary.reignofnether.ReignOfNether.MOD_ID, "textures/mobheads/villager.png");
 
@@ -77,7 +77,7 @@ public final class TopLeftPanel {
 
         int rowY = y;
         if (resources != null) {
-            Rect bar = renderResources(f, x, y, viewed, resources, viewed.equals(self));
+            Rect bar = renderResources(f, x, y, viewed, resources);
             rowY = bar.bottom() + HudLayout.GAP;
         }
         renderGroupsAndQueue(f, x, rowY, viewed);
@@ -121,16 +121,25 @@ public final class TopLeftPanel {
     private record Cell(ResourceLocation icon, String value, String sub, int subColour, @Nullable String workers,
                         boolean alarm, Supplier<Tooltip> tooltip) { }
 
-    private static Rect renderResources(HudFrame f, int x, int y, String owner, Resources res, boolean isSelf) {
+    static Rect renderResources(HudFrame f, int x, int y, String owner, Resources res) {
+        return renderResources(f, x, y, owner, res, true, VALUE, null);
+    }
+
+    /** Each cell's width in an owner's resource bar with values at the given scale, to lay it out before drawing. */
+    static int[] resourceWidths(String owner, Resources res, float valueScale) {
+        return widths(cells(owner, res), valueScale);
+    }
+
+    private static List<Cell> cells(String owner, Resources res) {
         List<Cell> cells = new ArrayList<>();
         RTSPlayer rtsPlayer = PlayerClientEvents.getPlayer(owner);
         int[] workers = countWorkers(owner);
-        cells.add(resourceCell(ResourceName.FOOD, ButtonCell.ICON_FOOD, res.food, workers[0], isSelf));
-        cells.add(resourceCell(ResourceName.WOOD, ButtonCell.ICON_WOOD, res.wood, workers[1], isSelf));
-        cells.add(resourceCell(ResourceName.ORE, ButtonCell.ICON_ORE, res.ore, workers[2], isSelf));
+        cells.add(resourceCell(owner, ResourceName.FOOD, ButtonCell.ICON_FOOD, res.food, workers[0]));
+        cells.add(resourceCell(owner, ResourceName.WOOD, ButtonCell.ICON_WOOD, res.wood, workers[1]));
+        cells.add(resourceCell(owner, ResourceName.ORE, ButtonCell.ICON_ORE, res.ore, workers[2]));
         if (ItemClientEvents.ENABLED) {
             int found = rtsPlayer != null ? rtsPlayer.itemsDropped : 0;
-            cells.add(new Cell(ButtonCell.ICON_EMERALD, String.valueOf(res.emerald),
+            cells.add(new Cell(ButtonCell.ICON_EMERALD, String.format(java.util.Locale.US, "%,d", res.emerald),
                     I18n.get("hud.reignofnether.items_found_short", found), Theme.MUTED, null, false, () -> {
                 Tooltip t = Tooltip.of(I18n.get("resources.reignofnether.emerald")).tag(I18n.get("hud.reignofnether.tag.resource"), Theme.EMERALD);
                 if (GameruleClient.randomItemDrops != RandomItemDropRule.DISABLED)
@@ -139,17 +148,34 @@ public final class TopLeftPanel {
             }));
         }
         cells.add(populationCell(owner, workers[3]));
+        return cells;
+    }
 
+    private static int[] widths(List<Cell> cells, float valueScale) {
         int[] widths = new int[cells.size()];
-        int total = 0;
         for (int i = 0; i < cells.size(); i++) {
             Cell c = cells.get(i);
-            int textW = Math.max(Text.bigWidth(c.value, VALUE), Text.smallWidth(c.sub) + (c.workers != null ? Text.smallWidth(c.workers) + 14 : 0));
+            int textW = Math.max(Text.bigWidth(c.value, valueScale), Text.smallWidth(c.sub) + (c.workers != null ? Text.smallWidth(c.workers) + 14 : 0));
             widths[i] = Math.max(CELL_MIN_W, 7 + 15 + 6 + textW + 8);
-            total += widths[i];
         }
+        return widths;
+    }
+
+    /**
+     * @param framed     false inside another panel (the spectator scoreboard): the cells without their own card
+     * @param valueScale size of the values: big on the player's own bar, medium on the scoreboard
+     * @param colWidths  cell widths to use, so several bars line up in columns; null to fit this bar's values
+     */
+    static Rect renderResources(HudFrame f, int x, int y, String owner, Resources res, boolean framed,
+                                float valueScale, @Nullable int[] colWidths) {
+        List<Cell> cells = cells(owner, res);
+        int[] widths = colWidths != null && colWidths.length == cells.size() ? colWidths : widths(cells, valueScale);
+        int total = 0;
+        for (int w : widths)
+            total += w;
         Rect bar = new Rect(x, y, total, CELL_H);
-        Theme.panel(f.g, x, y, total, CELL_H);
+        if (framed)
+            Theme.panel(f.g, x, y, total, CELL_H);
         f.zone(bar);
 
         int cx = x;
@@ -163,12 +189,13 @@ public final class TopLeftPanel {
                 f.g.fill(cx, y, cx + w, y + CELL_H, Theme.HOVER);
             MyRenderer.renderIcon(f.g, c.icon, cx + 7, y + 8, 15);
             int tx = cx + 7 + 15 + 6;
-            Text.big(f.g, c.value, tx, y + 6, c.alarm ? Theme.ERROR : Theme.TEXT, VALUE);
-            Text.small(f.g, c.sub, tx, y + 17, c.alarm ? Theme.ERROR : c.subColour);
+            // the value's top, so a big or a medium value both end just above the sub-line
+            Text.big(f.g, c.value, tx, y + 16 - Text.bigHeight(valueScale), c.alarm ? Theme.ERROR : Theme.TEXT, valueScale);
+            Text.small(f.g, c.sub, tx, y + 19, c.alarm ? Theme.ERROR : c.subColour);
             if (c.workers != null) {
                 int wx = tx + Text.smallWidth(c.sub) + 5;
-                MyRenderer.renderIcon(f.g, workerIcon(owner), wx, y + 19, 6);
-                Text.small(f.g, c.workers, wx + 8, y + 17, Theme.MUTED);
+                MyRenderer.renderIcon(f.g, workerIcon(owner), wx, y + 21, 6);
+                Text.small(f.g, c.workers, wx + 8, y + 19, Theme.MUTED);
             }
             if (i < cells.size() - 1)
                 Theme.divider(f.g, cx + w - 1, y + 1, 1, CELL_H - 2);
@@ -184,16 +211,15 @@ public final class TopLeftPanel {
         return player != null && player.faction != null ? player.faction.idleWorkerIcon : WORKER_ICON;
     }
 
-    private static Cell resourceCell(ResourceName name, ResourceLocation icon, int value, int workers, boolean isSelf) {
+    // every player's drop-offs reach every client, so the income shows for anyone whose bar is visible
+    private static Cell resourceCell(String owner, ResourceName name, ResourceLocation icon, int value, int workers) {
         String lower = name.name().toLowerCase();
-        int rate = isSelf ? IncomeTracker.perMinute(name) : -1;
+        int rate = IncomeTracker.perMinute(owner, name);
         String sub = rate >= 0 ? I18n.get("hud.reignofnether.per_minute", rate) : "";
-        return new Cell(icon, String.valueOf(value), sub, Theme.MUTED, String.valueOf(workers), false, () -> {
+        return new Cell(icon, String.format(java.util.Locale.US, "%,d", value), sub, Theme.MUTED, String.valueOf(workers), false, () -> {
             Tooltip t = Tooltip.of(I18n.get("resources.reignofnether." + lower))
                     .tag(I18n.get("hud.reignofnether.tag.resource"), Theme.ORANGE)
-                    .status(I18n.get("hud.reignofnether.workers_on_" + lower) + ": " + workers, Theme.MUTED);
-            if (rate >= 0)
-                t.status(I18n.get("hud.reignofnether.income_per_minute", rate), Theme.MUTED);
+                    .body(I18n.get("hud.reignofnether.resource_desc." + lower));
             return t;
         });
     }
@@ -208,8 +234,7 @@ public final class TopLeftPanel {
                 String.valueOf(workers), full, () -> {
             Tooltip t = Tooltip.of(I18n.get("resources.reignofnether.population"))
                     .tag(I18n.get("hud.reignofnether.tag.resource"), Theme.ORANGE)
-                    .status(I18n.get("hud.reignofnether.total_workers", workers), Theme.MUTED)
-                    .status(I18n.get("hud.reignofnether.max_population", max), Theme.MUTED);
+                    .body(I18n.get("hud.reignofnether.resource_desc.population"));
             if (full)
                 t.status(I18n.get("hud.reignofnether.housing_full_hint"), Theme.ERROR);
             return t;
@@ -220,7 +245,7 @@ public final class TopLeftPanel {
      * One pass over the owner's workers: {food, wood, ore, total}. A worker counts towards a resource when
      * gathering or carrying it (unless idle); hunters count towards food.
      */
-    private static int[] countWorkers(String owner) {
+    static int[] countWorkers(String owner) {
         int[] counts = new int[4];
         for (LivingEntity le : UnitClientEvents.getAllUnits()) {
             if (!(le instanceof Unit u) || !(le instanceof WorkerUnit wu) || !u.getOwnerName().equals(owner))
@@ -244,7 +269,7 @@ public final class TopLeftPanel {
         return counts;
     }
 
-    // ------------------------------------------------------------------ control groups + queue
+    // ------------------------------------------------------------------ control groups, then the queue below
 
     private static void renderGroupsAndQueue(HudFrame f, int x, int y, @Nullable String owner) {
         int cx = x;
@@ -262,17 +287,32 @@ public final class TopLeftPanel {
         if (queue.isEmpty())
             return;
 
-        if (cx > x) {
-            Theme.divider(f.g, cx, y + 2, 1, TILE - 4);
-            cx += TILE_GAP + 1;
+        // the queue continues the groups' row, after a divider and a vertical label, like the design; when it
+        // doesn't fit before the middle of the screen it takes its own row(s) under the groups instead
+        int limit = f.layout.width() / 2;
+        int step = TILE + TILE_GAP;
+        int labelW = 7 + TILE_GAP;
+        int divider = cx > x ? 1 + TILE_GAP : 0;
+        if (cx > x && cx + divider + labelW + queue.size() * step - TILE_GAP > limit) {
+            cx = x;
+            y += step;
+            divider = 0;
         }
-        Text.smallShadowed(f.g, I18n.get("hud.reignofnether.queue"), cx, y + (TILE - 8) / 2, Theme.GOLD);
-        cx += Text.smallWidth(I18n.get("hud.reignofnether.queue")) + TILE_GAP;
+        if (divider > 0) {
+            Theme.divider(f.g, cx, y, 1, TILE);
+            cx += divider;
+        }
+        String label = I18n.get("hud.reignofnether.queue");
+        f.g.pose().pushPose();
+        f.g.pose().translate(cx, y + (TILE + Text.smallWidth(label)) / 2f, 0);
+        f.g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-90));
+        Text.smallShadowed(f.g, label, 0, -1, Theme.GOLD);
+        f.g.pose().popPose();
+        int qx = cx + labelW;
+        int perRow = Math.max(1, (limit - qx + TILE_GAP) / step);
         boolean own = owner.equals(selfName());
-        for (GlobalProductionQueue.Group group : queue) {
-            renderQueueTile(f, group, cx, y, own);
-            cx += TILE + TILE_GAP;
-        }
+        for (int i = 0; i < queue.size(); i++)
+            renderQueueTile(f, queue.get(i), qx + (i % perRow) * step, y + (i / perRow) * step, own);
     }
 
     private static boolean canSeeQueue(String owner) {
@@ -294,7 +334,7 @@ public final class TopLeftPanel {
         String label = group.getKeybinding() != null ? group.getKeybinding().buttonLabel : "";
         Theme.keyCap(f.g, label, x + 1, y + 1, selected ? Theme.GOLD : Theme.MUTED);
         String n = String.valueOf(count);
-        Text.smallShadowed(f.g, n, x + TILE - Text.smallWidth(n) - 2, y + TILE - 13, Theme.TEXT);
+        Text.tinyShadowed(f.g, n, x + TILE - Text.tinyWidth(n) - 2, y + TILE - 13, Theme.TEXT);
         Theme.bar(f.g, x + 3, y + TILE - 4, TILE - 6, 2, hp, Theme.hpColor(hp));
 
         f.register(b, r, group.getKeybinding(), () -> Tooltip.of(I18n.get("hud.control_group.reignofnether.title", label))
@@ -359,11 +399,11 @@ public final class TopLeftPanel {
             MyRenderer.renderIcon(f.g, cancel.iconResource, x + 7, y + 3, 14);
         if (group.count > 1) {
             String n = "×" + group.count;
-            Text.smallShadowed(f.g, n, x + TILE - Text.smallWidth(n) - 1, y - 1, Theme.TEXT);
+            Text.tinyShadowed(f.g, n, x + TILE - Text.tinyWidth(n) - 1, y - 1, Theme.TEXT);
         }
         boolean blocked = group.isPopBlocked();
         String time = blocked ? I18n.get("hud.reignofnether.pop_short") : group.inProgress ? formatTime(group.secondsLeft()) : "";
-        Text.smallShadowed(f.g, time, x + (TILE - Text.smallWidth(time)) / 2, y + TILE - 12, blocked ? Theme.ERROR : Theme.BODY);
+        Text.tinyShadowed(f.g, time, x + (TILE - Text.tinyWidth(time)) / 2, y + TILE - 12, blocked ? Theme.ERROR : Theme.BODY);
         Theme.bar(f.g, x + 3, y + TILE - 3, TILE - 6, 2, group.progress(), blocked ? Theme.ERROR : Theme.ORANGE);
 
         Runnable cancelOne = cancel.onLeftClick;

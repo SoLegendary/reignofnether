@@ -103,7 +103,7 @@ public final class Tooltip {
             c.append(Component.literal(Character.toString(codePoint)).withStyle(style));
             return true;
         });
-        return Theme.font().split(c, maxW);
+        return Text.wrap(c, maxW);
     }
 
     /**
@@ -131,13 +131,13 @@ public final class Tooltip {
         for (FooterEntry e : footer)
             fw += Text.width(e.text) + (e.icon != null ? 10 : 0) + 6;
         if (key != null)
-            fw += Text.smallWidth(key) + 8;
+            fw += Text.tinyWidth(key) + 8;
         cw = Math.min(maxW, Math.max(cw, fw));
 
         int titleH = Text.bigHeight(TITLE_SCALE) + 2;
         int h = PAD + titleH;
         if (!lines.isEmpty())
-            h += 2 + lines.size() * 10;
+            h += 2 + lines.size() * Text.lineHeight();
         if (!statusLines.isEmpty())
             h += 3 + statusLines.size() * 8;
         h += PAD - 2;
@@ -163,7 +163,7 @@ public final class Tooltip {
             cy += 2;
             for (FormattedCharSequence line : lines) {
                 Text.draw(g, line, x + PAD, cy, Theme.DESC);
-                cy += 10;
+                cy += Text.lineHeight();
             }
         }
         if (!statusLines.isEmpty()) {
@@ -187,11 +187,11 @@ public final class Tooltip {
                 fx += Text.width(e.text) + 6;
             }
             if (key != null) {
-                int kw = Text.smallWidth(key) + 5;
+                int kw = Text.tinyWidth(key) + 5;
                 int kx = x + w - PAD - kw;
                 g.fill(kx, fy + 3, kx + kw, fy + 12, Theme.INK);
                 Theme.ring(g, kx, fy + 3, kw, 9, 1, Theme.FAINT);
-                Text.small(g, key, kx + 3, fy + 3, Theme.GOLD);
+                Text.tiny(g, key, kx + 3, fy + 3, Theme.GOLD);
             }
         }
         g.pose().popPose();

@@ -292,6 +292,12 @@ public class Button {
         }
     }
 
+    /** The HUD's tooltip for this button: its legacy lines restyled, or null when it has none. */
+    @Nullable
+    public com.solegendary.reignofnether.ui.Tooltip hudTooltip() {
+        return tooltipLines == null || tooltipLines.isEmpty() ? null : com.solegendary.reignofnether.ui.Tooltip.fromLines(tooltipLines);
+    }
+
     public void renderTooltip(GuiGraphics guiGraphics, int mouseX, int mouseY) {
         MyRenderer.renderTooltip(guiGraphics, tooltipLines, mouseX, mouseY + tooltipOffsetY);
     }

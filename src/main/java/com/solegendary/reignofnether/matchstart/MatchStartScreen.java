@@ -140,6 +140,18 @@ public class MatchStartScreen extends Screen {
         return player != null ? player.getName().getString() : "";
     }
 
+    /**
+     * The enemy on a hidden seat when it can only be them: one hidden enemy and one hidden seat. Their faction
+     * stays hidden; only the seat is no secret.
+     */
+    @Nullable
+    private static String deduced(StartPos sp) {
+        if (!sp.hidden || StartPosClientEvents.hiddenPlayers.size() != 1
+                || StartPosClientEvents.startPoses.stream().filter(p -> p.hidden).count() != 1)
+            return null;
+        return StartPosClientEvents.hiddenPlayers.keySet().iterator().next();
+    }
+
     /** Taken by someone, including an enemy whose pick is hidden from us. */
     private static boolean taken(StartPos sp) {
         return !sp.playerName.isBlank() || sp.hidden;
@@ -241,7 +253,7 @@ public class MatchStartScreen extends Screen {
         var g = frame.g;
         String mode = RTSMapInfoClientEvents.selectedMode;
         String kicker = I18n.get("matchstart.reignofnether.header", mode.isBlank() ? "" : " · " + mode.toUpperCase(Locale.ROOT));
-        Text.small(g, kicker, M, M - 2, Theme.ORANGE);
+        Text.medium(g, kicker, M, M - 2, Theme.ORANGE);
 
         String map = RTSMapInfoClientEvents.mapName.isBlank() ? I18n.get("matchstart.reignofnether.unnamed_map") : RTSMapInfoClientEvents.mapName;
         float titleScale = Text.px(48);
@@ -296,7 +308,7 @@ public class MatchStartScreen extends Screen {
     private void renderMap(Rect p) {
         var g = frame.g;
         Theme.panel(g, p.x(), p.y(), p.w(), p.h(), PANEL_FILL);
-        Text.small(g, I18n.get("matchstart.reignofnether.map_hint"), p.x() + 11, p.y() + 9, Theme.LABEL);
+        Text.tiny(g, I18n.get("matchstart.reignofnether.map_hint"), p.x() + 11, p.y() + 9, Theme.LABEL);
         renderModeChips(p.right() - 11, p.y() + 6);
 
         int top = p.y() + 24;
@@ -367,6 +379,8 @@ public class MatchStartScreen extends Screen {
         int inner = size * 2 / 3;
         if (!sp.enabled)
             Icon.LOCK.drawIn(g, x, y, size, size, Theme.TEXT);
+        else if (sp.hidden && deduced(sp) != null)
+            MyRenderer.renderPlayerHead(g, deduced(sp), x + (size - inner) / 2, y + (size - inner) / 2, inner, RANDOM_ICON);
         else if (sp.hidden)
             MyRenderer.renderIcon(g, RANDOM_ICON, x + (size - inner) / 2, y + (size - inner) / 2, inner);
         else if (sp.playerName.isBlank())
@@ -379,7 +393,7 @@ public class MatchStartScreen extends Screen {
         }
 
         String label = !sp.enabled ? I18n.get("matchstart.reignofnether.seat.closed")
-                : sp.hidden ? I18n.get("matchstart.reignofnether.pick_hidden")
+                : sp.hidden ? (deduced(sp) != null ? deduced(sp).toUpperCase(Locale.ROOT) : I18n.get("matchstart.reignofnether.pick_hidden"))
                 : sp.playerName.isBlank() ? I18n.get("matchstart.reignofnether.seat.open")
                 : mine ? I18n.get("matchstart.reignofnether.seat.you") : sp.playerName.toUpperCase(Locale.ROOT);
         int lw = Text.smallWidth(label) + 8;
@@ -395,7 +409,7 @@ public class MatchStartScreen extends Screen {
     }
 
     private Tooltip seatTooltip(StartPos sp) {
-        Tooltip t = Tooltip.of(sp.hidden ? I18n.get("matchstart.reignofnether.pick_hidden")
+        Tooltip t = Tooltip.of(sp.hidden ? (deduced(sp) != null ? deduced(sp) : I18n.get("matchstart.reignofnether.pick_hidden"))
                 : sp.playerName.isBlank() ? I18n.get(sp.enabled ? "matchstart.reignofnether.seat.open_title"
                 : "matchstart.reignofnether.seat.closed_title") : sp.playerName);
         if (sp.enabled && !taken(sp))
@@ -476,7 +490,8 @@ public class MatchStartScreen extends Screen {
             }
             y += 4;
         }
-        if (!StartPosClientEvents.hiddenPlayers.isEmpty()) {
+        boolean onSeat = StartPosClientEvents.startPoses.stream().anyMatch(seat -> deduced(seat) != null);
+        if (!StartPosClientEvents.hiddenPlayers.isEmpty() && !onSeat) {
             y = teamHeader(x, y, Theme.DIM, I18n.get("matchstart.reignofnether.other_teams"), I18n.get("matchstart.reignofnether.picks_hidden"));
             for (Map.Entry<String, Boolean> e : StartPosClientEvents.hiddenPlayers.entrySet()) {
                 renderHiddenRow(e.getKey(), e.getValue(), x, y, w);
@@ -505,8 +520,10 @@ public class MatchStartScreen extends Screen {
             renderBlocker(new Rect(p.x() + 1, p.bottom() - blockerH - 1, p.w() - 2, blockerH), empty.size());
     }
 
-    /** Fog of war and alliance lock as quick toggles for the host, right-aligned at `right`. */
+    /** Fog of war and alliance lock as quick toggles, right-aligned at `right`. Host only; players see them in the rules panel. */
     private void renderRuleToggles(int right, int y) {
+        if (!StartPosClientEvents.isHost())
+            return;
         int x = ruleToggle(right, y, "fog_of_war", FogOfWarClientEvents.isMatchFogOn(), GameruleServerboundPacket::setFogOfWar);
         ruleToggle(x - 4, y, "lock_alliances", GameruleClient.lockAlliances, GameruleServerboundPacket::setLockAlliances);
     }
@@ -563,6 +580,8 @@ public class MatchStartScreen extends Screen {
 
         if (!sp.enabled)
             Icon.LOCK.drawIn(g, hx, hy, HEAD, HEAD, Theme.DIM);
+        else if (sp.hidden && deduced(sp) != null)
+            MyRenderer.renderPlayerHead(g, deduced(sp), hx + 2, hy + 2, HEAD - 4, RANDOM_ICON);
         else if (sp.hidden)
             MyRenderer.renderIcon(g, RANDOM_ICON, hx + 2, hy + 2, HEAD - 4);
         else if (empty)
@@ -573,10 +592,12 @@ public class MatchStartScreen extends Screen {
         // right side first, so the name gets what's left: status column, then actions
         int right = x + w - ROW_PAD;
         // a hidden enemy's ready state is in the other teams list, not on their seat
-        String status = !sp.enabled || sp.hidden ? "" : empty ? I18n.get("matchstart.reignofnether.status.waiting")
-                : sp.ready ? I18n.get("matchstart.reignofnether.status.ready") : I18n.get("matchstart.reignofnether.status.not_ready");
+        String known = deduced(sp);
+        boolean ready = known != null ? StartPosClientEvents.hiddenPlayers.getOrDefault(known, false) : sp.ready;
+        String status = !sp.enabled || (sp.hidden && known == null) ? "" : empty ? I18n.get("matchstart.reignofnether.status.waiting")
+                : ready ? I18n.get("matchstart.reignofnether.status.ready") : I18n.get("matchstart.reignofnether.status.not_ready");
         if (!mine) {
-            Text.smallRight(g, status, right, y + (ROW_H - 8) / 2, sp.ready ? Theme.OK : empty ? Theme.ORANGE : Theme.LABEL);
+            Text.mediumRight(g, status, right, y + (ROW_H - 8) / 2, ready ? Theme.OK : empty ? Theme.ORANGE : Theme.LABEL);
             right -= 52 + 8;
         }
         if (visible)
@@ -589,6 +610,13 @@ public class MatchStartScreen extends Screen {
             int fx = right - pickerWidth(size, labels);
             renderFactionPicker(sp, fx, y + (ROW_H - size) / 2, size, visible, labels);
             right = fx - 8;
+        } else if (known != null) {
+            String fLabel = I18n.get("matchstart.reignofnether.faction_hidden");
+            int fx = right - Text.smallWidth(fLabel);
+            if (fx > nx + 50) {
+                Text.small(g, fLabel, fx, y + (ROW_H - 8) / 2, Theme.DIM);
+                right = fx - 8;
+            }
         } else if (!empty && !sp.hidden) {
             boolean picked = sp.faction != Factions.NONE;
             String fLabel = picked ? MiscUtil.getFactionName(sp.faction) : I18n.get("matchstart.reignofnether.choosing");
@@ -603,10 +631,10 @@ public class MatchStartScreen extends Screen {
         }
 
         String name = !sp.enabled ? I18n.get("matchstart.reignofnether.seat.closed_title")
-                : sp.hidden ? I18n.get("matchstart.reignofnether.pick_hidden")
+                : sp.hidden ? (known != null ? known : I18n.get("matchstart.reignofnether.pick_hidden"))
                 : empty ? I18n.get("matchstart.reignofnether.seat.open_title")
                 : mine ? I18n.get("matchstart.reignofnether.you_name", sp.playerName) : sp.playerName;
-        Text.draw(g, Text.fit(name, Math.max(10, Math.min(90, right - nx))), nx, y + 8, mine ? Theme.GOLD : empty || sp.hidden || !sp.enabled ? Theme.LABEL : Theme.TEXT);
+        Text.draw(g, Text.fit(name, Math.max(10, Math.min(90, right - nx))), nx, y + 8, mine ? Theme.GOLD : empty || (sp.hidden && known == null) || !sp.enabled ? Theme.LABEL : Theme.TEXT);
         String seat = I18n.get("matchstart.reignofnether.seat_number", StartPosClientEvents.startPoses.indexOf(sp) + 1);
         Text.small(g, seat, nx, y + 19, Theme.DIM);
         if (!sp.enabled)
@@ -723,9 +751,9 @@ public class MatchStartScreen extends Screen {
         MyRenderer.renderPlayerHead(g, name, x + 9, y + 5, hs - 2, RANDOM_ICON);
         Text.draw(g, Text.fit(name, w / 2), x + 8 + hs + 7, y + (ROW_H - 8) / 2, Theme.TEXT);
         String status = I18n.get(ready ? "matchstart.reignofnether.status.ready" : "matchstart.reignofnether.status.not_ready");
-        Text.smallRight(g, status, x + w - 6, y + (ROW_H - 8) / 2, ready ? Theme.OK : Theme.LABEL);
-        String hidden = I18n.get("matchstart.reignofnether.pick_hidden");
-        Text.smallRight(g, hidden, x + w - 14 - Text.smallWidth(status), y + (ROW_H - 8) / 2, Theme.DIM);
+        Text.mediumRight(g, status, x + w - 6, y + (ROW_H - 8) / 2, ready ? Theme.OK : Theme.LABEL);
+        String hidden = I18n.get("matchstart.reignofnether.faction_hidden");
+        Text.smallRight(g, hidden, x + w - 14 - Text.mediumWidth(status), y + (ROW_H - 8) / 2, Theme.DIM);
     }
 
     private int renderSpectators(int x, int y, int w, boolean seated, int clipTop, int clipBottom) {
@@ -857,13 +885,14 @@ public class MatchStartScreen extends Screen {
         int pad = 11;
         int btnH = 26;
         int btnY = p.bottom() - pad - btnH - 3;
-        List<FormattedCharSequence> descLines = this.font.split(Component.literal(desc), p.w() - pad * 2);
-        int maxLines = Math.max(0, (btnY - 6 - (p.y() + pad + 30)) / 10);
-        int y = btnY - 6 - Math.min(maxLines, descLines.size()) * 10;
+        List<FormattedCharSequence> descLines = Text.wrap(desc, p.w() - pad * 2);
+        int lh = Text.lineHeight();
+        int maxLines = Math.max(0, (btnY - 6 - (p.y() + pad + 30)) / lh);
+        int y = btnY - 6 - Math.min(maxLines, descLines.size()) * lh;
         for (int i = 0; i < Math.min(maxLines, descLines.size()); i++)
-            Text.draw(g, descLines.get(i), p.x() + pad, y + i * 10, Theme.DESC);
+            Text.draw(g, descLines.get(i), p.x() + pad, y + i * lh, Theme.DESC);
         Text.heading(g, title.toUpperCase(Locale.ROOT), p.x() + pad, y - 19, Theme.TEXT, Text.px(32));
-        Text.small(g, kicker, p.x() + pad, y - 30, Theme.ORANGE);
+        Text.medium(g, kicker, p.x() + pad, y - 30, Theme.ORANGE);
 
         boolean canReady = picked && !(StartPosClientEvents.isStarting && !ready);
         String label = mine == null ? I18n.get("matchstart.reignofnether.ready.take_seat")
@@ -873,7 +902,18 @@ public class MatchStartScreen extends Screen {
         boolean hover = canReady && frame.hovered(btn);
         Theme.readyButton(g, btn.x(), btn.y(), btn.w(), btn.h(),
                 ready ? Theme.ReadyState.READY : canReady ? Theme.ReadyState.CAN_READY : Theme.ReadyState.DISABLED, hover);
-        Text.drawCentered(g, label, btn.centerX(), btn.y() + (btnH - 8) / 2,
+        // ready: a check and READY, turning into UNREADY on hover
+        if (ready && hover)
+            label = I18n.get("matchstart.reignofnether.ready.unready_short");
+        else if (ready)
+            label = I18n.get("matchstart.reignofnether.ready.ready");
+        int lw = Text.mediumWidth(label) + (ready && !hover ? 12 + 6 : 0);
+        int lx = btn.centerX() - lw / 2;
+        if (ready && !hover) {
+            Icon.CHECK.draw(g, lx, btn.y() + (btnH - 12) / 2, 12, Theme.OK_TEXT);
+            lx += 12 + 6;
+        }
+        Text.medium(g, label, lx, btn.y() + (btnH - 9) / 2,
                 ready ? Theme.OK_TEXT : canReady ? Theme.ON_ORANGE : Theme.DIM);
         frame.register(new ButtonBuilder("ready").isEnabled(() -> canReady).onLeftClick(() -> toggleReady(mine)).build(), btn, null, null);
         frame.zone(p);
@@ -892,13 +932,13 @@ public class MatchStartScreen extends Screen {
         float titleScale = Text.px(34);
         int titleW = Text.headingWidth(title, titleScale);
         int bw = canCancel ? Text.smallWidth(unready) + 14 : 0;
-        int pw = 12 + Text.smallWidth(label) + 12 + titleW + 12 + bw + (canCancel ? 12 : 0);
+        int pw = 12 + Text.mediumWidth(label) + 12 + titleW + 12 + bw + (canCancel ? 12 : 0);
         int ph = 34;
         int x = (w - pw) / 2;
         int y = M + 4;
         Theme.bevel(g, x, y, pw, ph, 0xFF24232C, Theme.OK, 0, 2, Theme.INK);
-        Text.small(g, label, x + 12, y + 12, Theme.OK);
-        Text.heading(g, title, x + 24 + Text.smallWidth(label), y + 11, Theme.TEXT, titleScale);
+        Text.medium(g, label, x + 12, y + 12, Theme.OK);
+        Text.heading(g, title, x + 24 + Text.mediumWidth(label), y + 11, Theme.TEXT, titleScale);
         if (canCancel)
             rowButton(unready, x + pw - 12, y + 8, 18, false, () -> toggleReady(mine));
         frame.zone(x, y, pw, ph);

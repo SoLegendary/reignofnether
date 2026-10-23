@@ -53,10 +53,10 @@ public final class TopRightPanel {
     private static final int GAP = 3;
     private static final int PAD = 3;
 
-    private static final ResourceLocation MOON = rl("textures/hud/moon.png");
-    private static final ResourceLocation BLOOD_MOON = rl("textures/hud/blood_moon.png");
+    static final ResourceLocation MOON = rl("textures/hud/moon.png");
+    static final ResourceLocation BLOOD_MOON = rl("textures/hud/blood_moon.png");
     private static final ResourceLocation WARNING = rl("textures/hud/warning.png");
-    private static final ItemStack CLOCK = new ItemStack(Items.CLOCK);
+    static final ItemStack CLOCK = new ItemStack(Items.CLOCK);
 
     private static ResourceLocation rl(String path) {
         return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, path);
@@ -69,7 +69,8 @@ public final class TopRightPanel {
         List<Button> main = new ArrayList<>();
         addIfShown(main, HelperButtons.idleWorkerButton);
         addIfShown(main, HelperButtons.armyButton);
-        addIfShown(main, PlayerDisplayClientEvents.observerButton);
+        if (!SpectatorHud.isActive()) // the scoreboard already shows every player
+            addIfShown(main, PlayerDisplayClientEvents.observerButton);
         addIfShown(main, PlayerDisplayClientEvents.diplomacyButton);
         addIfShown(main, TutorialClientEvents.helpButton);
 
@@ -83,7 +84,8 @@ public final class TopRightPanel {
         int barLeft = bar.isEmpty() ? right : bar.x();
         int below = bar.isEmpty() ? top : bar.bottom() + HudLayout.GAP;
 
-        if (TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK))
+        // spectators have the clock in their scoreboard
+        if (TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) && !SpectatorHud.isActive())
             renderClock(f, barLeft - (bar.isEmpty() ? 0 : HudLayout.GAP), top);
 
         Rect contextBar = renderBar(f, context, right, below);
@@ -114,10 +116,12 @@ public final class TopRightPanel {
             Rect cell = new Rect(bx, top + PAD, BTN, BTN);
             ButtonCell.render(f.g, b, bx, top + PAD, BTN, null, f.hovered(cell));
             f.register(b, cell, b.hotkey, () -> ButtonCell.tooltipFor(b, key));
-            if (b == HelperButtons.idleWorkerButton)
-                Theme.badge(f.g, String.valueOf(UnitClientEvents.idleWorkerIds.size()), bx + BTN + 3, top + PAD - 3);
             bx += BTN + GAP;
         }
+        // badges last, so the next button never covers them
+        int idle = buttons.indexOf(HelperButtons.idleWorkerButton);
+        if (idle >= 0)
+            Theme.badge(f.g, String.valueOf(UnitClientEvents.idleWorkerIds.size()), x + PAD + idle * (BTN + GAP) + BTN + 3, top + PAD - 3);
         return new Rect(x, top, w, h);
     }
 
@@ -183,7 +187,7 @@ public final class TopRightPanel {
         boolean showGameTime = PlayerClientEvents.isRTSPlayer() && !SurvivalClientEvents.isEnabled;
 
         String phase = bloodMoon ? I18n.get("hud.reignofnether.clock.blood_moon")
-                : I18n.get(day ? "hud.reignofnether.clock.day" : "hud.reignofnether.clock.night");
+                : I18n.get(day ? "hud.reignofnether.clock.day" : "hud.reignofnether.clock.night") + " " + TimeClientEvents.dayNumber();
         String until = bloodMoon ? TimeUtils.getTimeStrFromTicks(TimeClientEvents.getBloodMoonTicksLeft())
                 : I18n.get(day ? "hud.reignofnether.clock.dusk_in" : "hud.reignofnether.clock.dawn_in",
                         TimeUtils.getTimeUntilStr(time, day ? TimeUtils.DUSK : TimeUtils.DAWN));
@@ -212,23 +216,21 @@ public final class TopRightPanel {
         int tx = ix + 15 + 7;
         Text.big(f.g, phase, tx, top + 6, phaseColour, big);
         Text.smallRight(f.g, until, tx + barW, top + 7, Theme.MUTED);
-        Theme.bar(f.g, tx, top + 19, barW, 3, phaseProgress(time, day, bloodMoon), phaseColour);
+        Theme.bar(f.g, tx, top + 22, barW, 3, phaseProgress(time, day, bloodMoon), phaseColour);
 
         if (showGameTime) {
             int gx = tx + barW + 6;
             Theme.divider(f.g, gx, top + 4, 1, h - 8);
-            Text.small(f.g, I18n.get("hud.reignofnether.clock.game_time"), gx + 6, top + 4, Theme.DIM);
-            Text.big(f.g, gameTime, gx + 6, top + 15, Theme.TEXT, big);
+            int mid = gx + timeW / 2;
+            Text.smallCentered(f.g, I18n.get("hud.reignofnether.clock.game_time"), mid, top + 4, Theme.DIM);
+            Text.bigCentered(f.g, gameTime, mid, top + 15, Theme.TEXT, big);
         }
 
         f.zone(r);
         Button clock = new ButtonBuilder("Clock")
-                .onLeftClick(() -> TimeClientEvents.showClockTooltip = !TimeClientEvents.showClockTooltip)
                 .onRightClick(TimeClientEvents::centreOnBloodMoon)
                 .build();
         f.register(clock, r, null, TimeClientEvents::clockTooltip);
-        if (TimeClientEvents.showClockTooltip && !f.hovered(r))
-            TimeClientEvents.clockTooltip().show(r.x(), r.y(), r.w(), r.h());
     }
 
     private static float phaseProgress(long time, boolean day, boolean bloodMoon) {
@@ -248,7 +250,7 @@ public final class TopRightPanel {
             return;
         String title = I18n.get("hud.reignofnether.under_attack");
         String hint = I18n.get("hud.reignofnether.under_attack_hint");
-        int w = Math.max(150, 7 + 16 + 7 + Math.max(Text.smallWidth(title), Text.width(hint)) + 30);
+        int w = Math.max(150, 7 + 16 + 7 + Math.max(Text.mediumWidth(title), Text.width(hint)) + 30);
         int h = HudLayout.TOP_CARD_H;
         int x = right - w;
         Rect r = new Rect(x, top, w, h);
@@ -257,7 +259,7 @@ public final class TopRightPanel {
         if (flash)
             Theme.outline(f.g, x - 1, top - 1, w + 2, h + 2, 1, Theme.ALARM_GLOW);
         MyRenderer.renderIcon(f.g, WARNING, x + 7, top + 8, 16);
-        Text.small(f.g, title, x + 30, top + 5, Theme.ERROR);
+        Text.medium(f.g, title, x + 30, top + 5, Theme.ERROR);
         Text.draw(f.g, hint, x + 30, top + 17, Theme.LABEL);
         f.zone(r);
         f.register(warning, r, Keybindings.jumpToAlert, () -> Tooltip.fromLines(warning.tooltipLines).key(Keybindings.jumpToAlert.getCurrentLabel()));

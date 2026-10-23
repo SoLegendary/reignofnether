@@ -32,9 +32,9 @@ public final class Theme {
     public static final int TEXT = 0xFFE7E9F5;
     public static final int BODY = 0xFFCFD3E8;
     public static final int DESC = 0xFFB7BCD6;
-    public static final int MUTED = 0xFF9A9FC1;
-    public static final int LABEL = 0xFF80849F;
-    public static final int DIM = 0xFF575A82;
+    public static final int MUTED = 0xFFA9AECF;
+    public static final int LABEL = 0xFF9498B5;
+    public static final int DIM = 0xFF6C709A;
     public static final int FAINT = 0xFF3C3E5A;
 
     // accents
@@ -232,19 +232,19 @@ public final class Theme {
     public static int keyCap(GuiGraphics g, String key, int x, int y, int textColour) {
         if (key == null || key.isEmpty())
             return 0;
-        int w = Text.smallWidth(key) + 3;
+        int w = Text.tinyWidth(key) + 3;
         g.fill(x, y, x + w, y + 7, 0xD90B0A0F);
-        Text.small(g, key, x + 2, y - 1, textColour);
+        Text.tiny(g, key, x + 2, y - 1, textColour);
         return w;
     }
 
     /** Orange count badge, e.g. idle workers. */
     public static void badge(GuiGraphics g, String text, int rightX, int topY) {
-        int w = Math.max(9, Text.smallWidth(text) + 5);
+        int w = Math.max(9, Text.tinyWidth(text) + 5);
         int x = rightX - w;
         outline(g, x, topY, w, 9, 1, ON_ORANGE);
         orangeChip(g, x, topY, w, 9);
-        Text.small(g, text, x + (w - Text.smallWidth(text) + 1) / 2, topY, ON_ORANGE);
+        Text.tiny(g, text, x + (w - Text.tinyWidth(text) + 1) / 2, topY, ON_ORANGE);
     }
 
     /** Orange chip with a gold top edge (badges, hero level, skill points); text goes on top in ON_ORANGE. */
@@ -261,5 +261,13 @@ public final class Theme {
     /** Close icon centred in the box (x, y, size). */
     public static void cross(GuiGraphics g, int x, int y, int size, int colour) {
         Icon.CLOSE.drawIn(g, x - 2, y - 2, size + 4, size + 4, colour);
+    }
+
+    /** Close icon (6 units) exactly centred on a button, half units included. */
+    public static void cross(GuiGraphics g, com.solegendary.reignofnether.ui.Rect r, int colour) {
+        g.pose().pushPose();
+        g.pose().translate(r.x() + (r.w() - 6) / 2f, r.y() + (r.h() - 6) / 2f, 0);
+        Icon.CLOSE.draw(g, 0, 0, 6, colour);
+        g.pose().popPose();
     }
 }

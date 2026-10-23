@@ -7,6 +7,9 @@ import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.abilities.CallToArmsUnit;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
+import com.solegendary.reignofnether.building.BuildingPlaceButton;
+import com.solegendary.reignofnether.building.Building;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.building.buildings.placements.ItemShopPlacement;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
@@ -42,6 +45,7 @@ import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -65,7 +69,22 @@ public final class CommandCard {
     private static int page = 0;
     private static Object pageOwner = null;
 
+    // buildings a worker's advanced tab shows; the rest are on the basic tab
+    private static final java.util.Set<Building> ADVANCED_BUILDINGS = java.util.Set.of(
+            Buildings.DUNGEON, Buildings.SPIDER_LAIR, Buildings.SLIME_PIT, Buildings.LABORATORY, Buildings.STRONGHOLD,
+            Buildings.BASTION, Buildings.HOGLIN_STABLES, Buildings.FLAME_SANCTUARY, Buildings.WITHER_SHRINE,
+            Buildings.BASALT_SPRINGS, Buildings.FORTRESS,
+            Buildings.BLACKSMITH, Buildings.WITCH_HUT, Buildings.ARCANE_TOWER, Buildings.LIBRARY, Buildings.CASTLE,
+            Buildings.IRON_GOLEM_BUILDING, Buildings.BEACON);
+
+    // a worker's open build tab: 0 = its commands, 1 = basic buildings, 2 = advanced buildings
+    private static int tab = 0;
+
     private record Contents(String title, List<Command<Button>> commands, List<Button> abilities) {
+        boolean isEmpty() {
+            return commands.isEmpty() && abilities.isEmpty();
+        }
+
         static Contents empty(String title) {
             return new Contents(title, List.of(), List.of());
         }
@@ -73,15 +92,18 @@ public final class CommandCard {
 
     public static void reset() {
         page = 0;
+        tab = 0;
         pageOwner = null;
         gatherKey = null;
     }
 
     public static void render(HudFrame f) {
+        if (SpectatorHud.isActive())
+            return; // spectators can't command anything
         Rect card = f.layout.commandCard();
         Contents c = contents();
         // a floating card, only there when there is something to command
-        if (c.commands().isEmpty() && c.abilities().isEmpty())
+        if (c.isEmpty())
             return;
         int pad = HudLayout.CONSOLE_PAD;
         Rect panel = new Rect(card.x() - pad, card.y() - pad, card.w() + pad * 2, card.h() + pad * 2);
@@ -92,6 +114,7 @@ public final class CommandCard {
         if (owner != pageOwner) {
             pageOwner = owner;
             page = 0;
+            tab = 0;
         }
         CommandGrid.Layout<Button> layout = CommandGrid.assign(c.commands(), c.abilities(), page);
 
@@ -113,7 +136,7 @@ public final class CommandCard {
 
     private static void renderCell(HudFrame f, Button b, int x, int y, int slot) {
         Runnable rankUp = rankUpAction(b);
-        f.cell(b, x, y, HudLayout.CELL, Keybindings.grid[slot], rankUp);
+        f.cell(isUnlearnt(b) ? locked(b) : b, x, y, HudLayout.CELL, Keybindings.grid[slot], rankUp);
         if (rankUp == null)
             return;
         // pulsing "+" in the corner, clickable on its own
@@ -126,6 +149,17 @@ public final class CommandCard {
         Button plus = new ButtonBuilder("rank up").onLeftClick(rankUp).build();
         f.register(plus, new Rect(px, y, s, s), null, () -> Tooltip.of(I18n.get("hud.reignofnether.rank_up"))
                 .status(I18n.get("hud.reignofnether.rank_up_hint", Keybindings.grid[slot].getCurrentLabel()), Theme.GOLD));
+    }
+
+    // unlearnt hero abilities stay on the grid, locked, so their "+" can be clicked and their key never moves
+    private static boolean isUnlearnt(Button b) {
+        return b instanceof AbilityButton ab && ab.ability instanceof HeroAbility ha && ab.getUnit() instanceof HeroUnit hero
+                && ha.getRank(hero) == 0;
+    }
+
+    private static Button locked(Button b) {
+        return new ButtonBuilder(b.name).iconResource(b.iconResource).innerIconSizeModifier(b.innerIconSizeModifier)
+                .isEnabled(() -> false).tooltipLines(b.tooltipLines).build();
     }
 
     private static Runnable rankUpAction(Button b) {
@@ -203,29 +237,102 @@ public final class CommandCard {
             updateGatherButton((WorkerUnit) entity);
             commands.add(new Command<>(ActionButtons.gather, SLOT_G));
         }
+        Button garrison = null;
         if (unit.canGarrison() && GarrisonableBuildingAddon.getGarrison(unit) == null)
-            commands.add(new Command<>(ActionButtons.garrison, SLOT_F));
+            garrison = ActionButtons.garrison;
         else if (GarrisonableBuildingAddon.getGarrison(unit) != null)
-            commands.add(new Command<>(ActionButtons.ungarrison, SLOT_F));
-        if (entity instanceof VillagerUnit vUnit)
-            for (Ability ability : vUnit.getAbilities().get())
-                if (ability instanceof CallToArmsUnit callToArms)
-                    commands.add(new Command<>(callToArms.getButton(Keybindings.hotkey1, vUnit), NO_PREFERENCE));
+            garrison = ActionButtons.ungarrison;
+        if (!worker && garrison != null)
+            commands.add(new Command<>(garrison, SLOT_F));
 
+        // workers: Q-T abilities, A-G commands, Z/X open the basic/advanced building tabs, which fill Q-G
+        // in a fixed order, so no building changes key when garrison or return resources appears
         List<Button> abilities = new ArrayList<>();
+        List<Button> basic = new ArrayList<>();
+        List<Button> advanced = new ArrayList<>();
+        if (worker) {
+            abilities.add(garrison); // null keeps Q, so the rest stay put
+            if (entity instanceof VillagerUnit vUnit)
+                for (Ability ability : vUnit.getAbilities().get())
+                    if (ability instanceof CallToArmsUnit callToArms)
+                        abilities.add(callToArms.getButton(Keybindings.hotkey1, vUnit));
+            if (entity instanceof VillagerUnit vUnit)
+                abilities.add(professionPassive(vUnit));
+        }
         boolean showAbilities = TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_INTRO) &&
                 (UnitClientEvents.getPlayerToEntityRelationship(first) == Relationship.OWNED
                         || !PlayerClientEvents.isRTSPlayer() || ResearchClient.hasCheat("wouldyoukindly"))
                 || AlliancesClient.canControlAlly(first);
         if (showAbilities)
             for (Button b : unit.getAbilityButtons())
-                if (!b.isHidden.get() && !(b instanceof AbilityButton ab && ab.ability instanceof CallToArmsUnit))
-                    abilities.add(b);
+                if ((!b.isHidden.get() || isUnlearnt(b)) && !(b instanceof AbilityButton ab && ab.ability instanceof CallToArmsUnit)) {
+                    if (b instanceof BuildingPlaceButton bp)
+                        (ADVANCED_BUILDINGS.contains(bp.building) ? advanced : basic).add(b);
+                    else
+                        abilities.add(b);
+                }
         addSandboxUnitActions(abilities, true);
 
         String name = SelectionPanel.displayName(entity);
         String mode = I18n.get(worker ? "hud.reignofnether.card.build" : entity instanceof HeroUnit ? "hud.reignofnether.card.hero" : "hud.reignofnether.card.army");
-        return new Contents(mode + " · " + name, commands, abilities);
+        if (basic.isEmpty() && advanced.isEmpty())
+            return new Contents(mode + " · " + name, commands, abilities);
+
+        List<Command<Button>> tabs = new ArrayList<>();
+        tabs.add(new Command<>(tabButton(1, "hud.reignofnether.card.basic", basic), SLOT_Z));
+        if (!advanced.isEmpty())
+            tabs.add(new Command<>(tabButton(2, "hud.reignofnether.card.advanced", advanced), SLOT_Z + 1));
+        if (tab == 0) {
+            commands.addAll(tabs);
+            return new Contents(mode + " · " + name, commands, abilities);
+        }
+        List<Button> buildings = tab == 1 ? basic : advanced;
+        List<Button> overflow = new ArrayList<>();
+        for (int i = 0; i < buildings.size(); i++) {
+            if (i < SLOT_Z)
+                tabs.add(new Command<>(buildings.get(i), i)); // Q-T then A-G, row by row
+            else
+                overflow.add(buildings.get(i));
+        }
+        return new Contents(I18n.get(tab == 1 ? "hud.reignofnether.card.basic" : "hud.reignofnether.card.advanced") + " · " + name, tabs, overflow);
+    }
+
+    // the profession's bonus as a passive, with its tool: iron, diamond once veteran (what the villager holds)
+    private static Button professionPassive(VillagerUnit v) {
+        String tool = switch (SelectionPanel.professionShown(v)) {
+            case FARMER -> "hoe";
+            case LUMBERJACK -> "axe";
+            case MINER -> "pickaxe";
+            case MASON -> "shovel";
+            case HUNTER -> "sword";
+            default -> null;
+        };
+        if (tool == null)
+            return null;
+        boolean hunter = tool.equals("sword");
+        String tier = v.isVeteran() ? (hunter ? "stone_" : "diamond_") : (hunter ? "wooden_" : "iron_");
+        ResourceLocation icon = ResourceLocation.withDefaultNamespace("textures/item/" + tier + tool + ".png");
+        return new AbilityButton(I18n.get("units.reignofnether." + SelectionPanel.professionShown(v).name().toLowerCase(Locale.ROOT)),
+                icon, null, () -> false, () -> false, () -> v.getUnitProfession() != VillagerUnitProfession.NONE,
+                null, null, List.of(), null, v) {
+            @Override
+            public Tooltip hudTooltip() {
+                return SelectionPanel.professionTooltip(v);
+            }
+        };
+    }
+
+    // opens its tab, or goes back to the worker's commands when it's already open
+    private static Button tabButton(int n, String key, List<Button> buildings) {
+        return new ButtonBuilder(I18n.get(key))
+                .iconResource(buildings.isEmpty() ? null : buildings.get(0).iconResource)
+                .isSelected(() -> tab == n)
+                .onLeftClick(() -> {
+                    tab = tab == n ? 0 : n;
+                    page = 0;
+                })
+                .tooltipLines(List.of(MiscUtil.fcs(I18n.get(key))))
+                .build();
     }
 
     private static boolean canReturnResources(LivingEntity entity, Unit unit) {

@@ -102,6 +102,7 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(StartPosClientEvents.class);
         vanillaEventBus.register(MatchStartClientEvents.class);
         vanillaEventBus.register(SettingsMenu.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.matchstart.ResultBanner.class);
         vanillaEventBus.register(ChatLog.class);
         vanillaEventBus.register(MatchEndClientEvents.class);
         vanillaEventBus.register(NonUnitClientEvents.class);

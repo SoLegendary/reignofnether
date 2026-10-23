@@ -41,10 +41,13 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
+import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -55,6 +58,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -77,7 +81,7 @@ public final class SelectionPanel {
     private static final int STAT_H = 24;
     private static final int SLOT = 26;
     private static final int EFFECT = 17;
-    private static final float NAME = Text.px(26);
+    private static final float NAME = Text.px(20); // medium: the body size
 
     // where the portrait was drawn, so holding the mouse on it can follow the unit
     private static Rect portraitRect = Rect.EMPTY;
@@ -111,7 +115,7 @@ public final class SelectionPanel {
         else if (army.size() >= 2)
             want = Math.max(stacksWidth(army.stream().map(HudClientEvents::getModifiedEntityName).distinct().count(), army.size()),
                     Text.bigWidth(I18n.get("hud.reignofnether.units_count", army.size()), Text.px(24)) + 70
-                            + Text.smallWidth(I18n.get("hud.reignofnether.army_hint")));
+                            + Text.tinyWidth(I18n.get("hud.reignofnether.army_hint")));
         else {
             int rightW = rightColumnWidth(entity);
             want = PORTRAIT_W + COL_GAP + INFO_W + (rightW > 0 ? rightW + COL_GAP : 0);
@@ -130,8 +134,25 @@ public final class SelectionPanel {
             renderBuilding(f, r, building);
         else if (army.size() >= 2)
             renderArmy(f, r, army);
-        else
+        else {
             renderUnit(f, r, entity);
+            if (entity instanceof Unit u)
+                renderEffects(f, u, card);
+        }
+    }
+
+    /** Effects float in a row just above the card, so gaining or losing one never resizes it. */
+    private static void renderEffects(HudFrame f, Unit u, Rect card) {
+        int ix = card.x();
+        int iy = card.y() - EFFECT - 3;
+        for (Button icon : passiveIcons(u)) {
+            if (ix + EFFECT > card.right()) {
+                ix = card.x();
+                iy -= EFFECT + 3;
+            }
+            effectTile(f, icon, ix, iy);
+            ix += EFFECT + 3;
+        }
     }
 
     /** Wide enough for every type stack on one row and, for armies, a row of unit tiles. */
@@ -170,6 +191,9 @@ public final class SelectionPanel {
 
     private static ResourceLocation headIcon(LivingEntity e) {
         String name = MiscUtil.getEntityIconName(e);
+        // these professions change the head (hat, eyepatch); the others only the body
+        if (e instanceof VillagerUnit v && switch (v.getUnitProfession()) { case FARMER, LUMBERJACK, HUNTER -> true; default -> false; })
+            name += "_" + v.getUnitProfession().name().toLowerCase(Locale.ROOT);
         return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,
                 "textures/mobheads/" + name + (e.isVehicle() && e instanceof Unit ? "_half.png" : ".png"));
     }
@@ -197,6 +221,7 @@ public final class SelectionPanel {
             renderer.drawEntity(f.g, e, x, y, w, h);
         else
             MyRenderer.renderIcon(f.g, headIcon(e), x + (w - 32) / 2, y + (h - 32) / 2, 32);
+            jobBadge(f.g, e, x + (w - 32) / 2 + 22, y + (h - 32) / 2 + 22, 12);
         Clip.pop(f.g);
         portraitRect = new Rect(x, y, w, h);
         f.zone(portraitRect);
@@ -239,6 +264,8 @@ public final class SelectionPanel {
         by += HP_H + 4;
         if (e instanceof HeroUnit hero)
             renderManaAndExperience(f, hero, ix, by, iw);
+        else if (e instanceof VillagerUnit v)
+            renderProfessionExperience(f, v, ix, by, iw);
 
         if (e instanceof Unit unit)
             renderStatCards(f, unit, ix, r.bottom() - STAT_H, iw, STAT_H);
@@ -278,7 +305,76 @@ public final class SelectionPanel {
         float frac = hp / Math.max(1f, max);
         Theme.bar(f.g, x, y, w, h, frac, Theme.hpColor(frac));
         String text = (hp >= 1 ? String.valueOf((int) hp) : String.format("%.1f", hp)) + " / " + (int) max;
-        Text.smallShadowed(f.g, text, x + (w - Text.smallWidth(text)) / 2, y + (h - 8) / 2, Theme.TEXT);
+        Text.smallShadowed(f.g, text, x + (w - Text.smallWidth(text)) / 2, y + Math.floorDiv(h - 9, 2), Theme.TEXT);
+    }
+
+    /**
+     * A villager's way to a profession, then to veteran: the profession it is learning (the one with the most
+     * progress) until it has one, then its experience towards veteran.
+     */
+    private static void renderProfessionExperience(HudFrame f, VillagerUnit v, int x, int y, int w) {
+        int h = HP_H;
+        VillagerUnitProfession p = professionShown(v);
+        String label;
+        float frac;
+        if (p == VillagerUnitProfession.NONE) {
+            label = I18n.get("hud.reignofnether.profession.none");
+            frac = 0;
+        } else if (v.isVeteran()) {
+            label = I18n.get("hud.reignofnether.profession.veteran");
+            frac = 1;
+        } else {
+            boolean learning = v.getUnitProfession() == VillagerUnitProfession.NONE;
+            int need = learning ? VillagerUnit.getExpReq(p) / 2 : VillagerUnit.getExpReq(p);
+            int exp = Math.min(v.getExp(p), need);
+            label = I18n.get(learning ? "hud.reignofnether.profession.learning" : "hud.reignofnether.profession.to_veteran",
+                    professionName(p).toUpperCase(Locale.ROOT), exp, need);
+            frac = exp / (float) need;
+        }
+        Theme.bar(f.g, x, y, w, h, frac, Theme.XP);
+        String shown = Text.fitSmall(label, w - 4);
+        Text.smallShadowed(f.g, shown, x + (w - Text.smallWidth(shown)) / 2, y + Math.floorDiv(h - 9, 2), Theme.TEXT);
+        f.register(new ButtonBuilder("profession").build(), new Rect(x, y, w, h), null, () -> professionTooltip(v));
+    }
+
+    /** Its profession, or the one it is closest to learning; NONE before any work. */
+    public static VillagerUnitProfession professionShown(VillagerUnit v) {
+        if (v.getUnitProfession() != VillagerUnitProfession.NONE)
+            return v.getUnitProfession();
+        VillagerUnitProfession best = VillagerUnitProfession.NONE;
+        float bestFrac = 0;
+        for (VillagerUnitProfession p : VillagerUnitProfession.values()) {
+            float frac = v.getExp(p) / (float) VillagerUnit.getExpReq(p);
+            if (p != VillagerUnitProfession.NONE && frac > bestFrac) {
+                best = p;
+                bestFrac = frac;
+            }
+        }
+        return best;
+    }
+
+    private static String professionName(VillagerUnitProfession p) {
+        return I18n.get("units.reignofnether." + p.name().toLowerCase(Locale.ROOT));
+    }
+
+    /** What the profession does, what veteran adds and how it is earned; shared with the command card passive. */
+    public static Tooltip professionTooltip(VillagerUnit v) {
+        VillagerUnitProfession p = professionShown(v);
+        if (p == VillagerUnitProfession.NONE)
+            return Tooltip.of(I18n.get("hud.reignofnether.profession.none_title"))
+                    .body(I18n.get("hud.reignofnether.profession.none_desc"));
+        String key = "hud.reignofnether.profession." + p.name().toLowerCase(Locale.ROOT);
+        boolean has = v.getUnitProfession() == p;
+        int req = VillagerUnit.getExpReq(p);
+        String status = v.isVeteran() ? I18n.get("hud.reignofnether.profession.is_veteran")
+                : has ? I18n.get("hud.reignofnether.profession.veteran_at", req)
+                : I18n.get("hud.reignofnether.profession.learn_at", professionName(p), req / 2);
+        return Tooltip.of(professionName(p))
+                .tag(I18n.get("hud.reignofnether.tag.passive"), Theme.XP)
+                .body(I18n.get(key + ".bonus"))
+                .body(I18n.get(key + ".veteran"))
+                .status(I18n.get(key + ".xp"), Theme.MUTED)
+                .status(status, v.isVeteran() ? Theme.GOLD : Theme.LABEL);
     }
 
     /** Mana bar, then the experience bar at a fixed width, like the design. */
@@ -288,14 +384,14 @@ public final class SelectionPanel {
         int manaW = w - xpW - 5;
         Theme.bar(f.g, x, y, manaW, h, hero.getMana() / Math.max(1f, hero.getMaxMana()), Theme.MANA);
         String mana = (int) hero.getMana() + " / " + (int) hero.getMaxMana();
-        Text.smallShadowed(f.g, mana, x + (manaW - Text.smallWidth(mana)) / 2, y + (h - 8) / 2, Theme.TEXT);
+        Text.smallShadowed(f.g, mana, x + (manaW - Text.smallWidth(mana)) / 2, y + Math.floorDiv(h - 9, 2), Theme.TEXT);
 
         int xx = x + manaW + 5;
         boolean max = hero.getHeroLevel() >= HeroUnit.MAX_LEVEL;
         float frac = max ? 1f : hero.getExpOnCurrentLevel() / (float) Math.max(1, hero.getExpToNextlevel());
         Theme.bar(f.g, xx, y, xpW, h, frac, Theme.XP);
         String xp = max ? I18n.get("hud.hero.reignofnether.max_level") : hero.getExpOnCurrentLevel() + " / " + hero.getExpToNextlevel() + " XP";
-        Text.smallShadowed(f.g, Text.fitSmall(xp, xpW - 4), xx + (xpW - Math.min(xpW - 4, Text.smallWidth(xp))) / 2, y + (h - 8) / 2, Theme.TEXT);
+        Text.smallShadowed(f.g, Text.fitSmall(xp, xpW - 4), xx + (xpW - Math.min(xpW - 4, Text.smallWidth(xp))) / 2, y + Math.floorDiv(h - 9, 2), Theme.TEXT);
         f.register(new ButtonBuilder("xp").build(), new Rect(xx, y, xpW, h), null, () -> max
                 ? Tooltip.of(I18n.get("hud.hero.reignofnether.max_level"))
                 : Tooltip.of(I18n.get("hud.hero.reignofnether.experience", hero.getExpOnCurrentLevel(), hero.getExpToNextlevel()))
@@ -338,12 +434,10 @@ public final class SelectionPanel {
         };
     }
 
-    // right column: effects, then inventory or what the unit carries
+    // right column: inventory or what the unit carries
 
     private static int rightColumnWidth(LivingEntity e) {
         if (e instanceof UnitInventory && ItemClientEvents.shouldRenderUnitInventory(e))
-            return 3 * SLOT + 2 * 4;
-        if (e instanceof Unit u && !passiveIcons(u).isEmpty())
             return 3 * SLOT + 2 * 4;
         if (carried(e) != null)
             return 95;
@@ -371,21 +465,6 @@ public final class SelectionPanel {
 
     private static void renderRightColumn(HudFrame f, LivingEntity e, int x, int y, int w, int h) {
         int cy = y;
-        if (e instanceof Unit u) {
-            List<Button> icons = passiveIcons(u);
-            if (!icons.isEmpty()) {
-                Text.small(f.g, I18n.get("hud.reignofnether.effects"), x, cy, Theme.LABEL);
-                cy += 10;
-                int ix = x;
-                for (Button icon : icons) {
-                    if (ix + EFFECT > x + w)
-                        break;
-                    effectTile(f, icon, ix, cy);
-                    ix += EFFECT + 4;
-                }
-                cy += EFFECT + 6;
-            }
-        }
         if (e instanceof UnitInventory inv && ItemClientEvents.shouldRenderUnitInventory(e)) {
             Text.small(f.g, I18n.get("hud.reignofnether.inventory"), x, cy, Theme.LABEL);
             cy += 10;
@@ -506,7 +585,7 @@ public final class SelectionPanel {
         int hh = Text.bigHeight(hs);
         Text.small(f.g, I18n.get("hud.reignofnether.pop_count", pop), r.x() + Text.bigWidth(header, hs) + 6, r.y() + hh - 9, Theme.ORANGE);
         if (!f.layout.compact())
-            Text.smallRight(f.g, I18n.get("hud.reignofnether.army_hint"), r.right(), r.y() + hh - 9, Theme.DESC);
+            Text.tinyRight(f.g, I18n.get("hud.reignofnether.army_hint"), r.right(), r.y() + hh - 9, Theme.DESC);
 
         int perRow = Math.max(1, (r.w() + GAP) / (STACK_W + GAP));
         int sy = r.y() + hh + 6;
@@ -532,6 +611,7 @@ public final class SelectionPanel {
         Rect r = new Rect(x, y, STACK_W, STACK_H);
         Theme.cell(f.g, x, y, STACK_W, STACK_H, active ? Theme.CellState.ACTIVE : Theme.CellState.READY, f.hovered(r));
         MyRenderer.renderIcon(f.g, headIcon(first), x + 5, y + 5, 20);
+        jobBadge(f.g, first, x + 18, y + 16, 10);
         String count = "×" + units.size();
         Text.bigRight(f.g, count, x + STACK_W - 5, y + 5, active ? Theme.GOLD : Theme.TEXT, Text.px(20));
         float hp = 0;
@@ -560,6 +640,25 @@ public final class SelectionPanel {
                 .build();
         f.register(b, r, null, () -> Tooltip.of(displayName(first) + " ×" + units.size())
                 .status(I18n.get("hud.reignofnether.stack_hint"), Theme.LABEL));
+    }
+
+    // a worker's job on the corner of its head when the head itself doesn't show it: villager miners and
+    // masons (their profession only changes the body), and other factions' workers by what they gather
+    private static void jobBadge(GuiGraphics g, LivingEntity e, int x, int y, int size) {
+        if (!(e instanceof WorkerUnit w))
+            return;
+        String tool = e instanceof VillagerUnit v ? switch (v.getUnitProfession()) {
+            case MINER -> "pickaxe";
+            case MASON -> "shovel";
+            default -> null;
+        } : switch (w.getGatherResourceGoal().getTargetResourceName()) {
+            case FOOD -> "hoe";
+            case WOOD -> "axe";
+            case ORE -> "pickaxe";
+            default -> null;
+        };
+        if (tool != null)
+            MyRenderer.renderIcon(g, ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/" + tool + ".png"), x, y, size);
     }
 
     private static void keepOnly(List<LivingEntity> units) {
@@ -593,6 +692,7 @@ public final class SelectionPanel {
             if (f.hovered(r))
                 Theme.ring(f.g, tx, ty, TILE, TILE, 1, Theme.ORANGE);
             MyRenderer.renderIcon(f.g, headIcon(e), tx + 4, ty + 2, 12);
+            jobBadge(f.g, e, tx + TILE - 9, ty + 1, 8);
             float hp = e.getHealth() / Math.max(1, e.getMaxHealth());
             Theme.bar(f.g, tx + 2, ty + TILE - 5, TILE - 4, 3, hp, Theme.hpColor(hp));
 
@@ -674,8 +774,9 @@ public final class SelectionPanel {
             return;
         }
 
+        // top: the unit in production, its name, time left and a bar across the whole card
         ActiveProduction current = queue.get(0);
-        int cs = Math.min(32, h - 18);
+        int cs = 16;
         int cy = y + 15;
         Button cancelFirst = current.item.getCancelButton(prod, true);
         queueCell(f, cancelFirst, px, cy, cs, owned, true, 0);
@@ -683,24 +784,32 @@ public final class SelectionPanel {
         float total = current.item.getCost(true, prod.ownerName).ticks;
         float done = total <= 0 ? 1f : 1f - current.ticksLeft / total;
         boolean blocked = !current.item.isBelowPopulationSupply(prod);
-        int tx = px + cs + 7;
-        int tw = Math.min(140, px + pw - tx);
-        String left = blocked ? I18n.get("hud.reignofnether.paused")
+        int tx = px + cs + 6;
+        int tw = px + pw - tx;
+        String left = blocked ? I18n.get("hud.reignofnether.paused_population")
                 : I18n.get("hud.reignofnether.time_left", TopLeftPanel.formatTime((int) Math.ceil(current.ticksLeft / 20f)));
         int leftW = Text.smallWidth(left);
-        Text.draw(f.g, Text.fit(cancelFirst.name, tw - leftW - 6), tx, cy + 2, Theme.TEXT);
-        Text.smallRight(f.g, left, tx + tw, cy + 2, blocked ? Theme.ERROR : Theme.GOLD);
-        Theme.bar(f.g, tx, cy + 13, tw, 6, done, blocked ? Theme.ERROR : Theme.ORANGE);
-        String note = blocked ? I18n.get("hud.reignofnether.paused_population") : I18n.get("hud.reignofnether.in_production");
-        Text.small(f.g, Text.fitSmall(note.toUpperCase(), tw), tx, cy + 22, blocked ? Theme.ERROR : Theme.DIM);
+        Text.draw(f.g, Text.fit(cancelFirst.name, tw - leftW - 6), tx, cy - 1, Theme.TEXT);
+        Text.smallRight(f.g, left, tx + tw, cy, blocked ? Theme.ERROR : Theme.GOLD);
+        Theme.bar(f.g, tx, cy + cs - 5, tw, 5, done, blocked ? Theme.ERROR : Theme.ORANGE);
 
-        int qx = tx + tw + 7;
-        int qs = Math.min(25, cs);
-        for (int i = 1; i < queue.size(); i++) {
-            if (qx + qs > px + pw)
+        // bottom: the rest of the queue in two rows of cells as big as the height allows, as many columns as fit
+        final int rows = 2, gap = 3;
+        int gy = cy + cs + 5;
+        int qs = Math.max(8, Math.min(18, (y + h - 5 - gy - gap) / rows));
+        int cols = Math.max(1, (pw + gap) / (qs + gap));
+        int queued = queue.size() - 1;
+        for (int slot = 0; slot < Math.min(queued, cols * rows); slot++) {
+            int cx = px + (slot % cols) * (qs + gap);
+            int ry = gy + (slot / cols) * (qs + gap);
+            if (slot == cols * rows - 1 && queued > cols * rows) {
+                Theme.outline(f.g, cx, ry, qs, qs, 1, Theme.INK);
+                f.g.fill(cx, ry, cx + qs, ry + qs, Theme.RAISED);
+                String more = "+" + (queued - slot);
+                Text.tiny(f.g, more, cx + (qs - Text.tinyWidth(more)) / 2, ry + (qs - 8) / 2, Theme.FAINT);
                 break;
-            queueCell(f, queue.get(i).item.getCancelButton(prod, false), qx, cy + (cs - qs) / 2, qs, owned, false, i + 1);
-            qx += qs + 4;
+            }
+            queueCell(f, queue.get(slot + 1).item.getCancelButton(prod, false), cx, ry, qs, owned, false, qs >= 18 ? slot + 2 : 0);
         }
     }
 
@@ -716,7 +825,7 @@ public final class SelectionPanel {
         if (owned)
             Theme.cross(f.g, x + size - 6, y + 2, 4, Theme.DANGER_TEXT);
         if (number > 0)
-            Text.small(f.g, String.valueOf(number), x + 2, y + size - 8, Theme.FAINT);
+            Text.tiny(f.g, String.valueOf(number), x + 2, y + size - 8, Theme.FAINT);
         if (!owned) {
             cancel.onLeftClick = null;
             cancel.onRightClick = null;

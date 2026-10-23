@@ -1,8 +1,10 @@
 package com.solegendary.reignofnether.resources;
 
 import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
 
-/** Resources the local player dropped off in the last minute, for the "+N/MIN" line on the HUD. */
+/** Resources each player dropped off in the last minute, for the "+N/MIN" lines on the HUD. */
 public final class IncomeTracker {
 
     private IncomeTracker() { }
@@ -11,18 +13,21 @@ public final class IncomeTracker {
 
     private record Deposit(long time, int food, int wood, int ore) { }
 
-    private static final ArrayDeque<Deposit> deposits = new ArrayDeque<>();
+    private static final Map<String, ArrayDeque<Deposit>> deposits = new HashMap<>();
 
-    public static void record(int food, int wood, int ore) {
-        deposits.addLast(new Deposit(System.currentTimeMillis(), food, wood, ore));
+    public static synchronized void record(String owner, int food, int wood, int ore) {
+        deposits.computeIfAbsent(owner, k -> new ArrayDeque<>()).addLast(new Deposit(System.currentTimeMillis(), food, wood, ore));
     }
 
-    public static int perMinute(ResourceName resource) {
+    public static synchronized int perMinute(String owner, ResourceName resource) {
+        ArrayDeque<Deposit> list = deposits.get(owner);
+        if (list == null)
+            return 0;
         long cutoff = System.currentTimeMillis() - WINDOW_MS;
-        while (!deposits.isEmpty() && deposits.peekFirst().time < cutoff)
-            deposits.removeFirst();
+        while (!list.isEmpty() && list.peekFirst().time < cutoff)
+            list.removeFirst();
         int total = 0;
-        for (Deposit d : deposits)
+        for (Deposit d : list)
             total += switch (resource) {
                 case FOOD -> d.food;
                 case WOOD -> d.wood;
@@ -32,7 +37,7 @@ public final class IncomeTracker {
         return total;
     }
 
-    public static void reset() {
+    public static synchronized void reset() {
         deposits.clear();
     }
 }

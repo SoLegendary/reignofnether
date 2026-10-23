@@ -394,6 +394,7 @@ public class OrthoviewClientEvents {
         }
 
         enabled = !enabled;
+        FaceCulling.setRtsView(enabled);
 
         if (enabled) {
             MC.options.tutorialStep = TutorialSteps.NONE;
