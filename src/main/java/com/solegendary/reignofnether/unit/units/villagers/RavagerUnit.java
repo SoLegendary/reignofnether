@@ -65,10 +65,10 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit, RangeInd
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new Roar(), Keybindings.abilitySlot1);
-        ABILITIES.add(new Eject(), Keybindings.abilitySlot2);
-        ABILITIES.add(new CastSummonVexes(), Keybindings.abilitySlot3);
-        ABILITIES.add(new ToggleSiegeMode(), Keybindings.abilitySlot4);
-        ABILITIES.add(new AttackGround(PillagerUnit.attackRange), Keybindings.abilitySlot5);
+        ABILITIES.add(new ToggleSiegeMode(), Keybindings.abilitySlot2);
+        ABILITIES.add(new AttackGround(PillagerUnit.attackRange), Keybindings.abilitySlot3);
+        ABILITIES.add(new CastSummonVexes(), Keybindings.abilitySlot4);
+        ABILITIES.add(new Eject(), Keybindings.abilitySlot5);
     }
 
     //region

@@ -26,7 +26,6 @@ import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -51,7 +50,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -60,7 +58,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -1013,6 +1010,15 @@ public class UnitServerEvents {
                 evt.setAmount(evt.getAmount() / 2);
             }
             evt.setAmount(evt.getAmount() * ghastUnit.getEffectiveDamageMultiplier());
+        }
+
+        if (evt.getSource().getEntity() instanceof PillagerUnit pillagerUnit && pillagerUnit.isSieging()) {
+            if (evt.getSource().getDirectEntity() instanceof Arrow arrow &&
+                    !arrow.getTags().contains(RangedAttackerUnit.MULTISHOT_ARROW_TAG)) {
+                evt.setCanceled(true); // rely on explosion damage for primary siege arrows
+            } else if (evt.getSource().is(DamageTypes.PLAYER_EXPLOSION)) {
+                evt.setAmount(evt.getAmount() * pillagerUnit.getEffectiveDamageMultiplier());
+            }
         }
 
         // ignore added weapon damage for workers

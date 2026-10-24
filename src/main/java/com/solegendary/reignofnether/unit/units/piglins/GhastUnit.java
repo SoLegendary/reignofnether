@@ -210,11 +210,6 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
         updateAbilityButtons();
     }
 
-    // used to scale fireball explosion damage based on attack bonuses
-    public float getEffectiveDamageMultiplier() {
-        return getUnitAttackDamage() / getBaseUnitAttackDamage();
-    }
-
     @Override
     public float getDamageAfterMagicAbsorb(DamageSource pSource, float pDamage) {
         pDamage = super.getDamageAfterMagicAbsorb(pSource, pDamage);

@@ -19,7 +19,6 @@ Balance
     - Tethered units take half damage and gain the enchanter's damage and passive item stats
     - March of Progress raises the damage and item bonus by 50%
 
-
 [🟡] Mounted Ravagers can now toggle 'Siege Mode', while active:
     - The ravager is immobile, immune to knockback, cannot rotate and can only attack enemies its facing
     - The mounted pillager gains double range and larger explosions on non-multishot arrows

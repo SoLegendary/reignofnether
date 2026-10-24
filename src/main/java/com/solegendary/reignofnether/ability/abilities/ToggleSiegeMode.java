@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import org.checkerframework.common.value.qual.ArrayLenRange;
 
@@ -52,7 +53,7 @@ public class ToggleSiegeMode extends Ability {
                 }
                 return false;
             },
-            () -> false,
+            () -> !((LivingEntity) unit).isVehicle(),
             () -> {
                 if (unit instanceof RavagerUnit ravagerUnit) {
                     return switch (ravagerUnit.getSiegeState()) {

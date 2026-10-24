@@ -103,6 +103,11 @@ public interface AttackerUnit {
         return Math.max(0, value * (1 - weak + str));
     }
 
+    // used to scale explosion damage based on attack bonuses
+    public default float getEffectiveDamageMultiplier() {
+        return getUnitAttackDamage() / getBaseUnitAttackDamage();
+    }
+
     public default float getCriticalChance() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.CRITICAL_HIT_CHANCE.get());
         return (float) (attr != null ? attr.getValue() : AttributeRegistrar.CRITICAL_HIT_CHANCE.get().getDefaultValue());
