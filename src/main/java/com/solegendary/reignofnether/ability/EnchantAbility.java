@@ -77,13 +77,7 @@ public abstract class EnchantAbility extends Ability {
 
     protected void doEnchant(LivingEntity entity) {
         ItemStack item = entity.getItemBySlot(equipmentSlot);
-        Enchantment enchantToRemove = getMutuallyExclusiveEnchant(entity);
         if (item != ItemStack.EMPTY) {
-            if (enchantToRemove != null) {
-                Map<Enchantment, Integer> enchants = new HashMap<>(item.getAllEnchantments());
-                enchants.remove(enchantToRemove);
-                EnchantmentHelper.setEnchantments(enchants, item);
-            }
             item.enchant(getEnchantment(), enchantmentLevel);
         }
     }
@@ -128,10 +122,5 @@ public abstract class EnchantAbility extends Ability {
                 playSound(level, te);
             }
         }
-    }
-
-    @Nullable
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        return null;
     }
 }

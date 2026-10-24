@@ -1,7 +1,7 @@
 
 1.20.1-1.5.1
 
-[✔] Done and tested
+[✅] Done and tested
 [🟡] Partially done and/or needs testing
 [❌] Not done, including unmerged PRs
 
@@ -11,8 +11,8 @@ Balance
 [❌] Slimes and magma cubes now roll on attack too
 [❌] Add roof to dark watchtower
 
-[✔] Militia Bows cost reduced from (250 food, 500 wood) to (200 food, 400 wood)
-[✔] Blacksmith Chainmail Armour cost reduced from 40 ore to 30 ore
+[✅] Militia Bows cost reduced from (250 food, 500 wood) to (200 food, 400 wood)
+[✅] Blacksmith Chainmail Armour cost reduced from 40 ore to 30 ore
 
 [🟡] The Enchanter's Protective Enchantment has been replaced with Enchanted Tether
     - Tether to up to 1/2/3 nearby allies for 30s
@@ -23,8 +23,6 @@ Balance
     - Free-attacking vexes
     - Block animations with block displays for royal guard slam
         - And make slam single click like war stomp
-    - Add tags to control arrow logic better
-        - Halve pierce and multishot damage and improve other enchants
 
 [❌] Siege tank mode for ravager artillery (by burrowing them partially into the ground)
     - Sound for digging in/out
@@ -32,32 +30,34 @@ Balance
     - Show range on hover on toggle button
     - louder arrow firing sounds
 
+[🟡] Library enchantments can now be stacked
+[🟡] Multishot additional arrows now deal 50% less damage
+[🟡] Arrows which have pierced and hurt a unit now deal 50% less damage
+
 [🟡] Great hammers now affect abilities and summoned units at 50% effectiveness (2x building damage)
 [🟡] Wildfire Molten Bombs now deal 20 damage to buildings
 
 [🟡] Royal Guard slow from Taunting Cry reduced 60% to 40% and resistance increased from 60% to 80%
-[✔] Bat HP reduced from 15hp to 10hp
+[✅] Bat HP reduced from 15hp to 10hp
 [🟡] Ghasts can now benefit from increased attack damage (explosion damage is scaled accordingly)
 [🟡] Piglin merchant TNT damage rescaled from 13.3/20/26.7 to 16/20/24 (radius unchanged)
 [🟡] Throwable TNT items are now equivalent to a level 3 merchant TNT
 [🟡] Neutral buildings now drop regular resources as bounty again instead of emeralds
 
+[🟡] All units can now take unlimited instances of damage in a single tick
+
 Quality of Life
 ---------------
-[✔] Items are no longer destroyed by explosions
-[✔] Villager profession bonuses as passive icons
+[✅] Items are no longer destroyed by explosions
+[✅] Villager profession bonuses as passive icons
 [❌] /rtsapi-set-scenario-role
     - "only works before game start and role is empty, not for in game"
 [🟡] Flowing water and lava now retain the same liquid level state when converted between each other
     - This means flowing water now becomes cobble & magma instead of lava source blocks
-[❌] Outlines of enemy buildings at the start of the game are no longer shown when fog of war is enabled
-    - This is prevent inferring your opponent's faction when they select random
 [🟡] Improved the accuracy of crediting killed neutrals for item drops and bounties
 [🟡] Population cost of units and custom production spawn eggs can now be set using the NBT tag "popCost"
 [🟡] Neutral unit bounty can be modified using the NBT "emeraldBounty"
-[❌] Improved visibility of items on the ground
-
-[❌] Look into lag from neutral aggro logic?
+[✅] Improved visibility of items on the ground and highlighted animals
 
 Bugfixes
 --------

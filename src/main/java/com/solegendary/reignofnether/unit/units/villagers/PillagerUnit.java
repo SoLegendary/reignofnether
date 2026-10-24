@@ -18,15 +18,19 @@ import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.faction.Faction;
 
+import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import com.solegendary.reignofnether.registrars.SoundRegistrar;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
@@ -53,7 +57,9 @@ import org.joml.Vector3f;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -223,11 +229,15 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     // ---- siege mode (driven by the ravager this pillager is riding) ----
     private static final UUID SIEGE_RANGE_UUID = UUID.fromString("5d1a7a3e-4c0e-4a7e-9b52-1f6a2c9e7b11");
-    // projectiles fired in siege mode carry this tag; the explosive arrow mixin should check for it
-    public static final String SIEGE_ARROW_TAG = "ron_siege_arrow";
+    private static final double SIEGE_RANGE_BONUS = 1.0; // +100% of base = doubled
 
     public boolean isSieging() {
         return getVehicle() instanceof RavagerUnit r && r.getSiegeState() == RavagerUnit.SiegeState.SIEGED;
+    }
+
+    // attack range while sieging, whether or not currently sieging (eg. for previewing it)
+    public float getSiegeAttackRange() {
+        return isSieging() ? getAttackRange() : getAttackRange() + getBaseAttackRange() * (float) SIEGE_RANGE_BONUS;
     }
 
     private void updateSiegeModifiers() {
@@ -238,16 +248,39 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
             if (ai == null) continue;
             boolean has = ai.getModifier(SIEGE_RANGE_UUID) != null;
             if (sieging && !has)
-                ai.addTransientModifier(new AttributeModifier(SIEGE_RANGE_UUID, "siege_mode", 1.0,
-                        AttributeModifier.Operation.MULTIPLY_BASE)); // +100% of base = doubled
+                ai.addTransientModifier(new AttributeModifier(SIEGE_RANGE_UUID, "siege_mode", SIEGE_RANGE_BONUS,
+                        AttributeModifier.Operation.MULTIPLY_BASE));
             else if (!sieging && has)
                 ai.removeModifier(SIEGE_RANGE_UUID);
         }
     }
 
-    private void markSiegeShot(Projectile p) {
-        if (isSieging())
-            p.addTag(SIEGE_ARROW_TAG);
+    // orange spark trail on siege arrows. Entity tags aren't synced to clients, so the pillager sends the particles
+    private static final DustParticleOptions SIEGE_TRAIL_PARTICLE =
+            new DustParticleOptions(new Vector3f(1.0f,1.0f,1.0f), 1.0f);
+    private static final int SIEGE_TRAIL_MAX_TICKS = 10 * ResourceCost.TICKS_PER_SECOND;
+    private final Map<Projectile, Vec3> siegeShots = new HashMap<>(); // arrow -> its position last tick
+
+    // multishot extras are fired at -10/+10 degrees, so only the primary arrow (angle 0) counts as the siege shot
+    private void markSiegeShot(Projectile p, float pProjectileAngle) {
+        if (isSieging() && pProjectileAngle == 0.0F)
+            siegeShots.put(p, p.position());
+    }
+
+    private void tickSiegeShotTrails() {
+        if (!(level() instanceof ServerLevel serverLevel))
+            return;
+        siegeShots.entrySet().removeIf(e -> {
+            Projectile p = e.getKey();
+            // stop once the arrow is gone or has landed (stopped moving)
+            if (p.isRemoved() || p.tickCount > SIEGE_TRAIL_MAX_TICKS)
+                return true;
+            if (p.tickCount > 1 && p.position().equals(e.getValue()))
+                return true;
+            e.setValue(p.position());
+            serverLevel.sendParticles(SIEGE_TRAIL_PARTICLE, p.getX(), p.getY(), p.getZ(), 3, 0.05, 0.05, 0.05, 0);
+            return false;
+        });
     }
 
     public PillagerUnit(EntityType<? extends Pillager> entityType, Level level) {
@@ -288,6 +321,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         Unit.tick(this);
         AttackerUnit.tick(this);
         updateSiegeModifiers();
+        tickSiegeShotTrails();
         this.mountGoal.tick();
         PromoteIllager.checkAndApplyBuff(this);
         this.attackGoal.tickChargeCrossbow();
@@ -390,7 +424,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         ItemStack itemstack = pUser.getItemInHand(interactionhand);
         if (pUser.isHolding((is) -> is.getItem() instanceof CrossbowItem)) {
             CrossbowItem.performShooting(pUser.level(), pUser, interactionhand, itemstack, pVelocity, 0);
-            this.playSound(SoundEvents.CROSSBOW_SHOOT, 3.0F, 0);
+            playCrossbowShootSound();
         }
         this.onCrossbowAttackPerformed();
         getMainHandItem().setDamageValue(0);
@@ -398,6 +432,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     @Override
     public void shootCrossbowProjectile(LivingEntity pUser, LivingEntity pTarget, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
+        RangedAttackerUnit.tagIfMultishot(pProjectile, pProjectileAngle);
+
         // bit of a hacky fix to attack buildings since this function is called from CrossbowItem
         try {
             if (pTarget == null) {
@@ -416,33 +452,33 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         if (pTarget == null)
             return;
 
-        // siege mode: lob at units in an upward arc, same as buildings
+        // siege mode: lob at units in an upward arc
         if (isSieging()) {
             double sdx = pTarget.getX() - pUser.getX();
             double sdz = pTarget.getZ() - pUser.getZ();
             Vector3f lob = this.getProjectileShotVector(pUser, new Vec3(sdx, 75, sdz), pProjectileAngle);
-            markSiegeShot(pProjectile);
+            markSiegeShot(pProjectile, pProjectileAngle);
             pProjectile.shoot(lob.x(), lob.y(), lob.z(), pVelocity, 0);
-            pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
-            if (!level().isClientSide() && pTarget instanceof Unit unit)
-                FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
-            return;
+            ParticleUtil.addParticleExplosion(ParticleTypes.POOF, 5, level(), getEyePosition());
+        } else {
+            double d0 = pTarget.getX() - pUser.getX();
+            double d1 = pTarget.getZ() - pUser.getZ();
+            double d2 = Math.sqrt(d0 * d0 + d1 * d1);
+            double d3 = pTarget.getY(0.3333333333333333) - pProjectile.getY() + d2 * 0.20000000298023224;
+            if (pTarget.getEyeHeight() <= 1.0f)
+                d1 -= (1.0f - pTarget.getEyeHeight());
+            Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
+            pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
         }
-
-        double d0 = pTarget.getX() - pUser.getX();
-        double d1 = pTarget.getZ() - pUser.getZ();
-        double d2 = Math.sqrt(d0 * d0 + d1 * d1);
-        double d3 = pTarget.getY(0.3333333333333333) - pProjectile.getY() + d2 * 0.20000000298023224;
-
-        if (pTarget.getEyeHeight() <= 1.0f)
-            d1 -= (1.0f - pTarget.getEyeHeight());
-
-        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
-        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
-        pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
-
         if (!level().isClientSide() && pTarget instanceof Unit unit)
             FogOfWarClientboundPacket.revealRangedUnit(unit.getOwnerName(), this.getId());
+    }
+
+    private void playCrossbowShootSound() {
+        if (isSieging()) {
+            this.playSound(SoundEvents.FIREWORK_ROCKET_SHOOT, 1.0f, 0);
+        }
+        this.playSound(SoundEvents.CROSSBOW_SHOOT, 3.0F, 0);
     }
 
     private void shootCrossbowProjectileAtBuilding(LivingEntity pUser, RangedAttackBuildingGoal<?> rabg, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
@@ -450,9 +486,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         double d1 = rabg.getBuildingTarget().centrePos.getZ() - pUser.getZ() + 0.5f;
 
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
-        markSiegeShot(pProjectile);
+        markSiegeShot(pProjectile, pProjectileAngle);
         pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
-        pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
 
         if (!level().isClientSide())
             FogOfWarClientboundPacket.revealRangedUnit(rabg.getBuildingTarget().ownerName, this.getId());
@@ -463,9 +498,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         double d1 = ragg.getGroundTarget().getZ() - pUser.getZ() + 0.5f;
 
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
-        markSiegeShot(pProjectile);
+        markSiegeShot(pProjectile, pProjectileAngle);
         pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
-        pUser.playSound(SoundEvents.CROSSBOW_SHOOT, 1.0F, 1.0F / (pUser.getRandom().nextFloat() * 0.4F + 0.8F));
     }
 
     @Override

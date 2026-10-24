@@ -6,6 +6,7 @@ import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
+import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.BoggedUnit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
@@ -170,6 +171,21 @@ public abstract class AbstractArrowMixin extends Projectile {
                 !(boggedUnit.getTargetGoal().forced && boggedUnit.getTargetGoal().getTarget() == entity);
     }
 
+    // piercing arrows deal half damage to every target after the first one they damage
+    @Unique
+    private boolean reignofnether$hasDealtDamage = false;
+
+    @Unique
+    private boolean reignofnether$isMultishot() {
+        return this.getTags().contains(RangedAttackerUnit.MULTISHOT_ARROW_TAG);
+    }
+
+    // siege mode pillagers' primary arrows have a larger explosion
+    @Unique
+    private float reignofnether$getExplosionRadius(PillagerUnit pUnit) {
+        return pUnit.isSieging() && !reignofnether$isMultishot() ? 2f : 1f;
+    }
+
     protected boolean canHitEntity(Entity entity) {
         return super.canHitEntity(entity) &&
                 (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId())) &&
@@ -211,6 +227,9 @@ public abstract class AbstractArrowMixin extends Projectile {
             i = (int)Math.min(j + (long)i, 2147483647L);
         }
 
+        if (reignofnether$isMultishot() || reignofnether$hasDealtDamage)
+            i = Mth.ceil(i / 2f);
+
         Entity entity1 = this.getOwner();
         DamageSource damagesource;
         if (entity1 == null) {
@@ -229,6 +248,7 @@ public abstract class AbstractArrowMixin extends Projectile {
         }
 
         if (entity.hurt(damagesource, (float)i)) {
+            reignofnether$hasDealtDamage = true;
             if (flag) {
                 return;
             }
@@ -295,7 +315,7 @@ public abstract class AbstractArrowMixin extends Projectile {
                     pResult.getEntity().getEyePosition().x,
                     pResult.getEntity().getEyePosition().y,
                     pResult.getEntity().getEyePosition().z,
-                    this.getTags().contains(PillagerUnit.SIEGE_ARROW_TAG) ? 2f : 1f,
+                    reignofnether$getExplosionRadius(pUnit),
                     false,
                     Level.ExplosionInteraction.BLOCK);
         }
@@ -313,7 +333,7 @@ public abstract class AbstractArrowMixin extends Projectile {
                     pResult.getLocation().x,
                     pResult.getLocation().y,
                     pResult.getLocation().z,
-                    1f,
+                    reignofnether$getExplosionRadius(pUnit),
                     false,
                     Level.ExplosionInteraction.TNT);
         }

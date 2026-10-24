@@ -31,6 +31,7 @@ public class ArmouredHoglinUnit extends HoglinUnit implements Unit, AttackerUnit
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
                 .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
-                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0);
+                .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), 0)
+                .add(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get(), 1.0);
     }
 }

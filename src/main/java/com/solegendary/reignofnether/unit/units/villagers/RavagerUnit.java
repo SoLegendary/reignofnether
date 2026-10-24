@@ -3,8 +3,10 @@ package com.solegendary.reignofnether.unit.units.villagers;
 import com.solegendary.reignofnether.ability.Abilities;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.abilities.*;
+import com.solegendary.reignofnether.blocks.RangeIndicator;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -59,7 +61,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
+public class RavagerUnit extends Ravager implements Unit, AttackerUnit, RangeIndicator {
     public static final Abilities ABILITIES = new Abilities();
     static {
         ABILITIES.add(new Roar(), Keybindings.abilitySlot1);
@@ -202,7 +204,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public enum SiegeState { NONE, BURROWING, SIEGED, UNBURROWING }
 
     public static final int SIEGE_TRANSITION_TICKS = 40;
-    public static final float SIEGE_SINK_DEPTH = 0.45f;       // blocks, visual only
+    public static final float SIEGE_SINK_DEPTH = 0.75f;       // blocks, visual only
     public static final double SIEGE_FRONT_HALF_ANGLE = 60;   // degrees either side of facing
 
     private int siegeTicks = 0;   // ticks into the current state (both sides)
@@ -224,6 +226,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
     public static AttributeSupplier.Builder createAttributes() {
         return Unit.createDefaultAttributes()
                 .add(Attributes.MAX_HEALTH, RavagerUnit.maxHealth)
+                .add(Attributes.MOVEMENT_SPEED, RavagerUnit.movementSpeed)
                 .add(Attributes.MOVEMENT_SPEED, RavagerUnit.movementSpeed)
                 .add(Attributes.ATTACK_DAMAGE, RavagerUnit.attackDamage)
                 .add(Attributes.ARMOR, RavagerUnit.armorValue)
@@ -274,7 +277,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         if (!canStartSiege()) return;
         lockedYRot = getYRot();
         setSiegeState(SiegeState.BURROWING);
-        digFx(true);
+        digFx();
     }
 
     public void stopSiege() {
@@ -284,7 +287,10 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         int startTicks = (s == SiegeState.BURROWING) ? SIEGE_TRANSITION_TICKS - siegeTicks : 0;
         setSiegeState(SiegeState.UNBURROWING);
         siegeTicks = Mth.clamp(startTicks, 0, SIEGE_TRANSITION_TICKS);
-        digFx(true);
+        digFx();
+        if (getFirstPassenger() instanceof Unit unit) {
+            Unit.fullResetBehaviours(unit);
+        }
     }
 
     public void toggleSiege() {
@@ -335,6 +341,11 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         Vec3 dm = getDeltaMovement();
         setDeltaMovement(0, Math.min(dm.y, 0), 0);
 
+        // runs on both sides: the sound is played locally on the client (like eating sounds in Unit.tick),
+        // particles are server only
+        if (state != SiegeState.SIEGED && siegeTicks % 4 == 0)
+            digFx();
+
         if (level().isClientSide()) return;
 
         // pillager gone (ejected, dead, dismounted) -> unburrow
@@ -348,27 +359,23 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         if (target != null && !isInFront(target))
             setTarget(null);
 
-        if (state != SiegeState.SIEGED && siegeTicks % 5 == 0)
-            digFx(false);
-
         if (siegeTicks >= SIEGE_TRANSITION_TICKS) {
             if (state == SiegeState.BURROWING) {
                 setSiegeState(SiegeState.SIEGED);
-                digFx(true);
             } else if (state == SiegeState.UNBURROWING) {
                 setSiegeState(SiegeState.NONE);
             }
         }
     }
 
-    private void digFx(boolean big) {
-        if (!(level() instanceof ServerLevel sl)) return;
-        BlockState below = sl.getBlockState(blockPosition().below());
+    private void digFx() {
+        BlockState below = level().getBlockState(blockPosition().below());
         if (below.isAir()) return;
         SoundType st = below.getSoundType();
-        playSound(big ? st.getBreakSound() : st.getHitSound(), big ? 1.4f : 0.9f, 0.6f);
+        playSound(st.getBreakSound(), 1.5f + (random.nextFloat() - 0.5f) * 0.4f, 0.4f + (random.nextFloat() - 0.5f) * 0.2f);
+        if (!(level() instanceof ServerLevel sl)) return;
         sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, below),
-                getX(), getY(), getZ(), big ? 25 : 8, 1.0, 0.1, 1.0, 0.15);
+                getX(), getY(), getZ(), 50, 1.0, 0.1, 1.0, 0.15);
     }
 
     // ---- immobility overrides ----
@@ -402,6 +409,45 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         return super.getPassengersRidingOffset() - getSiegeSinkOffset(1f);
     }
 
+    // ---- range indicator ----
+
+    private Set<BlockPos> highlightBps = new HashSet<>();
+    private BlockPos lastOnPos = new BlockPos(0,0,0);
+    private float lastIndicatorRange = 0;
+
+    @Override public Set<BlockPos> getHighlightBps() { return highlightBps; }
+    @Override public void setHighlightBps(Set<BlockPos> bps) { highlightBps = bps; }
+
+    // the riding pillager's siege range while sieged, or as a preview while hovering over the siege mode button
+    // 0 = nothing to show (only drawn if selected, see RangeIndicator.showOnlyWhenSelected)
+    private float getSiegeIndicatorRange() {
+        if (!(getFirstPassenger() instanceof PillagerUnit pillager))
+            return 0;
+        boolean previewing = HudClientEvents.hudSelectedEntity == this && ToggleSiegeMode.isButtonHovered();
+        if (getSiegeState() == SiegeState.SIEGED || previewing)
+            return pillager.getSiegeAttackRange();
+        return 0;
+    }
+
+    @Override
+    public void updateHighlightBps(Level level) {
+        RangeIndicator.super.updateHighlightBps(level());
+        if (level().isClientSide()) {
+            float range = getSiegeIndicatorRange();
+            if (range > 0)
+                this.highlightBps.addAll(MiscUtil.getRangeIndicatorCircleBlocks(blockPosition(), (int) (range - 1), level()));
+        }
+    }
+
+    private void tickRangeIndicator() {
+        float range = getSiegeIndicatorRange();
+        if (range != lastIndicatorRange || (range > 0 && !lastOnPos.equals(getOnPos()))) {
+            lastIndicatorRange = range;
+            lastOnPos = getOnPos();
+            updateHighlightBps(level());
+        }
+    }
+
     // ------------------------------------------------------------------
 
     public void tick() {
@@ -410,6 +456,8 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit {
         Unit.tick(this);
         AttackerUnit.tick(this);
         tickSiege();
+        if (level().isClientSide())
+            tickRangeIndicator();
     }
 
     @Override

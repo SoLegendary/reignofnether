@@ -61,7 +61,6 @@ public class EnchantMaiming extends EnchantAbility {
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.maiming.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.maiming.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.maiming.tooltip3"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY)
                 ),
                 this,
@@ -73,14 +72,5 @@ public class EnchantMaiming extends EnchantAbility {
     public boolean isCorrectUnitAndEquipment(LivingEntity entity) {
         return entity instanceof VindicatorUnit &&
                 entity.getItemBySlot(EquipmentSlot.MAINHAND).getItem() instanceof AxeItem;
-    }
-
-    @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
-            if (enchantment == Enchantments.SHARPNESS || enchantment == getEnchantment())
-                return enchantment;
-        }
-        return null;
     }
 }

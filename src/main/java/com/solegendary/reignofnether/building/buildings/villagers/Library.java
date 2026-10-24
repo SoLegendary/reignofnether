@@ -184,10 +184,7 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
                     Mob.class,
                     tickLevel
             )) {
-                if ((
-                        autoCastEnchant.isCorrectUnitAndEquipment(e) && autoCastEnchant.canAfford(bp)
-                                && autoCastEnchant.getMutuallyExclusiveEnchant(e) == null
-                )) {
+                if (autoCastEnchant.isCorrectUnitAndEquipment(e) && autoCastEnchant.canAfford(bp)) {
                     mobs.add(e);
                 }
             }

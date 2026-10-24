@@ -52,7 +52,7 @@ public class AttackGround extends Ability {
                 },
                 () -> {
                     if (unit instanceof RavagerUnit ravagerUnit)
-                        return !(ravagerUnit.getFirstPassenger() instanceof PillagerUnit);
+                        return !(ravagerUnit.getFirstPassenger() instanceof PillagerUnit) || (ravagerUnit.getSiegeState() != RavagerUnit.SiegeState.SIEGED);
                     return false;
                 },
                 () -> true,

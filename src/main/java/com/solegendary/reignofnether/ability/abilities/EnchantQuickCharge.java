@@ -62,7 +62,6 @@ public class EnchantQuickCharge extends EnchantAbility {
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.quickshot.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.quickshot.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.quickshot.tooltip3"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY)
                 ),
                 this,
@@ -74,14 +73,5 @@ public class EnchantQuickCharge extends EnchantAbility {
     public boolean isCorrectUnitAndEquipment(LivingEntity entity) {
         return entity instanceof PillagerUnit &&
                 entity.getItemBySlot(equipmentSlot).getItem() instanceof CrossbowItem;
-    }
-
-    @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
-            if (enchantment == Enchantments.MULTISHOT || enchantment == getEnchantment())
-                return enchantment;
-        }
-        return null;
     }
 }

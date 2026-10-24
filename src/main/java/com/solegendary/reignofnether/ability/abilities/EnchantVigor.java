@@ -63,7 +63,6 @@ public class EnchantVigor extends EnchantAbility {
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.vigor.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.vigor.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.vigor.tooltip3"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY)
                 ),
                 this,
@@ -74,14 +73,5 @@ public class EnchantVigor extends EnchantAbility {
     @Override
     public boolean isCorrectUnitAndEquipment(LivingEntity entity) {
         return entity instanceof EvokerUnit && entity.getItemBySlot(equipmentSlot).getItem() instanceof BowItem;
-    }
-
-    @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
-            if (enchantment == Enchantments.MULTISHOT || enchantment == getEnchantment())
-                return enchantment;
-        }
-        return null;
     }
 }

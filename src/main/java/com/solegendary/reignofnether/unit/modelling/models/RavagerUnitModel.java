@@ -11,7 +11,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class RavagerUnitModel extends RavagerModel {
     private static final float SPLAY = 0.22f;       // braced stance, radians outward
-    private static final float DIG_SPEED = 0.8f;    // radians per tick, ~5 scrapes over 40 ticks
+    private static final float WALK_SPEED = 0.6662f * 0.75f; // vanilla walk cycle (0.6662 rad per tick at full limb swing) - 25%
+    private static final float WALK_AMPLITUDE = 0.4f;        // vanilla full-speed leg swing
+    private static final float HIND_AMPLITUDE_MULT = 0.35f;  // hind legs move much less than front legs while digging
+    private static final float HEAD_DIP = 0.4f;              // radians, head pitched down while digging
+    private static final float HEAD_DIP_RAMP = 2.5f;         // higher = head reaches full dip sooner
 
     private final ModelPart head;
     private final ModelPart rightHindLeg;
@@ -39,19 +43,18 @@ public class RavagerUnitModel extends RavagerModel {
         float partialTick = pAgeInTicks - pEntity.tickCount;
         float progress = unit.getSiegeProgress(partialTick);   // 0 surfaced -> 1 sunk
         float dig = Mth.sin(progress * Mth.PI);                // 0 at both ends, peaks mid-transition
-        float t = pAgeInTicks * DIG_SPEED;
+        float t = pAgeInTicks * WALK_SPEED;
 
-        // front legs: alternate raising forward then scraping back (negative xRot = foot forward)
-        float frontR = -0.4f + 0.7f * Mth.sin(t);
-        float frontL = -0.4f + 0.7f * Mth.sin(t + Mth.PI);
-        rightFrontLeg.xRot = Mth.lerp(dig, rightFrontLeg.xRot, frontR);
-        leftFrontLeg.xRot  = Mth.lerp(dig, leftFrontLeg.xRot,  frontL);
+        // same leg cycle as vanilla RavagerModel's walk, eased in/out via 'dig'
+        float cycle = Mth.cos(t) * WALK_AMPLITUDE;
+        float hindCycle = cycle * HIND_AMPLITUDE_MULT;
+        rightHindLeg.xRot  = Mth.lerp(dig, rightHindLeg.xRot,   hindCycle);
+        leftHindLeg.xRot   = Mth.lerp(dig, leftHindLeg.xRot,   -hindCycle);
+        rightFrontLeg.xRot = Mth.lerp(dig, rightFrontLeg.xRot, -cycle);
+        leftFrontLeg.xRot  = Mth.lerp(dig, leftFrontLeg.xRot,   cycle);
 
-        // hind legs: smaller, offset kicks pushing dirt back
-        float hindR = 0.3f * Mth.sin(t + Mth.HALF_PI);
-        float hindL = 0.3f * Mth.sin(t + Mth.HALF_PI + Mth.PI);
-        rightHindLeg.xRot = Mth.lerp(dig, rightHindLeg.xRot, hindR);
-        leftHindLeg.xRot  = Mth.lerp(dig, leftHindLeg.xRot,  hindL);
+        // head dips toward the ground while digging: snaps down quickly (linear ramp, not eased), holds, then lifts
+        head.xRot += HEAD_DIP * Math.min(1f, dig * HEAD_DIP_RAMP);
 
         // braced stance once down: legs splay outward and stay that way while sieged
         // (positive zRot moves the foot toward -x, so right = +, left = -)
@@ -59,8 +62,5 @@ public class RavagerUnitModel extends RavagerModel {
         rightHindLeg.zRot  =  SPLAY * progress;
         leftFrontLeg.zRot  = -SPLAY * progress;
         leftHindLeg.zRot   = -SPLAY * progress;
-
-        // head nods into the ground while digging
-        head.xRot += 0.35f * dig * Mth.sin(t);
     }
 }

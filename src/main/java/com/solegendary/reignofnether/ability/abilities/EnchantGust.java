@@ -64,7 +64,6 @@ public class EnchantGust extends EnchantAbility {
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.gust.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.gust.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.gust.tooltip3"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY)
                 ),
                 this,
@@ -76,14 +75,5 @@ public class EnchantGust extends EnchantAbility {
     public boolean isCorrectUnitAndEquipment(LivingEntity entity) {
         return entity instanceof WindcallerUnit &&
                 entity.getItemBySlot(equipmentSlot).getItem() instanceof BowItem;
-    }
-
-    @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
-            if (enchantment == Enchantments.MULTISHOT || enchantment == getEnchantment())
-                return enchantment;
-        }
-        return null;
     }
 }

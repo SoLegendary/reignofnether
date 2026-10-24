@@ -30,6 +30,7 @@ import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
+import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
@@ -205,6 +206,10 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
 
         drawY += yAndScaleOffsets.getFirst();// + UnitClientEvents.yOffset;
         sizeFinal += yAndScaleOffsets.getSecond();// + UnitClientEvents.scale;
+
+        // counteract siege mode sinking
+        if (entity instanceof RavagerUnit ravagerUnit)
+            drawY -= Math.round(ravagerUnit.getSiegeSinkOffset(1f) * sizeFinal);
 
         boolean hasBanner = false;
         ItemStack bannerStack = entity.getItemBySlot(EquipmentSlot.HEAD);

@@ -2,7 +2,9 @@ package com.solegendary.reignofnether.ability.abilities;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
+import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -27,6 +29,13 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 public class ToggleSiegeMode extends Ability {
 
     private static final int CD_MAX_SECONDS = 20;
+    private static final String BUTTON_NAME = "Siege Mode";
+
+    // client only
+    public static boolean isButtonHovered() {
+        Button hovered = HudClientEvents.getMousedOverButton();
+        return hovered != null && hovered.name.equals(BUTTON_NAME);
+    }
 
     public ToggleSiegeMode() {
         super(UnitAction.TOGGLE_SIEGE_MODE, CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND, 0, 0, false, true);
@@ -34,10 +43,15 @@ public class ToggleSiegeMode extends Ability {
 
     @Override
     public AbilityButton getButton(Keybinding hotkey, Unit unit) {
-        return new AbilityButton("Siege Mode",
-            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/ravager_roar.png"),
+        return new AbilityButton(BUTTON_NAME,
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/siege_mode.png"),
             hotkey,
-            () -> false,
+            () -> {
+                if (unit instanceof RavagerUnit ravagerUnit) {
+                    return ravagerUnit.getSiegeState() == RavagerUnit.SiegeState.SIEGED;
+                }
+                return false;
+            },
             () -> false,
             () -> {
                 if (unit instanceof RavagerUnit ravagerUnit) {
