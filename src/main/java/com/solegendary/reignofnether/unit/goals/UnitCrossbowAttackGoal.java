@@ -117,6 +117,16 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
         return true;
     }
 
+    // refresh the effect of any applied enchantments
+    public void unloadCrossbow() {
+        if (this.crossbowState != CHARGED && this.crossbowState != READY_TO_ATTACK)
+            return;
+        ItemStack itemstack = this.mob.getItemBySlot(EquipmentSlot.MAINHAND);
+        CrossbowItem.setCharged(itemstack, false);
+        itemstack.removeTagKey("ChargedProjectiles");
+        this.crossbowState = UNCHARGED;
+    }
+
     public void tickChargeCrossbow() {
         ItemStack itemstack = this.mob.getItemBySlot(EquipmentSlot.MAINHAND);
         if (this.crossbowState == UNCHARGED) {

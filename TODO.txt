@@ -19,23 +19,20 @@ Balance
     - Tethered units take half damage and gain the enchanter's damage and passive item stats
     - March of Progress raises the damage and item bonus by 50%
 
-[❌] Villager reworks
-    - Free-attacking vexes
-    - Block animations with block displays for royal guard slam
-        - And make slam single click like war stomp
 
-[❌] Siege tank mode for ravager artillery (by burrowing them partially into the ground)
-    - Sound for digging in/out
-    - More ground particles
-    - Show range on hover on toggle button
-    - louder arrow firing sounds
+[🟡] Mounted Ravagers can now toggle 'Siege Mode', while active:
+    - The ravager is immobile, immune to knockback, cannot rotate and can only attack enemies its facing
+    - The mounted pillager gains double range and larger explosions on non-multishot arrows
+    - If the pillager dies or is ejected, siege mode is disabled
 
-[🟡] Library enchantments can now be stacked
+[❌] Libraries can now autocast any number of enchantments instead of just one
+[✅] Library enchantments can now be stacked
 [🟡] Multishot additional arrows now deal 50% less damage
 [🟡] Arrows which have pierced and hurt a unit now deal 50% less damage
-
+[✅] Multishot cost reduced from (70 wood, 35 ore) to (60 wood, 30 ore)
+[✅] Quick charge cost reduced from (40 wood, 20 ore) to (30 wood, 20 ore)
 [🟡] Great hammers now affect abilities and summoned units at 50% effectiveness (2x building damage)
-[🟡] Wildfire Molten Bombs now deal 20 damage to buildings
+[✅] Wildfire Molten Bombs now deal 20 damage to buildings
 
 [🟡] Royal Guard slow from Taunting Cry reduced 60% to 40% and resistance increased from 60% to 80%
 [✅] Bat HP reduced from 15hp to 10hp
@@ -44,27 +41,31 @@ Balance
 [🟡] Throwable TNT items are now equivalent to a level 3 merchant TNT
 [🟡] Neutral buildings now drop regular resources as bounty again instead of emeralds
 
-[🟡] All units can now take unlimited instances of damage in a single tick
+[❌] Free attacking vexes?
+[❌] Block animations with block displays for royal guard slam
+[❌] Make mace slam single click like war stomp
+[❌] All units can now take unlimited instances of damage in a single tick
 
 Quality of Life
 ---------------
 [✅] Items are no longer destroyed by explosions
 [✅] Villager profession bonuses as passive icons
-[❌] /rtsapi-set-scenario-role
-    - "only works before game start and role is empty, not for in game"
 [🟡] Flowing water and lava now retain the same liquid level state when converted between each other
     - This means flowing water now becomes cobble & magma instead of lava source blocks
 [🟡] Improved the accuracy of crediting killed neutrals for item drops and bounties
 [🟡] Population cost of units and custom production spawn eggs can now be set using the NBT tag "popCost"
 [🟡] Neutral unit bounty can be modified using the NBT "emeraldBounty"
 [✅] Improved visibility of items on the ground and highlighted animals
+[❌] /rtsapi-set-scenario-role
+    - actually start the rts player in that role
+    - error if there is already a player in that role or if that player already has a role
 
 Bugfixes
 --------
 [🟡] Fixed resistance effects being more effective than 20% per level
-[🟡] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
+[✅] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
 [🟡] Fixed mob effects not showing if it was applied while outside of render range or logged out
-[❌] Fixed an issue where pillagers did not benefit from their enchantment until after their next shot
+[✅] Fixed an issue where pillagers did not benefit from their enchantment until after their next shot
 
 Languages
 ---------

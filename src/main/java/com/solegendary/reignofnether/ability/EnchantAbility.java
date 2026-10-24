@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
@@ -79,6 +80,8 @@ public abstract class EnchantAbility extends Ability {
         ItemStack item = entity.getItemBySlot(equipmentSlot);
         if (item != ItemStack.EMPTY) {
             item.enchant(getEnchantment(), enchantmentLevel);
+            if (entity instanceof PillagerUnit pillagerUnit && equipmentSlot == EquipmentSlot.MAINHAND)
+                pillagerUnit.unloadCrossbow();
         }
     }
 

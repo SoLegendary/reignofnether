@@ -25,7 +25,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -171,10 +170,6 @@ public abstract class AbstractArrowMixin extends Projectile {
                 !(boggedUnit.getTargetGoal().forced && boggedUnit.getTargetGoal().getTarget() == entity);
     }
 
-    // piercing arrows deal half damage to every target after the first one they damage
-    @Unique
-    private boolean reignofnether$hasDealtDamage = false;
-
     @Unique
     private boolean reignofnether$isMultishot() {
         return this.getTags().contains(RangedAttackerUnit.MULTISHOT_ARROW_TAG);
@@ -227,15 +222,14 @@ public abstract class AbstractArrowMixin extends Projectile {
             i = (int)Math.min(j + (long)i, 2147483647L);
         }
 
-        if (reignofnether$isMultishot() || reignofnether$hasDealtDamage)
-            i = Mth.ceil(i / 2f);
-
         Entity entity1 = this.getOwner();
+        // the real arrow must be the direct entity so that its tags are visible in damage events
+        AbstractArrow thisArrow = (AbstractArrow) (Object) this;
         DamageSource damagesource;
         if (entity1 == null) {
-            damagesource = damageSources().arrow(new Arrow(this.level(), this.xo, this.yo, this.zo), this);//DamageSource.arrow(this, this);
+            damagesource = damageSources().arrow(thisArrow, this);
         } else {
-            damagesource = damageSources().arrow(new Arrow(this.level(), this.xo, this.yo, this.zo), entity1);
+            damagesource = damageSources().arrow(thisArrow, entity1);
             if (entity1 instanceof LivingEntity) {
                 ((LivingEntity)entity1).setLastHurtMob(entity);
             }
@@ -248,7 +242,7 @@ public abstract class AbstractArrowMixin extends Projectile {
         }
 
         if (entity.hurt(damagesource, (float)i)) {
-            reignofnether$hasDealtDamage = true;
+            this.addTag(RangedAttackerUnit.DEALT_DAMAGE_ARROW_TAG);
             if (flag) {
                 return;
             }

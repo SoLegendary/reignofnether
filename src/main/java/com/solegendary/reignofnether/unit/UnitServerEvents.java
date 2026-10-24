@@ -962,6 +962,18 @@ public class UnitServerEvents {
         return entities;
     }
 
+    // LivingEntityMixin.actuallyHurt ignores the amount returned from LivingDamageEvent for unit attacks,
+    // so damage that must apply to them is modified here instead
+    @SubscribeEvent
+    public static void onEntityHurt(LivingHurtEvent evt) {
+        // multishot extras and piercing arrows (after their first target) deal half damage
+        if (evt.getSource().getDirectEntity() instanceof AbstractArrow arrow &&
+            (arrow.getTags().contains(RangedAttackerUnit.MULTISHOT_ARROW_TAG) ||
+             arrow.getTags().contains(RangedAttackerUnit.DEALT_DAMAGE_ARROW_TAG))) {
+            evt.setAmount(evt.getAmount() / 2);
+        }
+    }
+
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
 

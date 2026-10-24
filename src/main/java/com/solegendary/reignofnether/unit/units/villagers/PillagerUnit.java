@@ -405,6 +405,11 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         this.setItemSlot(EquipmentSlot.MAINHAND, cbowStack);
     }
 
+    public void unloadCrossbow() {
+        if (this.attackGoal != null)
+            this.attackGoal.unloadCrossbow();
+    }
+
     public Enchantment getEnchant() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
         Optional<Enchantment> enchant = Optional.empty();
