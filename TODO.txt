@@ -48,10 +48,6 @@ Balance
 [✅] All units can now take unlimited instances of damage in a single tick
 
 
-[❌] Block animations with block displays for royal guard slam
-[❌] Make mace slam single click like war stomp
-
-
 Quality of Life
 ---------------
 [✅] Items are no longer destroyed by explosions

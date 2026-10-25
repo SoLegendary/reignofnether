@@ -529,12 +529,29 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     }
 
     private void shootCrossbowProjectileAtBuilding(LivingEntity pUser, RangedAttackBuildingGoal<?> rabg, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
-        double d0 = rabg.getBuildingTarget().centrePos.getX() - pUser.getX() + 0.5f;
-        double d1 = rabg.getBuildingTarget().centrePos.getZ() - pUser.getZ() + 0.5f;
+        if (isSieging()) {
+            double d0 = rabg.getBuildingTarget().centrePos.getX() - pUser.getX() + 0.5f;
+            double d1 = rabg.getBuildingTarget().centrePos.getZ() - pUser.getZ() + 0.5f;
 
-        Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
-        markSiegeShot(pProjectile, pProjectileAngle);
-        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
+            Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
+            markSiegeShot(pProjectile, pProjectileAngle);
+            pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
+        } else {
+            // outside of siege mode, shoot straight at a placed block of the building (with the same drop compensation
+            // as unit shots). crossbow shots don't go through the goal's own retargeting, so pick a new block per volley
+            // on the primary arrow - multishot extras then fan out around the same block
+            if (pProjectileAngle == 0.0F)
+                rabg.setNextBlockTarget();
+            BlockPos blockTarget = rabg.getBlockTarget() != null ? rabg.getBlockTarget() : rabg.getBuildingTarget().centrePos;
+            Vec3 targetPos = Vec3.atCenterOf(blockTarget);
+            double d0 = targetPos.x - pUser.getX();
+            double d1 = targetPos.z - pUser.getZ();
+            double d2 = Math.sqrt(d0 * d0 + d1 * d1);
+            double d3 = targetPos.y - pProjectile.getY() + d2 * 0.2;
+
+            Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, d3, d1), pProjectileAngle);
+            pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
+        }
 
         if (!level().isClientSide())
             FogOfWarClientboundPacket.revealRangedUnit(rabg.getBuildingTarget().ownerName, this.getId());
