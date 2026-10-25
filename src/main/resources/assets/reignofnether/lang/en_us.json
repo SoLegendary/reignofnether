@@ -991,6 +991,12 @@
     "commands.reignofnether.player.ally.success": "Allied %s and %s",
     "commands.reignofnether.player.ally.not_allied": "%s and %s are not allied",
     "commands.reignofnether.player.unally.success": "Unallied %s and %s",
+    "commands.reignofnether.scenario.not_scenario_mode": "The map is not in scenario mode",
+    "commands.reignofnether.scenario.already_rts_player": "%s is already an RTS player",
+    "commands.reignofnether.scenario.unknown_role": "Unknown scenario role %d",
+    "commands.reignofnether.scenario.role_npc": "Scenario role %d is only for NPCs",
+    "commands.reignofnether.scenario.role_taken": "Scenario role %d is already taken by %s",
+    "commands.reignofnether.scenario.start_role.success": "Started %s as scenario role '%s' (%d)",
 
     "commands.reignofnether.resource.unknown": "Unknown resource '%s'. Valid values: food, wood, ore, emerald",
 

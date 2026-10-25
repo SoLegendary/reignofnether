@@ -8,8 +8,8 @@
 
 Balance
 -------
-[❌] Slimes and magma cubes now roll on attack too
 [❌] Add roof to dark watchtower
+[❌] Free attacking vexes?
 
 [✅] The Enchanter's Protective Enchantment has been replaced with Enchanted Tether
     - Tether to up to 1/2/3 nearby allies for 30s
@@ -47,7 +47,7 @@ Balance
 
 [✅] All units can now take unlimited instances of damage in a single tick
 
-[❌] Free attacking vexes?
+
 [❌] Block animations with block displays for royal guard slam
 [❌] Make mace slam single click like war stomp
 
@@ -56,19 +56,20 @@ Quality of Life
 ---------------
 [✅] Items are no longer destroyed by explosions
 [✅] Villager profession bonuses as passive icons
-[🟡] Flowing water and lava now retain the same liquid level state when converted between each other
+[✅] Flowing water and lava now retain the same liquid level state when converted between each other
     - This means flowing water now becomes cobble & magma instead of lava source blocks
-[🟡] Improved the accuracy of crediting killed neutrals for item drops and bounties
-[🟡] Population cost of units and custom production spawn eggs can now be set using the NBT tag "popCost"
-[🟡] Neutral unit bounty can be modified using the NBT "emeraldBounty"
+[✅] Improved the accuracy of crediting killed neutrals for item drops and bounties
+[✅] Population cost of units and custom production spawn eggs can now be set using the NBT tag "popCost"
+[✅] Neutral unit bounty can be modified using the NBT "emeraldBounty"
 [✅] Improved visibility of items on the ground and highlighted animals
-[❌] /rtsapi-set-scenario-role
-    - actually start the rts player in that role
-    - error if there is already a player in that role or if that player already has a role
+[✅] Added a command /rtsapi-start-scenario-role <playerName> <scenarioRoleId>
+    - This immediately starts the scenario for the player in the given role
+    - Will error if the role is unavailable (nonexistent, taken or is for NPCs only)
+    - Can't be used to change the role for players who already started the scenario
 
 Bugfixes
 --------
-[❌] Fixed custom spawn eggs not showing custom tooltips unless they had a tooltipTitle tag
+[✅] Fixed custom spawn eggs tooltips showing default costs if you didn't add a tooltipTitle
 [✅] Fixed resistance effects being more effective than 20% per level
 [✅] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
 [✅] Fixed mob effects not showing if it was applied while outside of render range or logged out
