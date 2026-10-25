@@ -190,7 +190,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     // endregion
 
-    final static public int LEVITATE_TICKS = 80;
+    final static public int LEVITATE_TICKS = 100;
     final static public int LONGSHOT_BONUS_RANGE = 4;
 
     final static public float attackDamage = 5.0f;

@@ -388,6 +388,7 @@ public class MiscUtil {
                 if (filter.test(entity) &&
                         isIdleOrMoveAttackable(unitMob, entity, neutralAggro) &&
                         hasLineOfSightForAttacks(unitMob, entity) &&
+                        !(unitMob instanceof AttackerUnit aUnit && aUnit.isBelowMinAttackRange(entity)) &&
                         !(entity instanceof Unit unit && unit.isGarrisoned())) {
                     return entity;
                 }

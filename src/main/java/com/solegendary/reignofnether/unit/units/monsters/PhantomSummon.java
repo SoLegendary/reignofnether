@@ -13,7 +13,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -39,7 +38,7 @@ public class PhantomSummon extends Phantom {
     public int tickCountUntilDeath = 1200; // hard cap on lifespan
     public int attackCooldown = 0;
     public final int ATTACK_COOLDOWN_MAX = 120;
-    public static final float HERO_DAMAGE_MULT = 0.7f;
+    public static final float HERO_BUILDING_DAMAGE_MULT = 0.7f;
 
     public LivingEntity entityTarget = null;
 

@@ -721,8 +721,7 @@ public class BuildingServerEvents {
             );
 
             if (building.getBuilding() instanceof Library) {
-                EnchantAbility ability = building.getDataStorage().getData(Library.AUTO_CAST_ENCHANT);
-                if (ability != null) {
+                for (EnchantAbility ability : building.getDataStorage().getData(Library.AUTO_CAST_ENCHANTS)) {
                     BuildingAbilityClientboundPacket.doAbility(ability.action, building.originPos);
                 }
             }else if (building.getBuilding() instanceof Blacksmith) {

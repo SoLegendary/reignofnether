@@ -44,16 +44,13 @@ public class EnchantQuickCharge extends EnchantAbility {
                 "Quick Charge Enchantment",
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/crossbow_arrow.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this,
+                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || Library.isAutoCasting(placement, this),
                 () -> false,
                 () -> true,
                 () -> CursorClientEvents.setLeftClickAction(ENCHANT_ACTION),
                 () -> {
                     BuildingAbilityServerboundPacket.doAbility(ENCHANT_ACTION, placement.originPos, this.oneClickOneUse);
-                    if (placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this)
-                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
-                    else
-                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, this);
+                    Library.toggleAutoCast(placement, this);
                 },
                 List.of(
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.quickshot"), Style.EMPTY.withBold(true)),

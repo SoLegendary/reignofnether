@@ -909,7 +909,7 @@ public interface Unit {
         if (getUnitResistPercentage() > 0) {
             fcsList.add(fcs(I18n.get("unitstats.reignofnether.armour_all", (int) (getUnitResistPercentage() * 100)), false));
         }
-        else if (getUnitMagicArmorPercentage() > 0) {
+        if (getUnitMagicArmorPercentage() > 0) {
             fcsList.add(fcs(I18n.get("unitstats.reignofnether.armour_magic", (int) (getUnitMagicArmorPercentage() * 100)), false));
         }
         return fcsList;

@@ -181,6 +181,16 @@ public abstract class AbstractArrowMixin extends Projectile {
         return pUnit.isSieging() && !reignofnether$isMultishot() ? 2f : 1f;
     }
 
+    // an arrow only ever explodes once, even if it pierces or hits a block after hitting an entity
+    @Unique
+    private void reignofnether$explodeOnce(PillagerUnit pUnit, DamageSource source, Vec3 pos, Level.ExplosionInteraction interaction) {
+        if (this.getTags().contains(RangedAttackerUnit.EXPLODED_ARROW_TAG))
+            return;
+        this.addTag(RangedAttackerUnit.EXPLODED_ARROW_TAG);
+        pUnit.level().explode(this.getOwner(), source, null, pos.x, pos.y, pos.z,
+                reignofnether$getExplosionRadius(pUnit), false, interaction);
+    }
+
     protected boolean canHitEntity(Entity entity) {
         return super.canHitEntity(entity) &&
                 (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId())) &&
@@ -305,12 +315,7 @@ public abstract class AbstractArrowMixin extends Projectile {
 
         if (this.getOwner() instanceof PillagerUnit pUnit &&
             !pUnit.level().isClientSide() && pUnit.isPassenger()) {
-            pUnit.level().explode(this.getOwner(), damagesource, null,
-                    pResult.getEntity().getEyePosition().x,
-                    pResult.getEntity().getEyePosition().y,
-                    pResult.getEntity().getEyePosition().z,
-                    reignofnether$getExplosionRadius(pUnit),
-                    false,
+            reignofnether$explodeOnce(pUnit, damagesource, pResult.getEntity().getEyePosition(),
                     Level.ExplosionInteraction.BLOCK);
         }
     }
@@ -323,13 +328,7 @@ public abstract class AbstractArrowMixin extends Projectile {
     protected void onHitBlock(BlockHitResult pResult, CallbackInfo ci) {
         if (this.getOwner() instanceof PillagerUnit pUnit &&
                 !pUnit.level().isClientSide() && pUnit.isPassenger()) {
-            pUnit.level().explode(this.getOwner(), null, null,
-                    pResult.getLocation().x,
-                    pResult.getLocation().y,
-                    pResult.getLocation().z,
-                    reignofnether$getExplosionRadius(pUnit),
-                    false,
-                    Level.ExplosionInteraction.TNT);
+            reignofnether$explodeOnce(pUnit, null, pResult.getLocation(), Level.ExplosionInteraction.TNT);
         }
 
         if (this.getOwner() instanceof AttackerUnit aUnit) {

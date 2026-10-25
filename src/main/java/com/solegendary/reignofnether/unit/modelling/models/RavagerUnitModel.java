@@ -37,8 +37,14 @@ public class RavagerUnitModel extends RavagerModel {
                           float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
 
-        if (!(pEntity instanceof RavagerUnit unit) || !unit.isSiegeLocked())
+        if (!(pEntity instanceof RavagerUnit unit) || !unit.isSiegeLocked()) {
+            // the model is shared by every ravager and vanilla never resets zRot, so clear any splay left by a sieged one
+            rightFrontLeg.zRot = 0;
+            rightHindLeg.zRot = 0;
+            leftFrontLeg.zRot = 0;
+            leftHindLeg.zRot = 0;
             return;
+        }
 
         float partialTick = pAgeInTicks - pEntity.tickCount;
         float progress = unit.getSiegeProgress(partialTick);   // 0 surfaced -> 1 sunk

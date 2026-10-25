@@ -72,7 +72,7 @@ public abstract class EnchantAbility extends Ability {
         return false;
     }
 
-    protected boolean hasSameEnchant(LivingEntity entity) {
+    public boolean hasSameEnchant(LivingEntity entity) {
         return entity.getItemBySlot(equipmentSlot).getAllEnchantments().containsKey(getEnchantment());
     }
 

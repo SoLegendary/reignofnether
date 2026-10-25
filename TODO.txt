@@ -11,39 +11,46 @@ Balance
 [❌] Slimes and magma cubes now roll on attack too
 [❌] Add roof to dark watchtower
 
-[✅] Militia Bows cost reduced from (250 food, 500 wood) to (200 food, 400 wood)
-[✅] Blacksmith Chainmail Armour cost reduced from 40 ore to 30 ore
-
-[🟡] The Enchanter's Protective Enchantment has been replaced with Enchanted Tether
+[✅] The Enchanter's Protective Enchantment has been replaced with Enchanted Tether
     - Tether to up to 1/2/3 nearby allies for 30s
     - Tethered units take half damage and gain the enchanter's damage and passive item stats
     - March of Progress raises the damage and item bonus by 50%
 
-[🟡] Mounted Ravagers can now toggle 'Siege Mode', while active:
+[✅] Mounted Ravagers can now toggle 'Siege Mode', while active:
     - The ravager is immobile, immune to knockback, cannot rotate and can only attack enemies its facing
     - The mounted pillager gains double range and larger explosions on non-multishot arrows
     - If the pillager dies or is ejected, siege mode is disabled
 
-[❌] Libraries can now autocast any number of enchantments instead of just one
+[✅] Militia Bows cost reduced from (250 food, 500 wood) to (200 food, 400 wood)
+[✅] Blacksmith Chainmail Armour cost reduced from 40 ore to 30 ore
+[✅] Libraries can now autocast any number of enchantments instead of just one
+[✅] Windcaller levitation duration increased from 4s to 5s
 [✅] Library enchantments can now be stacked
-[🟡] Multishot additional arrows now deal 50% less damage
-[🟡] Arrows which have pierced and hurt a unit now deal 50% less damage
+[✅] Pillager base damage raised from 7 to 8
+[✅] The Enchanter's Ultimate now affects multishot (increasing the arrow count to 5)
+[✅] Multishot additional arrows now deal 50% less damage per level of multishot (arrows 2-3 deal 50%, arrows 4-5 deal 25%)
+[✅] Arrows which have pierced a unit now deal 50% less damage (unless they are multishot arrows)
 [✅] Multishot cost reduced from (70 wood, 35 ore) to (60 wood, 30 ore)
 [✅] Quick charge cost reduced from (40 wood, 20 ore) to (30 wood, 20 ore)
-[🟡] Great hammers now affect abilities and summoned units at 50% effectiveness (2x building damage)
+[✅] Sharpness cost reduced from (40 wood, 60 ore) to (30 wood, 60 ore)
+
+[✅] Great hammers now affect abilities and summoned units at 50% effectiveness (2x building damage)
+[✅] Phantoms now deal 30% less damage to buildings
 [✅] Wildfire Molten Bombs now deal 20 damage to buildings
 
-[🟡] Royal Guard slow from Taunting Cry reduced 60% to 40% and resistance increased from 60% to 80%
+[✅] Royal Guard slow from Taunting Cry reduced 60% to 40% and resistance increased from 60% to 80%
 [✅] Bat HP reduced from 15hp to 10hp
-[🟡] Ghasts can now benefit from increased attack damage (explosion damage is scaled accordingly)
-[🟡] Piglin merchant TNT damage rescaled from 13.3/20/26.7 to 16/20/24 (radius unchanged)
-[🟡] Throwable TNT items are now equivalent to a level 3 merchant TNT
-[🟡] Neutral buildings now drop regular resources as bounty again instead of emeralds
+[✅] Ghast explosive damage now benefits from increased attack damage
+[✅] Piglin merchant TNT damage rescaled from 13.3/20/26.7 to 16/20/24 (radius unchanged)
+[✅] Throwable TNT items are now equivalent to a level 3 merchant TNT
+[✅] Neutral buildings now drop regular resources as bounty again instead of emeralds
+
+[✅] All units can now take unlimited instances of damage in a single tick
 
 [❌] Free attacking vexes?
 [❌] Block animations with block displays for royal guard slam
 [❌] Make mace slam single click like war stomp
-[❌] All units can now take unlimited instances of damage in a single tick
+
 
 Quality of Life
 ---------------
@@ -61,9 +68,9 @@ Quality of Life
 
 Bugfixes
 --------
-[🟡] Fixed resistance effects being more effective than 20% per level
+[✅] Fixed resistance effects being more effective than 20% per level
 [✅] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
-[🟡] Fixed mob effects not showing if it was applied while outside of render range or logged out
+[✅] Fixed mob effects not showing if it was applied while outside of render range or logged out
 [✅] Fixed an issue where pillagers did not benefit from their enchantment until after their next shot
 
 Languages

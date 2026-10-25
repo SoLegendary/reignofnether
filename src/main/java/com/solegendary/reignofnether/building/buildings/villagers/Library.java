@@ -25,6 +25,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 
 import net.minecraft.nbt.CompoundTag;
@@ -39,7 +40,9 @@ import net.minecraft.world.level.block.Blocks;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Library extends ProductionBuilding implements RangeIndicatorAddon {
     private static final EnchantMaiming ENCHANT_MAIMING = new EnchantMaiming();
@@ -49,35 +52,38 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
     private static final EnchantVigor ENCHANT_VIGOR = new EnchantVigor();
     private static final EnchantGust ENCHANT_GUST = new EnchantGust();
 
-    public static final DataType<EnchantAbility> AUTO_CAST_ENCHANT = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "auto_cast_enchant"), (tag, server) -> {
-        int id = tag.getInt("autocast-id");
-        return switch (id) {
-            case 1: yield ENCHANT_MAIMING;
-            case 2: yield ENCHANT_QUICK_CHARGE;
-            case 3: yield ENCHANT_SHARPNESS;
-            case 4: yield ENCHANT_MULTISHOT;
-            case 5: yield ENCHANT_VIGOR;
-            case 6: yield ENCHANT_GUST;
-            default: yield null;
-        };
-    }, enchantAbility -> {
-        int id = 0;
-        if (enchantAbility instanceof EnchantMaiming)
-            id = 1;
-        if (enchantAbility instanceof EnchantQuickCharge)
-            id = 2;
-        if (enchantAbility instanceof EnchantSharpness)
-            id = 3;
-        if (enchantAbility instanceof EnchantMultishot)
-            id = 4;
-        if (enchantAbility instanceof EnchantVigor)
-            id = 5;
-        if (enchantAbility instanceof EnchantGust)
-            id = 6;
+    // a save id is the enchant's index + 1, so only ever append to this list
+    private static final List<EnchantAbility> ENCHANTS = List.of(
+            ENCHANT_MAIMING, ENCHANT_QUICK_CHARGE, ENCHANT_SHARPNESS, ENCHANT_MULTISHOT, ENCHANT_VIGOR, ENCHANT_GUST);
+
+    // any number of enchants can be autocast at once
+    // (older saves stored a single enchant under "autocast-id" instead of "autocast-ids")
+    public static final DataType<Set<EnchantAbility>> AUTO_CAST_ENCHANTS = DataType.createRegistered(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "auto_cast_enchant"), (tag, server) -> {
+        Set<EnchantAbility> enchants = new LinkedHashSet<>();
+        List<Integer> ids = new ArrayList<>();
+        for (int id : tag.getIntArray("autocast-ids"))
+            ids.add(id);
+        if (tag.contains("autocast-id"))
+            ids.add(tag.getInt("autocast-id"));
+        for (int id : ids)
+            if (id >= 1 && id <= ENCHANTS.size())
+                enchants.add(ENCHANTS.get(id - 1));
+        return enchants;
+    }, enchants -> {
         CompoundTag nbt = new CompoundTag();
-        nbt.putInt("autocast-id", id);
+        nbt.putIntArray("autocast-ids", enchants.stream().mapToInt(e -> ENCHANTS.indexOf(e) + 1).filter(id -> id > 0).toArray());
         return nbt;
-    });
+    }, LinkedHashSet::new);
+
+    public static boolean isAutoCasting(BuildingPlacement placement, EnchantAbility enchant) {
+        return placement.getDataStorage().getData(AUTO_CAST_ENCHANTS).contains(enchant);
+    }
+
+    public static void toggleAutoCast(BuildingPlacement placement, EnchantAbility enchant) {
+        Set<EnchantAbility> enchants = placement.getDataStorage().getData(AUTO_CAST_ENCHANTS);
+        if (!enchants.remove(enchant))
+            enchants.add(enchant);
+    }
 
     public final static String buildingName = "Library";
     public final static String structureName = "library";
@@ -169,27 +175,32 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
     public void tick(Level tickLevel, BuildingPlacement bp) {
         super.tick(tickLevel, bp);
 
-        EnchantAbility autoCastEnchant = bp.getDataStorage().getData(AUTO_CAST_ENCHANT);
+        if (bp.getTickAgeAfterBuilt() > 0 && bp.getTickAgeAfterBuilt() % 15 == 0 && bp.isBuilt) {
+            for (EnchantAbility autoCastEnchant : new ArrayList<>(bp.getDataStorage().getData(AUTO_CAST_ENCHANTS))) {
+                if (!autoCastEnchant.isOffCooldown(bp))
+                    continue;
 
-        if (bp.getTickAgeAfterBuilt() > 0 && bp.getTickAgeAfterBuilt() % 15 == 0 && bp.isBuilt && autoCastEnchant != null
-                && autoCastEnchant.isOffCooldown(bp)) {
-
-            List<Mob> mobs = new ArrayList<>();
-            for (Mob e : MiscUtil.getEntitiesWithinRange(new Vector3d(
-                            bp.centrePos.getX(),
-                            bp.centrePos.getY(),
-                            bp.centrePos.getZ()
-                    ),
-                    autoCastEnchant.range - 1,
-                    Mob.class,
-                    tickLevel
-            )) {
-                if (autoCastEnchant.isCorrectUnitAndEquipment(e) && autoCastEnchant.canAfford(bp)) {
-                    mobs.add(e);
+                List<Mob> mobs = new ArrayList<>();
+                for (Mob e : MiscUtil.getEntitiesWithinRange(new Vector3d(
+                                bp.centrePos.getX(),
+                                bp.centrePos.getY(),
+                                bp.centrePos.getZ()
+                        ),
+                        autoCastEnchant.range - 1,
+                        Mob.class,
+                        tickLevel
+                )) {
+                    // skip units that can't be enchanted (other owners, already enchanted) so they don't block eligible ones
+                    if (e instanceof Unit unit && unit.getOwnerName().equals(bp.ownerName) &&
+                            autoCastEnchant.isCorrectUnitAndEquipment(e) &&
+                            !autoCastEnchant.hasSameEnchant(e) &&
+                            autoCastEnchant.canAfford(bp)) {
+                        mobs.add(e);
+                    }
                 }
-            }
-            if (!mobs.isEmpty()) {
-                autoCastEnchant.use(tickLevel, bp, mobs.get(0));
+                if (!mobs.isEmpty()) {
+                    autoCastEnchant.use(tickLevel, bp, mobs.get(0));
+                }
             }
         }
         if (tickLevel.isClientSide && bp.getTickAgeAfterBuilt() > 0 && bp.getTickAgeAfterBuilt() % 100 == 0)

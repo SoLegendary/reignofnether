@@ -963,11 +963,13 @@ public class UnitServerEvents {
     // so damage that must apply to them is modified here instead
     @SubscribeEvent
     public static void onEntityHurt(LivingHurtEvent evt) {
-        // multishot extras and piercing arrows (after their first target) deal half damage
-        if (evt.getSource().getDirectEntity() instanceof AbstractArrow arrow &&
-            (arrow.getTags().contains(RangedAttackerUnit.MULTISHOT_ARROW_TAG) ||
-             arrow.getTags().contains(RangedAttackerUnit.DEALT_DAMAGE_ARROW_TAG))) {
-            evt.setAmount(evt.getAmount() / 2);
+        // wide-angle multishot extras deal quarter damage; other multishot extras and piercing arrows (after their first target) deal half
+        if (evt.getSource().getDirectEntity() instanceof AbstractArrow arrow) {
+            if (arrow.getTags().contains(RangedAttackerUnit.WIDE_MULTISHOT_ARROW_TAG))
+                evt.setAmount(evt.getAmount() / 4);
+            else if (arrow.getTags().contains(RangedAttackerUnit.MULTISHOT_ARROW_TAG) ||
+                     arrow.getTags().contains(RangedAttackerUnit.DEALT_DAMAGE_ARROW_TAG))
+                evt.setAmount(evt.getAmount() / 2);
         }
     }
 
@@ -1094,7 +1096,7 @@ public class UnitServerEvents {
         }
 
         if (evt.getEntity() instanceof HeroUnit && evt.getSource().getEntity() instanceof PhantomSummon) {
-            evt.setAmount(evt.getAmount() * PhantomSummon.HERO_DAMAGE_MULT);
+            evt.setAmount(evt.getAmount() * PhantomSummon.HERO_BUILDING_DAMAGE_MULT);
         }
 
         if (evt.getSource().getDirectEntity() instanceof GhastUnitFireball) {

@@ -429,6 +429,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
             DecimalFormat df2 = new DecimalFormat("###.##");
 
             int atkSpdColour = LIGHT_BLUE;
+
             float attacksPerSecond = Math.round(attackerUnit.getNonBaseAttacksPerSecond() * 100f) / 100f;
             float baseAttacksPerSecond = Math.round(attackerUnit.getBaseAttacksPerSecond() * 100f) / 100f;
 
@@ -445,13 +446,19 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                     0
             ));
             String rangeStr;
-            BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
-            GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
-            if (garr != null) {
-                rangeStr = String.valueOf(garr.getAttackRange());
+
+            if (((LivingEntity) attackerUnit).getFirstPassenger() instanceof AttackerUnit passengerUnit) {
+                rangeStr = String.valueOf((int) (passengerUnit.getAttackRange()));
             } else {
-                rangeStr = String.valueOf((int) (attackerUnit.getAttackRange()));
+                BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
+                GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+                if (garr != null) {
+                    rangeStr = String.valueOf(garr.getAttackRange());
+                } else {
+                    rangeStr = String.valueOf((int) (attackerUnit.getAttackRange()));
+                }
             }
+
             renderedStats.add(new RenderedStat(
                     ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/bow.png"),
                     rangeStr,

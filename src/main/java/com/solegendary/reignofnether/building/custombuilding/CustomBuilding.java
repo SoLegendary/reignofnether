@@ -266,7 +266,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             int emeraldBounty = -1;
 
                             if (stackNbt != null) {
-                                if (stackNbt.contains("foodCost", Tag.TAG_INT))
+                                 if (stackNbt.contains("foodCost", Tag.TAG_INT))
                                     newCost.food = stackNbt.getInt("foodCost");
                                 if (stackNbt.contains("woodCost", Tag.TAG_INT))
                                     newCost.wood = stackNbt.getInt("woodCost");

@@ -70,6 +70,14 @@ public interface AttackerUnit {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
     }
+    // targets closer than this can't be attacked (eg. sieging pillagers), so they are also ignored by auto-aggro and retaliation
+    public default float getMinAttackRange() {
+        return 0f;
+    }
+    public default boolean isBelowMinAttackRange(Entity target) {
+        float minRange = getMinAttackRange();
+        return minRange > 0 && ((Entity) this).distanceTo(target) < minRange;
+    }
     public default float getBaseAttackRange() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
         return (float) (attr != null ?  attr.getBaseValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
@@ -309,6 +317,7 @@ public interface AttackerUnit {
 
                 if (!isMeleeAttackedByFlyingOrGarrisoned &&
                     lastDSEntity instanceof LivingEntity &&
+                    !attackerUnit.isBelowMinAttackRange(lastDSEntity) &&
                     !(lastDSEntity instanceof Player player && player.isCreative()) &&
                     (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
 

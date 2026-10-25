@@ -224,7 +224,8 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
                 if (this.attackCooldown <= 0) {
                     this.crossbowState = READY_TO_ATTACK;
                 }
-            } else if (this.crossbowState == READY_TO_ATTACK && canSeeTarget && distToTarget < attackRange) {
+            } else if (this.crossbowState == READY_TO_ATTACK && canSeeTarget && distToTarget < attackRange &&
+                    distToTarget >= ((AttackerUnit) this.mob).getMinAttackRange()) {
                 performAttack();
             }
         }

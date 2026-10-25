@@ -48,7 +48,11 @@ import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec3;
@@ -173,12 +177,16 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     // combat stats
     public boolean getWillRetaliate() { return willRetaliate; }
     public float getAttackCooldown() {return ((20 / AttackerUnit.super.getNonBaseAttacksPerSecond()) * getAttackCooldownMultiplier());}
+    public float getBaseAttackCooldown() {return ((20 / AttackerUnit.super.getBaseAttacksPerSecond()) * getAttackCooldownMultiplier());}
     public float getAttacksPerSecond() {
         ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
         return 20f / (getAttackCooldown() + (CrossbowItem.getChargeDuration(itemStack)));
     }
     public float getNonBaseAttacksPerSecond() {
         return 20f / (getAttackCooldown() + 35);
+    }
+    public float getBaseAttacksPerSecond() {
+        return 20f / (getBaseAttackCooldown() + 35);
     }
     public boolean getAggressiveWhenIdle() { return aggressiveWhenIdle && !isVehicle(); }
     public float getUnitAttackDamage() {
@@ -194,7 +202,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     // endregion
 
-    final static public float attackDamage = 7.0f;
+    final static public float attackDamage = 8.0f;
     final static public float attacksPerSecond = 0.632f; // excludes crossbow charge time
     final static public float maxHealth = 45.0f;
     final static public float armorValue = 0.0f;
@@ -230,6 +238,13 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     // ---- siege mode (driven by the ravager this pillager is riding) ----
     private static final UUID SIEGE_RANGE_UUID = UUID.fromString("5d1a7a3e-4c0e-4a7e-9b52-1f6a2c9e7b11");
     private static final double SIEGE_RANGE_BONUS = 1.0; // +100% of base = doubled
+
+    public static final float SIEGE_MIN_ATTACK_RANGE = 6;
+
+    @Override
+    public float getMinAttackRange() {
+        return isSieging() ? SIEGE_MIN_ATTACK_RANGE : 0;
+    }
 
     public boolean isSieging() {
         return getVehicle() instanceof RavagerUnit r && r.getSiegeState() == RavagerUnit.SiegeState.SIEGED;
@@ -429,10 +444,37 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
         ItemStack itemstack = pUser.getItemInHand(interactionhand);
         if (pUser.isHolding((is) -> is.getItem() instanceof CrossbowItem)) {
             CrossbowItem.performShooting(pUser.level(), pUser, interactionhand, itemstack, pVelocity, 0);
+            shootExtraMultishotArrows(pUser, itemstack, pVelocity);
             playCrossbowShootSound();
         }
         this.onCrossbowAttackPerformed();
         getMainHandItem().setDamageValue(0);
+    }
+
+    // vanilla multishot always fires 3 arrows (0, -10, +10 degrees) regardless of level, so higher levels add a further
+    // pair of arrows per level at +/-10 degrees more each, ie. level n fires 2n + 1 arrows
+    private void shootExtraMultishotArrows(LivingEntity pUser, ItemStack crossbow, float pVelocity) {
+        int multishotLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MULTISHOT, crossbow);
+        if (multishotLevel <= 1 || level().isClientSide())
+            return;
+
+        ItemStack ammo = pUser.getProjectile(crossbow);
+        ArrowItem arrowItem = ammo.getItem() instanceof ArrowItem ai ? ai : (ArrowItem) Items.ARROW;
+        int pierceLevel = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.PIERCING, crossbow);
+
+        for (int tier = 2; tier <= multishotLevel; tier++) {
+            for (float angle : new float[]{-10.0F * tier, 10.0F * tier}) {
+                AbstractArrow arrow = arrowItem.createArrow(level(), ammo.isEmpty() ? new ItemStack(Items.ARROW) : ammo, pUser);
+                arrow.setShotFromCrossbow(true);
+                arrow.setCritArrow(true);
+                arrow.setSoundEvent(SoundEvents.CROSSBOW_HIT);
+                arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
+                if (pierceLevel > 0)
+                    arrow.setPierceLevel((byte) pierceLevel);
+                shootCrossbowProjectile(pUser, getTarget(), arrow, angle, pVelocity);
+                level().addFreshEntity(arrow);
+            }
+        }
     }
 
     @Override
