@@ -68,6 +68,7 @@ Quality of Life
 
 Bugfixes
 --------
+[❌] Fixed custom spawn eggs not showing custom tooltips unless they had a tooltipTitle tag
 [✅] Fixed resistance effects being more effective than 20% per level
 [✅] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
 [✅] Fixed mob effects not showing if it was applied while outside of render range or logged out
