@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -43,6 +44,8 @@ public interface AttackerUnit {
 
     public static final float ATTACK_DAMAGE_REDUCTION_PER_WEAK = 0.2f;
     public static final float ATTACK_DAMAGE_INCREASE_PER_STRENGTH = 0.2f;
+
+    public static final float MAX_RETALIATE_RANGE = 24f;
 
     public boolean getWillRetaliate();
     public default float getAttacksPerSecond() {
@@ -315,7 +318,11 @@ public interface AttackerUnit {
                 }
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
 
-                if (!isMeleeAttackedByFlyingOrGarrisoned &&
+                boolean beyondMaxRetaliateRange = lastDSEntity instanceof LivingEntity le &&
+                        le.distanceToSqr(unitMob.position()) > (MAX_RETALIATE_RANGE * MAX_RETALIATE_RANGE);
+
+                if (!beyondMaxRetaliateRange &&
+                    !isMeleeAttackedByFlyingOrGarrisoned &&
                     lastDSEntity instanceof LivingEntity &&
                     !attackerUnit.isBelowMinAttackRange(lastDSEntity) &&
                     !(lastDSEntity instanceof Player player && player.isCreative()) &&
@@ -328,8 +335,10 @@ public interface AttackerUnit {
             if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle())
                 attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level());
 
-            // if attacking another unit as melee, retarget the closest unit periodically unless forced on a target
-            if (!forced) {
+            boolean isSiegedPillager = attackerUnit instanceof PillagerUnit pUnit && pUnit.isSieging();
+
+            // if attacking another unit, retarget the closest unit periodically unless forced on a target
+            if (!forced && !isSiegedPillager) {
                 attackerUnit.retargetToClosestUnit((ServerLevel) unitMob.level());
             }
         }

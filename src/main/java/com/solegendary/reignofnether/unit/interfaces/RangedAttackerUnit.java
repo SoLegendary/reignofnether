@@ -19,6 +19,13 @@ public interface RangedAttackerUnit {
     float WIDE_MULTISHOT_MIN_ANGLE = 10.0F;
     String WIDE_MULTISHOT_ARROW_TAG = "ron_wide_multishot_arrow";
 
+    // arrows fired by a pillager while mounted on a ravager explode on impact. Tagged when fired so they still explode
+    // if the pillager dismounts or dies before they land
+    String EXPLOSIVE_ARROW_TAG = "ron_explosive_arrow";
+
+    // explosive arrows fired in siege mode (primary arrow only) get a larger explosion and no direct hit damage
+    String SIEGE_ARROW_TAG = "ron_siege_arrow";
+
     // arrows (eg. from pillagers on ravagers) get this tag after exploding so they can never explode again, eg. when piercing
     String EXPLODED_ARROW_TAG = "ron_exploded_arrow";
 

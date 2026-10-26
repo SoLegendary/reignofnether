@@ -595,6 +595,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
         WindcallerProjectile proj = new WindcallerProjectile(this.level(), this, x, y, z);
         proj.setPos(this.getEyePosition());
+        proj.setTarget(pTarget);
 
         level().addFreshEntity(proj);
 

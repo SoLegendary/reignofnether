@@ -3,10 +3,12 @@ package com.solegendary.reignofnether.ability.abilities;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
+import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.buttons.AbilityButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.goals.RangedAttackGroundGoal;
+import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
@@ -56,7 +58,12 @@ public class AttackGround extends Ability {
                     return false;
                 },
                 () -> true,
-                () -> CursorClientEvents.setLeftClickAction(UnitAction.ATTACK_GROUND),
+                () -> {
+                    if (HudClientEvents.hudSelectedEntity instanceof AttackerUnit aUnit) {
+                        this.range = aUnit.getAttackRange();
+                    }
+                    CursorClientEvents.setLeftClickAction(UnitAction.ATTACK_GROUND);
+                },
                 null,
                 List.of(
                         FormattedCharSequence.forward(LanguageUtil.getTranslation("abilities.reignofnether.attack_ground"), Style.EMPTY)

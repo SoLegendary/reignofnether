@@ -263,7 +263,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
             if (ai == null) continue;
             boolean has = ai.getModifier(SIEGE_RANGE_UUID) != null;
             if (sieging && !has)
-                ai.addTransientModifier(new AttributeModifier(SIEGE_RANGE_UUID, "siege_mode", SIEGE_RANGE_BONUS,
+                ai.addTransientModifier(new AttributeModifier(SIEGE_RANGE_UUID, "siege_mode",
+                        sup == AttributeRegistrar.SIGHT_RANGE ? 0.5f : 1.0f,
                         AttributeModifier.Operation.MULTIPLY_BASE));
             else if (!sieging && has)
                 ai.removeModifier(SIEGE_RANGE_UUID);
@@ -278,8 +279,10 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     // multishot extras are fired at -10/+10 degrees, so only the primary arrow (angle 0) counts as the siege shot
     private void markSiegeShot(Projectile p, float pProjectileAngle) {
-        if (isSieging() && pProjectileAngle == 0.0F)
+        if (isSieging() && pProjectileAngle == 0.0F) {
+            p.addTag(RangedAttackerUnit.SIEGE_ARROW_TAG);
             siegeShots.put(p, p.position());
+        }
     }
 
     private void tickSiegeShotTrails() {
@@ -480,6 +483,8 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
     @Override
     public void shootCrossbowProjectile(LivingEntity pUser, LivingEntity pTarget, Projectile pProjectile, float pProjectileAngle, float pVelocity) {
         RangedAttackerUnit.tagIfMultishot(pProjectile, pProjectileAngle);
+        if (isPassenger())
+            pProjectile.addTag(RangedAttackerUnit.EXPLOSIVE_ARROW_TAG);
 
         // bit of a hacky fix to attack buildings since this function is called from CrossbowItem
         try {
@@ -505,7 +510,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
             double sdz = pTarget.getZ() - pUser.getZ();
             Vector3f lob = this.getProjectileShotVector(pUser, new Vec3(sdx, 75, sdz), pProjectileAngle);
             markSiegeShot(pProjectile, pProjectileAngle);
-            pProjectile.shoot(lob.x(), lob.y(), lob.z(), pVelocity, 0);
+            pProjectile.shoot(lob.x(), lob.y(), lob.z(), pVelocity * 1.1f, 0);
             ParticleUtil.addParticleExplosion(ParticleTypes.POOF, 5, level(), getEyePosition());
         } else {
             double d0 = pTarget.getX() - pUser.getX();
@@ -535,7 +540,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
             Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
             markSiegeShot(pProjectile, pProjectileAngle);
-            pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
+            pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity * 1.1f, 0);
         } else {
             // outside of siege mode, shoot straight at a placed block of the building (with the same drop compensation
             // as unit shots). crossbow shots don't go through the goal's own retargeting, so pick a new block per volley
@@ -563,7 +568,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
         markSiegeShot(pProjectile, pProjectileAngle);
-        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity, 0);
+        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity * 1.1f, 0);
     }
 
     @Override

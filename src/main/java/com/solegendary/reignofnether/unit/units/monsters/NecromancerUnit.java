@@ -537,6 +537,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
         NecromancerProjectile proj = new NecromancerProjectile(this.level(), this, x, y, z);
         proj.setPos(this.getEyePosition());
+        proj.setTarget(pTarget);
 
         level().addFreshEntity(proj);
 

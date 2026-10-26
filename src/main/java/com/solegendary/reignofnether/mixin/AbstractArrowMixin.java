@@ -112,6 +112,9 @@ public abstract class AbstractArrowMixin extends Projectile {
             at = @At("TAIL")
     )
     public void tick(CallbackInfo ci) {
+        if (!this.level().isClientSide() && this.getOwner() instanceof PillagerUnit pUnit)
+            reignofnether$shooter = pUnit;
+
         if (this.isNoPhysics()) {
             Vec3 vec3 = this.getDeltaMovement();
             double d4 = vec3.horizontalDistance();
@@ -170,25 +173,28 @@ public abstract class AbstractArrowMixin extends Projectile {
                 !(boggedUnit.getTargetGoal().forced && boggedUnit.getTargetGoal().getTarget() == entity);
     }
 
+    // the pillager that fired this arrow, remembered because getOwner() returns null once it has been removed (eg. died)
     @Unique
-    private boolean reignofnether$isMultishot() {
-        return this.getTags().contains(RangedAttackerUnit.MULTISHOT_ARROW_TAG);
-    }
+    private PillagerUnit reignofnether$shooter = null;
 
     // siege mode pillagers' primary arrows have a larger explosion
     @Unique
-    private float reignofnether$getExplosionRadius(PillagerUnit pUnit) {
-        return pUnit.isSieging() && !reignofnether$isMultishot() ? 2f : 1f;
+    private float reignofnether$getExplosionRadius() {
+        return this.getTags().contains(RangedAttackerUnit.SIEGE_ARROW_TAG) ? 2f : 1f;
     }
 
+    // arrows fired by mounted pillagers explode, regardless of whether the pillager is still mounted or alive on impact
     // an arrow only ever explodes once, even if it pierces or hits a block after hitting an entity
     @Unique
-    private void reignofnether$explodeOnce(PillagerUnit pUnit, DamageSource source, Vec3 pos, Level.ExplosionInteraction interaction) {
-        if (this.getTags().contains(RangedAttackerUnit.EXPLODED_ARROW_TAG))
+    private void reignofnether$explodeOnce(DamageSource source, Vec3 pos, Level.ExplosionInteraction interaction) {
+        if (this.level().isClientSide() ||
+                !this.getTags().contains(RangedAttackerUnit.EXPLOSIVE_ARROW_TAG) ||
+                this.getTags().contains(RangedAttackerUnit.EXPLODED_ARROW_TAG))
             return;
         this.addTag(RangedAttackerUnit.EXPLODED_ARROW_TAG);
-        pUnit.level().explode(this.getOwner(), source, null, pos.x, pos.y, pos.z,
-                reignofnether$getExplosionRadius(pUnit), false, interaction);
+        Entity shooter = this.getOwner() != null ? this.getOwner() : reignofnether$shooter;
+        this.level().explode(shooter, source, null, pos.x, pos.y, pos.z,
+                reignofnether$getExplosionRadius(), false, interaction);
     }
 
     protected boolean canHitEntity(Entity entity) {
@@ -313,11 +319,7 @@ public abstract class AbstractArrowMixin extends Projectile {
             this.piercingIgnoreEntityIds.add(entity.getId());
         }
 
-        if (this.getOwner() instanceof PillagerUnit pUnit &&
-            !pUnit.level().isClientSide() && pUnit.isPassenger()) {
-            reignofnether$explodeOnce(pUnit, damagesource, pResult.getEntity().getEyePosition(),
-                    Level.ExplosionInteraction.BLOCK);
-        }
+        reignofnether$explodeOnce(damagesource, pResult.getEntity().getEyePosition(), Level.ExplosionInteraction.BLOCK);
     }
 
     @Inject(
@@ -326,10 +328,7 @@ public abstract class AbstractArrowMixin extends Projectile {
             cancellable = true
     )
     protected void onHitBlock(BlockHitResult pResult, CallbackInfo ci) {
-        if (this.getOwner() instanceof PillagerUnit pUnit &&
-                !pUnit.level().isClientSide() && pUnit.isPassenger()) {
-            reignofnether$explodeOnce(pUnit, null, pResult.getLocation(), Level.ExplosionInteraction.TNT);
-        }
+        reignofnether$explodeOnce(null, pResult.getLocation(), Level.ExplosionInteraction.TNT);
 
         if (this.getOwner() instanceof AttackerUnit aUnit) {
             // garrisoned unit -> ground

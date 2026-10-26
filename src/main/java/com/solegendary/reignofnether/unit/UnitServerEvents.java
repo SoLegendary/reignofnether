@@ -1014,13 +1014,13 @@ public class UnitServerEvents {
             evt.setAmount(evt.getAmount() * ghastUnit.getEffectiveDamageMultiplier());
         }
 
-        if (evt.getSource().getEntity() instanceof PillagerUnit pillagerUnit && pillagerUnit.isSieging()) {
-            if (evt.getSource().getDirectEntity() instanceof Arrow arrow &&
-                    !arrow.getTags().contains(RangedAttackerUnit.MULTISHOT_ARROW_TAG)) {
-                evt.setCanceled(true); // rely on explosion damage for primary siege arrows
-            } else if (evt.getSource().is(DamageTypes.PLAYER_EXPLOSION)) {
-                evt.setAmount(evt.getAmount() * pillagerUnit.getEffectiveDamageMultiplier());
-            }
+        // checked via tag rather than the pillager's current state, as it may have dismounted or died since firing
+        if (evt.getSource().getDirectEntity() instanceof Arrow arrow &&
+                arrow.getTags().contains(RangedAttackerUnit.SIEGE_ARROW_TAG)) {
+            evt.setCanceled(true); // rely on explosion damage for primary siege arrows
+        } else if (evt.getSource().getEntity() instanceof PillagerUnit pillagerUnit && pillagerUnit.isSieging() &&
+                evt.getSource().is(DamageTypes.PLAYER_EXPLOSION)) {
+            evt.setAmount(evt.getAmount() * pillagerUnit.getEffectiveDamageMultiplier());
         }
 
         // ignore added weapon damage for workers
@@ -1109,17 +1109,19 @@ public class UnitServerEvents {
                 RANDOM.nextFloat() < aUnit.getExplosiveChance() && evt.getAmount() > 0.1f) {
                 doExplosiveHit((LivingEntity) aUnit, evt.getEntity());
             }
-            float lifeDmgPerc = aUnit.getLifeStealPercent();
-            if (lifeDmgPerc > 0) {
-                ((LivingEntity) aUnit).heal(evt.getAmount() * lifeDmgPerc);
-                ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), (int) (evt.getAmount() * lifeDmgPerc) + 1,
-                        ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
-            }
-            float manaDmgPerc = aUnit.getManaOnHitPercent();
-            if (manaDmgPerc > 0 && aUnit instanceof HeroUnit heroUnit) {
-                heroUnit.setMana(heroUnit.getMana() + (evt.getAmount() * manaDmgPerc));
-                ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
-                        ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
+            if (evt.getSource().is(DamageTypes.MOB_ATTACK)) {
+                float lifeDmgPerc = aUnit.getLifeStealPercent();
+                if (lifeDmgPerc > 0) {
+                    ((LivingEntity) aUnit).heal(evt.getAmount() * lifeDmgPerc);
+                    ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), (int) (evt.getAmount() * lifeDmgPerc) + 1,
+                            ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
+                }
+                float manaDmgPerc = aUnit.getManaOnHitPercent();
+                if (manaDmgPerc > 0 && aUnit instanceof HeroUnit heroUnit) {
+                    heroUnit.setMana(heroUnit.getMana() + (evt.getAmount() * manaDmgPerc));
+                    ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
+                            ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
+                }
             }
         }
 

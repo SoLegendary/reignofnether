@@ -1,5 +1,5 @@
 
-1.20.1-1.5.1
+1.20.1-1.5.1-beta-2
 
 [✅] Done and tested
 [🟡] Partially done and/or needs testing
@@ -70,6 +70,18 @@ Bugfixes
 [✅] Fixed an issue with cobblestone sometimes turning into temporary magma blocks (which then became lava)
 [✅] Fixed mob effects not showing if it was applied while outside of render range or logged out
 [✅] Fixed an issue where pillagers did not benefit from their enchantment until after their next shot
+
+[✅] Ravager artillery in siege mode keep auto-targeting nearby targets instead of what you ordered
+[✅] All selected ravagers should burrow at the same time
+[✅] Fixed the RA firing at too short of a range
+[✅] Units no longer retaliate if damaged by a source more than 24 blocks away
+[✅] RAs now only get 24 sight range instead of 32 when sieged, requiring scouts to use their full range like ghasts
+[✅] Arrows should remain explosive even if the pillager dies or dismounts
+[❌] Ravagers always show as facing south to other players
+
+BALANCE
+[✅] Windcallers and Necromancers now have homing projectiles
+[✅] Lifesteal and mana-on-hit effects no longer apply to spells
 
 Languages
 ---------

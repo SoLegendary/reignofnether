@@ -40,6 +40,7 @@ public class ToggleSiegeMode extends Ability {
 
     public ToggleSiegeMode() {
         super(UnitAction.TOGGLE_SIEGE_MODE, CD_MAX_SECONDS * ResourceCost.TICKS_PER_SECOND, 0, 0, false, true);
+        this.oneClickOneUse = false;
     }
 
     @Override
