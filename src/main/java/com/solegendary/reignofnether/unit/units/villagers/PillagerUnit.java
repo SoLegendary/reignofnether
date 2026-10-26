@@ -510,7 +510,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
             double sdz = pTarget.getZ() - pUser.getZ();
             Vector3f lob = this.getProjectileShotVector(pUser, new Vec3(sdx, 75, sdz), pProjectileAngle);
             markSiegeShot(pProjectile, pProjectileAngle);
-            pProjectile.shoot(lob.x(), lob.y(), lob.z(), pVelocity * 1.1f, 0);
+            pProjectile.shoot(lob.x(), lob.y(), lob.z(), pVelocity * 1.09f, 0);
             ParticleUtil.addParticleExplosion(ParticleTypes.POOF, 5, level(), getEyePosition());
         } else {
             double d0 = pTarget.getX() - pUser.getX();
@@ -540,7 +540,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
             Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
             markSiegeShot(pProjectile, pProjectileAngle);
-            pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity * 1.1f, 0);
+            pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity * 1.09f, 0);
         } else {
             // outside of siege mode, shoot straight at a placed block of the building (with the same drop compensation
             // as unit shots). crossbow shots don't go through the goal's own retargeting, so pick a new block per volley
@@ -568,7 +568,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
         Vector3f vector3f = this.getProjectileShotVector(pUser, new Vec3(d0, 75, d1), pProjectileAngle);
         markSiegeShot(pProjectile, pProjectileAngle);
-        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity * 1.1f, 0);
+        pProjectile.shoot(vector3f.x(), vector3f.y(), vector3f.z(), pVelocity * 1.09f, 0);
     }
 
     @Override
