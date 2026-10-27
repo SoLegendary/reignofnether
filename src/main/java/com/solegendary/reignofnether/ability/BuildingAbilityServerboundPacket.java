@@ -80,10 +80,7 @@ public class BuildingAbilityServerboundPacket {
                         if (abl.action == abilityAction)
                             ability = abl;
                     if (ability instanceof EnchantAbility enchantAbility) {
-                        if (building.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == enchantAbility)
-                            building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
-                        else
-                            building.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, enchantAbility);
+                        Library.toggleAutoCast(building, enchantAbility);
                     }
                 }
                 else if (building.getBuilding() instanceof Blacksmith) {

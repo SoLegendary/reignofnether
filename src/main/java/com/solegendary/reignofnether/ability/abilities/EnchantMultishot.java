@@ -43,16 +43,13 @@ public class EnchantMultishot extends EnchantAbility {
                 "Multishot Enchantment",
                 ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/abilities/multishot.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this,
+                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || Library.isAutoCasting(placement, this),
                 () -> false,
                 () -> placement.getUpgradeLevel() > 0,
                 () -> CursorClientEvents.setLeftClickAction(ENCHANT_ACTION),
                 () -> {
                     BuildingAbilityServerboundPacket.doAbility(ENCHANT_ACTION, placement.originPos, this.oneClickOneUse);
-                    if (placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this)
-                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
-                    else
-                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, this);
+                    Library.toggleAutoCast(placement, this);
                 },
                 List.of(
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.multishot"), Style.EMPTY.withBold(true)),
@@ -60,8 +57,8 @@ public class EnchantMultishot extends EnchantAbility {
                         FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.multishot.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.multishot.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.multishot.tooltip3"), Style.EMPTY),
+                        FormattedCharSequence.forward("", Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY)
                 ),
                 this,
@@ -73,14 +70,5 @@ public class EnchantMultishot extends EnchantAbility {
     public boolean isCorrectUnitAndEquipment(LivingEntity entity) {
         return entity instanceof PillagerUnit &&
                 entity.getItemBySlot(EquipmentSlot.MAINHAND).getItem() instanceof CrossbowItem;
-    }
-
-    @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
-            if (enchantment == Enchantments.QUICK_CHARGE || enchantment == getEnchantment())
-                return enchantment;
-        }
-        return null;
     }
 }

@@ -18,6 +18,9 @@ public class UnitSyncServerboundPacket {
     public static void requestSyncAbilities(int unitId) {
         PacketHandler.INSTANCE.sendToServer(new UnitSyncServerboundPacket(UnitSyncAction.REQUEST_SYNC_ABILITIES, unitId));
     }
+    public static void requestSyncMobEffects(int unitId) {
+        PacketHandler.INSTANCE.sendToServer(new UnitSyncServerboundPacket(UnitSyncAction.REQUEST_SYNC_MOB_EFFECTS, unitId));
+    }
 
     // packet-handler functions
     public UnitSyncServerboundPacket(
@@ -46,6 +49,12 @@ public class UnitSyncServerboundPacket {
                 for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
                     if (entity.getId() == this.entityId) {
                         UnitSyncAbilityClientboundPacket.sendSyncAbilitiesPacket(entity);
+                    }
+                }
+            } else if (this.syncAction == UnitSyncAction.REQUEST_SYNC_MOB_EFFECTS) {
+                for (LivingEntity entity : UnitServerEvents.getAllUnits()) {
+                    if (entity.getId() == this.entityId) {
+                        UnitSyncAbilityClientboundPacket.sendSyncMobEffectsPacket(entity);
                     }
                 }
             }

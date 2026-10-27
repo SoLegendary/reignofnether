@@ -336,7 +336,6 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
                 .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)

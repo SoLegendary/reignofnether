@@ -1,35 +1,36 @@
 
-Features
---------
-
-
-Custom building production
---------------------------
-[❌] If a custom building has a spawn egg inside a chest, have it be able to produce that unit
-[❌] Same for hero items at a shop when that's finished
-
-
 Fog of war
 ----------
 [❌] Update night circle vision separate from buildings
     - If entered clientside, verify from server whether it's really that size or even still there
     - If entered serverside, sent to client the new range
 
-[❌] Reveal owners of explosive entities to nearby players in fog
 [❌] Allow spectators to see fog, but with vision of all players
 [❌] Add commands for revealing in fog, temporarily or permanently
 [❌] Add commands for force-moving camera
+[❌] Eyes of ender reveal in fog (like wards)
 
 
-[❌] Camera hotkeys (see starcraft example)
+Bugfixes
+--------
+[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
+[❌] Players logging in messes up the observer menu (and freezes resources?)
+[❌] Fix day/night time when /gamerule doDaylightCycle false
+[❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
+[❌] Allow fog to be kept on in between singleplayer relogs
 
-[❌] Custom building buttons
-    - Customisable icon, name, tooltip, range, cooldown, activation type (on-click, entity-target, ground target)
-    - Can be used for an ability, production, etc.
-    - On new 3rd screen
 
-[❌] Make custom arrow entity to control logic better
-    - Half pierce and multishot damage
+Quality of Life Features
+------------------------
+[❌] Handicap command
+    - Makes all resource income lower
+
+[❌] Added /gamerule for bridges over void
+
+[❌] restore ores on /rts-reset
+    - Have to track each ore block when it is mined or converted into nether terrain
+
+[❌] Waypoint looping (by shift clicking back onto a previous waypoint it will automatically cycle the list once it reaches the end)
 
 [❌] Save control groups to world per player
 
@@ -44,31 +45,5 @@ Scenario roles:
 
 [❌] Invisible block that units avoid
 
-[❌] Let villagers repair iron golems with ore for 1hp per ore, masons repair faster
-
 [❌] Config to allow changing resource block values, including modded blocks
-
-[❌] Horses for villagers and change captain flags to be a resistance aura?
-
-
-Bugfixes
---------
-[❌] Dropping an item in creative, then toggling RTS cam twice causes picked up items to not be shown clientside
-[❌] Players logging in messes up the observer menu (and freezes resources?)
-[❌] Fix day/night time when /gamerule doDaylightCycle false
-[❌] Camel animations are backwards (when standing, they are actually sitting, and vice-versa)
-[❌] Allow fog to be kept on in between singleplayer relogs
-
-Quality of Life Features
-------------------------
-[❌] Handicap command
-    - Makes all resource costs some % higher than normal
-
-[❌] Added /gamerule for bridges over void
-
-[❌] restore ores on /rts-reset
-    - Have to track each ore block when it is mined or converted into nether terrain
-
-[❌] Waypoint looping (by shift clicking back onto a previous waypoint it will automatically cycle the list once it reaches the end)
-
 

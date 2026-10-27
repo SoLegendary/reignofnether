@@ -5,6 +5,8 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitSyncAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -40,6 +42,13 @@ public class UnitSyncAbilityClientboundPacket {
                         abilityCharges
                 )
             );
+        }
+    }
+
+    public static void sendSyncMobEffectsPacket(LivingEntity le) {
+        for (MobEffectInstance mei : le.getActiveEffects()) {
+            if (mei.getDuration() > 0)
+                UnitSyncMobEffectsClientboundPacket.addEffectClientside(le, mei);
         }
     }
 

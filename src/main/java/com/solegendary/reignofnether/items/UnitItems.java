@@ -210,7 +210,7 @@ public class UnitItems {
             .descId("light_feather")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.COMMON)
-            .attribute(AttributeRegistrar.EVASION_CHANCE.get(), 0.17, ADDITION)
+            .attribute(AttributeRegistrar.EVASION_CHANCE.get(), 0.22, ADDITION)
             .build();
 
     public static final UnitItem SPYGLASS = UnitItemBuilder.of(Items.SPYGLASS)
@@ -708,7 +708,7 @@ public class UnitItems {
                 if (!le.level().isClientSide())
                     SoundClientboundPacket.playSoundAtPos(SoundAction.THROW_EGG, le.blockPosition());
 
-                ThrowableTntProjectile tnt = new ThrowableTntProjectile(le.level(), le, 3);
+                ThrowableTntProjectile tnt = new ThrowableTntProjectile(le.level(), le, 4);
                 tnt.setItem(new ItemStack(ItemRegistrar.THROWABLE_TNT.get()));
                 Vec3 dMove = Vec3.atCenterOf(pos).subtract(le.getEyePosition())
                         .multiply(1,0,1)

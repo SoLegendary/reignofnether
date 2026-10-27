@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
@@ -51,6 +52,10 @@ public class Eject extends Ability {
 
     @Override
     public void use(Level level, Unit unitUsing, BlockPos targetBp) {
+        for (Entity entity : ((LivingEntity) unitUsing).getPassengers()) {
+            if (entity instanceof Unit unit)
+                Unit.fullResetBehaviours(unit);
+        }
         ((LivingEntity) unitUsing).ejectPassengers();
 
         for (Ability ability : unitUsing.getAbilities().get())

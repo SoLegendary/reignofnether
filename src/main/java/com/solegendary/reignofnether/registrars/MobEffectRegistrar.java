@@ -13,6 +13,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.UUID;
+
 
 public class MobEffectRegistrar {
 
@@ -121,6 +123,10 @@ public class MobEffectRegistrar {
 
     public static final RegistryObject<MobEffect> PIGLIN_FERVOR = MOB_EFFECTS.register("piglin_fervor", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
             .addAttributeModifier(AttributeRegistrar.ATTACK_DAMAGE.get(), "166f078d-89e3-4529-abdc-13b09915002f", UnitItems.GOLDEN_PIGLIN_ATTACK_DAMAGE, AttributeModifier.Operation.MULTIPLY_BASE));
+
+    public static final UUID ENCHANTED_TETHER_UUID = UUID.fromString("12fd7bff-d0a0-470c-84ea-fc6fe49ce319");
+    public static final RegistryObject<MobEffect> ENCHANTED_TETHER = MOB_EFFECTS.register("enchanted_tether", () -> new InstantenousMobEffect(MobEffectCategory.BENEFICIAL, 0x000000)
+            .addAttributeModifier(AttributeRegistrar.SCALE.get(), "12fd7bff-d0a0-470c-84ea-fc6fe49ce319", 0.3, AttributeModifier.Operation.ADDITION));
 
     public static boolean isInterrupt(MobEffect mobEffect) {
         return mobEffect == STUN.get() ||

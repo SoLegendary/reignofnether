@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -14,6 +15,7 @@ import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -127,11 +129,32 @@ public abstract class EntityMixin {
             cancellable=true
     )
     private void isCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
-        if (level.isClientSide() && MinimapClientEvents.shouldHighlightAnimals()) {
-            if ((Object) this instanceof LivingEntity le && ResourceSources.isHuntableAnimal(le)) {
-                cir.setReturnValue(true);
-            }
+        if (ron$isHighlightedAnimal()) {
+            cir.setReturnValue(true);
         }
+        if (level.isClientSide() && OrthoviewClientEvents.isEnabled() &&
+                ((Object) this) instanceof ItemEntity ie && ItemUtil.isUnitItem(ie)) {
+            cir.setReturnValue(true);
+        }
+    }
+
+    // glow colour is the only per-entity data that reaches the outline buffer (alpha is always 255), so tag
+    // highlighted animals with a near-white marker colour that entity_sobel.fsh uses to draw a thicker outline.
+    // Must be kept in sync with isThick() in assets/minecraft/shaders/program/entity_sobel.fsh
+    @Inject(
+            method = "getTeamColor",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void getTeamColor(CallbackInfoReturnable<Integer> cir) {
+        if (ron$isHighlightedAnimal()) {
+            cir.setReturnValue(0xFFFFFE);
+        }
+    }
+
+    private boolean ron$isHighlightedAnimal() {
+        return level.isClientSide() && MinimapClientEvents.shouldHighlightAnimals() &&
+                (Object) this instanceof LivingEntity le && ResourceSources.isHuntableAnimal(le);
     }
 
 }

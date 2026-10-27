@@ -326,6 +326,13 @@
             "reignofnether:potion_pop_02",
             "reignofnether:potion_pop_03"
         ]
+    },
+    "enchanters_tome": {
+        "subtitle": "sounds.reignofnether.enchanters_tome",
+        "sounds": [
+            "reignofnether:enchanters_tome_01",
+            "reignofnether:enchanters_tome_01"
+        ]
     }
 }
 

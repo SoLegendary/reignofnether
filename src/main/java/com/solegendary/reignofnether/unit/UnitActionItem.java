@@ -295,6 +295,9 @@ public class UnitActionItem {
                 }
                 case ATTACK -> {
                     LivingEntity le = (LivingEntity) level.getEntity(unitId);
+                    if (level.isClientSide() && ((LivingEntity) unit).getFirstPassenger() instanceof AttackerUnit paUnit && paUnit.isBelowMinAttackRange(le))
+                        HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.target_too_close"));
+
                     if (unit instanceof AttackerUnit attackerUnit) {
                         if (unit instanceof WorkerUnit && ResourceSources.isHuntableAnimal(le) && Unit.atMaxResources(unit)) {
                             if (level.isClientSide()) {

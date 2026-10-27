@@ -49,6 +49,18 @@ public abstract class EntityRenderDispatcherMixin {
         return false;
     }
 
+    // RenderLivingEvent.Pre only covers living entities, so projectiles (arrows etc.) need hiding here
+    @Inject(
+            method = "render",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void onRender(Entity pEntity, double pX, double pY, double pZ, float pRotationYaw, float pPartialTicks,
+                          PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, CallbackInfo ci) {
+        if (pEntity instanceof Projectile && !FogOfWarClientEvents.isInBrightChunk(pEntity))
+            ci.cancel();
+    }
+
     @Inject(
             method = "renderFlame",
             at = @At("HEAD"),

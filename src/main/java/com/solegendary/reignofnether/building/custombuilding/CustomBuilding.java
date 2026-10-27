@@ -229,6 +229,16 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         }
     }
 
+    private boolean hasCustomProductionTag(CompoundTag tag) {
+        if (tag == null)
+            return false;
+        List<String> customIntTags = List.of("foodCost", "woodCost", "oreCost", "popCost", "ticksToTrain");
+        for (String customTag : customIntTags)
+            if (tag.contains(customTag, Tag.TAG_INT))
+                return true;
+        return false;
+    }
+
     // check the chest items for any RoN unit spawn eggs and add production items for them
     public void checkAndAddProductionItems(List<ListTag> itemsLists) {
         int hotkeyIndex = 0;
@@ -249,8 +259,8 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
 
                     if (type.getDescriptionId().contains("reignofnether") && type.getDescriptionId().contains("_unit")) {
                         ProductionItem originalProdItem = ProductionItems.getProductionItem((EntityType<? extends Mob>) type);
-                        if (originalProdItem != null) {
 
+                        if (originalProdItem != null) {
                             ResourceCost newCost = ResourceCost.Unit(
                                 originalProdItem.defaultCost.food,
                                 originalProdItem.defaultCost.wood,
@@ -263,15 +273,21 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             ArrayList<FormattedCharSequence> newTooltipLines = new ArrayList<>();
                             ArrayList<FormattedCharSequence> newToolTip = new ArrayList<>();
 
+                            int emeraldBounty = -1;
+
                             if (stackNbt != null) {
-                                if (stackNbt.contains("foodCost", Tag.TAG_INT))
+                                 if (stackNbt.contains("foodCost", Tag.TAG_INT))
                                     newCost.food = stackNbt.getInt("foodCost");
                                 if (stackNbt.contains("woodCost", Tag.TAG_INT))
                                     newCost.wood = stackNbt.getInt("woodCost");
                                 if (stackNbt.contains("oreCost", Tag.TAG_INT))
                                     newCost.ore = stackNbt.getInt("oreCost");
+                                if (stackNbt.contains("popCost", Tag.TAG_INT))
+                                    newCost.population = stackNbt.getInt("popCost");
                                 if (stackNbt.contains("ticksToTrain", Tag.TAG_INT))
                                     newCost.ticks = stackNbt.getInt("ticksToTrain");
+                                if (stackNbt.contains("emeraldBounty", Tag.TAG_INT))
+                                    emeraldBounty = stackNbt.getInt("emeraldBounty");
 
                                 if (stackNbt.contains("tooltipTitle", Tag.TAG_STRING))
                                     newTooltipTitle = fcs(stackNbt.getString("tooltipTitle"), true);
@@ -282,11 +298,13 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                                 };
                             }
 
-                            if (newTooltipTitle != null || !newTooltipLines.isEmpty()) {
+                            // custom costs need our own tooltip, else CustomProductionItem keeps the original item's tooltip (with original costs)
+                            if (hasCustomProductionTag(stackNbt) || newTooltipTitle != null || !newTooltipLines.isEmpty()) {
+                                // : fcs("") is placeholder only and is replaced with the original title later
                                 newToolTip = new ArrayList<>(List.of(
                                         newTooltipTitle != null ? newTooltipTitle : fcs(""),
                                         ResourceCosts.getFormattedCost(newCost),
-                                        ResourceCosts.getFormattedTime(newCost)
+                                        ResourceCosts.getFormattedPopAndTime(newCost)
                                 ));
                                 if (!newTooltipLines.isEmpty()) {
                                     newToolTip.add(fcs(""));
@@ -300,6 +318,9 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             Keybinding hotkey = hotkeyIndex < HOTKEYS.size() ? HOTKEYS.get(hotkeyIndex) : null;
                             this.productions.add(prodItem, hotkey);
                             if (stackNbt != null && stackNbt.contains("EntityTag")) {
+                                stackNbt.getCompound("EntityTag").putInt("popCost", newCost.population);
+                                if (emeraldBounty >= 0)
+                                    stackNbt.getCompound("EntityTag").putInt("emeraldBounty", emeraldBounty);
                                 this.unitProductionNbts.put(type, stackNbt.getCompound("EntityTag"));
                             }
                             hotkeyIndex += 1;

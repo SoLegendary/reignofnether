@@ -270,7 +270,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
     public void tick() {
         if (tickCount % 10 == 0) {
             BlockPos bp = MiscUtil.getHighestNonAirBlock(level(), blockPosition(), false, true);
-            BlockState lowestBs = level().getBlockState(bp.below());
+            BlockState lowestBs = level().getBlockState(bp.above());
             if (lowestBs.isAir()) {
                 addEffect(new MobEffectInstance(MobEffectRegistrar.DISARM.get(), 15, 1, true, false));
             }

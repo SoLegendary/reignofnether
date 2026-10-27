@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.building.buildings.placements.SculkCatalyst
 import com.solegendary.reignofnether.building.buildings.villagers.IronGolemBuilding;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.ProductionItems;
+import com.solegendary.reignofnether.entities.AdjustablePrimedTnt;
 import com.solegendary.reignofnether.entities.BlazeUnitFireball;
 import com.solegendary.reignofnether.entities.GhastUnitFireball;
 import com.solegendary.reignofnether.entities.WindcallerProjectile;
@@ -25,7 +26,6 @@ import com.solegendary.reignofnether.items.ItemClientboundPacket;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItems;
-import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.*;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
@@ -50,7 +50,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -59,7 +58,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -400,6 +398,7 @@ public class UnitServerEvents {
             mob.setPathfindingMalus(BlockPathTypes.DANGER_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.DAMAGE_FIRE, 1.0f);
             mob.setPathfindingMalus(BlockPathTypes.STICKY_HONEY, 1.0f);
+            mob.setPathfindingMalus(BlockPathTypes.STICKY_HONEY, 1.0f);
         }
 
         // for some reason some units need to be nudged a little on spawn or they can't move
@@ -601,25 +600,43 @@ public class UnitServerEvents {
                 vUnit.incrementHunterExp();
         }
 
-        if (evt.getEntity() instanceof Unit unitKilled && evt.getSource().getEntity() instanceof Unit unit) {
+        String killerName = "";
+        CompoundTag tag = evt.getEntity().getPersistentData();
+        Entity directEntity = evt.getSource().getDirectEntity();
+        Entity sourceEntity = evt.getSource().getEntity();
+
+        if (evt.getSource().getEntity() instanceof Unit unit)
+            killerName = unit.getOwnerName();
+        else if (tag.contains("lastHurtByRTSPlayer"))
+            killerName = tag.getString("lastHurtByRTSPlayer");
+        else if (directEntity != null && directEntity.getPersistentData().contains("ownerName"))
+            killerName = directEntity.getPersistentData().getString("ownerName");
+        else if (sourceEntity != null && sourceEntity.getPersistentData().contains("ownerName"))
+            killerName = sourceEntity.getPersistentData().getString("ownerName");
+
+        if (evt.getEntity() instanceof Unit unitKilled && !killerName.isBlank()) {
             float bountyPercent = 0;
             if (unitKilled.getOwnerName().isEmpty()) {
                 bountyPercent = NEUTRAL_UNIT_BOUNTY_PERCENT;
-            } else if (!AlliancesServerEvents.isAlliedOrOwned(unitKilled.getOwnerName(), unit.getOwnerName())) {
+            } else if (!AlliancesServerEvents.isAlliedOrOwned(unitKilled.getOwnerName(), killerName) && evt.getSource().getEntity() instanceof Unit unit) {
                 int lootingLevel = ((LivingEntity) unit).getMainHandItem().getEnchantmentLevel(Enchantments.MOB_LOOTING);
                 bountyPercent = lootingLevel * UNIT_BOUNTY_PERCENT_PER_LOOTING_LEVEL;
             }
             if (bountyPercent > 0) {
-
                 ResourceCost cost = unitKilled.getCost();
                 Resources resources;
                 int food = (int) (cost.food * bountyPercent);
                 int wood = (int) (cost.wood * bountyPercent);
                 int ore =  (int) (cost.ore * bountyPercent);
                 if (ItemServerEvents.ENABLED) {
-                    resources = Resources.emeralds(unit.getOwnerName(), food + wood + ore);
+                    CompoundTag etag = evt.getEntity().getPersistentData();
+                    if (etag.contains("emeraldBounty")) {
+                        resources = Resources.emeralds(killerName, etag.getInt("emeraldBounty"));
+                    } else {
+                        resources = Resources.emeralds(killerName, food + wood + ore);
+                    }
                 } else {
-                    resources = new Resources(unit.getOwnerName(), food, wood, ore);
+                    resources = new Resources(killerName, food, wood, ore);
                 }
                 if (resources.getTotalValue() > 0) {
                     ResourcesClientboundPacket.showFloatingText(resources, evt.getEntity().getOnPos());
@@ -942,6 +959,20 @@ public class UnitServerEvents {
         return entities;
     }
 
+    // LivingEntityMixin.actuallyHurt ignores the amount returned from LivingDamageEvent for unit attacks,
+    // so damage that must apply to them is modified here instead
+    @SubscribeEvent
+    public static void onEntityHurt(LivingHurtEvent evt) {
+        // wide-angle multishot extras deal quarter damage; other multishot extras and piercing arrows (after their first target) deal half
+        if (evt.getSource().getDirectEntity() instanceof AbstractArrow arrow) {
+            if (arrow.getTags().contains(RangedAttackerUnit.WIDE_MULTISHOT_ARROW_TAG))
+                evt.setAmount(evt.getAmount() / 4);
+            else if (arrow.getTags().contains(RangedAttackerUnit.MULTISHOT_ARROW_TAG) ||
+                     arrow.getTags().contains(RangedAttackerUnit.DEALT_DAMAGE_ARROW_TAG))
+                evt.setAmount(evt.getAmount() / 2);
+        }
+    }
+
     @SubscribeEvent
     public static void onEntityDamaged(LivingDamageEvent evt) {
 
@@ -975,11 +1006,21 @@ public class UnitServerEvents {
         }
 
         // halve direct ghast damage since they get bonus damage from launching units into the air
-        if (evt.getSource().getEntity() instanceof GhastUnit) {
+        if (evt.getSource().getEntity() instanceof GhastUnit ghastUnit) {
             // (unless its to a garrisoned unit)
             if (!(evt.getEntity() instanceof Unit unit && GarrisonableBuildingAddon.getGarrison(unit) != null)) {
                 evt.setAmount(evt.getAmount() / 2);
             }
+            evt.setAmount(evt.getAmount() * ghastUnit.getEffectiveDamageMultiplier());
+        }
+
+        // checked via tag rather than the pillager's current state, as it may have dismounted or died since firing
+        if (evt.getSource().getDirectEntity() instanceof Arrow arrow &&
+                arrow.getTags().contains(RangedAttackerUnit.SIEGE_ARROW_TAG)) {
+            evt.setCanceled(true); // rely on explosion damage for primary siege arrows
+        } else if (evt.getSource().getEntity() instanceof PillagerUnit pillagerUnit && pillagerUnit.isSieging() &&
+                evt.getSource().is(DamageTypes.PLAYER_EXPLOSION)) {
+            evt.setAmount(evt.getAmount() * pillagerUnit.getEffectiveDamageMultiplier());
         }
 
         // ignore added weapon damage for workers
@@ -1055,7 +1096,7 @@ public class UnitServerEvents {
         }
 
         if (evt.getEntity() instanceof HeroUnit && evt.getSource().getEntity() instanceof PhantomSummon) {
-            evt.setAmount(evt.getAmount() * PhantomSummon.HERO_DAMAGE_MULT);
+            evt.setAmount(evt.getAmount() * PhantomSummon.HERO_BUILDING_DAMAGE_MULT);
         }
 
         if (evt.getSource().getDirectEntity() instanceof GhastUnitFireball) {
@@ -1068,17 +1109,19 @@ public class UnitServerEvents {
                 RANDOM.nextFloat() < aUnit.getExplosiveChance() && evt.getAmount() > 0.1f) {
                 doExplosiveHit((LivingEntity) aUnit, evt.getEntity());
             }
-            float lifeDmgPerc = aUnit.getLifeStealPercent();
-            if (lifeDmgPerc > 0) {
-                ((LivingEntity) aUnit).heal(evt.getAmount() * lifeDmgPerc);
-                ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), (int) (evt.getAmount() * lifeDmgPerc) + 1,
-                        ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
-            }
-            float manaDmgPerc = aUnit.getManaOnHitPercent();
-            if (manaDmgPerc > 0 && aUnit instanceof HeroUnit heroUnit) {
-                heroUnit.setMana(heroUnit.getMana() + (evt.getAmount() * manaDmgPerc));
-                ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
-                        ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
+            if (evt.getSource().is(DamageTypes.MOB_ATTACK)) {
+                float lifeDmgPerc = aUnit.getLifeStealPercent();
+                if (lifeDmgPerc > 0) {
+                    ((LivingEntity) aUnit).heal(evt.getAmount() * lifeDmgPerc);
+                    ParticleUtil.addParticleExplosion(ParticleRegistrar.FLOATING_HEART.get(), (int) (evt.getAmount() * lifeDmgPerc) + 1,
+                            ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
+                }
+                float manaDmgPerc = aUnit.getManaOnHitPercent();
+                if (manaDmgPerc > 0 && aUnit instanceof HeroUnit heroUnit) {
+                    heroUnit.setMana(heroUnit.getMana() + (evt.getAmount() * manaDmgPerc));
+                    ParticleUtil.addParticleExplosion(ParticleRegistrar.MANA.get(), (int) (evt.getAmount() * manaDmgPerc) + 1,
+                            ((Entity) aUnit).level(), ((Entity) aUnit).getEyePosition());
+                }
             }
         }
 
@@ -1104,6 +1147,17 @@ public class UnitServerEvents {
                     tag.putFloat("damageTaken", dmg);
                 }
             }
+        }
+
+        if (evt.getEntity().hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
+            evt.setAmount(evt.getAmount() / 2);
+        }
+
+        if (evt.getSource().getDirectEntity() instanceof AdjustablePrimedTnt tnt) {
+            if (tnt.getExplosionPower() == 2.0f) // lvl 1 piglin TNT
+                evt.setAmount(evt.getAmount() * 1.2f);
+            else if (tnt.getExplosionPower() >= 4.0f) // lvl 3 piglin TNT or TNT items
+                evt.setAmount(evt.getAmount() * 0.9f);
         }
     }
 
@@ -1192,18 +1246,33 @@ public class UnitServerEvents {
     }
 
     @SubscribeEvent
+    public static void onMobEffectRemoved(MobEffectEvent.Remove evt) {
+        onMobEffectGone(evt);
+    }
+
+    @SubscribeEvent
     public static void onMobEffectExpired(MobEffectEvent.Expired evt) {
+        onMobEffectGone(evt);
+    }
+
+    private static void onMobEffectGone(MobEffectEvent evt) {
+        if (evt.getEffectInstance() == null) return;
+
         // halve level of all enchants
-        if (evt.getEffectInstance() != null) {
-            MobEffect effect = evt.getEffectInstance().getEffect();
-            if (effect == MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get()) {
-                EnchantmentUtil.updateEnchantLevels(evt.getEntity(), true);
-            } else if (effect == MobEffectRegistrar.TEMPORARY_EFFICIENCY.get()) {
-                EnchantmentHelper.setEnchantments(new HashMap<>(), evt.getEntity().getMainHandItem());
-            }
+        MobEffect effect = evt.getEffectInstance().getEffect();
+        if (effect == MobEffectRegistrar.ENCHANTMENT_AMPLIFIER.get()) {
+            EnchantmentUtil.updateEnchantLevels(evt.getEntity(), true);
+        } else if (effect == MobEffectRegistrar.TEMPORARY_EFFICIENCY.get()) {
+            EnchantmentHelper.setEnchantments(new HashMap<>(), evt.getEntity().getMainHandItem());
         }
         if (!evt.getEntity().level().isClientSide())
             UnitSyncMobEffectsClientboundPacket.removeEffectClientside(evt.getEntity(), evt.getEffectInstance().getEffect());
+
+        if (evt.getEffectInstance().getEffect() == MobEffectRegistrar.ENCHANTED_TETHER.get()) {
+            AttributeInstance inst = evt.getEntity().getAttribute(AttributeRegistrar.ATTACK_DAMAGE.get());
+            if (inst != null)
+                inst.removeModifier(MobEffectRegistrar.ENCHANTED_TETHER_UUID);
+        }
     }
 
     @SubscribeEvent
@@ -1217,10 +1286,7 @@ public class UnitServerEvents {
         }
     }
 
-    private static float KNOCKBACK_RESIST_PER_TICKS = 0.01f;
-
     public static ArrayList<Integer> knockbackIgnoreIds = new ArrayList<>();
-    public static ArrayList<Pair<Integer, Integer>> knockbackResistIds = new ArrayList<>();
 
     @SubscribeEvent
     public static void onLivingKnockBack(LivingKnockBackEvent evt) {

@@ -154,8 +154,6 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
 
     public ResourceCost getCost() {return ResourceCosts.MILITIA;}
     public boolean getWillRetaliate() {return willRetaliate;}
-    public float getAttackCooldown() {return ((20 / (isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond)) * getAttackCooldownMultiplier());}
-    public float getNonBaseAttacksPerSecond() {return isUsingBow() ? rangedAttacksPerSecond : attacksPerSecond;}
     public boolean getAggressiveWhenIdle() {return aggressiveWhenIdle && !isVehicle();}
     public float getAttackRange() {return isUsingBow() ? AttackerUnit.super.getAttackRange() : 2;}
     public float getUnitAttackDamage() {
@@ -247,6 +245,9 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
         AttributeInstance ai3 = getAttribute(Attributes.ARMOR);
         if (ai3 != null)
             ai3.setBaseValue(useBow ? rangedArmorValue : armorValue);
+        AttributeInstance ai4 = getAttribute(AttributeRegistrar.ATTACKS_PER_SECOND.get());
+        if (ai4 != null)
+            ai4.setBaseValue(useBow ? rangedAttacksPerSecond : attacksPerSecond);
 
         if (rangedAttackGoal != null && attackGoal != null) {
             if (useBow) {

@@ -441,7 +441,6 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), Unit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
                 .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
@@ -661,7 +660,7 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 }
             }
             for (BuildingPlacement building : buildings) {
-                building.destroyRandomBlocks(maceSlam.damage / 2);
+                building.destroyRandomBlocks((maceSlam.damage * getBuildingDamageMultiplier()) / 2);
             }
 
             for (LivingEntity hitEntity : MiscUtil.getEntitiesWithinRange(Vec3.atCenterOf(blockPos.above()), MaceSlam.RADIUS, LivingEntity.class, level())) {
@@ -702,8 +701,8 @@ public class RoyalGuardUnit extends Vindicator implements AttackerUnit, HeroUnit
                 ((LivingEntity) attackerUnit).addEffect(new MobEffectInstance(MobEffectRegistrar.UNCONTROLLABLE.get(), tauntingCry.duration));
                 ((LivingEntity) attackerUnit).addEffect(new MobEffectInstance(MobEffectRegistrar.ANGRY.get(), tauntingCry.duration));
             }
-            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, tauntingCry.duration, 2));
-            this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, tauntingCry.duration, 2));
+            this.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, tauntingCry.duration, 1));
+            this.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, tauntingCry.duration, 3));
             tauntingCryTicksLeft = tauntingCry.duration;
             updateKnockbackResistance();
             SoundClientboundPacket.playSoundAtPos(SoundAction.HEROISM, this.getOnPos().above());

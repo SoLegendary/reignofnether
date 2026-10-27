@@ -2,10 +2,13 @@ package com.solegendary.reignofnether.mixin;
 
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
+import com.solegendary.reignofnether.registrars.AttributeRegistrar;
+import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,6 +32,10 @@ public abstract class ArmorStandMixin extends LivingEntity {
     private void hurt(DamageSource pSource, float pAmount, CallbackInfoReturnable<Boolean> cir) {
         if (pSource.is(DamageTypes.MOB_ATTACK) || pSource.is(DamageTypes.MOB_ATTACK_NO_AGGRO)) {
             BuildingPlacement building = BuildingUtils.findBuilding(level().isClientSide(), blockPosition());
+            if (pSource.getDirectEntity() instanceof Mob mob && mob.getAttributes().hasAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get()))
+                pAmount *= (1 + mob.getAttributes().getValue(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get()));
+            if (pSource.getDirectEntity() instanceof PhantomSummon)
+                pAmount *= PhantomSummon.HERO_BUILDING_DAMAGE_MULT;
             if (building != null) {
                 building.destroyRandomBlocks(pAmount / 2);
             }

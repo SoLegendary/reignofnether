@@ -246,6 +246,12 @@ public class MobEffectIcons {
             "piglin_fervor"
     );
 
+    public static final MobEffectIcon ENCHANTED_TETHER = new MobEffectIcon(
+            MobEffectRegistrar.ENCHANTED_TETHER.get(),
+            ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID,  "textures/icons/abilities/enchanted_tether.png"),
+            "enchanted_tether"
+    );
+
     @Nullable
     public static MobEffectIcon getIcon(MobEffectInstance mei) {
         for (MobEffectIcon effectIcon : EFFECT_ICONS)
@@ -293,6 +299,7 @@ public class MobEffectIcons {
             VILLAGER_INSPIRATION,
             LIMITED_LIFESPAN,
             LIFESTEAL,
-            PIGLIN_FERVOR
+            PIGLIN_FERVOR,
+            ENCHANTED_TETHER
     );
 }

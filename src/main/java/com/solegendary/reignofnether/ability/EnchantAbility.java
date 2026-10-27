@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
@@ -71,20 +72,16 @@ public abstract class EnchantAbility extends Ability {
         return false;
     }
 
-    protected boolean hasSameEnchant(LivingEntity entity) {
+    public boolean hasSameEnchant(LivingEntity entity) {
         return entity.getItemBySlot(equipmentSlot).getAllEnchantments().containsKey(getEnchantment());
     }
 
     protected void doEnchant(LivingEntity entity) {
         ItemStack item = entity.getItemBySlot(equipmentSlot);
-        Enchantment enchantToRemove = getMutuallyExclusiveEnchant(entity);
         if (item != ItemStack.EMPTY) {
-            if (enchantToRemove != null) {
-                Map<Enchantment, Integer> enchants = new HashMap<>(item.getAllEnchantments());
-                enchants.remove(enchantToRemove);
-                EnchantmentHelper.setEnchantments(enchants, item);
-            }
             item.enchant(getEnchantment(), enchantmentLevel);
+            if (entity instanceof PillagerUnit pillagerUnit && equipmentSlot == EquipmentSlot.MAINHAND)
+                pillagerUnit.unloadCrossbow();
         }
     }
 
@@ -128,10 +125,5 @@ public abstract class EnchantAbility extends Ability {
                 playSound(level, te);
             }
         }
-    }
-
-    @Nullable
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        return null;
     }
 }

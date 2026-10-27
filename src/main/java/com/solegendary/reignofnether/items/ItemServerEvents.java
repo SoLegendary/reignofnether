@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.sounds.SoundClientboundPacket;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -160,7 +162,8 @@ public class ItemServerEvents {
             String killerName = "";
             Entity directEntity = evt.getSource().getDirectEntity();
             Entity sourceEntity = evt.getSource().getEntity();
-            LivingEntity lastHurtBy = evt.getEntity().getLastHurtByMob();
+            CompoundTag tag = killedEntity.getPersistentData();
+            String lastHurtByRTSPlayer = tag.contains("lastHurtByRTSPlayer") ? tag.getString("lastHurtByRTSPlayer") : "";
 
             if (directEntity instanceof Unit unit)
                 killerName = unit.getOwnerName();
@@ -170,10 +173,8 @@ public class ItemServerEvents {
                 killerName = unit.getOwnerName();
             else if (sourceEntity != null && sourceEntity.getPersistentData().contains("ownerName"))
                 killerName = sourceEntity.getPersistentData().getString("ownerName");
-            else if (lastHurtBy instanceof Unit unit)
-                killerName = unit.getOwnerName();
-            else if (lastHurtBy != null && lastHurtBy.getPersistentData().contains("ownerName"))
-                killerName = lastHurtBy.getPersistentData().getString("ownerName");
+            else if (!lastHurtByRTSPlayer.isBlank())
+                killerName = lastHurtByRTSPlayer;
             else if (directEntity instanceof AdjustablePrimedTnt tnt && tnt.getOwner() instanceof Unit unit)
                 killerName = unit.getOwnerName();
 
@@ -244,6 +245,14 @@ public class ItemServerEvents {
                 player.sendSystemMessage(Component.translatable("item.reignofnether.error.failed_other", mobName));
                 evt.setCancellationResult(InteractionResult.FAIL);
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoin(EntityJoinLevelEvent evt) {
+        if (evt.getEntity() instanceof ItemEntity item
+                && ItemUtil.isUnitItem(item.getItem())) {
+            item.setInvulnerable(true);
         }
     }
 }

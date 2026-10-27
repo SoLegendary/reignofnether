@@ -19,6 +19,7 @@ import com.solegendary.reignofnether.commands.rtsapi.RTSApiCommands;
 import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceName;
 import com.solegendary.reignofnether.resources.Resources;
@@ -27,6 +28,8 @@ import com.solegendary.reignofnether.rtsmap.RTSMapInfoAction;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientboundPacket;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.scenario.ScenarioRole;
+import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.unit.EnemySearchBehaviour;
 import com.solegendary.reignofnether.unit.UnitAction;
@@ -384,6 +387,17 @@ public class CommandsServerEvents {
 												StringArgumentType.getString(ctx, "playerName1"),
 												StringArgumentType.getString(ctx, "playerName2")
 										)))))
+		);
+
+		dispatcher.register(Commands.literal("rtsapi-start-scenario-role")
+				.requires(source -> source.hasPermission(2))
+				.then(Commands.argument("playerName", StringArgumentType.string())
+						.then(Commands.argument("scenarioId", IntegerArgumentType.integer(0))
+								.executes(ctx -> startScenarioRole(
+										ctx,
+										StringArgumentType.getString(ctx, "playerName"),
+										IntegerArgumentType.getInteger(ctx, "scenarioId")
+								))))
 		);
 
 		dispatcher.register(Commands.literal("rts-reset")
@@ -1001,6 +1015,53 @@ public class CommandsServerEvents {
 			true
 		);
 		StartPosServerEvents.loadPositionsFromMapInfo();
+		return 1;
+	}
+
+	public static int startScenarioRole(
+		CommandContext<CommandSourceStack> ctx,
+		String playerName,
+		int roleIndex
+	) {
+		if (!ctx.getSource().getServer().getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).get()) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.not_scenario_mode"));
+			return 0;
+		}
+		ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(playerName);
+		if (player == null) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.player.offline", playerName));
+			return 0;
+		}
+		if (PlayerServerEvents.isRTSPlayer(playerName)) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.already_rts_player", playerName));
+			return 0;
+		}
+		ScenarioRole role = ScenarioUtils.getScenarioRole(false, roleIndex);
+		if (role == null) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.unknown_role", roleIndex));
+			return 0;
+		}
+		if (role.isNpc) {
+			ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.role_npc", roleIndex));
+			return 0;
+		}
+		synchronized (PlayerServerEvents.rtsPlayers) {
+			for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers) {
+				if (rtsPlayer.scenarioRoleIndex == roleIndex) {
+					ctx.getSource().sendFailure(Component.translatable("commands.reignofnether.scenario.role_taken", roleIndex, rtsPlayer.name));
+					return 0;
+				}
+			}
+		}
+		if (PlayerServerEvents.rtsLocked) {
+			ctx.getSource().sendFailure(Component.translatable("server.reignofnether.locked"));
+			return 0;
+		}
+		PlayerServerEvents.startRTSScenario(player.getId(), roleIndex);
+		ctx.getSource().sendSuccess(
+			() -> Component.translatable("commands.reignofnether.scenario.start_role.success", playerName, role.name, roleIndex),
+			true
+		);
 		return 1;
 	}
 

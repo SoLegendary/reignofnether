@@ -36,6 +36,9 @@ public class WindcallerProjectile extends AbstractMagicProjectile {
     @Override
     protected void onHitEntity(EntityHitResult pResult) {
         if (!this.level().isClientSide && this.getOwner() instanceof AttackerUnit aUnit) {
+            // stop homing once we've reached the target so we don't circle back around it
+            if (pResult.getEntity() == getTarget())
+                setTarget(null);
             boolean isHurt = false;
             if (!damageDealt)
                 isHurt = pResult.getEntity().hurt(damageSources().mobProjectile(this, (LivingEntity) this.getOwner()), aUnit.getUnitAttackDamage());

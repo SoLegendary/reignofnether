@@ -190,7 +190,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     // endregion
 
-    final static public int LEVITATE_TICKS = 80;
+    final static public int LEVITATE_TICKS = 100;
     final static public int LONGSHOT_BONUS_RANGE = 4;
 
     final static public float attackDamage = 5.0f;
@@ -595,6 +595,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
         WindcallerProjectile proj = new WindcallerProjectile(this.level(), this, x, y, z);
         proj.setPos(this.getEyePosition());
+        proj.setTarget(pTarget);
 
         level().addFreshEntity(proj);
 

@@ -43,16 +43,13 @@ public class EnchantSharpness extends EnchantAbility {
                 "Sharpness Enchantment",
                 ResourceLocation.fromNamespaceAndPath("minecraft", "textures/item/diamond_axe.png"),
                 hotkey,
-                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this,
+                () -> CursorClientEvents.getLeftClickAction() == ENCHANT_ACTION || Library.isAutoCasting(placement, this),
                 () -> false,
                 () -> placement.getUpgradeLevel() > 0,
                 () -> CursorClientEvents.setLeftClickAction(ENCHANT_ACTION),
                 () -> {
                     BuildingAbilityServerboundPacket.doAbility(ENCHANT_ACTION, placement.originPos, this.oneClickOneUse);
-                    if (placement.getDataStorage().getData(Library.AUTO_CAST_ENCHANT) == this)
-                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, null);
-                    else
-                        placement.getDataStorage().setData(Library.AUTO_CAST_ENCHANT, this);
+                    Library.toggleAutoCast(placement, this);
                 },
                 List.of(
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.sharpness"), Style.EMPTY.withBold(true)),
@@ -61,7 +58,6 @@ public class EnchantSharpness extends EnchantAbility {
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.sharpness.tooltip1"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.sharpness.tooltip2"), Style.EMPTY),
                         FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("ability.reignofnether.enchant.sharpness.tooltip3"), Style.EMPTY),
                         FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY)
                 ),
                 this,
@@ -73,14 +69,5 @@ public class EnchantSharpness extends EnchantAbility {
     public boolean isCorrectUnitAndEquipment(LivingEntity entity) {
         return entity instanceof VindicatorUnit &&
                 entity.getItemBySlot(equipmentSlot).getItem() instanceof AxeItem;
-    }
-
-    @Override
-    public Enchantment getMutuallyExclusiveEnchant(LivingEntity entity) {
-        for (Enchantment enchantment : entity.getItemBySlot(equipmentSlot).getAllEnchantments().keySet()) {
-            if (enchantment == EnchantmentRegistrar.MAIMING.get() || enchantment == getEnchantment())
-                return enchantment;
-        }
-        return null;
     }
 }

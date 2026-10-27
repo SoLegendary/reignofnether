@@ -130,14 +130,6 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
         );
     }
 
-
-    @Override
-    public boolean canEnchant(LivingEntity le) {
-        return le instanceof Unit &&
-                !le.getItemBySlot(EquipmentSlot.CHEST).isEmpty() &&
-                !le.getItemBySlot(EquipmentSlot.CHEST).getAllEnchantments().containsKey(EnchantmentRegistrar.FORTYIFYING.get());
-    }
-
     @Override
     public void use(Level level, Unit unitUsing, LivingEntity targetEntity) {
         if (targetEntity.getItemBySlot(EquipmentSlot.CHEST).isEmpty()) {
@@ -150,7 +142,7 @@ public class ProtectiveEnchantment extends AbstractEnchantment {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error4"));
             return;
         }
-        ((EnchanterUnit) unitUsing).getCastEnchantProtectiveGoal().setAbility(this);
-        ((EnchanterUnit) unitUsing).getCastEnchantProtectiveGoal().setTarget(targetEntity);
+        ((EnchanterUnit) unitUsing).getCastEnchantedTetherGoal().setAbility(this);
+        ((EnchanterUnit) unitUsing).getCastEnchantedTetherGoal().setTarget(targetEntity);
     }
 }

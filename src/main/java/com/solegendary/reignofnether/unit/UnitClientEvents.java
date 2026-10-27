@@ -241,9 +241,15 @@ public class UnitClientEvents {
         if (MC.level != null) {
             List<Integer> allUnitIds = allUnits.stream().map(Entity::getId).toList();
             for (LivingEntity entity : allUnits) {
-                if (entity instanceof Unit unit)
-                    if (unit.getOwnerName().equals(playerName))
-                        currentPopulation += unit.getCost().population;
+                if (entity instanceof Unit unit) {
+                    if (unit.getOwnerName().equals(playerName)) {
+                        if (entity.getPersistentData().contains("popCost")) {
+                            currentPopulation += entity.getPersistentData().getInt("popCost");
+                        } else {
+                            currentPopulation += unit.getCost().population;
+                        }
+                    }
+                }
             }
             for (VirtualUnit virtualUnit : MinimapClientEvents.virtualUnits) {
                 if (virtualUnit.ownerName.equals(playerName) && !allUnitIds.contains(virtualUnit.id))
@@ -529,6 +535,9 @@ public class UnitClientEvents {
                     entity.setPos(pos);
                 }
                 entity.setAbsorptionAmount(absorb);
+                if (entity instanceof Unit unit)
+                    if (population >= 0 && population != unit.getCost().population)
+                        entity.getPersistentData().putInt("popCost", population);
                 return;
             }
         }
@@ -691,6 +700,7 @@ public class UnitClientEvents {
             unit.setupEquipmentAndUpgradesClient();
 
             UnitSyncServerboundPacket.requestSyncAbilities(entity.getId());
+            UnitSyncServerboundPacket.requestSyncMobEffects(entity.getId());
 
             if (entity instanceof HeroUnit)
                 HeroServerboundPacket.requestHeroSync(entity.getId());
@@ -1120,7 +1130,7 @@ public class UnitClientEvents {
 
             // render items in front of face for eating units
             for (LivingEntity entity : getAllUnits()) {
-                if (entity instanceof Unit unit && unit.isEatingFood()) {
+                if (entity instanceof Unit unit && unit.isEatingFood() && FogOfWarClientEvents.isBlockVisible(entity.blockPosition())) {
                     MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
                 }
             }

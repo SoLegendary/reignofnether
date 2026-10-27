@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.mixin.fogofwar.BlockColorsAccessor;
 import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.particles.*;
 import com.solegendary.reignofnether.registrars.*;
+import com.solegendary.reignofnether.unit.modelling.layers.GlintLayer;
 import com.solegendary.reignofnether.unit.modelling.models.*;
 import com.solegendary.reignofnether.unit.modelling.renderers.*;
 import net.minecraft.client.color.block.BlockColor;
@@ -27,6 +28,7 @@ import net.minecraft.client.renderer.blockentity.SkullBlockRenderer;
 import net.minecraft.client.renderer.entity.*;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -44,6 +46,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.util.HashSet;
+import java.util.List;
 
 @Mod.EventBusSubscriber(modid = ReignOfNether.MOD_ID, bus = Bus.MOD, value = Dist.CLIENT)
 public class ClientModEvents {
@@ -129,7 +132,7 @@ public class ClientModEvents {
         evt.registerEntityRenderer(EntityRegistrar.EVOKER_UNIT.get(), EvokerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.ENDERMAN_UNIT.get(), EndermanRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.WARDEN_UNIT.get(), WardenRenderer::new);
-        evt.registerEntityRenderer(EntityRegistrar.RAVAGER_UNIT.get(), RavagerRenderer::new);
+        evt.registerEntityRenderer(EntityRegistrar.RAVAGER_UNIT.get(), RavagerUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.SILVERFISH_UNIT.get(), SilverfishRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.GRUNT_UNIT.get(), PiglinUnitRenderer::new);
         evt.registerEntityRenderer(EntityRegistrar.STRIDER_UNIT.get(), StriderRenderer::new);
@@ -299,6 +302,27 @@ public class ClientModEvents {
                 ParticleRegistrar.BIG_VIBRATION.get(),
                 BigVibrationParticle.Provider::new
         );
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SubscribeEvent
+    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
+        for (EntityType<?> type : ForgeRegistries.ENTITY_TYPES.getValues()) {
+            LivingEntityRenderer living;
+            try {
+                living = event.getRenderer((EntityType) type);
+            } catch (ClassCastException e) {
+                continue; // not a living entity renderer
+            }
+            if (living != null) {
+                living.addLayer(new GlintLayer(living));
+            }
+        }
+        // Players use separate renderers
+        for (String skin : event.getSkins()) {
+            LivingEntityRenderer player = event.getSkin(skin);
+            if (player != null) player.addLayer(new GlintLayer(player));
+        }
     }
 }
 

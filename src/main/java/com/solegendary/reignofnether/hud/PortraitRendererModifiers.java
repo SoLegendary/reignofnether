@@ -94,7 +94,7 @@ public class PortraitRendererModifiers {
             yOffset = 26;
         } else if (entity instanceof EnderMan) {
             yOffset = -15;
-        } else if (entity instanceof Ravager) {
+        } else if (entity instanceof Ravager ravager) {
             yOffset = -54;
             scale = -25;
         } else if (entity instanceof Dolphin) {

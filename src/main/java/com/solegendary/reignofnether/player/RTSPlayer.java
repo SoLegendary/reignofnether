@@ -64,9 +64,6 @@ public class RTSPlayer {
         if (itemSeed >= 0)
             this.itemDropQueue = ItemUtil.getRandomItemDropsList(itemSeed, raritySeed);
 
-        System.out.println("");
-        System.out.println("Player: " + playerName);
-        System.out.println("----------------------");
         for (UnitItem unitItem : this.itemDropQueue) {
             System.out.println(unitItem.rarity.name() + " | " + unitItem.getName().getString());
         }
@@ -121,9 +118,6 @@ public class RTSPlayer {
         for (int i = 0; i < itemsDropped; i++)
             this.itemDropQueue.pollFirst();
 
-        System.out.println("");
-        System.out.println("Player: " + name);
-        System.out.println("----------------------");
         for (UnitItem unitItem : this.itemDropQueue) {
             System.out.println(unitItem.rarity.name() + " | " + unitItem.getName().getString());
         }

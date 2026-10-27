@@ -12,6 +12,8 @@ import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
+import com.solegendary.reignofnether.unit.units.monsters.HuskUnit;
+import com.solegendary.reignofnether.unit.units.monsters.StrayUnit;
 import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnitProfession;
@@ -47,9 +49,13 @@ import net.minecraftforge.event.ForgeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import javax.annotation.Nullable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -167,6 +173,8 @@ public abstract class LivingEntityMixin extends Entity {
             cancellable = true
     )
     protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount, CallbackInfo ci) {
+        this.invulnerableTime = 0;
+
         // ensure projectiles from units do the damage of the unit, not the item,
         // and that armour and anti-armour effects are considered through absorption
         if ((pDamageSource.is(DamageTypeTags.IS_PROJECTILE) ||
@@ -201,7 +209,7 @@ public abstract class LivingEntityMixin extends Entity {
                 dmg *= (1 - unit.getUnitPhysicalArmorPercentage());
                 if (pDamageSource.is(DamageTypeTags.IS_PROJECTILE))
                     dmg *= (1 - unit.getUnitRangedArmorPercentage());
-                dmg *= (1 - unit.getUnitResistPercentage());
+                //dmg *= (1 - unit.getUnitResistPercentage()); already counted in getDamageAfterMagicAbsorb
 
                 if (!this.level().isClientSide() && getRandom().nextFloat() < attackerUnit.getCriticalChance()) {
                     dmg *= CRITICAL_HIT_MULTIPLIER;
@@ -289,6 +297,13 @@ public abstract class LivingEntityMixin extends Entity {
         LivingEntity le = (LivingEntity) (Object) this;
         if (le.hasEffect(MobEffectRegistrar.PHASING.get())) {
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "setLastHurtByMob", at = @At("TAIL"))
+    private void extendHurtByMobTimer(@Nullable LivingEntity le, CallbackInfo ci) {
+        if (le instanceof Unit unit && unit.getOwnerName().isBlank()) {
+            this.getPersistentData().putString("lastHurtByRTSPlayer", unit.getOwnerName());
         }
     }
 }

@@ -358,7 +358,6 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 .add(AttributeRegistrar.ATTACK_RANGE.get(), attackRange)
                 .add(AttributeRegistrar.AGGRO_RANGE.get(), aggroRange)
                 .add(AttributeRegistrar.SIGHT_RANGE.get(), HeroUnit.DEFAULT_SIGHT_RANGE)
-                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0)
                 .add(AttributeRegistrar.MAGIC_DAMAGE_RESIST.get(), magicDamageResist)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), baseMaxMana)
                 .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), manaRegenPerSecond)
@@ -537,6 +536,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
         NecromancerProjectile proj = new NecromancerProjectile(this.level(), this, x, y, z);
         proj.setPos(this.getEyePosition());
+        proj.setTarget(pTarget);
 
         level().addFreshEntity(proj);
 
@@ -604,6 +604,11 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
                 zombieUnit.setItemSlot(EquipmentSlot.LEGS, leggings);
                 zombieUnit.setItemSlot(EquipmentSlot.FEET, boots);
                 zombieUnit.setItemSlot(EquipmentSlot.MAINHAND, sword);
+
+                AttributeInstance ai2 = zombieUnit.getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
+                if (ai2 != null) {
+                    ai2.setBaseValue(getBuildingDamageBonus() * 0.5f);
+                }
             }
         }
     }
@@ -637,6 +642,10 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
             AttributeInstance ai = phantom.getAttribute(Attributes.ATTACK_DAMAGE);
             if (ai != null) {
                 ai.setBaseValue(InsomniaCurse.PHANTOM_DAMAGE + (soulRank * InsomniaCurse.PHANTOM_DAMAGE_BONUS_PER_SOUL_RANK));
+            }
+            AttributeInstance ai2 = phantom.getAttribute(AttributeRegistrar.BUILDING_DAMAGE_BONUS.get());
+            if (ai2 != null) {
+                ai2.setBaseValue(getBuildingDamageBonus() * 0.5f);
             }
             this.level().addFreshEntity(phantom);
             phantom.getPersistentData().putString("ownerName", getOwnerName());

@@ -14,6 +14,7 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.goals.*;
 import com.solegendary.reignofnether.unit.units.monsters.PhantomSummon;
+import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
@@ -44,6 +45,8 @@ public interface AttackerUnit {
     public static final float ATTACK_DAMAGE_REDUCTION_PER_WEAK = 0.2f;
     public static final float ATTACK_DAMAGE_INCREASE_PER_STRENGTH = 0.2f;
 
+    public static final float MAX_RETALIATE_RANGE = 24f;
+
     public boolean getWillRetaliate();
     public default float getAttacksPerSecond() {
         return 20f / getAttackCooldown();
@@ -69,6 +72,14 @@ public interface AttackerUnit {
     public default float getAttackRange() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
         return (float) (attr != null ?  attr.getValue() : AttributeRegistrar.ATTACK_RANGE.get().getDefaultValue());
+    }
+    // targets closer than this can't be attacked (eg. sieging pillagers), so they are also ignored by auto-aggro and retaliation
+    public default float getMinAttackRange() {
+        return 0f;
+    }
+    public default boolean isBelowMinAttackRange(Entity target) {
+        float minRange = getMinAttackRange();
+        return minRange > 0 && ((Entity) this).distanceTo(target) < minRange;
     }
     public default float getBaseAttackRange() {
         AttributeInstance attr = ((LivingEntity) this).getAttribute(AttributeRegistrar.ATTACK_RANGE.get());
@@ -101,6 +112,11 @@ public interface AttackerUnit {
             str = (strMei.getAmplifier() + 1) * ATTACK_DAMAGE_INCREASE_PER_STRENGTH;
         }
         return Math.max(0, value * (1 - weak + str));
+    }
+
+    // used to scale explosion damage based on attack bonuses
+    public default float getEffectiveDamageMultiplier() {
+        return getUnitAttackDamage() / getBaseUnitAttackDamage();
     }
 
     public default float getCriticalChance() {
@@ -302,8 +318,13 @@ public interface AttackerUnit {
                 }
                 Relationship rs = UnitServerEvents.getUnitToEntityRelationship(unit, lastDSEntity);
 
-                if (!isMeleeAttackedByFlyingOrGarrisoned &&
+                boolean beyondMaxRetaliateRange = lastDSEntity instanceof LivingEntity le &&
+                        le.distanceToSqr(unitMob.position()) > (MAX_RETALIATE_RANGE * MAX_RETALIATE_RANGE);
+
+                if (!beyondMaxRetaliateRange &&
+                    !isMeleeAttackedByFlyingOrGarrisoned &&
                     lastDSEntity instanceof LivingEntity &&
+                    !attackerUnit.isBelowMinAttackRange(lastDSEntity) &&
                     !(lastDSEntity instanceof Player player && player.isCreative()) &&
                     (rs == Relationship.NEUTRAL || rs == Relationship.HOSTILE)) {
 
@@ -314,8 +335,10 @@ public interface AttackerUnit {
             if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle())
                 attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level());
 
-            // if attacking another unit as melee, retarget the closest unit periodically unless forced on a target
-            if (!forced) {
+            boolean isSiegedPillager = attackerUnit instanceof PillagerUnit pUnit && pUnit.isSieging();
+
+            // if attacking another unit, retarget the closest unit periodically unless forced on a target
+            if (!forced && !isSiegedPillager) {
                 attackerUnit.retargetToClosestUnit((ServerLevel) unitMob.level());
             }
         }
