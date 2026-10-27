@@ -210,7 +210,7 @@ public class UnitItems {
             .descId("light_feather")
             .type(UnitItemType.PASSIVE)
             .rarity(Rarity.COMMON)
-            .attribute(AttributeRegistrar.EVASION_CHANCE.get(), 0.17, ADDITION)
+            .attribute(AttributeRegistrar.EVASION_CHANCE.get(), 0.22, ADDITION)
             .build();
 
     public static final UnitItem SPYGLASS = UnitItemBuilder.of(Items.SPYGLASS)

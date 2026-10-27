@@ -1,5 +1,5 @@
 
-1.20.1-1.5.1-beta-2
+1.20.1-1.5.1
 
 [✅] Done and tested
 [🟡] Partially done and/or needs testing
@@ -47,6 +47,11 @@ Balance
 
 [✅] All units can now take unlimited instances of damage in a single tick
 
+[✅] Windcallers and Necromancers now have homing projectiles
+[✅] Lifesteal and mana-on-hit effects no longer apply to spells
+
+[✅] All heroes now have 20% ranged armour
+[✅] Light Feather evasion chance raised from 17% to 22%
 
 Quality of Life
 ---------------
@@ -71,17 +76,7 @@ Bugfixes
 [✅] Fixed mob effects not showing if it was applied while outside of render range or logged out
 [✅] Fixed an issue where pillagers did not benefit from their enchantment until after their next shot
 
-[✅] Ravager artillery in siege mode keep auto-targeting nearby targets instead of what you ordered
-[✅] All selected ravagers should burrow at the same time
-[✅] Fixed the RA firing at too short of a range
-[✅] Units no longer retaliate if damaged by a source more than 24 blocks away
-[✅] RAs now only get 24 sight range instead of 32 when sieged, requiring scouts to use their full range like ghasts
-[✅] Arrows should remain explosive even if the pillager dies or dismounts
-[❌] Ravagers always show as facing south to other players
 
-BALANCE
-[✅] Windcallers and Necromancers now have homing projectiles
-[✅] Lifesteal and mana-on-hit effects no longer apply to spells
 
 Languages
 ---------

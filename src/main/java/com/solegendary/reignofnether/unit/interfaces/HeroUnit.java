@@ -52,6 +52,7 @@ public interface HeroUnit extends Unit {
 
     public static AttributeSupplier.Builder createDefaultAttributes() {
         return Unit.createDefaultAttributes()
+                .add(AttributeRegistrar.RANGED_DAMAGE_RESIST.get(), 0.2f)
                 .add(AttributeRegistrar.BASE_MAX_HEALTH.get(), 1)
                 .add(AttributeRegistrar.BASE_MAX_MANA.get(), 0)
                 .add(AttributeRegistrar.MANA_REGEN_PER_SECOND.get(), 0)

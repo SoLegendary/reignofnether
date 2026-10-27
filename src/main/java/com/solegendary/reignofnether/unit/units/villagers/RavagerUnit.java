@@ -333,10 +333,14 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit, RangeInd
         if (state == SiegeState.NONE) return;
         siegeTicks++;
 
-        // freeze facing + motion (runs on both sides so the client doesn't jitter)
-        setYRot(lockedYRot); yRotO = lockedYRot;
-        yBodyRot = lockedYRot; yBodyRotO = lockedYRot;
-        yHeadRot = lockedYRot; yHeadRotO = lockedYRot;
+        // freeze facing on the server only: lockedYRot is only set on the server and the owner's client (the
+        // ability runs locally for the issuing player), so other clients rely on the vanilla-synced rotation
+        if (!level().isClientSide()) {
+            setYRot(lockedYRot); yRotO = lockedYRot;
+            yBodyRot = lockedYRot; yBodyRotO = lockedYRot;
+            yHeadRot = lockedYRot; yHeadRotO = lockedYRot;
+        }
+        // freeze motion (runs on both sides so the client doesn't jitter)
         getNavigation().stop();
         Vec3 dm = getDeltaMovement();
         setDeltaMovement(0, Math.min(dm.y, 0), 0);

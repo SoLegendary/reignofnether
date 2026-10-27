@@ -102,16 +102,21 @@ public class BuildingClientEvents {
     private static final long DOUBLE_CLICK_TIME_MS = 500;
 
     // can only be one preselected building as you can't box-select them like units
-    public static BuildingPlacement  getPreselectedBuilding() {
+    // non-bridge buildings are prioritised over bridges at the same location
+    public static BuildingPlacement getPreselectedBuilding() {
         BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
-        for (BuildingPlacement building : buildings)
-            if (building.isPosInsideBuilding(preSelBp)) {
-                if (building.getBuilding() instanceof AbstractBridge && ResourceSources.getBlockResourceName(preSelBp, MC.level) != ResourceName.NONE) {
-                    return null;
-                }
+        BuildingPlacement preSelBridge = null;
+        for (BuildingPlacement building : buildings) {
+            if (!building.isPosInsideBuilding(preSelBp))
+                continue;
+            if (!(building.getBuilding() instanceof AbstractBridge))
                 return building;
-            }
-        return null;
+            if (preSelBridge == null)
+                preSelBridge = building;
+        }
+        if (preSelBridge != null && ResourceSources.getBlockResourceName(preSelBp, MC.level) != ResourceName.NONE)
+            return null;
+        return preSelBridge;
     }
 
     public static ArrayList<BuildingPlacement> getSelectedBuildings() {

@@ -1130,7 +1130,7 @@ public class UnitClientEvents {
 
             // render items in front of face for eating units
             for (LivingEntity entity : getAllUnits()) {
-                if (entity instanceof Unit unit && unit.isEatingFood()) {
+                if (entity instanceof Unit unit && unit.isEatingFood() && FogOfWarClientEvents.isBlockVisible(entity.blockPosition())) {
                     MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
                 }
             }
