@@ -45,6 +45,7 @@ public class StartPos {
         this.faction = Factions.NONE;
         this.playerName = "";
         this.ready = false;
+        this.hidden = false;
     }
 
     public ResourceLocation getIcon() {
