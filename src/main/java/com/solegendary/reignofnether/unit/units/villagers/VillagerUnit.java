@@ -391,6 +391,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
                     EnchantmentHelper.setEnchantments(new HashMap<>(), getMainHandItem());
                 }
 
+                if (level().isClientSide) return;
                 boolean inRangeOfBellHolder = false;
                 for (LivingEntity le : UnitServerEvents.getAllUnits()) {
                     if (le instanceof UnitInventory inv && inv.isHoldingActive(UnitItems.BELL_OF_ARMS)) {
