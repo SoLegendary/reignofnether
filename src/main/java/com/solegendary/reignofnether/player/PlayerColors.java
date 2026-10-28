@@ -53,7 +53,7 @@ public class PlayerColors {
             this.hexCode = hexCode;
             this.blockTexture = blockTexture;
             this.bedIcon = bedIcon;
-            ReignOfNether.LOGGER.info("Created color '" + this.name + "' with index " + this.id);
+            ReignOfNether.LOGGER.debug("Created color '{}' with index {}", this.name, this.id);
             if (this.mapColorId != -1) {
                 mappedColors.put(mapColorId, this);
             }

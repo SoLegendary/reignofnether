@@ -66,7 +66,7 @@ public class RTSPlayer {
             this.itemDropQueue = ItemUtil.getRandomItemDropsList(itemSeed, raritySeed);
 
         for (UnitItem unitItem : this.itemDropQueue) {
-            ReignOfNether.LOGGER.info(unitItem.rarity.name() + " | " + unitItem.getName().getString());
+            ReignOfNether.LOGGER.debug("{} | {}", unitItem.rarity.name(), unitItem.getName().getString());
         }
     }
 
@@ -120,7 +120,7 @@ public class RTSPlayer {
             this.itemDropQueue.pollFirst();
 
         for (UnitItem unitItem : this.itemDropQueue) {
-            ReignOfNether.LOGGER.info(unitItem.rarity.name() + " | " + unitItem.getName().getString());
+            ReignOfNether.LOGGER.debug("{} | {}", unitItem.rarity.name(), unitItem.getName().getString());
         }
     }
 
