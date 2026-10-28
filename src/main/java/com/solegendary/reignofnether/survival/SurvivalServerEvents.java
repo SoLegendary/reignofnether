@@ -29,6 +29,7 @@ import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nullable;
@@ -73,6 +74,19 @@ public class SurvivalServerEvents {
         survivalData.save();
         level.getDataStorage().save();
         //ReignOfNether.LOGGER.info("saved survival data in serverevents");
+    }
+
+    // statics outlive the world: clear them so the next world opened in this game starts clean
+    // (not reset(): that kills enemies and writes the save)
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        enemies.clear();
+        portals.clear();
+        lastPortals.clear();
+        currentWave = null;
+        lastKilledEnemy = null;
+        lastTime = -1;
+        lastEnemyCount = 0;
     }
 
     @SubscribeEvent

@@ -71,6 +71,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -175,6 +176,20 @@ public class PlayerServerEvents {
         saveRTSPlayers();
     }
 
+    // statics outlive the world: clear them so the next world opened in this game starts clean
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        rtsPlayers.clear();
+        postGameRtsPlayers.clear();
+        players.clear();
+        orthoviewPlayers.clear();
+        playerDefaultGameModes.clear();
+        playerGuiOpenStatus.clear();
+        rtsLocked = false;
+        rtsSyncingEnabled = true;
+        rtsGameTicks = 0;
+    }
+
     public static boolean isRTSPlayer(String playerName) {
         synchronized (rtsPlayers) {
             for (RTSPlayer p : rtsPlayers) {
@@ -231,7 +246,10 @@ public class PlayerServerEvents {
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         serverLevel = evt.getServer().getLevel(Level.OVERWORLD);
 
-        if (FogChunkSnapshot.shouldRecapture) {
+        // also recapture when a match in progress has lost its snapshot (dark chunks would render as void)
+        // ponytail: retries every tick if the snapshot dir can't be created; add a give-up flag if that ever happens
+        if (FogChunkSnapshot.shouldRecapture
+                || (!FogChunkSnapshot.hasAny() && FogOfWarServerEvents.isEnabled() && isGameActive())) {
             FogChunkSnapshot.captureFogChunks(serverLevel);
         }
 
@@ -401,6 +419,7 @@ public class PlayerServerEvents {
         int id = evt.getEntity().getId();
         ReignOfNether.LOGGER.info("Player logged out: " + evt.getEntity().getName().getString() + ", id: " + id);
         players.removeIf(player -> player.getId() == id);
+        orthoviewPlayers.removeIf(player -> player.getId() == id);
     }
 
     public static void startRTS(int playerId, Vec3 pos, Faction faction) {

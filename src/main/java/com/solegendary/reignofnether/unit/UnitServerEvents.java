@@ -84,6 +84,7 @@ import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Vector3d;
@@ -177,6 +178,17 @@ public class UnitServerEvents {
         }
     }
 
+    // statics outlive the world: clear them so the next world opened in this game starts clean
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        HeroServerEvents.fallenHeroes.clear();
+        savedTargetResources.clear();
+        unitActionSlowQueue.clear();
+        formationDispatchQueue.clear();
+        knockbackIgnoreIds.clear();
+        rtsPathfinding = false;
+    }
+
     public static void addUnitPoofs(Level level, Entity entity) {
         ParticleUtil.addParticleExplosion(ParticleTypes.POOF, 35, level, entity.position());
     }
@@ -187,7 +199,7 @@ public class UnitServerEvents {
         data.heroUnits.addAll(HeroServerEvents.fallenHeroes);
         data.save();
         level.getDataStorage().save();
-        ReignOfNether.LOGGER.info("Saved " + getAllUnits().size() + " fallen hero units");
+        ReignOfNether.LOGGER.info("Saved " + data.heroUnits.size() + " fallen hero units");
     }
 
     public static void saveGatherTargets(ServerLevel level) {
@@ -219,8 +231,14 @@ public class UnitServerEvents {
 
         if (level != null) {
             HeroUnitSaveData heroData = HeroUnitSaveData.getInstance(level);
-            HeroServerEvents.fallenHeroes.addAll(heroData.heroUnits);
-            ReignOfNether.LOGGER.info("Loaded " + heroData.heroUnits.size() + " hero units in serverevents");
+            HeroServerEvents.fallenHeroes.clear(); // don't carry over the previous world's heroes
+            Set<String> seenHeroes = new HashSet<>();
+            for (HeroUnitSave hero : heroData.heroUnits)
+                if (seenHeroes.add(hero.ownerName + "|" + hero.name)) // drop duplicates from already-bloated saves
+                    HeroServerEvents.fallenHeroes.add(hero);
+            if (HeroServerEvents.fallenHeroes.size() < heroData.heroUnits.size())
+                saveFallenHeroUnits(level); // rewrite the save without the duplicates
+            ReignOfNether.LOGGER.info("Loaded " + HeroServerEvents.fallenHeroes.size() + " hero units in serverevents");
 
             synchronized (savedTargetResources) {
                 TargetResourcesSaveData data = TargetResourcesSaveData.getInstance(level);

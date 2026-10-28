@@ -24,6 +24,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
@@ -335,6 +336,14 @@ public class StartPosServerEvents {
             if (!newBlockPoses.contains(oldStartPos.pos))
                 StartPosClientboundPacket.removePos(oldStartPos.pos);
         syncAll();
+    }
+
+    // statics outlive the world: clear them so the next world opened in this game starts clean
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        startPoses.clear();
+        startingGame = false;
+        ticksToStart = TICKS_TO_START_MAX;
     }
 
     @SubscribeEvent

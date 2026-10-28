@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.taskscheduler;
 
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -15,6 +16,12 @@ public class TaskSchedulerServerEvents {
 
     public static void schedule(int delayTicks, Runnable task) {
         tasks.add(new ScheduledTask(delayTicks, task));
+    }
+
+    // pending tasks hold the closed world's level/players: never run them in the next world
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        tasks.clear();
     }
 
     @SubscribeEvent
