@@ -571,7 +571,8 @@ public class UnitServerEvents {
         boolean lastHurtByAlly = lastHurtByMob instanceof Unit unit && evt.getEntity() instanceof Unit unit2 &&
                 AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), unit2.getOwnerName());
 
-        if (lastHurtByMob instanceof Unit unit && (drownedInfected || slimeInfected) && !lastHurtByAlly) {
+        if (lastHurtByMob instanceof Unit unit && (drownedInfected || slimeInfected) && !lastHurtByAlly &&
+                !PlayerServerEvents.rtsPlayers.isEmpty()) {
 
             EntityType<? extends Unit> entityType = null;
 
