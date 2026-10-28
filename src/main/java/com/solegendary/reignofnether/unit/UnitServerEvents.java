@@ -82,6 +82,7 @@ import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
@@ -169,6 +170,7 @@ public class UnitServerEvents {
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent evt) {
         isServerStopping = true;
+        UnitChunkTickets.clear();
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null) {
             saveFallenHeroUnits(level);
@@ -187,6 +189,12 @@ public class UnitServerEvents {
         formationDispatchQueue.clear();
         knockbackIgnoreIds.clear();
         rtsPathfinding = false;
+    }
+
+    @SubscribeEvent
+    public static void onLevelUnload(LevelEvent.Unload evt) {
+        if (evt.getLevel() instanceof ServerLevel level)
+            UnitChunkTickets.clear(level);
     }
 
     public static void addUnitPoofs(Level level, Entity entity) {
@@ -480,10 +488,12 @@ public class UnitServerEvents {
             allUnits.removeIf(e -> e.getId() == entity.getId());
             UnitSyncClientboundPacket.sendLeavePacket(entity);
 
-            //ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
-            //ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos()
-            // .x, chunk.getPos().z, false, true);
-            //forcedUnitChunks.removeIf(p -> p.getFirst() == entity.getId());
+            UnitChunkTickets.remove((ServerLevel) evt.getLevel(), entity);
+            ChunkAccess chunk = forcedUnitChunks.remove(entity.getId());
+            if (chunk != null) {
+                ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID,
+                        entity, chunk.getPos().x, chunk.getPos().z, false, true);
+            }
         }
 
         // if a player has no more units, then they are defeated
