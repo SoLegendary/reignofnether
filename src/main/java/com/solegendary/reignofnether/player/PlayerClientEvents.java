@@ -13,6 +13,7 @@ import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.fogofwar.PlayerChunksClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
+import com.solegendary.reignofnether.healthbars.BarStates;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
 import com.solegendary.reignofnether.cursor.CursorClientEvents;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -349,8 +350,12 @@ public class PlayerClientEvents {
         AlliancesClient.inboundPendingAlliances.clear();
         AlliancesClient.outboundPendingAlliances.clear();
         MinimapClientEvents.mapMarkers.clear();
-        ScenarioClientEvents.resetRoles();
-        PlayerChunksClientEvents.applyServerState(new HashMap<>(), new HashMap<>());
+        // PlayerLoggedOutEvent fires on the integrated server thread in singleplayer
+        MC.execute(() -> {
+            ScenarioClientEvents.resetRoles();
+            PlayerChunksClientEvents.reset();
+            BarStates.clear();
+        });
     }
 
     @SubscribeEvent

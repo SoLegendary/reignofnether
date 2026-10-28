@@ -75,6 +75,8 @@ public class ScenarioClientEvents {
             scenarioRoles.add(new ScenarioRole(i));
         roleIndexToEdit = 0;
         roleIndexToPlay = 0;
+        setMenuOpen(false);
+        confirmPublishScenario = false;
     }
 
     public static void cycleRoleIndexToEdit(boolean reverse) {

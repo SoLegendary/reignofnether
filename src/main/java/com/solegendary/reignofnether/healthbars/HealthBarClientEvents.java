@@ -62,6 +62,8 @@ public class HealthBarClientEvents {
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END || MC.level == null || MC.isPaused())
             return;
+        // ran twice per tick back when this listened to PlayerTickEvent START and END, keep that speed
+        BarStates.tick();
         BarStates.tick();
     }
 
