@@ -45,7 +45,7 @@ public class CustomButtonActionServerboundPacket {
 				return;
 			
 			CustomButton button = CustomButtonServerEvents.customButtons.get(this.button);
-			if (button == null)
+			if (button == null || !button.isEnabled)
 				return;
 			List<CustomButtonActions.CustomButtonAction> actions = button.leftClickActions;
 			if (actions == null || actions.isEmpty())
