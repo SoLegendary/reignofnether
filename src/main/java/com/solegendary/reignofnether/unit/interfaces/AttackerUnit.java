@@ -274,6 +274,7 @@ public interface AttackerUnit {
         if (!unitMob.level().isClientSide && unitMob.tickCount % 4 == 0) {
             float targetLockRange = attackerUnit.getTargetLockRange();
             LivingEntity closestTarget = null;
+            boolean searchedForTarget = false;
             var level = (ServerLevel) unitMob.level();
             if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null ||
                 ((LivingEntity) unit).getEffect(MobEffectRegistrar.FREEZE.get()) != null) {
@@ -287,6 +288,7 @@ public interface AttackerUnit {
             // prioritises units and will chase them, resuming attack move once dead or out of range/sight
             if (attackerUnit.getAttackMoveTarget() != null && !unit.hasLivingTarget() && !isAttackingBuilding) {
                 closestTarget = attackerUnit.findClosestTarget(targetLockRange, level);
+                searchedForTarget = true;
                 attackerUnit.attackClosestEnemy(level, closestTarget, targetLockRange);
 
                 if (unit.getTargetGoal().getTarget() == null &&
@@ -336,8 +338,9 @@ public interface AttackerUnit {
             }
             // idle auto-aggression
             if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle()) {
-                if (closestTarget == null) {
+                if (!searchedForTarget) {
                     closestTarget = attackerUnit.findClosestTarget(targetLockRange, level);
+                    searchedForTarget = true;
                 }
                 attackerUnit.attackClosestEnemy(level, closestTarget, targetLockRange);
             }
@@ -345,9 +348,11 @@ public interface AttackerUnit {
             boolean isSiegedPillager = attackerUnit instanceof PillagerUnit pUnit && pUnit.isSieging();
 
             // if attacking another unit, retarget the closest unit periodically unless forced on a target
-            if (!forced && !isSiegedPillager) {
-                if (closestTarget == null) {
+            if (!forced && !isSiegedPillager &&
+                    (unitMob.getTarget() != null || isAttackingBuilding(attackerUnit))) {
+                if (!searchedForTarget) {
                     closestTarget = attackerUnit.findClosestTarget(targetLockRange, level);
+                    searchedForTarget = true;
                 }
                 attackerUnit.retargetToClosestUnit(closestTarget, targetLockRange);
             }
