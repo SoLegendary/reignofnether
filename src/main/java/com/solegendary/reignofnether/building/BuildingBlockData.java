@@ -17,8 +17,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 // a class for static functions related to reading building NBT data (as created by Structure Blocks)
 
@@ -67,13 +70,19 @@ public class BuildingBlockData {
         return blocks;
     }
 
-    public static CompoundTag getBuildingNbt(String structureName, ResourceManager resManager) {
+    // structures ship in the mod jar, so parsed NBT is cached per structure name (only read, never mutated)
+    private static final Map<String, CompoundTag> nbtCache = new ConcurrentHashMap<>();
 
-        try {
-            ResourceLocation rl = ResourceLocation.fromNamespaceAndPath("reignofnether", "structures/" + structureName + ".nbt");
-            Optional<Resource> rs = resManager.getResource(rl);
-            if (rs.isEmpty()) return null;
-            return NbtIo.readCompressed(rs.get().open());
+    public static CompoundTag getBuildingNbt(String structureName, ResourceManager resManager) {
+        return nbtCache.computeIfAbsent(structureName, name -> readBuildingNbt(name, resManager));
+    }
+
+    private static CompoundTag readBuildingNbt(String structureName, ResourceManager resManager) {
+        ResourceLocation rl = ResourceLocation.fromNamespaceAndPath("reignofnether", "structures/" + structureName + ".nbt");
+        Optional<Resource> rs = resManager.getResource(rl);
+        if (rs.isEmpty()) return null;
+        try (InputStream is = rs.get().open()) {
+            return NbtIo.readCompressed(is);
         } catch (IOException e) {
             ReignOfNether.LOGGER.error(e.getMessage(), e);
             return null;

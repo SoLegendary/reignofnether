@@ -1128,10 +1128,12 @@ public class UnitClientEvents {
                 }
             }
 
-            // render items in front of face for eating units
-            for (LivingEntity entity : getAllUnits()) {
-                if (entity instanceof Unit unit && unit.isEatingFood() && FogOfWarClientEvents.isBlockVisible(entity.blockPosition())) {
-                    MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
+            // render items in front of face for eating units (once per frame)
+            if (evt.getStage() == AFTER_ENTITIES) {
+                for (LivingEntity entity : getAllUnits()) {
+                    if (entity instanceof Unit unit && unit.isEatingFood() && FogOfWarClientEvents.isBlockVisible(entity.blockPosition())) {
+                        MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
+                    }
                 }
             }
         }

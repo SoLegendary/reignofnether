@@ -297,8 +297,8 @@ public class UnitActionItem {
                     }
                 }
                 case ATTACK -> {
-                    LivingEntity le = (LivingEntity) level.getEntity(unitId);
-                    if (level.isClientSide() && ((LivingEntity) unit).getFirstPassenger() instanceof AttackerUnit paUnit && paUnit.isBelowMinAttackRange(le))
+                    LivingEntity le = level.getEntity(unitId) instanceof LivingEntity e ? e : null;
+                    if (level.isClientSide() && le != null && ((LivingEntity) unit).getFirstPassenger() instanceof AttackerUnit paUnit && paUnit.isBelowMinAttackRange(le))
                         HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.target_too_close"));
 
                     if (unit instanceof AttackerUnit attackerUnit) {
@@ -326,7 +326,7 @@ public class UnitActionItem {
                                 boolean hasDropOffCommandQueued = false;
                                 for (UnitActionItem uai : UnitServerEvents.getUnitActionSlowQueue()) {
                                     for (int id : uai.getUnitIds()) {
-                                        if (id == le.getId() && (
+                                        if (id == ((Entity) unit).getId() && (
                                                 uai.getAction() == UnitAction.RETURN_RESOURCES_TO_CLOSEST ||
                                                 uai.getAction() == UnitAction.RETURN_RESOURCES)) {
                                             hasDropOffCommandQueued = true;
@@ -357,7 +357,7 @@ public class UnitActionItem {
                     }
                 }
                 case FOLLOW -> {
-                    LivingEntity livingEntity = (LivingEntity) level.getEntity(unitId);
+                    LivingEntity livingEntity = level.getEntity(unitId) instanceof LivingEntity e ? e : null;
                     if (livingEntity != null) {
                         MiscUtil.addUnitCheckpoint(unit, unitId, true);
                     }
@@ -440,7 +440,7 @@ public class UnitActionItem {
                             canAffordManaCost(ability, unit)
                         ) {
                             if (ability.canTargetEntities && this.unitId > 0) {
-                                ability.use(level, unit, (LivingEntity) level.getEntity(unitId));
+                                ability.use(level, unit, level.getEntity(unitId) instanceof LivingEntity e ? e : null);
                                 usedAbility = ability;
                                 if (ability.oneClickOneUse) {
                                     break actionableUnitsLoop;
@@ -526,7 +526,7 @@ public class UnitActionItem {
             for (Ability ability : actionableBuilding.getAbilities()) {
                 if (ability.action == action && (ability.isOffCooldown(actionableBuilding) || ability.canBypassCooldown(actionableBuilding))) {
                     if (ability.canTargetEntities && this.unitId > 0) {
-                        ability.use(level, actionableBuilding, (LivingEntity) level.getEntity(unitId));
+                        ability.use(level, actionableBuilding, level.getEntity(unitId) instanceof LivingEntity e ? e : null);
                     } else {
                         ability.use(level, actionableBuilding, preselectedBlockPos);
                     }
