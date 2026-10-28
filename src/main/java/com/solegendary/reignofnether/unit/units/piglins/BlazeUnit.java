@@ -236,7 +236,7 @@ public class BlazeUnit extends Blaze implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

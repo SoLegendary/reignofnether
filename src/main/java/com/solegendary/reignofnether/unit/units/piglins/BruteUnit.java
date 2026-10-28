@@ -269,7 +269,7 @@ public class BruteUnit extends PiglinBrute implements Unit, AttackerUnit {
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

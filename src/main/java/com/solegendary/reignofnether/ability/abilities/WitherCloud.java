@@ -11,15 +11,14 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.WitherSkeletonUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class WitherCloud extends Ability {
 
@@ -52,7 +51,7 @@ public class WitherCloud extends Ability {
                 null,
                 List.of(
                         fcs(I18n.get("abilities.reignofnether.wither_cloud")),
-                        FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s", MyRenderer.iconStyle),
+                        fcsIcons("\uE004  " + CD_MAX_SECONDS + "s"),
                         fcs(""),
                         fcs(I18n.get("abilities.reignofnether.wither_cloud.tooltip1")),
                         fcs(I18n.get("abilities.reignofnether.wither_cloud.tooltip2", DURATION_SECONDS))

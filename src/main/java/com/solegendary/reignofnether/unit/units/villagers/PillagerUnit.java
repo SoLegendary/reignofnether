@@ -348,7 +348,7 @@ public class PillagerUnit extends Pillager implements Unit, AttackerUnit, Ranged
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

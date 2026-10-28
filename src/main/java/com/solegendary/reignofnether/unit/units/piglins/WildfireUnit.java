@@ -442,7 +442,7 @@ public class WildfireUnit extends Blaze implements Unit, AttackerUnit, RangedAtt
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

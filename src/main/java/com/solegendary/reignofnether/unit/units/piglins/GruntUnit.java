@@ -269,7 +269,7 @@ public class GruntUnit extends Piglin implements Unit, WorkerUnit, AttackerUnit,
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

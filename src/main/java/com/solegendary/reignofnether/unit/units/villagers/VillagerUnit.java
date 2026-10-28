@@ -408,7 +408,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

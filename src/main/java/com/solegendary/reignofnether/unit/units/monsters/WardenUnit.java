@@ -242,7 +242,7 @@ public class WardenUnit extends Warden implements Unit, AttackerUnit, RangeIndic
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

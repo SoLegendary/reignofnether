@@ -12,17 +12,16 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class CallLightning extends Ability {
 
@@ -56,7 +55,7 @@ public class CallLightning extends Ability {
             null,
             List.of(
                     fcs(I18n.get("abilities.reignofnether.call_lightning"), true),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip1", CD_MAX / 20, RANGE), MyRenderer.iconStyle),
+                    fcsIcons(I18n.get("abilities.reignofnether.call_lightning.tooltip1", CD_MAX / 20, RANGE)),
                     fcs(""),
                     fcs(I18n.get("abilities.reignofnether.call_lightning.tooltip2")),
                     fcs(I18n.get("abilities.reignofnether.call_lightning.tooltip3")),

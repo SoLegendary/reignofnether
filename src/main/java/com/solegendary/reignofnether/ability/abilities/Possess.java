@@ -13,15 +13,14 @@ import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class Possess extends Ability {
 
@@ -68,7 +67,7 @@ public class Possess extends Ability {
                 () -> toggleAutocast(unit),
                 List.of(
                         fcs(I18n.get("abilities.reignofnether.possess"), true),
-                        FormattedCharSequence.forward("\uE005  " + RANGE, MyRenderer.iconStyle),
+                        fcsIcons("\uE005  " + RANGE),
                         fcs(I18n.get("abilities.reignofnether.possess.tooltip1")),
                         fcs(I18n.get("abilities.reignofnether.possess.tooltip2")),
                         fcs(I18n.get("abilities.reignofnether.possess.tooltip3"))

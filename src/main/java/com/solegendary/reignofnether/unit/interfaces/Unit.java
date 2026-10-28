@@ -232,13 +232,12 @@ public interface Unit {
     String getOnDeathCommand();
     void setOnDeathCommand(String command);
 
-    default void runOnDeathCommand() {
+    default void runOnDeathCommand(Entity.RemovalReason reason) {
         Entity entity = (Entity) this;
-        if (entity.level() instanceof ServerLevel serverLevel) {
+        if (reason == Entity.RemovalReason.KILLED && entity.level() instanceof ServerLevel serverLevel) {
             String command = this.getOnDeathCommand();
             if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
+                CommandSourceStack source = serverLevel.getServer()
                     .createCommandSourceStack()
                     .withEntity(entity)
                     .withPosition(entity.position())

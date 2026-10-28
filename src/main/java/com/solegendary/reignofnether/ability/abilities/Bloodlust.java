@@ -14,7 +14,6 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.HoglinUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MarauderUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -28,6 +27,7 @@ import net.minecraft.world.level.Level;
 import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class Bloodlust extends Ability {
 
@@ -60,7 +60,7 @@ public class Bloodlust extends Ability {
         if (unit instanceof HoglinUnit) {
             return List.of(
                     fcs(I18n.get("abilities.reignofnether.bloodlust"), true),
-                    FormattedCharSequence.forward("\uE007  " + getHealthCost(unit), MyRenderer.iconStyle),
+                    fcsIcons("\uE007  " + getHealthCost(unit)),
                     fcs(""),
                     fcs(I18n.get("abilities.reignofnether.bloodlust.tooltip1", getHealthCost(unit))),
                     fcs(I18n.get("abilities.reignofnether.bloodlust.tooltip2", DURATION_SECONDS)),
@@ -69,7 +69,7 @@ public class Bloodlust extends Ability {
         } else {
             return List.of(
                     fcs(I18n.get("abilities.reignofnether.bloodlust"), true),
-                    FormattedCharSequence.forward("\uE007  " + getHealthCost(unit), MyRenderer.iconStyle),
+                    fcsIcons("\uE007  " + getHealthCost(unit)),
                     fcs(""),
                     fcs(I18n.get("abilities.reignofnether.bloodlust.tooltip1", getHealthCost(unit))),
                     fcs(I18n.get("abilities.reignofnether.bloodlust.tooltip2", DURATION_SECONDS))

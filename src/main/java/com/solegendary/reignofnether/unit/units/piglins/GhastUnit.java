@@ -290,7 +290,7 @@ public class GhastUnit extends Ghast implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

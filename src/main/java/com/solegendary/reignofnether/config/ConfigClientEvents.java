@@ -6,7 +6,6 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.function.Supplier;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 @OnlyIn(Dist.CLIENT)
 public class ConfigClientEvents {
@@ -110,7 +110,7 @@ public class ConfigClientEvents {
 
                 showDiffsButton = true;
 
-                tooltipLines.add(FormattedCharSequence.forward(text, MyRenderer.iconStyle));
+                tooltipLines.add(fcsIcons(text));
 
                 ReignOfNether.LOGGER.info("Received different config from server: " + text);
             }

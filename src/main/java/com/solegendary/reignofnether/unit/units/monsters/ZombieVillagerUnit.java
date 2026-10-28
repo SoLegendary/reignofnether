@@ -267,7 +267,7 @@ public class ZombieVillagerUnit extends Vindicator implements Unit, WorkerUnit, 
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

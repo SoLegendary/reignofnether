@@ -476,7 +476,7 @@ public class WretchedWraithUnit extends Monster implements Unit, AttackerUnit, H
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

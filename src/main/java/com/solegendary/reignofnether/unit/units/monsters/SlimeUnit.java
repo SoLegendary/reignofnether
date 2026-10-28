@@ -248,7 +248,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
         // prevent vanilla split logic
         forceTiny = true;

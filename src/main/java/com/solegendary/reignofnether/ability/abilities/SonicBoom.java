@@ -13,16 +13,15 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.goals.SonicBoomGoal;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.WardenUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class SonicBoom extends Ability {
 
@@ -57,12 +56,10 @@ public class SonicBoom extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CAST_SONIC_BOOM),
             null,
             List.of(fcs(I18n.get("abilities.reignofnether.sonic_boom"), true),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.sonic_boom.tooltip1",
+                fcsIcons(I18n.get("abilities.reignofnether.sonic_boom.tooltip1",
                         WardenUnit.SONIC_BOOM_DAMAGE,
                         CD_MAX_SECONDS
-                    ) + WardenUnit.SONIC_BOOM_RANGE,
-                    MyRenderer.iconStyle
-                ),
+                    ) + WardenUnit.SONIC_BOOM_RANGE),
                 fcs(I18n.get("abilities.reignofnether.sonic_boom.tooltip2")),
                 fcs(I18n.get("abilities.reignofnether.sonic_boom.tooltip3"))
             ),

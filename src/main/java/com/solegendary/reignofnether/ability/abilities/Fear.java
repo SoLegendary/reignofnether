@@ -12,15 +12,14 @@ import com.solegendary.reignofnether.unit.goals.GenericTargetedSpellGoal;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.WraithUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class Fear extends Ability {
 
@@ -54,7 +53,7 @@ public class Fear extends Ability {
                 () -> toggleAutocast(unit),
                 List.of(
                         fcs(I18n.get("abilities.reignofnether.fear"), true),
-                        FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
+                        fcsIcons("\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE),
                         fcs(I18n.get("abilities.reignofnether.fear.tooltip1")),
                         fcs(I18n.get("abilities.reignofnether.fear.tooltip2", DURATION_SECONDS)),
                         fcs(""),

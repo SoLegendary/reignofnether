@@ -377,7 +377,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

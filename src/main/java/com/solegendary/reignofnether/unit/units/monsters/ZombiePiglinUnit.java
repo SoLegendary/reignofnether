@@ -194,7 +194,7 @@ public class ZombiePiglinUnit extends ZombifiedPiglin implements Unit, AttackerU
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

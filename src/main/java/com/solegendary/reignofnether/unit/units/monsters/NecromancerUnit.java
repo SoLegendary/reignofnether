@@ -388,7 +388,7 @@ public class NecromancerUnit extends Skeleton implements Unit, AttackerUnit, Ran
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

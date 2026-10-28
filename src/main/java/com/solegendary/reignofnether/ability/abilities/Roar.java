@@ -9,15 +9,14 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class Roar extends Ability {
 
@@ -39,11 +38,8 @@ public class Roar extends Ability {
             null,
             List.of(
                 fcs(I18n.get("abilities.reignofnether.roar")),
-                FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.roar.tooltip1", RavagerUnit.ROAR_DAMAGE, CD_MAX_SECONDS)
-                        + RavagerUnit.ROAR_RANGE,
-                    MyRenderer.iconStyle
-                ),
+                fcsIcons(I18n.get("abilities.reignofnether.roar.tooltip1", RavagerUnit.ROAR_DAMAGE, CD_MAX_SECONDS)
+                        + RavagerUnit.ROAR_RANGE),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.roar.tooltip2")),
                 fcs(I18n.get("abilities.reignofnether.roar.tooltip3"))

@@ -325,7 +325,7 @@ public class MilitiaUnit extends Vindicator implements Unit, AttackerUnit, Range
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

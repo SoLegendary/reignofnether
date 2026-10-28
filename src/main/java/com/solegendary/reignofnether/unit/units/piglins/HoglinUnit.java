@@ -267,7 +267,7 @@ public class HoglinUnit extends Hoglin implements Unit, AttackerUnit, Convertabl
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

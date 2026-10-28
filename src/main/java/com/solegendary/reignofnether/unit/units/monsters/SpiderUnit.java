@@ -285,7 +285,7 @@ public class SpiderUnit extends Spider implements Unit, AttackerUnit, Convertabl
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

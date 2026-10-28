@@ -10,15 +10,14 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class SetFangsCircle extends Ability {
 
@@ -46,10 +45,10 @@ public class SetFangsCircle extends Ability {
                 () -> UnitClientEvents.sendUnitCommand(UnitAction.SET_FANGS_CIRCLE),
                 null,
                 List.of(fcs(I18n.get("abilities.reignofnether.evoker_fangs_circular"), true),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.evoker_fangs_circular.tooltip1",
+                        fcsIcons(I18n.get("abilities.reignofnether.evoker_fangs_circular.tooltip1",
                                 EvokerUnit.FANGS_DAMAGE * 2,
                                 CD_MAX_SECONDS
-                        ) + EvokerUnit.FANGS_RANGE_CIRCLE, MyRenderer.iconStyle),
+                        ) + EvokerUnit.FANGS_RANGE_CIRCLE),
                         fcs(I18n.get("abilities.reignofnether.evoker_fangs_circular.tooltip2")),
                         fcs(I18n.get("abilities.reignofnether.evoker_fangs_circular.tooltip3"))
                 ),

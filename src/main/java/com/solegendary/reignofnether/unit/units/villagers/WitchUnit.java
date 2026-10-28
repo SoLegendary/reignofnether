@@ -239,7 +239,7 @@ public class WitchUnit extends Witch implements Unit, RangeIndicator {
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

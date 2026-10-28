@@ -2,8 +2,9 @@ package com.solegendary.reignofnether.resources;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.config.ReignOfNetherCommonConfigs;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.util.FormattedCharSequence;
+
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 // defined here because we need to be able to access in both
 // static (for ProductionItems) and nonstatic (for getCurrentPopulation) contexts
@@ -198,16 +199,16 @@ public class ResourceCosts {
         if (str.isEmpty())
             str += "\uE000  0     ";
         str = str.trim();
-        return FormattedCharSequence.forward(str, MyRenderer.iconStyle);
+        return fcsIcons(str);
     }
     public static FormattedCharSequence getFormattedPopAndTime(ResourceCost resCost) {
-        return FormattedCharSequence.forward("\uE003  " + resCost.population + "     \uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s", MyRenderer.iconStyle);
+        return fcsIcons("\uE003  " + resCost.population + "     \uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s");
     }
     public static FormattedCharSequence getFormattedPop(ResourceCost resCost) {
-        return FormattedCharSequence.forward("\uE003  " + resCost.population, MyRenderer.iconStyle);
+        return fcsIcons("\uE003  " + resCost.population);
     }
     public static FormattedCharSequence getFormattedTime(ResourceCost resCost) {
-        return FormattedCharSequence.forward("\uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s", MyRenderer.iconStyle);
+        return fcsIcons("\uE004  " + resCost.ticks/ResourceCost.TICKS_PER_SECOND + "s");
     }
 
     public static final int REPLANT_WOOD_COST = 1;

@@ -465,7 +465,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit, RangeInd
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

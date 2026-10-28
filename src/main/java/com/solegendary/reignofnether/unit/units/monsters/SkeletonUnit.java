@@ -235,7 +235,7 @@ public class SkeletonUnit extends Skeleton implements Unit, AttackerUnit, Ranged
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        this.runOnDeathCommand();
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
