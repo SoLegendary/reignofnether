@@ -133,7 +133,10 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit, RangeInd
     private boolean holdPosition = false;
 
     // which player owns this unit? this format ensures its synched to client without having to use packets
-    public String getOwnerName() { return this.entityData.get(ownerDataAccessor); }
+    // Refreshed by local writes and incoming entity data; hot reads avoid the data lock.
+    private volatile String cachedOwnerName = "";
+
+    public String getOwnerName() { return cachedOwnerName; }
     public void setOwnerName(String name) { this.entityData.set(ownerDataAccessor, name); }
     public static final EntityDataAccessor<String> ownerDataAccessor =
             SynchedEntityData.defineId(RavagerUnit.class, EntityDataSerializers.STRING);
@@ -263,6 +266,9 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit, RangeInd
 
     @Override
     public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> accessor) {
+        if (ownerDataAccessor.equals(accessor)) {
+            cachedOwnerName = this.entityData.get(ownerDataAccessor);
+        }
         super.onSyncedDataUpdated(accessor);
         // client only: the server manages siegeTicks itself
         if (accessor == siegeStateAccessor && level().isClientSide())
