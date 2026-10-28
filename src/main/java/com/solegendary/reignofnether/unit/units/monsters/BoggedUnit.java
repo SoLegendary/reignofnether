@@ -47,7 +47,7 @@ public class BoggedUnit extends SkeletonUnit implements Unit, AttackerUnit, Rang
 
     public static final int POISON_DAMAGE = 6;
 
-    final static public float attackDamage = 2.0f;
+    final static public float attackDamage = 1.5f;
 
     @Override
     protected @NotNull AbstractArrow getArrow(@NotNull ItemStack pArrowStack, float pDistanceFactor) {
