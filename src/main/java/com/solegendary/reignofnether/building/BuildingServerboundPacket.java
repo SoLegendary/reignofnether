@@ -11,6 +11,7 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuilding;
 import com.solegendary.reignofnether.building.custombuilding.CustomBuildingServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.network.NetworkEvent;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
@@ -48,6 +50,8 @@ public class BuildingServerboundPacket {
             BuildingAction.DESTROY,
             BuildingAction.SET_RALLY_POINT,
             BuildingAction.ADD_RALLY_POINT,
+            BuildingAction.SET_ATTACK_RALLY_POINT,
+            BuildingAction.ADD_ATTACK_RALLY_POINT,
             BuildingAction.SET_RALLY_POINT_ENTITY,
             BuildingAction.CHANGE_PORTAL
     );
@@ -171,13 +175,19 @@ public class BuildingServerboundPacket {
                     (existingBuildingAuthActions.contains(this.action) && building != null &&
                             !player.getName().getString().equals(building.ownerName))) &&
                     !SandboxServer.isSandboxOp(player) &&
-                    !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
+                    !AlliancesServerEvents.canControlAlly(player.getName().getString(), building != null ? building.ownerName : ownerName)) {
 
                 ReignOfNether.LOGGER.warn("BuildingServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
                 success.set(false);
                 return;
             }
             ReignOfNether.LOGGER.info("[Building] {} performed {} for {} (itemName: {}, pos: {})", player.getName(), this.action, this.ownerName, this.itemName, this.buildingPos);
+            // only the owner's own workers can be assigned to build it
+            if (newBuildingAuthActions.contains(this.action) && !SandboxServer.isSandboxOp(player)) {
+                this.builderUnitIds = Arrays.stream(this.builderUnitIds)
+                        .filter(id -> player.serverLevel().getEntity(id) instanceof Unit unit && unit.getOwnerName().equals(this.ownerName))
+                        .toArray();
+            }
             switch (this.action) {
                 case PLACE -> {
                     BuildingServerEvents.placeBuilding(ReignOfNetherRegistries.BUILDING.get(ResourceLocation.tryParse(this.itemName)), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, false, isDiagonalBridge, false, false);
@@ -192,7 +202,7 @@ public class BuildingServerboundPacket {
                     BuildingServerEvents.placeBuilding(CustomBuildingServerEvents.getCustomBuilding(this.itemName), this.buildingPos, this.rotation, this.ownerName, this.builderUnitIds, true, isDiagonalBridge, false, false);
                 }
                 case DESTROY -> {
-                    BuildingServerEvents.cancelBuilding(building, this.ownerName);
+                    BuildingServerEvents.cancelBuilding(building, player.getName().getString());
                 }
                 case SET_RALLY_POINT -> {
                     if (building instanceof ProductionPlacement productionBuilding) {
@@ -219,7 +229,7 @@ public class BuildingServerboundPacket {
                     }
                 }
                 case SET_RALLY_POINT_ENTITY -> {
-                    if (building instanceof ProductionPlacement productionBuilding) {
+                    if (building instanceof ProductionPlacement productionBuilding && this.builderUnitIds.length > 0) {
                         Entity e = building.level.getEntity(this.builderUnitIds[0]);
                         if (e instanceof LivingEntity le)
                             productionBuilding.setRallyPointEntity(le);
