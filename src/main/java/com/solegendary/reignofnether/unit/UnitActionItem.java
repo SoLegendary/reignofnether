@@ -43,6 +43,7 @@ public class UnitActionItem {
 
     public final UnitAction getAction() { return action; }
     public final int[] getUnitIds() { return unitIds; }
+    public final String getOwnerName() { return ownerName; }
     public final BlockPos getPreselectedBlockPos() { return preselectedBlockPos; }
 
     public boolean equals(UnitActionItem unitActionItem) {
