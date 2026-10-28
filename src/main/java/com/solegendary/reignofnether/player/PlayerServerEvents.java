@@ -190,6 +190,11 @@ public class PlayerServerEvents {
         rtsGameTicks = 0;
     }
 
+    // ops, or the singleplayer/LAN host (who has no permission level when cheats are off)
+    public static boolean isOpOrHost(ServerPlayer player) {
+        return player.hasPermissions(2) || player.server.isSingleplayerOwner(player.getGameProfile());
+    }
+
     public static boolean isRTSPlayer(String playerName) {
         synchronized (rtsPlayers) {
             for (RTSPlayer p : rtsPlayers) {
