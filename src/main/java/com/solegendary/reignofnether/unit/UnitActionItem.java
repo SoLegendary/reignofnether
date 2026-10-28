@@ -142,7 +142,7 @@ public class UnitActionItem {
             if (level.isClientSide())
                 isSandboxPlayer = SandboxClientEvents.isSandboxPlayer(this.ownerName);
             else
-                isSandboxPlayer = SandboxServer.isSandboxPlayer(this.ownerName);
+                isSandboxPlayer = SandboxServer.isSandboxOp(this.ownerName);
         }
 
         // filter out unowned units and non-unit entities
@@ -521,7 +521,7 @@ public class UnitActionItem {
 
         if (actionableBuilding != null && (
             actionableBuilding.ownerName.equals(ownerName) ||
-            SandboxServer.isSandboxPlayer(ownerName) ||
+            SandboxServer.isSandboxOp(ownerName) ||
             AlliancesServerEvents.canControlAlly(ownerName, actionableBuilding.ownerName))
         ) {
             for (Ability ability : actionableBuilding.getAbilities()) {

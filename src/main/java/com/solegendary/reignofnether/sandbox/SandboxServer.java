@@ -33,6 +33,12 @@ public class SandboxServer {
         return isSandboxPlayer(player.getName().getString()) && PlayerServerEvents.isOpOrHost(player);
     }
 
+    // for code that only has the (already sender-checked) owner name, eg. queued unit actions
+    public static boolean isSandboxOp(String playerName) {
+        ServerPlayer player = serverLevel == null ? null : serverLevel.getServer().getPlayerList().getPlayerByName(playerName);
+        return player != null && isSandboxOp(player);
+    }
+
     public static boolean isAnyoneASandboxPlayer() {
         for (RTSPlayer rtsPlayer : PlayerServerEvents.rtsPlayers)
             if (rtsPlayer.faction == Factions.NONE)
