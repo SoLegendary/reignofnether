@@ -70,11 +70,13 @@ public class BuildingBlockData {
         return blocks;
     }
 
-    // structures ship in the mod jar, so parsed NBT is cached per structure name (only read, never mutated)
+    // structures ship in the mod jar, so parsed NBT is cached per structure name
+    // callers get a copy since block sub-tags can be mutated (eg. by BlockEntity.loadStatic)
     private static final Map<String, CompoundTag> nbtCache = new ConcurrentHashMap<>();
 
     public static CompoundTag getBuildingNbt(String structureName, ResourceManager resManager) {
-        return nbtCache.computeIfAbsent(structureName, name -> readBuildingNbt(name, resManager));
+        CompoundTag cached = nbtCache.computeIfAbsent(structureName, name -> readBuildingNbt(name, resManager));
+        return cached != null ? cached.copy() : null;
     }
 
     private static CompoundTag readBuildingNbt(String structureName, ResourceManager resManager) {
