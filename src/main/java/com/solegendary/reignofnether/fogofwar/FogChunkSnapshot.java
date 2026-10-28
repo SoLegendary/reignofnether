@@ -165,6 +165,15 @@ public class FogChunkSnapshot {
         dir = null;
     }
 
+    // Drop the in-memory state but keep files on disk for rebuildIndex. Without this, the next world opened in
+    // the same game sees hasAny() == true, so loading its border recaptures (and deletes the old world's files).
+    public static void forget() {
+        index.clear();
+        lru.clear();
+        dir = null;
+        shouldRecapture = false;
+    }
+
     private static Path resolveDir(ServerLevel level) {
         return level.getServer().getWorldPath(LevelResource.ROOT).toAbsolutePath().resolve(DIR_NAME);
     }

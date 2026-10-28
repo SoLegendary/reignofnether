@@ -1053,7 +1053,7 @@ public class UnitClientEvents {
                     boolean isRightClickDown = MiscUtil.isRightClickDown(MC);
                     // render outline for each selected and preselected entities
                     for (Entity entity : unitsToDraw) {
-                        if (!FogOfWarClientEvents.isInBrightChunk(entity))
+                        if (!FogOfWarClientEvents.isInBrightChunk(entity) || entity.isRemoved())
                             continue;
 
                         AABB entityAABB = entity.getBoundingBox();
@@ -1086,7 +1086,7 @@ public class UnitClientEvents {
 
                     for (LivingEntity entity : allUnits) {
                         if (!FogOfWarClientEvents.isInBrightChunk(entity) ||
-                                entity.isPassenger())
+                                entity.isPassenger() || entity.isRemoved())
                             continue;
 
                         float alpha = 0.5f;

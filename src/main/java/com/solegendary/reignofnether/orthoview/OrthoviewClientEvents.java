@@ -77,6 +77,7 @@ public class OrthoviewClientEvents {
     public static LeafHideMethod hideLeavesMethod = LeafHideMethod.NONE;
     public static int enabledCount = 0;
     public static boolean enabled = false;
+    private static boolean snapYOnJoin = false;
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
 
     private static final Minecraft MC = Minecraft.getInstance();
@@ -343,6 +344,18 @@ public class OrthoviewClientEvents {
             return;
         }
 
+        // on join, wait for the chunks under the camera then teleport to the right height once,
+        // instead of the per-tick correction sliding there (it reads unloaded chunks as a drop)
+        if (snapYOnJoin) {
+            BlockPos bp = MC.player.blockPosition();
+            if (!MC.level.hasChunksAt(bp.getX() - 10, bp.getZ() - 10, bp.getX() + 10, bp.getZ() + 10))
+                return;
+            snapYOnJoin = false;
+            updateOrthoviewY();
+            PlayerServerboundPacket.teleportPlayer(MC.player.getX(), orthoviewPlayerBaseY, MC.player.getZ());
+            return;
+        }
+
         if (MiscUtil.isGroundBlock(MC.level, MC.player.blockPosition().offset(0, -5, 0))
             && MC.player.getOnPos().getY() <= orthoviewPlayerMaxY) {
             panCam(0, 1f, 0);
@@ -362,6 +375,11 @@ public class OrthoviewClientEvents {
             forcePanTicksLeft -= 1;
         }
         updateOrthoviewY();
+    }
+
+    @SubscribeEvent
+    public static void onClientLogin(ClientPlayerNetworkEvent.LoggingIn evt) {
+        snapYOnJoin = true;
     }
 
     @SubscribeEvent

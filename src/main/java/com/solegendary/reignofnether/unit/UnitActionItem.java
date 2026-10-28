@@ -166,6 +166,7 @@ public class UnitActionItem {
         }
 
         ArrayList<Unit> formationUnits = new ArrayList<>();
+        ArrayList<Unit> groupMovers = new ArrayList<>(); // MOVE / ATTACK_MOVE units that get speed matched
 
         actionableUnitsLoop:
         for (Unit unit : actionableUnits) {
@@ -278,9 +279,11 @@ public class UnitActionItem {
                         unit.setMoveTarget(preselectedBlockPos);
                     } else {
                         formationUnits.add(unit);
+                        groupMovers.add(unit);
                     }
                 }
                 case ATTACK_MOVE -> {
+                    groupMovers.add(unit);
                     // if the unit can't actually attack just treat this as a move action
                     if (unit instanceof AttackerUnit attackerUnit) {
                         MiscUtil.addUnitCheckpoint(unit, preselectedBlockPos, false);
@@ -457,6 +460,19 @@ public class UnitActionItem {
                     }
                 }
             }
+        }
+
+        // a group moves at its slowest ground unit's speed; flyers keep their own (they don't path with the group)
+        // ponytail: the cap lasts until the next order, so a group that loses its slowest unit stays slow until then
+        if (!level.isClientSide() && groupMovers.size() >= 2) {
+            double slowest = Double.MAX_VALUE;
+            for (Unit u : groupMovers)
+                if (!u.isFlyingUnit())
+                    slowest = Math.min(slowest, u.getMoveGoal().getWalkSpeed(u));
+            if (slowest < Double.MAX_VALUE)
+                for (Unit u : groupMovers)
+                    if (!u.isFlyingUnit())
+                        u.getMoveGoal().groupSpeed = slowest;
         }
 
         // if we have multiple units performing the same MOVE action, calculate a spread of blockPoses for them to go to

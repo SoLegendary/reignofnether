@@ -425,7 +425,8 @@ public class BuildingClientEvents {
                     }
                 }
             }
-            if (MinimapClientEvents.shouldUnderline() && inWorldBorderOrInSandbox)
+            // never underline a building this player hasn't seen through the fog
+            if (MinimapClientEvents.shouldUnderline() && inWorldBorderOrInSandbox && building.isExploredClientside)
                 MyRenderer.drawBoxBottom(evt.getPoseStack(), aabb, r, g, b, 0.5f);
         }
 

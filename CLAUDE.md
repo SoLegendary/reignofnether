@@ -33,6 +33,7 @@ Minecraft Forge mod that adds RTS gameplay (units, buildings, abilities, researc
 - Prefer builder classes where available (for example `ButtonBuilder` for HUD buttons, `UnitItemBuilder` for unit items) over constructing the objects by hand.
 - Match the style of the surrounding code (naming, comment density, formatting).
 - Strings shown to players go in `lang/en_us.json`
+- Static state tied to a world or match must be cleared in its class's `ServerStoppedEvent` handler (client: `PlayerClientEvents.resetAll()`), never only in `resetRTS()`. Every world opened in one game launch shares the same statics.
 - When adding features/fixing bugs, in order of preference:
 1. Isolated non-event changes to individual classes such as in a particular building, ability or unit
 2. Forge @SubscribeEvent event in an existing relevant *ClientEvents or *ServerEvents class

@@ -14,6 +14,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class WorldBorderServerEvents {
@@ -32,6 +33,12 @@ public class WorldBorderServerEvents {
     // fits in caches and can be snapshotted in full (see FogChunkSnapshot).
     public static boolean isRtsOptimisedMap(ServerLevel level) {
         return level != null && level.getWorldBorder().getSize() <= RTS_OPTIMIZED_BORDER;
+    }
+
+    // statics outlive the world: clear them so the next world opened in this game starts clean
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        prewarmedNavmesh = false;
     }
 
     @SubscribeEvent

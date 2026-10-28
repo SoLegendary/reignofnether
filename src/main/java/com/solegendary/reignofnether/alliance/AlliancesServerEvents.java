@@ -8,6 +8,7 @@ import com.solegendary.reignofnether.scenario.ScenarioUtils;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
@@ -140,6 +141,14 @@ public class AlliancesServerEvents {
         for (String player1 : alliances.keySet())
             for (String player2 : alliances.get(player1))
                 AllianceClientboundPacket.addAlliance(player1, player2);
+    }
+
+    // statics outlive the world: clear them so the next world opened in this game starts clean
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        alliances.clear();
+        pendingAlliances.clear();
+        playersWithAlliedControl.clear();
     }
 
     @SubscribeEvent

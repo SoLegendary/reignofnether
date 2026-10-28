@@ -342,6 +342,7 @@ public class BuildingServerEvents {
             netherZones.clear();
             buildings.clear();
         }
+        populations.clear();
     }
 
     private static boolean isOverlappingAnyOtherBuilding(BuildingPlacement buildingToPlace) {
