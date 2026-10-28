@@ -319,6 +319,19 @@ public class UnitServerEvents {
         BlockPos selectedBuildingPos,
         boolean shiftQueue
     ) {
+        addActionItem(ownerName, action, unitId, unitIds, preselectedBlockPos, selectedBuildingPos, shiftQueue, false);
+    }
+
+    public static void addActionItem(
+        String ownerName,
+        UnitAction action,
+        int unitId,
+        int[] unitIds,
+        BlockPos preselectedBlockPos,
+        BlockPos selectedBuildingPos,
+        boolean shiftQueue,
+        boolean groupMove
+    ) {
         if (shiftQueue) {
             synchronized(unitActionSlowQueue) {
                 for (int actionableUnitId : unitIds) {
@@ -328,7 +341,8 @@ public class UnitServerEvents {
                                 unitId,
                                 new int[] {actionableUnitId},
                                 preselectedBlockPos,
-                                selectedBuildingPos
+                                selectedBuildingPos,
+                                groupMove
                         )
                     );
                     //System.out.println("added item to shiftQueue: " + action.name() + "|" + actionableUnitId + "|" + preselectedBlockPos);
@@ -345,7 +359,8 @@ public class UnitServerEvents {
                         unitId,
                         unitIds,
                         preselectedBlockPos,
-                        selectedBuildingPos
+                        selectedBuildingPos,
+                        groupMove
                 );
                 if (!(!unitActionFastQueue.isEmpty() && unitActionFastQueue.get(0).equals(uai) && action == UnitAction.MOVE))
                     unitActionFastQueue.add(uai);

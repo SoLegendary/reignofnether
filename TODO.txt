@@ -26,14 +26,14 @@ Quality of Life
 [✅] Aquatic mobs (drowned, scout dogs/cats, frostwalker heroes) now always travel directly over water
 [🟡] Added `/gamerule hideEnemyPicks` which hides enemy faction picks
 [🟡] Various fog of war stability improvements
-[❌] Moving while holding ctrl causes your army to move together at the speed of the slowest unit
+[✅] Moving while holding ctrl causes your army to move together at the speed of the slowest unit
 
 Bugfixes
 --------
-[🟡] You can no longer see your opponent's building outlines in fog at the start of a match
-[🟡] Joining a world with a low Y level no longer makes your camera slide down
+[✅] You can no longer see your opponent's building outlines in fog at the start of a match
+[✅] Joining a world with a low Y level no longer makes your camera slide down
 [🟡] Workers no longer get stuck trying to reach resources out of reach
-[🟡] Fixed heroes sometimes spinning on spawn
+[✅] Fixed heroes sometimes spinning on spawn
 [🟡] Fixed various memory leaks related to closing/reopening singleplayer maps on the same session
 
 
