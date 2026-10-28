@@ -887,6 +887,12 @@ public class PlayerServerEvents {
     public static void openTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
 
+        // mirrors OrthoviewClientEvents.tryToToggleEnable, survival/adventure players can't use the RTS view
+        if (serverPlayer != null && (serverPlayer.gameMode.getGameModeForPlayer() == GameType.SURVIVAL ||
+                serverPlayer.gameMode.getGameModeForPlayer() == GameType.ADVENTURE)) {
+            ReignOfNether.LOGGER.warn("Refused to open topdown GUI for survival/adventure player {}", serverPlayer.getName().getString());
+            return;
+        }
         if (serverPlayer != null) {
             // Open GUI server-side
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
@@ -941,21 +947,28 @@ public class PlayerServerEvents {
     public static void movePlayer(int playerId, double x, double y, double z) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
         if (serverPlayer != null && (serverPlayer.isCreative() || serverPlayer.isSpectator())) {
-            boolean isOrtho = false;
+            if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z))
+                return;
+            boolean isOrtho = Boolean.TRUE.equals(playerGuiOpenStatus.get(serverPlayer.getName().getString()));
             for (ServerPlayer op : orthoviewPlayers)
                 if (op.getId() == playerId) { isOrtho = true; break; }
-            if (isOrtho) {
-                net.minecraft.world.level.border.WorldBorder border = serverPlayer.level().getWorldBorder();
-                double margin = 1.0D;
-                double minX = border.getMinX() + margin;
-                double maxX = border.getMaxX() - margin;
-                double minZ = border.getMinZ() + margin;
-                double maxZ = border.getMaxZ() - margin;
-                if (maxX > minX && maxZ > minZ) {
-                    x = net.minecraft.util.Mth.clamp(x, minX, maxX);
-                    z = net.minecraft.util.Mth.clamp(z, minZ, maxZ);
-                }
+            if (!isOrtho)
+                return;
+            net.minecraft.world.level.border.WorldBorder border = serverPlayer.level().getWorldBorder();
+            double margin = 1.0D;
+            double minX = border.getMinX() + margin;
+            double maxX = border.getMaxX() - margin;
+            double minZ = border.getMinZ() + margin;
+            double maxZ = border.getMaxZ() - margin;
+            if (maxX > minX && maxZ > minZ) {
+                x = net.minecraft.util.Mth.clamp(x, minX, maxX);
+                z = net.minecraft.util.Mth.clamp(z, minZ, maxZ);
+            } else {
+                x = border.getCenterX();
+                z = border.getCenterZ();
             }
+            // headroom above build height since the orthoview camera sits up to 100 blocks over the terrain
+            y = net.minecraft.util.Mth.clamp(y, serverPlayer.level().getMinBuildHeight(), serverPlayer.level().getMaxBuildHeight() + 100);
             serverPlayer.teleportTo(x, y, z);
         }
     }
