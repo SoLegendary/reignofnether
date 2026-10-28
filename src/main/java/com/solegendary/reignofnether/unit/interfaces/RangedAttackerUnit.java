@@ -29,6 +29,9 @@ public interface RangedAttackerUnit {
     // arrows (eg. from pillagers on ravagers) get this tag after exploding so they can never explode again, eg. when piercing
     String EXPLODED_ARROW_TAG = "ron_exploded_arrow";
 
+    // arrows from strays that have a chance to create snow on hit
+    String SNOW_ARROW_TAG = "ron_snow_arrow";
+
     // call from any unit's crossbow shooting override so that its multishot extras get tagged
     static void tagIfMultishot(Projectile projectile, float projectileAngle) {
         if (projectileAngle != 0.0F)

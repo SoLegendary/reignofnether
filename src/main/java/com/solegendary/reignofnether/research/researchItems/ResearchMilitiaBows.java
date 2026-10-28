@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.research.researchItems;
 
 import com.solegendary.reignofnether.ReignOfNether;
+import com.solegendary.reignofnether.building.BuildingClientEvents;
+import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ProdDupeRule;
 import com.solegendary.reignofnether.building.production.ProductionItem;
@@ -12,6 +14,7 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
+import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
@@ -44,8 +47,9 @@ public class ResearchMilitiaBows extends ProductionItem {
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_bronze.png"),
             hotkey,
             () -> ProductionItems.RESEARCH_MILITIA_BOWS.itemIsBeingProduced(prodBuilding.ownerName)
-                || ResearchClient.hasResearch(ProductionItems.RESEARCH_MILITIA_BOWS),
-            () -> true,
+                || ResearchClient.hasResearch(ProductionItems.RESEARCH_MILITIA_BOWS)
+                || TutorialClientEvents.isEnabled(),
+            () -> BuildingClientEvents.hasFinishedBuilding(Buildings.BARRACKS),
             List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows"),
                     Style.EMPTY.withBold(true)
                 ),
@@ -53,7 +57,9 @@ public class ResearchMilitiaBows extends ProductionItem {
                 ResourceCosts.getFormattedTime(cost),
                 FormattedCharSequence.forward("", Style.EMPTY),
                 FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows.tooltip2"), Style.EMPTY)
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows.tooltip2"), Style.EMPTY),
+                FormattedCharSequence.forward("", Style.EMPTY),
+                FormattedCharSequence.forward(I18n.get("research.reignofnether.militia_bows.tooltip3"), Style.EMPTY)
             ),
             this
         );

@@ -32,7 +32,7 @@ public class ToggleShield extends Ability {
     private static final int CD_MAX_SECONDS = 0;
 
     public static final float MOVESPEED_MULTIPLIER = 0.5f;
-    public static final float PROJECTILE_DAMAGE_RESIST = 0.75f;
+    public static final float PROJECTILE_DAMAGE_RESIST = 0.66f;
 
     public ToggleShield() {
         super(

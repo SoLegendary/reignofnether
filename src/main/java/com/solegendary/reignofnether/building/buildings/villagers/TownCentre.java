@@ -64,6 +64,7 @@ public class TownCentre extends ProductionBuilding implements RangeIndicatorAddo
         this.productions.add(ProductionItems.VILLAGER, Keybindings.abilitySlot1);
         this.productions.add(ProductionItems.SCOUT_DOG, Keybindings.abilitySlot2);
         this.productions.add(ProductionItems.SCOUT_CAT, Keybindings.abilitySlot2);
+        this.productions.add(ProductionItems.RESEARCH_MILITIA_BOWS, Keybindings.abilitySlot3);
 
         setActiveAddon(RangeIndicatorAddon.class, this, true);
     }

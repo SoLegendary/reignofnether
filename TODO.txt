@@ -13,13 +13,20 @@ Balance
 
 [✅] Pillager damage reduced from 8 to 6
 [✅] Militia Archer damage reduced from 3 to 2.5
-[✅] Evoker damage reduced from 12 to 10
+[✅] Militia Archer Training has been moved to the Town Centre and requires a Barracks
+
 [✅] Headhunter damage reduced from 6 to 4.5
+[✅] Brute Shields damage reduction reduced from 75% to 66%
+
 [✅] Skeleton and Stray damage reduced from 4 to 3
-[✅] Bogged damage reduced from 2 to 1.5
+[✅] Bogged damage reduced from 2 to 1 (poison damage unchanged)
+[✅] Strays now have a 25% chance to create a layer of wraith snow on hit instead of slowness
+
+
 
 Quality of Life
 ---------------
+
 
 Bugfixes
 --------
