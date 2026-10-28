@@ -79,7 +79,7 @@ public class UnitActionServerboundPacket {
                 success.set(false);
             }
             else if (!player.getName().getString().equals(ownerName) &&
-                    !SandboxServer.isSandboxPlayer(ownerName) &&
+                    !SandboxServer.isSandboxOp(player) &&
                     !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
                 ReignOfNether.LOGGER.warn("UnitActionServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
                 success.set(false);

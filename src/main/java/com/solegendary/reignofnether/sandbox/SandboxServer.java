@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 import com.solegendary.reignofnether.faction.Factions;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,6 +26,11 @@ public class SandboxServer {
             if (rtsPlayer.faction == Factions.NONE && playerName.equals(rtsPlayer.name))
                 return true;
         return false;
+    }
+
+    // only sandbox players with op rights may act on units and buildings they don't own
+    public static boolean isSandboxOp(ServerPlayer player) {
+        return isSandboxPlayer(player.getName().getString()) && PlayerServerEvents.isOpOrHost(player);
     }
 
     public static boolean isAnyoneASandboxPlayer() {

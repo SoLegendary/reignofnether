@@ -99,7 +99,7 @@ public class BuildingProductionServerboundPacket {
                 return;
             }
             else if (!player.getName().getString().equals(building.ownerName) &&
-                    !SandboxServer.isAnyoneASandboxPlayer() &&
+                    !SandboxServer.isSandboxOp(player) &&
                     !AlliancesServerEvents.canControlAlly(player.getName().getString(), "")) {
 
                 ReignOfNether.LOGGER.warn("BuildingProductionServerboundPacket: Tried to process packet from " + player.getName() + " for " + building.ownerName);

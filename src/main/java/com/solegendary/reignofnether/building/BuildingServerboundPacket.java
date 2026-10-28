@@ -170,7 +170,7 @@ public class BuildingServerboundPacket {
                     !player.getName().getString().equals(ownerName)) ||
                     (existingBuildingAuthActions.contains(this.action) && building != null &&
                             !player.getName().getString().equals(building.ownerName))) &&
-                    !SandboxServer.isAnyoneASandboxPlayer() &&
+                    !SandboxServer.isSandboxOp(player) &&
                     !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
 
                 ReignOfNether.LOGGER.warn("BuildingServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);

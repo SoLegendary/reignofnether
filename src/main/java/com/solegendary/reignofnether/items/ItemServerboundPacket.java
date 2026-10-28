@@ -178,7 +178,7 @@ public class ItemServerboundPacket {
                 success.set(false);
             }
             else if (!player.getName().getString().equals(actionableUnit.getOwnerName()) &&
-                    !SandboxServer.isSandboxPlayer(actionableUnit.getOwnerName()) &&
+                    !SandboxServer.isSandboxOp(player) &&
                     !AlliancesServerEvents.canControlAlly(player.getName().getString(), actionableUnit.getOwnerName())) {
                 ReignOfNether.LOGGER.warn("ItemServerboundPacket: Tried to process packet from " + player.getName() + " for " + actionableUnit.getOwnerName());
                 success.set(false);
