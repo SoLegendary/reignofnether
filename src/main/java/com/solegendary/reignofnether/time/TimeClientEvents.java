@@ -178,7 +178,7 @@ public class TimeClientEvents {
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render evt) {
+    public static void onDrawTooltip(ScreenEvent.Render.Post evt) {
         if (!TutorialClientEvents.isAtOrPastStage(TutorialStage.MINIMAP_CLICK) ||
                 !(MC.screen instanceof TopdownGui) || !HudClientEvents.enabled) {
             return;

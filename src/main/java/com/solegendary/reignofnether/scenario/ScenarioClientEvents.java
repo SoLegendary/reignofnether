@@ -68,6 +68,15 @@ public class ScenarioClientEvents {
     private static final ArrayList<Button> renderedButtons = new ArrayList<>();
     private static final ArrayList<RectZone> hudZones = new ArrayList<>();
 
+    // statics outlive the world: back to the defaults, or the next world inherits these
+    public static void resetRoles() {
+        scenarioRoles.clear();
+        for (int i = 0; i < 8; i++)
+            scenarioRoles.add(new ScenarioRole(i));
+        roleIndexToEdit = 0;
+        roleIndexToPlay = 0;
+    }
+
     public static void cycleRoleIndexToEdit(boolean reverse) {
         roleIndexToEdit += reverse ? -1 : 1;
         if (roleIndexToEdit < 0)

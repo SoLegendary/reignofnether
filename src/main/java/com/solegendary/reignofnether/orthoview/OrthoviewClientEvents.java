@@ -602,7 +602,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseScroll(ScreenEvent.MouseScrolled evt) {
+    public static void onMouseScroll(ScreenEvent.MouseScrolled.Pre evt) {
         if (!enabled || isCameraLocked()) {
             return;
         }
@@ -612,7 +612,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render evt) {
+    public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         if (!enabled || !(evt.getScreen() instanceof TopdownGui)) {
             return;
         }
@@ -717,7 +717,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseRelease(ScreenEvent.MouseButtonReleased evt) {
+    public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre evt) {
         if (!enabled || isCameraLocked()) {
             return;
         }
@@ -735,7 +735,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseDrag(ScreenEvent.MouseDragged evt) {
+    public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         if (!enabled || isCameraLocked()) {
             return;
         }

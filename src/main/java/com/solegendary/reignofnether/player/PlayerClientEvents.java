@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.building.custombuilding.CustomBuildingClien
 import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
+import com.solegendary.reignofnether.fogofwar.PlayerChunksClientEvents;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hero.HeroClientEvents;
@@ -26,6 +27,7 @@ import com.solegendary.reignofnether.research.ResearchClient;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
+import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.sounds.SoundClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
@@ -347,6 +349,8 @@ public class PlayerClientEvents {
         AlliancesClient.inboundPendingAlliances.clear();
         AlliancesClient.outboundPendingAlliances.clear();
         MinimapClientEvents.mapMarkers.clear();
+        ScenarioClientEvents.resetRoles();
+        PlayerChunksClientEvents.applyServerState(new HashMap<>(), new HashMap<>());
     }
 
     @SubscribeEvent
@@ -377,7 +381,7 @@ public class PlayerClientEvents {
 
     // allow tab player list menu on the orthoview screen
     @SubscribeEvent
-    public static void onScreenRender(ScreenEvent.Render evt) {
+    public static void onScreenRender(ScreenEvent.Render.Post evt) {
         if (OrthoviewClientEvents.isEnabled() && Keybindings.tab.isDown() && MC.level != null) {
             if (!MC.isLocalServer()) {
                 MC.gui.getTabList().setVisible(true);

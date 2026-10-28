@@ -56,7 +56,7 @@ public class ResourcesClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(ScreenEvent.Render evt) {
+    public static void onClientTick(ScreenEvent.Render.Post evt) {
         if (MC.level != null && !HudClientEvents.isMouseOverAnyButtonOrHud() && MC.screen instanceof TopdownGui) {
             BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
             ResourceSource res = ResourceSources.getFromBlockPos(preSelBp, MC.level);
