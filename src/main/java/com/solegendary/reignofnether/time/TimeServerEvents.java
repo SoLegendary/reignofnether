@@ -23,6 +23,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -46,6 +47,15 @@ public class TimeServerEvents {
     public static void resetBloodMoon() {
         bloodMoonTicksLeft = 0;
         bloodMoonOwner = null;
+        bloodMoonTarget = null;
+    }
+
+    // statics outlive the world: clear them so the next world opened in this game starts clean
+    @SubscribeEvent
+    public static void onServerStopped(ServerStoppedEvent evt) {
+        resetBloodMoon();
+        serverStartTime = 0;
+        lastTime = -1;
     }
 
     public static boolean isBloodMoonActive() {

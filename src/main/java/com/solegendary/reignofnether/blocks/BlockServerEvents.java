@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.BlockEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.*;
@@ -61,6 +62,17 @@ public class BlockServerEvents {
             BlockState bs = blocksToPlace.get(bp);
             evt.level.setBlockAndUpdate(bp, bs);
         }
+        blocksToPlace.clear();
+    }
+
+    // before the world saves: revert placed temp blocks so they don't stay in it forever,
+    // and drop the list so it doesn't tick in the next world opened in this game
+    @SubscribeEvent
+    public static void onServerStopping(ServerStoppingEvent evt) {
+        ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
+        if (level != null)
+            tempBlocks.forEach(tb -> tb.revert(level));
+        tempBlocks.clear();
         blocksToPlace.clear();
     }
 

@@ -313,6 +313,7 @@ public class MatchStartScreen extends Screen {
             byColor.computeIfAbsent(sp.colorId, k -> new ArrayList<>()).add(sp);
             if (!sp.playerName.isBlank()) seatedPlayers.add(sp.playerName);
         }
+        seatedPlayers.addAll(StartPosClientEvents.hiddenPlayers.keySet());
 
         List<String> spectators = new ArrayList<>();
         if (mc.level != null) {
@@ -406,7 +407,8 @@ public class MatchStartScreen extends Screen {
     private void renderSlotRow(GuiGraphics g, StartPos sp, String localName,
                                int x, int y, int width, int mx, int my, boolean overlayActive) {
         boolean mine = !sp.playerName.isBlank() && sp.playerName.equals(localName);
-        boolean empty = sp.playerName.isBlank();
+        boolean hidden = sp.hidden; // an enemy sits here but hideEnemyPicks hides who
+        boolean empty = sp.playerName.isBlank() && !hidden;
         int tint = (0x60000000) | (sp.getHexColor() & 0xFFFFFF);
         int rowBottom = y + ROW_H - 2;
         g.fill(x, y, x + width, rowBottom, tint);
@@ -428,9 +430,9 @@ public class MatchStartScreen extends Screen {
 
         int headX = x + 6;
         int innerOffset = (FRAME_SIZE - ICON_SIZE) / 2;
-        if (empty) {
+        if (empty || hidden) {
             MyRenderer.renderIconFrameWithBg(g, ICON_FRAME, headX, tileY, FRAME_SIZE, BG_ICON);
-            String plus = "+";
+            String plus = hidden ? "?" : "+";
             float scale = 1.15f;
             int plusW = this.font.width(plus);
             int plusH = this.font.lineHeight;
@@ -444,10 +446,10 @@ public class MatchStartScreen extends Screen {
             MyRenderer.renderPlayerHead(g, sp.playerName, headX + innerOffset, tileY + innerOffset, ICON_SIZE, ICON_FRAME);
         }
 
-        String name = empty
+        String name = hidden ? "?" : empty
                 ? Component.translatable("matchstart.reignofnether.empty_slot").getString()
                 : sp.playerName;
-        int nameCol = empty ? TEXT_DIM : TEXT_NORMAL;
+        int nameCol = empty || hidden ? TEXT_DIM : TEXT_NORMAL;
         int nameX = headX + FRAME_SIZE + 6;
         int nameMaxW = factionStartX - nameX - 6;
         String drawnName = this.font.plainSubstrByWidth(name, nameMaxW);
@@ -637,6 +639,8 @@ public class MatchStartScreen extends Screen {
             total++;
             if (sp.ready && !sp.playerName.isBlank()) ready++;
         }
+        for (boolean hiddenReady : StartPosClientEvents.hiddenPlayers.values())
+            if (hiddenReady) ready++;
         return Component.translatable("matchstart.reignofnether.ready_count", ready, total).getString();
     }
 
@@ -713,16 +717,16 @@ public class MatchStartScreen extends Screen {
     private void pickFaction(StartPos pos, Faction faction) {
         if (Minecraft.getInstance().player == null) return;
         String name = Minecraft.getInstance().player.getName().getString();
-        if (pos.playerName.isBlank()) {
+        if (pos.playerName.isBlank() && !pos.hidden) {
             StartPosClientEvents.selectedFaction = faction;
-            StartPosServerboundPacket.reservePos(pos.pos, faction, name);
+            StartPosServerboundPacket.reservePos(pos.pos, faction);
         } else if (pos.playerName.equals(name)) {
             if (pos.faction == faction) {
                 StartPosClientEvents.selectedFaction = Factions.NONE;
-                StartPosServerboundPacket.reservePos(pos.pos, Factions.NONE, name);
+                StartPosServerboundPacket.reservePos(pos.pos, Factions.NONE);
             } else {
                 StartPosClientEvents.selectedFaction = faction;
-                StartPosServerboundPacket.reservePos(pos.pos, faction, name);
+                StartPosServerboundPacket.reservePos(pos.pos, faction);
             }
         }
         if (pos.ready) {
@@ -735,18 +739,16 @@ public class MatchStartScreen extends Screen {
         String name = Minecraft.getInstance().player.getName().getString();
         if (pos.playerName.equals(name)) {
             StartPosServerboundPacket.unreservePos(pos.pos);
-        } else if (pos.playerName.isBlank()) {
-            StartPosServerboundPacket.reservePos(pos.pos, StartPosClientEvents.selectedFaction, name);
+        } else if (pos.playerName.isBlank() && !pos.hidden) {
+            StartPosServerboundPacket.reservePos(pos.pos, StartPosClientEvents.selectedFaction);
         }
     }
 
     private void toggleReady(StartPos pos) {
-        if (Minecraft.getInstance().player == null) return;
-        String name = Minecraft.getInstance().player.getName().getString();
         if (pos.ready) {
-            StartPosServerboundPacket.unreadyPlayer(name);
+            StartPosServerboundPacket.unreadyPlayer();
         } else {
-            StartPosServerboundPacket.readyPlayer(name);
+            StartPosServerboundPacket.readyPlayer();
         }
     }
 
