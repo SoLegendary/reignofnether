@@ -81,7 +81,7 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
             List.of(
                     new Pair<>(new EnchantedTether(), Keybindings.abilitySlot1),
                     new Pair<>(new MartialEnchantment(), Keybindings.abilitySlot2),
-                    new Pair<>(new CivilEnchantment(), Keybindings.abilitySlot3),
+                    new Pair<>(new ProtectiveEnchantment(), Keybindings.abilitySlot3),
                     new Pair<>(new MarchOfProgress(), Keybindings.abilitySlot4)
             )
     );
