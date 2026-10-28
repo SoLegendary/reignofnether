@@ -164,8 +164,8 @@ public class CivilEnchantment extends AbstractEnchantment {
                 HudClientEvents.showTemporaryMessage(I18n.get("ability.reignofnether.enchant.error4"));
             return;
         }
-        ((EnchanterUnit) unitUsing).getCastEnchantCivilGoal().setAbility(this);
-        ((EnchanterUnit) unitUsing).getCastEnchantCivilGoal().setTarget(targetEntity);
+        ((EnchanterUnit) unitUsing).getCastEnchantProtectiveGoal().setAbility(this);
+        ((EnchanterUnit) unitUsing).getCastEnchantProtectiveGoal().setTarget(targetEntity);
     }
 
     public static float getEfficiencyMultiplier(WorkerUnit workerUnit) {

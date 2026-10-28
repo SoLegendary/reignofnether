@@ -8,9 +8,8 @@
 
 Balance
 -------
-[❌] Add roof to dark watchtower
-[❌] Free attacking vexes?
-
+[✅] The Enchanter's Civil Enchantment has been replaced with Protective Enchantment again
+[✅] Enchanter abilities no longer give experience
 [✅] Pillager damage reduced from 8 to 6
 [✅] Militia Archer damage reduced from 3 to 2.5
 [✅] Militia Archer Training has been moved to the Town Centre and requires a Barracks
@@ -22,14 +21,20 @@ Balance
 [✅] Bogged damage reduced from 2 to 1 (poison damage unchanged)
 [✅] Strays now have a 25% chance to create a layer of wraith snow on hit instead of slowness
 
-
-
 Quality of Life
 ---------------
-
+[✅] Aquatic mobs (drowned, scout dogs/cats, frostwalker heroes) now always travel directly over water
+[🟡] Added `/gamerule hideEnemyPicks` which hides enemy faction picks
+[🟡] Various fog of war stability improvements
+[🟡] Armies now move together at the speed of the slowest unit
 
 Bugfixes
 --------
+[🟡] You can no longer see your opponent's building outlines in fog at the start of a match
+[🟡] Joining a world with a low Y level no longer makes your camera slide down
+[🟡] Workers no longer get stuck trying to reach resources out of reach
+[🟡] Fixed heroes sometimes spinning on spawn
+[🟡] Fixed various memory leaks related to closing/reopening singleplayer maps on the same session
 
 
 Languages
