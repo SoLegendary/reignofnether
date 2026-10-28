@@ -258,9 +258,9 @@ public interface AttackerUnit {
                 if (meleeAttackUnitGoal instanceof MeleeWindupAttackUnitGoal goal)
                     goal.checkAndPerformAttackWithWindup();
             }
-            else if (attackerUnit.getAttackGoal() instanceof UnitRangedAttackGoal rangedAttackGoal)
+            else if (attackerUnit.getAttackGoal() instanceof UnitRangedAttackGoal<?> rangedAttackGoal)
                 rangedAttackGoal.tickAttackCooldown();
-            else if (attackerUnit.getAttackGoal() instanceof UnitBowAttackGoal rangedAttackGoal)
+            else if (attackerUnit.getAttackGoal() instanceof UnitBowAttackGoal<?> rangedAttackGoal)
                 rangedAttackGoal.tickAttackCooldown();
 
             if (attackerUnit.getAttackBuildingGoal() != null && attackerUnit.canAttackBuildings())

@@ -80,7 +80,7 @@ public class EdibleFoodItem extends UnitItem {
         } else if (itemStack.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
             healAmount = "\uE011   " + Math.round(ENCHANTED_GOLDEN_APPLE_ABSORB);
         } else {
-            healAmount = "\uE007   " + (int) Math.round(ItemUtil.getFoodHealAmount(itemStack));
+            healAmount = "\uE007   " + Math.round(ItemUtil.getFoodHealAmount(itemStack));
         }
         if (itemStack.getCount() > 1)
             healAmount += "   (x" + itemStack.getCount() + ")";

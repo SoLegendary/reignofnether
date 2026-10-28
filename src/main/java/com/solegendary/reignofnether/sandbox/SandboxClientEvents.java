@@ -108,15 +108,6 @@ public class SandboxClientEvents {
         return faction.equals(Factions.NONE) ? Factions.NEUTRAL.getEntityButtons() : faction.getEntityButtons();
     }
 
-    public static String getRelationshipName(Relationship relationship) {
-        return switch (relationship) {
-            case OWNED -> I18n.get("hud.relationship.reignofnether.owned");
-            case FRIENDLY -> I18n.get("hud.relationship.reignofnether.allied");
-            case NEUTRAL -> I18n.get("hud.relationship.reignofnether.neutral");
-            case HOSTILE -> I18n.get("hud.relationship.reignofnether.enemy");
-        };
-    }
-
     public static Button getToggleFactionButton() {
         return new Button(
                 "Toggle Faction",

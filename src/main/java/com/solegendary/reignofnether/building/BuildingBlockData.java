@@ -89,11 +89,4 @@ public class BuildingBlockData {
         }
         return palette;
     }
-
-    public static BuildingBlock getBuildingBlockByPos(ArrayList<BuildingBlock> blocks, BlockPos bp) {
-        for (BuildingBlock block : blocks) {
-            if (block.getBlockPos().equals(bp)) return block;
-        }
-        return null;
-    }
 }

@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 public class TotemOfShieldingModel<T extends Entity> extends EntityModel<T> {
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation("modid", "totem_of_shielding"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath("modid", "totem_of_shielding"), "main");
 	private final ModelPart group;
 
 	public TotemOfShieldingModel(ModelPart root) {

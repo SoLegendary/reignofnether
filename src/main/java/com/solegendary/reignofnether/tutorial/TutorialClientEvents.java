@@ -138,10 +138,6 @@ public class TutorialClientEvents {
         helpButtonText = "";
     }
 
-    public static int getStageProgress() {
-        return stageProgress;
-    }
-
     public static boolean isEnabled() {
         return enabled && MC.hasSingleplayerServer();
     }
@@ -163,18 +159,6 @@ public class TutorialClientEvents {
 
     private static void nextStage() {
         tutorialStage = tutorialStage.next();
-        ticksOnStage = 0;
-        stageProgress = 0;
-        blockUpdateStage = false;
-        clearHelpButtonText();
-        TutorialRendering.clearButtonName();
-        updateStage();
-        shouldPauseTicking = () -> false;
-        TutorialServerboundPacket.saveStage(tutorialStage);
-    }
-
-    private static void prevStage() {
-        tutorialStage = tutorialStage.prev();
         ticksOnStage = 0;
         stageProgress = 0;
         blockUpdateStage = false;

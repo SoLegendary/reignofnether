@@ -1005,6 +1005,7 @@
     "commands.reignofnether.rtsmap.not_load": "No rtsMapInfo loaded",
     "commands.reignofnether.rtsmap.unknown_mode": "Unknown mode '%s' - not present in this map's modes",
     "commands.reignofnether.rtsmap.starting_team_mode.set": "Set starting teams mode to '%s'",
+    "commands.reignofnether.deprecated_argument": "Deprecated Argument",
 
     "argument.reignofnether.building.options.unknown.error": "Unknown option",
     "argument.reignofnether.building.options.inapplicable.error": "Invalid option",
@@ -1017,6 +1018,8 @@
     "argument.reignofnether.building.options.type.description": "Type",
     "argument.reignofnether.building.options.distance.description": "Distance",
     "argument.reignofnether.building.options.rotation.description": "Rotation",
+    "argument.reignofnether.building.options.tag.description": "Building tag",
+    "argument.reignofnether.building.options.health.description": "Building health",
     "argument.reignofnether.building.options.x.description": "x",
     "argument.reignofnether.building.options.y.description": "y",
     "argument.reignofnether.building.options.z.description": "z",
@@ -1887,6 +1890,12 @@
     "survival.reignofnether.wave_cleared": "Your enemies have been defeated... for now.",
     "survival.reignofnether.remaining_enemies_one": "1 enemy remains",
     "survival.reignofnether.remaining_enemies": "%d enemies remain",
+    "survival.reignofnether.advancing_next_night": "Advancing to next night and wave",
+    "survival.reignofnether.ending_wave": "Ending current wave",
+    "survival.reignofnether.failed_spawn_villagers": "Failed to spawn %d/%d population worth of villager units",
+    "survival.reignofnether.failed_spawn_monsters": "Failed to spawn %d/%d population worth of monster units",
+    "survival.reignofnether.failed_spawn_portals": "Failed to spawn %d portals!",
+    "survival.reignofnether.no_spawn_locations": "WARNING: could not find any valid spawn locations!",
 
     "survival.reignofnether.next_wave": "Next Wave: %d (Tier %d %s)",
 
@@ -2158,8 +2167,12 @@
     "message.reignofnether.rts_map_info_author.singular": "Author:",
     "message.reignofnether.rts_map_info_author.multiple": "Authors:",
     "message.reignofnether.commands.scores.player_not_available": "Player '%s' is either currently in a match but is a spectator, or doesn't exist.",
+    "message.reignofnether.commands.scores.none_defeated": "No players have been defeated yet.",
     "message.reignofnether.rts_map_info_modes": "Modes: %s",
     "message.reignofnether.rts_map_info_modes_command": "Change modes with /rtsapi-teams-mode",
+    "message.reignofnether.rts_map_info_mode": "Map Mode: %s",
+    "disconnect.reignofnether.illegal_packet": "Illegal packet received, terminating connection",
+    "disconnect.reignofnether.clear_failed": "Failed to clear, closing connection",
 
     "unitstats.reignofnether.attack_damage": "Attack damage",
     "unitstats.reignofnether.attack_damage_bonus_buildings": "%s to buildings",

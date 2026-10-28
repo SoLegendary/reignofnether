@@ -23,7 +23,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
@@ -220,21 +219,5 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
                     BlockRegistrar.WALKABLE_MAGMA_BLOCK.get().defaultBlockState(), bsOld, MAGMA_DURATION);
             }
         }
-    }
-    public void createFire() {
-        if (getSize() < MAX_SIZE || level().isClientSide())
-            return;
-
-        ArrayList<BlockPos> bps = new ArrayList<>();
-        for (int x = -4; x < 4; x++)
-            for (int y = -4; y < 4; y++)
-                for (int z = -4; z < 4; z++)
-                    if (level().getBlockState(getOnPos().offset(x,y,z)).getBlock() ==
-                            BlockRegistrar.WALKABLE_MAGMA_BLOCK.get() &&
-                            level().getBlockState(getOnPos().offset(x,y+1,z)).isAir())
-                        bps.add(getOnPos().offset(x,y,z));
-        Collections.shuffle(bps);
-        if (bps.size() >= 1)
-            level().setBlockAndUpdate(bps.get(0).above(), Blocks.FIRE.defaultBlockState());
     }
 }

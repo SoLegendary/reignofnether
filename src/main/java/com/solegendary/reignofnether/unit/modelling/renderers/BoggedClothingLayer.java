@@ -21,7 +21,7 @@ public class BoggedClothingLayer<T extends Mob & RangedAttackMob, M extends Enti
 
     public BoggedClothingLayer(RenderLayerParent<T, M> pRenderer, EntityModelSet pModelSet) {
         super(pRenderer);
-        this.layerModel = new SkeletonModel(pModelSet.bakeLayer(ModelLayers.STRAY_OUTER_LAYER));
+        this.layerModel = new SkeletonModel<>(pModelSet.bakeLayer(ModelLayers.STRAY_OUTER_LAYER));
     }
 
     public void render(PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight, T pLivingEntity, float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {

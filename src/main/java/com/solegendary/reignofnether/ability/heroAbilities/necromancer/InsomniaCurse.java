@@ -70,7 +70,7 @@ public class InsomniaCurse extends HeroAbility {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.INSOMNIA_CURSE),
             null,
-            getTooltipLines((HeroUnit) hero),
+            getTooltipLines(hero),
             this,
             hero
         );

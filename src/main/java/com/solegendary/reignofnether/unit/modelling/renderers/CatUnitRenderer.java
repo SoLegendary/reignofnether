@@ -30,7 +30,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class CatUnitRenderer extends MobRenderer<Cat, CatModel<Cat>> {
     public CatUnitRenderer(EntityRendererProvider.Context p_173943_) {
-        super(p_173943_, new CatModel(p_173943_.bakeLayer(ModelLayers.CAT)), 0.4F);
+        super(p_173943_, new CatModel<>(p_173943_.bakeLayer(ModelLayers.CAT)), 0.4F);
         this.addLayer(new CatCollarLayer(this, p_173943_.getModelSet()));
     }
 
@@ -57,10 +57,10 @@ public class CatUnitRenderer extends MobRenderer<Cat, CatModel<Cat>> {
             pPoseStack.mulPose(Axis.ZP.rotationDegrees(Mth.rotLerp($$5, 0.0F, 90.0F)));
             BlockPos $$6 = pEntityLiving.blockPosition();
             List<Player> $$7 = pEntityLiving.level().getEntitiesOfClass(Player.class, (new AABB($$6)).inflate(2.0, 2.0, 2.0));
-            Iterator var9 = $$7.iterator();
+            Iterator<Player> var9 = $$7.iterator();
 
             while(var9.hasNext()) {
-                Player $$8 = (Player)var9.next();
+                Player $$8 = var9.next();
                 if ($$8.isSleeping()) {
                     pPoseStack.translate(0.15F * $$5, 0.0F, 0.0F);
                     break;

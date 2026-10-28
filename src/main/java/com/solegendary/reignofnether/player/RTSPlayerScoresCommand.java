@@ -42,7 +42,10 @@ public class RTSPlayerScoresCommand {
     public static int execute(CommandContext<CommandSourceStack> command) {
         if (command.getSource().getEntity() instanceof Player player) {
             List<RTSPlayer> rtsPlayers = PlayerServerEvents.postGameRtsPlayers;
-            player.sendSystemMessage(Component.literal(displayScores(rtsPlayers)));
+            if (rtsPlayers.isEmpty())
+                player.sendSystemMessage(Component.translatable("message.reignofnether.commands.scores.none_defeated"));
+            else
+                player.sendSystemMessage(Component.literal(displayScores(rtsPlayers)));
         }
 
         return Command.SINGLE_SUCCESS;
@@ -62,10 +65,6 @@ public class RTSPlayerScoresCommand {
     }
 
     public static String displayScores(List<RTSPlayer> rtsPlayerList) {
-        if (rtsPlayerList.isEmpty()) {
-            return "No players have been defeated yet.";
-        }
-
         String scores = "      ";
 
         for (RTSPlayer rtsPlayer : rtsPlayerList) {

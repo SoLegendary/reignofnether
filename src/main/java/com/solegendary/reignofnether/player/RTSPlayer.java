@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.player;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
@@ -65,7 +66,7 @@ public class RTSPlayer {
             this.itemDropQueue = ItemUtil.getRandomItemDropsList(itemSeed, raritySeed);
 
         for (UnitItem unitItem : this.itemDropQueue) {
-            System.out.println(unitItem.rarity.name() + " | " + unitItem.getName().getString());
+            ReignOfNether.LOGGER.info(unitItem.rarity.name() + " | " + unitItem.getName().getString());
         }
     }
 
@@ -119,7 +120,7 @@ public class RTSPlayer {
             this.itemDropQueue.pollFirst();
 
         for (UnitItem unitItem : this.itemDropQueue) {
-            System.out.println(unitItem.rarity.name() + " | " + unitItem.getName().getString());
+            ReignOfNether.LOGGER.info(unitItem.rarity.name() + " | " + unitItem.getName().getString());
         }
     }
 
@@ -173,9 +174,5 @@ public class RTSPlayer {
                 }
             }
         }
-    }
-
-    public boolean isRevealed() {
-        return this.ticksWithoutCapitol >= TICKS_TO_REVEAL;
     }
 }

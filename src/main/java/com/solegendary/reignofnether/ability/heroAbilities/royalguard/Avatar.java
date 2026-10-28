@@ -66,7 +66,7 @@ public class Avatar extends HeroAbility {
                 () -> true,
                 () -> sendUnitCommand(UnitAction.AVATAR),
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );

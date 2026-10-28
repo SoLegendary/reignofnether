@@ -409,7 +409,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
         if (this.horizontalCollision) {
             boolean flag = false;
             AABB aabb = this.getBoundingBox().inflate(0.2);
-            Iterator var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
+            Iterator<BlockPos> var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
             label62:
             while(true) {
                 BlockPos blockpos;
@@ -420,7 +420,7 @@ public class PiglinMerchantUnit extends Piglin implements Unit, AttackerUnit, He
                             this.jumpFromGround();
                         break label62;
                     }
-                    blockpos = (BlockPos)var8.next();
+                    blockpos = var8.next();
                     BlockState blockstate = this.level().getBlockState(blockpos);
                     block = blockstate.getBlock();
                 } while(!(block instanceof LeavesBlock));

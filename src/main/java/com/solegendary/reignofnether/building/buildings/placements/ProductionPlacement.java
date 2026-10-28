@@ -125,9 +125,6 @@ public class ProductionPlacement extends BuildingPlacement {
                 (rallyPointEntity instanceof Unit unit1 && !AlliancesServerEvents.isAlliedOrOwned(unit1.getOwnerName(), ownerName)));
     }
 
-    private boolean isProducing() {
-        return !this.productionQueue.isEmpty();
-    }
     // start with the centre pos then go down and look at adjacent blocks until we reach a non-solid block
     public BlockPos getIndoorSpawnPoint(ServerLevel level) {
         ProductionBuilding building = (ProductionBuilding) getBuilding();

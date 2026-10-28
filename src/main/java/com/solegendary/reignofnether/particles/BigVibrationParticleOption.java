@@ -65,7 +65,7 @@ public class BigVibrationParticleOption implements ParticleOptions {
     }
 
     public String writeToString() {
-        Vec3 $$0 = (Vec3)this.destination.getPosition((Level)null).get();
+        Vec3 $$0 = this.destination.getPosition((Level)null).get();
         double $$1 = $$0.x();
         double $$2 = $$0.y();
         double $$3 = $$0.z();

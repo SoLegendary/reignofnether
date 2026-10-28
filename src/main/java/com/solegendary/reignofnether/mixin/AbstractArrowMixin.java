@@ -75,37 +75,6 @@ public abstract class AbstractArrowMixin extends Projectile {
         return building != null && building.isPosInsideBuilding(result.getBlockPos()) && !insideForeignEntity;
     }
 
-    /*
-    // prevent arrows from colliding with the building that a garrisoned unit is inside of
-    @Inject(
-            method = "isNoPhysics",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    public void isNoPhysics(CallbackInfoReturnable<Boolean> cir) {
-        if (this.getOwner() instanceof AttackerUnit aUnit) {
-            // garrisoned unit -> ground
-            BuildingPlacement building = GarrisonableBuildingAddon.getGarrison((Unit) aUnit);
-            if (isInsideBuildingAndNotForeignEntity(building)) {
-                cir.setReturnValue(true);
-            }
-
-            // ground -> garrisoned unit - allow through at 1/2 accuracy
-            // can't use random() here or the nophysics status will change every tick
-            //if (this.getId() % 2 == 0 &&
-            //    ((Unit) aUnit).getTargetGoal().getTarget() instanceof Unit tUnit) {
-            //    if (GarrisonableBuilding.getGarrison(tUnit) instanceof Building building &&
-            //        isInsideTopOfBuilding(building)) {
-
-            //        // nophysics all the time means they wouldn't collide with the actual target
-            //        if (this.distanceToSqr((Entity) tUnit) > Math.pow(1.0d, 2))
-            //             cir.setReturnValue(true);
-            //    }
-            //}
-        }
-    }
-    */
-
     // correct angle of nophysics arrows
     @Inject(
             method = "tick",

@@ -104,15 +104,6 @@ public class PlayerClientEvents {
         return null;
     }
 
-    public static Integer getPlayerId(String playerName) {
-        var player = getPlayer(playerName);
-        if (player == null) {
-            return null;
-        }
-
-        return player.id;
-    }
-
     public static Integer getPlayerIndex(String playerName) {
         var player = getPlayer(playerName);
         if (player == null) {
@@ -129,15 +120,6 @@ public class PlayerClientEvents {
         }
 
         return player.startPosColorId; // corresponds to a MapColor.id
-    }
-
-    public static Faction getPlayerFaction(String playerName) {
-        var player = getPlayer(playerName);
-        if (player == null) {
-            return Factions.NONE;
-        }
-
-        return player.faction;
     }
 
     public static String getPlayerName() {
@@ -475,91 +457,4 @@ public class PlayerClientEvents {
         if (MC.level != null)
             lastUsedBlockState = MC.level.getBlockState(evt.getPos());
     }
-
-    /*
-    public static double red = 0.0d;
-    public static double green = 0.0d;
-    public static double blue = 0.0d;
-
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (Keybindings.shiftMod.isDown()) {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
-                red -= 0.02f;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-                red += 0.02f;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-                green -= 0.02f;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-                green += 0.02f;
-            }
-        } else {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
-                blue -= 0.02f;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-                blue += 0.02f;
-            }
-        }
-    }
-     */
-
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
-                "red: " + red,
-                "green: " + green,
-                "blue: " + blue,
-        });
-    }
-
-
-    public static int titleX = -56;
-    public static int titleY = 5;
-    public static int width = 380;
-    public static int height = 127;
-    public static int editionY = 92;
-
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (Keybindings.shiftMod.isDown()) {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
-                titleX -= 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-                titleX += 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-                titleY -= 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-                titleY += 1;
-            }
-        } else if (Keybindings.ctrlMod.isDown()) {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-                editionY -= 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-                editionY += 1;
-            }
-        } else {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT) {
-                width -= 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-                width += 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP) {
-                height += 1;
-            }
-            else if (evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-                height -= 1;
-            }
-        }
-    }
-     */
 }

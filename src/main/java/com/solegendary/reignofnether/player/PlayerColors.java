@@ -53,7 +53,7 @@ public class PlayerColors {
             this.hexCode = hexCode;
             this.blockTexture = blockTexture;
             this.bedIcon = bedIcon;
-            System.out.println("Created color '" + this.name + "' with index " + this.id);
+            ReignOfNether.LOGGER.info("Created color '" + this.name + "' with index " + this.id);
             if (this.mapColorId != -1) {
                 mappedColors.put(mapColorId, this);
             }
@@ -160,10 +160,6 @@ public class PlayerColors {
         return colors[colorIndex % PLAYER_COLOR_TOTAL_COUNT].blockTexture;
     }
 
-    public static int getColorHex(int colorIndex) {
-        return colors[colorIndex % PLAYER_COLOR_TOTAL_COUNT].hexCode;
-    }
-
     public static int getPlayerColorHex(String playerName) {
         if (playerName == null || playerName.isBlank()) {
             return COLOR_WHITE.hexCode;
@@ -171,15 +167,6 @@ public class PlayerColors {
 
         int colorId = getPlayerColorId(playerName);
         return colors[colorId].hexCode;
-    }
-
-    public static ResourceLocation getPlayerColorIcon(String playerName) {
-        if (playerName == null || playerName.isBlank()) {
-            return COLOR_WHITE.blockTexture;
-        }
-
-        int colorId = getPlayerColorId(playerName);
-        return colors[colorId].blockTexture;
     }
 
     public static ResourceLocation getPlayerColorBedIcon(String playerName) {

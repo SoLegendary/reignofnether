@@ -57,10 +57,6 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
         return attackCooldown;
     }
 
-    public CrossbowState getCrossbowState() {
-        return crossbowState;
-    }
-
     public void setToMaxAttackCooldown() {
         this.attackCooldown = this.attackCooldownMax;
     }
@@ -236,9 +232,5 @@ public class UnitCrossbowAttackGoal<T extends Monster & RangedAttackMob & Crossb
         ItemStack itemstack1 = this.mob.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this.mob, item -> item instanceof CrossbowItem));
         CrossbowItem.setCharged(itemstack1, false);
         this.crossbowState = UNCHARGED;
-    }
-
-    private boolean canRun() {
-        return this.crossbowState == UNCHARGED;
     }
 }

@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.building.production.IUnitProductionItem;
-import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -25,7 +24,6 @@ public class CreeperProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Creeper";
     public static final ResourceCost cost = ResourceCosts.CREEPER;
-    public static Button startButton = null;
 
     public CreeperProd() {
         super(cost);

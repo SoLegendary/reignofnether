@@ -28,7 +28,6 @@ public class WaveSpawner {
 
     public static final int MAX_SPAWN_RANGE = 100;
     public static final int MIN_SPAWN_RANGE = 70;
-    public static final int SAMPLE_POINTS_PER_BUILDING = 100;
     public static final int MAX_FAILED_BUILDINGS = 10;
 
     public static final int MIN_VALID_BUILDINGS = 5; // once we sort the buildings by distance to centroid, how many buildings do we pick to spawn around?
@@ -188,7 +187,7 @@ public class WaveSpawner {
         Collections.shuffle(validSpawns);
 
         if (validSpawns.isEmpty())
-            PlayerServerEvents.sendMessageToAllPlayers("WARNING: could not find any valid spawn locations!");
+            PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.no_spawn_locations");
 
         return validSpawns;
     }

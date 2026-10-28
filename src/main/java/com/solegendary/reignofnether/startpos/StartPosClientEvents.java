@@ -6,15 +6,12 @@ import com.solegendary.reignofnether.faction.Faction;
 import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
-import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -23,7 +20,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
@@ -81,30 +77,6 @@ public class StartPosClientEvents {
         return getPos() != null;
     }
 
-    private static boolean isReady() {
-        for (StartPos startPos : startPoses) {
-            if (MC.player != null && MC.player.getName().getString().equals(startPos.playerName) && startPos.ready) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static Button getReadyButton() {
-        return new Button("Ready",
-                14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png"),
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                null,
-                () -> false,
-                () -> !isEnabled() || isStarting || isReady(),
-                () -> hasReservedPos() && selectedFaction != Factions.NONE,
-                StartPosServerboundPacket::readyPlayer,
-                null,
-                getReadyButtonTooltip()
-        );
-    }
-
     private static int getNumPlayersReady() {
         int readyPlayers = 0;
         for (StartPos startPose : startPoses)
@@ -127,33 +99,6 @@ public class StartPosClientEvents {
         return enabledPoses;
     }
 
-    private static List<FormattedCharSequence> getReadyButtonTooltip() {
-        ArrayList<FormattedCharSequence> fcsList = new ArrayList<>();
-        fcsList.add(fcs(I18n.get("startpos.reignofnether.ready_button.ready"), true));
-        if (!hasReservedPos())
-            fcsList.add(fcs(I18n.get("startpos.reignofnether.start_button.no_reserved_pos")));
-        if (selectedFaction.equals(Factions.NONE))
-            fcsList.add(fcs(I18n.get("startpos.reignofnether.start_button.no_faction")));
-        return fcsList;
-    }
-
-
-    public static Button getUnreadyButton() {
-        return new Button("Unready",
-                14,
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png"),
-                ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png"),
-                null,
-                () -> false,
-                () -> !isEnabled() || !isReady(),
-                () -> true,
-                StartPosServerboundPacket::unreadyPlayer,
-                null,
-                List.of(
-                        fcs(I18n.get("startpos.reignofnether.ready_button.unready"), true)
-                )
-        );
-    }
 
     public static StartPos getPos() {
         for (StartPos startPos : startPoses)
