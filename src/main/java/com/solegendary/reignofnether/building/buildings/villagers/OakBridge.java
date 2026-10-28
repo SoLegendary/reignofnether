@@ -16,10 +16,10 @@ import com.solegendary.reignofnether.tutorial.TutorialStage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class OakBridge extends AbstractBridge {
 
@@ -67,11 +67,11 @@ public class OakBridge extends AbstractBridge {
             ),
             List.of(Component.translatable("buildings.reignofnether.oak_bridge").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.oak_bridge.tooltip1").getVisualOrderText(),
                 Component.translatable("buildings.reignofnether.oak_bridge.tooltip2").getVisualOrderText(),
                 Component.translatable("buildings.reignofnether.oak_bridge.tooltip3").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.oak_bridge.tooltip4").getVisualOrderText()
             ),
             this

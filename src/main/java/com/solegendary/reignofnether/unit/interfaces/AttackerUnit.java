@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.hud.TooltipColours;
@@ -452,11 +453,7 @@ public interface AttackerUnit {
     public default void attackMoveNearestEnemyBuilding() {
         Mob mob = (Mob) this;
         Unit unit = (Unit) this;
-        List<BuildingPlacement> buildings;
-        if (mob.level().isClientSide())
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(mob.level().isClientSide());
 
         ArrayList<BuildingPlacement> eligibleTargets = new ArrayList<>();
         List<BuildingPlacement> buildingsCopy = new ArrayList<>(buildings); // defensive copy

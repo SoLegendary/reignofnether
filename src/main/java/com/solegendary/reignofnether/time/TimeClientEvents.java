@@ -199,36 +199,31 @@ public class TimeClientEvents {
             String timeStr = get12HourTimeStr(serverNormDayTime);
 
             FormattedCharSequence timeUntilStr =
-                    FormattedCharSequence.forward(
-                            isDay ? I18n.get("time.reignofnether.time_until_night",
+                    fcs(isDay ? I18n.get("time.reignofnether.time_until_night",
                                     getTimeUntilStr(serverNormDayTime, DUSK)) :
                                     I18n.get("time.reignofnether.time_until_day",
-                                            getTimeUntilStr(serverNormDayTime, DAWN)),
-                            Style.EMPTY);
+                                            getTimeUntilStr(serverNormDayTime, DAWN)));
 
             ArrayList<FormattedCharSequence> tooltip = new ArrayList<>();
 
             if (!showClockTooltip) {
                 if (targetClientTime != serverNormDayTime) {
-                    tooltip.add(FormattedCharSequence.forward(I18n.get("time.reignofnether.time_is_distorted"), Style.EMPTY.withBold(true)));
-                    tooltip.add(FormattedCharSequence.forward(I18n.get("time.reignofnether.real_time", timeStr), Style.EMPTY));
+                    tooltip.add(fcs(I18n.get("time.reignofnether.time_is_distorted"), true));
+                    tooltip.add(fcs(I18n.get("time.reignofnether.real_time", timeStr)));
                 } else {
-                    tooltip.add(FormattedCharSequence.forward(I18n.get("time.reignofnether" + ".time", timeStr), Style.EMPTY));
+                    tooltip.add(fcs(I18n.get("time.reignofnether" + ".time", timeStr)));
                 }
             }
             tooltip.add(timeUntilStr);
 
             if (SurvivalClientEvents.isEnabled) {
                 long timeOffset = -getWaveSurvivalTimeModifier(SurvivalClientEvents.difficulty);
-                tooltip.add(FormattedCharSequence.forward(I18n.get("time.reignofnether.time_until_next_wave",
-                        getTimeUntilStrWithOffset(serverNormDayTime, DUSK, isDay ? 0 : timeOffset)), Style.EMPTY));
+                tooltip.add(fcs(I18n.get("time.reignofnether.time_until_next_wave",
+                        getTimeUntilStrWithOffset(serverNormDayTime, DUSK, isDay ? 0 : timeOffset))));
             }
 
             if (PlayerClientEvents.isRTSPlayer() && !SurvivalClientEvents.isEnabled) {
-                FormattedCharSequence gameLengthStr = FormattedCharSequence.forward(
-                        I18n.get("time.reignofnether.game_time", getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks)),
-                        Style.EMPTY
-                );
+                FormattedCharSequence gameLengthStr = fcs(I18n.get("time.reignofnether.game_time", getTimeStrFromTicks(PlayerClientEvents.rtsGameTicks)));
                 tooltip.add(gameLengthStr);
             }
             if (showClockTooltip) {

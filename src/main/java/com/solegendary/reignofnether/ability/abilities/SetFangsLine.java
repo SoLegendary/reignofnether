@@ -13,12 +13,12 @@ import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SetFangsLine extends Ability {
 
@@ -45,22 +45,13 @@ public class SetFangsLine extends Ability {
             () -> true,
             () -> UnitClientEvents.sendUnitCommand(UnitAction.SET_FANGS_LINE),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.evoker_fangs_line"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("abilities.reignofnether.evoker_fangs_line"), true),
                 FormattedCharSequence.forward(I18n.get("abilities.reignofnether.evoker_fangs_line.tooltip1",
                     EvokerUnit.FANGS_DAMAGE * 2,
                     CD_MAX_SECONDS
                 ) + EvokerUnit.FANGS_RANGE_LINE, MyRenderer.iconStyle),
-                FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.evoker_fangs_line.tooltip2"),
-                    Style.EMPTY
-                ),
-                FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.evoker_fangs_line.tooltip3"),
-                    Style.EMPTY
-                )
+                fcs(I18n.get("abilities.reignofnether.evoker_fangs_line.tooltip2")),
+                fcs(I18n.get("abilities.reignofnether.evoker_fangs_line.tooltip3"))
             ),
             this,
             unit

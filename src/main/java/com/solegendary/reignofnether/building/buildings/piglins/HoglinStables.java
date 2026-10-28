@@ -16,10 +16,10 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class HoglinStables extends ProductionBuilding {
 
@@ -58,10 +58,10 @@ public class HoglinStables extends ProductionBuilding {
             List.of(
                 Component.translatable("buildings.reignofnether.hoglin_stables").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.hoglin_stables.tooltip1").getVisualOrderText(),
                 Component.translatable("buildings.reignofnether.hoglin_stables.tooltip2").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.hoglin_stables.tooltip3").getVisualOrderText()
             ),
             this

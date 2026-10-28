@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.util;
 
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.heroAbilities.enchanter.ProtectiveEnchantment;
@@ -447,8 +448,7 @@ public class MiscUtil {
 
 
     public static BuildingPlacement findClosestAttackableBuilding(Mob unitMob, float range) {
-        List<BuildingPlacement> buildings = unitMob.level().isClientSide() ?
-                BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(unitMob.level().isClientSide());
 
         double closestDist = range;
         BuildingPlacement closestBuilding = null;

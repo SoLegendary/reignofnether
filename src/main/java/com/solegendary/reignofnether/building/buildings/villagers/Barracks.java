@@ -17,10 +17,10 @@ import com.solegendary.reignofnether.tutorial.TutorialStage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class Barracks extends ProductionBuilding {
 
@@ -58,7 +58,7 @@ public class Barracks extends ProductionBuilding {
                 List.of(
                         Component.translatable("buildings.reignofnether.barracks").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.barracks.tooltip1").getVisualOrderText()
                 ),
                 this

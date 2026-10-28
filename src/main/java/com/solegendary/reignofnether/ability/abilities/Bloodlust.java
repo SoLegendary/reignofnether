@@ -18,7 +18,6 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -62,18 +61,18 @@ public class Bloodlust extends Ability {
             return List.of(
                     fcs(I18n.get("abilities.reignofnether.bloodlust"), true),
                     FormattedCharSequence.forward("\uE007  " + getHealthCost(unit), MyRenderer.iconStyle),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip1", getHealthCost(unit)), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip2", DURATION_SECONDS), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip3"), Style.EMPTY)
+                    fcs(""),
+                    fcs(I18n.get("abilities.reignofnether.bloodlust.tooltip1", getHealthCost(unit))),
+                    fcs(I18n.get("abilities.reignofnether.bloodlust.tooltip2", DURATION_SECONDS)),
+                    fcs(I18n.get("abilities.reignofnether.bloodlust.tooltip3"))
             );
         } else {
             return List.of(
                     fcs(I18n.get("abilities.reignofnether.bloodlust"), true),
                     FormattedCharSequence.forward("\uE007  " + getHealthCost(unit), MyRenderer.iconStyle),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip1", getHealthCost(unit)), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.bloodlust.tooltip2", DURATION_SECONDS), Style.EMPTY)
+                    fcs(""),
+                    fcs(I18n.get("abilities.reignofnether.bloodlust.tooltip1", getHealthCost(unit))),
+                    fcs(I18n.get("abilities.reignofnether.bloodlust.tooltip2", DURATION_SECONDS))
             );
         }
     }

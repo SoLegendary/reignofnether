@@ -15,7 +15,6 @@ import com.solegendary.reignofnether.util.MyMath;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EntityType;
@@ -23,6 +22,7 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class CallLightning extends Ability {
 
@@ -55,12 +55,12 @@ public class CallLightning extends Ability {
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CALL_LIGHTNING),
             null,
             List.of(
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning"), Style.EMPTY.withBold(true)),
+                    fcs(I18n.get("abilities.reignofnether.call_lightning"), true),
                     FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip1", CD_MAX / 20, RANGE), MyRenderer.iconStyle),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip2"), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip3"), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_lightning.tooltip4"), Style.EMPTY)
+                    fcs(""),
+                    fcs(I18n.get("abilities.reignofnether.call_lightning.tooltip2")),
+                    fcs(I18n.get("abilities.reignofnether.call_lightning.tooltip3")),
+                    fcs(I18n.get("abilities.reignofnether.call_lightning.tooltip4"))
             ),
             this,
             placement

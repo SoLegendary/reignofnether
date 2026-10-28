@@ -11,13 +11,12 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.unit.units.piglins.MagmaCubeUnit;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ConsumeSlime extends Ability {
 
@@ -44,15 +43,13 @@ public class ConsumeSlime extends Ability {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CONSUME_SLIME),
             () -> toggleAutocast(unit),
-            List.of(FormattedCharSequence.forward(I18n.get("abilities.reignofnether.consume"),
-                    Style.EMPTY.withBold(true)
-                ),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.consume.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.consume.tooltip2"), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.consume.tooltip3"), Style.EMPTY)
+            List.of(fcs(I18n.get("abilities.reignofnether.consume"), true),
+                fcs(""),
+                fcs(I18n.get("abilities.reignofnether.consume.tooltip1")),
+                fcs(I18n.get("abilities.reignofnether.consume.tooltip2")),
+                fcs(""),
+                fcs(I18n.get("abilities.reignofnether.autocast")),
+                fcs(I18n.get("abilities.reignofnether.consume.tooltip3"))
             ),
             this,
             unit

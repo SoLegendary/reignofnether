@@ -11,14 +11,13 @@ import com.solegendary.reignofnether.unit.units.villagers.TemporaryMilitiaUnit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class BackToWorkUnit extends Ability {
 
@@ -48,10 +47,10 @@ public class BackToWorkUnit extends Ability {
                 () -> sendUnitCommand(UnitAction.BACK_TO_WORK_UNIT),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.back_to_work_unit"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.back_to_work_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.back_to_work_unit.tooltip2"), Style.EMPTY)
+                        fcs(I18n.get("abilities.reignofnether.back_to_work_unit"), true),
+                        fcs(""),
+                        fcs(I18n.get("abilities.reignofnether.back_to_work_unit.tooltip1")),
+                        fcs(I18n.get("abilities.reignofnether.back_to_work_unit.tooltip2"))
                 ),
                 this,
                 unit

@@ -8,7 +8,6 @@ import com.solegendary.reignofnether.research.ResearchClient;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -101,21 +100,17 @@ public class SurvivalClientEvents {
     private static FormattedCharSequence slimeFcs() {
         Wave wave = Wave.getWave(waveNumber);
         String research = wave.highestUnitTier >= 6 ? (" [" + I18n.get("research.reignofnether.slime_conversion") + "]") : "";
-        return FormattedCharSequence.forward(
-                I18n.get("entity.reignofnether.slime_unit") + " " +
+        return fcs(I18n.get("entity.reignofnether.slime_unit") + " " +
                         I18n.get("entity.reignofnether.slime_unit.size", wave.highestUnitTier) +
-                        research,
-                Style.EMPTY);
+                        research);
     }
 
     private static FormattedCharSequence magmaCubeFcs() {
         Wave wave = Wave.getWave(waveNumber);
         String research = wave.highestUnitTier >= 6 ? (" [" + I18n.get("research.reignofnether.cube_magma") + "]") : "";
-        return FormattedCharSequence.forward(
-                I18n.get("entity.reignofnether.magma_cube_unit") + " " +
+        return fcs(I18n.get("entity.reignofnether.magma_cube_unit") + " " +
                         I18n.get("entity.reignofnether.slime_unit.size", wave.highestUnitTier) +
-                        research,
-                Style.EMPTY);
+                        research);
     }
 
     private static String research(String string) {
@@ -141,13 +136,13 @@ public class SurvivalClientEvents {
         ArrayList<FormattedCharSequence> tooltip = new ArrayList<>();
         Wave wave = Wave.getWave(waveNumber);
 
-        tooltip.add(FormattedCharSequence.forward(I18n.get("survival.reignofnether.next_wave",
-                wave.number, wave.highestUnitTier, faction(wave.faction)), Style.EMPTY.withBold(true)));
+        tooltip.add(fcs(I18n.get("survival.reignofnether.next_wave",
+                wave.number, wave.highestUnitTier, faction(wave.faction)), true));
 
-        tooltip.add(FormattedCharSequence.forward(I18n.get("hud.gamemode.reignofnether.survival5",
-                SurvivalClientEvents.difficulty, SurvivalClientEvents.getMinutesPerDay()), Style.EMPTY));
+        tooltip.add(fcs(I18n.get("hud.gamemode.reignofnether.survival5",
+                SurvivalClientEvents.difficulty, SurvivalClientEvents.getMinutesPerDay())));
 
-        tooltip.add(FormattedCharSequence.forward("", Style.EMPTY));
+        tooltip.add(fcs(""));
 
         if (wave.faction == Factions.MONSTERS) {
             if (wave.highestUnitTier == 1) {
@@ -289,7 +284,7 @@ public class SurvivalClientEvents {
             }
         }
         else if (wave.faction == Factions.NONE) {
-            tooltip.add(FormattedCharSequence.forward("???", Style.EMPTY));
+            tooltip.add(fcs("???"));
         }
 
         return tooltip;
