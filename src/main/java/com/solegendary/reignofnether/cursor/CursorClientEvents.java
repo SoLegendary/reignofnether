@@ -160,7 +160,7 @@ public class CursorClientEvents {
     private static final ResourceLocation TEXTURE_SHOVEL = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/cursors/customcursor_shovel.png");
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render evt) {
+    public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         long window = MC.getWindow().getWindow();
 
         if (!OrthoviewClientEvents.isEnabled() || !(evt.getScreen() instanceof TopdownGui)) {
