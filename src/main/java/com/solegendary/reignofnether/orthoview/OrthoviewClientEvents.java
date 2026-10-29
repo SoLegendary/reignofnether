@@ -144,7 +144,7 @@ public class OrthoviewClientEvents {
     }
 
     private static float getEdgeCamPanSensitivity() {
-        return 2 * (float) (Math.sqrt(getZoom()) / (Math.sqrt(ZOOM_MAX))) * getPanSensitivityMult();
+        return (float) (Math.sqrt(getZoom()) / (Math.sqrt(ZOOM_MAX))) * getPanSensitivityMult();
     }
     public static float getPanSensitivityMult() {
         return (float) ReignOfNetherClientConfigs.CAMERA_SENSITIVITY.get() / 10f;

@@ -21,7 +21,8 @@ Balance
 [✅] Strider HP increased from 30 to 40
 
 [✅] Skeleton and Stray damage reduced from 4 to 3
-[✅] Bogged damage reduced from 2 to 1.5 (poison damage unchanged)
+[✅] Bogged attack damage reduced from 2 to 1
+[✅] Bogged poison damage increased from 6 to 7
 [✅] Strays now have a 25% chance to create wraith snow on hit instead of slowness
 
 Quality of Life
@@ -33,6 +34,7 @@ Quality of Life
 [🟡] Miscellaneous performance improvements, especially for large scale battles
 [✅] Reduced the size of the mod jar significantly
 [🟡] Improved permissions security of various serverside actions
+[🟡] `/rtsapi-start-scenario-role` renamed to `/rtsapi player start-scenario-role` and is now compatible with player selectors
 
 Bugfixes
 --------
