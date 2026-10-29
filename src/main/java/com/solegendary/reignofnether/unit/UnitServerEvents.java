@@ -153,6 +153,7 @@ public class UnitServerEvents {
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END)
             return;
+        UnitChunkTickets.cleanupRestoredTickets(evt.getServer());
         saveTicks += 1;
         if (saveTicks >= SAVE_TICKS_MAX) {
             ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
@@ -178,6 +179,7 @@ public class UnitServerEvents {
     // statics outlive the world: clear them so the next world opened in this game starts clean
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent evt) {
+        UnitChunkTickets.clear();
         HeroServerEvents.fallenHeroes.clear();
         savedTargetResources.clear();
         unitActionSlowQueue.clear();
