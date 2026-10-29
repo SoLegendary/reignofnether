@@ -198,6 +198,8 @@ public class ItemClientEvents {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END)
+            return;
         if (HudClientEvents.hudSelectedEntity != null && actionableUnitItem != null &&
                 (actionableUnitItem.showRadiusCircle ||
                  actionableUnitItem.showRangeCircle ||
