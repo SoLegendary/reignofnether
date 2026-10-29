@@ -657,12 +657,12 @@ public class FogOfWarServerEvents {
     // register here too for command blocks
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
-        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("enable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").requires(s -> s.hasPermission(2)).then(Commands.literal("enable")
                 .executes((command) -> {
                     setEnabled(true);
                     return 1;
                 })));
-        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("disable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").requires(s -> s.hasPermission(2)).then(Commands.literal("disable")
                 .executes((command) -> {
                     setEnabled(false);
                     return 1;
