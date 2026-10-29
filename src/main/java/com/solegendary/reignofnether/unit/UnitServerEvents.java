@@ -72,13 +72,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
@@ -119,8 +117,6 @@ public class UnitServerEvents {
     public static List<UnitActionItem> getUnitActionSlowQueue() { return unitActionSlowQueue; }
 
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
-
-    private static final HashMap<Integer, ChunkAccess> forcedUnitChunks = new HashMap<>();
 
     private static final Random RANDOM = new Random();
 
@@ -176,7 +172,6 @@ public class UnitServerEvents {
             saveFallenHeroUnits(level);
             saveGatherTargets(level);
             allUnits.clear();
-            forcedUnitChunks.clear();
         }
     }
 
@@ -461,16 +456,7 @@ public class UnitServerEvents {
                 entity.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
             }
 
-            ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
-            ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(),
-                ReignOfNether.MOD_ID,
-                entity,
-                chunk.getPos().x,
-                chunk.getPos().z,
-                true,
-                true
-            );
-            forcedUnitChunks.put(entity.getId(), chunk);
+            UnitChunkTickets.update(entity);
         }
 
         if (evt.getEntity() instanceof Projectile proj) {
@@ -489,11 +475,6 @@ public class UnitServerEvents {
             UnitSyncClientboundPacket.sendLeavePacket(entity);
 
             UnitChunkTickets.remove((ServerLevel) evt.getLevel(), entity);
-            ChunkAccess chunk = forcedUnitChunks.remove(entity.getId());
-            if (chunk != null) {
-                ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID,
-                        entity, chunk.getPos().x, chunk.getPos().z, false, true);
-            }
         }
 
         // if a player has no more units, then they are defeated
@@ -831,35 +812,6 @@ public class UnitServerEvents {
                 }
                 if (entity instanceof UnitInventory inv) {
                     ItemClientboundPacket.syncInventory(entity.getId(), inv.getAllItems());
-                }
-
-                // remove old chunk // add current chunk
-                ChunkAccess newChunk = evt.level.getChunk(entity.getOnPos());
-                ChunkAccess oldChunk = forcedUnitChunks.get(entity.getId());
-                boolean chunkNeedsUpdate = oldChunk != null && (
-                    oldChunk.getPos().x != newChunk.getPos().x || oldChunk.getPos().z != newChunk.getPos().z
-                );
-
-                if (chunkNeedsUpdate) {
-                    ForgeChunkManager.forceChunk((ServerLevel) evt.level,
-                        ReignOfNether.MOD_ID,
-                        entity,
-                        oldChunk.getPos().x,
-                        oldChunk.getPos().z,
-                        false,
-                        true
-                    );
-                    ForgeChunkManager.forceChunk((ServerLevel) evt.level,
-                        ReignOfNether.MOD_ID,
-                        entity,
-                        newChunk.getPos().x,
-                        newChunk.getPos().z,
-                        true,
-                        true
-                    );
-                    forcedUnitChunks.put(entity.getId(), newChunk);
-                    //ReignOfNether.LOGGER.info("Updated forced chunk for entity: " + entity.getId() + " at: " +
-                    // newChunk.getPos().x + "," + newChunk.getPos().z);
                 }
             }
         }

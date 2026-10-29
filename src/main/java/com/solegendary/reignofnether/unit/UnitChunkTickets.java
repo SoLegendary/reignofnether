@@ -1,16 +1,17 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.ReignOfNether;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraftforge.common.world.ForgeChunkManager;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-/** Server-thread-only ownership of the temporary loading area around each unit. */
+/** Server-thread-only ownership of each unit's runtime loading area and persistent center ticket. */
 public final class UnitChunkTickets {
     private static final int RADIUS = 2;
     // Separate ownership from FORCED tickets used by other systems; no timeout is needed.
@@ -20,7 +21,7 @@ public final class UnitChunkTickets {
 
     private UnitChunkTickets() {}
 
-    public static void update(Mob unit) {
+    public static void update(Entity unit) {
         if (!(unit.level() instanceof ServerLevel level) || unit.isRemoved())
             return;
 
@@ -34,8 +35,12 @@ public final class UnitChunkTickets {
         ChunkPos current = new ChunkPos(chunkX, chunkZ);
         // Acquire the new area before releasing the old one, preserving their overlap.
         tickets.changeArea(level, current, previous, true);
-        if (previous != null)
+        // Forge saves this entity-owned center ticket and restores it before units load on world reopen.
+        ForgeChunkManager.forceChunk(level, ReignOfNether.MOD_ID, unit, current.x, current.z, true, true);
+        if (previous != null) {
+            ForgeChunkManager.forceChunk(level, ReignOfNether.MOD_ID, unit, previous.x, previous.z, false, true);
             tickets.changeArea(level, previous, current, false);
+        }
         tickets.units.put(unit, current);
     }
 
@@ -44,13 +49,15 @@ public final class UnitChunkTickets {
         if (tickets == null)
             return;
         ChunkPos previous = tickets.units.remove(unit);
-        if (previous != null)
+        if (previous != null) {
+            ForgeChunkManager.forceChunk(level, ReignOfNether.MOD_ID, unit, previous.x, previous.z, false, true);
             tickets.changeArea(level, previous, null, false);
+        }
         if (tickets.units.isEmpty())
             LEVELS.remove(level);
     }
 
-    // The level owns the actual tickets and discards them when it shuts down.
+    // Runtime tickets belong to the closing level; retain persistent centers so Forge restores them on reopen.
     public static void clear(ServerLevel level) {
         LEVELS.remove(level);
     }
