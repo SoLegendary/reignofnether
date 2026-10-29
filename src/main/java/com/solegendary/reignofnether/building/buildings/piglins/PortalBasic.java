@@ -19,12 +19,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class PortalBasic extends AbstractPortal {
 
@@ -63,10 +63,10 @@ public class PortalBasic extends AbstractPortal {
                 "modifythephasevariance"),
             List.of(Component.translatable("buildings.reignofnether.portal_basic").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.portal_basic.tooltip1").getVisualOrderText(),
                 Component.translatable("buildings.reignofnether.portal_basic.tooltip2").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.portal_basic.tooltip3").getVisualOrderText()
             ),
             this

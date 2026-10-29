@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building.custombuilding;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.sandbox.SandboxServer;
+import net.minecraft.server.level.ServerPlayer;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
@@ -80,7 +81,8 @@ public class CustomBuildingServerboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
-            if (!SandboxServer.isAnyoneASandboxPlayer())
+            ServerPlayer sender = ctx.get().getSender();
+            if (sender == null || !SandboxServer.isSandboxOp(sender))
                 return;
 
             ReignOfNether.LOGGER.info("[CustomBuilding] action={}, buildingName={}, boolValue={}, intValue={}, strValue={}", this.action, this.buildingName, this.boolValue, this.intValue, this.strValue);

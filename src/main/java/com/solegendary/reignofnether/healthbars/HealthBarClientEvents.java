@@ -23,7 +23,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.event.TickEvent.PlayerTickEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
@@ -59,9 +59,11 @@ public class HealthBarClientEvents {
         renderBarsInWorld(evt.getPartialTick(), evt.getPoseStack(), camera);
     }
     @SubscribeEvent
-    public static void playerTick(PlayerTickEvent evt) {
-        if (!evt.player.level().isClientSide)
+    public static void onClientTick(TickEvent.ClientTickEvent evt) {
+        if (evt.phase != TickEvent.Phase.END || MC.level == null || MC.isPaused())
             return;
+        // ran twice per tick back when this listened to PlayerTickEvent START and END, keep that speed
+        BarStates.tick();
         BarStates.tick();
     }
 
@@ -155,6 +157,7 @@ public class HealthBarClientEvents {
             matrix.popPose();
         }
 
+        RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
 
         renderedEntities.clear();

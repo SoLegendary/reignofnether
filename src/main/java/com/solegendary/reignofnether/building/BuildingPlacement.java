@@ -310,11 +310,7 @@ public class BuildingPlacement {
         initPlacedBlocks();
 
         // offset ticks from other buildings of the same type so we can tell which ones were built first
-        List<BuildingPlacement> bpls;
-        if (level.isClientSide())
-            bpls = BuildingClientEvents.getBuildings();
-        else
-            bpls = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> bpls = BuildingUtils.getBuildingsList(level.isClientSide());
 
         for (BuildingPlacement bpl : bpls)
             if (bpl.getBuilding().isTypeOf(this.getBuilding()) && bpl != this && bpl.ownerName.equals(this.ownerName))

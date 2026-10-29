@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.building.addon;
 
-import com.solegendary.reignofnether.alliance.AlliancesClient;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingServerEvents;
@@ -73,12 +72,7 @@ public interface GarrisonableBuildingAddon extends BuildingAddon {
         for (BuildingPlacement building : buildings) {
             GarrisonableBuildingAddon gba = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class);
             if (gba != null) {
-                boolean isAlliedOrOwned;
-                if (entity.level().isClientSide()) {
-                    isAlliedOrOwned = AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), building.ownerName);
-                } else {
-                    isAlliedOrOwned = AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), building.ownerName);
-                }
+                boolean isAlliedOrOwned = MiscUtil.isAlliedOrOwned(entity.level(), unit.getOwnerName(), building.ownerName);
 
                 if ((!isAlliedOrOwned && (!unit.getOwnerName().isEmpty() || !building.ownerName.isEmpty())) ||
                         gba.getCapacity() <= 0 || !building.isBuilt ||

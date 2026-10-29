@@ -32,7 +32,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -43,6 +42,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class Library extends ProductionBuilding implements RangeIndicatorAddon {
     private static final EnchantMaiming ENCHANT_MAIMING = new EnchantMaiming();
@@ -135,10 +135,10 @@ public class Library extends ProductionBuilding implements RangeIndicatorAddon {
                     ResearchClient.hasCheat("modifythephasevariance"),
             List.of(Component.translatable("buildings.reignofnether.library").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.library.tooltip1").getVisualOrderText(),
                 Component.translatable("buildings.reignofnether.library.tooltip2").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.library.tooltip3").getVisualOrderText()
             ),
             this

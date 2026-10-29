@@ -15,9 +15,7 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
@@ -25,6 +23,7 @@ import net.minecraft.world.level.block.Rotation;
 import java.util.List;
 
 import static com.solegendary.reignofnether.building.BuildingUtils.getAbsoluteBlockData;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class PortalPocket extends AbstractPortal {
 
@@ -61,13 +60,11 @@ public class PortalPocket extends AbstractPortal {
             () -> false,
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.CENTRAL_PORTAL) || ResearchClient.hasCheat(
                 "modifythephasevariance"),
-            List.of(FormattedCharSequence.forward(I18n.get("buildings.reignofnether.portal_pocket"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("buildings.reignofnether.portal_pocket"), true),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.portal_pocket.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("buildings.reignofnether.portal_pocket.tooltip2"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("buildings.reignofnether.portal_pocket.tooltip1")),
+                fcs(I18n.get("buildings.reignofnether.portal_pocket.tooltip2"))
             ),
             this
         );

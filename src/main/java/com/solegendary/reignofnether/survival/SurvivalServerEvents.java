@@ -189,6 +189,7 @@ public class SurvivalServerEvents {
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
         evt.getDispatcher().register(Commands.literal("debug-end-wave")
+                .requires(s -> s.hasPermission(2))
                 .executes((command) -> {
                     if (command.getSource().getPlayer() != null) {
                         String name = command.getSource().getPlayer().getName().getString();
@@ -198,6 +199,7 @@ public class SurvivalServerEvents {
                     return endCurrentWave();
                 }));
         evt.getDispatcher().register(Commands.literal("debug-next-night")
+                .requires(s -> s.hasPermission(2))
                 .executes((command) -> {
                     if (command.getSource().getPlayer() != null) {
                         String name = command.getSource().getPlayer().getName().getString();

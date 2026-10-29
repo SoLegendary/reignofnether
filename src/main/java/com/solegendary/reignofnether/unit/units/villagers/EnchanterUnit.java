@@ -33,13 +33,11 @@ import com.solegendary.reignofnether.unit.units.piglins.GhastUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
@@ -637,21 +635,9 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                        .createCommandSourceStack()
-                        .withEntity(this)
-                        .withPosition(this.position())
-                        .withLevel(serverLevel)
-                        .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-            if (!tetheredEntities.isEmpty()) {
-                SoundClientboundPacket.playSoundAtPos(SoundAction.BEACON_DEACTIVATE, blockPosition(), 1.5f);
-            }
+        this.runOnDeathCommand(pReason);
+        if (!this.level().isClientSide() && !tetheredEntities.isEmpty()) {
+            SoundClientboundPacket.playSoundAtPos(SoundAction.BEACON_DEACTIVATE, blockPosition(), 1.5f);
         }
         synchronized (tetheredEntities) {
             tetheredEntities.forEach(le -> {

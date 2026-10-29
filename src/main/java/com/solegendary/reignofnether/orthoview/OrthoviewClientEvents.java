@@ -81,8 +81,8 @@ public class OrthoviewClientEvents {
     private static boolean cameraMovingByMouse = false; // excludes edgepanning
 
     private static final Minecraft MC = Minecraft.getInstance();
-    private static final float ZOOM_STEP_KEY = 5;
-    private static final float ZOOM_STEP_SCROLL = 1;
+    private static final float ZOOM_STEP_KEY = 10;
+    private static final float ZOOM_STEP_SCROLL = 2;
     private static final float ZOOM_MIN = 10;
     private static final float ZOOM_MAX = 90;
     private static final float CAMROTY_MAX = -20;
@@ -144,7 +144,7 @@ public class OrthoviewClientEvents {
     }
 
     private static float getEdgeCamPanSensitivity() {
-        return (float) (Math.sqrt(getZoom()) / (Math.sqrt(ZOOM_MAX))) * getPanSensitivityMult();
+        return 2 * (float) (Math.sqrt(getZoom()) / (Math.sqrt(ZOOM_MAX))) * getPanSensitivityMult();
     }
     public static float getPanSensitivityMult() {
         return (float) ReignOfNetherClientConfigs.CAMERA_SENSITIVITY.get() / 10f;
@@ -602,7 +602,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseScroll(ScreenEvent.MouseScrolled evt) {
+    public static void onMouseScroll(ScreenEvent.MouseScrolled.Pre evt) {
         if (!enabled || isCameraLocked()) {
             return;
         }
@@ -612,7 +612,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onDrawScreen(ScreenEvent.Render evt) {
+    public static void onDrawScreen(ScreenEvent.Render.Post evt) {
         if (!enabled || !(evt.getScreen() instanceof TopdownGui)) {
             return;
         }
@@ -717,7 +717,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseRelease(ScreenEvent.MouseButtonReleased evt) {
+    public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre evt) {
         if (!enabled || isCameraLocked()) {
             return;
         }
@@ -735,7 +735,7 @@ public class OrthoviewClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMouseDrag(ScreenEvent.MouseDragged evt) {
+    public static void onMouseDrag(ScreenEvent.MouseDragged.Pre evt) {
         if (!enabled || isCameraLocked()) {
             return;
         }
@@ -750,8 +750,8 @@ public class OrthoviewClientEvents {
             float normalizedX = (float) evt.getDragX() / frameTimeNormalizer;
             float normalizedZ = (float) evt.getDragY() / frameTimeNormalizer;
 
-            float moveX = normalizedX * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
-            float moveZ = normalizedZ * 0.20f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
+            float moveX = normalizedX * 0.40f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
+            float moveZ = normalizedZ * 0.40f * (zoom / ZOOM_MAX) * getPanSensitivityMult() * frameTimeNormalizer;
             panCam(moveX, 0, moveZ);
         } else if (evt.getMouseButton() == GLFW.GLFW_MOUSE_BUTTON_2 && Keybindings.altMod.isDown()) {
             cameraMovingByMouse = true;

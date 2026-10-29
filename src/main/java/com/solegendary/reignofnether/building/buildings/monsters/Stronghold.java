@@ -24,13 +24,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class Stronghold extends ProductionBuilding implements GarrisonableBuildingAddon, RangeIndicatorAddon, NightSourceAddon {
     public final static int MAX_OCCUPANTS = 7;
@@ -83,12 +83,12 @@ public class Stronghold extends ProductionBuilding implements GarrisonableBuildi
             () -> hasPrerequisiteBuildings() || ResearchClient.hasCheat("modifythephasevariance"),
             List.of(Component.translatable("buildings.reignofnether.stronghold").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.stronghold.tooltip1").getVisualOrderText(),
                 Component.translatable("buildings.reignofnether.stronghold.tooltip2", Stronghold.MAX_OCCUPANTS).getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.stronghold.tooltip3", nightRange).getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.stronghold.tooltip4").getVisualOrderText()
             ),
             this

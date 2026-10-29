@@ -13,9 +13,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
@@ -65,10 +63,10 @@ public class ToggleShield extends Ability {
                 null,
                 List.of(
                         fcs(I18n.get("abilities.reignofnether.shield_stance"), true),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.shield_stance.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.shield_stance.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.shield_stance.tooltip3"), Style.EMPTY)
+                        fcs(""),
+                        fcs(I18n.get("abilities.reignofnether.shield_stance.tooltip1")),
+                        fcs(I18n.get("abilities.reignofnether.shield_stance.tooltip2")),
+                        fcs(I18n.get("abilities.reignofnether.shield_stance.tooltip3"))
                 ),
                 this,
                 unit

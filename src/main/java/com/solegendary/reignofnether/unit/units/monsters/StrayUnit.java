@@ -19,13 +19,11 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -224,19 +222,7 @@ public class StrayUnit extends Stray implements Unit, AttackerUnit, RangedAttack
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

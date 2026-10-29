@@ -50,6 +50,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 
 public class ProductionPlacement extends BuildingPlacement {
+    private static final int MAX_RALLY_POINTS = 64;
     protected ArrayList<BlockPos> rallyPoints = new ArrayList<>();
     protected LivingEntity rallyPointEntity;
     public List<Button> productionButtons;
@@ -99,7 +100,7 @@ public class ProductionPlacement extends BuildingPlacement {
     }
 
     public void addRallyPoint(BlockPos rallyPoint) {
-        if (!canSetRallyPoint())
+        if (!canSetRallyPoint() || rallyPoints.size() >= MAX_RALLY_POINTS)
             return;
         if (!isPosInsideBuilding(rallyPoint))
             this.rallyPoints.add(rallyPoint);

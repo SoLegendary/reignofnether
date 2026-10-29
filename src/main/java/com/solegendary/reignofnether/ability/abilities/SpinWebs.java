@@ -10,16 +10,15 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SpiderUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class SpinWebs extends Ability {
 
@@ -52,13 +51,13 @@ public class SpinWebs extends Ability {
                 () -> CursorClientEvents.setLeftClickAction(UnitAction.SPIN_WEBS),
                 () -> toggleAutocast(unit),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.spin_webs"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE, MyRenderer.iconStyle),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.spin_webs.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.spin_webs.tooltip2", DURATION_SECONDS), Style.EMPTY),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.spin_webs.tooltip3"), Style.EMPTY)
+                        fcs(I18n.get("abilities.reignofnether.spin_webs"), true),
+                        fcsIcons("\uE004  " + CD_MAX_SECONDS + "s  \uE005  " + RANGE),
+                        fcs(I18n.get("abilities.reignofnether.spin_webs.tooltip1")),
+                        fcs(I18n.get("abilities.reignofnether.spin_webs.tooltip2", DURATION_SECONDS)),
+                        fcs(""),
+                        fcs(I18n.get("abilities.reignofnether.autocast")),
+                        fcs(I18n.get("abilities.reignofnether.spin_webs.tooltip3"))
                 ),
                 this,
                 unit

@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -88,19 +87,7 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

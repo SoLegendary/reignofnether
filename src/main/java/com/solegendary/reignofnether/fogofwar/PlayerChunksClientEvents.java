@@ -24,6 +24,11 @@ public class PlayerChunksClientEvents {
     // toggle this from a keybind/command if you don't want it rendering all the time
     public static boolean enabled = true;
 
+    public static void reset() {
+        liveChunks = new HashMap<>();
+        edgeChunks = new HashMap<>();
+    }
+
     public static void applyServerState(Map<UUID, Set<ChunkPos>> live, Map<UUID, Set<ChunkPos>> sent) {
         liveChunks = live;
         edgeChunks = sent;

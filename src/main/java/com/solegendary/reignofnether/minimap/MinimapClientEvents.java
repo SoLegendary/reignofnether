@@ -44,9 +44,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -70,6 +68,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -322,6 +321,8 @@ public class MinimapClientEvents {
             worldRadius = 120;
             mapGuiRadius = 60;
         }
+        if (mapTexLoc != null)
+            Minecraft.getInstance().textureManager.release(mapTexLoc); // also closes the old DynamicTexture
         mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
         mapTexLoc = Minecraft.getInstance().textureManager.register(
             ReignOfNether.MOD_ID + "_" + "minimap",
@@ -346,9 +347,9 @@ public class MinimapClientEvents {
                 () -> true,
                 () -> shouldToggleSize = true,
                 null,
-                List.of(FormattedCharSequence.forward(largeMap
+                List.of(fcs(largeMap
                         ? I18n.get("hud.map.reignofnether.close")
-                        : I18n.get("hud.map.reignofnether.open"), Style.EMPTY))
+                        : I18n.get("hud.map.reignofnether.open")))
         );
     }
 
@@ -381,9 +382,9 @@ public class MinimapClientEvents {
                 () -> OrthoviewClientEvents.adjustPanSensitivityMult(true),
                 () -> OrthoviewClientEvents.adjustPanSensitivityMult(false),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip1",
-                                Math.round(OrthoviewClientEvents.getPanSensitivityMult() * 10), Math.round(OrthoviewClientEvents.MAX_PAN_SENSITIVITY * 10)), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip2"), Style.EMPTY)
+                        fcs(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip1",
+                                Math.round(OrthoviewClientEvents.getPanSensitivityMult() * 10), Math.round(OrthoviewClientEvents.MAX_PAN_SENSITIVITY * 10))),
+                        fcs(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip2"))
                 )
         );
     }
@@ -437,9 +438,9 @@ public class MinimapClientEvents {
                         setMapCentre(MC.player.getX(), MC.player.getZ());
                 },
                 null,
-                List.of(FormattedCharSequence.forward(lockedMap
+                List.of(fcs(lockedMap
                         ? I18n.get("hud.map.reignofnether.lock_map.tooltip1.enabled")
-                        : I18n.get("hud.map.reignofnether.lock_map.tooltip1.disabled"), Style.EMPTY)
+                        : I18n.get("hud.map.reignofnether.lock_map.tooltip1.disabled"))
                 )
         );
     }
@@ -459,9 +460,9 @@ public class MinimapClientEvents {
                     highlightAnimals = !highlightAnimals;
                 },
                 null,
-                List.of(FormattedCharSequence.forward(highlightAnimals
+                List.of(fcs(highlightAnimals
                         ? I18n.get("hud.map.reignofnether.highlight_animals.enabled")
-                        : I18n.get("hud.map.reignofnether.highlight_animals.disabled"), Style.EMPTY)
+                        : I18n.get("hud.map.reignofnether.highlight_animals.disabled"))
                 )
         );
     }
@@ -479,9 +480,9 @@ public class MinimapClientEvents {
                 () -> true,
                 () -> underlineUnitsAndBuildings = !underlineUnitsAndBuildings,
                 null,
-                List.of(FormattedCharSequence.forward(underlineUnitsAndBuildings
+                List.of(fcs(underlineUnitsAndBuildings
                         ? I18n.get("hud.map.reignofnether.underlines.enabled")
-                        : I18n.get("hud.map.reignofnether.underlines.disabled"), Style.EMPTY)
+                        : I18n.get("hud.map.reignofnether.underlines.disabled"))
                 )
         );
     }
@@ -581,6 +582,7 @@ public class MinimapClientEvents {
         // from producing a half-shaded map
         final boolean fogEnabled = FogOfWarClientEvents.isEnabled();
         final BlockPos.MutableBlockPos borderPos = new BlockPos.MutableBlockPos();
+        final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
         // fog state for the chunk the scan is currently inside; refreshed only on chunk boundaries
         long cachedChunkKey = ChunkPos.INVALID_CHUNK_POS;
@@ -637,10 +639,10 @@ public class MinimapClientEvents {
                     }
                 }
 
-                int y = MC.level.getChunkAt(new BlockPos(x, 0, z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+                int y = MC.level.getChunkAt(pos.set(x, 0, z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
                 do {
-                    bs = MC.level.getBlockState(new BlockPos(x, y, z));
+                    bs = MC.level.getBlockState(pos.set(x, y, z));
                     if (bs.getBlock() instanceof SnowLayerBlock) {
                         int layers = bs.getValue(SnowLayerBlock.LAYERS);
                         y += (int) (layers * (1.0F / 8.0F));
@@ -653,11 +655,11 @@ public class MinimapClientEvents {
                     }
                 } while (true);
 
-                int yNorth = MC.level.getChunkAt(new BlockPos(x, 0, z - 1))
+                int yNorth = MC.level.getChunkAt(pos.set(x, 0, z - 1))
                         .getHeight(Heightmap.Types.WORLD_SURFACE, x, z - 1);
                 BlockState bsNorth;
                 do {
-                    bsNorth = MC.level.getBlockState(new BlockPos(x, yNorth, z - 1));
+                    bsNorth = MC.level.getBlockState(pos.set(x, yNorth, z - 1));
                     if (bsNorth.getBlock() instanceof SnowLayerBlock) {
                         int layersNorth = bsNorth.getValue(SnowLayerBlock.LAYERS);
                         yNorth += (int) (layersNorth * (1.0F / 8.0F));
@@ -670,14 +672,15 @@ public class MinimapClientEvents {
                     }
                 } while (true);
 
-                MapColor mat = MC.level.getBlockState(new BlockPos(x, yNorth, z - 1)).getMapColor(MC.level, new BlockPos(x, yNorth, z - 1));
+                pos.set(x, yNorth, z - 1);
+                MapColor mat = MC.level.getBlockState(pos).getMapColor(MC.level, pos);
                 int rgb = mat.col;
                 if (bs.getBlock() instanceof SnowLayerBlock) {
                     rgb = 0xFFFFFF;
                 }
 
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)
-                if (MC.level.getBlockState(new BlockPos(x, yNorth, z - 1)).getFluidState().isEmpty()) {
+                if (MC.level.getBlockState(pos).getFluidState().isEmpty()) {
                     if (yNorth > y) {
                         rgb = MiscUtil.shadeHexRGB(rgb, 0.82F);
                     } else if (yNorth < y) {
@@ -689,7 +692,7 @@ public class MinimapClientEvents {
                     BlockState matBelow;
                     do {
                         depth += 1;
-                        matBelow = MC.level.getBlockState(new BlockPos(x, y - depth, z));
+                        matBelow = MC.level.getBlockState(pos.set(x, y - depth, z));
                     } while (!matBelow.getFluidState().isEmpty() && depth < depthMax);
 
                     // only reduce shade every nth step to have the map look sharper
@@ -1376,7 +1379,11 @@ public class MinimapClientEvents {
         long t0 = System.nanoTime();
 
         updateMapTerrain(terrainPartition, darkTerrainPartition);
-        mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
+        if (mapColoursOverlays.length != worldRadius * 2)
+            mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
+        else
+            for (int[] row : mapColoursOverlays)
+                Arrays.fill(row, 0);
         if (BlockClientEvents.nightCircleMode != NightCircleMode.OFF)
             updateNightCircles();
         

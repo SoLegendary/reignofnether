@@ -57,6 +57,12 @@ public class BarStates {
     tickCount++;
   }
 
+  public static void clear() {
+    HEALTH_STATES.clear();
+    ABSORB_STATES.clear();
+    MANA_STATES.clear();
+  }
+
   private static void cleanCache() {
     HEALTH_STATES.entrySet().removeIf(BarStates::stateExpired);
     ABSORB_STATES.entrySet().removeIf(BarStates::stateExpired);

@@ -1,8 +1,7 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.google.common.collect.Lists;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -124,10 +123,7 @@ public abstract class AbstractArrowMixin extends Projectile {
                 entity instanceof Unit unit2) {
             String owner1 = unit1.getOwnerName();
             String owner2 = unit2.getOwnerName();
-            if (entity.level().isClientSide())
-                isAlliedOrOwned = owner1.equals(owner2) || AlliancesClient.isAllied(owner1, owner2);
-            else
-                isAlliedOrOwned = owner1.equals(owner2) || AlliancesServerEvents.isAllied(owner1, owner2);
+            isAlliedOrOwned = MiscUtil.isAlliedOrOwned(entity.level(), owner1, owner2);
         }
         return this.getOwner() instanceof Unit unit1 &&
                 entity instanceof Unit unit2 &&

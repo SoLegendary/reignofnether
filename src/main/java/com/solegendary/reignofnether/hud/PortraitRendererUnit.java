@@ -44,7 +44,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.util.FormattedCharSequence;
@@ -338,7 +337,7 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
                         .getBuilder());
 
         for (int i = 0; i < texts.size(); i++) {
-            FormattedCharSequence pTooltips = FormattedCharSequence.forward(texts.get(i), Style.EMPTY);
+            FormattedCharSequence pTooltips = fcs(texts.get(i));
             ClientTooltipComponent clientTooltip = ClientTooltipComponent.create(pTooltips);
             guiGraphics.pose().translate(0.0, 0.0, 400.0);
             int x0 = x + (frameWidth / 2);

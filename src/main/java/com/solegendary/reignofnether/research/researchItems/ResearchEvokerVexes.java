@@ -13,12 +13,11 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchEvokerVexes extends ProductionItem {
 
@@ -46,13 +45,11 @@ public class ResearchEvokerVexes extends ProductionItem {
             () -> ProductionItems.RESEARCH_EVOKER_VEXES.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_EVOKER_VEXES),
             () -> true,
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.evoker_vexes"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("research.reignofnether.evoker_vexes"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.evoker_vexes.tooltip1"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.evoker_vexes.tooltip1"))
             ),
             this
         );

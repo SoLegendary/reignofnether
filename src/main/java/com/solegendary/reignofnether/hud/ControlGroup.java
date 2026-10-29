@@ -15,9 +15,7 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -29,6 +27,7 @@ import static com.solegendary.reignofnether.building.BuildingClientEvents.getSel
 import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedEntity;
 import static com.solegendary.reignofnether.hud.HudClientEvents.hudSelectedPlacement;
 import static com.solegendary.reignofnether.unit.UnitClientEvents.*;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // classic RTS control groups that can contain either buildings or units
 // ctrl + number to create a group, number to select that group
@@ -184,10 +183,7 @@ public class ControlGroup {
                 if (Keybindings.shiftMod.isDown())
                     clearAll();
             },
-            List.of(FormattedCharSequence.forward(
-                I18n.get("hud.control_group.reignofnether.control_group", keybinding.buttonLabel),
-                Style.EMPTY
-            ))
+            List.of(fcs(I18n.get("hud.control_group.reignofnether.control_group", keybinding.buttonLabel)))
         );
     }
 }

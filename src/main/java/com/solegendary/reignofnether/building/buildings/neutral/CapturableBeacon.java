@@ -14,12 +14,12 @@ import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.ArrayList;
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class CapturableBeacon extends Beacon {
 
@@ -74,10 +74,10 @@ public class CapturableBeacon extends Beacon {
                 List.of(
                         Component.translatable("buildings.reignofnether.capturable_beacon").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         Component.translatable("buildings.reignofnether.capturable_beacon.tooltip3").getVisualOrderText(),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.capturable_beacon.tooltip1").getVisualOrderText(),
                         Component.translatable("buildings.reignofnether.capturable_beacon.tooltip2").getVisualOrderText(),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.beacon.tooltip3").getVisualOrderText()
                 ),
                 this

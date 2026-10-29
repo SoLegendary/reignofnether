@@ -52,6 +52,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -260,6 +261,14 @@ public class MiscUtil {
 
     public static BlockPos getHighestNonAirBlock(Level level, BlockPos blockPos) {
         return getHighestNonAirBlock(level, blockPos, false);
+    }
+
+    public static boolean listContainsObjectValue(List<Object> objs, String obj) {
+        for (Object o : objs) {
+            if (!o.equals(obj)) continue;
+            return true;
+        }
+        return false;
     }
 
     public static boolean isLeftClickDown(Minecraft MC) {
@@ -505,10 +514,10 @@ public class MiscUtil {
             List<T> entities = level.getEntitiesOfClass(entityType, aabb);
             List<T> entitiesInRange = new ArrayList<>();
 
-            for (T entity : entities)
+            for (Entity entity : entities)
                 if (entity.position().distanceTo(new Vec3(pos.x, pos.y, pos.z)) <= range &&
                         entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()))
-                    entitiesInRange.add(entity);
+                    entitiesInRange.add((T) entity);
 
             return entitiesInRange;
         } else
@@ -520,9 +529,9 @@ public class MiscUtil {
             List<T> entities = level.getEntitiesOfClass(entityType, aabb);
             List<T> entitiesInRange = new ArrayList<>();
 
-            for (T entity : entities)
+            for (Entity entity : entities)
                 if (entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()))
-                    entitiesInRange.add(entity);
+                    entitiesInRange.add((T) entity);
 
             return entitiesInRange;
         } else
@@ -539,6 +548,17 @@ public class MiscUtil {
             guiGraphics.drawString(font, str, 0, y, 0xFFFFFF);
             y += 10;
         }
+    }
+
+    public static Relationship getClientsideRelationship(String playerName1, String playerName2) {
+        if (playerName1.isEmpty() || playerName2.isEmpty())
+            return Relationship.NEUTRAL;
+        else if (playerName1.equals(playerName2))
+            return Relationship.OWNED;
+        else if (AlliancesClient.isAllied(playerName1, playerName2))
+            return Relationship.FRIENDLY;
+        else
+            return Relationship.HOSTILE;
     }
 
     // lightens or darkens a hex RGB value
@@ -588,6 +608,11 @@ public class MiscUtil {
         msOsc *= (max - min);
         msOsc += min;
         return (float) msOsc;
+    }
+
+    public static double round(double value, int precision) {
+        int scale = (int) Math.pow(10, precision);
+        return (double) Math.round(value * scale) / scale;
     }
 
     // gets the unit vector in the direction of player facing (same as camera)
@@ -684,6 +709,21 @@ public class MiscUtil {
     public static class CircleUtil {
 
         private static final Map<Integer, Set<BlockPos>> circleCache = new HashMap<>();
+
+        private static final int HASH_GRID_SIZE = 5;
+
+        private static final Map<String, Set<BlockPos>> spatialHashMap = new HashMap<>();
+
+        private static String getHashKey(BlockPos point) {
+            int x = point.getX() / HASH_GRID_SIZE;
+            int z = point.getZ() / HASH_GRID_SIZE;
+            return x + ":" + z;
+        }
+
+        private static void addPointToSpatialHashMap(BlockPos point, String hashKey) {
+            spatialHashMap.putIfAbsent(hashKey, new HashSet<>());
+            spatialHashMap.get(hashKey).add(point);
+        }
 
         public static Set<BlockPos> getCircleWithCulledOverlaps(BlockPos center, int radius, List<Pair<BlockPos, Integer>> overlapSources) {
             if (radius <= 0)
@@ -836,6 +876,13 @@ public class MiscUtil {
         }
         return (le.getVehicle() != null && NetherBlocks.isNetherBlock(le.level(), le.getVehicle().getOnPos())) ||
                 (NetherBlocks.isNetherBlock(le.level(), le.getOnPos()));
+    }
+
+    public static void runServerCommand(MinecraftServer server, String command) {
+        server.getCommands().performPrefixedCommand(
+                server.createCommandSourceStack(),
+                command
+        );
     }
 
     public static void runPlayerCommand(ServerPlayer player, String command) {

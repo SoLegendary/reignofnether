@@ -190,6 +190,11 @@ public class PlayerServerEvents {
         rtsGameTicks = 0;
     }
 
+    // ops, or the singleplayer/LAN host (who has no permission level when cheats are off)
+    public static boolean isOpOrHost(ServerPlayer player) {
+        return player.hasPermissions(2) || player.server.isSingleplayerOwner(player.getGameProfile());
+    }
+
     public static boolean isRTSPlayer(String playerName) {
         synchronized (rtsPlayers) {
             for (RTSPlayer p : rtsPlayers) {
@@ -327,8 +332,9 @@ public class PlayerServerEvents {
 
         if (rtsSyncingEnabled) {
             MinecraftServer server = evt.getEntity().level().getServer();
-            if (server == null || !server.isDedicatedServer()) {
-                CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(PlayerServerEvents::syncUnits);
+            if (server != null && !server.isDedicatedServer()) {
+                CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS)
+                        .execute(() -> server.execute(PlayerServerEvents::syncUnits));
             } else {
                 syncUnits();
             }
@@ -874,6 +880,12 @@ public class PlayerServerEvents {
     public static void openTopdownGui(int playerId) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
 
+        // mirrors OrthoviewClientEvents.tryToToggleEnable, survival/adventure players can't use the RTS view
+        if (serverPlayer != null && (serverPlayer.gameMode.getGameModeForPlayer() == GameType.SURVIVAL ||
+                serverPlayer.gameMode.getGameModeForPlayer() == GameType.ADVENTURE)) {
+            ReignOfNether.LOGGER.warn("Refused to open topdown GUI for survival/adventure player {}", serverPlayer.getName().getString());
+            return;
+        }
         if (serverPlayer != null) {
             // Open GUI server-side
             MenuConstructor provider = TopdownGuiContainer.getServerContainerProvider();
@@ -928,21 +940,28 @@ public class PlayerServerEvents {
     public static void movePlayer(int playerId, double x, double y, double z) {
         ServerPlayer serverPlayer = getPlayerById(playerId);
         if (serverPlayer != null && (serverPlayer.isCreative() || serverPlayer.isSpectator())) {
-            boolean isOrtho = false;
+            if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z))
+                return;
+            boolean isOrtho = Boolean.TRUE.equals(playerGuiOpenStatus.get(serverPlayer.getName().getString()));
             for (ServerPlayer op : orthoviewPlayers)
                 if (op.getId() == playerId) { isOrtho = true; break; }
-            if (isOrtho) {
-                net.minecraft.world.level.border.WorldBorder border = serverPlayer.level().getWorldBorder();
-                double margin = 1.0D;
-                double minX = border.getMinX() + margin;
-                double maxX = border.getMaxX() - margin;
-                double minZ = border.getMinZ() + margin;
-                double maxZ = border.getMaxZ() - margin;
-                if (maxX > minX && maxZ > minZ) {
-                    x = net.minecraft.util.Mth.clamp(x, minX, maxX);
-                    z = net.minecraft.util.Mth.clamp(z, minZ, maxZ);
-                }
+            if (!isOrtho)
+                return;
+            net.minecraft.world.level.border.WorldBorder border = serverPlayer.level().getWorldBorder();
+            double margin = 1.0D;
+            double minX = border.getMinX() + margin;
+            double maxX = border.getMaxX() - margin;
+            double minZ = border.getMinZ() + margin;
+            double maxZ = border.getMaxZ() - margin;
+            if (maxX > minX && maxZ > minZ) {
+                x = net.minecraft.util.Mth.clamp(x, minX, maxX);
+                z = net.minecraft.util.Mth.clamp(z, minZ, maxZ);
+            } else {
+                x = border.getCenterX();
+                z = border.getCenterZ();
             }
+            // headroom above build height since the orthoview camera sits up to 100 blocks over the terrain
+            y = net.minecraft.util.Mth.clamp(y, serverPlayer.level().getMinBuildHeight(), serverPlayer.level().getMaxBuildHeight() + 100);
             serverPlayer.teleportTo(x, y, z);
         }
     }
@@ -1231,7 +1250,7 @@ public class PlayerServerEvents {
             rtsPlayers.clear();
             FogOfWarServerEvents.invalidateRtsCache();
 
-            for (LivingEntity entity : UnitServerEvents.getAllUnits())
+            for (LivingEntity entity : new ArrayList<>(UnitServerEvents.getAllUnits()))
                 if (hardReset || (entity instanceof Unit unit && !Unit.hasAnchor(unit) && !isSandboxOrScenario))
                     entity.kill();
 
@@ -1306,7 +1325,7 @@ public class PlayerServerEvents {
         for (BuildingPlacement bpl : BuildingServerEvents.getBuildings()) {
             ScenarioRole role = ScenarioUtils.getScenarioRole(false, bpl.scenarioRoleIndex);
             bpl.ownerName = role != null ? role.name : "";
-            BuildingClientEvents.syncBuilding(bpl, bpl.getBlocksPlaced(), bpl.partialBlocksDestroyed, bpl.ownerName, bpl.scenarioRoleIndex);
+            BuildingClientboundPacket.syncBuilding(bpl.originPos, bpl.getBlocksPlaced(), bpl.partialBlocksDestroyed, bpl.ownerName, bpl.scenarioRoleIndex);
         }
         serverLevel.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).set(true, serverLevel.getServer());
 

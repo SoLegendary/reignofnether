@@ -15,10 +15,10 @@ import com.solegendary.reignofnether.tutorial.TutorialStage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class VillagerHouse extends Building {
 
@@ -58,7 +58,7 @@ public class VillagerHouse extends Building {
                 Component.translatable("buildings.reignofnether.villager_house").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.villager_house.tooltip1").getVisualOrderText()
             ),
             this

@@ -13,15 +13,14 @@ import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import org.joml.Vector3d;
 
 import java.util.List;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class BackToWorkBuilding extends Ability {
 
@@ -51,10 +50,10 @@ public class BackToWorkBuilding extends Ability {
                 () -> sendUnitCommand(UnitAction.BACK_TO_WORK_BUILDING),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("abilities.reignofnether.back_to_work_building"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("abilities.reignofnether.back_to_work_building.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("abilities.reignofnether.back_to_work_building.tooltip2"), Style.EMPTY)
+                        fcs(LanguageUtil.getTranslation("abilities.reignofnether.back_to_work_building"), true),
+                        fcs(""),
+                        fcs(LanguageUtil.getTranslation("abilities.reignofnether.back_to_work_building.tooltip1")),
+                        fcs(LanguageUtil.getTranslation("abilities.reignofnether.back_to_work_building.tooltip2"))
                 ),
                 this,
                 placement

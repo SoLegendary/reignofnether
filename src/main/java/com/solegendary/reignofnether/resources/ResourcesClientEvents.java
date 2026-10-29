@@ -21,7 +21,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -37,6 +36,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.getSelectedUnits;
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class ResourcesClientEvents {
 
@@ -56,7 +56,7 @@ public class ResourcesClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(ScreenEvent.Render evt) {
+    public static void onClientTick(ScreenEvent.Render.Post evt) {
         if (MC.level != null && !HudClientEvents.isMouseOverAnyButtonOrHud() && MC.screen instanceof TopdownGui) {
             BlockPos preSelBp = CursorClientEvents.getPreselectedBlockPos();
             ResourceSource res = ResourceSources.getFromBlockPos(preSelBp, MC.level);
@@ -86,7 +86,7 @@ public class ResourcesClientEvents {
                     case NONE -> "";
                 };
                 MyRenderer.renderTooltip(evt.getGuiGraphics(),
-                        List.of(FormattedCharSequence.forward(str, MyRenderer.iconStyle)),
+                        List.of(fcsIcons(str)),
                         evt.getMouseX(), evt.getMouseY()
                 );
             }

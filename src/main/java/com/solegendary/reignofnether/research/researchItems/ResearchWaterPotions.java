@@ -9,12 +9,11 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchWaterPotions extends ProductionItem {
 
@@ -44,15 +43,11 @@ public class ResearchWaterPotions extends ProductionItem {
             () -> ProductionItems.RESEARCH_WATER_POTIONS.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_WATER_POTIONS),
             () -> true,
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.water_potions"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("research.reignofnether.water_potions"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.water_potions.tooltip1"),
-                    Style.EMPTY
-                )
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.water_potions.tooltip1"))
             ),
             this
         );

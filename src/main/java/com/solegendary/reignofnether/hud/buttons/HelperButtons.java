@@ -58,7 +58,7 @@ public class HelperButtons {
                 () -> true,
                 () -> MC.setScreen(new ChatScreen("")),
                 null,
-                List.of(FormattedCharSequence.forward(I18n.get("hud.helperbuttons.reignofnether.chat"), Style.EMPTY))
+                List.of(fcs(I18n.get("hud.helperbuttons.reignofnether.chat")))
         );
         idleWorkerButton = new Button(
                 "Idle workers (CTRL-click to select all)",
@@ -98,8 +98,8 @@ public class HelperButtons {
                 },
                 null,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("hud.helperbuttons.reignofnether.idle_workers"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("hud.helperbuttons.reignofnether.idle_workers_shift"), Style.EMPTY)
+                        fcs(I18n.get("hud.helperbuttons.reignofnether.idle_workers")),
+                        fcs(I18n.get("hud.helperbuttons.reignofnether.idle_workers_shift"))
                 )
         );
         buildingCancelButton = new Button(
@@ -122,7 +122,7 @@ public class HelperButtons {
                     hudSelectedPlacement = null;
                 },
                 null,
-                List.of(FormattedCharSequence.forward(I18n.get("hud.helperbuttons.reignofnether.cancel"), Style.EMPTY))
+                List.of(fcs(I18n.get("hud.helperbuttons.reignofnether.cancel")))
         );
         armyButton = new Button(
                 "Select all military units",
