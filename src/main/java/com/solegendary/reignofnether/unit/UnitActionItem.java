@@ -151,6 +151,7 @@ public class UnitActionItem {
     // clientside actions are purely for tracking data
     public void action(Level level) {
         Ability usedAbility = null;
+        LivingEntity targetEntity = level.getEntity(unitId) instanceof LivingEntity e ? e : null;
 
         boolean isSandboxPlayer = true;
         if (this.ownerName != null) {
@@ -313,8 +314,8 @@ public class UnitActionItem {
                     }
                 }
                 case ATTACK -> {
-                    LivingEntity le = (LivingEntity) level.getEntity(unitId);
-                    if (level.isClientSide() && ((LivingEntity) unit).getFirstPassenger() instanceof AttackerUnit paUnit && paUnit.isBelowMinAttackRange(le))
+                    LivingEntity le = targetEntity;
+                    if (level.isClientSide() && le != null && ((LivingEntity) unit).getFirstPassenger() instanceof AttackerUnit paUnit && paUnit.isBelowMinAttackRange(le))
                         HudClientEvents.showTemporaryMessage(LanguageUtil.getTranslation("hud.reignofnether.target_too_close"));
 
                     if (unit instanceof AttackerUnit attackerUnit) {
@@ -342,7 +343,7 @@ public class UnitActionItem {
                                 boolean hasDropOffCommandQueued = false;
                                 for (UnitActionItem uai : UnitServerEvents.getUnitActionSlowQueue()) {
                                     for (int id : uai.getUnitIds()) {
-                                        if (id == le.getId() && (
+                                        if (id == ((Entity) unit).getId() && (
                                                 uai.getAction() == UnitAction.RETURN_RESOURCES_TO_CLOSEST ||
                                                 uai.getAction() == UnitAction.RETURN_RESOURCES)) {
                                             hasDropOffCommandQueued = true;
@@ -360,7 +361,7 @@ public class UnitActionItem {
                                 }
                             }
                         }
-                    } else { // if the unit can't actually attack just treat this as a follow action
+                    } else if (le != null) { // if the unit can't actually attack just treat this as a follow action
                         unit.setFollowTarget(le);
                     }
                 }
@@ -373,7 +374,7 @@ public class UnitActionItem {
                     }
                 }
                 case FOLLOW -> {
-                    LivingEntity livingEntity = (LivingEntity) level.getEntity(unitId);
+                    LivingEntity livingEntity = targetEntity;
                     if (livingEntity != null) {
                         MiscUtil.addUnitCheckpoint(unit, unitId, true);
                     }
@@ -456,10 +457,12 @@ public class UnitActionItem {
                             canAffordManaCost(ability, unit)
                         ) {
                             if (ability.canTargetEntities && this.unitId > 0) {
-                                ability.use(level, unit, (LivingEntity) level.getEntity(unitId));
-                                usedAbility = ability;
-                                if (ability.oneClickOneUse) {
-                                    break actionableUnitsLoop;
+                                if (targetEntity != null) {
+                                    ability.use(level, unit, targetEntity);
+                                    usedAbility = ability;
+                                    if (ability.oneClickOneUse) {
+                                        break actionableUnitsLoop;
+                                    }
                                 }
                             } else {
                                 ability.use(level, unit, preselectedBlockPos);
@@ -542,7 +545,8 @@ public class UnitActionItem {
             for (Ability ability : actionableBuilding.getAbilities()) {
                 if (ability.action == action && (ability.isOffCooldown(actionableBuilding) || ability.canBypassCooldown(actionableBuilding))) {
                     if (ability.canTargetEntities && this.unitId > 0) {
-                        ability.use(level, actionableBuilding, (LivingEntity) level.getEntity(unitId));
+                        if (targetEntity != null)
+                            ability.use(level, actionableBuilding, targetEntity);
                     } else {
                         ability.use(level, actionableBuilding, preselectedBlockPos);
                     }

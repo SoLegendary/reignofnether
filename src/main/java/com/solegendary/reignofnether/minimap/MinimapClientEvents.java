@@ -70,6 +70,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -322,6 +323,8 @@ public class MinimapClientEvents {
             worldRadius = 120;
             mapGuiRadius = 60;
         }
+        if (mapTexLoc != null)
+            Minecraft.getInstance().textureManager.release(mapTexLoc); // also closes the old DynamicTexture
         mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
         mapTexLoc = Minecraft.getInstance().textureManager.register(
             ReignOfNether.MOD_ID + "_" + "minimap",
@@ -581,6 +584,7 @@ public class MinimapClientEvents {
         // from producing a half-shaded map
         final boolean fogEnabled = FogOfWarClientEvents.isEnabled();
         final BlockPos.MutableBlockPos borderPos = new BlockPos.MutableBlockPos();
+        final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
         // fog state for the chunk the scan is currently inside; refreshed only on chunk boundaries
         long cachedChunkKey = ChunkPos.INVALID_CHUNK_POS;
@@ -637,10 +641,10 @@ public class MinimapClientEvents {
                     }
                 }
 
-                int y = MC.level.getChunkAt(new BlockPos(x, 0, z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
+                int y = MC.level.getChunkAt(pos.set(x, 0, z)).getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                 BlockState bs;
                 do {
-                    bs = MC.level.getBlockState(new BlockPos(x, y, z));
+                    bs = MC.level.getBlockState(pos.set(x, y, z));
                     if (bs.getBlock() instanceof SnowLayerBlock) {
                         int layers = bs.getValue(SnowLayerBlock.LAYERS);
                         y += (int) (layers * (1.0F / 8.0F));
@@ -653,11 +657,11 @@ public class MinimapClientEvents {
                     }
                 } while (true);
 
-                int yNorth = MC.level.getChunkAt(new BlockPos(x, 0, z - 1))
+                int yNorth = MC.level.getChunkAt(pos.set(x, 0, z - 1))
                         .getHeight(Heightmap.Types.WORLD_SURFACE, x, z - 1);
                 BlockState bsNorth;
                 do {
-                    bsNorth = MC.level.getBlockState(new BlockPos(x, yNorth, z - 1));
+                    bsNorth = MC.level.getBlockState(pos.set(x, yNorth, z - 1));
                     if (bsNorth.getBlock() instanceof SnowLayerBlock) {
                         int layersNorth = bsNorth.getValue(SnowLayerBlock.LAYERS);
                         yNorth += (int) (layersNorth * (1.0F / 8.0F));
@@ -670,14 +674,15 @@ public class MinimapClientEvents {
                     }
                 } while (true);
 
-                MapColor mat = MC.level.getBlockState(new BlockPos(x, yNorth, z - 1)).getMapColor(MC.level, new BlockPos(x, yNorth, z - 1));
+                pos.set(x, yNorth, z - 1);
+                MapColor mat = MC.level.getBlockState(pos).getMapColor(MC.level, pos);
                 int rgb = mat.col;
                 if (bs.getBlock() instanceof SnowLayerBlock) {
                     rgb = 0xFFFFFF;
                 }
 
                 // shade blocks to give elevation effects, excluding liquids and nonblocking blocks (eg. grass, flowers)
-                if (MC.level.getBlockState(new BlockPos(x, yNorth, z - 1)).getFluidState().isEmpty()) {
+                if (MC.level.getBlockState(pos).getFluidState().isEmpty()) {
                     if (yNorth > y) {
                         rgb = MiscUtil.shadeHexRGB(rgb, 0.82F);
                     } else if (yNorth < y) {
@@ -689,7 +694,7 @@ public class MinimapClientEvents {
                     BlockState matBelow;
                     do {
                         depth += 1;
-                        matBelow = MC.level.getBlockState(new BlockPos(x, y - depth, z));
+                        matBelow = MC.level.getBlockState(pos.set(x, y - depth, z));
                     } while (!matBelow.getFluidState().isEmpty() && depth < depthMax);
 
                     // only reduce shade every nth step to have the map look sharper
@@ -1376,7 +1381,11 @@ public class MinimapClientEvents {
         long t0 = System.nanoTime();
 
         updateMapTerrain(terrainPartition, darkTerrainPartition);
-        mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
+        if (mapColoursOverlays.length != worldRadius * 2)
+            mapColoursOverlays = new int[worldRadius * 2][worldRadius * 2];
+        else
+            for (int[] row : mapColoursOverlays)
+                Arrays.fill(row, 0);
         if (BlockClientEvents.nightCircleMode != NightCircleMode.OFF)
             updateNightCircles();
         

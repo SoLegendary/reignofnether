@@ -39,7 +39,6 @@ import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.packets.UnitSyncClientboundPacket;
 
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -591,7 +590,7 @@ public class CommandsServerEvents {
 		);
 		item.action(ctx.getSource().getLevel());
 
-		String ownersText = ownerName.isEmpty() ? "" : I18n.get("commands.reignofnether.unit.action.issue.owner", ownerName);
+		Component ownersText = ownerName.isEmpty() ? Component.empty() : Component.translatable("commands.reignofnether.unit.action.issue.owner", ownerName);
 		ctx.getSource().sendSuccess(
 			() -> Component.translatable(
 				"commands.reignofnether.unit.action.issue.with_owner.success",
@@ -676,8 +675,8 @@ public class CommandsServerEvents {
 			case "90" -> Rotation.CLOCKWISE_90;
 			case "180" -> Rotation.CLOCKWISE_180;
 			case "270" -> Rotation.COUNTERCLOCKWISE_90;
-			default -> throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
-				.create(I18n.get("commands.reignofnether.entity.rotation.invalid", input));
+			default -> throw new SimpleCommandExceptionType(
+				Component.translatable("commands.reignofnether.entity.rotation.invalid", input)).create();
 		};
 	}
 	
@@ -875,7 +874,7 @@ public class CommandsServerEvents {
 		
 		ResourcesServerEvents.addSubtractResources(new Resources(playerName, food, wood, ore, emerald));
 		ctx.getSource().sendSuccess(
-			() -> Component.translatable("commands.reignofnether.player.resource.add", I18n.get("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
+			() -> Component.translatable("commands.reignofnether.player.resource.add", Component.translatable("resources.reignofnether." + resource.name().toLowerCase()), amount, playerName),
 			true
 		);
 		return 1;

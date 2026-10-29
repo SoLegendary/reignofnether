@@ -1131,17 +1131,19 @@ public class UnitClientEvents {
                 }
             }
 
-            // render items in front of face for eating units
-            for (LivingEntity entity : getAllUnits()) {
-                if (entity instanceof Unit unit && unit.isEatingFood() && FogOfWarClientEvents.isBlockVisible(entity.blockPosition())) {
-                    MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
+            // render items in front of face for eating units (once per frame)
+            if (evt.getStage() == AFTER_ENTITIES) {
+                for (LivingEntity entity : getAllUnits()) {
+                    if (entity instanceof Unit unit && unit.isEatingFood() && FogOfWarClientEvents.isBlockVisible(entity.blockPosition())) {
+                        MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
+                    }
                 }
             }
         }
 
         if (OrthoviewClientEvents.isEnabled() && evt.getStage() == AFTER_ENTITIES) {
             VertexConsumer vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINE_STRIP);
-            ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+            ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
             VertexConsumer vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
             // draw unit checkpoints
             for (LivingEntity entity : getSelectedUnits()) {
@@ -1170,7 +1172,7 @@ public class UnitClientEvents {
                                         cp.isGreen ? 1 : 0,
                                         0,
                                         a,
-                                        ResourceLocation.parse("forge:textures/white.png")
+                                        MyRenderer.WHITE_TEXTURE
                                 );
                             } else {
                                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, cp.bp, cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a);
@@ -1195,7 +1197,7 @@ public class UnitClientEvents {
                                     aabb,
                                     Direction.UP,
                                     1, 1, 0, a,
-                                    ResourceLocation.parse("forge:textures/white.png")
+                                    MyRenderer.WHITE_TEXTURE
                             );
                         } else {
                             MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, ap, 1, 1, 0, a);
@@ -1224,7 +1226,7 @@ public class UnitClientEvents {
                                         aabb,
                                         Direction.UP,
                                         1, 0, 0, MiscUtil.getOscillatingFloat(0.25f, 0.75f),
-                                        ResourceLocation.parse("forge:textures/white.png")
+                                        MyRenderer.WHITE_TEXTURE
                                 );
                             }  else {
                                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, blockTarget, 1, 0, 0, a);
@@ -1236,7 +1238,7 @@ public class UnitClientEvents {
 
             if (FormationDragMove.isDragging()) {
                 VertexConsumer vertexConsumerLineFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
-                VertexConsumer vertexConsumerEntityTranslucentFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(ResourceLocation.parse("forge:textures/white.png")));
+                VertexConsumer vertexConsumerEntityTranslucentFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(MyRenderer.WHITE_TEXTURE));
                 float a = 0.5f;
 
                 Vec3 lineStart = FormationDragMove.getLineStart();
@@ -1256,7 +1258,7 @@ public class UnitClientEvents {
                                 1,
                                 0,
                                 a,
-                                ResourceLocation.parse("forge:textures/white.png")
+                                MyRenderer.WHITE_TEXTURE
                         );
                     } else {
                         MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucentFd, Direction.UP, bp, 0, 1, 0, a);

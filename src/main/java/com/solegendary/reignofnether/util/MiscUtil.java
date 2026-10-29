@@ -456,6 +456,14 @@ public class MiscUtil {
         for (BuildingPlacement building : buildings) {
             // Check if the building is attackable, taking into account the relationship
             if (isBuildingAutoAttackable(unitMob, building) && !(building.getBuilding() instanceof AbstractBridge)) {
+                // getClosestGroundPos only returns positions within 1 block of the footprint at minCorner's Y,
+                // so if even the nearest such position is out of range, the full scan can't win either
+                BlockPos ubp = unitMob.blockPosition();
+                long dx = Math.max(0, Math.max(building.minCorner.getX() - 1 - ubp.getX(), ubp.getX() - building.maxCorner.getX() - 1));
+                long dz = Math.max(0, Math.max(building.minCorner.getZ() - 1 - ubp.getZ(), ubp.getZ() - building.maxCorner.getZ() - 1));
+                long dy = ubp.getY() - building.minCorner.getY();
+                if (Math.sqrt(dx * dx + dy * dy + dz * dz) >= closestDist)
+                    continue;
                 BlockPos attackPos = building.getClosestGroundPos(unitMob.blockPosition(), 1);
                 double dist = Math.sqrt(unitMob.blockPosition().distSqr(attackPos));
                 if (dist < closestDist) {
@@ -514,8 +522,10 @@ public class MiscUtil {
             List<T> entities = level.getEntitiesOfClass(entityType, aabb);
             List<T> entitiesInRange = new ArrayList<>();
 
+            Vec3 centre = new Vec3(pos.x, pos.y, pos.z);
+            double rangeSqr = (double) range * range;
             for (Entity entity : entities)
-                if (entity.position().distanceTo(new Vec3(pos.x, pos.y, pos.z)) <= range &&
+                if (entity.position().distanceToSqr(centre) <= rangeSqr &&
                         entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()))
                     entitiesInRange.add((T) entity);
 

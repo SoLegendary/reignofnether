@@ -340,8 +340,9 @@ public class PlayerServerEvents {
          */
         if (rtsSyncingEnabled) {
             MinecraftServer server = evt.getEntity().level().getServer();
-            if (server == null || !server.isDedicatedServer()) {
-                CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(PlayerServerEvents::syncUnits);
+            if (server != null && !server.isDedicatedServer()) {
+                CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS)
+                        .execute(() -> server.execute(PlayerServerEvents::syncUnits));
             } else {
                 syncUnits();
             }
@@ -1244,7 +1245,7 @@ public class PlayerServerEvents {
             rtsPlayers.clear();
             FogOfWarServerEvents.invalidateRtsCache();
 
-            for (LivingEntity entity : UnitServerEvents.getAllUnits())
+            for (LivingEntity entity : new ArrayList<>(UnitServerEvents.getAllUnits()))
                 if (hardReset || (entity instanceof Unit unit && !Unit.hasAnchor(unit) && !isSandboxOrScenario))
                     entity.kill();
 
@@ -1319,7 +1320,7 @@ public class PlayerServerEvents {
         for (BuildingPlacement bpl : BuildingServerEvents.getBuildings()) {
             ScenarioRole role = ScenarioUtils.getScenarioRole(false, bpl.scenarioRoleIndex);
             bpl.ownerName = role != null ? role.name : "";
-            BuildingClientEvents.syncBuilding(bpl, bpl.getBlocksPlaced(), bpl.partialBlocksDestroyed, bpl.ownerName, bpl.scenarioRoleIndex);
+            BuildingClientboundPacket.syncBuilding(bpl.originPos, bpl.getBlocksPlaced(), bpl.partialBlocksDestroyed, bpl.ownerName, bpl.scenarioRoleIndex);
         }
         serverLevel.getGameRules().getRule(GameRuleRegistrar.SCENARIO_MODE).set(true, serverLevel.getServer());
 

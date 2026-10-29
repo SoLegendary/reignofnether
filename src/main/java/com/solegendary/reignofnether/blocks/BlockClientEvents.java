@@ -41,11 +41,11 @@ public class BlockClientEvents {
     // deals with block rendering jobs like range indicators
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
-        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         if (evt.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }
+        ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
+        var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         // draw range indicators for buildings with abilities and monster night sources
         for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
             if (!FogOfWarClientEvents.isBuildingInBrightChunk(building)) continue;
