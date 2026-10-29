@@ -13,17 +13,16 @@ import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.EvokerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 public class CastSummonVexes extends Ability {
 
@@ -63,12 +62,12 @@ public class CastSummonVexes extends Ability {
                         toggleAutocast(evokerUnit);
                 },
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.summon_vexes"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.summon_vexes.tooltip1", CD_MAX_SECONDS), MyRenderer.iconStyle),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.summon_vexes.tooltip2", EvokerUnit.SUMMON_VEXES_AMOUNT), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.summon_vexes.tooltip3", VEX_DURATION_SECONDS), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.autocast"),Style.EMPTY)
+                        fcs(I18n.get("abilities.reignofnether.summon_vexes"), true),
+                        fcsIcons(I18n.get("abilities.reignofnether.summon_vexes.tooltip1", CD_MAX_SECONDS)),
+                        fcs(I18n.get("abilities.reignofnether.summon_vexes.tooltip2", EvokerUnit.SUMMON_VEXES_AMOUNT)),
+                        fcs(I18n.get("abilities.reignofnether.summon_vexes.tooltip3", VEX_DURATION_SECONDS)),
+                fcs(""),
+                fcs(I18n.get("abilities.reignofnether.autocast"))
                 ),
                 evokerUnit != null ? evokerUnit.getSummonVexes() : this,
                 evokerUnit

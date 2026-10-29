@@ -12,12 +12,11 @@ import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchMassBurials extends ProductionItem {
 
@@ -47,13 +46,13 @@ public class ResearchMassBurials extends ProductionItem {
                     ResearchClient.hasResearch(ProductionItems.RESEARCH_MASS_BURIAL),
             () -> BuildingClientEvents.hasFinishedBuilding(Buildings.STRONGHOLD),
             List.of(
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_mass_burials"), Style.EMPTY.withBold(true)),
+                fcs(I18n.get("research.reignofnether.research_mass_burials"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_mass_burials.tooltip1", Graveyard.OVERFLOW_AMOUNT_UPGRADED), Style.EMPTY),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.research_mass_burials.tooltip2"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_mass_burials.tooltip1", Graveyard.OVERFLOW_AMOUNT_UPGRADED)),
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.research_mass_burials.tooltip2"))
             ),
             this
         );

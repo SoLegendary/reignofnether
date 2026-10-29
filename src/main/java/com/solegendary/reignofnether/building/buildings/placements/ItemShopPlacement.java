@@ -1,7 +1,6 @@
 package com.solegendary.reignofnether.building.buildings.placements;
 
 import com.solegendary.reignofnether.alliance.AlliancesClient;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.Building;
 import com.solegendary.reignofnether.building.BuildingBlock;
 import com.solegendary.reignofnether.building.addon.ItemShopAddon;
@@ -44,12 +43,7 @@ public class ItemShopPlacement extends ProductionPlacement {
     public boolean canServeUnit(Unit unit) {
         if (getStockedItems().isEmpty()) return false;
         if (unit instanceof Mob mob && unit instanceof UnitInventory inv && inv.canPickupUnitItems()) {
-            boolean friendly;
-            if (mob.level().isClientSide()) {
-                friendly = AlliancesClient.isAlliedOrOwned(unit.getOwnerName(), ownerName);
-            } else {
-                friendly = AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), ownerName);
-            }
+            boolean friendly = MiscUtil.isAlliedOrOwned(mob.level(), unit.getOwnerName(), ownerName);
             return friendly && isPosInsideBuilding(mob.getOnPos(), UNIT_SERVE_RANGE);
         }
         return false;

@@ -27,13 +27,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 import java.util.UUID;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class Castle extends ProductionBuilding implements GarrisonableBuildingAddon {
     public final static int MAX_OCCUPANTS = 7;
@@ -102,10 +102,10 @@ public class Castle extends ProductionBuilding implements GarrisonableBuildingAd
             ) || ResearchClient.hasCheat("modifythephasevariance"),
             List.of(Component.translatable("buildings.reignofnether.castle").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.castle.tooltip1").getVisualOrderText(),
                 Component.translatable("buildings.reignofnether.castle.tooltip2", MAX_OCCUPANTS).getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.castle.tooltip3").getVisualOrderText()
             ),
             this

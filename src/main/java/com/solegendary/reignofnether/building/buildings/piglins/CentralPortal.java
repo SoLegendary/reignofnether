@@ -19,13 +19,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class CentralPortal extends ProductionBuilding implements NetherConvertingAddon {
 
@@ -66,7 +66,7 @@ public class CentralPortal extends ProductionBuilding implements NetherConvertin
                         Component.translatable("buildings.reignofnether.central_portal").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPop(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.central_portal.tooltip1").getVisualOrderText()
                 ),
                 this

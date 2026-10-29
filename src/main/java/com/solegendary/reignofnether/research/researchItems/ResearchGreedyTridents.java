@@ -11,13 +11,12 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.units.piglins.HeadhunterUnit;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ResearchGreedyTridents extends ProductionItem {
 
@@ -49,13 +48,11 @@ public class ResearchGreedyTridents extends ProductionItem {
             () -> ProductionItems.RESEARCH_GREEDY_TRIDENTS.itemIsBeingProduced(prodBuilding.ownerName)
                 || ResearchClient.hasResearch(ProductionItems.RESEARCH_GREEDY_TRIDENTS),
             () -> true,
-            List.of(FormattedCharSequence.forward(I18n.get("research.reignofnether.greedy_tridents"),
-                    Style.EMPTY.withBold(true)
-                ),
+            List.of(fcs(I18n.get("research.reignofnether.greedy_tridents"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("research.reignofnether.greedy_tridents.tooltip1"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("research.reignofnether.greedy_tridents.tooltip1"))
             ),
             this
         );

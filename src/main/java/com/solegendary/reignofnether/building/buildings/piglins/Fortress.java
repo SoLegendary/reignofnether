@@ -20,10 +20,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class Fortress extends ProductionBuilding implements GarrisonableBuildingAddon {
     public final static int MAX_OCCUPANTS = 7;
@@ -76,10 +76,10 @@ public class Fortress extends ProductionBuilding implements GarrisonableBuilding
             List.of(
                     Component.translatable("buildings.reignofnether.fortress").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                     ResourceCosts.getFormattedCost(cost),
-                    FormattedCharSequence.forward("", Style.EMPTY),
+                    fcs(""),
                     Component.translatable("buildings.reignofnether.fortress.tooltip1").getVisualOrderText(),
                     Component.translatable("buildings.reignofnether.fortress.tooltip2", MAX_OCCUPANTS).getVisualOrderText(),
-                    FormattedCharSequence.forward("", Style.EMPTY),
+                    fcs(""),
                     Component.translatable("buildings.reignofnether.fortress.tooltip3").getVisualOrderText()
             ),
             this

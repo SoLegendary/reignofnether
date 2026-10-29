@@ -14,10 +14,10 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SpruceStockpile extends AbstractStockpile {
 
@@ -46,7 +46,7 @@ public class SpruceStockpile extends AbstractStockpile {
                 List.of(
                         Component.translatable("buildings.reignofnether.spruce_stockpile").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.spruce_stockpile.tooltip1").getVisualOrderText()
                 ),
                 this

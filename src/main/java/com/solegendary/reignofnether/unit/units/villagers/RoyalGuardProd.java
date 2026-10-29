@@ -21,6 +21,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class RoyalGuardProd extends HeroProductionItem implements IUnitProductionItem {
 
@@ -58,7 +59,7 @@ public class RoyalGuardProd extends HeroProductionItem implements IUnitProductio
                 Component.translatable("entity.reignofnether.royal_guard_unit").append(Component.literal(" (")).append(Component.translatable("hud.units.reignofnether.hero")).append(Component.literal(")")).withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.royal_guard_unit.tooltip1").getVisualOrderText(),
                 Component.translatable("entity.reignofnether.royal_guard_unit.tooltip2").getVisualOrderText()
         ));

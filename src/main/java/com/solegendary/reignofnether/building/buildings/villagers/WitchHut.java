@@ -19,10 +19,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class WitchHut extends ProductionBuilding {
 
@@ -64,10 +64,10 @@ public class WitchHut extends ProductionBuilding {
                 List.of(
                         Component.translatable("buildings.reignofnether.witch_hut").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.witch_hut.tooltip1").getVisualOrderText(),
                         Component.translatable("buildings.reignofnether.witch_hut.tooltip2").getVisualOrderText(),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.witch_hut.tooltip3").getVisualOrderText()
                 ),
                 this

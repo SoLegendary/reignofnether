@@ -14,10 +14,10 @@ import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class HauntedHouse extends Building {
 
@@ -54,7 +54,7 @@ public class HauntedHouse extends Building {
                     Component.translatable("buildings.reignofnether.haunted_house").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                     ResourceCosts.getFormattedCost(cost),
                     ResourceCosts.getFormattedPop(cost),
-                    FormattedCharSequence.forward("", Style.EMPTY),
+                    fcs(""),
                     Component.translatable("buildings.reignofnether.haunted_house.tooltip1").getVisualOrderText()
             ),
             this

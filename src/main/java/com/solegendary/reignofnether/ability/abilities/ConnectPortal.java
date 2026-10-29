@@ -13,12 +13,11 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.unit.UnitAction;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class ConnectPortal extends Ability {
 
@@ -41,13 +40,10 @@ public class ConnectPortal extends Ability {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.CONNECT_PORTAL),
             null,
-            List.of(FormattedCharSequence.forward(
-                    I18n.get("abilities.reignofnether.connect_portal"),
-                    Style.EMPTY.withBold(true)
-                ),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.connect_portal.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("abilities.reignofnether.connect_portal.tooltip2"), Style.EMPTY)
+            List.of(fcs(I18n.get("abilities.reignofnether.connect_portal"), true),
+                fcs(""),
+                fcs(I18n.get("abilities.reignofnether.connect_portal.tooltip1")),
+                fcs(I18n.get("abilities.reignofnether.connect_portal.tooltip2"))
             ),
             this,
             placement

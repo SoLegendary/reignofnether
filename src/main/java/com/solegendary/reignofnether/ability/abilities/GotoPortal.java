@@ -13,12 +13,11 @@ import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class GotoPortal extends Ability {
 
@@ -56,7 +55,7 @@ public class GotoPortal extends Ability {
                 () -> UnitClientEvents.sendUnitCommand(UnitAction.GOTO_PORTAL),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.go_to_portal"), Style.EMPTY.withBold(true))
+                        fcs(I18n.get("abilities.reignofnether.go_to_portal"), true)
                 ),
                 this,
                 placement

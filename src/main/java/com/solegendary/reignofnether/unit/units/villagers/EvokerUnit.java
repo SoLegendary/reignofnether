@@ -27,7 +27,6 @@ import com.solegendary.reignofnether.unit.modelling.models.VillagerUnitModel;
 import com.solegendary.reignofnether.faction.Faction;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -290,19 +289,7 @@ public class EvokerUnit extends Evoker implements Unit, AttackerUnit, RangedAtta
     
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
     

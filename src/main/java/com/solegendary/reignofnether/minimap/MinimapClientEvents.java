@@ -44,9 +44,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -349,9 +347,9 @@ public class MinimapClientEvents {
                 () -> true,
                 () -> shouldToggleSize = true,
                 null,
-                List.of(FormattedCharSequence.forward(largeMap
+                List.of(fcs(largeMap
                         ? I18n.get("hud.map.reignofnether.close")
-                        : I18n.get("hud.map.reignofnether.open"), Style.EMPTY))
+                        : I18n.get("hud.map.reignofnether.open")))
         );
     }
 
@@ -384,9 +382,9 @@ public class MinimapClientEvents {
                 () -> OrthoviewClientEvents.adjustPanSensitivityMult(true),
                 () -> OrthoviewClientEvents.adjustPanSensitivityMult(false),
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip1",
-                                Math.round(OrthoviewClientEvents.getPanSensitivityMult() * 10), Math.round(OrthoviewClientEvents.MAX_PAN_SENSITIVITY * 10)), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip2"), Style.EMPTY)
+                        fcs(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip1",
+                                Math.round(OrthoviewClientEvents.getPanSensitivityMult() * 10), Math.round(OrthoviewClientEvents.MAX_PAN_SENSITIVITY * 10))),
+                        fcs(I18n.get("hud.map.reignofnether.pan_sensitivity.tooltip2"))
                 )
         );
     }
@@ -440,9 +438,9 @@ public class MinimapClientEvents {
                         setMapCentre(MC.player.getX(), MC.player.getZ());
                 },
                 null,
-                List.of(FormattedCharSequence.forward(lockedMap
+                List.of(fcs(lockedMap
                         ? I18n.get("hud.map.reignofnether.lock_map.tooltip1.enabled")
-                        : I18n.get("hud.map.reignofnether.lock_map.tooltip1.disabled"), Style.EMPTY)
+                        : I18n.get("hud.map.reignofnether.lock_map.tooltip1.disabled"))
                 )
         );
     }
@@ -462,9 +460,9 @@ public class MinimapClientEvents {
                     highlightAnimals = !highlightAnimals;
                 },
                 null,
-                List.of(FormattedCharSequence.forward(highlightAnimals
+                List.of(fcs(highlightAnimals
                         ? I18n.get("hud.map.reignofnether.highlight_animals.enabled")
-                        : I18n.get("hud.map.reignofnether.highlight_animals.disabled"), Style.EMPTY)
+                        : I18n.get("hud.map.reignofnether.highlight_animals.disabled"))
                 )
         );
     }
@@ -482,9 +480,9 @@ public class MinimapClientEvents {
                 () -> true,
                 () -> underlineUnitsAndBuildings = !underlineUnitsAndBuildings,
                 null,
-                List.of(FormattedCharSequence.forward(underlineUnitsAndBuildings
+                List.of(fcs(underlineUnitsAndBuildings
                         ? I18n.get("hud.map.reignofnether.underlines.enabled")
-                        : I18n.get("hud.map.reignofnether.underlines.disabled"), Style.EMPTY)
+                        : I18n.get("hud.map.reignofnether.underlines.disabled"))
                 )
         );
     }
