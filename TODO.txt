@@ -61,5 +61,5 @@ Testing checklist
 [ ] Toggle map size
 [ ] Health bars behind blocks?
 [ ] Publish scenario on server
-
-[ ] All sounds and assets
+[ ] All sounds and assets quality
+[ ] All unit/ability/building tooltips
