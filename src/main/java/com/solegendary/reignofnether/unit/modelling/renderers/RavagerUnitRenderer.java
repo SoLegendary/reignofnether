@@ -13,7 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class RavagerUnitRenderer extends MobRenderer<Ravager, RavagerUnitModel> {
-    private static final ResourceLocation TEXTURE_LOCATION = new ResourceLocation("textures/entity/illager/ravager.png");
+    private static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/illager/ravager.png");
 
     public RavagerUnitRenderer(EntityRendererProvider.Context p_174362_) {
         super(p_174362_, new RavagerUnitModel(p_174362_.bakeLayer(ModelLayers.RAVAGER)), 1.1F);

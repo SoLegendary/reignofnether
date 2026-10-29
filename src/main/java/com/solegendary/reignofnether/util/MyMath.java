@@ -21,17 +21,6 @@ public class MyMath {
     }
 
 
-    // returns whether the given 2d point (m) is inside a rectangle with corners a,b,c,d
-    // https://math.stackexchange.com/questions/190111/how-to-check-if-a-point-is-inside-a-rectangle
-    public static boolean isPointInsideRect2d(Vec2 m, Vec2 a, Vec2 b, Vec2 c, Vec2 d) {
-        float area_rect = 0.5f * abs((a.y-c.y)*(d.x-b.x) + (b.y-d.y)*(a.x-c.x));
-        float abm = 0.5f * (a.x*(b.y-m.y) + b.x*(m.y-a.y) + m.x*(a.y-b.y));
-        float bcm = 0.5f * (b.x*(c.y-m.y) + c.x*(m.y-b.y) + m.x*(b.y-c.y));
-        float cdm = 0.5f * (c.x*(d.y-m.y) + d.x*(m.y-c.y) + m.x*(c.y-d.y));
-        float dam = 0.5f * (d.x*(a.y-m.y) + a.x*(m.y-d.y) + m.x*(d.y-a.y));
-        return (abm + bcm + cdm + dam) < area_rect;
-    }
-
     // returns the uvw used by isPointInsideRect3d
     // the 3 corners are SCREEN positions which are converted to world positions
     // usually used to check if a point is in the view camera (or part of it)
@@ -151,26 +140,6 @@ public class MyMath {
         return Math.sqrt(dx * dx + dy * dy);
     }
 
-
-    // https://stackoverflow.com/questions/11907947/how-to-check-if-a-point-lies-on-a-line-between-2-other-points
-    // the greater quad_threshold, the thicker the lines will be; ptc is the tested point
-    public static boolean isPointOnLine(Vec2 pt1, Vec2 pt2, Vec2 ptc, float threshold) {
-        // Compute differences
-        double dx1 = ptc.x - pt1.x;
-        double dy1 = ptc.y - pt1.y;
-        double dx2 = pt2.x - pt1.x;
-        double dy2 = pt2.y - pt1.y;
-
-        // Calculate cross product for collinearity check
-        double cross = dx1 * dy2 - dy1 * dx2;
-        if (Math.abs(cross) > threshold) return false;
-
-        // Check if the point is within the bounding segment of pt1 and pt2
-        boolean isWithinXBounds = (dx2 >= 0) ? (pt1.x <= ptc.x && ptc.x <= pt2.x) : (pt2.x <= ptc.x && ptc.x <= pt1.x);
-        boolean isWithinYBounds = (dy2 >= 0) ? (pt1.y <= ptc.y && ptc.y <= pt2.y) : (pt2.y <= ptc.y && ptc.y <= pt1.y);
-
-        return isWithinXBounds && isWithinYBounds;
-    }
 
 
     public static int randRangeInt(int min, int max) {

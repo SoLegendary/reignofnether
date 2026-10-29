@@ -128,7 +128,7 @@ public class BuildingSelectorOptions {
 						return p_175166_.getTags().contains(s) != flag;
 					}
 				});
-			}, (p_121528_) -> true, Component.translatable("argument.entity.options.tag.description"));
+			}, (p_121528_) -> true, Component.translatable("argument.reignofnether.building.options.tag.description"));
 			register("rotation", (p_121530_) -> {
 				String s = p_121530_.getReader().readUnquotedString();
 				p_121530_.addPredicate((p_175166_) -> {
@@ -138,7 +138,7 @@ public class BuildingSelectorOptions {
 						return false;
 					}
 				});
-			}, (p_121528_) -> true, Component.translatable("argument.entity.options.tag.description"));
+			}, (p_121528_) -> true, Component.translatable("argument.reignofnether.building.options.rotation.description"));
 			register("health", (p_121417_) -> {
 				int i = p_121417_.getReader().getCursor();
 				MinMaxBounds.Ints minmaxbounds$ints = MinMaxBounds.Ints.fromReader(p_121417_.getReader());
@@ -148,9 +148,9 @@ public class BuildingSelectorOptions {
 					p_121417_.getReader().setCursor(i);
 					throw ERROR_HEALTH_NEGATIVE.createWithContext(p_121417_.getReader());
 				}
-			}, (p_121415_) -> p_121415_.getHealth().isAny(), Component.translatable("argument.entity.options.level.description"));
+			}, (p_121415_) -> p_121415_.getHealth().isAny(), Component.translatable("argument.reignofnether.building.options.health.description"));
 		}
-	} // TODO: translation (entity -> building)
+	}
 	
 	private static Building resolveBuilding(String input) {
 		ResourceLocation location;

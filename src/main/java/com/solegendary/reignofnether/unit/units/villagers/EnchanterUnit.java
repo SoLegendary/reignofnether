@@ -16,7 +16,6 @@ import com.solegendary.reignofnether.items.UnitInventory;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.registrars.AttributeRegistrar;
-import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.registrars.ParticleRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
@@ -823,16 +822,6 @@ public class EnchanterUnit extends Vindicator implements AttackerUnit, HeroUnit,
         }
         if (!level().isClientSide)
             playEnchantSound();
-
-        if (getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)
-            addExperience(ENCHANT_EXP);
-    }
-
-    public void enchantArmour(LivingEntity entity) {
-        if (level().isClientSide) return;
-
-        entity.getItemBySlot(EquipmentSlot.CHEST).enchant(EnchantmentRegistrar.FORTYIFYING.get(), 1);
-        playEnchantSound();
 
         if (getHeroLevel() < HeroUnit.MAX_NEUTRAL_EXP_LEVEL)
             addExperience(ENCHANT_EXP);

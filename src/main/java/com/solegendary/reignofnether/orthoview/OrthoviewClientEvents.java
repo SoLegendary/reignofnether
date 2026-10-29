@@ -745,7 +745,7 @@ public class OrthoviewClientEvents {
             cameraMovingByMouse = true;
 
             // Normalize drag delta by frame time to prevent drift when Vsync is off
-            float frameTimeNormalizer = Math.min((float) MC.getDeltaFrameTime(), 5.0f);
+            float frameTimeNormalizer = Math.min(MC.getDeltaFrameTime(), 5.0f);
             if (frameTimeNormalizer <= 0) frameTimeNormalizer = 1.0f;
             float normalizedX = (float) evt.getDragX() / frameTimeNormalizer;
             float normalizedZ = (float) evt.getDragY() / frameTimeNormalizer;

@@ -158,7 +158,7 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
         } else if ($$3.is(BlockTags.SNOW_LAYER_CAN_SURVIVE_ON)) {
             return true;
         } else {
-            return Block.isFaceFull($$3.getCollisionShape(pLevel, pPos.below()), Direction.UP) || $$3.is(this) && (Integer)$$3.getValue(LAYERS) == 8;
+            return Block.isFaceFull($$3.getCollisionShape(pLevel, pPos.below()), Direction.UP) || $$3.is(this) && $$3.getValue(LAYERS) == 8;
         }
     }
 
@@ -191,7 +191,7 @@ public class WraithSnowLayerBlock extends BaseEntityBlock {
     }
 
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(new Property[]{LAYERS});
+        pBuilder.add(new Property<?>[]{LAYERS});
     }
 
     static {

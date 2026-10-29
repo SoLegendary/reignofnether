@@ -74,14 +74,6 @@ public class Abilities {
         return list;
     }
 
-    public Ability getDefaultAutocast() {
-        for (Pair<Ability, Keybinding> ability:abilities) {
-            if (ability.getA().isDefaultAutocast())
-                return ability.getA();
-        }
-        return null;
-    }
-
     public Abilities clone() {
         return new Abilities(new ArrayList<>(abilities));
     }

@@ -20,7 +20,7 @@ public class LlamaUnitRenderer extends MobRenderer<Llama, LlamaModel<Llama>> {
     };
 
     public LlamaUnitRenderer(EntityRendererProvider.Context pContext) {
-        super(pContext, new LlamaModel(pContext.bakeLayer(ModelLayers.LLAMA)), 0.7F);
+        super(pContext, new LlamaModel<>(pContext.bakeLayer(ModelLayers.LLAMA)), 0.7F);
         this.addLayer(new LlamaDecorLayer(this, pContext.getModelSet()));
     }
 

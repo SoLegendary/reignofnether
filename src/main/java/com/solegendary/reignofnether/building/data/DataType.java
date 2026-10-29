@@ -29,7 +29,7 @@ public class DataType<T> {
     }
 
     public static <T> DataType<T> createRegistered(ResourceLocation rl, BiFunction<CompoundTag, MinecraftServer, T> decode, Function<T, CompoundTag> encode, Supplier<T> defaultValue) {
-        DataType<T> type = new DataType(decode, encode, defaultValue);
+        DataType<T> type = new DataType<>(decode, encode, defaultValue);
         Registry.register(ReignOfNetherRegistries.DATA_TYPE, rl, type);
         return type;
     }

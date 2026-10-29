@@ -31,7 +31,6 @@ import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 public class MatchStartScreen extends Screen {
 
     private static final ResourceLocation ICON_FRAME      = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame.png");
-    private static final ResourceLocation ICON_FRAME_SEL  = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/icon_frame_selected.png");
     private static final ResourceLocation TICK_ICON       = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/tick.png");
     private static final ResourceLocation CROSS_ICON      = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross.png");
     private static final ResourceLocation CLOSE_ICON      = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/cross_square.png");

@@ -179,7 +179,7 @@ public class MonsterWaveSpawner {
                 break;
         }
         if (remainingPop > 0) {
-            PlayerServerEvents.sendMessageToAllPlayers("Failed to spawn " + remainingPop + "/" + pop + " population worth of monster units");
+            PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.failed_spawn_monsters", false, remainingPop, pop);
         }
         lastFaction = Factions.MONSTERS;
     }

@@ -49,18 +49,6 @@ public class UnitArgument implements ArgumentType<EntitySelector> {
 		return new UnitArgument(false);
 	}
 	
-//	public static Unit getUnit(CommandContext<CommandSourceStack> pContext, String pName, String pOwner) throws CommandSyntaxException {
-//		EntitySelector selector = pContext.getArgument(pName, EntitySelector.class);
-//		Entity entity = selector.findSingleEntity(pContext.getSource());
-//		if (!(entity instanceof Unit unit) || entity instanceof Player) {
-//			throw NO_UNITS_FOUND.create();
-//		}
-//		if (pOwner != null && !Objects.equals(unit.getOwnerName(), pOwner)) {
-//			throw NO_UNITS_FOUND.create();
-//		}
-//		return unit;
-//	}
-	
 	public static List<Unit> getUnits(CommandContext<CommandSourceStack> pContext, String pName, String pOwner) throws CommandSyntaxException {
 		List<Unit> units = getOptionalUnits(pContext, pName, pOwner);
 		if (units.isEmpty()) {

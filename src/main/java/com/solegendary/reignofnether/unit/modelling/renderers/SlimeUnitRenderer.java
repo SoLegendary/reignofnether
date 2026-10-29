@@ -25,8 +25,8 @@ public class SlimeUnitRenderer extends MobRenderer<SlimeUnit, SlimeModel<SlimeUn
     private static final ResourceLocation SLIME_LOCATION = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/slime/slime.png");
 
     public SlimeUnitRenderer(EntityRendererProvider.Context p_174391_) {
-        super(p_174391_, new SlimeModel(p_174391_.bakeLayer(ModelLayers.SLIME)), 0.25F);
-        this.addLayer(new SlimeOuterLayer(this, p_174391_.getModelSet()));
+        super(p_174391_, new SlimeModel<>(p_174391_.bakeLayer(ModelLayers.SLIME)), 0.25F);
+        this.addLayer(new SlimeOuterLayer<>(this, p_174391_.getModelSet()));
     }
 
     public void render(SlimeUnit pEntity, float pEntityYaw, float pPartialTicks, PoseStack pPoseStack, MultiBufferSource pBuffer, int pPackedLight) {

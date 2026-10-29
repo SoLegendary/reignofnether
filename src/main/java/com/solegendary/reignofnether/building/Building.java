@@ -42,7 +42,6 @@ public abstract class Building {
     protected float buildTimeModifier = 1.0f; // only affects non-built buildings, not repair times
     protected float repairTimeModifier = 1.25f; // only affects built buildings
 
-    public int captureRange = 20;
     public boolean capturable = false;
     public boolean invulnerable = false;
     public boolean repairable = true;
@@ -70,7 +69,7 @@ public abstract class Building {
 
     // blocks types that are placed automatically when the building is placed
     // used to control size of initial foundations while keeping it symmetrical
-    public final ArrayList<Block> startingBlockTypes = new ArrayList();
+    public final ArrayList<Block> startingBlockTypes = new ArrayList<>();
 
     public int foundationYLayers = 1; // how many Y layers from the bottom are part of the foundation
 
@@ -124,7 +123,7 @@ public abstract class Building {
 
     @Nullable
     public <T extends BuildingAddon> T getActiveAddon(Class<T> addonClass) {
-        return (T) activeAddons.get(addonClass);
+        return addonClass.cast(activeAddons.get(addonClass));
     }
 
     public <T extends BuildingAddon> void setActiveAddon(Class<T> addonClass, T addon, boolean active) {
