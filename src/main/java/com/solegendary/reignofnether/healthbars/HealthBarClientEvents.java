@@ -155,6 +155,7 @@ public class HealthBarClientEvents {
             matrix.popPose();
         }
 
+        RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
 
         renderedEntities.clear();

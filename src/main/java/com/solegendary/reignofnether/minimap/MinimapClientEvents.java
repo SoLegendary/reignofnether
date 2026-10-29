@@ -323,6 +323,8 @@ public class MinimapClientEvents {
             worldRadius = 120;
             mapGuiRadius = 60;
         }
+        if (mapTexLoc != null)
+            Minecraft.getInstance().textureManager.release(mapTexLoc); // also closes the old DynamicTexture
         mapTexture = new DynamicTexture(worldRadius * 2, worldRadius * 2, true);
         mapTexLoc = Minecraft.getInstance().textureManager.register(
             ReignOfNether.MOD_ID + "_" + "minimap",
