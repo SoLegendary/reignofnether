@@ -1,6 +1,8 @@
 package com.solegendary.reignofnether.tutorial;
 
+import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.PacketHandler;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -40,6 +42,9 @@ public class TutorialServerboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
+            ServerPlayer player = ctx.get().getSender();
+            if (player == null || !TutorialServerEvents.isEnabled() || !PlayerServerEvents.isOpOrHost(player))
+                return;
             switch (action) {
                 case SAVE_STAGE -> TutorialServerEvents.saveStage(stage);
                 case SET_DAY_TIME -> TutorialServerEvents.setDayTime();

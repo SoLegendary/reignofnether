@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.ResourcesClientEvents;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -157,4 +158,12 @@ public abstract class EntityMixin {
                 (Object) this instanceof LivingEntity le && ResourceSources.isHuntableAnimal(le);
     }
 
+    // units run on-death commands with permission level 2, so stop non-ops setting them through spawn egg EntityTag.
+    // Units extend many different vanilla mobs with no shared base class, and an interface default can't
+    // override Entity's concrete method, so this has to be a mixin
+    @Inject(method = "onlyOpCanSetNbt", at = @At("HEAD"), cancellable = true)
+    private void onlyOpCanSetNbt(CallbackInfoReturnable<Boolean> cir) {
+        if ((Object) this instanceof Unit)
+            cir.setReturnValue(true);
+    }
 }

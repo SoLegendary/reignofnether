@@ -111,6 +111,7 @@ public class UnitServerEvents {
     public static boolean rtsPathfinding = false;
 
     // actioned only when the associated unit is idle, one at a time
+    private static final int MAX_QUEUED_ACTIONS_PER_OWNER = 4096;
     private static final List<UnitActionItem> unitActionSlowQueue = Collections.synchronizedList(new ArrayList<>());
     // actioned ASAP regardless of what the unit was doing
     private static final List<UnitActionItem> unitActionFastQueue = Collections.synchronizedList(new ArrayList<>());
@@ -334,7 +335,10 @@ public class UnitServerEvents {
     ) {
         if (shiftQueue) {
             synchronized(unitActionSlowQueue) {
+                long queued = unitActionSlowQueue.stream().filter(uai -> Objects.equals(ownerName, uai.getOwnerName())).count();
                 for (int actionableUnitId : unitIds) {
+                    if (queued++ >= MAX_QUEUED_ACTIONS_PER_OWNER)
+                        break;
                     unitActionSlowQueue.add(
                         new UnitActionItem(ownerName,
                                 action,

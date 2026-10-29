@@ -90,6 +90,9 @@ public class ResourceSources {
     }
 
     public static ResourceName getBlockResourceName(BlockPos bp, Level level) {
+        // positions can come from clients (move orders, rally points), don't load chunks for them
+        if (!level.hasChunkAt(bp))
+            return ResourceName.NONE;
         Block block = level.getBlockState(bp).getBlock();
 
         if (block == Blocks.FARMLAND)

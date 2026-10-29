@@ -15,6 +15,8 @@ import java.util.function.Supplier;
 
 public class UnitActionServerboundPacket {
 
+    private static final int MAX_UNIT_IDS = 2048;
+
     private final String ownerName; // player that is issuing this command
     private final UnitAction action;
     private final int unitId;
@@ -61,7 +63,7 @@ public class UnitActionServerboundPacket {
         this.ownerName = buffer.readUtf();
         this.action = buffer.readEnum(UnitAction.class);
         this.unitId = buffer.readInt();
-        this.unitIds = buffer.readVarIntArray();
+        this.unitIds = buffer.readVarIntArray(MAX_UNIT_IDS);
         this.preselectedBlockPos = buffer.readBlockPos();
         this.selectedBuildingPos = buffer.readBlockPos();
         this.shiftQueue = buffer.readBoolean();
@@ -96,7 +98,7 @@ public class UnitActionServerboundPacket {
                 success.set(false);
             }
             else if (!player.getName().getString().equals(ownerName) &&
-                    !SandboxServer.isSandboxPlayer(ownerName) &&
+                    !SandboxServer.isSandboxOp(player) &&
                     !AlliancesServerEvents.canControlAlly(player.getName().getString(), ownerName)) {
                 ReignOfNether.LOGGER.warn("UnitActionServerboundPacket: Tried to process packet from " + player.getName() + " for " + ownerName);
                 success.set(false);
