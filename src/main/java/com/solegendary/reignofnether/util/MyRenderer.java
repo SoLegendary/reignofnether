@@ -89,6 +89,8 @@ public class MyRenderer {
     );
 
 
+    public static final ResourceLocation WHITE_TEXTURE = ResourceLocation.parse("forge:textures/white.png");
+
     public static final Style iconStyle = Style.EMPTY.withFont(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "resource_icons"));
 
     // matches any of the custom bitmap-font icon chars from font/default.json's private-use range
@@ -286,7 +288,7 @@ public class MyRenderer {
     ) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, vertexConsumer, aabb, null, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
+        drawSolidBox(matrixStack, vertexConsumer, aabb, null, r, g, b, a, WHITE_TEXTURE);
     }
 
     public static void drawBlockFace(
@@ -301,7 +303,7 @@ public class MyRenderer {
     ) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, vertexConsumer, aabb, dir, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
+        drawSolidBox(matrixStack, vertexConsumer, aabb, dir, r, g, b, a, WHITE_TEXTURE);
     }
 
     public static void drawBlockFace(
@@ -317,7 +319,7 @@ public class MyRenderer {
     ) {
         AABB aabb = new AABB(bp);
         aabb = aabb.setMaxY(aabb.maxY + 0.01f);
-        drawSolidBox(matrixStack, vertexConsumer, aabb, dir, yOffset, r, g, b, a, ResourceLocation.parse("forge:textures/white.png"));
+        drawSolidBox(matrixStack, vertexConsumer, aabb, dir, yOffset, r, g, b, a, WHITE_TEXTURE);
     }
 
     // might be null RL for black.png as of 1.19?

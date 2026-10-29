@@ -40,18 +40,21 @@ public class FrustumMixin {
     )
     public void isVisible(AABB aabb, CallbackInfoReturnable<Boolean> cir) {
         // aabb is infinite only for some block entities: structure, beacon, end portal
-        boolean infAABB = aabb.equals(IForgeBlockEntity.INFINITE_EXTENT_AABB);
+        if (!aabb.equals(IForgeBlockEntity.INFINITE_EXTENT_AABB))
+            return;
 
         Player player = Minecraft.getInstance().player;
         float zoom = Math.max(30, OrthoviewClientEvents.getZoom()) * 2;
 
-        if (player != null && OrthoviewClientEvents.isEnabled() && infAABB) {
+        if (player != null && OrthoviewClientEvents.isEnabled()) {
             for (BuildingPlacement building : BuildingClientEvents.getBuildings()) {
                 if (building instanceof BeaconPlacement ||
                     building.getBuilding() instanceof EndPortal) {
                     BlockPos equalYBp = new BlockPos(player.getOnPos().getX(), building.centrePos.getY(), player.getOnPos().getZ());
-                    if (building.centrePos.distSqr(equalYBp) < (zoom * zoom))
+                    if (building.centrePos.distSqr(equalYBp) < (zoom * zoom)) {
                         cir.setReturnValue(true);
+                        return;
+                    }
                 }
             }
         }

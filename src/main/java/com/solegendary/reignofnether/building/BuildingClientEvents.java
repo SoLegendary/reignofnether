@@ -266,7 +266,7 @@ public class BuildingClientEvents {
         int maxX = -999999;
         int maxY = -999999;
         int maxZ = -999999;
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
         var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         for (BuildingBlock block : blocks) {
             if (isBridge(buildingToPlace)
@@ -382,12 +382,15 @@ public class BuildingClientEvents {
         );
 
         Map<BlockPos, List<BuildingBlock>> fogBlocksToDraw = new HashMap<>();
+        Set<BlockPos> buildingOrigins = new HashSet<>();
+        for (BuildingPlacement b : buildings)
+            buildingOrigins.add(b.originPos);
         for (LivingEntity le : UnitClientEvents.getAllUnits()) {
             if (le instanceof Unit unit && le instanceof WorkerUnit workerUnit &&
                 MC.player != null && unit.getOwnerName().equals(MC.player.getName().getString()))
             {
                 Map<BlockPos, List<BuildingBlock>> fogBlocks = workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw();
-                fogBlocks.keySet().removeIf(bp -> buildings.stream().map(b -> b.originPos).toList().contains(bp));
+                fogBlocks.keySet().removeIf(buildingOrigins::contains);
                 for (BlockPos pos : fogBlocks.keySet())
                     fogBlocksToDraw.put(pos, fogBlocks.get(pos));
             }
@@ -431,7 +434,7 @@ public class BuildingClientEvents {
         }
 
         // draw rally points and lines
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
         var vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         var vertexConsumerNoDepthLine = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST);
         var vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
@@ -448,7 +451,7 @@ public class BuildingClientEvents {
                             AABB aabb = new AABB(bp);
                             aabb = aabb.setMaxY(aabb.maxY + 0.13f);
                             MyRenderer.drawSolidBox(evt.getPoseStack(), vertexConsumerEntityTranslucent, aabb, Direction.UP,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a,
-                                    ResourceLocation.fromNamespaceAndPath("forge", "textures/white.png"));
+                                    MyRenderer.WHITE_TEXTURE);
                         } else {
                             MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, bp,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
                         }
