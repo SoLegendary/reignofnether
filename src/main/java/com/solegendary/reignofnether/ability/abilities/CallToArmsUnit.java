@@ -11,9 +11,7 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.villagers.VillagerUnit;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 
@@ -22,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static com.solegendary.reignofnether.unit.UnitClientEvents.sendUnitCommand;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class CallToArmsUnit extends Ability {
 
@@ -48,11 +47,11 @@ public class CallToArmsUnit extends Ability {
                 () -> sendUnitCommand(UnitAction.CALL_TO_ARMS_UNIT),
                 null,
                 List.of(
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_to_arms_unit"), Style.EMPTY.withBold(true)),
-                        FormattedCharSequence.forward("", Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_to_arms_unit.tooltip1"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_to_arms_unit.tooltip2"), Style.EMPTY),
-                        FormattedCharSequence.forward(I18n.get("abilities.reignofnether.call_to_arms_unit.tooltip3", TownCentre.MILITIA_RANGE), Style.EMPTY)
+                        fcs(I18n.get("abilities.reignofnether.call_to_arms_unit"), true),
+                        fcs(""),
+                        fcs(I18n.get("abilities.reignofnether.call_to_arms_unit.tooltip1")),
+                        fcs(I18n.get("abilities.reignofnether.call_to_arms_unit.tooltip2")),
+                        fcs(I18n.get("abilities.reignofnether.call_to_arms_unit.tooltip3", TownCentre.MILITIA_RANGE))
                 ),
                 this,
                 unit

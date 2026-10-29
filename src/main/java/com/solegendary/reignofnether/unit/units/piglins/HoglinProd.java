@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class HoglinProd extends ProductionItem implements IUnitProductionItem {
 
@@ -59,10 +60,10 @@ public class HoglinProd extends ProductionItem implements IUnitProductionItem {
                 Component.translatable("entity.reignofnether.hoglin_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.hoglin_unit.tooltip1").getVisualOrderText(),
                 Component.translatable("entity.reignofnether.hoglin_unit.tooltip2").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.hoglin_unit.tooltip3").getVisualOrderText()
         ));
 

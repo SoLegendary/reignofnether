@@ -15,12 +15,11 @@ import com.solegendary.reignofnether.unit.units.villagers.PillagerUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
 import com.solegendary.reignofnether.util.LanguageUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class AttackGround extends Ability {
 
@@ -66,7 +65,7 @@ public class AttackGround extends Ability {
                 },
                 null,
                 List.of(
-                        FormattedCharSequence.forward(LanguageUtil.getTranslation("abilities.reignofnether.attack_ground"), Style.EMPTY)
+                        fcs(LanguageUtil.getTranslation("abilities.reignofnether.attack_ground"))
                 ),
                 this,
                 unit

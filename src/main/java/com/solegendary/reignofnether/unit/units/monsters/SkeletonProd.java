@@ -20,6 +20,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SkeletonProd extends GraveyardUnitProductionItem implements IUnitProductionItem {
 
@@ -88,9 +89,9 @@ public class SkeletonProd extends GraveyardUnitProductionItem implements IUnitPr
                 Component.translatable("entity.reignofnether.skeleton_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.skeleton_unit.tooltip1").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.skeleton_unit.tooltip2").getVisualOrderText()
             ),
             this

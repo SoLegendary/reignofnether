@@ -52,6 +52,7 @@ import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -230,6 +231,22 @@ public interface Unit {
     
     String getOnDeathCommand();
     void setOnDeathCommand(String command);
+
+    default void runOnDeathCommand(Entity.RemovalReason reason) {
+        Entity entity = (Entity) this;
+        if (reason == Entity.RemovalReason.KILLED && entity.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(entity)
+                    .withPosition(entity.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+    }
 
     default double getDamageTakenIncrease() {
         MobEffectInstance mei = ((LivingEntity) this).getEffect(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get());

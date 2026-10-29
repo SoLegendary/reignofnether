@@ -22,6 +22,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class PoisonSpiderProd extends ProductionItem implements IUnitProductionItem {
 
@@ -65,11 +66,11 @@ public class PoisonSpiderProd extends ProductionItem implements IUnitProductionI
                 Component.translatable("entity.reignofnether.poison_spider_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.poison_spider_unit.tooltip1").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.poison_spider_unit.tooltip2").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.poison_spider_unit.tooltip3").getVisualOrderText()
             ),
             this

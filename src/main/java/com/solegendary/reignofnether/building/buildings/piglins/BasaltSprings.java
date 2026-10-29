@@ -15,10 +15,10 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class BasaltSprings extends ProductionBuilding {
 
@@ -58,10 +58,10 @@ public class BasaltSprings extends ProductionBuilding {
             List.of(
                 Component.translatable("buildings.reignofnether.basalt_springs").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.basalt_springs.tooltip1").getVisualOrderText(),
                 Component.translatable("buildings.reignofnether.basalt_springs.tooltip2").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.basalt_springs.tooltip3").getVisualOrderText()
             ),
             this

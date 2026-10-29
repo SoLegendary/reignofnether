@@ -15,10 +15,10 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SpiderLair extends ProductionBuilding {
 
@@ -57,9 +57,9 @@ public class SpiderLair extends ProductionBuilding {
                 List.of(
                         Component.translatable("buildings.reignofnether.spider_lair").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.spider_lair.tooltip1").getVisualOrderText(),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.spider_lair.tooltip2").getVisualOrderText()
                 ),
                 this

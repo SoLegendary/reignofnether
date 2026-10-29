@@ -23,6 +23,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class WitherSkeletonProd extends ProductionItem implements IUnitProductionItem {
 
@@ -59,10 +60,10 @@ public class WitherSkeletonProd extends ProductionItem implements IUnitProductio
                 Component.translatable("entity.reignofnether.wither_skeleton_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.wither_skeleton_unit.tooltip1").getVisualOrderText(),
                 Component.translatable("entity.reignofnether.wither_skeleton_unit.tooltip2").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.wither_skeleton_unit.tooltip3").getVisualOrderText()
         ));
 

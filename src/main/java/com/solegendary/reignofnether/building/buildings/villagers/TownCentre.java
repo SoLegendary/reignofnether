@@ -26,12 +26,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class TownCentre extends ProductionBuilding implements RangeIndicatorAddon {
 
@@ -89,7 +89,7 @@ public class TownCentre extends ProductionBuilding implements RangeIndicatorAddo
                         Component.translatable("buildings.reignofnether.town_centre").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPop(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.town_centre.tooltip1").getVisualOrderText()
                 ),
                 this

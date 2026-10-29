@@ -6,10 +6,8 @@ import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.api.distmarker.Dist;
@@ -21,6 +19,8 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.function.Supplier;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
+import static com.solegendary.reignofnether.util.MiscUtil.fcsIcons;
 
 @OnlyIn(Dist.CLIENT)
 public class ConfigClientEvents {
@@ -34,9 +34,9 @@ public class ConfigClientEvents {
 
     public static void resetDiffsTooltips() {
         tooltipLines.clear();
-        tooltipLines.add(FormattedCharSequence.forward(I18n.get("config.reignofnether.warn_config_change"), Style.EMPTY.withBold(true)));
-        tooltipLines.add(FormattedCharSequence.forward(I18n.get("config.reignofnether.hide_config_change"), Style.EMPTY));
-        tooltipLines.add(FormattedCharSequence.forward("", Style.EMPTY));
+        tooltipLines.add(fcs(I18n.get("config.reignofnether.warn_config_change"), true));
+        tooltipLines.add(fcs(I18n.get("config.reignofnether.hide_config_change")));
+        tooltipLines.add(fcs(""));
         showDiffsButton = false;
     }
 
@@ -110,7 +110,7 @@ public class ConfigClientEvents {
 
                 showDiffsButton = true;
 
-                tooltipLines.add(FormattedCharSequence.forward(text, MyRenderer.iconStyle));
+                tooltipLines.add(fcsIcons(text));
 
                 ReignOfNether.LOGGER.info("Received different config from server: " + text);
             }

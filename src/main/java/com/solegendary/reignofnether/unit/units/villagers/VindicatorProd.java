@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class VindicatorProd extends ProductionItem implements IUnitProductionItem {
 
@@ -55,7 +56,7 @@ public class VindicatorProd extends ProductionItem implements IUnitProductionIte
                 Component.translatable("entity.reignofnether.vindicator_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.vindicator_unit.tooltip1").getVisualOrderText()
         ));
         return new StartProductionButton(

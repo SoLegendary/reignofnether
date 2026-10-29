@@ -10,10 +10,10 @@ import com.solegendary.reignofnether.resources.ResourceCost;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class NeutralTransportPortal extends PortalTransport {
 
@@ -47,7 +47,7 @@ public class NeutralTransportPortal extends PortalTransport {
                 () -> false,
                 () -> true,
                 List.of(Component.translatable("buildings.reignofnether.neutral_transport_portal").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.neutral_transport_portal.tooltip1").getVisualOrderText(),
                         Component.translatable("buildings.reignofnether.neutral_transport_portal.tooltip2").getVisualOrderText()
                 ),
