@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.hud;
 
+import com.solegendary.reignofnether.hud.layout.HudGeometry;
+import com.solegendary.reignofnether.hud.playerdisplay.DiplomacyPlayerDisplay;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -28,6 +30,8 @@ public class TextInputClientEvents {
     }
 
     public static boolean isAnyInputFocused() {
+        if (DiplomacyPlayerDisplay.isTyping())
+            return true;
         for (MyEditBox input : registeredInputs)
             if (input.isFocused())
                 return true;
@@ -39,18 +43,24 @@ public class TextInputClientEvents {
         if (Minecraft.getInstance().isPaused())
             return;
         for (MyEditBox input : registeredInputs) {
-            input.render(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY(), 0f);
-            if (input.isHovered()) {
-                evt.getGuiGraphics().fill(
-                        input.getX() - 1, input.getY() - 1,
+            float k = scale(input);
+            var g = evt.getGuiGraphics();
+            g.pose().pushPose();
+            g.pose().scale(k, k, 1);
+            input.render(g, (int) (evt.getMouseX() / k), (int) (evt.getMouseY() / k), 0f);
+            if (input.isHovered())
+                g.fill(input.getX() - 1, input.getY() - 1,
                         input.getX() + input.getWidth() + 1, input.getY() + input.getHeight() + 1,
-                        0x30FFFFFF
-                );
-                MyRenderer.renderTooltip(evt.getGuiGraphics(), input.tooltipLines, evt.getMouseX(), evt.getMouseY());
-            }
+                        com.solegendary.reignofnether.ui.Theme.HOVER);
+            g.pose().popPose();
+            if (input.isHovered())
+                MyRenderer.renderTooltip(g, input.tooltipLines, evt.getMouseX(), evt.getMouseY());
             if (input.isFocused() && input.commandSuggestions != null) {
                 input.commandSuggestions.updateCommandInfo();
-                input.commandSuggestions.render(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
+                g.pose().pushPose();
+                g.pose().scale(k, k, 1); // placed from the box, so in the box's units too
+                input.commandSuggestions.render(g, (int) (evt.getMouseX() / k), (int) (evt.getMouseY() / k));
+                g.pose().popPose();
             }
         }
     }
@@ -78,13 +88,19 @@ public class TextInputClientEvents {
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Post evt) {
         for (MyEditBox input : registeredInputs) {
-            input.mouseClicked(evt.getMouseX(), evt.getMouseY(), evt.getButton());
-            boolean isMouseOver = input.isMouseOver(evt.getMouseX(), evt.getMouseY());
+            float k = scale(input);
+            input.mouseClicked(evt.getMouseX() / k, evt.getMouseY() / k, evt.getButton());
+            boolean isMouseOver = input.isMouseOver(evt.getMouseX() / k, evt.getMouseY() / k);
             boolean wasFocused = input.isFocused();
             input.setFocused(isMouseOver);
             if (wasFocused && !input.isFocused())
                 handleDefocus(input);
         }
+    }
+
+    // GUI pixels per box unit: 1 for plain boxes, the HUD scale for boxes laid out in HUD units
+    private static float scale(MyEditBox input) {
+        return input.hudUnits ? HudGeometry.scale().poseScale() : 1f;
     }
 
     private static void handleDefocus(MyEditBox input) {

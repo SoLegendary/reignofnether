@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.orthoview;
 
+import com.solegendary.reignofnether.chat.SystemMessage;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
@@ -411,6 +412,7 @@ public class OrthoviewClientEvents {
         }
 
         enabled = !enabled;
+        FaceCulling.setRtsView(enabled);
 
         if (enabled) {
             MC.options.tutorialStep = TutorialSteps.NONE;
@@ -494,6 +496,9 @@ public class OrthoviewClientEvents {
                 tryToToggleEnable();
             } else if (evt.getKey() == Keybindings.reset.getKey()) {
                 reset();
+            } else if (enabled && Keybindings.altMod.isDown() && !TextInputClientEvents.isAnyInputFocused()
+                    && (evt.getKey() == Keybindings.rotCW.getKey() || evt.getKey() == Keybindings.rotCCW.getKey())) {
+                fixedRotateCam(evt.getKey() == Keybindings.rotCW.getKey()); // Alt + arrow, like the minimap's rotate buttons
             }
             int i = 1;
             for (Keybinding keybind : CAMERA_KEYBINDS) {
@@ -544,7 +549,7 @@ public class OrthoviewClientEvents {
                     MC.gameMode.getPlayerMode() == GameType.ADVENTURE
                             || MC.gameMode.getPlayerMode() == GameType.SURVIVAL
             )) {
-                MC.player.sendSystemMessage(Component.literal(I18n.get("hud.orthoview.reignofnether.ortho_error")));
+                MC.player.sendSystemMessage(SystemMessage.error(Component.literal(I18n.get("hud.orthoview.reignofnether.ortho_error"))));
             } else {
                 toggleEnable();
             }
@@ -574,6 +579,7 @@ public class OrthoviewClientEvents {
                     } else if (hideLeavesMethod == LeafHideMethod.ALL) {
                         hideLeavesMethod = LeafHideMethod.NONE;
                     }
+                    ReignOfNetherClientConfigs.HIDE_LEAVES.set(hideLeavesMethod);
                 },
                 null,
                 List.of(

@@ -33,6 +33,8 @@ import com.solegendary.reignofnether.hud.TitleClientEvents;
 import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.matchstart.MatchEndClientEvents;
+import com.solegendary.reignofnether.chat.ChatLog;
+import com.solegendary.reignofnether.hud.panels.SettingsMenu;
 import com.solegendary.reignofnether.matchstart.MatchStartClientEvents;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.orthoview.CameraFadeClientEvents;
@@ -99,6 +101,9 @@ public class ClientEventRegistrar {
         vanillaEventBus.register(SurvivalClientEvents.class);
         vanillaEventBus.register(StartPosClientEvents.class);
         vanillaEventBus.register(MatchStartClientEvents.class);
+        vanillaEventBus.register(SettingsMenu.class);
+        vanillaEventBus.register(com.solegendary.reignofnether.matchstart.ResultBanner.class);
+        vanillaEventBus.register(ChatLog.class);
         vanillaEventBus.register(MatchEndClientEvents.class);
         vanillaEventBus.register(NonUnitClientEvents.class);
         vanillaEventBus.register(HeroClientEvents.class);

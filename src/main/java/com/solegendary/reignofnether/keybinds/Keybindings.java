@@ -44,13 +44,11 @@ public class Keybindings {
     public static final Keybinding abilitySlot10       = new Keybinding("key.reignofnether.ability_10",   GLFW.GLFW_KEY_P,             CATEGORY_RTS, "P");
     public static final Keybinding hotkey1        = new Keybinding("key.reignofnether.hotkey_1",        GLFW.GLFW_KEY_V,             CATEGORY_RTS, "V");
     public static final Keybinding hotkey2        = new Keybinding("key.reignofnether.hotkey_2",        GLFW.GLFW_KEY_L,             CATEGORY_RTS, "L");
-    public static final Keybinding minimapToggle  = new Keybinding("key.reignofnether.minimap_toggle",        GLFW.GLFW_KEY_M,             CATEGORY_RTS, "M");
     public static final Keybinding hotkey3        = new Keybinding("key.reignofnether.hotkey_3",        GLFW.GLFW_KEY_F,             CATEGORY_RTS, "F");
     public static final Keybinding hotkey4        = new Keybinding("key.reignofnether.hotkey_4",        GLFW.GLFW_KEY_C,             CATEGORY_RTS, "C");
     public static final Keybinding hotkey5        = new Keybinding("key.reignofnether.hotkey_5",        GLFW.GLFW_KEY_D,             CATEGORY_RTS, "D");
     public static final Keybinding hotkey6        = new Keybinding("key.reignofnether.hotkey_6",        GLFW.GLFW_KEY_J,             CATEGORY_RTS, "J");
     public static final Keybinding hotkey7        = new Keybinding("key.reignofnether.hotkey_7",        GLFW.GLFW_KEY_K,             CATEGORY_RTS, "K");
-    public static final Keybinding hotkey8        = new Keybinding("key.reignofnether.hotkey_8",        GLFW.GLFW_KEY_Z,             CATEGORY_RTS, "Z");
     public static final Keybinding hotkey9        = new Keybinding("key.reignofnether.hotkey_9",        GLFW.GLFW_KEY_X,             CATEGORY_RTS, "X");
     public static final Keybinding hotkey10       = new Keybinding("key.reignofnether.hotkey_10",       GLFW.GLFW_KEY_H,             CATEGORY_RTS, "H");
     public static final Keybinding attack      = new Keybinding("key.reignofnether.attack",       GLFW.GLFW_KEY_A,             CATEGORY_RTS, "A");
@@ -64,12 +62,26 @@ public class Keybindings {
     public static final Keybinding tab         = new Keybinding("key.reignofnether.tab",          GLFW.GLFW_KEY_TAB,           CATEGORY_RTS, "");
     public static final Keybinding openShop    = new Keybinding("key.reignofnether.open_shop",         GLFW.GLFW_KEY_S,             CATEGORY_RTS, "S");
 
-    public static final Keybinding item1 = new Keybinding("key.reignofnether.item1", GLFW.GLFW_KEY_T, CATEGORY_RTS, "T");
-    public static final Keybinding item2 = new Keybinding("key.reignofnether.item2", GLFW.GLFW_KEY_Y, CATEGORY_RTS, "Y");
-    public static final Keybinding item3 = new Keybinding("key.reignofnether.item3", GLFW.GLFW_KEY_F, CATEGORY_RTS, "F");
-    public static final Keybinding item4 = new Keybinding("key.reignofnether.item4", GLFW.GLFW_KEY_G, CATEGORY_RTS, "G");
-    public static final Keybinding item5 = new Keybinding("key.reignofnether.item5", GLFW.GLFW_KEY_C, CATEGORY_RTS, "C");
-    public static final Keybinding item6 = new Keybinding("key.reignofnether.item6", GLFW.GLFW_KEY_B, CATEGORY_RTS, "V");
+    // hero items; the command card's bottom row is empty for heroes, so its keys are free here
+    public static final Keybinding item1 = new Keybinding("key.reignofnether.item1", GLFW.GLFW_KEY_Z, CATEGORY_RTS, RtsConflictContext.ITEM, "Z");
+    public static final Keybinding item2 = new Keybinding("key.reignofnether.item2", GLFW.GLFW_KEY_X, CATEGORY_RTS, RtsConflictContext.ITEM, "X");
+    public static final Keybinding item3 = new Keybinding("key.reignofnether.item3", GLFW.GLFW_KEY_C, CATEGORY_RTS, RtsConflictContext.ITEM, "C");
+    public static final Keybinding item4 = new Keybinding("key.reignofnether.item4", GLFW.GLFW_KEY_V, CATEGORY_RTS, RtsConflictContext.ITEM, "V");
+    public static final Keybinding item5 = new Keybinding("key.reignofnether.item5", GLFW.GLFW_KEY_B, CATEGORY_RTS, RtsConflictContext.ITEM, "B");
+    public static final Keybinding item6 = new Keybinding("key.reignofnether.item6", GLFW.GLFW_KEY_N, CATEGORY_RTS, RtsConflictContext.ITEM, "N");
+
+    public static final Keybinding jumpToAlert = new Keybinding("key.reignofnether.jump_to_alert", GLFW.GLFW_KEY_SPACE, CATEGORY_RTS, RtsConflictContext.COMMAND, "SPC");
+
+    // the command card: one key per slot, by position (see CommandGrid)
+    public static final Keybinding[] grid = {
+        gridKey("q", GLFW.GLFW_KEY_Q), gridKey("w", GLFW.GLFW_KEY_W), gridKey("e", GLFW.GLFW_KEY_E), gridKey("r", GLFW.GLFW_KEY_R), gridKey("t", GLFW.GLFW_KEY_T),
+        gridKey("a", GLFW.GLFW_KEY_A), gridKey("s", GLFW.GLFW_KEY_S), gridKey("d", GLFW.GLFW_KEY_D), gridKey("f", GLFW.GLFW_KEY_F), gridKey("g", GLFW.GLFW_KEY_G),
+        gridKey("z", GLFW.GLFW_KEY_Z), gridKey("x", GLFW.GLFW_KEY_X), gridKey("c", GLFW.GLFW_KEY_C), gridKey("v", GLFW.GLFW_KEY_V), gridKey("b", GLFW.GLFW_KEY_B)
+    };
+
+    private static Keybinding gridKey(String slot, int key) {
+        return new Keybinding("key.reignofnether.grid_" + slot, key, CATEGORY_RTS, RtsConflictContext.COMMAND, slot.toUpperCase());
+    }
 
     public static final Keybinding[] nums = {
         new Keybinding("key.reignofnether.control_group_0", GLFW.GLFW_KEY_0, CATEGORY_RTS, "0"),
@@ -98,22 +110,23 @@ public class Keybindings {
         new Keybinding("key.reignofnether.fn_12", GLFW.GLFW_KEY_F12, CATEGORY_RTS, "F12")
     };
 
+    // RTS view only, like the command card; off the grid so Z stays a command
+    public static final Keybinding diplomacy = new Keybinding("key.reignofnether.diplomacy", GLFW.GLFW_KEY_M, CATEGORY_RTS, RtsConflictContext.COMMAND, "M");
+
     private static final List<Keybinding> ALL;
     static {
+        // Only global keys are registered. The per-button keys above (ability slots, hotkey1-10, attack...)
+        // are kept as ordering hints for the buttons that use them; the command card binds keys by slot.
         List<Keybinding> list = new ArrayList<>(List.of(
             pause, shiftMod, ctrlMod, altMod,
             zoomIn, zoomOut,
             panPlusX, panMinusX, panPlusZ, panMinusZ,
             rotCW, rotCCW, reset,
-            cancelBuild,
-            abilitySlot1, abilitySlot2, abilitySlot3, abilitySlot4, abilitySlot5,
-            abilitySlot6, abilitySlot7, abilitySlot8, abilitySlot9, abilitySlot10,
-            hotkey1, hotkey2, minimapToggle, hotkey3, hotkey4, hotkey5, hotkey6, hotkey7, hotkey8, hotkey9,
-            attack, stop, hold,
-            build, gather, garrison,
-            chat, deselect, tab, openShop,
+            hotkey6, hotkey7, jumpToAlert, diplomacy,
+            chat, deselect, tab,
             item1, item2, item3, item4, item5, item6
         ));
+        Collections.addAll(list, grid);
         Collections.addAll(list, nums);
         Collections.addAll(list, fnums);
         ALL = Collections.unmodifiableList(list);

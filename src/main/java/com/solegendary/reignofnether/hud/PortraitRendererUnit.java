@@ -1,63 +1,52 @@
 package com.solegendary.reignofnether.hud;
 
+import com.solegendary.reignofnether.unit.units.monsters.WretchedWraithUnit;
+import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.ability.abilities.ToggleShield;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
-import com.solegendary.reignofnether.healthbars.HealthBarClientEvents;
-import com.solegendary.reignofnether.hud.buttons.Button;
-import com.solegendary.reignofnether.hud.effecticons.EnchantmentIcon;
-import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
 import com.solegendary.reignofnether.resources.ResourceSource;
 import com.solegendary.reignofnether.resources.ResourceSources;
 import com.solegendary.reignofnether.resources.Resources;
-import com.solegendary.reignofnether.unit.Relationship;
-import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.UnitStatType;
 import com.solegendary.reignofnether.unit.controls.SlimeJumpMoveControl;
+import com.solegendary.reignofnether.unit.modelling.renderers.EnchanterRenderer;
+import com.solegendary.reignofnether.unit.modelling.renderers.RoyalGuardRenderer;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.HeroUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.interfaces.WorkerUnit;
 import com.solegendary.reignofnether.unit.units.monsters.CreeperUnit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
-import com.solegendary.reignofnether.unit.units.piglins.BruteUnit;
 import com.solegendary.reignofnether.unit.units.villagers.EnchanterUnit;
 import com.solegendary.reignofnether.unit.units.villagers.RavagerUnit;
-import com.solegendary.reignofnether.util.MiscUtil;
+import com.solegendary.reignofnether.unit.units.villagers.RoyalGuardUnit;
 import com.solegendary.reignofnether.util.MyMath;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.AbstractIllager;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BannerItem;
 import net.minecraft.world.item.ItemStack;
-import org.apache.commons.lang3.text.WordUtils;
 import org.joml.Quaternionf;
 
 import java.text.DecimalFormat;
@@ -65,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.solegendary.reignofnether.hud.TooltipColours.*;
-import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 // Renders a Unit's portrait including its animated head, name, healthbar, list of stats and UI frames for these
 
@@ -75,16 +63,6 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     public R renderer;
     public Model model;
 
-    public final int frameWidth = 60;
-    public final int frameHeight = 60;
-
-    public final int statsWidth = 44;
-    public final int statsHeight = 60;
-
-    private final int size = 46;
-    private final int offsetX = 31;
-    private final int offsetY = 105;
-    private final float standardEyeHeight = 1.74f; // height for most humanoid mobs
 
     // change these randomly every few seconds to make the head look around
     private int lookX = 0;
@@ -98,8 +76,6 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
     private final int ticksLeftMax = 60;
     private final int lookRangeX = 100;
     private final int lookRangeY = 40;
-
-    public final int HERO_Y_OFFSET = 10;
 
     public PortraitRendererUnit() {
     }
@@ -171,579 +147,221 @@ public class PortraitRendererUnit<T extends LivingEntity, M extends EntityModel<
         }
     }
 
-    // Render the portrait including:
-    // - background frame
-    // - moving head
-    // - healthbar
-    // - unit name
-    // Must be called from DrawScreenEvent
-    public RectZone render(GuiGraphics guiGraphics, String name, int x, int y, int mouseX, int mouseY, LivingEntity entity) {
-        if (entity instanceof HeroUnit)
-            y -= HERO_Y_OFFSET;
+    /**
+     * Draws the selected entity's animated 3D model inside a box (HUD units): the whole body, plus its mount and
+     * riders, scaled from their bounding boxes to fit the box with the feet near the bottom.
+     */
+    public void drawEntity(GuiGraphics g, LivingEntity entity, int x, int y, int w, int h) {
+        Entity root = entity.getRootVehicle();
+        List<Entity> stack = root.getSelfAndPassengers().toList();
 
-        Relationship rs = UnitClientEvents.getPlayerToEntityRelationship(entity);
-        int bgCol = PlayerColors.getPlayerPortraitDisplayColorHex(entity instanceof Unit u ? u.getOwnerName() : null);
-        if (entity instanceof Player player) {
-            bgCol = 0xA0000000 | PlayerColors.getPlayerAllianceColorHex(player.getName().getString());
+        float width = 0, height = 0;
+        for (Entity e : stack) {
+            float rs = rendererScale(e);
+            width = Math.max(width, e.getBbWidth() * rs);
+            height = Math.max(height, (float) (e.getY() - root.getY()) + e.getBbHeight() * rs);
         }
-        int frameHeightPlus = 0;
-        if (entity instanceof HeroUnit) {
-            frameHeightPlus = HERO_Y_OFFSET;
-        }
-        MyRenderer.renderFrameWithBg(guiGraphics, x, y, frameWidth, frameHeight + frameHeightPlus, bgCol);
-
-        // remember 0,0 is top left
-        int drawX = x + offsetX;
-        int drawY = y + (int) (entity.getEyeHeight() / standardEyeHeight * offsetY);
-
-        //if (entity instanceof HeroUnit)
-        //    drawY += HERO_Y_OFFSET;
-
-        int sizeFinal = size;
-
-        Pair<Integer, Integer> yAndScaleOffsets = PortraitRendererModifiers.getPortraitRendererModifiers(entity);
-
-        drawY += yAndScaleOffsets.getFirst();// + UnitClientEvents.yOffset;
-        sizeFinal += yAndScaleOffsets.getSecond();// + UnitClientEvents.scale;
-
-        // counteract siege mode sinking
-        if (entity instanceof RavagerUnit ravagerUnit)
-            drawY -= Math.round(ravagerUnit.getSiegeSinkOffset(1f) * sizeFinal);
-
-        boolean hasBanner = false;
-        ItemStack bannerStack = entity.getItemBySlot(EquipmentSlot.HEAD);
-        if (bannerStack.getItem() instanceof BannerItem) {
-            hasBanner = true;
-            entity.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
-        }
-        drawEntityOnScreen(guiGraphics.pose(), entity, drawX, drawY, sizeFinal);
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0,0,2000);
-        name = WordUtils.capitalize(name);
-
-        if (rs != Relationship.OWNED && entity instanceof Unit unit && unit.getOwnerName().length() > 0) {
-            name += " (" + unit.getOwnerName() + ")";
-        }
-
-        // draw name (unless a player, since their nametag will be rendered anyway)
-        if (entity instanceof HeroUnit) {
-            y -= 6;
-        }
-        int xOrig = x;
-        if (entity instanceof Unit unit) {
-            for (Button passiveIcon : unit.getPassiveIcons()) {
-                int yr = unit instanceof HeroUnit ? y - 18 : y - 16;
-                if (!passiveIcon.isHidden.get()) {
-                    passiveIcon.render(guiGraphics, x - 2, yr, mouseX, mouseY);
-                    if (passiveIcon.isMouseOver(mouseX, mouseY))
-                        passiveIcon.renderTooltip(guiGraphics, mouseX, mouseY);
-                    x += EnchantmentIcon.ICON_SIZE * 2;
-                }
-            }
-            if (!unit.getPassiveIcons().isEmpty())
-                x += EnchantmentIcon.ICON_SIZE / 2;
-        }
-        if (!(entity instanceof Player)) {
-            guiGraphics.drawString(Minecraft.getInstance().font, name, x + 4, y - 9, WHITE);
-        }
-        x = xOrig;
-        if (entity instanceof HeroUnit) {
-            y += 14;
-        }
-
-        RectZone rectZone = RectZone.getZoneByLW(x, y, frameWidth, frameHeight);
-
-        if (entity instanceof HeroUnit heroUnit) {
-            // draw health bar and write min/max hp
-            HealthBarClientEvents.renderForEntity(guiGraphics.pose(),
-                    entity,
-                    x + (frameWidth / 2f),
-                    y + frameHeight - 22,
-                    frameWidth - 9,
-                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
-            );
-            HealthBarClientEvents.renderAbsorbForEntity(guiGraphics.pose(),
-                    entity,
-                    x + (frameWidth / 2f),
-                    y + frameHeight - 22,
-                    frameWidth - 9,
-                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
-            );
-            HealthBarClientEvents.renderManaForEntity(guiGraphics.pose(),
-                    heroUnit,
-                    x + (frameWidth / 2f),
-                    y + frameHeight - 12,
-                    frameWidth - 9,
-                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
-            );
-        } else {
-            HealthBarClientEvents.renderForEntity(guiGraphics.pose(),
-                    entity,
-                    x + (frameWidth / 2f),
-                    y + frameHeight - 14,
-                    frameWidth - 9,
-                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
-            );
-            HealthBarClientEvents.renderAbsorbForEntity(guiGraphics.pose(),
-                    entity,
-                    x + (frameWidth / 2f),
-                    y + frameHeight - 14,
-                    frameWidth - 9,
-                    HealthBarClientEvents.RenderMode.GUI_PORTRAIT
-            );
-        }
-
-        ArrayList<String> texts = new ArrayList<>();
-        String healthText = "";
-        float health = entity.getHealth();
-        health += entity.getAbsorptionAmount();
-        if (health >= 1) {
-            healthText = String.valueOf((int) health);
-        } else {
-            healthText = String.valueOf(health).substring(0, 3);
-        }
-        float maxHealth = entity.getMaxHealth();
-        if (entity.getAbsorptionAmount() > 0)
-            maxHealth += MiscUtil.getMaxAbsorptionAmount(entity);
-
-        healthText += "/" + ((int) maxHealth);
-        texts.add(healthText);
-
-        if (entity instanceof HeroUnit heroUnit) {
-            String manaText = "";
-            float mana = heroUnit.getMana();
-            if (mana >= 1) {
-                manaText = String.valueOf((int) mana);
-            } else {
-                manaText = String.valueOf(mana).substring(0, 3);
-            }
-            manaText += "/" + (int) heroUnit.getMaxMana();
-            texts.add(manaText);
-        }
-
-        renderStatText(texts, entity, x, (entity instanceof HeroUnit ? y - HERO_Y_OFFSET + 2 : y), guiGraphics);
-
-        if (hasBanner)
-            entity.setItemSlot(EquipmentSlot.HEAD, bannerStack);
-
-        return rectZone;
+        float pad = 4;
+        // ponytail: the hitbox, plus headroom for models that overshoot it (shields,
+        // helmets); long mobs turning sideways (ravager) can still touch the edge, Clip keeps it in
+        float scale = Math.min((w - 2 * pad) / (width * 1.3f), (h - 2 * pad) / (height * 1.2f));
+        float drawY = y + h - pad; // feet on the bottom: the headroom goes on top, clear of the level badge
+        drawEntityOnScreen(g.pose(), root, stack, x + w / 2f, drawY, scale);
     }
 
-    private void renderStatText(List<String> texts, LivingEntity entity, int x, int y, GuiGraphics guiGraphics) {
-        // need to render like this instead of GuiComponent.drawCenteredString, so it's layered above the portrait entity
-        Minecraft MC = Minecraft.getInstance();
-        MultiBufferSource.BufferSource multibuffersource$buffersource =
-                MultiBufferSource.immediate(Tesselator.getInstance()
-                        .getBuilder());
-
-        for (int i = 0; i < texts.size(); i++) {
-            FormattedCharSequence pTooltips = fcs(texts.get(i));
-            ClientTooltipComponent clientTooltip = ClientTooltipComponent.create(pTooltips);
-            guiGraphics.pose().translate(0.0, 0.0, 400.0);
-            int x0 = x + (frameWidth / 2);
-            int xC = (x0 - MC.font.width(texts.get(i)) / 2);
-            clientTooltip.renderText(MC.font,
-                    xC,
-                    y + frameHeight - 2 + ((i-1) * 10),
-                    guiGraphics.pose().last().pose(),
-                    multibuffersource$buffersource
-            );
-        }
-        multibuffersource$buffersource.endBatch();
-        guiGraphics.pose().popPose();
+    // how far the renderer scales the model past the hitbox. Hitboxes already include the scale for nearly every mob
+    // (wither skeletons, slimes by size, the necromancer's registration); these two are registered at vindicator size
+    // and their hitbox only grows with getScale(), not with SCALE_MULT; the wretched wraith's model is about twice
+    // its zombie-sized hitbox
+    private static float rendererScale(Entity e) {
+        if (e instanceof WretchedWraithUnit)
+            return 2f;
+        if (e instanceof RoyalGuardUnit)
+            return RoyalGuardRenderer.SCALE_MULT;
+        return e instanceof EnchanterUnit ? EnchanterRenderer.SCALE_MULT : 1f;
     }
 
-    private class RenderedStat {
-        public ResourceLocation icon;
-        public String text;
-        public UnitStatType type;
-        public int colour = WHITE;
-        public int textXOffset = 0;
+    /** One line of the unit's stats, as shown on the selection panel's stat cards. */
+    public record Stat(ResourceLocation icon, UnitStatType type, String value, int colour) { }
 
-        public RenderedStat(ResourceLocation icon, String text, UnitStatType type) {
-            this.icon = icon;
-            this.text = text;
-            this.type = type;
-        }
-        public RenderedStat(ResourceLocation icon, String text, UnitStatType type, int colour, int xOffset) {
-            this.icon = icon;
-            this.text = text;
-            this.type = type;
-            this.colour = colour;
-            this.textXOffset = xOffset;
-        }
-    }
-
-    public RectZone renderStats(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, Unit unit) {
-        int statsHeightPlus = 0;
-        if (unit instanceof HeroUnit) {
-            y -= HERO_Y_OFFSET;
-            statsHeightPlus = HERO_Y_OFFSET;
-        }
-        MyRenderer.renderFrameWithBg(guiGraphics, x, y, statsWidth, statsHeight + statsHeightPlus, 0xA0000000);
-
-        int blitXIcon = x + 6;
-        int blitYIcon = y + 7;
-
-        ArrayList<RenderedStat> renderedStats = new ArrayList<>();
+    public static List<Stat> computeStats(Unit unit) {
+        List<Stat> stats = new ArrayList<>();
 
         if (unit instanceof AttackerUnit attackerUnit) {
             double atkDmg = attackerUnit.getUnitAttackDamage() + AttackerUnit.getWeaponDamageModifier(attackerUnit);
-            if (unit instanceof CreeperUnit cUnit && cUnit.isPowered()) {
+            if (unit instanceof CreeperUnit cUnit && cUnit.isPowered())
                 atkDmg *= CreeperUnit.CHARGED_DAMAGE_MULT;
-            }
-            if (unit instanceof WorkerUnit) {
+            if (unit instanceof WorkerUnit)
                 atkDmg = (int) attackerUnit.getUnitAttackDamage();
-            }
             double atkDmgRounded = Math.round(atkDmg);
-            String atkStr;
-            if (Math.abs(atkDmgRounded - atkDmg) < 0.1d) {
-                atkStr = String.valueOf((int) atkDmgRounded); // attacks per second
-            } else {
-                DecimalFormat df1 = new DecimalFormat("###.#");
-                atkStr = String.valueOf(df1.format(atkDmg)); // attacks per second
-            }
-            if (unit instanceof Mob mob && mob.isVehicle() && mob.getFirstPassenger() instanceof AttackerUnit passenger) {
+            String atkStr = Math.abs(atkDmgRounded - atkDmg) < 0.1d
+                    ? String.valueOf((int) atkDmgRounded)
+                    : new DecimalFormat("###.#").format(atkDmg);
+            if (unit instanceof Mob mob && mob.isVehicle() && mob.getFirstPassenger() instanceof AttackerUnit passenger)
                 atkStr += "+" + (int) passenger.getUnitAttackDamage();
-            }
 
-            int damageTooltipColour = attackerUnit.getDamageTooltipColour();
-            float attackDmg = attackerUnit.getUnitAttackDamage();
-            float baseAttackDmg = attackerUnit.getBaseUnitAttackDamage();
-            if (attackDmg < baseAttackDmg)
-                damageTooltipColour = RED;
-            else if (attackDmg > baseAttackDmg)
-                damageTooltipColour = GREEN;
+            int dmgColour = attackerUnit.getDamageTooltipColour();
+            if (attackerUnit.getUnitAttackDamage() < attackerUnit.getBaseUnitAttackDamage())
+                dmgColour = RED;
+            else if (attackerUnit.getUnitAttackDamage() > attackerUnit.getBaseUnitAttackDamage())
+                dmgColour = GREEN;
+            if (dmgColour == WHITE && attackerUnit.getBuildingDamageBonus() > 0)
+                dmgColour = GREEN;
+            stats.add(new Stat(icon("sword"), UnitStatType.ATTACK_DAMAGE, atkStr, dmgColour));
 
-            if (damageTooltipColour == WHITE && attackerUnit.getBuildingDamageBonus() > 0)
-                damageTooltipColour = GREEN;
+            float aps = Math.round(attackerUnit.getNonBaseAttacksPerSecond() * 100f) / 100f;
+            float baseAps = Math.round(attackerUnit.getBaseAttacksPerSecond() * 100f) / 100f;
+            int apsColour = aps > baseAps ? GREEN : aps < baseAps ? RED : WHITE;
+            stats.add(new Stat(icon("sparkler"), UnitStatType.ATTACK_SPEED,
+                    new DecimalFormat("###.##").format(attackerUnit.getAttacksPerSecond()), apsColour));
 
-            renderedStats.add(new RenderedStat(
-                    ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/sword.png"),
-                    atkStr,
-                    UnitStatType.ATTACK_DAMAGE,
-                    damageTooltipColour,
-                    0
-            ));
-            DecimalFormat df2 = new DecimalFormat("###.##");
-
-            int atkSpdColour = LIGHT_BLUE;
-
-            float attacksPerSecond = Math.round(attackerUnit.getNonBaseAttacksPerSecond() * 100f) / 100f;
-            float baseAttacksPerSecond = Math.round(attackerUnit.getBaseAttacksPerSecond() * 100f) / 100f;
-
-            if (attacksPerSecond > baseAttacksPerSecond) {
-                atkSpdColour = GREEN;
-            } else if (attacksPerSecond < baseAttacksPerSecond) {
-                atkSpdColour = RED;
-            }
-            renderedStats.add(new RenderedStat(
-                    ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/sparkler.png"),
-                    String.valueOf(df2.format(attackerUnit.getAttacksPerSecond())),
-                    UnitStatType.ATTACK_SPEED,
-                    atkSpdColour,
-                    0
-            ));
-            String rangeStr;
-
-            if (((LivingEntity) attackerUnit).getFirstPassenger() instanceof AttackerUnit passengerUnit) {
-                rangeStr = String.valueOf((int) (passengerUnit.getAttackRange()));
-            } else {
-                BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
-                GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
-                if (garr != null) {
-                    rangeStr = String.valueOf(garr.getAttackRange());
-                } else {
-                    rangeStr = String.valueOf((int) (attackerUnit.getAttackRange()));
-                }
-            }
-
-            renderedStats.add(new RenderedStat(
-                    ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/bow.png"),
-                    rangeStr,
-                    UnitStatType.RANGE,
-                    attackerUnit.hasBonusRange() ? GREEN : WHITE,
-                    0
-            ));
+            BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison(unit);
+            GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
+            String range;
+            if (((LivingEntity) attackerUnit).getFirstPassenger() instanceof AttackerUnit passengerUnit)
+                range = String.valueOf((int) passengerUnit.getAttackRange());
+            else
+                range = garr != null ? String.valueOf(garr.getAttackRange()) : String.valueOf((int) attackerUnit.getAttackRange());
+            stats.add(new Stat(icon("bow"), UnitStatType.RANGE, range, attackerUnit.hasBonusRange() ? GREEN : WHITE));
         }
 
-        int armourColor = WHITE;
-        double physicalArmour = unit.getUnitPhysicalArmorPercentage();
-        double rangedArmour = unit.getUnitRangedArmorPercentage();
-        double magicArmour = unit.getUnitMagicArmorPercentage();
-        double resistArmour = unit.getUnitResistPercentage();
-        double highestArmour = 0;
-
-        String armourStr = "0%";
-        int nonZeroArmourTypes = 0;
-
-        if (physicalArmour != 0) {
-            armourStr = (int) (physicalArmour * 100) + "%";
-            armourColor = GREEN;
-            if (physicalArmour > highestArmour) highestArmour = physicalArmour;
-            nonZeroArmourTypes += 1;
-        }
-        if (rangedArmour != 0) {
-            armourStr = (int) (rangedArmour * 100) + "%";
-            armourColor = YELLOW;
-            if (rangedArmour > highestArmour) highestArmour = rangedArmour;
-            nonZeroArmourTypes += 1;
-        }
-        if (resistArmour != 0) {
-            armourStr = (int) (resistArmour * 100) + "%";
-            armourColor = LIGHT_BLUE;
-            if (resistArmour > highestArmour) highestArmour = resistArmour;
-            nonZeroArmourTypes += 1;
-        }
-        if (magicArmour != 0 && resistArmour <= 0) { // resistArmour includes magicArmour
-            armourStr = (int) (magicArmour * 100) + "%";
-            armourColor = DARK_BLUE;
-            if (magicArmour > highestArmour) highestArmour = magicArmour;
-            nonZeroArmourTypes += 1;
-        }
-        if (nonZeroArmourTypes > 1 && highestArmour > 0) {
-            armourStr = (int) (highestArmour * 100) + "%+";
-            armourColor = LIGHT_BLUE;
-        }
-        if (((Mob) unit).hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
-            armourColor = GREEN;
-            if (nonZeroArmourTypes > 0 && highestArmour > 0) {
-                armourStr = (int) (Mth.lerp(0.5, highestArmour, 1.0) * 100) + "%+";
-            } else {
-                armourStr = "50%";
-            }
-        }
-        if (armourStr.contains("-")) {
-            armourColor = RED;
-        }
-
-        int xOffset = 0;
-        if (armourStr.endsWith("+")) xOffset = -3;
-        if (armourStr.startsWith("-")) xOffset = -4;
-
-        renderedStats.add(new RenderedStat(
-                ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/chestplate.png"),
-                armourStr,
-                UnitStatType.ARMOUR,
-                armourColor,
-                xOffset
-        ));
+        stats.add(armourStat(unit));
 
         if (((LivingEntity) unit).getAttribute(Attributes.MOVEMENT_SPEED) != null) {
             float ms = unit.getMovementSpeed() * unit.getSpeedModifier();
             int msInt = (int) (ms * 101);
-            if (unit instanceof SlimeUnit slimeUnit && slimeUnit.isUsingJumpingMovement()) {
+            if (unit instanceof SlimeUnit slimeUnit && slimeUnit.isUsingJumpingMovement())
                 msInt /= SlimeJumpMoveControl.MOVESPEED_MULTIPLIER;
-            }
-            int msColour = WHITE;
             double msBase = ((LivingEntity) unit).getAttributeBaseValue(Attributes.MOVEMENT_SPEED);
-            if (msBase < ms) {
-                msColour = GREEN;
-            } else if (msBase > ms) {
-                msColour = RED;
-            }
-            renderedStats.add(new RenderedStat(
-                    ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/boots.png"),
-                    String.valueOf(msInt),
-                    UnitStatType.MOVEMENT_SPEED,
-                    msColour,
-                    0
-            ));
+            int msColour = msBase < ms ? GREEN : msBase > ms ? RED : WHITE;
+            stats.add(new Stat(icon("boots"), UnitStatType.MOVEMENT_SPEED, String.valueOf(msInt), msColour));
         }
-
-        if (unit instanceof HeroUnit heroUnit) {
-            int heroLvl = heroUnit.getHeroLevel();
-            String heroLvlString = I18n.get("hud.hero.reignofnether.level", heroLvl);
-            String heroLvString = I18n.get("hud.hero.reignofnether.level.short", heroLvl);
-            guiGraphics.drawString(
-                    Minecraft.getInstance().font,
-                    fcs((heroLvl >= 10 ? heroLvString : heroLvlString), true),
-                    blitXIcon + 1,
-                    blitYIcon - 1,
-                    WHITE
-            );
-            blitYIcon += HERO_Y_OFFSET + 1;
-        }
-
-        // render based on prepped strings/icons
-        for (RenderedStat renderedStat : renderedStats) {
-            MyRenderer.renderIcon(guiGraphics, renderedStat.icon, blitXIcon, blitYIcon, 8);
-
-            boolean isMouseOver =
-                    mouseX >= blitXIcon - 1 &&
-                    mouseY >= blitYIcon - 1 &&
-                    mouseX < blitXIcon + statsWidth - 11 &&
-                    mouseY < blitYIcon + 9;
-
-            // highlight on hover
-            if (isMouseOver) {
-                guiGraphics.fill( // x1,y1, x2,y2,
-                    blitXIcon - 1,
-                    blitYIcon - 1,
-                    blitXIcon + statsWidth - 11,
-                    blitYIcon + 9,
-                    0x32FFFFFF);
-                MyRenderer.renderTooltip(guiGraphics, unit.getStatTooltip(renderedStat.type), mouseX, mouseY);
-            }
-
-            guiGraphics.drawString(
-                Minecraft.getInstance().font,
-                renderedStat.text,
-                blitXIcon + 13 + renderedStat.textXOffset,
-                blitYIcon,
-                renderedStat.colour
-            );
-            blitYIcon += 10;
-        }
-        return RectZone.getZoneByLW(x, y, statsWidth, statsHeight);
+        return stats;
     }
 
-    public RectZone renderHeroLevelAndExp(GuiGraphics guiGraphics, int x, int y, int mouseX, int mouseY, HeroUnit heroUnit) {
-        int width = 101;
-        int height = 5;
+    /** The armour stat; its colour tells the armour type. */
+    private static Stat armourStat(Unit unit) {
+        double physical = unit.getUnitPhysicalArmorPercentage();
+        double ranged = unit.getUnitRangedArmorPercentage();
+        double magic = unit.getUnitMagicArmorPercentage();
+        double resist = unit.getUnitResistPercentage();
+        double highest = 0;
+        String str = "0%";
+        int colour = WHITE;
+        int types = 0;
 
-        y -= HERO_Y_OFFSET;
-
-        ResourceLocation expBarEmptyRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/experience_bar_empty.png");
-        RenderSystem.setShaderTexture(0, expBarEmptyRl);
-        guiGraphics.blit(expBarEmptyRl,
-                x, y, 0,
-                0,0, // where on texture to start drawing from
-                width, height, // dimensions of blit texture
-                width, height // size of texture itself (if < dimensions, texture is repeated)
-        );
-        ResourceLocation expBarFullRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/hud/experience_bar_full.png");
-        RenderSystem.setShaderTexture(0, expBarFullRl);
-        float expPercent = (float) heroUnit.getExpOnCurrentLevel() / heroUnit.getExpToNextlevel();
-        if (heroUnit.getHeroLevel() >= HeroUnit.MAX_LEVEL)
-            expPercent = 1.0f;
-        guiGraphics.blit(expBarFullRl,
-                x, y, 0,
-                0,0, // where on texture to start drawing from
-                Math.round((float) width * expPercent), height, // dimensions of blit texture
-                width, height // size of texture itself (if < dimensions, texture is repeated)
-        );
-        return RectZone.getZoneByLW(x, y-2, width, height+4);
+        if (physical != 0) { str = (int) (physical * 100) + "%"; colour = GREEN; highest = Math.max(highest, physical); types++; }
+        if (ranged != 0) { str = (int) (ranged * 100) + "%"; colour = YELLOW; highest = Math.max(highest, ranged); types++; }
+        if (resist != 0) { str = (int) (resist * 100) + "%"; colour = LIGHT_BLUE; highest = Math.max(highest, resist); types++; }
+        if (magic != 0 && resist <= 0) { // resist includes magic
+            str = (int) (magic * 100) + "%"; colour = DARK_BLUE; highest = Math.max(highest, magic); types++;
+        }
+        if (types > 1 && highest > 0) {
+            str = (int) (highest * 100) + "%+";
+            colour = LIGHT_BLUE;
+        }
+        if (((Mob) unit).hasEffect(MobEffectRegistrar.ENCHANTED_TETHER.get())) {
+            colour = GREEN;
+            str = types > 0 && highest > 0 ? (int) (Mth.lerp(0.5, highest, 1.0) * 100) + "%+" : "50%";
+        }
+        if (str.contains("-"))
+            colour = RED;
+        return new Stat(icon("chestplate"), UnitStatType.ARMOUR, str, colour);
     }
 
-
-    public RectZone renderResourcesHeld(GuiGraphics guiGraphics, int x, int y, Unit unit) {
-        Resources resources = Resources.getTotalResourcesFromItems(unit.getItems());
-        return renderResourcesHeld(guiGraphics, x, y, resources, Unit.atMaxResources(unit));
+    private static ResourceLocation icon(String name) {
+        return ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/" + name + ".png");
     }
 
-    public RectZone renderResourcesHeld(GuiGraphics guiGraphics, int x, int y, Animal animal) {
-        Resources resources = new Resources("",0,0,0,0);
+    public static Resources resourcesHeld(Animal animal) {
+        Resources resources = new Resources("", 0, 0, 0, 0);
         for (ItemStack itemStack : ResourceSources.getFoodItemsFromAnimal(animal)) {
             ResourceSource res = ResourceSources.getFromItem(itemStack.getItem());
             if (res != null)
                 resources.food += res.resourceValue * itemStack.getCount();
         }
-        return renderResourcesHeld(guiGraphics, x, y, resources, false);
+        return resources;
     }
 
-    public RectZone renderResourcesHeld(GuiGraphics guiGraphics, int x, int y, Resources resources, boolean redText) {
-        MyRenderer.renderFrameWithBg(guiGraphics, x, y, statsWidth, statsHeight, 0xA0000000);
-
-        int blitXIcon = x + 6;
-        int blitYIcon = y + 7;
-
-        // prep strings/icons to render
-        List<ResourceLocation> textureStatIcons = List.of(
-            ResourceLocation.fromNamespaceAndPath("reignofnether","textures/icons/items/wheat.png"),
-            ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/wood.png"),
-            ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/iron_ore.png"),
-            ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/icons/items/emerald.png")
-        );
-
-        List<String> statStrings = List.of(
-            String.valueOf(resources.food),
-            String.valueOf(resources.wood),
-            String.valueOf(resources.ore),
-            String.valueOf(resources.emerald)
-        );
-
-        // render based on prepped strings/icons
-        for (int i = 0; i < statStrings.size(); i++) {
-
-            if (!statStrings.get(i).equals("0")) {
-                MyRenderer.renderIcon(guiGraphics, textureStatIcons.get(i), blitXIcon, blitYIcon, 8);
-                guiGraphics.drawString(
-                    Minecraft.getInstance().font,
-                    statStrings.get(i),
-                    blitXIcon + 12,
-                    blitYIcon,
-                    redText ? RED : WHITE
-                );
-                blitYIcon += 10;
-            }
-        }
-        return RectZone.getZoneByLW(x, y, statsWidth, statsHeight);
-    }
-
-    private void drawEntityOnScreen(PoseStack poseStack, LivingEntity entity, int x, int y, int size) {
+    private void drawEntityOnScreen(PoseStack poseStack, Entity root, List<Entity> stack, float x, float y, float size) {
         float f = (float) Math.atan(-lookX / 40F);
         float g = (float) Math.atan(-lookY / 40F);
         PoseStack poseStackModel = RenderSystem.getModelViewStack();
         poseStackModel.pushPose();
-        poseStackModel.translate(x, y, 1050.0D);
+        poseStackModel.translate(0, 0, 1050.0D);
         poseStackModel.scale(1.0F, 1.0F, -1.0F);
         RenderSystem.applyModelViewMatrix();
         poseStack.pushPose();
-        poseStack.translate(0.0D, 0.0D, 10.0D);
-        poseStack.scale((float) size, (float) size, (float) size);
-        float h = entity.yBodyRot; // bodyYaw;
-        float i = entity.getYRot(); // getYaw();
-        float j = entity.getXRot(); // getPitch();
-        float k = entity.yHeadRotO; // prevHeadYaw;
-        float l = entity.yHeadRot; // headYaw;
+        // x/y go on the GUI pose (not the model-view stack) so the model follows the HUD scale
+        poseStack.translate(x, y, 10.0D);
+        poseStack.scale(size, size, size);
         Quaternionf quaternion = Axis.ZP.rotationDegrees(180.0F);
         Quaternionf quaternion2 = Axis.XP.rotationDegrees(g * 20.0F);
         quaternion.mul(quaternion2);
         poseStack.mulPose(quaternion);
-        if (shouldAnimate()) {
-            entity.yBodyRot = 180.0F + f * 20.0F;
-            entity.setYRot(180.0F + f * 40.0F);
-            entity.setXRot(-g * 20.0F);
-            entity.yHeadRot = entity.getYRot();
-            entity.yHeadRotO = entity.getYRot();
-        }
         Lighting.setupForEntityInInventory();
         EntityRenderDispatcher entityrenderdispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
         entityrenderdispatcher.setRenderShadow(false);
         quaternion2.conjugate();
         entityrenderdispatcher.overrideCameraOrientation(quaternion2);
 
-        // for some reason this snippet causes drawLineBox to draw lines in completely wrong locations while in
-        // spectator mode
-        RenderSystem.runAsFancy(() -> {
-            try {
-                MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-                if (entity instanceof EnchanterUnit enchanterUnit) {
-                    enchanterUnit.renderTether = false;
-                    entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate, 15728880);
-                    immediate.endBatch();
-                    enchanterUnit.renderTether = true;
-                } else {
-                    entityrenderdispatcher.render(entity, 0.0D, 0.0D, 0.0D, 0.0F, 1.0F, poseStack, immediate, 15728880);
-                    immediate.endBatch();
+        boolean animate = shouldAnimate();
+        // counteract siege mode sinking
+        double siegeLift = root instanceof RavagerUnit ravagerUnit ? ravagerUnit.getSiegeSinkOffset(1f) : 0;
+        for (Entity entity : stack) {
+            // riders sit straight on top of their mount; horizontal seat offsets are dropped since we rotate the model
+            double dy = entity.getY() - root.getY() + siegeLift;
+            float h = 0, i = entity.getYRot(), j = entity.getXRot(), k = 0, l = 0;
+            LivingEntity living = entity instanceof LivingEntity le ? le : null;
+            if (animate) {
+                if (living != null) {
+                    h = living.yBodyRot; k = living.yHeadRotO; l = living.yHeadRot;
+                    living.yBodyRot = 180.0F + f * 20.0F;
+                    living.yHeadRot = 180.0F + f * 40.0F;
+                    living.yHeadRotO = living.yHeadRot;
                 }
-            } catch (ReportedException e) {
-                //System.out.println("Caught reportedException: " + e);
+                entity.setYRot(180.0F + f * 40.0F);
+                entity.setXRot(-g * 20.0F);
             }
-        });
+            ItemStack bannerStack = living != null ? living.getItemBySlot(EquipmentSlot.HEAD) : ItemStack.EMPTY;
+            boolean hasBanner = bannerStack.getItem() instanceof BannerItem;
+            if (hasBanner)
+                living.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY);
+
+            // for some reason this snippet causes drawLineBox to draw lines in completely wrong locations while in
+            // spectator mode
+            RenderSystem.runAsFancy(() -> {
+                try {
+                    MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
+                    if (entity instanceof EnchanterUnit enchanterUnit)
+                        enchanterUnit.renderTether = false;
+                    entityrenderdispatcher.render(entity, 0.0D, dy, 0.0D, 0.0F, 1.0F, poseStack, immediate, 15728880);
+                    immediate.endBatch();
+                    if (entity instanceof EnchanterUnit enchanterUnit)
+                        enchanterUnit.renderTether = true;
+                } catch (ReportedException e) {
+                    //System.out.println("Caught reportedException: " + e);
+                }
+            });
+
+            if (hasBanner)
+                living.setItemSlot(EquipmentSlot.HEAD, bannerStack);
+            if (animate) {
+                if (living != null) {
+                    living.yBodyRot = h; living.yHeadRotO = k; living.yHeadRot = l;
+                }
+                entity.setYRot(i);
+                entity.setXRot(j);
+            }
+        }
         entityrenderdispatcher.setRenderShadow(true);
 
-        if (shouldAnimate()) {
-            entity.yBodyRot = h;
-            entity.setYRot(i);
-            entity.setXRot(j);
-            entity.yHeadRotO = k;
-            entity.yHeadRot = l;
-        }
         poseStackModel.popPose();
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();
+        // the model leaves its depth at GUI z ~1040, in front of everything drawn after it (level badge, tooltips);
+        // the caller's Clip scissor keeps this clear to the portrait box
+        RenderSystem.clear(GlConst.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
     }
 }

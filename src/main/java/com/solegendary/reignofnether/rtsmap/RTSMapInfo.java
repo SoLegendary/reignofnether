@@ -62,6 +62,14 @@ public class RTSMapInfo {
         return teams;
     }
 
+    // teams fixed by the map (1v1, 2v2...), not a free for all where everyone is their own team
+    public boolean isTeamMode() {
+        List<List<BlockPos>> teams = getTeams();
+        if (teams == null || teams.size() < 2)
+            return false;
+        return teams.size() == 2 || teams.stream().anyMatch(team -> team.size() > 1);
+    }
+
     public boolean supportsMode(String mode) {
         return mode.equalsIgnoreCase("none") ||  modes != null && modes.containsKey(mode);
     }

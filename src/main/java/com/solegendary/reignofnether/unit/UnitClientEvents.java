@@ -74,6 +74,8 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import com.solegendary.reignofnether.chat.SpectatorFeed;
+import com.solegendary.reignofnether.hud.panels.SelectionPanel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -219,6 +221,11 @@ public class UnitClientEvents {
     public static void clearSelectedUnits() {
         selectedUnits.clear();
         NonUnitClientEvents.isMoveCheckpointGreen = true;
+        markSelectedUnitsChanged();
+    }
+    public static void removeSelectedUnits(Collection<? extends LivingEntity> units) {
+        selectedUnits.removeAll(units);
+        markSelectedUnitsChanged();
     }
 
     private static long lastLeftClickTime = 0; // to track double clicks
@@ -560,6 +567,12 @@ public class UnitClientEvents {
         }
     }
 
+    public static void syncVillagerExp(int entityId, int[] exp) {
+        for (LivingEntity entity : allUnits)
+            if (entity.getId() == entityId && entity instanceof VillagerUnit vUnit)
+                vUnit.syncExp(exp);
+    }
+
     public static void syncUnitResources(int entityId, Resources res) {
         for(LivingEntity entity : allUnits) {
             if (entity.getId() == entityId && MC.level != null) {
@@ -665,6 +678,9 @@ public class UnitClientEvents {
      * Therefore, only remove entities if they leave serverside via UnitClientboundPacket.
      */
     public static void onEntityLeave(int entityId) {
+        for (LivingEntity e : allUnits)
+            if (e.getId() == entityId && e instanceof Unit u && e.isDeadOrDying())
+                SpectatorFeed.unitLost(u.getOwnerName(), SelectionPanel.displayName(e));
         selectedUnits.removeIf(e -> e.getId() == entityId);
         //System.out.println("selectedUnits removed entity: " + entityId);
         preselectedUnits.removeIf(e -> e.getId() == entityId);
@@ -1038,13 +1054,13 @@ public class UnitClientEvents {
             unitsToDraw.addAll(selectedUnits);
             unitsToDraw.addAll(preselectedUnits);
 
-            var vcNoDepthTest = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST);
-
-            if (evt.getStage() == AFTER_ENTITIES) {
+            if (evt.getStage() == AFTER_CUTOUT_BLOCKS) {
                 // draw outlines on all (pre)selected units but only draw once per unit based on conditions
                 // don't render preselection outlines if mousing over HUD
 
                 if (OrthoviewClientEvents.isEnabled()) {
+                    // drawn before the entities: still visible through terrain, but models cover it
+                    var vcOutline = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_UNDER_ENTITIES);
                     // evaluate conditions that will remain constant during the rendering stage
                     boolean isMouseOverAnyButtonOrHud = HudClientEvents.isMouseOverAnyButtonOrHud();
                     boolean isLeftClickAttack = isLeftClickAttack();
@@ -1067,14 +1083,14 @@ public class UnitClientEvents {
                         boolean isSelected = selectedUnits.contains(entity);
 
                         if (isPreselected && isLeftClickAttack && !targetingSelf && !isMouseOverAnyButtonOrHud)
-                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
+                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcOutline, entityAABB, 1.0f, 0.3f, 0.3f, 1.0f, false);
                         else if (isSelected)
-                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
+                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcOutline, entityAABB, 1.0f, 1.0f, 1.0f, 1.0f, false);
                         else if (isPreselected && !isMouseOverAnyButtonOrHud)
-                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
+                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcOutline, entityAABB, 1.0f, 1.0f, 1.0f, isRightClickDown ? 1.0f : 0.5f, false);
                     }
+                    MC.renderBuffers().bufferSource().endBatch(MyRenderer.LINES_UNDER_ENTITIES);
                 }
-            } else if (evt.getStage() == AFTER_CUTOUT_BLOCKS) {
                 if (MinimapClientEvents.shouldUnderline()) {
                     var selectedEntityIds = new HashSet<>();
                     for (LivingEntity selectedUnit : selectedUnits) {
@@ -1117,7 +1133,7 @@ public class UnitClientEvents {
 
                         // always-shown highlights to indicate unit relationships
                         if (OrthoviewClientEvents.isEnabled()) {
-                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vcNoDepthTest, entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
+                            MyRenderer.drawLineBoxOutlineOnly(evt.getPoseStack(), vc, entityAABB, 1.0f, 1.0f, 1.0f, alpha, excludeMaxY);
                         }
 
                         MyRenderer.drawBoxBottom(evt.getPoseStack(), entityAABB, vc, r, g, b, 0.5f);

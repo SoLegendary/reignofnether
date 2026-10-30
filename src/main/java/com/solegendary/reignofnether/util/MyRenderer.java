@@ -8,7 +8,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.ReignOfNether;
-import com.solegendary.reignofnether.hud.RectZone;
 import com.solegendary.reignofnether.items.UnitItem;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import net.minecraft.CrashReport;
@@ -49,7 +48,6 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.regex.Matcher;
@@ -484,8 +482,8 @@ public class MyRenderer {
         matrixStack.popPose();
     }
 
-    // render a HUD frame and return the RectZone that it represents
-    public static RectZone renderFrameWithBg(GuiGraphics guiGraphics, int x, int y, int width, int height, int bgCol) {
+    // render a HUD frame
+    public static void renderFrameWithBg(GuiGraphics guiGraphics, int x, int y, int width, int height, int bgCol) {
         // draw icon frame with dark transparent bg
         guiGraphics.fill(// x1,y1, x2,y2,
                 x + 2, y + 2,
@@ -529,26 +527,6 @@ public class MyRenderer {
                 width - thickness * 2, thickness, // dimensions of blit texture
                 width, thickness // size of texture itself (if < dimensions, texture is repeated)
         );
-        return RectZone.getZoneByLW(x, y, width, height);
-    }
-
-    public static RectZone renderIconFrameWithBg(GuiGraphics guiGraphics, ResourceLocation frameRl, int x, int y, int size, int bg) {
-        //transparent background
-        guiGraphics.fill(// x1,y1, x2,y2,
-                x, y,
-                x + size,
-                y + size,
-                bg); //ARGB(hex); note that alpha ranges between ~0-16, not 0-255
-
-        // icon frame
-        RenderSystem.setShaderTexture(0, frameRl);
-        guiGraphics.blit(frameRl,
-                x, y, 0,
-                0, 0, // where on texture to start drawing from
-                size, size, // dimensions of blit texture
-                size, size // size of texture itself (if < dimensions, texture is repeated)
-        );
-        return RectZone.getZoneByLW(x, y, size, size);
     }
 
     public static void renderIcon(GuiGraphics guiGraphics, ResourceLocation resourceLocation, int x, int y, int size) {
@@ -561,49 +539,40 @@ public class MyRenderer {
         );
     }
 
+    /** Legacy tooltip lines, drawn now in the HUD's tooltip style next to the cursor (GUI coordinates). */
     public static void renderTooltip(GuiGraphics guiGraphics, List<FormattedCharSequence> tooltipLines, int mouseX, int mouseY) {
-        if (MC.screen != null && tooltipLines != null && tooltipLines.size() > 0) {
-            if (mouseY < MC.screen.height / 2)
-                mouseY += (tooltipLines.size() * 10);
+        if (tooltipLines != null && tooltipLines.size() > 0)
+            renderTooltip(guiGraphics, com.solegendary.reignofnether.ui.Tooltip.fromLines(tooltipLines), mouseX, mouseY);
+    }
+
+    public static void renderTooltip(GuiGraphics guiGraphics, com.solegendary.reignofnether.ui.Tooltip tooltip, int mouseX, int mouseY) {
+        if (MC.screen != null) {
+            var scale = com.solegendary.reignofnether.hud.layout.HudGeometry.scale();
+            float k = scale.poseScale();
+            guiGraphics.pose().pushPose();
             guiGraphics.pose().translate(0, 0, 3000);
-            guiGraphics.renderTooltip(MC.font, tooltipLines, mouseX, mouseY - (9 * (tooltipLines.size() - 1)));
-            guiGraphics.pose().translate(0, 0, -3000);
+            guiGraphics.pose().scale(k, k, 1);
+            tooltip.render(guiGraphics, scale.toUnits(mouseX), scale.toUnits(mouseY), 12, 12, scale.width(), scale.height());
+            guiGraphics.pose().popPose();
         }
     }
 
     public static void renderItemEntityTooltip(GuiGraphics guiGraphics, UnitItem unitItem, ItemStack itemStack, int mouseX, int mouseY) {
         if (unitItem == null || MC.screen == null || !unitItem.enableTooltip)
             return;
-
-        final int iconSize = 16;
-        int spaceWidth = MC.font.width(" ");
-        int paddingChars = iconSize / Math.max(spaceWidth, 1);
-        String pad = " ".repeat(paddingChars);
-        String qty = itemStack.getCount() > 1 ? " (" + itemStack.getCount() + ")" : "";
-        MutableComponent name = unitItem.iconRl != null ?
-                Component.literal(pad + unitItem.getName().getString() + qty) :
-                Component.literal(unitItem.getName().getString() + qty);
-
-        List<FormattedCharSequence> lore = unitItem.getEntityTooltip(itemStack);
-
-        List<FormattedCharSequence> lines = new ArrayList<>();
-        lines.add(name.getVisualOrderText());
-        if (lore != null)
-            lines.addAll(lore);
-
-        if (mouseY < MC.screen.height / 2)
-            mouseY += (lines.size() * 10);
-
-        int textY = mouseY - (9 * (lines.size() - 1));
-
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 3000);
-        if (unitItem.iconRl != null)
-            guiGraphics.blit(unitItem.iconRl, mouseX + 19, textY - 15, 0, 0, iconSize-2, iconSize-2, iconSize-2, iconSize-2);
-        guiGraphics.pose().translate(0, 0, -1500);
-        guiGraphics.renderTooltip(MC.font, lines, mouseX + 8, textY);
-        guiGraphics.pose().translate(0, 0, -1500);
-        guiGraphics.pose().popPose();
+        String name = unitItem.getName().getString();
+        if (itemStack.getCount() > 1)
+            name += " (" + itemStack.getCount() + ")";
+        var rarity = unitItem.rarity.getStyleModifier().apply(Style.EMPTY).getColor();
+        var t = com.solegendary.reignofnether.ui.Tooltip.of(name)
+                .titleColour(rarity != null ? 0xFF000000 | rarity.getValue() : com.solegendary.reignofnether.ui.Theme.TEXT)
+                .tag("Item", com.solegendary.reignofnether.ui.Theme.ORANGE);
+        String desc = unitItem.getDescription();
+        if (!desc.isBlank())
+            t.body(desc);
+        for (FormattedCharSequence line : unitItem.getEntityTooltip(itemStack))
+            t.body(line);
+        renderTooltip(guiGraphics, t, mouseX, mouseY);
     }
 
     public static void renderItemInFrontOfEntityFace(PoseStack poseStack, LivingEntity entity, float partialTicks, ItemStack itemStack) {
@@ -704,15 +673,6 @@ public class MyRenderer {
         poseStack.translate(x, y, 0);
         poseStack.scale(scale, scale, 1.0f);
         guiGraphics.drawString(font, text, 0, 0, color);
-        poseStack.popPose();
-    }
-
-    public static void drawScaledCenteredString(GuiGraphics guiGraphics, Font font, String text, int x, int y, int color, float scale) {
-        PoseStack poseStack = guiGraphics.pose();
-        poseStack.pushPose();
-        poseStack.translate(x, y, 0);
-        poseStack.scale(scale, scale, 1.0f);
-        guiGraphics.drawCenteredString(font, text, 0, 0, color);
         poseStack.popPose();
     }
 

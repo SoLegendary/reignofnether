@@ -1,7 +1,8 @@
 package com.solegendary.reignofnether.hud;
 
-import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
+import javax.annotation.Nullable;
+
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.hud.buttons.Button;
@@ -20,7 +21,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getPlayerToBuildingRelationship;
 import static com.solegendary.reignofnether.building.BuildingClientEvents.getSelectedBuildings;
@@ -51,6 +54,16 @@ public class ControlGroup {
         return keybinding != null ? keybinding.getKey() : -1;
     }
 
+    @Nullable
+    public Keybinding getKeybinding() {
+        return keybinding;
+    }
+
+    @Nullable
+    public ResourceLocation getIcon() {
+        return iconRl;
+    }
+
     public void clearAll() {
         this.entityIds.clear();
         this.buildingBps.clear();
@@ -62,18 +75,19 @@ public class ControlGroup {
 
     // removes any entities/buildings that are no longer being tracked (likely dead/left world)
     public void clean() {
-        var ids = new ArrayList<>();
-        for (LivingEntity livingEntity : getAllUnits()) {
-            Integer id = livingEntity.getId();
-            ids.add(id);
+        // runs every frame for every group, so sets rather than list lookups, and nothing for an empty half
+        if (!this.entityIds.isEmpty()) {
+            Set<Integer> ids = new HashSet<>();
+            for (LivingEntity livingEntity : getAllUnits())
+                ids.add(livingEntity.getId());
+            this.entityIds.removeIf(e -> !ids.contains(e));
         }
-        this.entityIds.removeIf(e -> !ids.contains(e));
-        var poses = new ArrayList<>();
-        for (BuildingPlacement b2 : BuildingClientEvents.getBuildings()) {
-            BlockPos originPos = b2.originPos;
-            poses.add(originPos);
+        if (!this.buildingBps.isEmpty()) {
+            Set<BlockPos> poses = new HashSet<>();
+            for (BuildingPlacement b2 : BuildingClientEvents.getBuildings())
+                poses.add(b2.originPos);
+            this.buildingBps.removeIf(b -> !poses.contains(b));
         }
-        this.buildingBps.removeIf(b -> !poses.contains(b));
     }
 
     // assigns selected entities/buildings to this control group
@@ -109,8 +123,7 @@ public class ControlGroup {
         // assign the icon resource (won't update if the front entity/building dies)
         if (newGroup) {
             if (hudSelectedEntity != null) {
-                String unitName = MiscUtil.getEntityIconName(hudSelectedEntity);
-                iconRl = ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/" + unitName + ".png");
+                iconRl = MiscUtil.mobHeadIcon(hudSelectedEntity);
             } else if (hudSelectedPlacement != null) {
                 iconRl = hudSelectedPlacement.getBuilding().icon;
             }
@@ -179,11 +192,8 @@ public class ControlGroup {
                 if (!Keybindings.shiftMod.isDown())
                     loadToSelected();
             },
-            () -> {
-                if (Keybindings.shiftMod.isDown())
-                    clearAll();
-            },
-            List.of(fcs(I18n.get("hud.control_group.reignofnether.control_group", keybinding.buttonLabel)))
+            this::clearAll,
+            List.of(fcs(I18n.get("hud.control_group.reignofnether.control_group", keybinding.getCurrentLabel())))
         );
     }
 }

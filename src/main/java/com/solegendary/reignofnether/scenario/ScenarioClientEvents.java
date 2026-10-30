@@ -7,16 +7,17 @@ import com.solegendary.reignofnether.guiscreen.TopdownGui;
 import com.solegendary.reignofnether.hud.*;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
+import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
 import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.ui.EditorRows;
 import com.solegendary.reignofnether.unit.UnitClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
-import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -24,7 +25,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -65,8 +65,7 @@ public class ScenarioClientEvents {
     ));
     private static int roleIndexToEdit = 0; // list index, not role.index
     private static int roleIndexToPlay = 0; // list index, not role.index
-    private static final ArrayList<Button> renderedButtons = new ArrayList<>();
-    private static final ArrayList<RectZone> hudZones = new ArrayList<>();
+    private static HudFrame frame = null; // the editor drawn last frame, for clicks
 
     // statics outlive the world: back to the defaults, or the next world inherits these
     public static void resetRoles() {
@@ -348,43 +347,21 @@ public class ScenarioClientEvents {
 
     @SubscribeEvent
     public static void onDrawScreen(ScreenEvent.Render.Post evt) {
-        hudZones.clear();
-        renderedButtons.clear();
-        if (MC.screen instanceof TopdownGui && isMenuOpen()) {
-            int width = 254;
-            int height = 160;
-            int blitX = MC.screen.width - width - 120;
-            int blitY = 5;
-            MyRenderer.renderFrameWithBg(evt.getGuiGraphics(), blitX, blitY, width, height, 0xA0000000);
-
-            ScenarioRole role = getScenarioRoleToEdit();
-            if (role != null) {
-                renderedButtons.addAll(ScenarioMenu.renderRoleNameAndCycleButtons(evt, getScenarioRoleToEdit(), blitX + 14, blitY + 14));
-                renderedButtons.add(ScenarioMenu.renderHelpButton(evt, blitX + width - Button.itemIconSize - 32, blitY + 4));
-                renderedButtons.add(ScenarioMenu.renderCloseButton(evt, blitX + width - Button.itemIconSize - 12, blitY + 4));
-                renderedButtons.addAll(ScenarioMenu.renderCustomisationButtonsColumn1(evt, blitX + 16, blitY + 56));
-                renderedButtons.addAll(ScenarioMenu.renderCustomisationButtonsColumn2(evt, blitX + 140, blitY + 56));
-                renderedButtons.add(ScenarioMenu.renderResetRoleButton(evt, blitX + width - Button.itemIconSize - 12, blitY + height - 26));
-            }
-            hudZones.add(new RectZone(blitX, blitY, blitX + width, blitY + height));
+        frame = null;
+        ScenarioRole role = getScenarioRoleToEdit();
+        if (MC.screen instanceof TopdownGui && isMenuOpen() && role != null) {
+            frame = EditorRows.begin(evt.getGuiGraphics(), evt.getMouseX(), evt.getMouseY());
+            ScenarioMenu.render(frame, role);
+            EditorRows.end(frame);
         }
     }
 
     public static boolean isMouseOverHud(int mouseX, int mouseY) {
-        for (RectZone hudZone : hudZones)
-            if (hudZone.isMouseOver(mouseX, mouseY))
-                return true;
-        return false;
+        return EditorRows.isOver(frame, mouseX, mouseY);
     }
 
     @SubscribeEvent
     public static void onMousePress(ScreenEvent.MouseButtonPressed.Post evt) {
-        for (Button button : renderedButtons) {
-            if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_1) {
-                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), true);
-            } else if (evt.getButton() == GLFW.GLFW_MOUSE_BUTTON_2) {
-                button.checkClicked((int) evt.getMouseX(), (int) evt.getMouseY(), false);
-            }
-        }
+        EditorRows.click(frame, evt.getMouseX(), evt.getMouseY(), evt.getButton());
     }
 }
