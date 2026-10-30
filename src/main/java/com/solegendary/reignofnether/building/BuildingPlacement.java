@@ -40,6 +40,7 @@ import com.solegendary.reignofnether.items.ItemServerEvents;
 import com.solegendary.reignofnether.items.ItemUtil;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.player.RTSPlayerScores;
 import com.solegendary.reignofnether.player.RTSPlayerScoresEnum;
 import com.solegendary.reignofnether.registrars.BlockRegistrar;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -747,6 +748,12 @@ public class BuildingPlacement {
         if (targetStand != null)
             targetStand.discard();
 
+        // only a building someone knocked down; not one cancelled or deleted by its owner
+        if (!this.level.isClientSide() && lastAttacker instanceof Unit attacker && !attacker.getOwnerName().equals(ownerName)) {
+            RTSPlayerScores.addToScore(ownerName, RTSPlayerScoresEnum.BUILDINGS_LOST);
+            RTSPlayerScores.addToScore(attacker.getOwnerName(), RTSPlayerScoresEnum.BUILDINGS_DESTROYED);
+        }
+
         if (ownerName.isEmpty()) {
             awardBounty();
         }
@@ -900,7 +907,10 @@ public class BuildingPlacement {
                 SoundClientEvents.playFactionCalmTheme(this.getFaction(), ownerName);
         }
 
-        // prevent showing blocks on minimap unless previously explored
+        // prevent showing blocks on minimap unless previously explored. Checked here too, not only on the client
+        // tick: a building can be placed and finished within one frame (a replay skipping ahead)
+        if (this.level.isClientSide() && (!FogOfWarClientEvents.isEnabled() || FogOfWarClientEvents.isInBrightChunk(originPos)))
+            isExploredClientside = true;
         if (this.level.isClientSide() && !isExploredClientside && !(getBuilding() instanceof CustomBuilding))
             for (BuildingBlock bb : blocks)
                 if (!this.level.getBlockState(bb.getBlockPos()).isAir())

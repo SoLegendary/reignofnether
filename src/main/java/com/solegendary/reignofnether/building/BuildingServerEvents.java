@@ -688,7 +688,7 @@ public class BuildingServerEvents {
         }
     }
 
-    private static void placeBuildingsClientside() {
+    public static void placeBuildingsClientside() {
         for (BuildingPlacement building : buildings) {
             BuildingClientboundPacket.placeBuilding(building.originPos,
                     building.getBuilding(),

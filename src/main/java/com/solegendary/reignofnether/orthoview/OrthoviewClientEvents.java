@@ -205,6 +205,12 @@ public class OrthoviewClientEvents {
         return -camRotY - camRotAdjY;
     }
 
+    // a replay following a player's recorded camera (zoom and getCamRotX())
+    public static void setCam(float zoomValue, float rotX) {
+        zoom = Mth.clamp(zoomValue, ZOOM_MIN, ZOOM_MAX);
+        camRotX = -rotX - camRotAdjX;
+    }
+
     public static boolean isCameraLocked() {
         return cameraLockTicksLeft > 0 || cameraLocked;
     }

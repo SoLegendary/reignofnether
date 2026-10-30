@@ -27,6 +27,7 @@ public class RTSPlayer {
     public int beaconOwnerTicks = 0; // ticks owning a beacon - will win upon reaching
     public int startPosColorId = 0;
     public RTSPlayerScores scores = new RTSPlayerScores();
+    public List<Integer> armyTimeline = new ArrayList<>(); // army size every MatchStatsClientboundPacket.ARMY_SAMPLE_TICKS, for the end screen
     public int scenarioRoleIndex = -1;
     public Map<TradeAction, Integer> tradeRates = new HashMap<>();
     public boolean isDogPerson = true;
