@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.hud.HudClientEvents;
 import com.solegendary.reignofnether.hud.buttons.Button;
+import com.solegendary.reignofnether.matchstart.MatchEndClientEvents;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.hud.buttons.HelperButtons;
 import com.solegendary.reignofnether.hud.buttons.StartButtons;
@@ -123,6 +124,7 @@ public final class TopRightPanel {
     /** Buttons that only appear in some game states, in a second row under the utility bar. */
     private static List<Button> contextButtons() {
         List<Button> list = new ArrayList<>();
+        addIfShown(list, MatchEndClientEvents.getResultsButton());
         if (!PlayerClientEvents.isRTSPlayer() && !PlayerClientEvents.rtsLocked) {
             if (GameruleClient.scenarioMode) {
                 Button cycleRole = ScenarioClientEvents.getCycleRoleToPlayButton();
