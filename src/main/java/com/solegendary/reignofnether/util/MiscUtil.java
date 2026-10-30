@@ -25,6 +25,7 @@ import com.solegendary.reignofnether.unit.Checkpoint;
 import com.solegendary.reignofnether.unit.NonUnitServerEvents;
 import com.solegendary.reignofnether.unit.Relationship;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
+import com.solegendary.reignofnether.unit.targeting.EntityTargetIndex;
 import com.solegendary.reignofnether.unit.goals.AbstractMeleeAttackUnitGoal;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
@@ -337,114 +338,55 @@ public class MiscUtil {
     }
 
     public static LivingEntity findClosestAttackableEntity(Mob unitMob, float range, ServerLevel level) {
-        Vector3d unitPosition = new Vector3d(unitMob.position().x, unitMob.position().y, unitMob.position().z);
-        var pos = new Vec3(unitPosition.x, unitPosition.y, unitPosition.z);
         boolean neutralAggro = unitMob.level().getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get();
-        AABB aabb = new AABB(
-                unitPosition.x - range,
-                unitPosition.y - range,
-                unitPosition.z - range,
-                unitPosition.x + range,
-                unitPosition.y + range,
-                unitPosition.z + range
-        );
-        var entities = level.getEntitiesOfClass(LivingEntity.class, aabb);
-        boolean isMelee = unitMob instanceof AttackerUnit aUnit && aUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal;
-        entities.sort(Comparator.comparingDouble(
-            e -> {
-                double dist = e.position().distanceTo(pos); // deprioritise over actual enemy units
-                boolean isMeleeAgainstFlyer = isMelee && e instanceof Unit unit && unit.isFlyingUnit();
-                if (e instanceof PhantomSummon || (e instanceof Unit unit && unit.isScout()) || isMeleeAgainstFlyer || (e instanceof BeeUnit) || e.hasEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get()))
-                    dist += 100;
-                return dist;
-            }
-        ));
+        boolean isUnit = unitMob instanceof Unit;
+        String ownerName = isUnit ? ((Unit) unitMob).getOwnerName() : null;
+        Faction faction = isUnit ? Factions.getFaction((Unit) unitMob) : null;
+        boolean isMelee = unitMob instanceof AttackerUnit attacker &&
+                attacker.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal;
 
-        // Determine priority effect filter for specific unit types
-        Predicate<LivingEntity> priorityFilter = null;
+        Predicate<LivingEntity> preferred = null;
         if (unitMob instanceof BoggedUnit) {
-            priorityFilter = e -> !e.hasEffect(MobEffects.POISON);
+            preferred = entity -> !entity.hasEffect(MobEffects.POISON);
         } else if (unitMob instanceof WraithUnit) {
-            priorityFilter = e -> !e.hasEffect(MobEffectRegistrar.FEARFUL.get());
+            preferred = entity -> !entity.hasEffect(MobEffectRegistrar.FEARFUL.get());
         } else if (unitMob instanceof WitherSkeletonUnit) {
-            priorityFilter = e -> e.hasEffect(MobEffects.WITHER);
+            preferred = entity -> entity.hasEffect(MobEffects.WITHER);
         } else if (unitMob instanceof WindcallerUnit) {
-            priorityFilter = e -> !e.hasEffect(MobEffects.LEVITATION);
+            preferred = entity -> !entity.hasEffect(MobEffects.LEVITATION);
         }
 
-        Vec3 unitVec = new Vec3(unitPosition.x, unitPosition.y, unitPosition.z);
-
-        Predicate<LivingEntity> baseFilter = e ->
-                e.position().distanceTo(unitVec) <= range &&
-                e.level().getWorldBorder().isWithinBounds(e.blockPosition());
-
-        // Try priority pass first, then fall back to base filter
-        List<Predicate<LivingEntity>> passes = priorityFilter != null
-                ? List.of(baseFilter.and(priorityFilter), baseFilter)
-                : List.of(baseFilter);
-
-        for (Predicate<LivingEntity> filter : passes) {
-            for (LivingEntity entity : entities) {
-                if (filter.test(entity) &&
-                        isIdleOrMoveAttackable(unitMob, entity, neutralAggro) &&
+        return EntityTargetIndex.get(level).findClosest(unitMob.position(), range,
+                group -> isAttackableGroup(group, isUnit, ownerName, faction, neutralAggro, unitMob instanceof GhastUnit),
+                preferred,
+                entity -> attackTargetPenalty(entity, isMelee),
+                entity -> entity.getId() != unitMob.getId() &&
+                        !(entity instanceof Player player && (player.isCreative() || player.isSpectator())) &&
+                        !(isMelee && entity instanceof Unit unit && unit.isFlyingUnit()) &&
+                        entity.level().getWorldBorder().isWithinBounds(entity.blockPosition()) &&
                         hasLineOfSightForAttacks(unitMob, entity) &&
-                        !(unitMob instanceof AttackerUnit aUnit && aUnit.isBelowMinAttackRange(entity)) &&
-                        !(entity instanceof Unit unit && unit.isGarrisoned())) {
-                    return entity;
-                }
-            }
-        }
-        return null;
+                        !(unitMob instanceof AttackerUnit attacker && attacker.isBelowMinAttackRange(entity)) &&
+                        !(entity instanceof Unit unit1 && unit1.isGarrisoned()));
     }
 
-    // does not cover explicit attack commands
-    private static boolean isIdleOrMoveAttackable(Mob unitMob, LivingEntity targetEntity, boolean neutralAggro) {
-        Relationship rs = Relationship.NEUTRAL;
-        if (unitMob instanceof Unit) {
-            rs = UnitServerEvents.getUnitToEntityRelationship((Unit) unitMob, targetEntity);
-
-            // don't aggro against blood moon enemies as a ghast so that buildings don't get friendly fired
-            if (targetEntity instanceof Unit targetUnit &&
-                    targetUnit.getOwnerName().equals(BloodMoon.ENEMY_NAME) &&
-                    unitMob instanceof GhastUnit)
-                return false;
-
-            // don't target vanilla units of the same faction
-            if (!(targetEntity instanceof Unit) && NonUnitServerEvents.getNonUnitFaction(targetEntity).equals(Factions.getFaction((Unit) unitMob)))
-                return false;
+    // Owner/faction/type rules are evaluated once per group, before enumerating any of its entities.
+    private static boolean isAttackableGroup(EntityTargetIndex.TargetGroup group, boolean isUnit,
+                                             String ownerName, Faction faction, boolean neutralAggro,
+                                             boolean isGhast) {
+        if (isUnit) {
+            if (isGhast && group.unit() && BloodMoon.ENEMY_NAME.equals(group.ownerName())) return false;
+            if (!group.unit() && group.faction().equals(faction)) return false;
         }
-
-        if (targetEntity instanceof Player player && (player.isCreative() || player.isSpectator()))
-            return false;
-
-        // If the relationship is FRIENDLY, do not allow the attack
-        if (rs == Relationship.FRIENDLY)
-            return false;
-
-        // Prevents certain attacks based on specific unit and goal conditions
-        if (targetEntity instanceof Unit unit &&
-                unit.isFlyingUnit() &&
-                unitMob instanceof AttackerUnit attackerUnit &&
-                attackerUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal) {
-            return false;
-        }
-        boolean isPassiveNonUnit = !(targetEntity instanceof Unit) &&
-                (targetEntity instanceof Animal || targetEntity instanceof AbstractFish || targetEntity instanceof Villager);
-
-
-
-        // Checks if neutral units can be attacked based on neutralAggro flag and other conditions
-        boolean canAttackNeutral =
-                rs == Relationship.NEUTRAL && neutralAggro &&
-                        !(targetEntity instanceof Vex) &&
-                        !(targetEntity instanceof ArmorStand) &&
-                        !(targetEntity instanceof PhantomSummon) &&
-                        !isPassiveNonUnit;
-
-        return (rs == Relationship.HOSTILE || canAttackNeutral) &&
-                targetEntity.getId() != unitMob.getId();
+        Relationship relationship = isUnit ? group.relationshipTo(ownerName) : Relationship.NEUTRAL;
+        return relationship == Relationship.HOSTILE ||
+                (relationship == Relationship.NEUTRAL && neutralAggro && group.neutralAttackable());
     }
 
+    private static double attackTargetPenalty(LivingEntity entity, boolean isMelee) {
+        return entity instanceof PhantomSummon || (entity instanceof Unit unit && unit.isScout()) ||
+                (isMelee && entity instanceof Unit unit1 && unit1.isFlyingUnit()) || entity instanceof BeeUnit ||
+                entity.hasEffect(MobEffectRegistrar.PARTIALLY_POSSESSED.get()) ? 100 : 0;
+    }
 
     public static BuildingPlacement findClosestAttackableBuilding(Mob unitMob, float range) {
         List<BuildingPlacement> buildings = unitMob.level().isClientSide() ?

@@ -249,7 +249,6 @@ public interface AttackerUnit {
     static void tick(AttackerUnit attackerUnit) {
         Mob unitMob = (Mob) attackerUnit;
         Unit unit = (Unit) attackerUnit;
-
         if (!unitMob.level().isClientSide && !unit.isEatingFood()) {
             if (attackerUnit.getAttackGoal() instanceof AbstractMeleeAttackUnitGoal meleeAttackUnitGoal) {
                 meleeAttackUnitGoal.tickAttackCooldown();
@@ -274,6 +273,10 @@ public interface AttackerUnit {
         }
 
         if (!unitMob.level().isClientSide && unitMob.tickCount % 4 == 0) {
+            float targetLockRange = attackerUnit.getTargetLockRange();
+            LivingEntity closestTarget = null;
+            boolean searchedForTarget = false;
+            var level = (ServerLevel) unitMob.level();
             if (((LivingEntity) unit).getEffect(MobEffectRegistrar.STUN.get()) != null ||
                 ((LivingEntity) unit).getEffect(MobEffectRegistrar.FREEZE.get()) != null) {
                 Unit.fullResetBehaviours(unit);
@@ -285,7 +288,9 @@ public interface AttackerUnit {
             // enact attack moving
             // prioritises units and will chase them, resuming attack move once dead or out of range/sight
             if (attackerUnit.getAttackMoveTarget() != null && !unit.hasLivingTarget() && !isAttackingBuilding) {
-                attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level());
+                closestTarget = attackerUnit.findClosestTarget(targetLockRange, level);
+                searchedForTarget = true;
+                attackerUnit.attackClosestEnemy(level, closestTarget, targetLockRange);
 
                 if (unit.getTargetGoal().getTarget() == null &&
                     unit.getMoveGoal().getMoveTarget() == null &&
@@ -333,14 +338,24 @@ public interface AttackerUnit {
                 }
             }
             // idle auto-aggression
-            if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle())
-                attackerUnit.attackClosestEnemy((ServerLevel) unitMob.level());
+            if (unit.isIdle() && !isCasting && attackerUnit.getAggressiveWhenIdle()) {
+                if (!searchedForTarget) {
+                    closestTarget = attackerUnit.findClosestTarget(targetLockRange, level);
+                    searchedForTarget = true;
+                }
+                attackerUnit.attackClosestEnemy(level, closestTarget, targetLockRange);
+            }
 
             boolean isSiegedPillager = attackerUnit instanceof PillagerUnit pUnit && pUnit.isSieging();
 
             // if attacking another unit, retarget the closest unit periodically unless forced on a target
-            if (!forced && !isSiegedPillager) {
-                attackerUnit.retargetToClosestUnit((ServerLevel) unitMob.level());
+            if (!forced && !isSiegedPillager &&
+                    (unitMob.getTarget() != null || isAttackingBuilding(attackerUnit))) {
+                if (!searchedForTarget) {
+                    closestTarget = attackerUnit.findClosestTarget(targetLockRange, level);
+                    searchedForTarget = true;
+                }
+                attackerUnit.retargetToClosestUnit(closestTarget, targetLockRange);
             }
         }
 
@@ -364,21 +379,31 @@ public interface AttackerUnit {
         }
     }
 
-    // if the nearest target is closer than the current target, retarget to the nearest
-    default void retargetToClosestUnit(ServerLevel level) {
-        float aggroRange = this.getAggroRange();
+    default float getTargetLockRange() {
+        float targetLockRange = this.getAggroRange();
         BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this);
         GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
         if (garr != null) {
-            aggroRange = garr.getAttackRange();
+            targetLockRange = garr.getAttackRange();
         }
+        return targetLockRange;
+    }
+
+    default LivingEntity findClosestTarget(float targetLockRange, ServerLevel level) {
+        return MiscUtil.findClosestAttackableEntity((Mob) this, targetLockRange, level);
+    }
+
+    // if the nearest target is closer than the current target, retarget to the nearest
+    default void retargetToClosestUnit(
+            LivingEntity closestTarget,
+            float targetLockRange
+    ) {
         boolean isAttackingBuilding = isAttackingBuilding(this);
         LivingEntity currentTarget = ((Mob) this).getTarget();
         if (currentTarget == null && !isAttackingBuilding) return;
-        LivingEntity closestTarget = MiscUtil.findClosestAttackableEntity((Mob) this, aggroRange, level);
         if (closestTarget == null) return;
         double distClosestTarget =  ((Mob) this).distanceToSqr(closestTarget.position());
-        double distCurrentTarget = isAttackingBuilding ? (aggroRange / 2) * (aggroRange / 2) : ((Mob) this).distanceToSqr(currentTarget.position());
+        double distCurrentTarget = isAttackingBuilding ? (targetLockRange / 2) : ((Mob) this).distanceToSqr(currentTarget.position());
 
         if (distClosestTarget < distCurrentTarget) {
             if (!((LivingEntity) this).isPassenger())
@@ -387,24 +412,21 @@ public interface AttackerUnit {
         }
     }
 
-    default void attackClosestEnemy(ServerLevel level) {
-        float aggroRange = this.getAggroRange();
-        BuildingPlacement garrPlacement = GarrisonableBuildingAddon.getGarrison((Unit) this);
-        GarrisonableBuildingAddon garr = garrPlacement != null ? garrPlacement.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class) : null;
-        if (garr != null) {
-            aggroRange = garr.getAttackRange();
-        }
-        LivingEntity entity = MiscUtil.findClosestAttackableEntity((Mob) this, aggroRange, level);
-        if (entity != null) {
+    default void attackClosestEnemy(
+            ServerLevel level,
+            LivingEntity closestTarget,
+            float targetLockRange
+    ) {
+        if (closestTarget != null) {
             if (!((LivingEntity) this).isPassenger())
                 ((Unit) this).getMoveGoal().stopMoving();
-            setUnitAttackTarget(entity);
+            setUnitAttackTarget(closestTarget);
             return;
         }
         if (canAttackBuildings() && !(this instanceof RavagerUnit && ((LivingEntity) this).isVehicle()) &&
                 (!(((Unit) this).getOwnerName()).isEmpty() || level.getGameRules().getRule(GameRuleRegistrar.NEUTRAL_AGGRO).get()))
         {
-            BuildingPlacement closestBuilding = MiscUtil.findClosestAttackableBuilding((Mob) this, aggroRange);
+            BuildingPlacement closestBuilding = MiscUtil.findClosestAttackableBuilding((Mob) this, targetLockRange);
             if (closestBuilding != null) {
                 if (!((LivingEntity) this).isPassenger())
                     ((Unit) this).getMoveGoal().stopMoving();
