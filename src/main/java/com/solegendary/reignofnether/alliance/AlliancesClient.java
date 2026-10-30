@@ -3,17 +3,22 @@ package com.solegendary.reignofnether.alliance;
 import com.solegendary.reignofnether.gamerules.GameruleClient;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.*;
 
 public class AlliancesClient {
+
+    static {
+        WorldState.onClientReset(AlliancesClient::resetAllAlliances);
+    }
     private static final Minecraft MC = Minecraft.getInstance();
 
     private static final Map<String, Set<String>> alliances = new HashMap<>();
-    public static final Set<String> inboundPendingAlliances = new HashSet<>();
-    public static final Set<String> outboundPendingAlliances = new HashSet<>();
+    public static final Set<String> inboundPendingAlliances = WorldState.client(new HashSet<>());
+    public static final Set<String> outboundPendingAlliances = WorldState.client(new HashSet<>());
     public static final HashSet<String> playersWithAlliedControl = new HashSet<>();
 
     public static boolean sharingAllyControl() {

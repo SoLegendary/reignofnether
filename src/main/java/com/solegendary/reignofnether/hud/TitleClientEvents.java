@@ -16,17 +16,24 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class TitleClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
-    private static final Random random = new Random();
     private static Faction titleBackgroundFaction = getRandomFaction();
     private static PanoramaRenderer panorama = new PanoramaRenderer(getCubeMap());
     public static String splash = getRandomSplash();
 
     public static PanoramaRenderer getPanorama() { return panorama; }
+
+    // how far the panorama has turned, in degrees: PanoramaRenderer keeps its own to itself, so this counts the same
+    // way (0.1 a frame-time unit) for things drawn to turn with it
+    private static float panoramaSpin = 0;
+
+    public static float turnPanorama(float partialTick) {
+        panoramaSpin = (panoramaSpin + partialTick * 0.1f) % 360f;
+        return panoramaSpin;
+    }
 
     private static CubeMap getCubeMap() {
         return new CubeMap(

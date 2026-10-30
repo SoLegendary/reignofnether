@@ -15,6 +15,7 @@ import com.solegendary.reignofnether.survival.SurvivalServerEvents;
 import com.solegendary.reignofnether.unit.UnitAction;
 import com.solegendary.reignofnether.unit.UnitServerEvents;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.util.WorldState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -23,7 +24,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.ArrayList;
@@ -43,6 +43,13 @@ public class TimeServerEvents {
     private static boolean zombieOrSkeleton = true;
 
     private static long lastTime = -1;
+    static {
+        WorldState.onServerReset(() -> {
+            resetBloodMoon();
+            serverStartTime = 0;
+            lastTime = -1;
+        });
+    }
 
     public static void resetBloodMoon() {
         bloodMoonTicksLeft = 0;
@@ -51,12 +58,6 @@ public class TimeServerEvents {
     }
 
     // statics outlive the world: clear them so the next world opened in this game starts clean
-    @SubscribeEvent
-    public static void onServerStopped(ServerStoppedEvent evt) {
-        resetBloodMoon();
-        serverStartTime = 0;
-        lastTime = -1;
-    }
 
     public static boolean isBloodMoonActive() {
         return bloodMoonTicksLeft > 0;

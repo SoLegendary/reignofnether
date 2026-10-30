@@ -29,6 +29,8 @@ public class ResearchClient {
     }
 
     public static void addResearch(String ownerName, ResourceLocation researchItemName) {
+        com.solegendary.reignofnether.chat.SpectatorFeed.researched(ownerName,
+                I18n.get("research." + researchItemName.getNamespace() + "." + researchItemName.getPath()));
         synchronized (researchItems) {
             if (MC.player != null && MC.player.getName().getString().equals(ownerName) && !researchItems.contains(researchItemName)) {
                 researchItems.add(researchItemName);
