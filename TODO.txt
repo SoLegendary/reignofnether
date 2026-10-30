@@ -30,11 +30,13 @@ Quality of Life
 [✅] Aquatic mobs (drowned, scout dogs/cats, frostwalker heroes) now always travel directly over water
 [✅] Added `/gamerule hideEnemyPicks` which hides enemy faction picks
 [🟡] Various fog of war stability improvements
-[✅] Moving while holding ctrl causes your army to move together at the speed of the slowest unit
 [🟡] Miscellaneous performance improvements, especially for large scale battles
 [✅] Reduced the size of the mod jar significantly
 [🟡] Improved permissions security of various serverside actions
-[🟡] `/rtsapi-start-scenario-role` renamed to `/rtsapi player start-scenario-role` and is now compatible with player selectors
+[✅] `/rtsapi-start-scenario-role` renamed to `/rtsapi player start-scenario-role` and is now compatible with player selectors
+[🟡] Holding ctrl when issuing a move command makes your army move together in formation:
+    - Faster units slow down by up to 40% to allow slower units to catch up
+    - Ranged units try to stay behind melee units
 
 Bugfixes
 --------
@@ -53,7 +55,7 @@ Languages
 
 Testing checklist
 -----------------
-[ ] Militia bell
+[✅] Militia bell
 [ ] Vanilla mob targeting and aggression
 [ ] Minimap buildings and units
 [ ] Food pickup
