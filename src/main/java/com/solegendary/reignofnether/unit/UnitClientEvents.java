@@ -1,5 +1,8 @@
 package com.solegendary.reignofnether.unit;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
@@ -60,8 +63,11 @@ import com.solegendary.reignofnether.unit.units.villagers.*;
 import com.solegendary.reignofnether.util.ArrayUtil;
 import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.MyMath;
+import com.solegendary.reignofnether.util.GhostBufferSource;
 import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -83,6 +89,7 @@ import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
@@ -115,6 +122,11 @@ public class UnitClientEvents {
 
     private static final Minecraft MC = Minecraft.getInstance();
 
+    private static final GhostBufferSource GHOST_BUFFER = new GhostBufferSource(MyRenderer.IMMEDIATE_BUFFER);
+    private static final int GHOST_ALPHA = 90;
+    // the ghost pass goes through the normal renderers, so their render events fire a second time
+    public static boolean renderingGhosts = false;
+
     // list of vecs used in RenderChunkRegionMixin to replace leaf rendering
     private static final int WINDOW_RADIUS = 5; // size of area to hide leaves
     public static final int WINDOW_UPDATE_TICKS_MAX = 5; // size of area to hide leaves
@@ -145,6 +157,12 @@ public class UnitClientEvents {
 
     public static ArrayList<LivingEntity> getSelectedUnits() {
         return selectedUnits;
+    }
+
+    // any selected unit has something to drop off, not just the one the HUD shows
+    public static boolean selectionCarrying() {
+        return selectedUnits.stream().anyMatch(e -> e instanceof Unit u && u.getReturnResourcesGoal() != null &&
+                Resources.getTotalResourcesFromItems(u.getItems()).getTotalValue() > 0);
     }
 
     private static void markSelectedUnitsChanged() {
@@ -278,12 +296,12 @@ public class UnitClientEvents {
                         currentPopulation += ResourceCosts.IRON_GOLEM.population;
                     }
         }
-        return currentPopulation;
+        return currentPopulation + PlayerRolesClient.soldiersOf(playerName).size(); // each soldier takes 1
     }
 
     public static void sendUnitCommandManual(String playerName, UnitAction action, int unitId, int[] unitIds,
                                              BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
-        if (MC.player != null && playerName.equals(MC.player.getName().getString()))
+        if (MC.player != null && playerName.equals(PlayerRolesClient.myOwner()))
             sendUnitCommandManual(action, unitId, unitIds, preselectedBlockPos, selectedBuildingPos);
     }
 
@@ -314,7 +332,7 @@ public class UnitClientEvents {
                                              BlockPos preselectedBlockPos, BlockPos selectedBuildingPos) {
         if (MC.player != null) {
             UnitActionItem actionItem = new UnitActionItem(
-                MC.player.getName().getString(),
+                PlayerRolesClient.myOwner(),
                 action, unitId, unitIds,
                 preselectedBlockPos,
                 selectedBuildingPos
@@ -326,7 +344,7 @@ public class UnitClientEvents {
             }
 
             PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-                MC.player.getName().getString(),
+                PlayerRolesClient.myOwner(),
                 action, unitId, unitIds,
                 preselectedBlockPos,
                 selectedBuildingPos,
@@ -342,7 +360,7 @@ public class UnitClientEvents {
         if (MC.player != null) {
             if (clientside) {
                 UnitActionItem actionItem = new UnitActionItem(
-                        MC.player.getName().getString(),
+                        PlayerRolesClient.myOwner(),
                         action, unitId, unitIds,
                         preselectedBlockPos,
                         selectedBuildingPos
@@ -351,7 +369,7 @@ public class UnitClientEvents {
             }
             if (serverside) {
                 PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-                        MC.player.getName().getString(),
+                        PlayerRolesClient.myOwner(),
                         action, unitId, unitIds,
                         preselectedBlockPos,
                         selectedBuildingPos,
@@ -405,7 +423,7 @@ public class UnitClientEvents {
                 if (includeUnit == null || includeUnit.test(livingEntity))
                     selUnits.add(livingEntity);
             }
-            String playerName = MC.player.getName().getString();
+            String playerName = PlayerRolesClient.myOwner();
 
             UnitActionItem actionItem = new UnitActionItem(
                 playerName,
@@ -788,7 +806,7 @@ public class UnitClientEvents {
                 );
                 if (getPlayerToEntityRelationship(selectedUnit) == Relationship.OWNED ||
                         NonUnitClientEvents.canControlAllMobs() ||
-                        AlliancesClient.canControlAlly(selectedUnit)) {
+                        SharingClient.canControl(selectedUnit)) {
 
                     for (LivingEntity entity : nearbyEntities) {
                         boolean bothVillagers = entity instanceof VillagerUnit &&
@@ -802,7 +820,7 @@ public class UnitClientEvents {
                         if (entity == selectedUnit) continue;
                         if ((getPlayerToEntityRelationship(entity) == Relationship.OWNED ||
                                 NonUnitClientEvents.canControlAllMobs() ||
-                                AlliancesClient.canControlAlly(entity)) &&
+                                SharingClient.canControl(entity)) &&
                                 (!bothVillagers || sameProfession) && garrionStatusMatches) {
                             addSelectedUnit(entity);
                         }
@@ -836,7 +854,7 @@ public class UnitClientEvents {
 
                 if (Keybindings.shiftMod.isDown() && !deselected &&
                     ((preselectedUnits.get(0) instanceof Unit && getPlayerToEntityRelationship(preselectedUnits.get(0)) == Relationship.OWNED) ||
-                    AlliancesClient.canControlAlly(preselectedUnits.get(0)) ||
+                    SharingClient.canControl(preselectedUnits.get(0)) ||
                     NonUnitClientEvents.canControlAllMobs())) {
                         addSelectedUnit(preselectedUnits.get(0));
                 }
@@ -851,7 +869,7 @@ public class UnitClientEvents {
             // and disallow selecting > 1 non-owned unit or the client player
             if (selectedUnits.size() > 1) {
                 selectedUnits.removeIf(e ->
-                    (getPlayerToEntityRelationship(e) != Relationship.OWNED && !NonUnitClientEvents.canControlAllMobs() && !AlliancesClient.canControlAlly(e)) ||
+                    (getPlayerToEntityRelationship(e) != Relationship.OWNED && !NonUnitClientEvents.canControlAllMobs() && !SharingClient.canControl(e)) ||
                             e.getId() == MC.player.getId()
                 );
             }
@@ -916,7 +934,7 @@ public class UnitClientEvents {
                 // right click -> return resources
                 else if (hudSelectedEntity instanceof Unit unit &&
                         unit.getReturnResourcesGoal() != null &&
-                        Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0 &&
+                        selectionCarrying() &&
                         preSelBuilding != null && preSelBuilding.getBuilding().canAcceptResources && preSelBuilding.isBuilt &&
                         unit.getOwnerName().equals(preSelBuilding.ownerName)) {
                     sendUnitCommand(UnitAction.RETURN_RESOURCES);
@@ -924,7 +942,7 @@ public class UnitClientEvents {
                 }
                 // right click -> build or repair preselected building
                 else if (hudSelectedEntity instanceof WorkerUnit && preSelBuilding != null &&
-                        (getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED || AlliancesClient.canControlAlly(hudSelectedEntity)) ||
+                        (getPlayerToBuildingRelationship(preSelBuilding) == Relationship.OWNED || SharingClient.canControl(hudSelectedEntity)) ||
                         (preSelBuilding != null && preSelBuilding.getBuilding() instanceof AbstractBridge)) {
 
                     if (preSelBuilding.getBuilding() instanceof AbstractFarm && preSelBuilding.isBuilt)
@@ -968,7 +986,7 @@ public class UnitClientEvents {
         for (LivingEntity unit : selUnits) {
             if ((getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
                     NonUnitClientEvents.canControlAllMobs() ||
-                    AlliancesClient.canControlAlly(unit)) && unit instanceof Unit) {
+                    SharingClient.canControl(unit)) && unit instanceof Unit) {
                 actionableUnits.add(unit);
             }
         }
@@ -1001,7 +1019,7 @@ public class UnitClientEvents {
                 for (LivingEntity unit : selUnits) {
                     if ((getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
                             NonUnitClientEvents.canControlAllMobs() ||
-                            AlliancesClient.canControlAlly(unit)) && unit instanceof Unit) {
+                            SharingClient.canControl(unit)) && unit instanceof Unit) {
                         actionableUnits.add(unit);
                     }
                 }
@@ -1020,7 +1038,7 @@ public class UnitClientEvents {
         if (MC.player == null || MC.level == null) return;
 
         List<com.mojang.datafixers.util.Pair<LivingEntity, BlockPos>> pairs = FormationDragMove.endDrag(units);
-        String playerName = MC.player.getName().getString();
+        String playerName = PlayerRolesClient.myOwner();
 
         for (var pair : pairs) {
             LivingEntity le = pair.getFirst();
@@ -1050,6 +1068,38 @@ public class UnitClientEvents {
         }
     }
 
+
+    /** Owners that aren't RTS players have no player colour, like the sandbox's "Enemy": they go by relationship. */
+    private static Color ownerColor(Unit unit) {
+        String owner = unit.getOwnerName();
+        return new Color(PlayerClientEvents.isRTSPlayer(owner) ? PlayerColors.getPlayerDisplayColorHex(owner) : PlayerColors.getPlayerAllianceColorHex(owner));
+    }
+
+    // ponytail: submits every on-screen unit's model twice, skip units with a clear line to the camera if it costs too much
+    private static void renderUnitGhosts(RenderLevelStageEvent evt) {
+        Vec3 cam = evt.getCamera().getPosition();
+        float partialTick = evt.getPartialTick();
+        PoseStack poseStack = evt.getPoseStack();
+
+        renderingGhosts = true;
+        for (LivingEntity entity : allUnits) {
+            if (!FogOfWarClientEvents.isInBrightChunk(entity) || entity.isRemoved() ||
+                    !evt.getFrustum().isVisible(entity.getBoundingBoxForCulling()))
+                continue;
+
+            Color color = entity instanceof Unit unit ? ownerColor(unit) : new Color(PlayerColors.getPlayerDisplayColorHex(""));
+            GHOST_BUFFER.setColor(color.getRed(), color.getGreen(), color.getBlue(), GHOST_ALPHA);
+
+            EntityRenderer<? super LivingEntity> renderer = MC.getEntityRenderDispatcher().getRenderer(entity);
+            Vec3 pos = entity.getPosition(partialTick).subtract(cam).add(renderer.getRenderOffset(entity, partialTick));
+            poseStack.pushPose();
+            poseStack.translate(pos.x, pos.y, pos.z);
+            renderer.render(entity, Mth.lerp(partialTick, entity.yRotO, entity.getYRot()), partialTick, poseStack, GHOST_BUFFER, LightTexture.FULL_BRIGHT);
+            poseStack.popPose();
+        }
+        renderingGhosts = false;
+        MyRenderer.IMMEDIATE_BUFFER.endBatch(MyRenderer.GHOST);
+    }
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) {
@@ -1102,6 +1152,9 @@ public class UnitClientEvents {
                     MyRenderer.IMMEDIATE_BUFFER.endBatch(MyRenderer.LINES_UNDER_ENTITIES);
                 }
                 if (MinimapClientEvents.shouldUnderline()) {
+                    if (OrthoviewClientEvents.isEnabled())
+                        renderUnitGhosts(evt);
+
                     var selectedEntityIds = new HashSet<>();
                     for (LivingEntity selectedUnit : selectedUnits) {
                         Integer id = selectedUnit.getId();
@@ -1124,15 +1177,16 @@ public class UnitClientEvents {
                             entityAABB = unit.getInflatedSelectionBox();
                         }
                         entityAABB = entityAABB.setMaxY(entityAABB.minY);
+                        // depth-tested in first person, so lift off the ground to stop z-fighting with it
+                        if (!OrthoviewClientEvents.isEnabled())
+                            entityAABB = entityAABB.move(0, 0.05, 0);
                         boolean excludeMaxY = OrthoviewClientEvents.isEnabled();
 
                         Color colorHex;
-                        if (entity instanceof Unit unit) {
-                            if (PlayerClientEvents.isRTSPlayer(unit.getOwnerName())) {
-                                colorHex = new Color(PlayerColors.getPlayerDisplayColorHex(unit.getOwnerName()));
-                            } else {
-                                colorHex = new Color(PlayerColors.COLOR_GRAY.hexCode, false);
-                            }
+                        if (alpha == 1.0f) { // selected
+                            colorHex = Color.WHITE;
+                        } else if (entity instanceof Unit unit) {
+                            colorHex = ownerColor(unit);
                         } else {
                             colorHex = new Color(0xFFFFFF, false);
                         }
@@ -1318,7 +1372,7 @@ public class UnitClientEvents {
                 return Relationship.NEUTRAL;
             }
 
-            String playerName = MC.player.getName().getString();
+            String playerName = PlayerRolesClient.myOwner();
             if (playerName.equals(ownerName)) {
                 return Relationship.OWNED;
             } else if (AlliancesClient.isAllied(playerName, ownerName)) {
@@ -1333,7 +1387,7 @@ public class UnitClientEvents {
     }
     public static Relationship getPlayerToEntityRelationship(LivingEntity entity) {
         if (MC.level != null && MC.player != null) {
-            String playerName = MC.player.getName().getString();
+            String playerName = PlayerRolesClient.myOwner();
 
             // Check if the entity is a Unit with no owner (neutral)
             if (entity instanceof Unit unit && unit.getOwnerName().isBlank()) {

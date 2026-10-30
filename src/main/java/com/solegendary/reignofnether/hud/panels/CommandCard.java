@@ -1,6 +1,5 @@
 package com.solegendary.reignofnether.hud.panels;
 
-import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.ability.abilities.TradeResources;
 import com.solegendary.reignofnether.building.buildings.shared.AbstractMarket;
 import com.solegendary.reignofnether.building.buildings.monsters.Laboratory;
@@ -8,6 +7,7 @@ import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import java.util.Map;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
@@ -33,7 +33,6 @@ import com.solegendary.reignofnether.items.ItemClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
 import com.solegendary.reignofnether.research.ResearchClient;
-import com.solegendary.reignofnether.resources.Resources;
 import com.solegendary.reignofnether.sandbox.SandboxClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialClientEvents;
 import com.solegendary.reignofnether.tutorial.TutorialStage;
@@ -249,7 +248,7 @@ public final class CommandCard {
         return UnitClientEvents.getPlayerToEntityRelationship(first) == Relationship.OWNED
                 || !PlayerClientEvents.isRTSPlayer()
                 || NonUnitClientEvents.canControlAllMobs()
-                || AlliancesClient.canControlAlly(first);
+                || SharingClient.canControl(first);
     }
 
     private static Contents unitContents(LivingEntity entity, Unit unit, LivingEntity first) {
@@ -291,7 +290,7 @@ public final class CommandCard {
         boolean showAbilities = TutorialClientEvents.isAtOrPastStage(TutorialStage.BUILD_INTRO) &&
                 (UnitClientEvents.getPlayerToEntityRelationship(first) == Relationship.OWNED
                         || !PlayerClientEvents.isRTSPlayer() || ResearchClient.hasCheat("wouldyoukindly"))
-                || AlliancesClient.canControlAlly(first);
+                || SharingClient.canControl(first);
         if (showAbilities)
             for (Button b : unit.getAbilityButtons())
                 if ((!b.isHidden.get() || isUnlearnt(b)) && !(b instanceof AbilityButton ab && ab.ability instanceof CallToArmsUnit)) {
@@ -341,12 +340,11 @@ public final class CommandCard {
 
     private static boolean canReturnResources(LivingEntity entity, Unit unit) {
         return entity instanceof Mob mob && mob.canPickUpLoot()
-                && Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0
-                && (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED || AlliancesClient.canControlAlly(entity));
+                && (UnitClientEvents.getPlayerToEntityRelationship(entity) == Relationship.OWNED || SharingClient.canControl(entity));
     }
 
     private static Button returnResourcesButton(Unit unit) {
-        boolean carrying = Resources.getTotalResourcesFromItems(unit.getItems()).getTotalValue() > 0;
+        boolean carrying = UnitClientEvents.selectionCarrying();
         return new ButtonBuilder(I18n.get("hud.reignofnether.drop_off_resources"))
                 .isEnabled(() -> carrying)
                 .iconResource(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/icons/items/chest.png"))

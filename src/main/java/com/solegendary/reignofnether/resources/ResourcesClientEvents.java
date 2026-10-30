@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.resources;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -123,7 +124,7 @@ public class ResourcesClientEvents {
     public static Resources getOwnResources() {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null) {
-            return getResources(MC.player.getName().getString());
+            return getResources(PlayerRolesClient.myOwner());
         }
         return null;
     }
@@ -175,8 +176,7 @@ public class ResourcesClientEvents {
     public static void addFloatingTextsFromResources(Resources res, BlockPos pos) {
         // every player's drop-offs reach every client, so spectators get everyone's income
         IncomeTracker.record(res.ownerName, res.food, res.wood, res.ore);
-        Player player = Minecraft.getInstance().player;
-        if (player == null || !player.getName().getString().equals(res.ownerName)) {
+        if (!PlayerRolesClient.myOwner().equals(res.ownerName)) {
             return;
         }
         if (!OrthoviewClientEvents.isEnabled()) {
