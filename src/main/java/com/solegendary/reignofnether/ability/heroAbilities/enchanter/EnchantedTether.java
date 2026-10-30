@@ -34,8 +34,6 @@ public class EnchantedTether extends HeroAbility {
     public static final int RANGE = 10;
     public static final int BREAK_RANGE = 15;
 
-    public static final float DAMAGE_RESIST_MULTIPLIER = 0.5f;
-
     public static final int CHARGES_RANK_1 = 1;
     public static final int CHARGES_RANK_2 = 2;
     public static final int CHARGES_RANK_3 = 3;

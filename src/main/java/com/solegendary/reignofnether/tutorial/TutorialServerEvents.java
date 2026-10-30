@@ -48,7 +48,6 @@ public class TutorialServerEvents {
     private static final Vec3i ARMY_SPAWN_POS = new Vec3i(-2946, 68, -1177);
     private static final Vec3i ANIMAL_POS = new Vec3i(-2923, 67, -1184);
     private static final Vec3i MONSTER_ATTACK_SPAWN_POS = new Vec3i(-2968, 64, -1216);
-    private static final Vec3i MONSTER_WORKER_POS = new Vec3i(-3082, 71, -1286);
 
     private static final Vec3i MAUSOLEUM_POS = new Vec3i(-3082, 71, -1293);
     private static final Vec3i FARM_POS_1 = new Vec3i(-3091, 70, -1291);

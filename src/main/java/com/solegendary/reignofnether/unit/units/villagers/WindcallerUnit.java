@@ -32,14 +32,12 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
@@ -461,19 +459,7 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
@@ -582,23 +568,6 @@ public class WindcallerUnit extends Pillager implements Unit, AttackerUnit, Rang
     public void performUnitRangedAttack(LivingEntity pTarget, float velocity) {
         if (pTarget == null)
             return;
-
-        // Lead the shot by predicting where the target will be when the projectile arrives
-        /*
-        Vec3 shooterPos = this.getEyePosition();
-        Vec3 targetPos = pTarget.getEyePosition().subtract(0,0.5,0);
-        Vec3 targetDelta = pTarget.getDeltaMovement();
-
-        if (pTarget.onGround())
-            targetDelta = targetDelta.multiply(1,0,1);
-
-        double distanceTicks = shooterPos.distanceTo(targetPos) * 1.5f;
-        Vec3 predictedPos = targetPos.add(targetDelta.multiply(distanceTicks * 1.5f, distanceTicks, distanceTicks * 1.5f));
-
-        double x = predictedPos.x() - shooterPos.x();
-        double y = predictedPos.y() - shooterPos.y();
-        double z = predictedPos.z() - shooterPos.z();
-         */
 
         double x = pTarget.getX() - this.getX();
         double y = isFlying() ? (pTarget.getY() - this.getEyeY()) : (pTarget.getEyeY() - 0.5 - this.getEyeY());

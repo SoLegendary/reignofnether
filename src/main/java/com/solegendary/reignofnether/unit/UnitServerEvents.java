@@ -72,16 +72,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.common.world.ForgeChunkManager;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
@@ -111,6 +110,7 @@ public class UnitServerEvents {
     public static boolean rtsPathfinding = false;
 
     // actioned only when the associated unit is idle, one at a time
+    private static final int MAX_QUEUED_ACTIONS_PER_OWNER = 4096;
     private static final List<UnitActionItem> unitActionSlowQueue = Collections.synchronizedList(new ArrayList<>());
     // actioned ASAP regardless of what the unit was doing
     private static final List<UnitActionItem> unitActionFastQueue = Collections.synchronizedList(new ArrayList<>());
@@ -118,8 +118,6 @@ public class UnitServerEvents {
     public static List<UnitActionItem> getUnitActionSlowQueue() { return unitActionSlowQueue; }
 
     private static final ArrayList<LivingEntity> allUnits = new ArrayList<>();
-
-    private static final HashMap<Integer, ChunkAccess> forcedUnitChunks = new HashMap<>();
 
     private static final Random RANDOM = new Random();
 
@@ -156,6 +154,7 @@ public class UnitServerEvents {
     public static void onServerTick(TickEvent.ServerTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END)
             return;
+        UnitChunkTickets.cleanupRestoredTickets(evt.getServer());
         saveTicks += 1;
         if (saveTicks >= SAVE_TICKS_MAX) {
             ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
@@ -169,24 +168,31 @@ public class UnitServerEvents {
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent evt) {
         isServerStopping = true;
+        UnitChunkTickets.clear();
         ServerLevel level = evt.getServer().getLevel(Level.OVERWORLD);
         if (level != null) {
             saveFallenHeroUnits(level);
             saveGatherTargets(level);
             allUnits.clear();
-            forcedUnitChunks.clear();
         }
     }
 
     // statics outlive the world: clear them so the next world opened in this game starts clean
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent evt) {
+        UnitChunkTickets.clear();
         HeroServerEvents.fallenHeroes.clear();
         savedTargetResources.clear();
         unitActionSlowQueue.clear();
         formationDispatchQueue.clear();
         knockbackIgnoreIds.clear();
         rtsPathfinding = false;
+    }
+
+    @SubscribeEvent
+    public static void onLevelUnload(LevelEvent.Unload evt) {
+        if (evt.getLevel() instanceof ServerLevel level)
+            UnitChunkTickets.clear(level);
     }
 
     public static void addUnitPoofs(Level level, Entity entity) {
@@ -321,7 +327,10 @@ public class UnitServerEvents {
     ) {
         if (shiftQueue) {
             synchronized(unitActionSlowQueue) {
+                long queued = unitActionSlowQueue.stream().filter(uai -> Objects.equals(ownerName, uai.getOwnerName())).count();
                 for (int actionableUnitId : unitIds) {
+                    if (queued++ >= MAX_QUEUED_ACTIONS_PER_OWNER)
+                        break;
                     unitActionSlowQueue.add(
                         new UnitActionItem(ownerName,
                                 action,
@@ -453,16 +462,7 @@ public class UnitServerEvents {
                 entity.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.AIR));
             }
 
-            ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
-            ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(),
-                ReignOfNether.MOD_ID,
-                entity,
-                chunk.getPos().x,
-                chunk.getPos().z,
-                true,
-                true
-            );
-            forcedUnitChunks.put(entity.getId(), chunk);
+            UnitChunkTickets.update(entity);
         }
 
         if (evt.getEntity() instanceof Projectile proj) {
@@ -480,10 +480,7 @@ public class UnitServerEvents {
             allUnits.removeIf(e -> e.getId() == entity.getId());
             UnitSyncClientboundPacket.sendLeavePacket(entity);
 
-            //ChunkAccess chunk = evt.getLevel().getChunk(entity.getOnPos());
-            //ForgeChunkManager.forceChunk((ServerLevel) evt.getLevel(), ReignOfNether.MOD_ID, entity, chunk.getPos()
-            // .x, chunk.getPos().z, false, true);
-            //forcedUnitChunks.removeIf(p -> p.getFirst() == entity.getId());
+            UnitChunkTickets.remove((ServerLevel) evt.getLevel(), entity);
         }
 
         // if a player has no more units, then they are defeated
@@ -571,7 +568,8 @@ public class UnitServerEvents {
         boolean lastHurtByAlly = lastHurtByMob instanceof Unit unit && evt.getEntity() instanceof Unit unit2 &&
                 AlliancesServerEvents.isAlliedOrOwned(unit.getOwnerName(), unit2.getOwnerName());
 
-        if (lastHurtByMob instanceof Unit unit && (drownedInfected || slimeInfected) && !lastHurtByAlly) {
+        if (lastHurtByMob instanceof Unit unit && (drownedInfected || slimeInfected) && !lastHurtByAlly &&
+                !PlayerServerEvents.rtsPlayers.isEmpty()) {
 
             EntityType<? extends Unit> entityType = null;
 
@@ -737,33 +735,6 @@ public class UnitServerEvents {
                             unit.getItems().add(itemStack);
                     }
                 }
-
-                // insert a drop-off command without disrupting other queued commands
-                /*
-                if (Unit.atThresholdResources(unit)) {
-                    int unitId = ((Mob) unit).getId();
-                    boolean hasDropOffCommandQueued = false;
-                    for (UnitActionItem uai : unitActionSlowQueue) {
-                        for (int id : uai.getUnitIds()) {
-                            if (id == unitId && (
-                                uai.getAction() == UnitAction.RETURN_RESOURCES_TO_CLOSEST ||
-                                uai.getAction() == UnitAction.RETURN_RESOURCES)) {
-                                hasDropOffCommandQueued = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!hasDropOffCommandQueued) {
-                        unitActionSlowQueue.add(0, new UnitActionItem(
-                                unit.getOwnerName(),
-                                UnitAction.RETURN_RESOURCES_TO_CLOSEST,
-                                -1,
-                                new int[]{((Entity) unit).getId()}
-                        ));
-                    }
-                }
-
-                 */
             } else {
                 lastHuntedAnimalId = evt.getEntity().getId();
             }
@@ -821,35 +792,6 @@ public class UnitServerEvents {
                 }
                 if (entity instanceof UnitInventory inv) {
                     ItemClientboundPacket.syncInventory(entity.getId(), inv.getAllItems());
-                }
-
-                // remove old chunk // add current chunk
-                ChunkAccess newChunk = evt.level.getChunk(entity.getOnPos());
-                ChunkAccess oldChunk = forcedUnitChunks.get(entity.getId());
-                boolean chunkNeedsUpdate = oldChunk != null && (
-                    oldChunk.getPos().x != newChunk.getPos().x || oldChunk.getPos().z != newChunk.getPos().z
-                );
-
-                if (chunkNeedsUpdate) {
-                    ForgeChunkManager.forceChunk((ServerLevel) evt.level,
-                        ReignOfNether.MOD_ID,
-                        entity,
-                        oldChunk.getPos().x,
-                        oldChunk.getPos().z,
-                        false,
-                        true
-                    );
-                    ForgeChunkManager.forceChunk((ServerLevel) evt.level,
-                        ReignOfNether.MOD_ID,
-                        entity,
-                        newChunk.getPos().x,
-                        newChunk.getPos().z,
-                        true,
-                        true
-                    );
-                    forcedUnitChunks.put(entity.getId(), newChunk);
-                    //ReignOfNether.LOGGER.info("Updated forced chunk for entity: " + entity.getId() + " at: " +
-                    // newChunk.getPos().x + "," + newChunk.getPos().z);
                 }
             }
         }

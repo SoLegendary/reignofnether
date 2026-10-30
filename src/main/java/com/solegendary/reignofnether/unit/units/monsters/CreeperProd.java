@@ -5,7 +5,6 @@ import com.solegendary.reignofnether.building.buildings.placements.ProductionPla
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
 import com.solegendary.reignofnether.building.production.IUnitProductionItem;
-import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.UnitSpawnButton;
 import com.solegendary.reignofnether.keybinds.Keybinding;
 import com.solegendary.reignofnether.registrars.EntityRegistrar;
@@ -20,12 +19,12 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class CreeperProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Creeper";
     public static final ResourceCost cost = ResourceCosts.CREEPER;
-    public static Button startButton = null;
 
     public CreeperProd() {
         super(cost);
@@ -65,10 +64,10 @@ public class CreeperProd extends ProductionItem implements IUnitProductionItem {
                 Component.translatable("entity.reignofnether.creeper_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.creeper_unit.tooltip1").getVisualOrderText(),
                 Component.translatable("entity.reignofnether.creeper_unit.tooltip2").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("entity.reignofnether.creeper_unit.tooltip3").getVisualOrderText()
             ),
             this

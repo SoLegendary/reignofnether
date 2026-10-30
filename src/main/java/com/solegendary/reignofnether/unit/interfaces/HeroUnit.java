@@ -1,10 +1,9 @@
 package com.solegendary.reignofnether.unit.interfaces;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.building.production.ActiveProduction;
 import com.solegendary.reignofnether.building.production.HeroProductionItem;
@@ -91,7 +90,7 @@ public interface HeroUnit extends Unit {
     }
 
     static List<ActiveProduction> getHeroesInTraining(boolean isClientside, String ownerName) {
-        List<BuildingPlacement> buildings = isClientside ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(isClientside);
         List<ActiveProduction> productions = new ArrayList<>();
         for (BuildingPlacement b : buildings)
             if (b instanceof ProductionPlacement pb && pb.ownerName.equals(ownerName))

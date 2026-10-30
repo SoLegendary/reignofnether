@@ -15,10 +15,10 @@ import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class WitherShrine extends ProductionBuilding {
 
@@ -58,10 +58,10 @@ public class WitherShrine extends ProductionBuilding {
             List.of(
                 Component.translatable("buildings.reignofnether.wither_shrine").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.wither_shrine.tooltip1").getVisualOrderText(),
                 Component.translatable("buildings.reignofnether.wither_shrine.tooltip2").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.wither_shrine.tooltip3").getVisualOrderText()
             ),
             this

@@ -150,7 +150,8 @@ public class ScenarioServerboundPacket {
     public boolean handle(Supplier<NetworkEvent.Context> ctx) {
         final var success = new AtomicBoolean(false);
         ctx.get().enqueueWork(() -> {
-            if (!SandboxServer.isAnyoneASandboxPlayer())
+            ServerPlayer sender = ctx.get().getSender();
+            if (sender == null || !SandboxServer.isSandboxOp(sender))
                 return;
 
             ReignOfNether.LOGGER.info("[Scenario] action={}(roleIndex={}, intValue={}, strValue={})", this.action, this.roleIndex, this.intValue, this.strValue);

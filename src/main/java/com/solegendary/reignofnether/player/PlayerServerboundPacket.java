@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.gamemode.ClientGameModeHelper;
 import com.solegendary.reignofnether.gamemode.GameMode;
 import com.solegendary.reignofnether.gamemode.GameModeServerboundPacket;
 import com.solegendary.reignofnether.hud.HudClientEvents;
+import com.solegendary.reignofnether.registrars.GameRuleRegistrar;
 import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalServerboundPacket;
@@ -139,23 +140,6 @@ public class PlayerServerboundPacket {
         }
     }
 
-    /*
-    public static void startRTSEveryone() {
-        Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null && MC.level != null) {
-            GameModeServerboundPacket.setAndLockAllClientGameModes(ClientGameModeHelper.gameMode);
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
-        }
-    }
-
-        public static void cancelStartRTSEveryone() {
-        Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null && MC.level != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.CANCEL_START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
-        }
-    }
-     */
-
     public static void startRTSScenario(int roleIndex) {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null && MC.level != null) {
@@ -257,7 +241,13 @@ public class PlayerServerboundPacket {
 
     private static final List<PlayerAction> opOnlyActions = List.of(
             PlayerAction.RESET_RTS,
-            PlayerAction.RESET_RTS_HARD
+            PlayerAction.RESET_RTS_HARD,
+            PlayerAction.START_RTS_SANDBOX,
+            PlayerAction.LOCK_RTS,
+            PlayerAction.UNLOCK_RTS,
+            PlayerAction.PUBLISH_SCENARIO_MAP,
+            PlayerAction.ENABLE_RTS_SYNCING,
+            PlayerAction.DISABLE_RTS_SYNCING
     );
 
     // server-side packet-consuming functions
@@ -274,8 +264,20 @@ public class PlayerServerboundPacket {
                 ReignOfNether.LOGGER.warn("PlayerServerboundPacket: Tried to process packet from " + player.getName() + " for id: " + this.playerId);
                 success.set(false);
                 return;
-            } else if (opOnlyActions.contains(action) && !player.hasPermissions(4)) {
+            } else if (opOnlyActions.contains(action) && !PlayerServerEvents.isOpOrHost(player)) {
                 ReignOfNether.LOGGER.warn("PlayerServerboundPacket: Non-op player " + player.getName() + " tried to run action: " + this.action.name());
+                if (action == PlayerAction.START_RTS_SANDBOX)
+                    player.sendSystemMessage(Component.translatable("server.reignofnether.sandbox_op_only"));
+                success.set(false);
+                return;
+            } else if (action == PlayerAction.START_RTS && (faction == Factions.NONE || faction == Factions.NEUTRAL)) {
+                // unknown faction keys decode to NONE, which would start a sandbox without the op check
+                ReignOfNether.LOGGER.warn("PlayerServerboundPacket: " + player.getName() + " tried to start RTS with faction: " + faction.key);
+                success.set(false);
+                return;
+            } else if (action == PlayerAction.START_RTS_SANDBOX &&
+                    player.level().getGameRules().getRule(GameRuleRegistrar.PVP_MODES_ONLY).get()) {
+                ReignOfNether.LOGGER.warn("PlayerServerboundPacket: " + player.getName() + " tried to start sandbox while pvpModesOnly is on");
                 success.set(false);
                 return;
             }

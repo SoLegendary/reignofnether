@@ -1,7 +1,5 @@
 package com.solegendary.reignofnether.survival.spawners;
 
-import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.production.ProductionItems;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.registrars.EnchantmentRegistrar;
@@ -119,23 +117,6 @@ public class IllagerWaveSpawner {
         }
     }
 
-    public static void spawnIllagerBase(ServerLevel level, Wave wave) {
-        List<BlockPos> spawnBps = getValidSpawnPoints(1, level, false, 16);
-        if (spawnBps.isEmpty())
-            spawnIllagerWave(level, wave);
-
-        boolean flipCoords = random.nextBoolean();
-
-        for (BlockPos bp : spawnBps) {
-            BuildingPlacement building = WaveSpawner.spawnBuilding(Buildings.BARRACKS, bp.above());
-            if (building != null) {
-                BlockPos bp2 = new BlockPos(building.centrePos.getX() - 2, building.minCorner.getY(), building.centrePos.getZ());
-                WaveSpawner.spawnBuilding(Buildings.WATCHTOWER, bp2.offset(new BlockPos(flipCoords ? 10 : -0,-1, flipCoords ? 0 : 10)));
-                WaveSpawner.spawnBuilding(Buildings.WATCHTOWER, bp2.offset(new BlockPos(flipCoords ? -10 : 0,-1, flipCoords ? 0 : -10)));
-            }
-        }
-    }
-
     // spawn illagers from one direction
     public static void spawnIllagerWave(ServerLevel level, Wave wave) {
         checkAndApplyUpgrades(wave.highestUnitTier);
@@ -186,7 +167,7 @@ public class IllagerWaveSpawner {
                 entities.get(i).moveTo(bps.get(i).getX(), entities.get(i).getY() + 0.5f, bps.get(i).getZ());
         }
         if (remainingPop > 0) {
-            PlayerServerEvents.sendMessageToAllPlayers("Failed to spawn " + remainingPop + "/" + pop + " population worth of villager units");
+            PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.failed_spawn_villagers", false, remainingPop, pop);
         }
         lastFaction = Factions.VILLAGERS;
     }

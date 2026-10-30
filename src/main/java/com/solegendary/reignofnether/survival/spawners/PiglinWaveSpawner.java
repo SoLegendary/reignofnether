@@ -173,7 +173,7 @@ public class PiglinWaveSpawner {
                 failedPortalPlacements += 1;
         }
         if (failedPortalPlacements > 0)
-            PlayerServerEvents.sendMessageToAllPlayers("Failed to spawn " + failedPortalPlacements + " portals!");
+            PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.failed_spawn_portals", false, failedPortalPlacements);
 
         lastFaction = Factions.PIGLINS;
     }

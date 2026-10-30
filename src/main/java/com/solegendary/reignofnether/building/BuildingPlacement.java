@@ -310,11 +310,7 @@ public class BuildingPlacement {
         initPlacedBlocks();
 
         // offset ticks from other buildings of the same type so we can tell which ones were built first
-        List<BuildingPlacement> bpls;
-        if (level.isClientSide())
-            bpls = BuildingClientEvents.getBuildings();
-        else
-            bpls = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> bpls = BuildingUtils.getBuildingsList(level.isClientSide());
 
         for (BuildingPlacement bpl : bpls)
             if (bpl.getBuilding().isTypeOf(this.getBuilding()) && bpl != this && bpl.ownerName.equals(this.ownerName))
@@ -1480,7 +1476,7 @@ public class BuildingPlacement {
         try {
             this.commands.remove(index);
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in deleteCommand");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in deleteCommand", e);
         }
     }
     
@@ -1488,7 +1484,7 @@ public class BuildingPlacement {
         try {
             this.commands.get(index).commandStr = text;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandText");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandText", e);
         }
     }
     
@@ -1497,7 +1493,7 @@ public class BuildingPlacement {
             this.commands.get(index).tickCooldownMax = cooldownTicks;
             this.commands.get(index).tickCooldown = cooldownTicks;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandCooldown");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandCooldown", e);
         }
     }
     
@@ -1506,13 +1502,13 @@ public class BuildingPlacement {
         try {
             triggerCond = BuildingCommand.TriggerCondition.valueOf(triggerStr);
         } catch (IllegalArgumentException e) {
-            System.out.println("IllegalArgumentException in setCommandTrigger");
+            ReignOfNether.LOGGER.warn("IllegalArgumentException in setCommandTrigger", e);
             return;
         }
         try {
             this.commands.get(index).condition = triggerCond;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandTrigger");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandTrigger", e);
         }
     }
 }

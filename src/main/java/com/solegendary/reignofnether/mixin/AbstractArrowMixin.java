@@ -1,8 +1,7 @@
 package com.solegendary.reignofnether.mixin;
 
+import com.solegendary.reignofnether.util.MiscUtil;
 import com.google.common.collect.Lists;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
 import com.solegendary.reignofnether.unit.interfaces.AttackerUnit;
@@ -75,37 +74,6 @@ public abstract class AbstractArrowMixin extends Projectile {
         return building != null && building.isPosInsideBuilding(result.getBlockPos()) && !insideForeignEntity;
     }
 
-    /*
-    // prevent arrows from colliding with the building that a garrisoned unit is inside of
-    @Inject(
-            method = "isNoPhysics",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    public void isNoPhysics(CallbackInfoReturnable<Boolean> cir) {
-        if (this.getOwner() instanceof AttackerUnit aUnit) {
-            // garrisoned unit -> ground
-            BuildingPlacement building = GarrisonableBuildingAddon.getGarrison((Unit) aUnit);
-            if (isInsideBuildingAndNotForeignEntity(building)) {
-                cir.setReturnValue(true);
-            }
-
-            // ground -> garrisoned unit - allow through at 1/2 accuracy
-            // can't use random() here or the nophysics status will change every tick
-            //if (this.getId() % 2 == 0 &&
-            //    ((Unit) aUnit).getTargetGoal().getTarget() instanceof Unit tUnit) {
-            //    if (GarrisonableBuilding.getGarrison(tUnit) instanceof Building building &&
-            //        isInsideTopOfBuilding(building)) {
-
-            //        // nophysics all the time means they wouldn't collide with the actual target
-            //        if (this.distanceToSqr((Entity) tUnit) > Math.pow(1.0d, 2))
-            //             cir.setReturnValue(true);
-            //    }
-            //}
-        }
-    }
-    */
-
     // correct angle of nophysics arrows
     @Inject(
             method = "tick",
@@ -155,10 +123,7 @@ public abstract class AbstractArrowMixin extends Projectile {
                 entity instanceof Unit unit2) {
             String owner1 = unit1.getOwnerName();
             String owner2 = unit2.getOwnerName();
-            if (entity.level().isClientSide())
-                isAlliedOrOwned = owner1.equals(owner2) || AlliancesClient.isAllied(owner1, owner2);
-            else
-                isAlliedOrOwned = owner1.equals(owner2) || AlliancesServerEvents.isAllied(owner1, owner2);
+            isAlliedOrOwned = MiscUtil.isAlliedOrOwned(entity.level(), owner1, owner2);
         }
         return this.getOwner() instanceof Unit unit1 &&
                 entity instanceof Unit unit2 &&

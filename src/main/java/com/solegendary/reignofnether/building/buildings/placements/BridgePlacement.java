@@ -49,7 +49,7 @@ public class BridgePlacement extends BuildingPlacement {
     @Override
     public double getHealthPerBlock() {
         int solidBlocks = getSolidBlocks().size();
-        return (double) (getMaxHealth() / solidBlocks) * 2;
+        return getMaxHealth() / (double) Math.max(1, solidBlocks) * 2;
     }
 
     @Override

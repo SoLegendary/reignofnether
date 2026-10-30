@@ -81,10 +81,6 @@ public class BeaconPlacement extends ProductionPlacement implements RangeIndicat
             return name;
     }
 
-    private Block getBeaconBlock() {
-        return level.getBlockState(beaconPos).getBlock();
-    }
-
     private BlockEntity getBeaconBlockEntity() {
         return level.getBlockEntity(beaconPos);
     }

@@ -52,14 +52,13 @@ import com.solegendary.reignofnether.util.ParticleUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.FormattedCharSequence;
@@ -80,7 +79,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -231,6 +229,22 @@ public interface Unit {
     String getOnDeathCommand();
     void setOnDeathCommand(String command);
 
+    default void runOnDeathCommand(Entity.RemovalReason reason) {
+        Entity entity = (Entity) this;
+        if (reason == Entity.RemovalReason.KILLED && entity.level() instanceof ServerLevel serverLevel) {
+            String command = this.getOnDeathCommand();
+            if (command != null && !command.isEmpty()) {
+                CommandSourceStack source = serverLevel.getServer()
+                    .createCommandSourceStack()
+                    .withEntity(entity)
+                    .withPosition(entity.position())
+                    .withLevel(serverLevel)
+                    .withPermission(2);
+                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
+            }
+        }
+    }
+
     default double getDamageTakenIncrease() {
         MobEffectInstance mei = ((LivingEntity) this).getEffect(MobEffectRegistrar.DAMAGE_TAKEN_INCREASE.get());
         double value = mei == null ? 0 : (mei.getAmplifier() + 1) * 0.05d;
@@ -280,20 +294,7 @@ public interface Unit {
 
     static void tick(Unit unit) {
         Mob unitMob = (Mob) unit;
-        if (!unitMob.level().isClientSide() && unitMob.level() instanceof ServerLevel serverLevel) {
-            ServerChunkCache chunkProvider = serverLevel.getChunkSource();
-
-            BlockPos unitPos = unitMob.blockPosition();
-            ChunkPos currentChunkPos = new ChunkPos(unitPos);
-
-            // Load a 2-chunk radius around the unit
-            for (int dx = -2; dx <= 2; dx++) {
-                for (int dz = -2; dz <= 2; dz++) {
-                    ChunkPos chunkPos = new ChunkPos(currentChunkPos.x + dx, currentChunkPos.z + dz);
-                    chunkProvider.addRegionTicket(TicketType.FORCED, chunkPos, 2, chunkPos);
-                }
-            }
-        }
+        UnitChunkTickets.update(unitMob);
         boolean clientSide = ((Entity) unit).level().isClientSide();
         double ticksPerSec = clientSide ? RtsDebugClientEvents.getCappedTPS() : 20d;
 
@@ -305,7 +306,8 @@ public interface Unit {
 
         var cooldowns = unit.getAbilityCooldowns();
 
-        for (Ability ability : new ArrayList<>(cooldowns.keySet())) {
+        // only existing keys are put() in this loop, which doesn't structurally modify the map
+        for (Ability ability : cooldowns.keySet()) {
             float cooldown = cooldowns.get(ability);
 
             if (cooldown <= 0 && unit.getAbilityCharges(ability) >= ability.maxCharges)
@@ -342,9 +344,10 @@ public interface Unit {
                 }
             }
         } else {
-            checkAndPickupFood(unit);
-            checkAndPickupResources(unit);
-            checkAndPickupEquipment(unit);
+            List<ItemEntity> nearbyItems = unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1));
+            checkAndPickupFood(unit, nearbyItems);
+            checkAndPickupResources(unit, nearbyItems);
+            checkAndPickupEquipment(unit, nearbyItems);
 
             // sync target variables between goals and Mob
             if (unit.getTargetGoal().getTarget() == null || !unit.getTargetGoal().getTarget().isAlive() ||
@@ -524,10 +527,10 @@ public interface Unit {
         }
     }
 
-    private static void checkAndPickupResources(Unit unit) {
+    private static void checkAndPickupResources(Unit unit, List<ItemEntity> nearbyItems) {
         Mob unitMob = (Mob) unit;
         if (unitMob.canPickUpLoot() && (!(unit instanceof UnitInventory inv) || inv.isEmpty())) {
-            for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
+            for (ItemEntity itementity : nearbyItems) {
                 if (!itementity.isRemoved() && !itementity.getItem().isEmpty() && !itementity.hasPickUpDelay() && unitMob.isAlive()) {
                     if (!Unit.atMaxResources(unit)) {
                         ItemStack itemstack = itementity.getItem();
@@ -568,9 +571,8 @@ public interface Unit {
         }
     }
 
-    private static void checkAndPickupEquipment(Unit unit) {
-        Mob unitMob = (Mob) unit;
-        for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
+    private static void checkAndPickupEquipment(Unit unit, List<ItemEntity> nearbyItems) {
+        for (ItemEntity itementity : nearbyItems) {
             Relationship rl = UnitServerEvents.getUnitToEntityRelationship(unit, itementity);
             if (rl != Relationship.HOSTILE) {
                 if (tryPickingUpEquipment(unit, itementity))
@@ -600,10 +602,10 @@ public interface Unit {
 
     static int HOSTILE_FOOD_DELAY_TICKS = 200;
 
-    private static void checkAndPickupFood(Unit unit) {
+    private static void checkAndPickupFood(Unit unit, List<ItemEntity> nearbyItems) {
         Mob unitMob = (Mob) unit;
         if (!unit.isHoldingEdibleFood()) {
-            for (ItemEntity itementity : unitMob.level().getEntitiesOfClass(ItemEntity.class, unitMob.getBoundingBox().inflate(1, 0, 1))) {
+            for (ItemEntity itementity : nearbyItems) {
                 if (itementity.isRemoved() || itementity.tickCount < 10)
                     continue;
                 ItemStack itemstack = itementity.getItem();

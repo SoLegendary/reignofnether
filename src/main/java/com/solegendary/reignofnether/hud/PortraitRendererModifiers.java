@@ -156,22 +156,6 @@ public class PortraitRendererModifiers {
             scale = -7;
         }
 
-        /*
-         else if (entity instanceof TotemOfRegeneration) {
-            yOffset = 18;
-            scale = -7;
-        } else if (entity instanceof TotemOfShielding) {
-            yOffset = 18;
-            scale = -7;
-        } else if (entity instanceof TotemOfProtection) {
-            yOffset = 12;
-            scale = -7;
-        } else if (entity instanceof TotemOfCasting) {
-            yOffset = 20;
-            scale = -7;
-        }
-         */
-
         return new Pair<>(yOffset, scale);
     }
 }

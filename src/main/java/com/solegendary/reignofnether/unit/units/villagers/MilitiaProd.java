@@ -11,13 +11,12 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class MilitiaProd extends ProductionItem {
 
@@ -41,10 +40,10 @@ public class MilitiaProd extends ProductionItem {
             "Militia",
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/militia.png"),
             List.of(
-                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.militia_unit"), Style.EMPTY.withBold(true)),
-                    FormattedCharSequence.forward("", Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.militia_unit.tooltip1"), Style.EMPTY),
-                    FormattedCharSequence.forward(I18n.get("entity.reignofnether.militia_unit.tooltip2"), Style.EMPTY)
+                    fcs(I18n.get("entity.reignofnether.militia_unit"), true),
+                    fcs(""),
+                    fcs(I18n.get("entity.reignofnether.militia_unit.tooltip1")),
+                    fcs(I18n.get("entity.reignofnether.militia_unit.tooltip2"))
             )
         );
     }
@@ -57,12 +56,12 @@ public class MilitiaProd extends ProductionItem {
             () -> false,
             () -> true,
             List.of(
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.militia_unit"), Style.EMPTY.withBold(true)),
+                fcs(I18n.get("entity.reignofnether.militia_unit"), true),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPopAndTime(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.militia_unit.tooltip1"), Style.EMPTY),
-                FormattedCharSequence.forward(I18n.get("entity.reignofnether.militia_unit.tooltip2"), Style.EMPTY)
+                fcs(""),
+                fcs(I18n.get("entity.reignofnether.militia_unit.tooltip1")),
+                fcs(I18n.get("entity.reignofnether.militia_unit.tooltip2"))
             ),
             this
         );

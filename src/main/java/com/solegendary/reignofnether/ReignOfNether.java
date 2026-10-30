@@ -183,7 +183,7 @@ public class ReignOfNether {
         
         if (context.getDirection() != NetworkDirection.LOGIN_TO_CLIENT
             && context.getDirection() != NetworkDirection.PLAY_TO_CLIENT) {
-            connection.disconnect(Component.literal("Illegal packet received, terminating connection"));
+            connection.disconnect(Component.translatable("disconnect.reignofnether.illegal_packet"));
             throw new IllegalStateException("Invalid packet received, aborting connection");
         }
         
@@ -256,7 +256,7 @@ public class ReignOfNether {
             return true;
         } catch (Exception ex) {
             logger.error(RESETMARKER, "Failed to clear, closing connection", ex);
-            context.getNetworkManager().disconnect(Component.literal("Failed to clear, closing connection"));
+            context.getNetworkManager().disconnect(Component.translatable("disconnect.reignofnether.clear_failed"));
             return false;
         }
     }

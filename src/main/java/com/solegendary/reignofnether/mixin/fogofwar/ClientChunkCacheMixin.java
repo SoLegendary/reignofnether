@@ -71,7 +71,7 @@ public abstract class ClientChunkCacheMixin {
     @SuppressWarnings("unchecked")
     private static PalettedContainer<BlockState>[] ron_snapshot(LevelChunk chunk) {
         LevelChunkSection[] sections = chunk.getSections();
-        PalettedContainer<BlockState>[] snapshot = new PalettedContainer[sections.length];
+        PalettedContainer<BlockState>[] snapshot = (PalettedContainer<BlockState>[]) new PalettedContainer<?>[sections.length];
         for (int s = 0; s < sections.length; s++) {
             LevelChunkSection sec = sections[s];
             if (sec == null || sec.hasOnlyAir()) continue; // leave null = remembered as air

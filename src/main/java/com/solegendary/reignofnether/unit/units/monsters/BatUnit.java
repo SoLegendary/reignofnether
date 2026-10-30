@@ -119,6 +119,12 @@ public class BatUnit extends Mob implements Unit {
             SynchedEntityData.defineId(BatUnit.class, EntityDataSerializers.STRING);
 
     @Override
+    public void remove(@NotNull RemovalReason pReason) {
+        this.runOnDeathCommand(pReason);
+        super.remove(pReason);
+    }
+
+    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");

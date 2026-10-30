@@ -16,7 +16,7 @@ public class ReignOfNetherRegistries {
     public static final MappedRegistry<Building> BUILDING = createMappedRegistry(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "building"));
     public static final MappedRegistry<ProductionItem> PRODUCTION_ITEM = createMappedRegistry(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "production_item"));
     public static final MappedRegistry<Faction> FACTIONS = createMappedRegistry(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "faction"));
-    public static final MappedRegistry<DataType> DATA_TYPE = createMappedRegistry(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "data_type"));
+    public static final MappedRegistry<DataType<?>> DATA_TYPE = createMappedRegistry(ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "data_type"));
 
     private static <T> MappedRegistry<T> createMappedRegistry(ResourceLocation id) {
         ResourceKey<Registry<T>> key = ResourceKey.createRegistryKey(id);

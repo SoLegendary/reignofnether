@@ -33,7 +33,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.event.ScreenEvent;
@@ -49,6 +48,7 @@ import java.util.function.Supplier;
 import static com.solegendary.reignofnether.registrars.SoundRegistrar.ALLY;
 import static com.solegendary.reignofnether.registrars.SoundRegistrar.CHAT;
 import static com.solegendary.reignofnether.tutorial.TutorialStage.*;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class TutorialClientEvents {
 
@@ -108,7 +108,7 @@ public class TutorialClientEvents {
         },
         () -> {
         },
-        List.of(FormattedCharSequence.forward(I18n.get("tutorial.reignofnether.tutorial_help"), Style.EMPTY))
+        List.of(fcs(I18n.get("tutorial.reignofnether.tutorial_help")))
     );
 
     public static void loadStage(TutorialStage stage) {
@@ -138,10 +138,6 @@ public class TutorialClientEvents {
         helpButtonText = "";
     }
 
-    public static int getStageProgress() {
-        return stageProgress;
-    }
-
     public static boolean isEnabled() {
         return enabled && MC.hasSingleplayerServer();
     }
@@ -163,18 +159,6 @@ public class TutorialClientEvents {
 
     private static void nextStage() {
         tutorialStage = tutorialStage.next();
-        ticksOnStage = 0;
-        stageProgress = 0;
-        blockUpdateStage = false;
-        clearHelpButtonText();
-        TutorialRendering.clearButtonName();
-        updateStage();
-        shouldPauseTicking = () -> false;
-        TutorialServerboundPacket.saveStage(tutorialStage);
-    }
-
-    private static void prevStage() {
-        tutorialStage = tutorialStage.prev();
         ticksOnStage = 0;
         stageProgress = 0;
         blockUpdateStage = false;

@@ -21,7 +21,7 @@ public class EvokerUnitRenderer extends AbstractVillagerUnitRenderer<EvokerUnit>
     private static final ResourceLocation EVOKER_ILLAGER = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/evoker_unit.png");
 
     public EvokerUnitRenderer(EntityRendererProvider.Context p_174108_) {
-        super(p_174108_, new VillagerUnitModel(p_174108_.bakeLayer(VillagerUnitModel.LAYER_LOCATION)), 0.5F);
+        super(p_174108_, new VillagerUnitModel<>(p_174108_.bakeLayer(VillagerUnitModel.LAYER_LOCATION)), 0.5F);
 
         // do not render any held items
         this.addLayer(new ItemInHandLayer<EvokerUnit, VillagerUnitModel<EvokerUnit>>(this, p_174108_.getItemInHandRenderer()) {

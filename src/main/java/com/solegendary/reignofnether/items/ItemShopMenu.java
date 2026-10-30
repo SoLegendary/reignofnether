@@ -161,10 +161,6 @@ public class ItemShopMenu {
         return HEADER_HEIGHT + rows * ITEM_SLOT_SIZE;
     }
 
-    public static int getMenuWidth() {
-        return MENU_WIDTH;
-    }
-
     // same helper pattern as CustomBuildingMenu.renderButton(): renders a button unless
     // hidden, and renders its tooltip when moused over
     private static void renderButton(GuiGraphics guiGraphics, Button button, int x, int y, int mouseX, int mouseY) {

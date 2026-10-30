@@ -70,11 +70,7 @@ public class BuildingUtils {
 
 
     public static int getTotalCompletedBuildingsOwned(boolean isClientSide, String ownerName) {
-        List<BuildingPlacement> buildings;
-        if (isClientSide)
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         List<BuildingPlacement> list = new ArrayList<>();
         for (BuildingPlacement b : buildings) {
@@ -86,11 +82,7 @@ public class BuildingUtils {
     }
 
     public static boolean castleOwned(boolean isClientSide, String ownerName) {
-        List<BuildingPlacement> buildings;
-        if (isClientSide)
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings) {
             if (ownerName.equals(building.ownerName) &&
@@ -105,11 +97,7 @@ public class BuildingUtils {
     }
 
     public static boolean isBuildingBuildable(boolean isClientSide, BuildingPlacement building) {
-        List<BuildingPlacement> buildings;
-        if (isClientSide)
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
         var flag = false;
         for (BuildingPlacement buildingPlacement : buildings) {
             if (buildingPlacement.originPos.equals(building.originPos)) {
@@ -167,7 +155,7 @@ public class BuildingUtils {
 
     // note originPos may be an air block
     public static BuildingPlacement findBuilding(boolean isClientSide, BlockPos pos) {
-        List<BuildingPlacement> buildings = isClientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings)
             if (building.originPos.equals(pos) || building.isPosInsideBuilding(pos))
@@ -269,9 +257,7 @@ public class BuildingUtils {
     // returns whether the given pos is part of ANY building in the level
     // WARNING: very processing expensive!
     public static boolean isPosPartOfAnyBuilding(boolean isClientSide, BlockPos bp, boolean onlyPlacedBlocks, int range) {
-        List<BuildingPlacement> buildings = isClientSide
-                ? BuildingClientEvents.getBuildings()
-                : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         // Precompute range squared to avoid repeated calculation
         int rangeSquared = range * range;
@@ -288,11 +274,7 @@ public class BuildingUtils {
 
     // returns whether the given pos is part of ANY building in the level
     public static boolean isPosInsideAnyBuilding(boolean isClientSide, BlockPos bp) {
-        List<BuildingPlacement> buildings;
-        if (isClientSide)
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings)
             if (building.isPosInsideBuilding(bp))
@@ -301,11 +283,7 @@ public class BuildingUtils {
     }
 
     public static boolean isPosInsideFarm(boolean isClientSide, BlockPos bp) {
-        List<BuildingPlacement> buildings;
-        if (isClientSide)
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings)
             if (building instanceof FarmPlacement && building.isPosInsideBuilding(bp))
@@ -315,11 +293,7 @@ public class BuildingUtils {
 
     @Nullable
     public static BuildingPlacement findClosestBuilding(boolean isClientSide, Vec3 pos, Predicate<BuildingPlacement> condition) {
-        List<BuildingPlacement> buildings;
-        if (isClientSide)
-            buildings = BuildingClientEvents.getBuildings();
-        else
-            buildings = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = getBuildingsList(isClientSide);
 
         double closestDist = 9999;
         BuildingPlacement closestBuilding = null;

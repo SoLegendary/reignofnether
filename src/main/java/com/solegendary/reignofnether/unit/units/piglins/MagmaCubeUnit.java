@@ -10,7 +10,6 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.unit.units.monsters.SlimeUnit;
 import com.solegendary.reignofnether.util.MiscUtil;
 
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,7 +22,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
@@ -89,19 +87,7 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-	    if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                    .createCommandSourceStack()
-                    .withEntity(this)
-                    .withPosition(this.position())
-                    .withLevel(serverLevel)
-                    .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 
@@ -220,21 +206,5 @@ public class MagmaCubeUnit extends SlimeUnit implements Unit, AttackerUnit {
                     BlockRegistrar.WALKABLE_MAGMA_BLOCK.get().defaultBlockState(), bsOld, MAGMA_DURATION);
             }
         }
-    }
-    public void createFire() {
-        if (getSize() < MAX_SIZE || level().isClientSide())
-            return;
-
-        ArrayList<BlockPos> bps = new ArrayList<>();
-        for (int x = -4; x < 4; x++)
-            for (int y = -4; y < 4; y++)
-                for (int z = -4; z < 4; z++)
-                    if (level().getBlockState(getOnPos().offset(x,y,z)).getBlock() ==
-                            BlockRegistrar.WALKABLE_MAGMA_BLOCK.get() &&
-                            level().getBlockState(getOnPos().offset(x,y+1,z)).isAir())
-                        bps.add(getOnPos().offset(x,y,z));
-        Collections.shuffle(bps);
-        if (bps.size() >= 1)
-            level().setBlockAndUpdate(bps.get(0).above(), Blocks.FIRE.defaultBlockState());
     }
 }

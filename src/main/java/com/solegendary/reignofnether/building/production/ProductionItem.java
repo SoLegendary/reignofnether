@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.building.production;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
 import com.solegendary.reignofnether.debug.RtsDebugClientEvents;
@@ -124,7 +125,7 @@ public abstract class ProductionItem {
     }
 
     public boolean itemIsBeingProduced(boolean isClientSide, String ownerName) {
-        List<BuildingPlacement> buildings = isClientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings)
             if (building.ownerName.equals(ownerName) && building instanceof ProductionPlacement prodBuilding)
@@ -140,7 +141,7 @@ public abstract class ProductionItem {
     }
 
     public boolean itemIsBeingProducedAt(boolean isClientSide, ProductionPlacement pp) {
-        List<BuildingPlacement> buildings = isClientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(isClientSide);
 
         for (BuildingPlacement building : buildings)
             if (building == pp)

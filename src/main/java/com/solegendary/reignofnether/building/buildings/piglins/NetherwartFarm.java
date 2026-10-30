@@ -14,10 +14,10 @@ import com.solegendary.reignofnether.util.MyRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class NetherwartFarm extends AbstractFarm {
 
@@ -51,7 +51,7 @@ public class NetherwartFarm extends AbstractFarm {
                 List.of(
                         Component.translatable("buildings.reignofnether.netherwart_farm").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         Component.translatable("buildings.reignofnether.netherwart_farm.tooltip1", cost.wood, ResourceCosts.REPLANT_WOOD_COST).withStyle(MyRenderer.iconStyle).getVisualOrderText(),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.netherwart_farm.tooltip2").getVisualOrderText(),
                         Component.translatable("buildings.reignofnether.netherwart_farm.tooltip3").getVisualOrderText()
                 ),

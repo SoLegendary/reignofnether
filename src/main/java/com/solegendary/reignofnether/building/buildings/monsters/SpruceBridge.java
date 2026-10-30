@@ -15,10 +15,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class SpruceBridge extends AbstractBridge {
 
@@ -68,11 +68,11 @@ public class SpruceBridge extends AbstractBridge {
                 List.of(
                         Component.translatable("buildings.reignofnether.spruce_bridge").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.spruce_bridge.tooltip1").getVisualOrderText(),
                         Component.translatable("buildings.reignofnether.spruce_bridge.tooltip2").getVisualOrderText(),
                         Component.translatable("buildings.reignofnether.spruce_bridge.tooltip3").getVisualOrderText(),
-                        FormattedCharSequence.forward("", Style.EMPTY),
+                        fcs(""),
                         Component.translatable("buildings.reignofnether.spruce_bridge.tooltip4").getVisualOrderText()
                 ),
                 this

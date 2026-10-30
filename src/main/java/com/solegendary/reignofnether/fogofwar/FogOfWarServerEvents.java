@@ -222,18 +222,6 @@ public class FogOfWarServerEvents {
         pendingResends.computeIfAbsent(playerId, k -> ConcurrentHashMap.newKeySet()).add(pos);
     }
 
-    public static Set<ChunkPos> getBuildingChunks(BuildingPlacement b) {
-        int minCx = b.minCorner.getX() >> 4;
-        int maxCx = b.maxCorner.getX() >> 4;
-        int minCz = b.minCorner.getZ() >> 4;
-        int maxCz = b.maxCorner.getZ() >> 4;
-        Set<ChunkPos> chunks = new HashSet<>();
-        for (int cx = minCx; cx <= maxCx; cx++)
-            for (int cz = minCz; cz <= maxCz; cz++)
-                chunks.add(new ChunkPos(cx, cz));
-        return chunks;
-    }
-
     public static boolean canPlayerSeeBuilding(ServerPlayer sp, BuildingPlacement b) {
         if (!isFogActiveFor(sp)) return true;
         return isBlockVisibleFor(sp, b.maxCorner.getX(), b.maxCorner.getZ()) ||
@@ -657,12 +645,12 @@ public class FogOfWarServerEvents {
     // register here too for command blocks
     @SubscribeEvent
     public static void onRegisterCommand(RegisterCommandsEvent evt) {
-        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("enable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").requires(s -> s.hasPermission(2)).then(Commands.literal("enable")
                 .executes((command) -> {
                     setEnabled(true);
                     return 1;
                 })));
-        evt.getDispatcher().register(Commands.literal("rts-fog").then(Commands.literal("disable")
+        evt.getDispatcher().register(Commands.literal("rts-fog").requires(s -> s.hasPermission(2)).then(Commands.literal("disable")
                 .executes((command) -> {
                     setEnabled(false);
                     return 1;

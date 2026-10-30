@@ -119,6 +119,12 @@ public class ScoutDogUnit extends Wolf implements Unit {
             SynchedEntityData.defineId(ScoutDogUnit.class, EntityDataSerializers.STRING);
 
     @Override
+    public void remove(@NotNull RemovalReason pReason) {
+        this.runOnDeathCommand(pReason);
+        super.remove(pReason);
+    }
+
+    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");

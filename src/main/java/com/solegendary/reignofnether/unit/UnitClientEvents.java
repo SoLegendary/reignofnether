@@ -83,7 +83,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.event.TickEvent;
@@ -1128,17 +1127,19 @@ public class UnitClientEvents {
                 }
             }
 
-            // render items in front of face for eating units
-            for (LivingEntity entity : getAllUnits()) {
-                if (entity instanceof Unit unit && unit.isEatingFood() && FogOfWarClientEvents.isBlockVisible(entity.blockPosition())) {
-                    MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
+            // render items in front of face for eating units (once per frame)
+            if (evt.getStage() == AFTER_ENTITIES) {
+                for (LivingEntity entity : getAllUnits()) {
+                    if (entity instanceof Unit unit && unit.isEatingFood() && FogOfWarClientEvents.isBlockVisible(entity.blockPosition())) {
+                        MyRenderer.renderItemInFrontOfEntityFace(evt.getPoseStack(), entity, evt.getPartialTick(), new ItemStack(unit.getFoodBeingEaten()));
+                    }
                 }
             }
         }
 
         if (OrthoviewClientEvents.isEnabled() && evt.getStage() == AFTER_ENTITIES) {
             VertexConsumer vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINE_STRIP);
-            ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+            ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
             VertexConsumer vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
             // draw unit checkpoints
             for (LivingEntity entity : getSelectedUnits()) {
@@ -1167,7 +1168,7 @@ public class UnitClientEvents {
                                         cp.isGreen ? 1 : 0,
                                         0,
                                         a,
-                                        ResourceLocation.parse("forge:textures/white.png")
+                                        MyRenderer.WHITE_TEXTURE
                                 );
                             } else {
                                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, cp.bp, cp.isGreen ? 0 : 1, cp.isGreen ? 1 : 0, 0, a);
@@ -1192,7 +1193,7 @@ public class UnitClientEvents {
                                     aabb,
                                     Direction.UP,
                                     1, 1, 0, a,
-                                    ResourceLocation.parse("forge:textures/white.png")
+                                    MyRenderer.WHITE_TEXTURE
                             );
                         } else {
                             MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, ap, 1, 1, 0, a);
@@ -1221,7 +1222,7 @@ public class UnitClientEvents {
                                         aabb,
                                         Direction.UP,
                                         1, 0, 0, MiscUtil.getOscillatingFloat(0.25f, 0.75f),
-                                        ResourceLocation.parse("forge:textures/white.png")
+                                        MyRenderer.WHITE_TEXTURE
                                 );
                             }  else {
                                 MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, blockTarget, 1, 0, 0, a);
@@ -1233,7 +1234,7 @@ public class UnitClientEvents {
 
             if (FormationDragMove.isDragging()) {
                 VertexConsumer vertexConsumerLineFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
-                VertexConsumer vertexConsumerEntityTranslucentFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(ResourceLocation.parse("forge:textures/white.png")));
+                VertexConsumer vertexConsumerEntityTranslucentFd = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(MyRenderer.WHITE_TEXTURE));
                 float a = 0.5f;
 
                 Vec3 lineStart = FormationDragMove.getLineStart();
@@ -1253,7 +1254,7 @@ public class UnitClientEvents {
                                 1,
                                 0,
                                 a,
-                                ResourceLocation.parse("forge:textures/white.png")
+                                MyRenderer.WHITE_TEXTURE
                         );
                     } else {
                         MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucentFd, Direction.UP, bp, 0, 1, 0, a);
@@ -1633,135 +1634,4 @@ public class UnitClientEvents {
             }
         }
     }
-
-    /*
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_P) {
-            if (AFTER_SKY.equals(stage)) {
-                stage = AFTER_SOLID_BLOCKS;
-            } else if (AFTER_SOLID_BLOCKS.equals(stage)) {
-                stage = AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS;
-            } else if (AFTER_CUTOUT_MIPPED_BLOCKS_BLOCKS.equals(stage)) {
-                stage = AFTER_CUTOUT_BLOCKS;
-            } else if (AFTER_CUTOUT_BLOCKS.equals(stage)) {
-                stage = AFTER_ENTITIES;
-            } else if (AFTER_ENTITIES.equals(stage)) {
-                stage = AFTER_BLOCK_ENTITIES;
-            } else if (AFTER_BLOCK_ENTITIES.equals(stage)) {
-                stage = AFTER_TRANSLUCENT_BLOCKS;
-            } else if (AFTER_TRANSLUCENT_BLOCKS.equals(stage)) {
-                stage = AFTER_TRIPWIRE_BLOCKS;
-            } else if (AFTER_TRIPWIRE_BLOCKS.equals(stage)) {
-                stage = AFTER_PARTICLES;
-            } else if (AFTER_PARTICLES.equals(stage)) {
-                stage = AFTER_WEATHER;
-            } else if (AFTER_WEATHER.equals(stage)) {
-                stage = AFTER_LEVEL;
-            } else if (AFTER_LEVEL.equals(stage)) {
-                stage = AFTER_SKY;
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
-            "stage: " + stage.toString(),
-        });
-    }
-     */
-
-    /*
-    public static int yOffset = 0;
-    public static int scale = 0;
-
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT || evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_LEFT ? -1 : 1;
-            yOffset += sign;
-        }
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP || evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_UP ? -1 : 1;
-            scale += sign;
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[] {
-                "yOffset: " +  yOffset,
-                "scale: " + scale,
-        });
-    }
-     */
-
-    /*
-    @SubscribeEvent
-    public static void onKeyPress(ScreenEvent.KeyPressed.Pre evt) {
-
-        if (!getSelectedUnits().isEmpty() && getSelectedUnits().get(0) instanceof SlimeUnit slime) {
-            if (evt.getKeyCode() == GLFW.GLFW_KEY_W) {
-                slime.sideAngleX += 90;
-            } else if (evt.getKeyCode() == GLFW.GLFW_KEY_A) {
-                slime.sideAngleY -= 90;
-            } else if (evt.getKeyCode() == GLFW.GLFW_KEY_S) {
-                slime.sideAngleX -= 90;
-            } else if (evt.getKeyCode() == GLFW.GLFW_KEY_D) {
-                slime.sideAngleY += 90;
-            }
-        }*/
-
-
-        /*
-        if (Keybindings.altMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE && !getAllUnits().isEmpty()) {
-            PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-                    "",
-                    UnitAction.DEBUG1, 0, new int[]{0},
-                    new BlockPos(0,0,0),
-                    new BlockPos(0,0,0)
-            ));
-        }
-        if (Keybindings.ctrlMod.isDown() && evt.getKeyCode() == GLFW.GLFW_KEY_SPACE && !getAllUnits().isEmpty()) {
-            PacketHandler.INSTANCE.sendToServer(new UnitActionServerboundPacket(
-                    "",
-                    UnitAction.DEBUG2, 0, new int[]{0},
-                    new BlockPos(0,0,0),
-                    new BlockPos(0,0,0)
-            ));
-        }
-
-
-    }*/
-
-    /*
-    public static int pitch = 0;
-    public static int yaw = 0;
-
-    @SubscribeEvent
-    public static void onButtonPress2(ScreenEvent.KeyPressed.Pre evt) {
-        if (evt.getKeyCode() == GLFW.GLFW_KEY_LEFT || evt.getKeyCode() == GLFW.GLFW_KEY_RIGHT) {
-            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_LEFT ? -1 : 1;
-            yaw += sign;
-        }
-        else if (evt.getKeyCode() == GLFW.GLFW_KEY_UP || evt.getKeyCode() == GLFW.GLFW_KEY_DOWN) {
-            int sign = evt.getKeyCode() == GLFW.GLFW_KEY_UP ? -1 : 1;
-            pitch += sign;
-        }
-    }
-
-     */
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        if (!getSelectedUnits().isEmpty() && getSelectedUnits().get(0) instanceof SlimeUnit slime) {
-            MiscUtil.drawDebugStrings(evt.getGuiGraphics(), MC.font, new String[]{
-                    "rollAngle: " + slime.rollAngle,
-                    "sideAngleX: " + slime.sideAngleX,
-                    "sideAngleY: " + slime.sideAngleY,
-            });
-        }
-    }
-     */
 }

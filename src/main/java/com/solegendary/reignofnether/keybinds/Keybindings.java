@@ -123,9 +123,6 @@ public class Keybindings {
         return ALL;
     }
 
-    public static Keybinding getNum(int i) {
-        return nums[i];
-    }
     public static Keybinding getFnum(int i) {
         return fnums[i-1];
     }

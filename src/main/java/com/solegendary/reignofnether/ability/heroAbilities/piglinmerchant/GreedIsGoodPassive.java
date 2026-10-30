@@ -71,7 +71,7 @@ public class GreedIsGoodPassive extends HeroAbility {
                 () -> true,
                 () -> toggleAutocast(hero),
                 null,
-                getTooltipLines((HeroUnit) hero),
+                getTooltipLines(hero),
                 this,
                 hero
         );

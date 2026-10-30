@@ -21,7 +21,6 @@ import com.solegendary.reignofnether.unit.interfaces.Unit;
 import com.solegendary.reignofnether.util.MiscUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -200,8 +199,6 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit, RangeInd
     public final static float ROAR_RANGE = 5.0f;
     public final static float ROAR_KNOCKBACK = 6f;
     public final static int ROAR_SLOW_DURATION = 10 * ResourceCost.TICKS_PER_SECOND;
-
-    private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = e -> e.isAlive() && !(e instanceof Ravager);
 
     // ---- siege mode ----
     public enum SiegeState { NONE, BURROWING, SIEGED, UNBURROWING }
@@ -472,19 +469,7 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit, RangeInd
 
     @Override
     public void remove(@NotNull RemovalReason pReason) {
-        if (this.level() instanceof ServerLevel serverLevel) {
-            String command = this.getOnDeathCommand();
-            if (command != null && !command.isEmpty()) {
-                CommandSourceStack source;
-                source = serverLevel.getServer()
-                        .createCommandSourceStack()
-                        .withEntity(this)
-                        .withPosition(this.position())
-                        .withLevel(serverLevel)
-                        .withPermission(2);
-                serverLevel.getServer().getCommands().performPrefixedCommand(source, command);
-            }
-        }
+        this.runOnDeathCommand(pReason);
         super.remove(pReason);
     }
 

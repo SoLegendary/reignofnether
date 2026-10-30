@@ -84,9 +84,9 @@ public class SoulSiphonPassive extends HeroAbility {
         button.bottomLeftText = () -> String.valueOf(necro.souls);
         if ((necro.souls) <= 0)
             button.bottomLeftTextColor = 0xFF0000;
-        else if ((necro.souls) >= ((int) soulsMax))
+        else if ((necro.souls) >= (soulsMax))
             button.bottomLeftTextColor = 0x00FF00;
-        else if ((necro.souls) <= ((int) soulsPerCast))
+        else if ((necro.souls) <= (soulsPerCast))
             button.bottomLeftTextColor = 0xFFFF00;
         button.innerIconSizeModifier = 1;
         return button;
@@ -107,9 +107,9 @@ public class SoulSiphonPassive extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip2")),
-                fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip3", (int) soulsPerCast, (int) soulsMax)),
+                fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip3", soulsPerCast, soulsMax)),
                 fcs(""),
-                fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip4", (int) soulsConsumedForHealth, healthPerSoul)),
+                fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip4", soulsConsumedForHealth, healthPerSoul)),
                 fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip5"))
         );
     }
@@ -121,7 +121,7 @@ public class SoulSiphonPassive extends HeroAbility {
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip1")),
                 fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip2")),
-                fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip3", (int) soulsPerCast, (int) soulsMax)),
+                fcs(I18n.get("abilities.reignofnether.soul_siphon.tooltip3", soulsPerCast, soulsMax)),
                 fcs(""),
                 fcs(I18n.get("abilities.reignofnether.can_be_toggled")),
                 fcs(""),

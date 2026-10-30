@@ -46,7 +46,7 @@ public class RTSMapInfoClientEvents {
                     RTSMapInfoServerboundPacket.setStartingMode(mode);
                 })
                 .tooltipLines(List.of(
-                        Component.literal("Map Mode: " + selectedMode).getVisualOrderText()
+                        Component.translatable("message.reignofnether.rts_map_info_mode", selectedMode).getVisualOrderText()
                 ))
                 .build();
     }

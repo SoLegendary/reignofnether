@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.building;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
@@ -196,7 +197,7 @@ public class BuildingClientEvents {
                 buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
                 buildingRotation = Rotation.NONE;
             } catch (Exception e) {
-                e.printStackTrace();
+                ReignOfNether.LOGGER.error("Failed to load building block data", e);
             }
             lastBuildingToPlace = buildingToPlace; // avoid loading the same data twice unnecessarily
         }
@@ -266,7 +267,7 @@ public class BuildingClientEvents {
         int maxX = -999999;
         int maxY = -999999;
         int maxZ = -999999;
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
         var vertexConsumer = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         for (BuildingBlock block : blocks) {
             if (isBridge(buildingToPlace)
@@ -353,18 +354,6 @@ public class BuildingClientEvents {
         MyRenderer.drawLineBox(matrix, aabb2, r, g, 0, 0.25f);
     }
 
-    /*
-    @SubscribeEvent
-    public static void onRenderOverLay(RenderGuiOverlayEvent.Pre evt) {
-        if (MC.level == null)
-            return;
-
-        MiscUtil.drawDebugStrings(evt.getPoseStack(), MC.font, new String[] {
-                "dist to border: " + MC.level.getWorldBorder().getDistanceToBorder(cursorPos.getX(), cursorPos.getZ()),
-        });
-    }
-     */
-
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent evt) throws NoSuchFieldException {
@@ -382,12 +371,15 @@ public class BuildingClientEvents {
         );
 
         Map<BlockPos, List<BuildingBlock>> fogBlocksToDraw = new HashMap<>();
+        Set<BlockPos> buildingOrigins = new HashSet<>();
+        for (BuildingPlacement b : buildings)
+            buildingOrigins.add(b.originPos);
         for (LivingEntity le : UnitClientEvents.getAllUnits()) {
             if (le instanceof Unit unit && le instanceof WorkerUnit workerUnit &&
                 MC.player != null && unit.getOwnerName().equals(MC.player.getName().getString()))
             {
                 Map<BlockPos, List<BuildingBlock>> fogBlocks = workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw();
-                fogBlocks.keySet().removeIf(bp -> buildings.stream().map(b -> b.originPos).toList().contains(bp));
+                fogBlocks.keySet().removeIf(buildingOrigins::contains);
                 for (BlockPos pos : fogBlocks.keySet())
                     fogBlocksToDraw.put(pos, fogBlocks.get(pos));
             }
@@ -431,7 +423,7 @@ public class BuildingClientEvents {
         }
 
         // draw rally points and lines
-        ResourceLocation rl = ResourceLocation.parse("forge:textures/white.png");
+        ResourceLocation rl = MyRenderer.WHITE_TEXTURE;
         var vertexConsumerEntityTranslucent = MC.renderBuffers().bufferSource().getBuffer(RenderType.entityTranslucent(rl));
         var vertexConsumerNoDepthLine = MC.renderBuffers().bufferSource().getBuffer(MyRenderer.LINES_NO_DEPTH_TEST);
         var vertexConsumerLine = MC.renderBuffers().bufferSource().getBuffer(RenderType.LINES);
@@ -448,7 +440,7 @@ public class BuildingClientEvents {
                             AABB aabb = new AABB(bp);
                             aabb = aabb.setMaxY(aabb.maxY + 0.13f);
                             MyRenderer.drawSolidBox(evt.getPoseStack(), vertexConsumerEntityTranslucent, aabb, Direction.UP,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a,
-                                    ResourceLocation.fromNamespaceAndPath("forge", "textures/white.png"));
+                                    MyRenderer.WHITE_TEXTURE);
                         } else {
                             MyRenderer.drawBlockFace(evt.getPoseStack(), vertexConsumerEntityTranslucent, Direction.UP, bp,  isRed ? 1 : 0, isRed ? 0 : 1, 0, a);
                         }
@@ -498,7 +490,7 @@ public class BuildingClientEvents {
                     blocksToDraw = bridge.getRelativeBlockData(MC.level, isBridgeDiagonal());
                     buildingDimensions = BuildingUtils.getBuildingSize(blocksToDraw);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    ReignOfNether.LOGGER.error("Failed to load building block data", e);
                 }
                 Rotation rotationDelta = List.of(0, 1).contains(bridgePlaceState)
                                          ? Rotation.NONE

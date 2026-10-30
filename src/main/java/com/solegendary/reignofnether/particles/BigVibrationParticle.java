@@ -35,7 +35,7 @@ public class BigVibrationParticle extends TextureSheetParticle {
         // Face the initial direction of travel (toward the target) before the first tick runs.
         Optional<Vec3> optional = pTarget.getPosition(pLevel);
         if (optional.isPresent()) {
-            Vec3 vec3 = (Vec3)optional.get();
+            Vec3 vec3 = optional.get();
             double d0 = vec3.x() - pX;
             double d2 = vec3.z() - pZ;
             this.yawO = this.yaw = (float)Mth.atan2(d0, d2);
@@ -116,7 +116,7 @@ public class BigVibrationParticle extends TextureSheetParticle {
             } else {
                 int i = this.lifetime - this.age;
                 double d0 = 1.0 / (double)i;
-                Vec3 vec3 = (Vec3)optional.get();
+                Vec3 vec3 = optional.get();
                 this.x = Mth.lerp(d0, this.x, vec3.x());
                 this.y = Mth.lerp(d0, this.y, vec3.y());
                 this.z = Mth.lerp(d0, this.z, vec3.z());

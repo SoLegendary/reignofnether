@@ -118,6 +118,12 @@ public class StriderUnit extends Strider implements Unit {
             SynchedEntityData.defineId(StriderUnit.class, EntityDataSerializers.STRING);
 
     @Override
+    public void remove(@NotNull RemovalReason pReason) {
+        this.runOnDeathCommand(pReason);
+        super.remove(pReason);
+    }
+
+    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(ownerDataAccessor, "");

@@ -141,6 +141,12 @@ public class BeeUnit extends Bee implements Unit, AttackerUnit {
     public static final EntityDataAccessor<String> onDeathCommandDataAccessor =
             SynchedEntityData.defineId(BeeUnit.class, EntityDataSerializers.STRING);
 
+    @Override
+    public void remove(@NotNull RemovalReason pReason) {
+        this.runOnDeathCommand(pReason);
+        super.remove(pReason);
+    }
+
     public boolean isSummoned() { return this.entityData.get(isSummonedAccessor); }
     public void setIsSummoned(boolean index) { this.entityData.set(isSummonedAccessor, index); }
     public static final EntityDataAccessor<Boolean> isSummonedAccessor = SynchedEntityData.defineId(BeeUnit.class, EntityDataSerializers.BOOLEAN);

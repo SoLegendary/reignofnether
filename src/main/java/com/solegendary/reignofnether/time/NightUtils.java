@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.time;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.*;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.registrars.MobEffectRegistrar;
@@ -23,7 +24,7 @@ public class NightUtils {
             (!clientSide && TimeServerEvents.isBloodMoonActive())) {
             return true;
         }
-        List<BuildingPlacement> buildings = clientSide ? BuildingClientEvents.getBuildings() : BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> buildings = BuildingUtils.getBuildingsList(clientSide);
 
         Vec2 pos2d = new Vec2((float) pos.x, (float) pos.z);
 

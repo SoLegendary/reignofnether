@@ -1,11 +1,11 @@
 package com.solegendary.reignofnether.building.buildings.monsters;
 
+import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlaceButton;
 import com.solegendary.reignofnether.building.BuildingPlacement;
-import com.solegendary.reignofnether.building.BuildingServerEvents;
 import com.solegendary.reignofnether.building.Buildings;
 import com.solegendary.reignofnether.building.addon.NightSourceAddon;
 import com.solegendary.reignofnether.building.addon.RangeIndicatorAddon;
@@ -20,11 +20,11 @@ import com.solegendary.reignofnether.util.MiscUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
+import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
 public class Mausoleum extends ProductionBuilding implements NightSourceAddon, RangeIndicatorAddon {
 
@@ -71,11 +71,11 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
             List.of(Component.translatable("buildings.reignofnether.mausoleum").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                 ResourceCosts.getFormattedCost(cost),
                 ResourceCosts.getFormattedPop(cost),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.mausoleum.tooltip1").getVisualOrderText(),
-                FormattedCharSequence.forward("", Style.EMPTY),
+                fcs(""),
                 Component.translatable("buildings.reignofnether.mausoleum.tooltip2", nightRange).getVisualOrderText(),
-                Component.translatable("buildings.reignofnether.mausoleum.tooltip3", nightRangeReduced).getVisualOrderText()
+                Component.translatable("buildings.reignofnether.mausoleum.tooltip4", nightRangeReduced).getVisualOrderText()
             ),
             this
         );
@@ -90,11 +90,7 @@ public class Mausoleum extends ProductionBuilding implements NightSourceAddon, R
 
     @Override
     public int getRange(BuildingPlacement placement) {
-        List<BuildingPlacement> bpls;
-        if (placement.level.isClientSide())
-            bpls = BuildingClientEvents.getBuildings();
-        else
-            bpls = BuildingServerEvents.getBuildings();
+        List<BuildingPlacement> bpls = BuildingUtils.getBuildingsList(placement.level.isClientSide());
 
         int nRange = nightRangeReduced;
         long oldestMausoleumAge = 0;
