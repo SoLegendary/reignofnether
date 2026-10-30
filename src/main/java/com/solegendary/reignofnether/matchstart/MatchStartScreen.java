@@ -17,6 +17,7 @@ import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerboundPacket;
+import com.solegendary.reignofnether.startpos.SeatJoin;
 import com.solegendary.reignofnether.startpos.StartPos;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosServerboundPacket;
@@ -187,6 +188,8 @@ public class MatchStartScreen extends Screen {
 
     private static List<String> spectators() {
         List<String> seated = new ArrayList<>(StartPosClientEvents.hiddenPlayers.keySet());
+        for (SeatJoin join : StartPosClientEvents.joins)
+            seated.add(join.playerName);
         for (StartPos sp : StartPosClientEvents.startPoses)
             if (!sp.playerName.isBlank())
                 seated.add(sp.playerName);
@@ -492,6 +495,22 @@ public class MatchStartScreen extends Screen {
                 if (y + ROW_H > top - ROW_H && y < bottom + ROW_H)
                     renderSeatRow(sp, me, x, y, w, top, bottom);
                 y += ROW_H + 3;
+                for (SeatJoin join : StartPosClientEvents.joins) {
+                    if (!join.isSoldier() && join.seat.equals(sp.pos)) {
+                        renderJoinRow(join, me, x, y, w, top, bottom);
+                        y += ROW_H + 3;
+                    }
+                }
+            }
+            int colorId = team.get(0).colorId;
+            List<SeatJoin> soldiers = StartPosClientEvents.joins.stream().filter(j -> j.isSoldier() && j.colorId == colorId).toList();
+            for (SeatJoin join : soldiers) {
+                renderJoinRow(join, me, x, y, w, top, bottom);
+                y += ROW_H + 3;
+            }
+            if (soldiers.size() < GameruleClient.soldiersPerTeam && team.stream().anyMatch(sp -> sp.enabled)) {
+                renderSoldierSlot(team, x, y, w, top, bottom);
+                y += ROW_H + 3;
             }
             y += 4;
         }
@@ -507,7 +526,7 @@ public class MatchStartScreen extends Screen {
         if (StartPosClientEvents.startPoses.isEmpty())
             Text.draw(g, I18n.get("matchstart.reignofnether.no_positions"), x, y, Theme.DIM);
 
-        y = renderSpectators(x, y, w, mine != null, top, bottom);
+        y = renderSpectators(x, y, w, mine != null || StartPosClientEvents.getJoin() != null, top, bottom);
         Clip.pop(g);
 
         int contentH = y + rosterScroll - top;
@@ -530,7 +549,11 @@ public class MatchStartScreen extends Screen {
         if (!StartPosClientEvents.isHost())
             return;
         int x = ruleToggle(right, y, "fog_of_war", FogOfWarClientEvents.isMatchFogOn(), GameruleServerboundPacket::setFogOfWar);
-        ruleToggle(x - 4, y, "lock_alliances", GameruleClient.lockAlliances, GameruleServerboundPacket::setLockAlliances);
+        x = ruleToggle(x - 4, y, "lock_alliances", GameruleClient.lockAlliances, GameruleServerboundPacket::setLockAlliances);
+        x = ruleToggle(x - 4, y, "co_commanders", GameruleClient.coCommanders, GameruleServerboundPacket::setCoCommanders);
+        // soldiers cycle 0..MAX seats per team
+        ruleChip(x - 4, y, "soldiers_per_team", GameruleClient.soldiersPerTeam > 0, String.valueOf(GameruleClient.soldiersPerTeam),
+                () -> GameruleServerboundPacket.setSoldiersPerTeam((GameruleClient.soldiersPerTeam + 1) % (GameruleClient.MAX_SOLDIERS_PER_TEAM + 1)));
     }
 
     /** An ON/OFF chip for a lobby game rule. Returns its left edge. */
@@ -693,6 +716,12 @@ public class MatchStartScreen extends Screen {
         if (host)
             right = rowButton(I18n.get("matchstart.reignofnether.action.kick"), right, y, h, true,
                     () -> StartPosServerboundPacket.unreservePos(sp.pos)) - 4;
+        boolean coTaken = StartPosClientEvents.joins.stream().anyMatch(j -> !j.isSoldier() && j.seat.equals(sp.pos));
+        if (GameruleClient.coCommanders && !coTaken && !sp.hidden)
+            right = rowButton(I18n.get("matchstart.reignofnether.action.co_command"), right, y, h, false, () -> {
+                leaveOwnSeat();
+                StartPosServerboundPacket.joinAsCoCommander(sp.pos);
+            }) - 4;
         return right;
     }
 
@@ -706,6 +735,18 @@ public class MatchStartScreen extends Screen {
             Theme.button(frame.g, r.x(), y, w, h, hovered);
         Text.drawCentered(frame.g, label, r.centerX(), y + (h - 8) / 2 + 1, danger ? Theme.DANGER_TEXT : hovered ? Theme.GOLD : Theme.BODY);
         frame.register(new ButtonBuilder(label).onLeftClick(action).build(), r, null, null);
+        return r.x();
+    }
+
+    private int iconRowButton(Icon icon, int colour, boolean danger, String tooltip, int right, int y, int h, Runnable action) {
+        Rect r = new Rect(right - h, y, h, h);
+        boolean hovered = frame.hovered(r);
+        if (danger)
+            Theme.dangerButton(frame.g, r.x(), y, h, h, hovered);
+        else
+            Theme.button(frame.g, r.x(), y, h, h, hovered);
+        icon.drawIn(frame.g, r.x(), y, h, h, colour);
+        frame.register(new ButtonBuilder(tooltip).onLeftClick(action).build(), r, null, () -> Tooltip.of(I18n.get(tooltip)));
         return r.x();
     }
 
@@ -748,6 +789,65 @@ public class MatchStartScreen extends Screen {
                         () -> Tooltip.of(MiscUtil.getFactionName(f)).body(I18n.get("matchstart.reignofnether.faction_desc." + factionKey(f))));
             x += w + 4;
         }
+    }
+
+    /** A soldier or co-commander: no seat or faction of their own. */
+    private void renderJoinRow(SeatJoin join, String me, int x, int y, int w, int clipTop, int clipBottom) {
+        var g = frame.g;
+        boolean mine = join.playerName.equals(me);
+        boolean visible = y >= clipTop && y + ROW_H <= clipBottom;
+        int indent = 14;
+        int rx = x + indent;
+        int rw = w - indent;
+        int hx = rowFrame(rx, y, rw, mine, Theme.RAISED, false, teamColour(join.colorId));
+        MyRenderer.renderPlayerHead(g, join.playerName, hx + 2, y + (ROW_H - HEAD) / 2 + 2, HEAD - 4, RANDOM_ICON);
+
+        int right = rx + rw - ROW_PAD;
+        String status = I18n.get(join.pending ? "matchstart.reignofnether.status.pending"
+                : join.ready ? "matchstart.reignofnether.status.ready" : "matchstart.reignofnether.status.not_ready");
+        Text.mediumRight(g, status, right, y + (ROW_H - 8) / 2, join.pending ? Theme.ORANGE : join.ready ? Theme.OK : Theme.LABEL);
+        right -= 52 + 8;
+        if (visible && mine && !StartPosClientEvents.isStarting)
+            right = rowButton(I18n.get("matchstart.reignofnether.action.leave"), right, y + (ROW_H - 20) / 2, 20, false,
+                    StartPosServerboundPacket::leaveJoin) - 4;
+        // the check only while they're asking; the X also removes someone already let in
+        if (visible && !StartPosClientEvents.isStarting && StartPosClientEvents.startPoses.stream().anyMatch(sp -> sp.playerName.equals(me) && join.answeredBy(sp))) {
+            right = iconRowButton(Icon.CLOSE, Theme.DANGER_TEXT, true, "matchstart.reignofnether.action.refuse", right, y + (ROW_H - 20) / 2, 20,
+                    () -> StartPosServerboundPacket.answerJoin(join.playerName, false)) - 4;
+            if (join.pending)
+                right = iconRowButton(Icon.CHECK, Theme.OK, false, "matchstart.reignofnether.action.accept", right, y + (ROW_H - 20) / 2, 20,
+                        () -> StartPosServerboundPacket.answerJoin(join.playerName, true)) - 4;
+        }
+
+        int nx = hx + HEAD + 8;
+        String name = mine ? I18n.get("matchstart.reignofnether.you_name", join.playerName) : join.playerName;
+        Text.draw(g, Text.fit(name, Math.max(10, Math.min(90, right - nx))), nx, y + 8, mine ? Theme.GOLD : Theme.TEXT);
+        Text.small(g, I18n.get(join.isSoldier() ? "matchstart.reignofnether.role.soldier" : "matchstart.reignofnether.role.co_commander"),
+                nx, y + 19, Theme.DIM);
+    }
+
+    /** An open soldier slot on a team. */
+    private void renderSoldierSlot(List<StartPos> team, int x, int y, int w, int clipTop, int clipBottom) {
+        var g = frame.g;
+        int indent = 14;
+        int rx = x + indent;
+        int rw = w - indent;
+        int hx = rowFrame(rx, y, rw, false, Theme.RAISED, false, seatColour(team.get(0)));
+        Icon.PLUS.drawIn(g, hx, y + (ROW_H - HEAD) / 2, HEAD, HEAD, Theme.DIM);
+        int right = rx + rw - ROW_PAD;
+        if (y >= clipTop && y + ROW_H <= clipBottom && !StartPosClientEvents.isStarting)
+            right = primaryRowButton(I18n.get("matchstart.reignofnether.action.join_soldier"), right, y + (ROW_H - 20) / 2, 20, () -> {
+                leaveOwnSeat();
+                StartPosServerboundPacket.joinAsSoldier(team.get(0).pos);
+            }) - 4;
+        int nx = hx + HEAD + 8;
+        Text.draw(g, Text.fit(I18n.get("matchstart.reignofnether.seat.soldier_open"), Math.max(10, right - nx)), nx, y + 8, Theme.LABEL);
+        Text.small(g, I18n.get("matchstart.reignofnether.role.soldier"), nx, y + 19, Theme.DIM);
+    }
+
+    private static int teamColour(int colorId) {
+        return StartPosClientEvents.startPoses.stream().filter(sp -> sp.colorId == colorId).findFirst()
+                .map(MatchStartScreen::seatColour).orElse(Theme.DIM);
     }
 
     private void renderHiddenRow(String name, boolean ready, int x, int y, int w) {
@@ -855,9 +955,11 @@ public class MatchStartScreen extends Screen {
     private void renderPick(Rect p) {
         var g = frame.g;
         StartPos mine = StartPosClientEvents.getPos();
+        SeatJoin join = StartPosClientEvents.getJoin();
         Faction faction = mine != null ? mine.faction : Factions.NONE;
-        boolean picked = mine != null && faction != Factions.NONE;
-        boolean ready = mine != null && mine.ready;
+        boolean pending = join != null && join.pending;
+        boolean picked = (mine != null && faction != Factions.NONE) || (join != null && !pending);
+        boolean ready = (mine != null && mine.ready) || (join != null && join.ready);
 
         frame.zone(p);
         Theme.outline(g, p.x(), p.y(), p.w(), p.h(), 1, Theme.INK);
@@ -877,7 +979,12 @@ public class MatchStartScreen extends Screen {
         g.fill(p.x(), p.y(), p.right(), p.y() + Theme.BEVEL, ready ? Theme.OK : picked ? Theme.ORANGE : Theme.FAINT);
 
         String kicker, title, desc;
-        if (mine == null) {
+        if (join != null) {
+            String role = join.isSoldier() ? "soldier" : "co_commander";
+            kicker = I18n.get(pending ? "matchstart.reignofnether.pick.pending" : "matchstart.reignofnether.pick.joined");
+            title = I18n.get("matchstart.reignofnether.role." + role);
+            desc = I18n.get("matchstart.reignofnether.pick." + role + "_desc");
+        } else if (mine == null) {
             kicker = I18n.get("matchstart.reignofnether.pick.spectating");
             title = I18n.get("matchstart.reignofnether.pick.no_seat");
             desc = I18n.get("matchstart.reignofnether.pick.no_seat_desc");
@@ -904,7 +1011,8 @@ public class MatchStartScreen extends Screen {
         Text.medium(g, kicker, p.x() + pad, y - 30, Theme.ORANGE);
 
         boolean canReady = picked && !(StartPosClientEvents.isStarting && !ready);
-        String label = mine == null ? I18n.get("matchstart.reignofnether.ready.take_seat")
+        String label = mine == null && join == null ? I18n.get("matchstart.reignofnether.ready.take_seat")
+                : pending ? I18n.get("matchstart.reignofnether.ready.pending")
                 : !picked ? I18n.get("matchstart.reignofnether.ready.pick_faction")
                 : ready ? I18n.get("matchstart.reignofnether.ready.unready") : I18n.get("matchstart.reignofnether.ready.ready_up");
         Rect btn = new Rect(p.x() + pad, btnY, p.w() - pad * 2, btnH);
@@ -1008,6 +1116,8 @@ public class MatchStartScreen extends Screen {
             StartPosServerboundPacket.unreservePos(current.pos);
             StartPosClientEvents.selectedFaction = Factions.NONE;
         }
+        if (StartPosClientEvents.getJoin() != null)
+            StartPosServerboundPacket.leaveJoin();
     }
 
     private void pickFaction(StartPos pos, Faction faction) {
@@ -1019,8 +1129,13 @@ public class MatchStartScreen extends Screen {
     }
 
     private void toggleReady(@Nullable StartPos pos) {
-        if (pos != null)
-            toggleReady(pos.ready);
+        if (pos == null) {
+            SeatJoin join = StartPosClientEvents.getJoin();
+            if (join != null)
+                toggleReady(join.ready);
+            return;
+        }
+        toggleReady(pos.ready);
     }
 
     private void toggleReady(boolean ready) {

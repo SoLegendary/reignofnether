@@ -23,6 +23,8 @@ import java.util.Random;
 public class RTSPlayerSaveData extends SavedData {
 
     public final ArrayList<RTSPlayer> rtsPlayers = new ArrayList<>();
+    public final Map<String, String> soldierOf = new HashMap<>();     // PlayerRoles, soldier -> owner
+    public final Map<String, String> coCommanderOf = new HashMap<>(); // PlayerRoles, co-commander -> owner
 
     private static RTSPlayerSaveData create() {
         return new RTSPlayerSaveData();
@@ -89,7 +91,20 @@ public class RTSPlayerSaveData extends SavedData {
                 ReignOfNether.LOGGER.info("RTSPlayerSaveData.load: " + name + "|" + id + "|" + faction);
             }
         }
+        readNames(tag.getCompound("soldierOf"), data.soldierOf);
+        readNames(tag.getCompound("coCommanderOf"), data.coCommanderOf);
         return data;
+    }
+
+    private static void readNames(CompoundTag tag, Map<String, String> into) {
+        for (String k : tag.getAllKeys())
+            into.put(k, tag.getString(k));
+    }
+
+    private static CompoundTag writeNames(Map<String, String> from) {
+        CompoundTag tag = new CompoundTag();
+        from.forEach(tag::putString);
+        return tag;
     }
 
     @Override
@@ -121,6 +136,8 @@ public class RTSPlayerSaveData extends SavedData {
             //ReignOfNether.LOGGER.info("RTSPlayerSaveData.save: " + p.name + "|" + p.id + "|" + p.faction);
         });
         tag.put("rtsplayers", list);
+        tag.put("soldierOf", writeNames(soldierOf));
+        tag.put("coCommanderOf", writeNames(coCommanderOf));
         return tag;
     }
 
