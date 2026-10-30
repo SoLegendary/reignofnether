@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.hud.buttons;
 
-import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.items.*;
 import com.solegendary.reignofnether.keybinds.Keybinding;
@@ -39,8 +40,8 @@ public class UnitItemInventoryButton extends AbstractUnitItemButton {
                 () -> false,
                 () -> {
                     Player player = Minecraft.getInstance().player;
-                    boolean ownsUnit = player != null && player.getName().getString().equals(unit.getOwnerName());
-                    return ownsUnit || AlliancesClient.canControlAlly(unit) || SandboxClientEvents.isSandboxPlayer();
+                    boolean ownsUnit = player != null && PlayerRolesClient.myOwner().equals(unit.getOwnerName());
+                    return ownsUnit || SharingClient.canControl(unit) || SandboxClientEvents.isSandboxPlayer();
                 },
                 () -> { // onLeftClick
                     ItemClientEvents.actionableUnitItem = unitItem;

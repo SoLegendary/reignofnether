@@ -10,7 +10,8 @@ public enum RtsConflictContext implements IKeyConflictContext {
     PAN,
     ROTATE,
     COMMAND,
-    ITEM; // hero item keys share the command card's bottom row on purpose
+    ITEM, // hero item keys share the command card's bottom row on purpose
+    SOLDIER; // soldier keys only fire with no screen open, RTS keys only in the RTS view
 
     @Override
     public boolean isActive() {

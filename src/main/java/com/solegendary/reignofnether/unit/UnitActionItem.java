@@ -1,10 +1,11 @@
 package com.solegendary.reignofnether.unit;
 
+import com.solegendary.reignofnether.alliance.SharingClient;
+import com.solegendary.reignofnether.alliance.Share;
+import com.solegendary.reignofnether.alliance.Sharing;
 import com.mojang.datafixers.util.Pair;
 import com.solegendary.reignofnether.ability.Ability;
 import com.solegendary.reignofnether.ability.HeroAbility;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
-import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
 import com.solegendary.reignofnether.building.addon.GarrisonableBuildingAddon;
@@ -171,10 +172,10 @@ public class UnitActionItem {
                 boolean alliedControl;
                 boolean fullControl;
                 if (level.isClientSide()) {
-                    alliedControl = AlliancesClient.canControlAlly(unit.getOwnerName());
+                    alliedControl = SharingClient.canControl(unit.getOwnerName());
                     fullControl = NonUnitClientEvents.canControlAllMobs();
                 } else {
-                    alliedControl = AlliancesServerEvents.canControlAlly(this.ownerName, unit.getOwnerName());
+                    alliedControl = Sharing.shares(unit.getOwnerName(), this.ownerName, Share.CONTROL);
                     fullControl = NonUnitServerEvents.canControlAllMobs(entity.level(), this.ownerName);
                 }
                 if (this.ownerName == null || unit.getOwnerName().equals(this.ownerName) || isSandboxPlayer || alliedControl || fullControl) {
@@ -538,7 +539,7 @@ public class UnitActionItem {
         if (actionableBuilding != null && (
             actionableBuilding.ownerName.equals(ownerName) ||
             SandboxServer.isSandboxOp(ownerName) ||
-            AlliancesServerEvents.canControlAlly(ownerName, actionableBuilding.ownerName))
+            Sharing.shares(actionableBuilding.ownerName, ownerName, Share.CONTROL))
         ) {
             for (Ability ability : actionableBuilding.getAbilities()) {
                 if (ability.action == action && (ability.isOffCooldown(actionableBuilding) || ability.canBypassCooldown(actionableBuilding))) {

@@ -1,8 +1,8 @@
 package com.solegendary.reignofnether.cursor;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
-import com.solegendary.reignofnether.alliance.AlliancesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -434,7 +434,7 @@ public class CursorClientEvents {
                 for (LivingEntity unit : preselectedUnit)
                     if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
                             NonUnitClientEvents.canControlAllMobs() ||
-                            AlliancesClient.canControlAlly(unit))
+                            SharingClient.canControl(unit))
                         ownedEntities += 1;
 
                 if (ownedEntities > 0) {
@@ -442,7 +442,7 @@ public class CursorClientEvents {
                     for (LivingEntity unit : preselectedUnit)
                         if (UnitClientEvents.getPlayerToEntityRelationship(unit) == Relationship.OWNED ||
                                 NonUnitClientEvents.canControlAllMobs() ||
-                                AlliancesClient.canControlAlly(unit))
+                                SharingClient.canControl(unit))
                             unitsToAdd.add(unit);
 
                     if (Keybindings.shiftMod.isDown()) {
