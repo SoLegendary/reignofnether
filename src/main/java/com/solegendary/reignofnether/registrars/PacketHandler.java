@@ -41,6 +41,8 @@ import com.solegendary.reignofnether.research.ResearchClientboundPacket;
 import com.solegendary.reignofnether.research.ResearchServerboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesClientboundPacket;
 import com.solegendary.reignofnether.resources.ResourcesServerboundPacket;
+import com.solegendary.reignofnether.matchstart.MatchResumeClientboundPacket;
+import com.solegendary.reignofnether.matchstart.MatchResumeServerboundPacket;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientboundPacket;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerboundPacket;
 import com.solegendary.reignofnether.sandbox.SandboxServerboundPacket;
@@ -466,6 +468,18 @@ public final class PacketHandler {
                 .encoder(VoiceChannelServerboundPacket::encode)
                 .decoder(VoiceChannelServerboundPacket::new)
                 .consumerMainThread(VoiceChannelServerboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(MatchResumeClientboundPacket.class, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(MatchResumeClientboundPacket::encode)
+                .decoder(MatchResumeClientboundPacket::new)
+                .consumerMainThread(MatchResumeClientboundPacket::handle)
+                .add();
+
+        INSTANCE.messageBuilder(MatchResumeServerboundPacket.class, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(MatchResumeServerboundPacket::encode)
+                .decoder(MatchResumeServerboundPacket::new)
+                .consumerMainThread(MatchResumeServerboundPacket::handle)
                 .add();
     }
 }

@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
  * the map tools in the same grid.
  */
 public enum Icon {
-    CHECK, CLOSE, PLUS, MINUS, LOCK, UNLOCK, SETTINGS("settings-cog"), MESSAGE, USERS, EYE, SHUFFLE,
+    CHECK, CLOSE, PLUS, MINUS, LOCK, UNLOCK, SETTINGS("settings-cog"), MESSAGE, USERS, EYE, SHUFFLE, DICE,
     ZOOM_IN("zoom-in"), ZOOM_OUT("zoom-out"), UNDO, REDO, LIST("bulletlist"), MAP, BOOK_OPEN("book-open"), GLOBE,
     PAW, LEAF, SLIDERS, EXPAND, SHRINK, SATELLITE;
 
