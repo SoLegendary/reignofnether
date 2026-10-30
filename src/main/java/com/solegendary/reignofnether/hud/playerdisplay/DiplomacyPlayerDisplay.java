@@ -1,5 +1,7 @@
 package com.solegendary.reignofnether.hud.playerdisplay;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
 import com.solegendary.reignofnether.alliance.AllianceAction;
 import com.solegendary.reignofnether.alliance.AllianceServerboundPacket;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
@@ -72,7 +74,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
     }
 
     private Relation relation() {
-        if (MC.player != null && AlliancesClient.isAllied(MC.player.getName().getString(), playerName))
+        if (MC.player != null && AlliancesClient.isAllied(PlayerRolesClient.myOwner(), playerName))
             return Relation.ALLY;
         if (AlliancesClient.outboundPendingAlliances.contains(playerName))
             return Relation.SENT;
@@ -96,7 +98,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         if (!online)
             status.append(I18n.get("hud.reignofnether.diplomacy.offline")).append(" · ");
         status.append(I18n.get("hud.reignofnether.diplomacy." + rel.key));
-        if (rel == Relation.ALLY && AlliancesClient.canControlAlly(playerName))
+        if (rel == Relation.ALLY && SharingClient.canControl(playerName))
             status.append(" · ").append(I18n.get("hud.reignofnether.diplomacy.shares_control"));
 
         int cx = renderIdentity(f, x, y, w, status.toString(), online ? rel.colour : Theme.LABEL);
@@ -223,7 +225,7 @@ public class DiplomacyPlayerDisplay extends AbstractPlayerDisplay {
         if (MC.player == null)
             return;
         ResourcesServerboundPacket.sendResources(new Resources(playerName, amounts[0], amounts[1], amounts[2], amounts[3]),
-                MC.player.getName().getString());
+                PlayerRolesClient.myOwner());
         java.util.Arrays.fill(amounts, 0);
         if (focused == this)
             focused = null;

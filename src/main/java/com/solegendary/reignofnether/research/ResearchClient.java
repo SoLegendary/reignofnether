@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.research;
 
+import com.solegendary.reignofnether.player.PlayerRolesClient;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.hud.HudClientEvents;
@@ -32,7 +33,7 @@ public class ResearchClient {
         com.solegendary.reignofnether.chat.SpectatorFeed.researched(ownerName,
                 I18n.get("research." + researchItemName.getNamespace() + "." + researchItemName.getPath()));
         synchronized (researchItems) {
-            if (MC.player != null && MC.player.getName().getString().equals(ownerName) && !researchItems.contains(researchItemName)) {
+            if (MC.player != null && PlayerRolesClient.myOwner().equals(ownerName) && !researchItems.contains(researchItemName)) {
                 researchItems.add(researchItemName);
                 HudClientEvents.showTemporaryMessage(I18n.get(
                     "research.reignofnether.upgrade_completed",

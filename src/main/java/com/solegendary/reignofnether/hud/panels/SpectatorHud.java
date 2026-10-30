@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.hud.panels;
 
+import com.solegendary.reignofnether.fogofwar.FogOfWarClientEvents;
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.alliance.AlliancesClient;
 import com.solegendary.reignofnether.building.BuildingClientEvents;
@@ -233,12 +234,18 @@ public final class SpectatorHud {
         }
 
         Rect row = new Rect(x, y, SIDE_W, ROW_H);
-        Button b = new ButtonBuilder(p.name).onLeftClick(() -> startFollowing(p.name)).build();
+        Button b = new ButtonBuilder(p.name)
+                .onLeftClick(() -> FogOfWarClientEvents.toggleSpectatorView(p.name))
+                .onRightClick(() -> startFollowing(p.name)).build();
         Rect cells = bar;
         // over the resource cells their own tooltip (income, spending, workers) shows instead
-        f.register(b, row, null, () -> cells != null && f.hovered(cells) ? null : Tooltip.of(p.name).status(I18n.get("hud.reignofnether.spectator.click_follow"), Theme.MUTED));
+        f.register(b, row, null, () -> cells != null && f.hovered(cells) ? null : Tooltip.of(p.name)
+                .status(I18n.get("hud.reignofnether.spectator.click_view"), Theme.MUTED)
+                .status(I18n.get("hud.reignofnether.spectator.click_follow"), Theme.MUTED));
+        if (FogOfWarClientEvents.isViewing(p.name))
+            Theme.ring(f.g, x, y, SIDE_W, ROW_H, 1, Theme.OK);
         if (p.name.equals(follow))
-            Theme.ring(f.g, x, y, SIDE_W, ROW_H, 1, Theme.GOLD);
+            Theme.ring(f.g, x + 1, y + 1, SIDE_W - 2, ROW_H - 2, 1, Theme.GOLD);
     }
 
     private static void head(HudFrame f, RTSPlayer p, int x, int y, int size) {

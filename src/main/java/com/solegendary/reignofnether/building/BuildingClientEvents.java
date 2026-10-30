@@ -1,8 +1,11 @@
 package com.solegendary.reignofnether.building;
 
 import com.solegendary.reignofnether.hud.buttons.HelperButtons;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+
+import com.solegendary.reignofnether.player.PlayerRolesClient;
+import com.solegendary.reignofnether.alliance.SharingClient;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.solegendary.reignofnether.ReignOfNether;
@@ -172,7 +175,7 @@ public class BuildingClientEvents {
         BuildingPlacement idlestBuilding = null;
         float prodTicksLeftMax = Float.MAX_VALUE;
         for (BuildingPlacement building : selectedBuildings) {
-            if (!(building.getBuilding().equals(hudSelectedPlacement.getBuilding()) && building.isBuilt && building.ownerName.equals(MC.player.getName().getString()))) continue;
+            if (!(building.getBuilding().equals(hudSelectedPlacement.getBuilding()) && building.isBuilt && building.ownerName.equals(PlayerRolesClient.myOwner()))) continue;
             if (!(building instanceof ProductionPlacement prodB)) continue;
             float prodTicksLeft = 0f;
             for (ActiveProduction production : prodB.productionQueue) {
@@ -252,7 +255,7 @@ public class BuildingClientEvents {
             return;
 
         boolean valid = BuildingValidators.isPlacementValid(
-                MC.level, buildingToPlace, originPos, MC.player.getName().getString(), buildingRotation,
+                MC.level, buildingToPlace, originPos, PlayerRolesClient.myOwner(), buildingRotation,
                 isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
         );
         boolean yellowUnderline = buildingToPlace instanceof PortalBasic && !BuildingValidators.isOnNetherBlocks(MC.level, blocksToDraw, originPos, false);
@@ -379,7 +382,7 @@ public class BuildingClientEvents {
             buildingOrigins.add(b.originPos);
         for (LivingEntity le : UnitClientEvents.getAllUnits()) {
             if (le instanceof Unit unit && le instanceof WorkerUnit workerUnit &&
-                MC.player != null && unit.getOwnerName().equals(MC.player.getName().getString()))
+                MC.player != null && unit.getOwnerName().equals(PlayerRolesClient.myOwner()))
             {
                 Map<BlockPos, List<BuildingBlock>> fogBlocks = workerUnit.getExploreBuildLocationGoal().getFogQueuedBlocksToDraw();
                 fogBlocks.keySet().removeIf(buildingOrigins::contains);
@@ -531,10 +534,10 @@ public class BuildingClientEvents {
             BuildingPlacement preSelBuilding = getPreselectedBuilding();
 
             String errorMsgKey = BuildingValidators.getPlacementValidityError(
-                    MC.level, buildingToPlace, originPos, MC.player.getName().getString(), buildingRotation, isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
+                    MC.level, buildingToPlace, originPos, PlayerRolesClient.myOwner(), buildingRotation, isBridgeDiagonal(), SandboxClientEvents.isSandboxPlayer(), true
             );
             boolean valid = errorMsgKey == null;
-            boolean inFog = !BuildingValidators.isInBrightChunk(MC.level, preSelPos, MC.player.getName().getString());
+            boolean inFog = !BuildingValidators.isInBrightChunk(MC.level, preSelPos, PlayerRolesClient.myOwner());
 
             if (errorMsgKey != null && errorMsgKey.equals("building.reignofnether.build_centre_here")) {
                 OrthoviewClientEvents.forceMoveCam(TutorialClientEvents.BUILD_CAM_POS, 50);
@@ -559,7 +562,7 @@ public class BuildingClientEvents {
                     ids[i] = builderIds.get(i);
                 }
                 if (Keybindings.shiftMod.isDown()) {
-                    String ownerName = MC.player.getName().getString();
+                    String ownerName = PlayerRolesClient.myOwner();
                     if (SandboxClientEvents.relationship == Relationship.NEUTRAL)
                         ownerName = "";
                     else if (SandboxClientEvents.relationship == Relationship.HOSTILE)
@@ -602,7 +605,7 @@ public class BuildingClientEvents {
                             break;
                         }
                     }
-                    String ownerName = MC.player.getName().getString();
+                    String ownerName = PlayerRolesClient.myOwner();
                     if (SandboxClientEvents.isSandboxPlayer(ownerName) && !hasSelectedWorkers &&
                         !(buildingToPlace instanceof AbstractBridge)) {
                         if (SandboxClientEvents.relationship == Relationship.NEUTRAL)
@@ -748,7 +751,7 @@ public class BuildingClientEvents {
                 (((building.isBuilt || !HelperButtons.buildingCancelButton.isHidden.get())
                         && getPlayerToBuildingRelationship(building) == Relationship.OWNED) || isSandboxPlayer)) {
                 HudClientEvents.hudSelectedPlacement = null;
-                BuildingServerboundPacket.cancelBuilding(building.minCorner, MC.player.getName().getString());
+                BuildingServerboundPacket.cancelBuilding(building.minCorner, PlayerRolesClient.myOwner());
             }
         }
     }
@@ -910,7 +913,7 @@ public class BuildingClientEvents {
 
     public static Relationship getPlayerToBuildingRelationship(BuildingPlacement building) {
         if (MC.player != null) {
-            String playerName = MC.player.getName().getString();
+            String playerName = PlayerRolesClient.myOwner();
             String buildingOwnerName = building.ownerName;
 
             if (playerName.equals(buildingOwnerName)) {
@@ -932,7 +935,7 @@ public class BuildingClientEvents {
     public static boolean hasFinishedBuilding(Building building) {
         for (BuildingPlacement bpl : buildings) {
             if (bpl.getBuilding().isTypeOf(building) && bpl.isBuilt &&
-                    ((MC.player != null && bpl.ownerName.equals(MC.player.getName().getString())) ||
+                    ((MC.player != null && bpl.ownerName.equals(PlayerRolesClient.myOwner())) ||
                             allyHasFinishedBuilding(building))) {
                 return true;
             }
@@ -942,7 +945,7 @@ public class BuildingClientEvents {
 
     // does the selected ally's unit own one of these buildings?
     public static boolean allyHasFinishedBuilding(Building building) {
-        if (!AlliancesClient.canControlAlly(hudSelectedEntity))
+        if (!SharingClient.canControl(hudSelectedEntity))
             return false;
 
         String allyName = "";
