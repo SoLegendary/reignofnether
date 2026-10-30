@@ -556,8 +556,6 @@
     "hud.helperbuttons.reignofnether.beacon.click_to_centre": "(Натисніть, щоб перейти до маяка)",
     "hud.helperbuttons.reignofnether.select_all_military_units_shift": "(Shift+клік для вибору лише на екрані)",
 
-    "hud.map.reignofnether.close": "Закрити",
-    "hud.map.reignofnether.open": "Відкрити велику карту",
     "hud.map.reignofnether.pan_sensitivity.tooltip1": "Чутливість камери: %d/%d",
     "hud.map.reignofnether.pan_sensitivity.tooltip2": "(Лівий/правий клік для налаштування)",
     "hud.map.reignofnether.lock_map.tooltip1.enabled": "Фіксація центру мапи: Увімкнено",
@@ -586,11 +584,9 @@
     "hud.reignofnether.drop_off_resources": "Скиньте ресурси",
     "hud.reignofnether.gather_resources": "Збирати ресурси (%s)",
     "hud.reignofnether.change_target_resource": "Натисніть, щоб змінити обраний ресурс",
-    "hud.reignofnether.total_workers": "Усього робітників: %d",
     "hud.reignofnether.workers_on_food": "Збір їжі",
     "hud.reignofnether.workers_on_wood": "Добування дерева",
     "hud.reignofnether.workers_on_ore": "Добування руди",
-    "hud.reignofnether.max_resources": "%s (Максимум: %d)",
     "hud.reignofnether.players_resources": "%s ресурсів",
     "hud.reignofnether.you_are_spectator": "Ти глядач",
     "hud.reignofnether.placed_capitol": "%s поставив свою ратушу!",
@@ -618,7 +614,6 @@
     "hud.relationship.reignofnether.enemy": "Ворог",
     "hud.relationship.reignofnether.neutral": "Нейтральний",
 
-    "hud.hero.reignofnether.level": " (Рівень %d)",
     "hud.hero.reignofnether.experience": "Досвід: %d/%d",
     "hud.hero.reignofnether.max_level": "Макс. рівень!",
 
@@ -1105,11 +1100,9 @@
     "alliance.reignofnether.ally_accepted": "%s приняв союз с тобой.",
     "alliance.reignofnether.no_request": "Немає приглошень на вступ до союзу від %s.",
     "alliance.reignofnether.disbanded": "Твій союз з %s був скасован.",
-    "alliance.reignofnether.disbanding": "Скасування союзу с %s через 30 секунд...",
     "alliance.reignofnether.disband_self": "Ти не можешь себе скасувати.",
-    "alliance.reignofnether.disband_pending": "Запит на скасування союзу з цим гравцем вже надіслан.",
-    "alliance.reignofnether.now_allied_third_party": "\n%s тепер у союзі з %s.\n",
-    "alliance.reignofnether.disbanded_third_party": "\n%s розірвав(ла) союз із %s.\n",
+    "alliance.reignofnether.now_allied_third_party": "%s тепер у союзі з %s.",
+    "alliance.reignofnether.disbanded_third_party": "%s розірвав(ла) союз із %s.",
 
     "survival.reignofnether.dawn": "Світанок розгортається",
     "survival.reignofnether.dusk": "Настає ніч...",
@@ -1170,10 +1163,6 @@
     "hud.gamemode.reignofnether.changemode": "ПКМ щоб змінити режим гри",
     "hud.gamemode.reignofnether.locked": "(закрито)",
 
-    "hud.gamerule.reignofnether.shift_click": "(Утримуйте Shift для швидшої зміни)",
-    "hud.gamerule.reignofnether.click": "(Лівий/правий клік для зміни)",
-    "hud.gamerule.reignofnether.warn_not_opped": "(Змінювати можуть лише адміністратори)",
-    "hud.gamerule.reignofnether.menu": "Меню правил гри",
 
     "config.reignofnether.warn_config_change": "Хост сервера змінив налаштування",
     "config.reignofnether.hide_config_change": "(Натисніть, щоб сховати)",

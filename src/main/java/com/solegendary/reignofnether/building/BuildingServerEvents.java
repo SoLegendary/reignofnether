@@ -664,7 +664,7 @@ public class BuildingServerEvents {
     }
 
     public static int getTotalPopulationSupply(String ownerName) {
-        if (ResearchServerEvents.playerHasCheat(ownerName, "foodforthought")) {
+        if (ResearchServerEvents.playerHasCheat(ownerName, "foodforthought") || SandboxServer.isSandboxPlayer(ownerName)) {
             return UnitServerEvents.maxPopulation;
         }
 
