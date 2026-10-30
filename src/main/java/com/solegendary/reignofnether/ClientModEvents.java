@@ -1,6 +1,9 @@
 package com.solegendary.reignofnether;
 
+import com.solegendary.reignofnether.blocks.BlockClientEvents;
 import com.solegendary.reignofnether.blocks.InvisibleBlockRenderer;
+import com.solegendary.reignofnether.config.ReignOfNetherClientConfigs;
+import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.blocks.SkullTypes;
 import com.solegendary.reignofnether.building.BuildingPlacement;
 import com.solegendary.reignofnether.building.BuildingUtils;
@@ -180,6 +183,9 @@ public class ClientModEvents {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public static void onClientSetupEvent(FMLClientSetupEvent evt) {
+        // read on hot render paths, so kept in statics; the toggles write them back
+        OrthoviewClientEvents.hideLeavesMethod = ReignOfNetherClientConfigs.HIDE_LEAVES.get();
+        BlockClientEvents.nightCircleMode = ReignOfNetherClientConfigs.NIGHT_CIRCLES.get();
         evt.enqueueWork(() -> {
             MenuScreens.register(ContainerRegistrar.TOPDOWNGUI_CONTAINER.get(), TopdownGui::new);
             ItemBlockRenderTypes.setRenderLayer(

@@ -10,7 +10,7 @@ public class ClientModConfigs {
     public static void registerClientConfigs(FMLJavaModLoadingContext mlctx) {
         mlctx.registerConfig(ModConfig.Type.CLIENT,
                 ReignOfNetherClientConfigs.SPEC,
-                "reignofnether-client-" + ReignOfNether.VERSION_STRING + ".toml");
+                "reignofnether-client.toml");
 
         mlctx.registerExtensionPoint(
                 ConfigScreenHandler.ConfigScreenFactory.class,
