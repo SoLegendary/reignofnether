@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.goals;
 
 import com.solegendary.reignofnether.unit.interfaces.RangedAttackerUnit;
 import com.solegendary.reignofnether.unit.interfaces.Unit;
+import com.solegendary.reignofnether.unit.units.villagers.MilitiaUnit;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -43,7 +44,7 @@ public class GroupPace {
             refTick = now;
             updateRef();
         }
-        double want = ref + (hasMelee && u instanceof RangedAttackerUnit ? RANGED_BEHIND : 0);
+        double want = ref + (hasMelee && isRanged(u) ? RANGED_BEHIND : 0);
         double left = distLeft(e);
         if (left - want > SLACK)
             return Double.MAX_VALUE;
@@ -62,13 +63,17 @@ public class GroupPace {
             double left = distLeft(e);
             all += left;
             allCount++;
-            if (!(u instanceof RangedAttackerUnit)) {
+            if (!(isRanged(u))) {
                 melee += left;
                 meleeCount++;
             }
         }
         hasMelee = meleeCount > 0;
         ref = hasMelee ? melee / meleeCount : allCount > 0 ? all / allCount : 0;
+    }
+
+    private boolean isRanged(Unit unit) {
+        return unit instanceof RangedAttackerUnit && (!(unit instanceof MilitiaUnit militiaUnit) || militiaUnit.isUsingBow());
     }
 
     private double distLeft(LivingEntity e) {
