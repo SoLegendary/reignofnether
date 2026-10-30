@@ -166,7 +166,7 @@ public class GameruleServerboundPacket {
                 success.set(false);
                 return;
             }
-            // the match setup's rules are also open to the match host (op 2 or the singleplayer/Essential host)
+            // the match setup's rules are also open to the match host (op 2 or the singleplayer/P2P host)
             else if (!player.hasPermissions(4) && !(LOBBY_RULES.contains(action) && StartPosServerEvents.isHost(player)
                     && PlayerServerEvents.rtsPlayers.isEmpty() && !StartPosServerEvents.isStartingGame())) {
                 ReignOfNether.LOGGER.warn("GameruleServerboundPacket: Tried to process packet from " + player.getName() + " with insufficient permissions");

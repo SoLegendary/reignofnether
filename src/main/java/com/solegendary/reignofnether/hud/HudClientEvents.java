@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL11;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screens.Screen;
 import com.solegendary.reignofnether.matchstart.MatchEndScreen;
+import com.solegendary.reignofnether.matchstart.MatchResumeScreen;
 import com.solegendary.reignofnether.matchstart.MatchStartScreen;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.layout.HudGeometry;
@@ -297,7 +298,7 @@ public class HudClientEvents {
     @SubscribeEvent
     public static void onDrawMatchScreen(ScreenEvent.Render.Pre evt) {
         Screen s = evt.getScreen();
-        if (s instanceof MatchStartScreen || s instanceof MatchEndScreen)
+        if (s instanceof MatchStartScreen || s instanceof MatchResumeScreen || s instanceof MatchEndScreen)
             renderUnder(evt.getGuiGraphics(), true);
     }
 

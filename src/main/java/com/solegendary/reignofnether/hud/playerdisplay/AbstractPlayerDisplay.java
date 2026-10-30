@@ -9,6 +9,7 @@ import com.solegendary.reignofnether.faction.Factions;
 import com.solegendary.reignofnether.hud.buttons.Button;
 import com.solegendary.reignofnether.hud.buttons.ButtonBuilder;
 import com.solegendary.reignofnether.hud.panels.HudFrame;
+import com.solegendary.reignofnether.p2p.P2PJoin;
 import com.solegendary.reignofnether.player.PlayerColors;
 import com.solegendary.reignofnether.player.RTSPlayer;
 import com.solegendary.reignofnether.ui.Rect;
@@ -70,13 +71,27 @@ public abstract class AbstractPlayerDisplay {
         return !AlliancesClient.isAlliedOrOwned(PlayerRolesClient.myOwner(), playerName);
     }
 
+    // the singleplayer/P2P host's latency is always 0: ourselves when hosting, or the host of the P2P game we joined
+    // by code (the connection is named after them). ponytail: direct codes carry no host name, so no HOST there
+    private static boolean isHost(String name) {
+        if (MC.hasSingleplayerServer())
+            return MC.player != null && MC.player.getName().getString().equals(name);
+        var server = MC.getCurrentServer();
+        return name.equals(P2PJoin.hostName) && server != null && server.name.equals(name);
+    }
+
+    /** "42 MS", "HOST" for the P2P host, or null when the game has no latency for them. */
     @Nullable
     public static String pingText(String name) {
+        if (isHost(name))
+            return I18n.get("hud.reignofnether.host");
         PlayerInfo info = MC.getConnection() == null ? null : MC.getConnection().getPlayerInfo(name);
         return info == null ? null : I18n.get("hud.reignofnether.ping", info.getLatency());
     }
 
     public static int pingColour(String name) {
+        if (isHost(name))
+            return Theme.GOLD;
         PlayerInfo info = MC.getConnection() == null ? null : MC.getConnection().getPlayerInfo(name);
         int ms = info == null ? 0 : info.getLatency();
         return ms < 80 ? Theme.OK : ms < 150 ? Theme.YELLOW : Theme.ERROR;

@@ -3,6 +3,7 @@ package com.solegendary.reignofnether.hud;
 import com.solegendary.reignofnether.hud.layout.HudLayout;
 import com.solegendary.reignofnether.loading.LoadingScreenClientEvents;
 import com.solegendary.reignofnether.matchstart.MatchEndScreen;
+import com.solegendary.reignofnether.matchstart.MatchResumeScreen;
 import com.solegendary.reignofnether.matchstart.MatchStartScreen;
 import com.solegendary.reignofnether.ui.EdgeSlide;
 import com.solegendary.reignofnether.ui.Rect;
@@ -28,7 +29,7 @@ public final class HudMotion {
     private static boolean wanted() {
         Screen s = Minecraft.getInstance().screen;
         return !LoadingScreenClientEvents.isShowing()
-                && !(s instanceof MatchStartScreen || s instanceof MatchEndScreen);
+                && !(s instanceof MatchStartScreen || s instanceof MatchResumeScreen || s instanceof MatchEndScreen);
     }
 
     /** Once a frame, before the HUD draws. */

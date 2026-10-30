@@ -80,7 +80,7 @@ public class StartPosClientEvents {
         }
     }
 
-    // the singleplayer/Essential host or an op; the server checks this too
+    // the singleplayer/P2P host or an op; the server checks this too
     public static boolean isHost() {
         return MC.hasSingleplayerServer() || (MC.player != null && MC.player.hasPermissions(2));
     }

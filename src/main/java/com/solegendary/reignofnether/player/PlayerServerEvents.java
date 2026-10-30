@@ -7,6 +7,7 @@ import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.ability.HeroAbility;
 import com.solegendary.reignofnether.ability.TradeAction;
 import com.solegendary.reignofnether.alliance.AlliancesServerEvents;
+import com.solegendary.reignofnether.matchstart.MatchResumeServerEvents;
 import com.solegendary.reignofnether.alliance.AllyCommand;
 import com.solegendary.reignofnether.api.ReignOfNetherRegistries;
 import com.solegendary.reignofnether.building.*;
@@ -155,6 +156,13 @@ public class PlayerServerEvents {
         data.rtsPlayers.clear();
         data.rtsPlayers.addAll(rtsPlayers);
         PlayerRoles.saveTo(data.soldierOf, data.coCommanderOf);
+        data.alliances.clear();
+        AlliancesServerEvents.getAlliances().forEach((owner, allies) -> data.alliances.put(owner, new HashSet<>(allies)));
+        data.alliedControl.clear();
+        data.alliedControl.addAll(AlliancesServerEvents.playersWithAlliedControl);
+        data.rtsLocked = rtsLocked;
+        data.rtsGameTicks = rtsGameTicks;
+        data.fogEnabled = FogOfWarServerEvents.isEnabled();
         data.save();
         serverLevel.getDataStorage().save();
     }
@@ -170,6 +178,19 @@ public class PlayerServerEvents {
             rtsPlayers.addAll(data.rtsPlayers);
             PlayerRoles.loadFrom(data.soldierOf, data.coCommanderOf);
             FogOfWarServerEvents.invalidateRtsCache();
+
+            // a match in progress: bring back what isn't in the world itself, and wait for the host to resume
+            if (!rtsPlayers.isEmpty()) {
+                data.alliances.forEach((owner, allies) -> allies.forEach(ally -> AlliancesServerEvents.addAlliance(owner, ally)));
+                AlliancesServerEvents.playersWithAlliedControl.addAll(data.alliedControl);
+                rtsLocked = data.rtsLocked;
+                rtsGameTicks = data.rtsGameTicks;
+                FogOfWarServerEvents.restoreOnLoad(data.fogEnabled);
+                // saved games are singleplayer/LAN worlds on RTS maps; a dedicated server, or a normal world
+                // played in RTS, just carries on
+                MatchResumeServerEvents.resumePending = !evt.getServer().isDedicatedServer()
+                        && WorldBorderServerEvents.isRtsOptimisedMap(evt.getServer().overworld());
+            }
 
             for (RTSPlayer rtsPlayer : rtsPlayers) {
                 if (rtsPlayer.faction == Factions.NONE) {
@@ -342,6 +363,10 @@ public class PlayerServerEvents {
 
         players.add((ServerPlayer) evt.getEntity());
         String playerName = serverPlayer.getName().getString();
+        // entity ids change every session: point a returning RTS player at their new one
+        RTSPlayer returning = getRTSPlayer(playerName);
+        if (returning != null && returning.id >= 0)
+            returning.id = serverPlayer.getId();
         ReignOfNether.LOGGER.info("Player logged in: " + playerName + ", id: " + serverPlayer.getId());
 
         PlayerRoles.syncTo(serverPlayer); // first: the client filters research by the owner it acts as
@@ -413,6 +438,15 @@ public class PlayerServerEvents {
         }
 
         updateMarketRates(playerName);
+
+        // a little later, so the screen opens after the world has finished loading on the client
+        if (MatchResumeServerEvents.resumePending) {
+            MinecraftServer server = serverPlayer.server;
+            CompletableFuture.delayedExecutor(1000, TimeUnit.MILLISECONDS).execute(() -> server.execute(() -> {
+                if (!serverPlayer.hasDisconnected())
+                    MatchResumeServerEvents.sendScreenToAll(server); // everyone sees who is back
+            }));
+        }
     }
 
     @SubscribeEvent
@@ -422,6 +456,11 @@ public class PlayerServerEvents {
         players.removeIf(player -> player.getId() == id);
         orthoviewPlayers.removeIf(player -> player.getId() == id);
         PingServerEvents.forget(evt.getEntity().getName().getString());
+        if (evt.getEntity() instanceof ServerPlayer sp)
+            MatchResumeServerEvents.onPlayerLeft(sp);
+        // while a saved game waits, the others see them go offline (once they've left the player list)
+        if (MatchResumeServerEvents.resumePending && evt.getEntity() instanceof ServerPlayer sp)
+            sp.server.execute(() -> MatchResumeServerEvents.sendScreenToAll(sp.server));
     }
 
     public static void startRTS(int playerId, Vec3 pos, Faction faction) {
@@ -1179,6 +1218,7 @@ public class PlayerServerEvents {
                     p.name, p.faction, winnerNames.contains(p.name), teamId(p, all),
                     p.scores.getScoreListAsArray()));
         MatchStatsClientboundPacket.broadcast(rtsGameTicks, rows);
+        MatchResumeServerEvents.matchEnded = true;
     }
 
     // allies share a team on the end screen, however they teamed up: lobby teams, start block colours or /ally
@@ -1363,6 +1403,7 @@ public class PlayerServerEvents {
     private static void saveAll() {
         saveRTSPlayers();
         postGameRtsPlayers.clear();
+        MatchResumeServerEvents.matchEnded = false;
         saveBuildings(serverLevel);
         BuildingServerEvents.saveNetherZones(serverLevel);
         UnitServerEvents.saveGatherTargets(serverLevel);
