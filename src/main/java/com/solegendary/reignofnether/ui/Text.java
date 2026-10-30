@@ -251,6 +251,12 @@ public final class Text {
         return fit(s, maxWidth, t -> bigWidth(t, scale));
     }
 
+    /** A plain "?" filling a size x size icon slot: a hidden pick or a random faction. */
+    public static void unknown(GuiGraphics g, int x, int y, int size) {
+        float scale = size / 10f;
+        bigCentered(g, "?", x + size / 2, y + (size - bigHeight(scale)) / 2, Theme.TEXT, scale);
+    }
+
     public static void bigRight(GuiGraphics g, String s, int rightX, int y, int colour, float scale) {
         big(g, s, rightX - bigWidth(s, scale), y, colour, scale);
     }
@@ -306,6 +312,11 @@ public final class Text {
         return Theme.font().split(c, maxWidth);
     }
 
+    /** Height of a title at this scale, as drawn (scales snap to whole screen pixels). */
+    public static int titleHeight(float scale) {
+        return Math.round(8 * crispBig(scale));
+    }
+
     public static int titleWidth(String s, float scale) {
         return Math.round(Theme.font().width(bigText(s)) * crispBig(scale));
     }
@@ -328,8 +339,14 @@ public final class Text {
         g.pose().translate(x, y, 0);
         float k = crispBig(scale);
         g.pose().scale(k, k, 1);
-        g.drawString(Theme.font(), text, 1, 1, shadow, false);
+        if (shadow != 0) // 0 = no shadow
+            g.drawString(Theme.font(), text, 1, 1, shadow, false);
 
+        if (bands[0] == bands[bands.length - 1] && bands[0] == bands[1]) { // one colour: no bands, so it can be rotated
+            g.drawString(Theme.font(), text, 0, 0, bands[0], false);
+            g.pose().popPose();
+            return;
+        }
         var matrix = g.pose().last().pose();
         for (int i = 0; i < bands.length; i++) {
             Vector4f top = matrix.transform(new Vector4f(0, h * TITLE_STOPS[i], 0, 1));

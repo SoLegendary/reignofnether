@@ -54,8 +54,12 @@ import static com.solegendary.reignofnether.player.PlayerServerEvents.sendMessag
 public class FogOfWarServerEvents {
 
     private static boolean enabled = false; // enforced for all clients
+    private static boolean restoreOnLoad = false; // a saved game had fog on: turn it back on once the level ticks
     static {
-        WorldState.onServerReset(() -> enabled = false);
+        WorldState.onServerReset(() -> {
+            enabled = false;
+            restoreOnLoad = false;
+        });
     }
     private static ServerLevel serverLevel = null;
 
@@ -381,6 +385,10 @@ public class FogOfWarServerEvents {
         return enabled;
     }
 
+    public static void restoreOnLoad(boolean wasEnabled) {
+        restoreOnLoad = wasEnabled;
+    }
+
     @SubscribeEvent
     public static void onWorldTick(TickEvent.LevelTickEvent evt) {
         if (evt.phase != TickEvent.Phase.END || evt.level.isClientSide() || evt.level.dimension() != Level.OVERWORLD)
@@ -390,8 +398,9 @@ public class FogOfWarServerEvents {
 
         // Only attempt the forced auto-enable on an RTS-optimised map; otherwise setEnabled would refuse
         // and spam the log/chat every tick. On a vanilla-sized map force-fog simply stays inert.
-        if (!enabled && isForceFog() && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel))
+        if (!enabled && (isForceFog() || restoreOnLoad) && WorldBorderServerEvents.isRtsOptimisedMap(serverLevel))
             setEnabled(true);
+        restoreOnLoad = false;
 
         if (!enabled) return;
 
