@@ -36,7 +36,7 @@ Quality of Life
 [✅] Improved permissions security of various serverside actions
 [✅] `/rtsapi-start-scenario-role` renamed to `/rtsapi player start-scenario-role` and is now compatible with player selectors
 [✅] Added bees to the sandbox unit menu
-[🟡] Holding ctrl when issuing a move command makes your army move together in formation:
+[✅] Holding ctrl when issuing a move command makes your army move together in formation:
     - Faster units slow down by up to 40% to allow slower units to catch up
     - Ranged units try to stay behind melee units
 
@@ -45,10 +45,10 @@ Bugfixes
 --------
 [✅] You can no longer see your opponent's building outlines in fog at the start of a match
 [✅] Joining a world with a low Y level no longer makes your camera slide down
-[🟡] Workers no longer get stuck trying to reach resources out of reach
+[✅] Workers no longer get stuck trying to reach resources out of reach and instead search elsewhere
 [✅] Fixed heroes sometimes spinning on spawn
-[🟡] Fixed various memory leaks related to closing/reopening singleplayer maps on the same session
-[🟡] Fixed a crash when publishing a scenario map on a server world
+[✅] Fixed various memory leaks related to closing/reopening singleplayer maps on the same session
+[✅] Fixed a crash when publishing a scenario map on a server world
 [✅] Fixed accuracy problems when using `/rtsapi player camera move` with different pan durations
 
 
@@ -56,7 +56,3 @@ Languages
 ---------
 
 
-
-Testing checklist
------------------
-[ ] Vanilla mob targeting and aggression
