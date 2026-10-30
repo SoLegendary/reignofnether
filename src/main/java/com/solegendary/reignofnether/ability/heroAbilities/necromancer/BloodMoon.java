@@ -73,7 +73,7 @@ public class BloodMoon extends HeroAbility {
             () -> true,
             () -> CursorClientEvents.setLeftClickAction(UnitAction.BLOOD_MOON),
             null,
-            getTooltipLines((HeroUnit) hero),
+            getTooltipLines(hero),
             this,
             hero
         );

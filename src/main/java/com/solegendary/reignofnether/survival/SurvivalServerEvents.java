@@ -208,7 +208,7 @@ public class SurvivalServerEvents {
                     }
                     if (!isEnabled())
                         return 0;
-                    PlayerServerEvents.sendMessageToAllPlayers("Advancing to next night and wave");
+                    PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.advancing_next_night");
                     serverLevel.setDayTime(12450);
                     return 1;
                 }));
@@ -217,7 +217,7 @@ public class SurvivalServerEvents {
     public static int endCurrentWave() {
         if (!isEnabled())
             return 0;
-        PlayerServerEvents.sendMessageToAllPlayers("Ending current wave");
+        PlayerServerEvents.sendMessageToAllPlayers("survival.reignofnether.ending_wave");
         ArrayList<WaveEnemy> enemiesCopy = new ArrayList<>(enemies);
         for (WaveEnemy enemy : enemiesCopy)
             enemy.getEntity().kill();
@@ -303,10 +303,6 @@ public class SurvivalServerEvents {
         }
     }
 
-    public static long getDayLength() {
-        return 12000 - getWaveSurvivalTimeModifier(difficulty);
-    }
-
     public static void setToStartingDayTime() {
         serverLevel.setDayTime(TimeUtils.DAWN + getWaveSurvivalTimeModifier(difficulty));
     }
@@ -339,18 +335,14 @@ public class SurvivalServerEvents {
         return pop;
     }
 
-    public static boolean isWaveInProgress() {
-        return !getCurrentEnemies().isEmpty();
-    }
-
     // triggered at nightfall
     public static void startNextWave(ServerLevel level) {
         saveData(level);
         currentWave = nextWave;
-        System.out.println("starting wave: " + nextWave.faction.getName());
+        ReignOfNether.LOGGER.info("starting wave: " + nextWave.faction.getName());
         nextWave.start(level);
         nextWave = Wave.getWave(nextWave.number + 1);
-        System.out.println("next wave: " + nextWave.faction.getName());
+        ReignOfNether.LOGGER.info("next wave: " + nextWave.faction.getName());
         SurvivalClientboundPacket.setWaveNumber(nextWave.number);
     }
 

@@ -13,10 +13,7 @@ import java.util.WeakHashMap;
 public final class EntityEaser {
 
     // Presets (CSS-style cubic-bezier x1, y1, x2, y2)
-    public static final float[] EASE        = {0.25f, 0.1f, 0.25f, 1.0f};
     public static final float[] EASE_IN_OUT = {0.35f, 0.0f, 0.65f, 1.0f};
-    public static final float[] EASE_OUT    = {0.0f, 0.0f, 0.58f, 1.0f};
-    public static final float[] OVERSHOOT   = {0.34f, 1.56f, 0.64f, 1.0f};
 
     private final float durationTicks;
     private final float x1, y1, x2, y2;

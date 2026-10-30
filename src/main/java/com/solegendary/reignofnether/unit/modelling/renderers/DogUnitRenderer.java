@@ -23,13 +23,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class DogUnitRenderer extends MobRenderer<Wolf, WolfModel<Wolf>> {
 
-    private static final ResourceLocation WOLF_ASHEN_TAME_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/wolf/wolf_ashen_tame.png");
-    private static final ResourceLocation WOLF_BLACK_TAME_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/wolf/wolf_black_tame.png");
-    private static final ResourceLocation WOLF_CHESTNUT_TAME_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/wolf/wolf_chestnut_tame.png");
-    private static final ResourceLocation WOLF_RUSTY_TAME_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/wolf/wolf_rusty_tame.png");
-    private static final ResourceLocation WOLF_SNOWY_TAME_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/wolf/wolf_snowy_tame.png");
-    private static final ResourceLocation WOLF_SPOTTED_TAME_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/wolf/wolf_spotted_tame.png");
-    private static final ResourceLocation WOLF_STRIPED_TAME_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/wolf/wolf_striped_tame.png");
     private static final ResourceLocation WOLF_WOODS_TAME_LOCATION = ResourceLocation.fromNamespaceAndPath("reignofnether", "textures/entities/wolf/wolf_woods_tame.png");
 
     public DogUnitRenderer(EntityRendererProvider.Context p_174452_) {

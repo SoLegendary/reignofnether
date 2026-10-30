@@ -585,7 +585,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
             if (this.horizontalCollision || this.verticalCollision) {
                 boolean flag = false;
                 AABB aabb = this.getBoundingBox().inflate(0.2);
-                Iterator var = BlockPos.betweenClosed(
+                Iterator<BlockPos> var = BlockPos.betweenClosed(
                         Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ),
                         Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ))
                 .iterator();
@@ -597,7 +597,7 @@ public class SlimeUnit extends Slime implements Unit, AttackerUnit {
                     do {
                         if (!var.hasNext())
                             break label;
-                        blockpos = (BlockPos) var.next();
+                        blockpos = var.next();
                         BlockState blockstate = this.level().getBlockState(blockpos);
                         block = blockstate.getBlock();
                     } while (!(block instanceof LeavesBlock));

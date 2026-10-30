@@ -300,10 +300,10 @@ public class PhantomSummon extends Phantom {
                 List<Player> $$0 = PhantomSummon.this.level().getNearbyPlayers(this.attackTargeting, PhantomSummon.this, PhantomSummon.this.getBoundingBox().inflate(16.0, 64.0, 16.0));
                 if (!$$0.isEmpty()) {
                     $$0.sort(Comparator.comparing(player -> ((Entity) player).getY()).reversed());
-                    Iterator var2 = $$0.iterator();
+                    Iterator<Player> var2 = $$0.iterator();
 
                     while(var2.hasNext()) {
-                        Player $$1 = (Player)var2.next();
+                        Player $$1 = var2.next();
                         if (PhantomSummon.this.canAttack($$1, TargetingConditions.DEFAULT)) {
                             PhantomSummon.this.setTarget($$1);
                             return true;

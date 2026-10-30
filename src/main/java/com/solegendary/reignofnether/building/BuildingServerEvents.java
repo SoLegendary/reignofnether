@@ -345,26 +345,6 @@ public class BuildingServerEvents {
         populations.clear();
     }
 
-    private static boolean isOverlappingAnyOtherBuilding(BuildingPlacement buildingToPlace) {
-        BlockPos minPos = buildingToPlace.minCorner;
-        BlockPos maxPos = buildingToPlace.maxCorner;
-
-        for (BuildingPlacement building : buildings) {
-            for (BuildingBlock block : building.blocks) {
-                if (buildingToPlace.getBuilding() instanceof AbstractBridge &&
-                        building.getBuilding() instanceof AbstractBridge) {
-                    continue;
-                }
-                BlockPos bp = block.getBlockPos();
-                if (bp.getX() >= minPos.getX() && bp.getX() <= maxPos.getX() && bp.getY() >= minPos.getY()
-                        && bp.getY() <= maxPos.getY() && bp.getZ() >= minPos.getZ() && bp.getZ() <= maxPos.getZ()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     @Nullable
     public static BuildingPlacement placeBuilding(
         Building building,

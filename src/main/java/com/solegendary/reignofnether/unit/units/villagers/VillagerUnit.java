@@ -434,7 +434,7 @@ public class VillagerUnit extends Vindicator implements Unit, WorkerUnit, Attack
     public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
         super.readAdditionalSaveData(pCompound);
         if (pCompound.contains("VillagerData", 10)) {
-            DataResult<VillagerData> dataresult = VillagerData.CODEC.parse(new Dynamic(NbtOps.INSTANCE, pCompound.get("VillagerData")));
+            DataResult<VillagerData> dataresult = VillagerData.CODEC.parse(new Dynamic<>(NbtOps.INSTANCE, pCompound.get("VillagerData")));
             dataresult.resultOrPartial((err) -> ReignOfNether.LOGGER.error("Failed to load villager data"))
                     .ifPresent(this::setVillagerData);
         }

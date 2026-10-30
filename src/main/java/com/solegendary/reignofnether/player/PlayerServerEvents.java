@@ -330,19 +330,6 @@ public class PlayerServerEvents {
         String playerName = serverPlayer.getName().getString();
         ReignOfNether.LOGGER.info("Player logged in: " + playerName + ", id: " + serverPlayer.getId());
 
-        // if a player is looking directly at a frozenchunk on login, they may load in the real blocks before
-        // they are frozen so move them away then BuildingClientEvents.placeBuilding moves them to their base later
-        // don't do this if they don't own any buildings
-        /*
-        if (isRTSPlayer(playerName) && rtsSyncingEnabled) {
-            for (BuildingPlacement building : BuildingServerEvents.getBuildings()) {
-                if (building.ownerName.equals(playerName)) {
-                    movePlayer(serverPlayer.getId(), 0, ORTHOVIEW_PLAYER_BASE_Y, 0);
-                    break;
-                }
-            }
-        }
-         */
         if (rtsSyncingEnabled) {
             MinecraftServer server = evt.getEntity().level().getServer();
             if (server != null && !server.isDedicatedServer()) {
@@ -1181,7 +1168,7 @@ public class PlayerServerEvents {
                 winners.add(playerName);
                 broadcastMatchStats(winners);
             } catch (ConcurrentModificationException e) {
-                System.err.println("ConcurrentModificationException during beaconVictory: " + e.getMessage());
+                ReignOfNether.LOGGER.error("ConcurrentModificationException during beaconVictory", e);
             }
         } else {
             for (RTSPlayer p : rtsPlayers) {

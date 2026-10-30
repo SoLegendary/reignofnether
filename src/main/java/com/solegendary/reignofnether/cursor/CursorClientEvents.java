@@ -109,14 +109,6 @@ public class CursorClientEvents {
         return rightClickDown && cursorRightClickDownPos.distanceToSqr(cursorRightClickDragPos) > (DRAG_THRESHOLD * DRAG_THRESHOLD);
     }
 
-    public static Vec2 getCursorRightClickDownPos() {
-        return cursorRightClickDownPos;
-    }
-
-    public static Vec2 getCursorRightClickDragPos() {
-        return cursorRightClickDragPos;
-    }
-
     public static BlockPos getRightClickStartBp() {
         return rightClickStartBp;
     }

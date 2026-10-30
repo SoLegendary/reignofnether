@@ -93,41 +93,6 @@ public interface GarrisonableBuildingAddon extends BuildingAddon {
         return null;
     }
 
-//    static BuildingPlacement getGarrisonPlacement(Unit unit) {
-//        List<BuildingPlacement> buildings;
-//        Entity entity = (Entity) unit;
-//        if (entity.level().isClientSide())
-//            buildings = BuildingClientEvents.getBuildings();
-//        else
-//            buildings = BuildingServerEvents.getBuildings();
-//
-//        for (BuildingPlacement building : buildings) {
-//
-//            boolean isAllied;
-//            if (entity.level().isClientSide())
-//                isAllied = AlliancesClient.isAllied(unit.getOwnerName(), building.ownerName);
-//            else
-//                isAllied = AlliancesServerEvents.isAllied(unit.getOwnerName(), building.ownerName);
-//
-//            GarrisonableBuildingAddon garr;
-//            if ((unit.getOwnerName().equals(building.ownerName) || isAllied || (unit.getOwnerName().isEmpty() && building.ownerName.isEmpty())) &&
-//                    (garr = building.getBuilding().getActiveAddon(GarrisonableBuildingAddon.class)) != null && building.isBuilt &&
-//                    building.isPosInsideBuilding(((LivingEntity) unit).getOnPos().above())) {
-//
-//                if (building.getBuilding() instanceof CustomBuilding) {
-//                    Block onBlock = entity.level().getBlockState(entity.getOnPos().above()).getBlock();
-//                    if (onBlock == BlockRegistrar.GARRISON_ZONE_BLOCK.get() ||
-//                            onBlock == BlockRegistrar.GARRISON_ENTRY_BLOCK.get())
-//                        return building;
-//                } else {
-//                    if (((LivingEntity) unit).getOnPos().getY() > building.originPos.getY() + 2)
-//                        return building;
-//                }
-//            }
-//        }
-//        return null;
-//    }
-
     static int getNumOccupants(BuildingPlacement building) {
         List<LivingEntity> entities;
         if (building.getLevel().isClientSide())

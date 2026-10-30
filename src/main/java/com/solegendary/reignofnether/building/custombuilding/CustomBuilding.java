@@ -224,7 +224,9 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                     );
                     stockedItems.add(stockedItem);
                 }
-                catch (Exception e) { }
+                catch (Exception e) {
+                    ReignOfNether.LOGGER.warn("Failed to load custom building shop item", e);
+                }
             }
         }
     }
@@ -326,7 +328,9 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
                             hotkeyIndex += 1;
                         }
                     }
-                } catch (Exception e) { }
+                } catch (Exception e) {
+                    ReignOfNether.LOGGER.warn("Failed to load custom building production item", e);
+                }
             }
         }
     }
@@ -529,7 +533,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         try {
             this.commands.remove(index);
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in deleteCommand");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in deleteCommand", e);
         }
     }
 
@@ -537,7 +541,7 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         try {
             this.commands.get(index).commandStr = text;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandText");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandText", e);
         }
     }
 
@@ -546,14 +550,14 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         try {
             cooldownTicks = Integer.parseInt(cooldownTicksStr);
         } catch (NumberFormatException e) {
-            System.out.println("NumberFormatException in setCommandCooldown");
+            ReignOfNether.LOGGER.warn("NumberFormatException in setCommandCooldown", e);
             return;
         }
         try {
             this.commands.get(index).tickCooldownMax = cooldownTicks;
             this.commands.get(index).tickCooldown = cooldownTicks;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandCooldown");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandCooldown", e);
         }
     }
 
@@ -562,13 +566,13 @@ public class CustomBuilding extends ProductionBuilding implements GarrisonableBu
         try {
             triggerCond = BuildingCommand.TriggerCondition.valueOf(triggerStr);
         } catch (IllegalArgumentException e) {
-            System.out.println("IllegalArgumentException in setCommandTrigger");
+            ReignOfNether.LOGGER.warn("IllegalArgumentException in setCommandTrigger", e);
             return;
         }
         try {
             this.commands.get(index).condition = triggerCond;
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("IndexOutOfBoundsException in setCommandTrigger");
+            ReignOfNether.LOGGER.warn("IndexOutOfBoundsException in setCommandTrigger", e);
         }
     }
     // GarrisonableBuilding

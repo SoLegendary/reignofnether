@@ -197,8 +197,6 @@ public class RavagerUnit extends Ravager implements Unit, AttackerUnit, RangeInd
     public final static float ROAR_KNOCKBACK = 6f;
     public final static int ROAR_SLOW_DURATION = 10 * ResourceCost.TICKS_PER_SECOND;
 
-    private static final Predicate<Entity> NO_RAVAGER_AND_ALIVE = e -> e.isAlive() && !(e instanceof Ravager);
-
     // ---- siege mode ----
     public enum SiegeState { NONE, BURROWING, SIEGED, UNBURROWING }
 

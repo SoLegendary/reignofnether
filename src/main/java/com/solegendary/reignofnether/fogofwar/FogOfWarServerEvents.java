@@ -222,18 +222,6 @@ public class FogOfWarServerEvents {
         pendingResends.computeIfAbsent(playerId, k -> ConcurrentHashMap.newKeySet()).add(pos);
     }
 
-    public static Set<ChunkPos> getBuildingChunks(BuildingPlacement b) {
-        int minCx = b.minCorner.getX() >> 4;
-        int maxCx = b.maxCorner.getX() >> 4;
-        int minCz = b.minCorner.getZ() >> 4;
-        int maxCz = b.maxCorner.getZ() >> 4;
-        Set<ChunkPos> chunks = new HashSet<>();
-        for (int cx = minCx; cx <= maxCx; cx++)
-            for (int cz = minCz; cz <= maxCz; cz++)
-                chunks.add(new ChunkPos(cx, cz));
-        return chunks;
-    }
-
     public static boolean canPlayerSeeBuilding(ServerPlayer sp, BuildingPlacement b) {
         if (!isFogActiveFor(sp)) return true;
         return isBlockVisibleFor(sp, b.maxCorner.getX(), b.maxCorner.getZ()) ||

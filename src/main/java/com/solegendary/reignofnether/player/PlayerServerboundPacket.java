@@ -140,23 +140,6 @@ public class PlayerServerboundPacket {
         }
     }
 
-    /*
-    public static void startRTSEveryone() {
-        Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null && MC.level != null) {
-            GameModeServerboundPacket.setAndLockAllClientGameModes(ClientGameModeHelper.gameMode);
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
-        }
-    }
-
-        public static void cancelStartRTSEveryone() {
-        Minecraft MC = Minecraft.getInstance();
-        if (MC.player != null && MC.level != null) {
-            PacketHandler.INSTANCE.sendToServer(new PlayerServerboundPacket(PlayerAction.CANCEL_START_RTS_EVERYONE, MC.player.getId(), 0d,0d,0d));
-        }
-    }
-     */
-
     public static void startRTSScenario(int roleIndex) {
         Minecraft MC = Minecraft.getInstance();
         if (MC.player != null && MC.level != null) {

@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -61,15 +60,6 @@ public class TitleScreenMixin extends Screen {
 
     protected TitleScreenMixin(Component pTitle) {
         super(pTitle);
-    }
-
-    private boolean textureExists(ResourceLocation resource) {
-        try {
-            ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-            return resourceManager.getResource(resource).isPresent();
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     @Inject(method = "init", at = @At("TAIL"))
@@ -209,7 +199,7 @@ public class TitleScreenMixin extends Screen {
             URI uri = new URI(url);
             Util.getPlatform().openUri(uri);
         } catch (Exception e) {
-            System.err.println("Failed to open URL: " + e.getMessage());
+            ReignOfNether.LOGGER.error("Failed to open URL: " + url, e);
         }
     }
 
@@ -303,29 +293,4 @@ public class TitleScreenMixin extends Screen {
             RenderSystem.disableBlend();
         }
     }
-
-    /*
-    @Shadow private Component getMultiplayerDisabledReason() { return null; }
-    @Shadow private void realmsButtonClicked() { }
-
-    private final int menuOffsetY = 20;
-
-    @Inject(method = "createNormalMenuOptions", at = @At("HEAD"), cancellable = true)
-    private void createNormalMenuOptions(int pY, int pRowHeight, CallbackInfo ci) {
-        ci.cancel();
-        this.addRenderableWidget(Button.builder(Component.translatable("menu.singleplayer"), (p_280833_) -> {
-            this.minecraft.setScreen(new SelectWorldScreen(this));
-        }).bounds(this.width / 2 - 100, pY + menuOffsetY, 200, 20).build());
-        Component component = this.getMultiplayerDisabledReason();
-        boolean flag = component == null;
-        Tooltip tooltip = component != null ? Tooltip.create(component) : null;
-        ((Button)this.addRenderableWidget(Button.builder(Component.translatable("menu.multiplayer"), (p_210872_) -> {
-            Screen screen = this.minecraft.options.skipMultiplayerWarning ? new JoinMultiplayerScreen(this) : new SafetyScreen(this);
-            this.minecraft.setScreen((Screen)screen);
-        }).bounds(this.width / 2 - 100, pY + menuOffsetY + pRowHeight * 1, 200, 20).tooltip(tooltip).build())).active = flag;
-        ((Button)this.addRenderableWidget(Button.builder(Component.translatable("menu.online"), (p_210872_) -> {
-            this.realmsButtonClicked();
-        }).bounds(this.width / 2 + 2, pY + menuOffsetY + pRowHeight * 2, 98, 20).tooltip(tooltip).build())).active = flag;
-    }
-     */
 }
