@@ -10,6 +10,7 @@ import com.solegendary.reignofnether.player.PlayerClientboundPacket;
 import com.solegendary.reignofnether.player.PlayerRoles;
 import com.solegendary.reignofnether.player.PlayerServerEvents;
 import com.solegendary.reignofnether.player.RTSPlayer;
+import com.solegendary.reignofnether.registrars.PacketHandler;
 import com.solegendary.reignofnether.research.ResearchServerEvents;
 import com.solegendary.reignofnether.resources.ResourcesServerEvents;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoServerEvents;
@@ -18,6 +19,7 @@ import com.solegendary.reignofnether.startpos.StartPosServerEvents;
 import com.solegendary.reignofnether.tutorial.TutorialServerEvents;
 import com.solegendary.reignofnether.worldborder.WorldBorderServerEvents;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.*;
 import net.minecraft.server.MinecraftServer;
@@ -29,6 +31,7 @@ import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.LevelResource;
@@ -39,6 +42,8 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -109,12 +114,41 @@ public class ReplayServerEvents {
             r.recordSnapshot(packet, 1L << ReplayRecorder.SNAPSHOT_BIT);
             return true;
         }
+        // block changes come from onBlockChanged for everywhere at once, not each player's fogged copy
+        if (packet instanceof ClientboundBlockUpdatePacket || packet instanceof ClientboundSectionBlocksUpdatePacket)
+            return false;
         // a fogged player gets the pre-game snapshot of chunks they can't see: not what's really there
         if (packet instanceof ClientboundLevelChunkWithLightPacket c && FogOfWarServerEvents.isFogActiveFor(player)
                 && !FogOfWarServerEvents.isChunkSentFor(player, new ChunkPos(c.getX(), c.getZ())))
             return false;
         r.record(player.getName().getString(), packet);
         return false;
+    }
+
+    /**
+     * Something a viewer with no fog would get, though maybe no player did: every entity's spawn, movement and
+     * removal, and stats that are only sent to players who can see the unit. So the replay has the whole match,
+     * and its fog is only a view.
+     */
+    public static void recordOmni(Packet<?> packet) {
+        ReplayRecorder r = recorder;
+        if (r != null && !capturing)
+            r.record(ReplayRecorder.OMNI, packet);
+    }
+
+    public static void recordOmniMessage(Object modMessage) {
+        if (recorder != null && !capturing)
+            recordOmni(PacketHandler.INSTANCE.toVanillaPacket(modMessage, NetworkDirection.PLAY_TO_CLIENT));
+    }
+
+    public static boolean isRecording() {
+        return recorder != null && !capturing;
+    }
+
+    /** ServerLevel.sendBlockUpdated: any block change a client would hear about. */
+    public static void onBlockChanged(BlockPos pos, BlockState state) {
+        if (recorder != null && !capturing)
+            recordOmni(new ClientboundBlockUpdatePacket(pos, state));
     }
 
     public static void onCamera(ServerPlayer player, float x, float z, float zoom, float rot) {
@@ -188,7 +222,10 @@ public class ReplayServerEvents {
         String map = RTSMapInfoServerEvents.rtsMapInfo != null ? RTSMapInfoServerEvents.rtsMapInfo.getName()
                 : server.getWorldData().getLevelName();
         String stamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
-        Path file = ReplayHeader.dir().resolve(stamp + "_" + map.replaceAll("[^A-Za-z0-9._-]", "_") + ReplayHeader.EXTENSION);
+        // kept out of the replays folder: it's only saved there if a player clicks download on the end screen
+        Path pending = FMLPaths.GAMEDIR.get().resolve("reignofnether").resolve("replays-pending");
+        FileUtils.deleteQuietly(pending.toFile()); // the last match's, nobody can download it anymore
+        Path file = pending.resolve(stamp + "_" + map.replaceAll("[^A-Za-z0-9._-]", "_") + ReplayHeader.EXTENSION);
         try {
             recorder = new ReplayRecorder(file, p -> {
                 if (p != null)
@@ -322,7 +359,7 @@ public class ReplayServerEvents {
             long mask = 0;
             for (ServerPlayerConnection conn : (Set<ServerPlayerConnection>) seenByField.get(te))
                 mask |= r.maskOf(conn.getPlayer().getName().getString());
-            long m = mask == 0 ? 1L << ReplayRecorder.SNAPSHOT_BIT : mask;
+            long m = mask | r.maskOf(ReplayRecorder.OMNI);
             serverEntity.sendPairingData(null, p -> r.recordSnapshot(p, m));
         }
     }

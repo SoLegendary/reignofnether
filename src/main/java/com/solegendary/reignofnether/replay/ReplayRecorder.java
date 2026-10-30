@@ -39,6 +39,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class ReplayRecorder {
 
+    public static final String OMNI = "*"; // what a viewer with no fog and endless view distance gets: not a real name
     public static final int SNAPSHOT_BIT = 63; // the start snapshot: seen by no-one in particular
     public static final int CAMERA_ID = -1;
     private static final int MAX_PLAYER_BITS = 63;
