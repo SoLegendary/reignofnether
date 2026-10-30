@@ -1,5 +1,6 @@
 package com.solegendary.reignofnether.util;
 
+import com.solegendary.reignofnether.ui.Text;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -703,6 +704,15 @@ public class MyRenderer {
         poseStack.scale(scale, scale, 1.0f);
         guiGraphics.drawString(font, text, 0, 0, color);
         poseStack.popPose();
+    }
+
+    // a plain "?" until the skin has loaded
+    public static void renderPlayerHead(GuiGraphics g, String playerName, int x, int y, int iconSize) {
+        var level = Minecraft.getInstance().level;
+        if (level != null && level.players().stream().anyMatch(p -> p.getName().getString().equals(playerName) && p.isSkinLoaded()))
+            renderPlayerHead(g, playerName, x, y, iconSize, null);
+        else
+            Text.unknown(g, x, y, iconSize);
     }
 
     public static void renderPlayerHead(GuiGraphics g, String playerName, int x, int y, int iconSize, ResourceLocation fallbackRl) {

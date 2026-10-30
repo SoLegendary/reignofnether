@@ -29,6 +29,7 @@ public class ReignOfNetherClientConfigs {
     public static final ForgeConfigSpec.ConfigValue<Boolean> UNDERLINES;
     public static final ForgeConfigSpec.EnumValue<OrthoviewClientEvents.LeafHideMethod> HIDE_LEAVES;
     public static final ForgeConfigSpec.EnumValue<NightCircleMode> NIGHT_CIRCLES;
+    public static final ForgeConfigSpec.ConfigValue<String> P2P_API_URL;
 
     static {
         BUILDER.push("Configuration File");
@@ -45,7 +46,7 @@ public class ReignOfNetherClientConfigs {
         CAMERA_SENSITIVITY = BUILDER.define("camera_sensitivity", 10);
         SEEN_NETWORK_NOTICE = BUILDER.define("seen_network_notice", false);
         SQUARE_MINIMAP = BUILDER.define("square_minimap", false);
-        LARGER_SMALL_TEXT = BUILDER.define("larger_small_text", false);
+        LARGER_SMALL_TEXT = BUILDER.define("larger_small_text", true);
         SOLID_PANELS = BUILDER.define("solid_panels", false);
         SHOW_MISSING_COST = BUILDER.define("show_missing_cost", true);
         QUEUE_OWN_ROW = BUILDER.define("queue_own_row", false);
@@ -53,6 +54,8 @@ public class ReignOfNetherClientConfigs {
         UNDERLINES = BUILDER.define("underlines", true);
         HIDE_LEAVES = BUILDER.defineEnum("hide_leaves", OrthoviewClientEvents.LeafHideMethod.NONE);
         NIGHT_CIRCLES = BUILDER.defineEnum("night_circles", NightCircleMode.NO_OVERLAPS);
+        BUILDER.comment("Website that introduces P2P players to each other (join codes)");
+        P2P_API_URL = BUILDER.define("p2p_api_url", "https://reignofnether.net");
         SPEC = BUILDER.build();
     }
 
