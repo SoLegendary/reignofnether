@@ -25,18 +25,21 @@ Balance
 [✅] Bogged poison damage increased from 6 to 7
 [✅] Strays now have a 25% chance to create wraith snow on hit instead of slowness
 
+
 Quality of Life
 ---------------
 [✅] Aquatic mobs (drowned, scout dogs/cats, frostwalker heroes) now always travel directly over water
 [✅] Added `/gamerule hideEnemyPicks` which hides enemy faction picks
-[🟡] Various fog of war stability improvements
-[🟡] Miscellaneous performance improvements, especially for large scale battles
+[✅] Various fog of war stability improvements
+[✅] Miscellaneous performance improvements, especially for large scale battles
 [✅] Reduced the size of the mod jar significantly
-[🟡] Improved permissions security of various serverside actions
+[✅] Improved permissions security of various serverside actions
 [✅] `/rtsapi-start-scenario-role` renamed to `/rtsapi player start-scenario-role` and is now compatible with player selectors
+[✅] Added bees to the sandbox unit menu
 [🟡] Holding ctrl when issuing a move command makes your army move together in formation:
     - Faster units slow down by up to 40% to allow slower units to catch up
     - Ranged units try to stay behind melee units
+
 
 Bugfixes
 --------
@@ -45,8 +48,9 @@ Bugfixes
 [🟡] Workers no longer get stuck trying to reach resources out of reach
 [✅] Fixed heroes sometimes spinning on spawn
 [🟡] Fixed various memory leaks related to closing/reopening singleplayer maps on the same session
-
 [🟡] Fixed a crash when publishing a scenario map on a server world
+[✅] Fixed accuracy problems when using `/rtsapi player camera move` with different pan durations
+
 
 Languages
 ---------
@@ -55,15 +59,4 @@ Languages
 
 Testing checklist
 -----------------
-[✅] Militia bell
 [ ] Vanilla mob targeting and aggression
-[ ] Minimap buildings and units
-[ ] Food pickup
-[ ] Building auto aggression
-[ ] Bridge attacking and destruction
-[ ] Player commands to move camera
-[ ] Toggle map size
-[ ] Health bars behind blocks?
-[ ] Publish scenario on server
-[ ] All sounds and assets quality
-[ ] All unit/ability/building tooltips

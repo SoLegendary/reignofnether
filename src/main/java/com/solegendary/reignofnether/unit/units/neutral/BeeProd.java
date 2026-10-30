@@ -2,6 +2,7 @@ package com.solegendary.reignofnether.unit.units.neutral;
 
 import com.solegendary.reignofnether.ReignOfNether;
 import com.solegendary.reignofnether.building.buildings.placements.ProductionPlacement;
+import com.solegendary.reignofnether.building.production.IUnitProductionItem;
 import com.solegendary.reignofnether.building.production.ProductionItem;
 import com.solegendary.reignofnether.building.production.StartProductionButton;
 import com.solegendary.reignofnether.building.production.StopProductionButton;
@@ -11,6 +12,8 @@ import com.solegendary.reignofnether.registrars.EntityRegistrar;
 import com.solegendary.reignofnether.resources.ResourceCost;
 import com.solegendary.reignofnether.resources.ResourceCosts;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -19,7 +22,7 @@ import java.util.List;
 
 import static com.solegendary.reignofnether.util.MiscUtil.fcs;
 
-public class BeeProd extends ProductionItem {
+public class BeeProd extends ProductionItem implements IUnitProductionItem {
 
     public final static String itemName = "Bee";
     public final static ResourceCost cost = ResourceCosts.BEE;
@@ -42,9 +45,9 @@ public class BeeProd extends ProductionItem {
             itemName,
             ResourceLocation.fromNamespaceAndPath(ReignOfNether.MOD_ID, "textures/mobheads/bee.png"),
             List.of(
-                    fcs(I18n.get("entity.reignofnether.bee_unit"), true),
-                    fcs(""),
-                    fcs(I18n.get("entity.reignofnether.bee_unit.tooltip1"))
+                Component.translatable("entity.reignofnether.bee_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
+                fcs(""),
+                Component.translatable("entity.reignofnether.bee_unit.tooltip1").getVisualOrderText()
             )
         );
     }
@@ -57,11 +60,11 @@ public class BeeProd extends ProductionItem {
                 () -> false,
                 () -> true,
                 List.of(
-                        fcs(I18n.get("entity.reignofnether.bee_unit"), true),
+                        Component.translatable("entity.reignofnether.bee_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         ResourceCosts.getFormattedCost(cost),
                         ResourceCosts.getFormattedPopAndTime(cost),
                         fcs(""),
-                        fcs(I18n.get("entity.reignofnether.bee_unit.tooltip1"))
+                        Component.translatable("entity.reignofnether.bee_unit.tooltip1").getVisualOrderText()
                 ),
                 this
         );

@@ -46,7 +46,7 @@ public class WolfProd extends ProductionItem implements IUnitProductionItem {
                 List.of(
 	                Component.translatable("entity.reignofnether.wolf_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         fcs(""),
-	                Component.translatable("entity.reignofnether.wolf_unit.tooltip1").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText()
+	                Component.translatable("entity.reignofnether.wolf_unit.tooltip1").getVisualOrderText()
                 )
         );
     }

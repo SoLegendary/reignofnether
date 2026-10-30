@@ -47,7 +47,7 @@ public class PolarBearProd extends ProductionItem implements IUnitProductionItem
                 List.of(
 	                Component.translatable("entity.reignofnether.polar_bear_unit").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText(),
                         fcs("", Style.EMPTY),
-	                Component.translatable("entity.reignofnether.polar_bear_unit.tooltip1").withStyle(Style.EMPTY.withBold(true)).getVisualOrderText()
+	                Component.translatable("entity.reignofnether.polar_bear_unit.tooltip1").getVisualOrderText()
                 )
         );
     }

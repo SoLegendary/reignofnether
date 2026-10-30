@@ -95,6 +95,7 @@ public class OrthoviewClientEvents {
 
     private static final int FORCE_PAN_TICKS_DEFAULT = 20;
     private static int forcePanTicksLeft = 0;
+    private static int forcePanTicksMax = FORCE_PAN_TICKS_DEFAULT;
     private static float forcePanTargetX = 0;
     private static float forcePanTargetZ = 0;
     private static float forcePanOriginalX = 0;
@@ -288,6 +289,7 @@ public class OrthoviewClientEvents {
     public static void forceMoveCam(int x, int z, int cameraLockTicks, int forcePanTicks, int zoomLevel) {
         if (MC.player != null && OrthoviewClientEvents.isEnabled()) {
             forcePanTicksLeft = forcePanTicks;
+            forcePanTicksMax = forcePanTicksLeft;
             forcePanTargetX = x;
             forcePanTargetZ = z;
             cameraLockTicksLeft = forcePanTicks + cameraLockTicks;
@@ -366,9 +368,9 @@ public class OrthoviewClientEvents {
         }
 
         if (forcePanTicksLeft > 0) {
-            float xDiff = (forcePanTargetX - forcePanOriginalX) / FORCE_PAN_TICKS_DEFAULT;
-            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / FORCE_PAN_TICKS_DEFAULT;
-            float zoomDiff = (forceZoom - forcePanOriginalZoom) / FORCE_PAN_TICKS_DEFAULT;
+            float xDiff = (forcePanTargetX - forcePanOriginalX) / forcePanTicksMax;
+            float zDiff = (forcePanTargetZ - forcePanOriginalZ) / forcePanTicksMax;
+            float zoomDiff = (forceZoom - forcePanOriginalZoom) / forcePanTicksMax;
             zoom += zoomDiff;
             MC.player.move(MoverType.SELF, new Vec3(xDiff, 0, zDiff));
             clampPlayerToWorldBorder();
