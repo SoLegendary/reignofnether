@@ -28,6 +28,8 @@ import com.solegendary.reignofnether.hud.panels.HudFrame;
 import com.solegendary.reignofnether.hud.panels.MinimapTools;
 import com.solegendary.reignofnether.hud.panels.SelectionPanel;
 import com.solegendary.reignofnether.hud.panels.SpectatorHud;
+import com.solegendary.reignofnether.replay.ReplayClientEvents;
+import com.solegendary.reignofnether.replay.ReplayHud;
 import com.solegendary.reignofnether.chat.SpectatorFeed;
 import com.solegendary.reignofnether.hud.panels.TopLeftPanel;
 import com.solegendary.reignofnether.hud.panels.TopRightPanel;
@@ -379,6 +381,11 @@ public class HudClientEvents {
         else
             TopLeftPanel.render(f);
         HudMotion.pop(g);
+        if (ReplayClientEvents.isActive()) {
+            HudMotion.push(g, layout.console(), layout, 1);
+            ReplayHud.render(f);
+            HudMotion.pop(g);
+        }
         HudMotion.push(g, topRight, layout, 1);
         TopRightPanel.render(f);
         HudMotion.pop(g);

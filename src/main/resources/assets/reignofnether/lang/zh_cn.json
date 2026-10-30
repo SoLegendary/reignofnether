@@ -1064,10 +1064,7 @@
   "matchend.reignofnether.title": "对局结果",
   "matchend.reignofnether.winner": "赢家",
   "matchend.reignofnether.loser": "输家",
-  "matchend.reignofnether.party_total": "队伍总计",
-  "matchend.reignofnether.resources": "已采集资源：%s",
   "matchend.reignofnether.col_units": "所有单位",
-  "matchend.reignofnether.col_military": "军事单位",
   "matchend.reignofnether.col_buildings": "建筑",
 
   "fogofwar.reignofnether.warning": "【警告】",

@@ -18,6 +18,7 @@ import com.solegendary.reignofnether.hud.layout.HudLayout;
 import com.solegendary.reignofnether.hud.playerdisplay.PlayerDisplayClientEvents;
 import com.solegendary.reignofnether.keybinds.Keybindings;
 import com.solegendary.reignofnether.player.PlayerClientEvents;
+import com.solegendary.reignofnether.replay.ReplayClientEvents;
 import com.solegendary.reignofnether.scenario.ScenarioClientEvents;
 import com.solegendary.reignofnether.startpos.StartPosClientEvents;
 import com.solegendary.reignofnether.survival.SurvivalClientEvents;
@@ -122,7 +123,8 @@ public final class TopRightPanel {
     /** Buttons that only appear in some game states, in a second row under the utility bar. */
     private static List<Button> contextButtons() {
         List<Button> list = new ArrayList<>();
-        if (!PlayerClientEvents.isRTSPlayer() && !PlayerClientEvents.rtsLocked) {
+        // a replay's viewer isn't in the match, but can't join it either
+        if (!PlayerClientEvents.isRTSPlayer() && !PlayerClientEvents.rtsLocked && !ReplayClientEvents.isActive()) {
             if (GameruleClient.scenarioMode) {
                 Button cycleRole = ScenarioClientEvents.getCycleRoleToPlayButton();
                 if (cycleRole != null)

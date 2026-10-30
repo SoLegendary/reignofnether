@@ -1,6 +1,7 @@
 package com.solegendary.reignofnether.matchstart;
 
 import com.solegendary.reignofnether.player.MatchStatsClientboundPacket.MatchStatRow;
+import com.solegendary.reignofnether.replay.ReplayClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.event.TickEvent;
@@ -32,37 +33,31 @@ public class MatchEndClientEvents {
 
     // called on the client main thread from the packet handler
     public static void receive(long ticks, List<MatchStatRow> newRows) {
-        /*
         gameDurationTicks = ticks;
         rows = newRows != null ? newRows : new ArrayList<>();
         pendingOpen = true;
-         */
+        ReplayClientEvents.resetDownload();
     }
 
     public static void dismiss() {
-        /*
         Minecraft mc = Minecraft.getInstance();
         if (mc.screen instanceof MatchEndScreen) {
             mc.setScreen(null);
         }
-         */
     }
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent evt) {
-        /*
         if (evt.phase != TickEvent.Phase.END) return;
         if (!pendingOpen) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
         pendingOpen = false;
         mc.setScreen(new MatchEndScreen());
-         */
     }
 
     @SubscribeEvent
     public static void onClientLogout(ClientPlayerNetworkEvent.LoggingOut evt) {
-        /*
         gameDurationTicks = 0;
         rows = new ArrayList<>();
         pendingOpen = false;
@@ -70,6 +65,5 @@ public class MatchEndClientEvents {
         if (mc.screen instanceof MatchEndScreen) {
             mc.setScreen(null);
         }
-         */
     }
 }

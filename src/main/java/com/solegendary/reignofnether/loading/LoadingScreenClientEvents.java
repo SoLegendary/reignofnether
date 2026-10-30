@@ -14,6 +14,8 @@ import com.solegendary.reignofnether.minimap.MinimapClientEvents;
 import com.solegendary.reignofnether.minimap.StrategicMapClientEvents;
 import com.solegendary.reignofnether.orthoview.OrthoviewClientEvents;
 import com.solegendary.reignofnether.player.PlayerServerboundPacket;
+import com.solegendary.reignofnether.replay.ReplayClientEvents;
+import com.solegendary.reignofnether.replay.ReplayHeader;
 import com.solegendary.reignofnether.time.TimeUtils;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfo;
 import com.solegendary.reignofnether.rtsmap.RTSMapInfoClientEvents;
@@ -215,6 +217,16 @@ public final class LoadingScreenClientEvents {
     // the world's name, its map info and whether it's an RTS map, once the server exists
     private static void readLocalInfo() {
         localInfoRead = true;
+        ReplayHeader h = ReplayClientEvents.header();
+        if (h != null) {
+            // a replay plays in a blank world of its own: its name and size say nothing, the recording does
+            replay = true;
+            title = h.map.isBlank() ? I18n.get("loading.reignofnether.replay_title") : h.map;
+            byLine = I18n.get("loading.reignofnether.replay_by", TimeUtils.getTimeStrFromTicks(h.durationTicks));
+            rtsMap = false;
+            sizeRows();
+            return;
+        }
         var data = MC.getSingleplayerServer().getWorldData();
         title = data.getLevelName();
         try { // read here rather than waiting for the server, so the column never changes once shown
@@ -347,6 +359,13 @@ public final class LoadingScreenClientEvents {
                 float frac = state == State.DONE ? 1 : state == State.ACTIVE ? Math.min(1, LoadProgress.done / (float) LoadProgress.total) : 0;
                 rows.add(new Row(st.name().toLowerCase(Locale.ROOT), state, frac, step == st ? LoadProgress.total : 0));
             }
+        }
+        if (replay) {
+            // the recorded match only fills the world once we're in it, so the screen stays until it has
+            boolean playing = ReplayClientEvents.isActive();
+            rows.add(new Row("join", ended || playing ? State.DONE : !preparing || joining ? State.ACTIVE : State.PENDING, -1, 0));
+            rows.add(new Row("replay", playing ? State.DONE : ended ? State.ACTIVE : State.PENDING, -1, 0));
+            return rows;
         }
         rows.add(new Row("join", ended ? State.DONE : serverDone && !preparing || joining ? State.ACTIVE : State.PENDING, -1, 0));
         return rows;

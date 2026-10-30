@@ -317,7 +317,7 @@ public class PlayerClientEvents {
         }
     }
 
-    private static void resetAll() {
+    public static void resetAll() {
         resetRTS(true);
         // everything declared through WorldState (each class registers its own world state)
         WorldState.resetClient();
